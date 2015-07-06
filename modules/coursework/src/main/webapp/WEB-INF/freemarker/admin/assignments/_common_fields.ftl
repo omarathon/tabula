@@ -23,14 +23,14 @@ so that they can be passed around between requests.
 	</@form.labelled_row>
 </#if>
 
-<#if features.markingWorkflows && department.markingWorkflows?has_content>
+<#if features.markingWorkflows && command.allMarkingWorkflows?has_content>
 
 	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
 		<@f.select path="markingWorkflow" disabled=disabled>
 			<@f.option value="" label="None"/>
-			<#list department.markingWorkflows as markingWorkflow>
+			<#list command.allMarkingWorkflows as markingWorkflow>
 				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
 			</#list>
 		</@f.select>
@@ -63,6 +63,21 @@ so that they can be passed around between requests.
 			</script>
 		</#if>
 	</@form.labelled_row>
+
+	<#assign automaticallyReleaseToMarkersHelp>
+		When using a marking workflow, automatically release all submissions to markers when the assignment closes.
+		Any late submissions or submissions within an extension will be released when they are received.<br />
+		<strong>Note:</strong> Students who do not submit will not be released automatically and will need to be released manually.
+	</#assign>
+	<@form.row>
+		<@form.field>
+			<label class="checkbox">
+				<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
+				Automatically release to markers
+				<@fmt.help_popover id="automaticallyReleaseToMarkersHelp" content="${automaticallyReleaseToMarkersHelp}" html=true />
+			</label>
+		</@form.field>
+	</@form.row>
 </#if>
 
 <#if features.collectMarks>

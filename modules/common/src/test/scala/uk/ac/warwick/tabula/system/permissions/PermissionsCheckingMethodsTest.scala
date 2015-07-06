@@ -7,6 +7,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.system.CustomDataBinder
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
+import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {
 
@@ -95,6 +97,33 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 
 		try {
 			mustBeLinked(submission, ass1)
+			fail("expected exception")
+		} catch {
+			case e: ItemNotFoundException =>
+		}
+	}
+
+	@Test def linkedFileAttachmentToSubmission() {
+
+		val attachment = new FileAttachment
+
+		val submission1 = Fixtures.submissionWithId("0000001", id = "submission1")
+		val submission2 = Fixtures.submissionWithId("0000002", id = "submission2")
+
+		val sv1 = new SavedFormValue
+		sv1.submission = submission1
+
+		val sv2 = new SavedFormValue
+		sv2.submission = submission2
+
+		attachment.submissionValue = sv1
+
+		mustBeLinked(attachment, submission1)
+
+		attachment.submissionValue = sv2
+
+		try {
+			mustBeLinked(attachment, submission1)
 			fail("expected exception")
 		} catch {
 			case e: ItemNotFoundException =>

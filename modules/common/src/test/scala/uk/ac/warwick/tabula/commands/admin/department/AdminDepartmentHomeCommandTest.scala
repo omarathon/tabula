@@ -43,96 +43,96 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 		val command = new AdminDepartmentHomeCommandInternal(department, user) with CommandTestSupport with AdminDepartmentHomeCommandPermissions
 	}
 
-	@Test def init { new Fixture {
+	@Test def init() { new Fixture {
 		// This is mostly to test that we don't eagerly do anything on command creation
 		command.department should be (department)
 		command.user should be (user)
 	}}
 
 	trait DeptAdminFixture extends Fixture {
-		command.securityService.can(user, Permissions.Module.Administer, department) returns (true)
-		command.securityService.can(user, Permissions.Route.Administer, department) returns (true)
+		command.securityService.can(user, Permissions.Module.Administer, department) returns true
+		command.securityService.can(user, Permissions.Route.Administer, department) returns true
 	}
 
 	trait ModuleManagerFixture extends Fixture {
-		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set(mod3, mod1))
-		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
+		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns Set(mod3, mod1)
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns Set.empty
 	}
 
 	trait RouteManagerFixture extends Fixture {
-		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
-		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set.empty)
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns Set(route3, route1)
+		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns Set.empty
 	}
 
 	trait ModuleAndRouteManagerFixture extends Fixture {
-		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set(mod3, mod1))
-		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set(route3, route1))
+		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns Set(mod3, mod1)
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns Set(route3, route1)
 	}
 
 	trait NoPermissionsFixture extends Fixture {
-		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns (Set.empty)
-		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns (Set.empty)
+		command.moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer, department) returns Set.empty
+		command.courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer, department) returns Set.empty
 	}
 
-	@Test def applyNoPerms { new NoPermissionsFixture {
+	@Test def applyNoPerms() { new NoPermissionsFixture {
 		val (modules, routes) = command.applyInternal()
 		modules should be ('empty)
 		routes should be ('empty)
 	}}
 
-	@Test def applyForDeptAdmin { new DeptAdminFixture {
+	@Test def applyForDeptAdmin() { new DeptAdminFixture {
 		val (modules, routes) = command.applyInternal()
 		modules should be (Seq(mod1, mod2, mod3))
 		routes should be (Seq(route1, route2, route3))
 	}}
 
-	@Test def applyForModuleManager { new ModuleManagerFixture {
+	@Test def applyForModuleManager() { new ModuleManagerFixture {
 		val (modules, routes) = command.applyInternal()
 		modules should be (Seq(mod1, mod3))
 		routes should be ('empty)
 	}}
 
-	@Test def applyForRouteManager { new RouteManagerFixture {
+	@Test def applyForRouteManager() { new RouteManagerFixture {
 		val (modules, routes) = command.applyInternal()
 		modules should be ('empty)
 		routes should be (Seq(route1, route3))
 	}}
 
-	@Test def applyForModuleAndRouteManager { new ModuleAndRouteManagerFixture {
+	@Test def applyForModuleAndRouteManager() { new ModuleAndRouteManagerFixture {
 		val (modules, routes) = command.applyInternal()
 		modules should be (Seq(mod1, mod3))
 		routes should be (Seq(route1, route3))
 	}}
 
-	@Test def permissionsNoPerms { new NoPermissionsFixture {
+	@Test def permissionsNoPerms() { new NoPermissionsFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
-	@Test def permissionsForDeptAdmin { new DeptAdminFixture {
+	@Test def permissionsForDeptAdmin() { new DeptAdminFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
-	@Test def permissionsForModuleManager { new ModuleManagerFixture {
+	@Test def permissionsForModuleManager() { new ModuleManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
 	}}
 
-	@Test def permissionsForRouteManager { new RouteManagerFixture {
+	@Test def permissionsForRouteManager() { new RouteManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.Route.Administer, Set(route1, route3))
 	}}
 
-	@Test def permissionsForModuleAndRouteManager { new ModuleAndRouteManagerFixture {
+	@Test def permissionsForModuleAndRouteManager() { new ModuleAndRouteManagerFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
@@ -165,14 +165,15 @@ object AdminDepartmentHomeCommandTest {
 		bean(){mock[EventListener]}
 		bean(){mock[MaintenanceModeService]}
 		bean(){mock[Features]}
+		bean(){mock[TriggerService]}
 		bean(){
 			val service = mock[ModuleAndDepartmentService]
-			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns (Set.empty)
+			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns Set.empty
 			service
 		}
 		bean(){
 			val service = mock[CourseAndRouteService]
-			service.routesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns (Set.empty)
+			service.routesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns Set.empty
 			service
 		}
 	}

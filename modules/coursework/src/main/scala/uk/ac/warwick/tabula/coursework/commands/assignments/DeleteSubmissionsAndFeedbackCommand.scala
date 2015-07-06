@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.data.HibernateHelpers
+
 import scala.collection.JavaConversions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
@@ -48,6 +50,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	def applyInternal() = {			
 		val submissions = if (shouldDeleteSubmissions) {
 			val submissions = for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) yield {
+				HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
 				submissionService.delete(mandatory(submission))				
 				submission
 			}
@@ -57,6 +60,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
 		val feedbacks = if (shouldDeleteFeedback) {
 			val feedbacks = for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) yield {
+				HibernateHelpers.initialiseAndUnproxy(feedback.attachments)
 				feedbackService.delete(mandatory(feedback))
 				feedback
 			}

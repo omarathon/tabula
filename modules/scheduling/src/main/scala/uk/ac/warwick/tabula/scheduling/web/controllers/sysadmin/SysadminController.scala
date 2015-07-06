@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportDepartmentsModulesCommand, ImportAssignmentsCommand, ImportAcademicInformationCommand, ImportProfilesCommand}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
-import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationIndexService, AuditEventIndexService, ModuleAndDepartmentService, ProfileIndexService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
@@ -191,20 +191,26 @@ class ImportProfilesController extends BaseSysadminController {
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/import-profiles/{member}"))
+@RequestMapping(Array("/sysadmin/import-profiles/{universityId}"))
 class ImportSingleProfileController extends BaseSysadminController {
+
+	var profileService = Wire[ProfileService]
+
+	@RequestMapping def form = "sysadmin/reindexprofile"
+
 	@RequestMapping(method = Array(POST))
-	def importProfile(@PathVariable("member") member: Member) = {
+	def importProfile(@PathVariable("universityId") universityId: String) = {
 		val command = new ImportProfilesCommand
 
-		member match {
-			case stu: StudentMember => command.refresh(stu)
-			case staff: StaffMember => command.refresh(staff)
-			case _ => throw new IllegalArgumentException("Tried to refresh a non-staff/student member - not implemented yet")
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId) match {
+			case Some(stu: StudentMember) => command.refresh(stu.universityId, Some(stu.userId))
+			case Some(staff: StaffMember) => command.refresh(staff.universityId, Some(staff.userId))
+			case Some(_) => throw new IllegalArgumentException("Tried to refresh a non-staff/student member - not implemented yet")
+			case None => command.refresh(universityId, None)
 		}
 
 		// Redirect cross-context
-		Redirect(urlRewriter.exec(JArrayList("/view/" + member.universityId, "/profiles", true)).toString())
+		Redirect(urlRewriter.exec(JArrayList("/view/" + universityId, "/profiles", true)).toString())
 	}
 }
 

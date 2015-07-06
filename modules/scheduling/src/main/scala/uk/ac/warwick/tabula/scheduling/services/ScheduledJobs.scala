@@ -34,6 +34,7 @@ class ScheduledJobs {
 	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
 	var termService = Wire[TermService]
+	var triggerService = Wire[TriggerService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 
@@ -91,6 +92,14 @@ class ScheduledJobs {
 		if (features.schedulingProcessScheduledNotifications) maintenanceGuard {
 			exceptionResolver.reportExceptions {
 				scheduledNotificationService.processNotifications()
+			}
+		}
+
+	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
+	def processTriggers(): Unit =
+		if (features.schedulingTriggers) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				triggerService.processTriggers()
 			}
 		}
 

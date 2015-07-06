@@ -154,7 +154,7 @@
 							<output>${project.build.directory}/${project.build.finalName}/static/css/render.css</output>
 							<inputDir>${basedir}/src/main/webapp/static</inputDir>
 							<includes>
-								<include>css/concat6.css</include>
+								<include>css/id6/concat6.css</include>
 								<include>css/id6a.css</include>
 								<include>${project.build.directory}/${project.build.finalName}/static/css/main.css</include>
 								<include>libs/bootstrap-editable/css/bootstrap-editable.css</include>
@@ -321,7 +321,7 @@
 
 								<lesscss
 									todir="${project.build.directory}/${project.build.finalName}/static/css">
-									<fileset dir="${basedir}/src/main/webapp/static/css"
+									<fileset dir="${basedir}/src/main/webapp/static/css/id6"
 										includes="*.less" excludes="*.inc.less" />
 								</lesscss>
 							</target>

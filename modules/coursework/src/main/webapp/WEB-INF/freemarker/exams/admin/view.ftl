@@ -131,7 +131,7 @@
 				</td>
 				<#if hasFeedback>
 					<#assign feedback = mapGet(feedbackMap, student) />
-					<td>${feedback.actualMark!""}</td>
+					<td>${feedback.actualMark!""}%</td>
 					<td>${feedback.actualGrade!""}</td>
 					<td>${(feedback.latestPrivateOrNonPrivateAdjustment.mark)!""}</td>
 					<td>${(feedback.latestPrivateOrNonPrivateAdjustment.grade)!""}</td>
@@ -153,7 +153,7 @@
 							${sitsStatus.status.description}<#if sitsWarning>  (!)</#if>
 						</span></td>
 						<td data-sortby="${(sitsStatus.dateOfUpload.millis?c)!""}"><#if sitsStatus.dateOfUpload??><@fmt.date sitsStatus.dateOfUpload /></#if></td>
-						<td>${sitsStatus.actualMarkLastUploaded!""}</td>
+						<td>${sitsStatus.actualMarkLastUploaded!""}%</td>
 						<td>${sitsStatus.actualGradeLastUploaded!""}</td>
 					<#else>
 						<td><span class="label">Upload not queued</span></td><td></td><td></td><td></td>

@@ -320,7 +320,7 @@
 									<#if feedback?? && feedback.hasMarkOrGrade>
 										: <#compress>
 											<#if feedback.hasMark>
-												${feedback.actualMark!''}<#if feedback.hasGrade>,</#if>
+												${feedback.actualMark!''}%<#if feedback.hasGrade>,</#if>
 											</#if>
 											<#if feedback.hasGrade>
 												grade ${feedback.actualGrade!''}
@@ -331,7 +331,7 @@
 								<#if feedback.hasPrivateOrNonPrivateAdjustments>
 									<div>
 										<i class="icon-ok"></i> Marks adjusted:
-										<#if feedback.latestMark??>${feedback.latestMark}</#if><#if feedback.latestGrade??>,</#if>
+										<#if feedback.latestMark??>${feedback.latestMark}%</#if><#if feedback.latestGrade??>,</#if>
 										<#if feedback.latestGrade??> grade ${feedback.latestGrade}</#if>
 										<#if feedback.latestPrivateOrNonPrivateAdjustment?? && feedback.latestPrivateOrNonPrivateAdjustment.reason??>
 										 - Reason for adjustment: ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
@@ -482,7 +482,7 @@
 	</script>
 	<#else>
 		<#if submissionAndFeedbackCommand.filter.name == 'AllStudents'>
-			<p>There are no submissions or feedbacks yet for this assignment.</p>
+			<p>There are no submissions or feedback yet for this assignment.</p>
 		<#else>
 			<#macro filterDescription filter filterParameters><#compress>
 				${filter.description}

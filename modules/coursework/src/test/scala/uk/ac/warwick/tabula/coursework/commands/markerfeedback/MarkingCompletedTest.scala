@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 import org.hibernate.Session
 import org.junit.{After, Before}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.coursework.ReleasedState
 import uk.ac.warwick.tabula.{Mockito, _}
 import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleasedState
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification

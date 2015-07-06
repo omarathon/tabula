@@ -143,7 +143,7 @@ To not bind:
 	<#-- List existing values -->
 	<#if value?? && value?size gt 0>
 	<#list value as id>
-		<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+		<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
 		--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" value="${id}" id="${htmlId}">
 		</div>
 	</#list>
@@ -151,7 +151,7 @@ To not bind:
 
 	<#if !value?has_content || multiple>
 	<#-- an empty field for entering new values in any case -->
-	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user"></i></span><#--
+	<div class="user-picker-container input-prepend input-append"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
 	--><input type="text" class="user-code-picker ${spanClass}" name="${expression}" id="${htmlId}">
 	</div>
 	</#if>
@@ -206,7 +206,7 @@ To not bind:
 	<#-- List existing values -->
 		<#if value?? && value?size gt 0>
 			<#list value as id>
-				<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
+				<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
 			--><input type="text" class="text flexi-picker ${cssClass}"
 					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
@@ -218,7 +218,7 @@ To not bind:
 		</#if>
 
 		<#if !value?has_content || (multiple && auto_multiple)>
-			<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user"></i></span><#--
+			<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
 		--><input   type="text" class="text flexi-picker ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
@@ -296,7 +296,7 @@ To not bind:
 			// nothing, already works
 		} else {
 			// Add button which generates more file inputs
-		    $addButton = $('<a>').addClass('btn btn-mini').append($('<i class="icon-plus"></i>').attr('title','Add another attachment'));
+		    $addButton = $('<a>').addClass('btn btn-mini').append($('<i class="icon-plus fa fa-plus"></i>').attr('title','Add another attachment'));
 		    $addButton.click(function(){
 			$addButton
 				.before($('<br/>'))

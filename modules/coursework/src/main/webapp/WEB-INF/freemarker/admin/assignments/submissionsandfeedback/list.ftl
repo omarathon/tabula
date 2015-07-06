@@ -51,7 +51,7 @@
 		</#function>
 
 		<#if hasSubmissionOrFeedback(students)?size = 0>
-			<p>There are no submissions or feedbacks yet for this assignment.</p>
+			<p>There are no submissions or feedback yet for this assignment.</p>
 		</#if>
 
 		<div class="submission-feedback-list">
@@ -268,9 +268,9 @@
 							 <#if assignment.collectMarks>
 								<td class="mark">
 								 <#if student.coursework.enhancedFeedback??>
-								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
+								 	${(student.coursework.enhancedFeedback.feedback.actualMark)!''}%
 									<#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments>
-										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark})
+										 (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark}%)
 									</#if>
 								 </#if>
 								</td>

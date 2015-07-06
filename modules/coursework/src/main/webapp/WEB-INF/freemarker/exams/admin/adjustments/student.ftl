@@ -15,7 +15,7 @@
 		<h3>Mark</h3>
 		<p>
 			<#if command.feedback.actualMark??>
-				Original mark - ${command.feedback.actualMark}<br>
+				Original mark - ${command.feedback.actualMark}%<br>
 			</#if>
 			<#if command.feedback.actualGrade??>
 				Original grade - ${command.feedback.actualGrade}<br>

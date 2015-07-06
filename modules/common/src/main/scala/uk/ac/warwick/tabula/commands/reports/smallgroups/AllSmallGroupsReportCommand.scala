@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 
@@ -25,6 +25,7 @@ object AllSmallGroupsReportCommand {
 			with AutowiringTermServiceComponent
 			with ComposableCommand[AllSmallGroupsReportCommandResult]
 			with ReportPermissions
+			with ReportCommandRequest
 			with AllSmallGroupsReportCommandState
 			with ReadOnly with Unaudited
 }
@@ -48,11 +49,14 @@ class AllSmallGroupsReportCommandInternal(
 	val filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
 ) extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
 
-	self: SmallGroupServiceComponent with TermServiceComponent =>
+	self: SmallGroupServiceComponent with TermServiceComponent with ReportCommandRequest =>
 
 	override def applyInternal() = {
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
 		val thisDay = DateTime.now.getDayOfWeek
+		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+			weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 		val sets = benchmarkTask("sets") {
 			smallGroupService.getAllSmallGroupSets(department).filter(_.academicYear == academicYear).filter(_.collectAttendance)
@@ -71,12 +75,15 @@ class AllSmallGroupsReportCommandInternal(
 				sge.allWeeks.map(week => SmallGroupEventWeek(UUID.randomUUID.toString, sge, week, {
 					week < thisWeek || week == thisWeek && sge.day.getAsInt < thisDay
 				}))
-			})).sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+			})).filter{sgew =>
+				val eventDate = weekNumberToDate(sgew.week, sgew.event.day).toLocalDate
+				(eventDate.isEqual(startDate) || eventDate.isAfter(startDate)) && (eventDate.isEqual(endDate) || eventDate.isBefore(endDate))
+			}.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		}
 
 		val sgewAttendanceMap = benchmarkTask("attendance") {
 			sets.flatMap(_.groups.asScala).flatMap(smallGroupService.findAttendanceByGroup).flatMap(occurrence =>
-				// Ignore any occurrences that can't be found in the eventWeeks; probably weeks that have subsequently been removed
+				// Ignore any occurrences that aren't in the eventWeeks
 				eventWeeks.find(sgew => sgew.event == occurrence.event && sgew.week == occurrence.week).map(sgew => sgew -> occurrence.attendance.asScala)
 			).toMap
 		}

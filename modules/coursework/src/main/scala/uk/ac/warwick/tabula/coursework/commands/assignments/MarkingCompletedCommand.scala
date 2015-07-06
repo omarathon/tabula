@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{FeedbackReleasedNotifier, ReleasedState}
+import uk.ac.warwick.tabula.commands.coursework.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling

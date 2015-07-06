@@ -1,13 +1,6 @@
 <section id="course-details" class="clearfix">
 	<hr class="full-width"></hr>
 
-	<!-- course heading -->
-	<h3 class="course-title">
-		Course: ${(studentCourseDetails.course.name)!}, ${(studentCourseDetails.course.code)!}
-	<@fmt.course_year_span studentCourseDetails />
-
-	</h3>
-
 	<!-- drop-down to choose other courses: -->
 	<#if (profile.freshStudentCourseDetails)?? && (profile.freshStudentCourseDetails?size > 1)>
 		<div class="dropdown">
@@ -26,8 +19,8 @@
 									>
 							<#-- when choosing from the "Other courses" drop-down, make the most signicant course
 							  -- bold to assist with navigating back if you have previously gone into a different course -->
-									${(scd.course.code)!}
-									<@fmt.course_year_span scd /> ${scd.scjCode}
+										${(scd.course.code)!}
+										<@fmt.course_year_span scd /> ${scd.scjCode}
 							</a>
 						</li>
 					</#if>
@@ -35,6 +28,13 @@
 			</ul>
 		</div>
 	</#if>
+
+	<!-- course heading -->
+	<h3 class="course-title">
+		Course: ${(studentCourseDetails.course.name)!}, ${(studentCourseDetails.course.code)!}
+	<@fmt.course_year_span studentCourseDetails />
+
+	</h3>
 
 	<#macro moreDetails>
 		<#if studentCourseDetails.award??>

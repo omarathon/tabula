@@ -17,9 +17,9 @@
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
 		<#if feedback.studentViewableAdjustments?has_content && feedback.latestMark??>
-			<h3>Adjusted mark: ${feedback.latestMark}</h3>
+			<h3>Adjusted mark: ${feedback.latestMark}%</h3>
 		<#elseif feedback.latestMark??>
-			<h3>Mark: ${feedback.latestMark}</h3>
+			<h3>Mark: ${feedback.latestMark}%</h3>
 		</#if>
 		<#if feedback.studentViewableAdjustments?has_content && feedback.latestGrade??>
 			<h3>Adjusted grade: ${feedback.latestGrade}</h3>
@@ -39,7 +39,7 @@
 			<p>Your marks before adjustment were:</p>
 
 			<#if viewableFeedback_has_next>
-				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].mark??><div>Mark: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].mark}</div></#if>
+				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].mark??><div>Mark: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].mark}%</div></#if>
 				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].grade??><div>Grade: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].grade}</div></#if>
 			<#else>
 				<div>Mark: ${feedback.studentViewableRawMark}</div>

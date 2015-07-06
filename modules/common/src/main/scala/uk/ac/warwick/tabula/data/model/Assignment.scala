@@ -43,6 +43,8 @@ object Assignment {
 		}
 
 		val IncludeInFeedbackReportWithoutSubmissions = "includeInFeedbackReportWithoutSubmissions"
+		val AutomaticallyReleaseToMarkers = "automaticallyReleaseToMarkers"
+		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
 	}
 }
 
@@ -664,6 +666,11 @@ class Assignment
 		}
 	}
 
+	def automaticallyReleaseToMarkers = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
+	def automaticallyReleaseToMarkers_= (include: Boolean) = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
+	def automaticallySubmitToTurnitin = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
+	def automaticallySubmitToTurnitin_= (include: Boolean) = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
@@ -725,6 +732,8 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
+	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
+	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -738,6 +747,8 @@ trait BooleanAssignmentProperties {
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
+		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
 	}
 }
 

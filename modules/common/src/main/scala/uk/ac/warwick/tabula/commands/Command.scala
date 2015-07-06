@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
-import uk.ac.warwick.tabula.events.{Event, EventDescription, EventHandling, NotificationHandling}
+import uk.ac.warwick.tabula.data.model.triggers.Trigger
+import uk.ac.warwick.tabula.events._
 import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
@@ -62,6 +63,10 @@ trait CompletesNotifications[A] {
 	def notificationsToComplete(commandResult: A): CompletesNotificationsResult
 }
 
+trait GeneratesTriggers[A] {
+	def generateTriggers(commandResult: A): Seq[Trigger[_ >: Null <: ToEntityReference, _]]
+}
+
 
 trait Appliable[A]{
   def apply():A
@@ -83,7 +88,8 @@ trait Appliable[A]{
  * change name too. Careful now!
  */
 trait Command[A] extends Describable[A] with Appliable[A]
-		with JavaImports with EventHandling with NotificationHandling with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
+		with JavaImports with EventHandling with NotificationHandling with TriggerHandling
+		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
 
 	var maintenanceMode = Wire[MaintenanceModeService]
 
@@ -92,9 +98,11 @@ trait Command[A] extends Describable[A] with Appliable[A]
 			if (readOnlyCheck(this)) {
 				recordEvent(this) {
 					transactional() {
-						notify(this) {
-							benchmark() {
-								applyInternal()
+						handleTriggers(this) {
+							notify(this) {
+								benchmark() {
+									applyInternal()
+								}
 							}
 						}
 					}
@@ -105,7 +113,7 @@ trait Command[A] extends Describable[A] with Appliable[A]
 				throw new CannotPerformWriteOperationException(this)
 			}
 		} else {
-			notify(this) { benchmark() { applyInternal() } }
+			handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 		}
 	}
 	

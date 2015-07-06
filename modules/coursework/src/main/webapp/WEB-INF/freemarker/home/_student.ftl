@@ -94,7 +94,7 @@
 <#else>
 	<div class="alert alert-block alert-info">
 		<#if !ajax><h3>Pending</h3></#if>
-		There are no pending assignments to show <#if isSelf>you </#if>right now
+		There are no pending assignments to show <#if isSelf>you </#if>in Tabula right now
 	</div>
 </#if>
 
@@ -187,6 +187,6 @@
 <#else>
 	<div class="alert alert-block alert-info">
 		<#if !ajax><h3>Past</h3></#if>
-		There are no past assignments to show <#if isSelf>you </#if>right now
+		There are no past assignments to show <#if isSelf>you </#if>in Tabula right now
 	</div>
 </#if>

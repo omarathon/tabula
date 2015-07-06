@@ -112,6 +112,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
+        <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentTokenIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>

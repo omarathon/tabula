@@ -28,6 +28,14 @@ object Fixtures extends Mockito {
 		s
 	}
 
+	def submissionWithId(universityId: String = "0123456", userId: String = "cuspxp", id: String) = {
+		val s = new Submission
+		s.universityId = universityId
+		s.userId = userId
+		s.id = id
+		s
+	}
+
 	def assignmentFeedback(universityId: String = "0123456") = {
 		val f = new AssignmentFeedback
 		f.universityId = universityId

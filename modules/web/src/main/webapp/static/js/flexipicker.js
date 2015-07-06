@@ -245,7 +245,7 @@ FlexiPicker.prototype.getQuery = function(value) {
 FlexiPicker.prototype.transformItem = function(item) {
 	if (item.type == 'user') {
 		item.title = item.name;
-		item.description = item.value; // usercode
+		item.description = item.value + ', ' + ((item.isStaff === 'true')?'Staff':'Student') + ', ' + item.department; // usercode, staff/student, department
 	} else if (item.type == 'group') {
 		item.description = item.title;
 		item.title = item.value;
