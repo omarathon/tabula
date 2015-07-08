@@ -146,7 +146,8 @@ class ScheduledJobs {
 				UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
 			}
 			exceptionResolver.reportExceptions {
-				if (AcademicYear.isSITSInFlux(DateTime.now, termService)) {
+				val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+				if (thisAcademicYear.isSITSInFlux(DateTime.now)) {
 					UnlinkAttendanceMonitoringSchemeCommand().apply()
 				}
 			}

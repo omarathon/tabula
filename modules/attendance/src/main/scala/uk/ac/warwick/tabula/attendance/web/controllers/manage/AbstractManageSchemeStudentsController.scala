@@ -5,7 +5,6 @@ import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
@@ -76,7 +75,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 			"summaryString" -> summaryString(findStudentsForSchemeCommandResult, editMembershipCommandResult),
 			"expandFind" -> expandFind,
 			"expandManual" -> expandManual,
-			"SITSInFlux" -> AcademicYear.isSITSInFlux(DateTime.now, termService),
+			"SITSInFlux" -> scheme.academicYear.isSITSInFlux(DateTime.now),
 			"returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
 		).crumbs(
 				Breadcrumbs.Manage.Home,
