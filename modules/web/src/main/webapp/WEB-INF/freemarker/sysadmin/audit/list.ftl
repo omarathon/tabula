@@ -16,7 +16,7 @@
 	<#assign helpText>
 		<p>Use <a href="http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Terms">Lucene query syntax</a> to search, for example:</p>
 		<p><code>department:ps AND eventType:SubmitAssignment</code></p>
-		<p><i class="icon-lightbulb icon-large"></i> The fields available in the audit index are <i>(Case-Sensitively)</i>:</p>
+		<p><i class="icon-lightbulb fa fa-lightbulb-o icon-large fa fa-lg"></i> The fields available in the audit index are <i>(Case-Sensitively)</i>:</p>
 		<dl>
 			<dt class="muted">assignment</dt><dd class="muted">Database GUID</dd>
 			<dt>department</dt><dd>Two letter code</dd>
@@ -41,12 +41,12 @@
 			data-trigger="click"
 			data-placement="right"
 			data-html="true"
-			data-content="${helpText}"><i class="icon-question-sign icon-fixed-width" style="font-size:11pt"></i></a>
+			data-content="${helpText}"><i class="icon-question-sign fa fa-question-circle icon-fixed-width fa fa-fw" style="font-size:11pt"></i></a>
 	</#assign>
 
 	<@f.form commandName="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form-inline">
 		<div class="input-append input-prepend">
-			<span class="add-on"><i class="icon-search"></i></span><@f.input path="query" placeholder="Query..." /><input class="btn" type="submit" value="Search">
+			<span class="add-on"><i class="icon-search fa fa-search"></i></span><@f.input path="query" placeholder="Query..." /><input class="btn" type="submit" value="Search">
 			<span class="help-inline"><#noescape>${helpLink}</#noescape></span>
 		</div>
 	</@f.form>

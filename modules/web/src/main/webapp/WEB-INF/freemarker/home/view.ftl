@@ -96,7 +96,7 @@
 
 	<#if !ajax && (activeSpringProfiles!"") == "sandbox">
 	<div class="alert alert-block">
-		<h4><i class="icon-sun"></i> Tabula Sandbox</h4>
+		<h4><i class="icon-sun fa fa-sun-o"></i> Tabula Sandbox</h4>
 
 		<p>This instance of Tabula is a sandbox, used for testing Tabula's features and functionality without affecting
 			any real data.</p>

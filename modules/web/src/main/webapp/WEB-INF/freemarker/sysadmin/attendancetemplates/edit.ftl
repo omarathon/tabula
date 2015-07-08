@@ -56,7 +56,7 @@
 
 	<div class="striped-section">
 		<div class="pull-right">
-			<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+			<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/add" />" class="btn btn-primary new-point"><i class="icon-plus fa fa-plus"></i> Create new point</a>
 		</div>
 		<h2 class="section-title">Monitoring points</h2>
 		<div class="striped-section-contents">
@@ -75,7 +75,7 @@
 						<div class="span12">
 							<div class="pull-right">
 								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/edit"/>">Edit</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/delete"/>"><i class="icon-remove"></i></a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/delete"/>"><i class="icon-remove fa fa-times"></i></a>
 							</div>
 							<#if template.pointStyle.dbValue == "week">
 								${point.name} (week ${point.startWeek} - ${point.endWeek})

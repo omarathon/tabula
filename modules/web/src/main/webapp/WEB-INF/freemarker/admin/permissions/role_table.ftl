@@ -112,18 +112,18 @@
 						<td data-name="${roleId(roles._1())}">
 							<#if roles._2()?has_content>
 								<#if roles._2()>
-									<#assign icon="icon-ok attended" />
+									<#assign icon="icon-ok fa fa-check attended has-role" />
 									<#assign title><#noescape>${roleDescription(roles._1())}</#noescape> <strong>can</strong> ${permission._1().description?uncap_first}</#assign>
 								<#else>
-									<#assign icon="icon-sign-blank transparent" />
+									<#assign icon="icon-sign-blank fa fa-square transparent" />
 									<#assign title><#noescape>${roleDescription(roles._1())}</#noescape> <strong>cannot</strong> ${permission._1().description?uncap_first}</#assign>
 								</#if>
 							<#else>
-								<#assign icon="icon-ok-circle authorised" />
+								<#assign icon="icon-ok-circle fa fa-check-circle-o authorised has-role" />
 								<#assign title><#noescape>${roleDescription(roles._1())}</#noescape> <strong>can</strong> ${permission._1().description?uncap_first} <strong>for students with the same relationship</strong></#assign>
 							</#if>
 
-							<i class="${icon} icon-fixed-width use-tooltip" title="${title}" data-html="true"></i>
+							<i class="${icon} icon-fixed-width fa fa-fw use-tooltip" title="${title}" data-html="true"></i>
 						</td>
 					</#list>
 				</tr>
@@ -145,21 +145,19 @@
 				return false;
 			});
 
-			$('.show-hide-form input[type="checkbox"]').on('change', function(e) {
+			$('.show-hide-form input[type="checkbox"]').on('change', function() {
 				console.log('change');
 				var name = $(this).attr('name');
 				if ($(this).is(':checked')) {
 					console.log('showing ' + name);
 					$('.roles-table [data-name="' + name + '"]').show();
 				} else {
-					console.log('hiding ' + name)
+					console.log('hiding ' + name);
 					$('.roles-table [data-name="' + name + '"]').hide();
 				}
 
 				// Hide any empty rows
-				var hasData = function() {
-					return $(this).find('.icon-ok:visible').length > 0 || $(this).find('.icon-ok-circle:visible').length > 0;
-				};
+				var hasData = function() { return $(this).find('.has-role:visible').length > 0; };
 
 				$('.roles-table tbody tr').show().not(hasData).hide();
 			});

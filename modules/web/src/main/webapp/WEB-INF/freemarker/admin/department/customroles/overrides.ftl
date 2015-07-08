@@ -6,7 +6,7 @@
 	<div class="overrides">
 		<h2>Role overrides</h2>
 
-		<p><a class="btn" href="<@routes.admin.addcustomroleoverride customRoleDefinition />"><i class="icon-plus"></i> Create</a></p>
+		<p><a class="btn" href="<@routes.admin.addcustomroleoverride customRoleDefinition />"><i class="icon-plus fa fa-plus"></i> Create</a></p>
 
 		<#if roleInfo.overrides?size gt 0>
 			<table class="permissions-table table table-bordered permission-list">
@@ -28,13 +28,13 @@
 							<td><abbr title="${override.permission.description}" class="initialism">${permissionName}</abbr></td>
 							<td>
 								<#if override.overrideType>
-									<i class="icon-ok" title="Allowed"></i>
+									<i class="icon-ok fa fa-check" title="Allowed"></i>
 								<#else>
-									<i class="icon-remove" title="Not allowed"></i>
+									<i class="icon-remove fa fa-times" title="Not allowed"></i>
 								</#if>
 							</td>
 							<td class="actions">
-								<a class="btn btn-mini btn-danger" href="<@routes.admin.deletecustomroleoverride override />" data-toggle="modal" data-target="#custom-roles-modal"><i class="icon-remove icon-white"></i> Delete</a>
+								<a class="btn btn-mini btn-danger" href="<@routes.admin.deletecustomroleoverride override />" data-toggle="modal" data-target="#custom-roles-modal"><i class="icon-remove fa fa-times icon-white fa fa-inverse"></i> Delete</a>
 							</td>
 						</tr>
 					</#list>

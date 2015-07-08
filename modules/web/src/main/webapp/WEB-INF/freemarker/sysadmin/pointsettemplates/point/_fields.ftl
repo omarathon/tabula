@@ -8,7 +8,7 @@
 			<@f.option value="${week}">Week ${week}</@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-validFromWeek" data-content="You cannot mark a point as attended or missed (unauthorised) before its start date"><i class="icon-question-sign"></i></a>
+	<a class="use-popover" id="popover-validFromWeek" data-content="You cannot mark a point as attended or missed (unauthorised) before its start date"><i class="icon-question-sign fa fa-question-circle"></i></a>
 </@form.labelled_row>
 
 <@form.labelled_row "requiredFromWeek" "End">
@@ -17,7 +17,7 @@
 			<@f.option value="${week}">Week ${week}</@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-requiredFromWeek" data-content="A warning will appear for unrecorded attendance after its end date"><i class="icon-question-sign"></i></a>
+	<a class="use-popover" id="popover-requiredFromWeek" data-content="A warning will appear for unrecorded attendance after its end date"><i class="icon-question-sign fa fa-question-circle"></i></a>
 </@form.labelled_row>
 
 <script>

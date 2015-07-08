@@ -6,7 +6,7 @@
 	<div class="striped-section">
 		<div class="pull-right">
 			<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-success btn-medium pull-right">
-				<i class="icon-plus"></i> Add a new template
+				<i class="icon-plus fa fa-plus"></i> Add a new template
 			</a>
 		</div>
 		<h2 class="section-title">Templates</h2>
@@ -22,7 +22,7 @@
 		<div class="striped-section">
 			<div class="pull-right">
 				<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-success btn-medium pull-right">
-					<i class="icon-plus"></i> Add a new template
+					<i class="icon-plus fa fa-plus"></i> Add a new template
 				</a>
 			</div>
 			<h2 class="section-title">Templates</h2>

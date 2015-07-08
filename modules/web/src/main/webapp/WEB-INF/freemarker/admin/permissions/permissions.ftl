@@ -27,7 +27,7 @@
 
 				<#if target.customRoleDefinitions??>
 					<a class="btn" href="<@routes.admin.customroles target />">
-						<i class="icon-user"></i> Custom roles
+						<i class="icon-user fa fa-user"></i> Custom roles
 					</a>
 				</#if>
 
@@ -38,7 +38,7 @@
 						</button>
 						<ul class="dropdown-menu">
 							<#list target.permissionsParents as parent>
-								<li><a href="<@routes.admin.permissions parent />"><i class="icon-lock"></i> ${parent.humanReadableId}</a></li>
+								<li><a href="<@routes.admin.permissions parent />"><i class="icon-lock fa fa-lock"></i> ${parent.humanReadableId}</a></li>
 							</#list>
 						</ul>
 					</div>
@@ -90,7 +90,7 @@
 							   id="popover-${roleDefinition.name}"
 							   data-html="true"
 							   data-original-title="${roleDefinition.description}"
-							   data-content="${roleDescription}"><i class="icon-question-sign"></i></a>
+							   data-content="${roleDescription}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 							<@pm.roleTable perms_url "${roleDefinition.name}-table" target roleDefinitionName roleDefinition.description />
 						</div>
@@ -127,7 +127,7 @@
 							   id="popover-${roleDefinition.name}"
 							   data-html="true"
 							   data-original-title="${roleDefinition.description}"
-							   data-content="${roleDescription}"><i class="icon-question-sign"></i></a>
+							   data-content="${roleDescription}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 							<@pm.roleTable perms_url "${roleDefinition.name}-table" target roleDefinitionName roleDefinition.description />
 						</div>
@@ -169,9 +169,9 @@
 									<td><abbr title="${grantedPermission.permission.description}" class="initialism">${permissionName}</abbr></td>
 									<td>
 										<#if grantedPermission.overrideType>
-											<i class="icon-ok" title="Allowed"></i>
+											<i class="icon-ok fa fa-check" title="Allowed"></i>
 										<#else>
-											<i class="icon-remove" title="Not allowed"></i>
+											<i class="icon-remove fa fa-times" title="Not allowed"></i>
 										</#if>
 									</td>
 									<td class="actions">
@@ -181,7 +181,7 @@
 												<input type="hidden" name="permission" value="${permissionName}">
 												<input type="hidden" name="overrideType" value="<#if grantedPermission.overrideType>true<#else>false</#if>">
 												<input type="hidden" name="usercodes" value="${u.userId}">
-												<a class="btn btn-danger btn-mini removeUser"><i class="icon-white icon-remove"></i></a>
+												<a class="btn btn-danger btn-mini removeUser"><i class="icon-white fa fa-inverse icon-remove fa fa-times"></i></a>
 											</form>
 										<#else>
 											<#assign popoverText>
@@ -196,7 +196,7 @@
 
 											<button class="btn btn-danger btn-mini use-tooltip disabled" type="button"
 													data-html="true"
-													data-title="${popoverText}"><i class="icon-white icon-remove"></i></button>
+													data-title="${popoverText}"><i class="icon-white fa fa-inverse icon-remove fa fa-times"></i></button>
 										</#if>
 									</td>
 								</tr>
@@ -245,7 +245,7 @@
 			</fieldset>
 
 			<div class="submit-buttons">
-				<button type="submit" class="btn"><i class="icon-plus"></i> Add</button>
+				<button type="submit" class="btn"><i class="icon-plus fa fa-plus"></i> Add</button>
 			</div>
 		</@f.form>
 	</div>

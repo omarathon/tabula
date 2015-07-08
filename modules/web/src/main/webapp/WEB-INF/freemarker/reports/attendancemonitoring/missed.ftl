@@ -8,17 +8,17 @@
 	<ul class="dropdown-menu">
 		<li>
 			<a href="#" data-href="<@routes.reports.missedAttendanceDownloadCsv department academicYear />">
-				<i class="icon-table"></i> CSV
+				<i class="icon-table fa fa-table"></i> CSV
 			</a>
 		</li>
 		<li>
 			<a href="#" data-href="<@routes.reports.missedAttendanceDownloadXlsx department academicYear />">
-				<i class="icon-list-alt"></i> Excel
+				<i class="icon-list-alt fa fa-list-alt"></i> Excel
 			</a>
 		</li>
 		<li>
 			<a href="#" data-href="<@routes.reports.missedAttendanceDownloadXml department academicYear />">
-				<i class="icon-code"></i> XML
+				<i class="icon-code fa fa-code"></i> XML
 			</a>
 		</li>
 	</ul>
