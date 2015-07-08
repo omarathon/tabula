@@ -64,7 +64,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
 	@Value("${features.smallGroupTeaching.selfGroupSwitching:true}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
 	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
-	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring = defaults.attendanceMonitoring
+
 	@Value("${features.smallGroupAllocationFiltering:true}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
 	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment = defaults.personalTutorAssignment
 	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
@@ -72,26 +72,32 @@ abstract class Features {
 	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
-	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
-	@Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport = defaults.attendanceMonitoringReport
+
 	@Value("${features.smallGroupTeaching.lectures:true}") var smallGroupTeachingLectures = defaults.smallGroupTeachingLectures
 	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile = defaults.courseworkInStudentProfile
 	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
-	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
+
 	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.disability.rendering.submissions:false}") var disabilityOnSubmission = defaults.disabilityOnSubmission
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.attendanceMonitoring.smallGroupPointType:true}")
-	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
-	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
-	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
 	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
 	@Value("${features.profiles.showAccreditedPriorLearning:true}") var showAccreditedPriorLearning = defaults.showAccreditedPriorLearning
+	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring = defaults.attendanceMonitoring
+	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
+	@Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport = defaults.attendanceMonitoringReport
+	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
+	@Value("${features.attendanceMonitoring.smallGroupPointType:true}")
+	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
+	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
+	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
+	@Value("${features.attendanceMonitoring.version2:true}")	var attendanceMonitoringVersion2 = defaults.attendanceMonitoringVersion2
+	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
+	@Value("${features.attendanceMonitoring.academicYear2015:true}")	var attendanceMonitoringAcademicYear2015 = defaults.attendanceMonitoringAcademicYear2015
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
 	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport = defaults.schedulingAssignmentsImport
@@ -107,7 +113,6 @@ abstract class Features {
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
-	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
 	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
 	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
@@ -206,7 +211,9 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
+	@BeanProperty var attendanceMonitoringVersion2 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
+	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true

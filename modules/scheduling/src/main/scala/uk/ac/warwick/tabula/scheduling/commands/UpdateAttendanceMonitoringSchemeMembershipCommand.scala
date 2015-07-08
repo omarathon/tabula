@@ -32,7 +32,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 	self: FeaturesComponent with AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringSchemeMembershipCommandState with TaskBenchmarking =>
 
 	override def applyInternal() = {
-		if (features.attendanceMonitoringAcademicYear2014) {
+		if (features.attendanceMonitoringVersion2) {
 
 			val schemesToUpdate = transactional(readOnly = true) {
 				attendanceMonitoringService.listSchemesForMembershipUpdate

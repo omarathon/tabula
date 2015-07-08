@@ -53,7 +53,7 @@ class AssignmentController extends CourseworkController
 			submission.submittedDate = DateTime.now
 			submission.userId = user.userId
 			monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).nonEmpty || (
-				features.attendanceMonitoringAcademicYear2014 && attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
+				features.attendanceMonitoringVersion2 && attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
 			)
 	}
 

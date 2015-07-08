@@ -31,6 +31,9 @@
 						<#if features.attendanceMonitoringAcademicYear2014>
 							<li><h5><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentHomeForYear relationshipType '2014'/>">${relationshipType.studentRole?cap_first}s 14/15</a></h5></li>
 						</#if>
+						<#if features.attendanceMonitoringAcademicYear2015>
+							<li><h5><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentHomeForYear relationshipType '2015'/>">${relationshipType.studentRole?cap_first}s 15/16</a></h5></li>
+						</#if>
 					</#list>
 					</ul>
 				</section>
