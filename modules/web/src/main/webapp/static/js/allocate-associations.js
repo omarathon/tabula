@@ -41,9 +41,15 @@ jQuery(function($){
 
 		$table.on('click', 'input', function(){
 			if ($table.find('input:checked').length === 0) {
-				$removeButton.attr('disabled', true);
+				$removeButton.attr({
+					'disabled': true,
+					'title': 'You need to select some personal tutors from which to remove students'
+				});
 			} else {
-				$removeButton.attr('disabled', false);
+				$removeButton.attr({
+					'disabled': false,
+					'title': 'All students will be removed from selected personal tutors'
+				});
 			}
 		});
 		$removeButton.attr('disabled', true);
@@ -76,6 +82,12 @@ jQuery(function($){
 	entityTable.getTable().on('click', 'input', checkDistributeButton);
 	$distrubuteButton.attr('disabled', true);
 
+	$('input[name=query]').on('keypress', function(e){
+		if (e.which === 13) {
+			$(this).closest('form').submit();
+		}
+	});
+
 	$('.for-check-all').append(
 		$('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' })
 	).find('input').change(function() {
@@ -83,10 +95,6 @@ jQuery(function($){
 	});
 
 	$('.fix-area').fixHeaderFooter();
-
-	$studentFilter.prepend(
-		$('<button class="btn btn-mini clear-all-filters" type="submit" disabled>Clear filter</button>')
-	);
 
 	var prependClearLink = function($list) {
 		if (!$list.find('input:checked').length) {
@@ -170,7 +178,11 @@ jQuery(function($){
 		}
 	});
 
-	$('.clear-all-filters').on('click', function() {
+	$studentFilter.prepend(
+		$('<button class="btn btn-mini clear-all-filters" type="submit" disabled>Clear filter</button>')
+	);
+
+	var $clearAllButtons = $('.clear-all-filters').on('click', function() {
 		$(this).closest('.student-filter').find('.filter-list').each(function() {
 			var $list = $(this);
 
@@ -182,6 +194,10 @@ jQuery(function($){
 
 			prependClearLink($list);
 		});
+	});
+
+	$clearAllButtons.each(function() {
+		updateClearAllButton($(this));
 	});
 
 	var updateFilterFromPicker = function($picker, name, value, shortValue) {

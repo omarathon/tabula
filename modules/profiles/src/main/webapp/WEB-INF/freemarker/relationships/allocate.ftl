@@ -1,4 +1,5 @@
 <#escape x as x?html>
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#macro deptheaderroutemacro dept><@routes.relationship_allocate dept relationshipType /></#macro>
 <#assign deptheaderroute = deptheaderroutemacro in routes/>
@@ -6,7 +7,7 @@
 <#assign uploadFormAction><@routes.relationship_allocate_upload department relationshipType /></#assign>
 <#assign previewFormAction><@routes.relationship_allocate_preview department relationshipType /></#assign>
 
-<@fmt.deptheader "Allocate students" "to ${relationshipType.description}s" department routes "deptheaderroute" "with-settings" />
+<@fmt.deptheader "Allocate ${relationshipType.description?lower_case}s" "in" department routes "deptheaderroute" "with-settings" />
 
 <div class="tabbable">
 	<ul class="nav nav-tabs">
@@ -21,9 +22,9 @@
 
 <div class="tab-content">
 	<div id="allocatestudents-tab1" class="tab-pane active fix-area allocate-associations">
-		<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
+		<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
 			<@spring.bind path=path>
-			<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
+			<div class="btn-group ${cssClass} <#if currentFilter == placeholder> empty-filter</#if>">
 				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
 					<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 					<span class="caret"></span>
@@ -110,14 +111,14 @@
 								<span class="add-on"><i class="icon-search"></i></span>
 							</div>
 						</#assign>
-						<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes validItems=command.visibleRoutes customPicker=routesCustomPicker; route, isValid>
+						<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes validItems=command.visibleRoutes customPicker=routesCustomPicker cssClass="wide"; route, isValid>
 							<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}" ${contains_by_code(command.routes, route)?string('checked','')} <#if !isValid>disabled</#if>>
 							<@fmt.route_name route false />
 						</@filter>
 
 						<#assign placeholder = "All years" />
 						<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
-						<@filter "yearsOfStudy" placeholder currentfilter command.allYearsOfStudy command.allYearsOfStudy "Year "; yearOfStudy>
+						<@filter "yearsOfStudy" placeholder currentfilter command.allYearsOfStudy command.allYearsOfStudy "Year " "" "narrow"; yearOfStudy>
 							<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
 							${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
 						${yearOfStudy}
@@ -159,7 +160,7 @@
 										<td class="check"><input type="checkbox" name="allocate" value="${studentData.universityId}"></td>
 										<td class="single-name">${studentData.firstName}</td>
 										<td class="single-name">${studentData.lastName}</td>
-										<td class="universityid">${studentData.universityId}</td>
+										<td class="universityid">${studentData.universityId} <@pl.profile_link studentData.universityId /></td>
 									</tr>
 								</#list>
 							</tbody>
@@ -172,12 +173,13 @@
 				<div class="span6 entities">
 					<div class="header-with-tooltip">
 						<h3>${relationshipType.description}s</h3>
+						<span><@fmt.p allocated?size "${relationshipType.description}" /> found</span>
 					</div>
 
 					<div class="student-filter btn-group-group well well-small">
 						<#assign placeholder = "All ${relationshipType.description}s" />
 						<#assign currentfilter><@current_filter_value "entityTypes" placeholder; entityType>${command.allEntityTypesLabels[entityType]}</@current_filter_value></#assign>
-						<@filter path="entityTypes" placeholder=placeholder currentFilter=currentfilter allItems=command.allEntityTypes validItems=command.allEntityTypes customPicker=""; entityType, isValid>
+						<@filter path="entityTypes" placeholder=placeholder currentFilter=currentfilter allItems=command.allEntityTypes validItems=command.allEntityTypes cssClass="wide"; entityType, isValid>
 							<input type="checkbox" name="${status.expression}" value="${entityType}" data-short-value="${command.allEntityTypesLabels[entityType]}"
 								${command.entityTypes?seq_contains(entityType)?string('checked','')}
 							>
@@ -192,7 +194,9 @@
 							Add ${relationshipType.agentRole}s</button>
 					</div>
 
-					<button class="btn remove-all" name="action" value="${commandActions.RemoveFromAll}" type="submit"><i class="icon-arrow-left"></i> Remove all students from selected ${relationshipType.description}(s)</button>
+					<button class="btn remove-all" name="action" value="${commandActions.RemoveFromAll}" type="submit" title="You need to select some personal tutors from which to remove students">
+						<i class="icon-arrow-left"></i> Remove all students from selected ${relationshipType.description}(s)
+					</button>
 
 					<br /> <br />
 
@@ -267,8 +271,8 @@
 			<input type="hidden" name="allocationType" value="${allocationTypes.Add}" />
 
 			<div class="submit-buttons fix-footer">
-				<button type="submit" class="btn btn-primary">Continue</button>
-				<a href="https://jeff.warwick.ac.uk/profiles/" class="btn">Cancel</a>
+				<button type="submit" class="btn btn-primary">Save</button>
+				<a href="<@routes.home />" class="btn">Cancel</a>
 			</div>
 		</@f.form>
 	</div>
@@ -333,5 +337,7 @@
 		</@f.form>
 	</div>
 </div>
+
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 </#escape>
