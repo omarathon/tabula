@@ -78,7 +78,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		controller.features.attendanceMonitoringAcademicYear2014 = false
+		controller.features.attendanceMonitoringVersion2 = false
 		val mav = controller.home(command)
 		mav.viewName should be(s"redirect:/attendance/$departmentCode")
 
@@ -109,7 +109,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		controller.features.attendanceMonitoringAcademicYear2014 = false
+		controller.features.attendanceMonitoringVersion2 = false
 		val mav = controller.home(command)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/2013")
 
