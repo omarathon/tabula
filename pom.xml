@@ -248,36 +248,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>pl.project13.maven</groupId>
-						<artifactId>git-commit-id-plugin</artifactId>
-						<version>2.1.11</version>
-						<executions>
-							<execution>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>revision</goal>
-								</goals>
-							</execution>
-						</executions>
-
-						<configuration>
-							<prefix>git</prefix>
-							<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
-							<verbose>false</verbose>
-							<dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-							<generateGitPropertiesFile>false</generateGitPropertiesFile>
-							<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
-							<failOnNoGitDirectory>true</failOnNoGitDirectory>
-							<gitDescribe>
-								<skip>false</skip>
-								<always>false</always>
-								<abbrev>7</abbrev>
-								<dirty>-devel</dirty>
-								<forceLongFormat>false</forceLongFormat>
-							</gitDescribe>
-						</configuration>
-					</plugin>
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
