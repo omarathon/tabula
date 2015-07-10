@@ -320,13 +320,13 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 					Restrictions.isNull("relationshipsOfType.id"),
 					"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 					"mostSignificantCourse.allRelationships" ->
-						AliasAndJoinType("relationshipsOfType", JoinType.LEFT_OUTER_JOIN, Restrictions.and(
+						AliasAndJoinType("relationshipsOfType", JoinType.LEFT_OUTER_JOIN, Some(Restrictions.and(
 							Restrictions.eq("relationshipType", relationshipType),
 							Restrictions.or(
 								Restrictions.isNull("endDate"),
 								Restrictions.gt("endDate", DateTime.now)
 							)
-						))
+						)))
 				) ++
 				// Plus whatever was passed in
 				restrictions

@@ -31,9 +31,9 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
 	def setFetchMode(associationPath: String, mode: FetchMode) = chainable { c.setFetchMode(associationPath, mode) }
-	def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN, withClause: Criterion = null) = chainable {
+	def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN, withClause: Option[Criterion] = None) = chainable {
 		aliases.put(property, alias) match {
-			case None => c.createAlias(property, alias, joinType, withClause)
+			case None => c.createAlias(property, alias, joinType, withClause.orNull)
 			case Some(existing) if existing == alias => // duplicate
 			case Some(other) => throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
 		}
