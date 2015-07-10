@@ -51,13 +51,13 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 			findAll(cssSelector(".students tbody tr td.check input")).toSeq.forall(_.isSelected) should be {true}
 		}
 
-		And("I choose to distribute to all entities")
-		val distributeAction = singleSel(cssSelector("[name=distributeAction]"))
-		distributeAction.value = "DistributeToAll"
-		distributeAction.selection.get should be ("DistributeToAll")
+		And("I select all of the entities")
+		findAll(cssSelector(".entities tbody tr td.check input")).foreach(c => clickOn(c))
 		eventually{
-			find(cssSelector("button[name=action][value=Distribute]")).get.isEnabled should be {true}
+			findAll(cssSelector(".entities tbody tr td.check input")).toSeq.forall(_.isSelected) should be {true}
 		}
+
+		And("I choose to distribute")
 		click on cssSelector("button[name=action][value=Distribute]")
 
 		Then("All the students are allocated")

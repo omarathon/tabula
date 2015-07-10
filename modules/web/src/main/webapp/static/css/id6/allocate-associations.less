@@ -73,6 +73,33 @@
 		[colspan="3"] {
 			padding-left: 29px;
 		}
+
+		tr.expanded {
+			background-color: @tableBackgroundHover;
+			td {
+				border-bottom: 1px solid @tableBorder;
+				&.check {
+					border-left: 1px solid @tableRowBorderBottom;
+				}
+				&.toggle {
+					border-right: 1px solid @tableRowBorderBottom;
+				}
+			}
+		}
+		tr.forentity {
+			td {
+				border-bottom: 1px solid @tableBorder;
+				&.student {
+					border-left: 1px solid @tableRowBorderBottom;
+				}
+				&.remove {
+					border-right: 1px solid @tableRowBorderBottom;
+				}
+			}
+			&.last td {
+				border-bottom: 1px solid @tableRowBorderBottom;
+			}
+		}
 	}
 
 	.student-filter .wide .filter-short-values {

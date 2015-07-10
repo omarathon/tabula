@@ -19,8 +19,6 @@ object FetchDepartmentRelationshipInformationCommand {
 
 	object Actions {
 		val Distribute = "Distribute"
-		val DistributeToAll = "DistributeToAll"
-		val DistributeToSelected = "DistributeToSelected"
 		val RemoveSingle = "RemoveSingle"
 		val RemoveFromAll = "RemoveFromAll"
 		val AddAdditionalEntities = "AddAdditionalEntities"
@@ -51,11 +49,8 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 	override def applyInternal() = {
 		val initialState = fetchResult
 		action match {
-			case Actions.DistributeToAll =>
-				distributeToAll(initialState)
-				fetchResult
-			case Actions.DistributeToSelected =>
-				distributeToSelected(initialState)
+			case Actions.Distribute =>
+				distribute(initialState)
 				fetchResult
 			case Actions.RemoveSingle =>
 				removeSingle(initialState)
@@ -146,11 +141,7 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 		(allocatedWithAdditionsAndRemovals, newUnallocated)
 	}
 
-	private def distributeToAll(initialState: StudentAssociationResult): Unit = {
-		distribute(initialState.unallocated.filter(s => allocate.contains(s.universityId)), initialState.allocated)
-	}
-
-	private def distributeToSelected(initialState: StudentAssociationResult): Unit = {
+	private def distribute(initialState: StudentAssociationResult): Unit = {
 		distribute(initialState.unallocated.filter(s => allocate.contains(s.universityId)), initialState.allocated.filter(e => entities.contains(e.entityId)))
 	}
 
@@ -297,9 +288,6 @@ trait FetchDepartmentRelationshipInformationCommandBindListener extends BindList
 				studentToRemove = split(2)
 			}
 		}
-		if (action == Actions.Distribute) {
-			action = distributeAction
-		}
 	}
 
 }
@@ -341,7 +329,6 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
 	var action: String = ""
 
 	var allocate: JList[String] = JArrayList()
-	var distributeAction: String = ""
 
 	var removeSingleCombined: String = ""
 	var studentToRemove: String = ""
@@ -351,4 +338,6 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
 
 	var additionalEntityUserIds: JList[String] = JArrayList()
 	var additionalEntities: JList[String] = JArrayList()
+
+	var expanded: JMap[String, JBoolean] = JHashMap()
 }

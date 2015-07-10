@@ -129,19 +129,15 @@
 						<br /><br />
 
 						<div class="input-append">
-							<input class="input-xlarge" name="query" type="text" placeholder="Search for any students by name or ID" value="${command.query!}"/>
+							<input class="input-xlarge" name="query" type="text" placeholder="Search these students" value="${command.query!}"/>
 							<button class="btn" type="submit"><i class="icon-search"></i></button>
 						</div>
 					</div>
 
+					<#assign singleUnallocated = unallocated?has_content && unallocated?size == 1 />
 					<#if unallocated?has_content>
 
-						<select name="distributeAction" class="input-xlarge">
-							<option value="" style="display:none;">Choose student allocation method</option>
-							<option value="${commandActions.DistributeToSelected}">Distribute to selected ${relationshipType.description}(s)</option>
-							<option value="${commandActions.DistributeToAll}">Distribute to all ${relationshipType.description}(s)</option>
-						</select>
-						<button class="btn distribute" name="action" value="${commandActions.Distribute}" type="submit">Go <i class="icon-arrow-right"></i></button>
+						<button class="btn distribute" name="action" value="${commandActions.Distribute}" type="submit">Distribute between selected personal tutors <i class="icon-arrow-right"></i></button>
 
 						<br /> <br />
 
@@ -157,7 +153,7 @@
 							<tbody>
 								<#list unallocated as studentData>
 									<tr>
-										<td class="check"><input type="checkbox" name="allocate" value="${studentData.universityId}"></td>
+										<td class="check"><input type="checkbox" name="allocate" value="${studentData.universityId}" <#if singleUnallocated>checked</#if>></td>
 										<td class="single-name">${studentData.firstName}</td>
 										<td class="single-name">${studentData.lastName}</td>
 										<td class="universityid">${studentData.universityId} <@pl.profile_link studentData.universityId /></td>
@@ -211,16 +207,19 @@
 						</thead>
 						<tbody>
 							<#list allocated?sort_by("displayName") as entityData>
-								<tr data-entity="${entityData.entityId}">
+								<tr data-entity="${entityData.entityId}" <#if command.expanded[entityData.entityId]!false>class="expanded"</#if>>
 									<td class="check"><input type="checkbox" name="entities" value="${entityData.entityId}"></td>
 									<td class="full-name">${entityData.displayName}</td>
 									<td class="counter">${entityData.students?size}</td>
-									<td><i title="Edit students allocated to this ${relationshipType.agentRole}" class="icon-edit icon-large icon-fixed-width <#if !entityData.students?has_content>icon-muted</#if>"></i></td>
+									<td class="toggle">
+										<i title="Edit students allocated to this ${relationshipType.agentRole}" class="icon-edit icon-large icon-fixed-width <#if !entityData.students?has_content>icon-muted</#if>"></i>
+										<input type="hidden" name="expanded[${entityData.entityId}]" value="${(command.expanded[entityData.entityId]!false)?string}" />
+									</td>
 								</tr>
 								<#list entityData.students?sort_by("lastName", "firstName") as studentData>
-									<tr data-forentity="${entityData.entityId}">
-										<td colspan="3">${studentData.firstName} ${studentData.lastName} (${studentData.universityId})</td>
-										<td>
+									<tr data-forentity="${entityData.entityId}" class="forentity <#if !studentData_has_next>last</#if>">
+										<td class="student" colspan="3">${studentData.firstName} ${studentData.lastName} (${studentData.universityId})  <@pl.profile_link studentData.universityId /></td>
+										<td class="remove">
 											<button title="Remove" class="btn btn-link" type="submit" name="removeSingleCombined" value="removeSingle-${entityData.entityId}-${studentData.universityId}"><i class="icon-remove icon-large icon-fixed-width"></i></button>
 										</td>
 									</tr>

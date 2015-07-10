@@ -76,47 +76,12 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 	}
 
 	@Test
-	def distributeToAll(): Unit = {
-		new Fixture {
-			val allocated = Seq("8", "9", "10", "11")
-			command.allocate.addAll(allocated.asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToAll
-			val result = command.applyInternal()
-			result.unallocated.isEmpty should be {true}
-			result.allocated.size should be (4)
-			result.allocated.flatMap(_.students).distinct.size should be (11)
-			val sizes = result.allocated.map(_.students.size)
-			sizes.count(_ == 3) should be (3)
-			sizes.count(_ == 2) should be (1)
-			allocated.foreach(id => {
-				command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {true}
-			})
-		}
-
-		new Fixture {
-			val allocated = Seq("8", "9", "10")
-			command.allocate.addAll(allocated.asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToAll
-			val result = command.applyInternal()
-			result.unallocated.size should be (1)
-			result.allocated.size should be (4)
-			result.allocated.flatMap(_.students).distinct.size should be (10)
-			val sizes = result.allocated.map(_.students.size)
-			sizes.count(_ == 3) should be (2)
-			sizes.count(_ == 2) should be (2)
-			allocated.foreach(id => {
-				command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {true}
-			})
-		}
-	}
-
-	@Test
-	def distributeToSelected(): Unit = {
+	def distribute(): Unit = {
 		new Fixture {
 			val allocated = Seq("8", "9", "10", "11")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
 			val result = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
@@ -133,7 +98,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			val allocated = Seq("8", "9", "10")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3", "4").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
 			val result = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
@@ -150,7 +115,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			val allocated = Seq("8", "9", "10")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("3", "4").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
 			val result = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
@@ -215,7 +180,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			// Re-add
 			command.allocate = Seq("1").asJava
 			command.entities = Seq("2").asJava
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
 			val result2 = command.applyInternal()
 			result2.unallocated.size should be (4)
 			result2.allocated.size should be (4)
@@ -232,7 +197,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			// Add
 			command.allocate = JArrayList("8")
 			command.entities = JArrayList("2")
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeToSelected
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
 			val result = command.applyInternal()
 			result.unallocated.size should be (3)
 			result.allocated.size should be (4)

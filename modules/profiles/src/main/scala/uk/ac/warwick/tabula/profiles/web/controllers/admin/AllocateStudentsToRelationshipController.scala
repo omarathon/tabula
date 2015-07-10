@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.commands.relationships._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.tabula.web.views.{JSONView, ExcelView}
 
 @Controller
 @RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate"))
@@ -31,10 +31,20 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
 		val results = cmd.apply()
-		Mav("relationships/allocate",
-			"unallocated" -> results.unallocated,
-			"allocated" -> results.allocated
-		)
+		if (ajax) {
+			Mav(new JSONView(
+				Map("unallocated" -> results.unallocated.map(studentData => Map(
+					"firstName" -> studentData.firstName,
+					"lastName" -> studentData.lastName,
+					"universityId" -> studentData.universityId
+				)))
+			)).noLayout()
+		} else {
+			Mav("relationships/allocate",
+				"unallocated" -> results.unallocated,
+				"allocated" -> results.allocated
+			)
+		}
 	}
 
 }

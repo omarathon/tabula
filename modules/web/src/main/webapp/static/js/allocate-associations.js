@@ -3,7 +3,7 @@ jQuery(function($){
 		return;
 
 
-	var $studentFilter = $('#command').find('.student-filter');
+	var $fetchForm = $('form.fetch'), $studentFilter = $('#command').find('.student-filter');
 	var EntityTable = function($table){
 		var rowMap = {}, $removeButton = $table.closest('div').find('button.remove-all');
 
@@ -17,14 +17,19 @@ jQuery(function($){
 		});
 
 		$table.on('click', '.icon-edit', function(){
-			var $row = $(this).closest('tr'), entityId = $row.data('entity');
-			if ($row.data('expanded')) {
+			var $this = $(this), $expandedInput = $this.closest('td').find('input'), $row = $this.closest('tr'), entityId = $row.data('entity');
+			if ($row.hasClass('expanded')) {
 				$table.find('tr[data-forentity="' + entityId + '"]').detach();
-				$row.data('expanded', false);
+				$row.removeClass('expanded');
+				$expandedInput.val('false');
 			} else {
 				$row.after(rowMap[entityId]);
-				$row.data('expanded', true);
+				$row.addClass('expanded', true);
+				$expandedInput.val('true');
 			}
+		});
+		$table.find('tr.expanded').each(function(){
+			$(this).after(rowMap[$(this).data('entity')]);
 		});
 
 		$table.sortableTable();
@@ -33,7 +38,7 @@ jQuery(function($){
 		}).on('sortEnd', function(){
 			$table.find('tr').each(function(){
 				var $row = $(this), entityId = $row.data('entity');
-				if ($row.data('expanded')) {
+				if ($row.hasClass('expanded')) {
 					$row.after(rowMap[entityId]);
 				}
 			});
@@ -64,13 +69,7 @@ jQuery(function($){
 		$distributeActionSelect = $('select[name=distributeAction]');
 
 	var checkDistributeButton = function(){
-		var result = (
-			$studentTable.find('input:checked').length > 0 && (
-				$distributeActionSelect.val() === 'DistributeToAll' || (
-					$distributeActionSelect.val() === 'DistributeToSelected' && entityTable.getTable().find('input:checked').length > 0
-				)
-			)
-		);
+		var result = $studentTable.find('input:checked').length > 0 && entityTable.getTable().find('input:checked').length > 0;
 		if (result) {
 			$distrubuteButton.attr('disabled', false);
 		} else {
@@ -82,11 +81,67 @@ jQuery(function($){
 	entityTable.getTable().on('click', 'input', checkDistributeButton);
 	$distrubuteButton.attr('disabled', true);
 
-	$('input[name=query]').on('keypress', function(e){
+	var $studentQuery = $('input[name=query]').on('keypress', function(e){
 		if (e.which === 13) {
 			$(this).closest('form').submit();
 		}
-	});
+	}).attr('autocomplete', 'off');
+	var $typeahead = $studentQuery.typeahead({
+		source: function(query, process){
+			// Abort any existing search
+			if (self.currentSearch) {
+				self.currentSearch.abort();
+				self.currentSearch = null;
+			}
+			self.currentSearch = $.ajax({
+				url: $fetchForm.attr('action'),
+				data: $fetchForm.serialize(),
+				success: function(data) {
+					process(data.unallocated)
+				}
+			});
+		},
+		item: '<li class="flexi-picker-result"><a href="#"><span class="name"></span> (<span class="universityId"></span>)</a></li>'
+	}).data('typeahead');
+	$typeahead.sorter = function(items) { return items; };
+	$typeahead.matcher = function() { return true; };
+	$typeahead.render = function (items) {
+		var that = this;
+		items = $(items).map(function (i, item) {
+			if (item != undefined) {
+				i = $(that.options.item);
+				i.find('span.name').html(that.highlighter(item.firstName + ' ' + item.lastName));
+				i.find('span.universityId').html(that.highlighter(item.universityId));
+				return i[0];
+			} else {
+				// no idea what's happened here. Return an empty item.
+				return $(that.options.item)[0];
+			}
+		});
+		items.first().addClass('active');
+		this.$menu.html(items);
+		return this;
+	};
+	$typeahead.show = function () {
+		var pos = $.extend({}, this.$element.offset(), {
+			height: this.$element[0].offsetHeight
+		});
+
+		this.$menu.appendTo($('body')).show().css({
+			top: pos.top + pos.height, left: pos.left
+		});
+
+		this.shown = true;
+		return this;
+	};
+	$typeahead.updater = function() {
+		return this.$menu.find('.active .universityId').text();
+	};
+	var oldSelect = $typeahead.select;
+	$typeahead.select = function () {
+		oldSelect.call($typeahead);
+		$fetchForm.submit();
+	};
 
 	$('.for-check-all').append(
 		$('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' })
@@ -249,7 +304,7 @@ jQuery(function($){
 	if ($previewForm.find('input[name^=additions]').length > 0 || $previewForm.find('input[name^=removals]').length > 0) {
 		$previewForm.addClass('dirty');
 	}
-	$('form.fetch').on('submit', function(){
+	$fetchForm.on('submit', function(){
 		$previewForm.removeClass('dirty');
 	});
 
