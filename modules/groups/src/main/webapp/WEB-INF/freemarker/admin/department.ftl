@@ -413,6 +413,7 @@
 						});
 
 						$('.use-tooltip').tooltip();
+						AjaxPopup.wireAjaxPopupLinks($('#container'));
 
 						// callback for hooking in local changes to results
 						$(document).trigger("tabula.filterResultsChanged");

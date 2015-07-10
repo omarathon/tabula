@@ -15,23 +15,23 @@
 	<div class="btn-toolbar dept-toolbar">
 		<div class="btn-group dept-settings">
 			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-				<i class="icon-wrench"></i>
+				<i class="icon-wrench fa fa-wrench"></i>
 				Manage
 				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.admin.deptperms department/>">
-					<i class="icon-user icon-fixed-width"></i> Edit departmental permissions
+					<i class="icon-user fa fa-user icon-fixed-width fa fa-fw"></i> Edit departmental permissions
 				</a></li>
 
 				<li class="divider"></li>
 
 				<#if modules?has_content || departmentRoutes?has_content || !department.children?has_content>
 					<li><a href="<@routes.admin.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-						<i class="icon-list-alt icon-fixed-width"></i> Display settings</a>
+						<i class="icon-list-alt fa fa-list-alt icon-fixed-width fa fa-fw"></i> Display settings</a>
 					</li>
 					<li><a href="<@routes.admin.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}">
-						<i class="icon-envelope icon-fixed-width"></i> Notification settings</a>
+						<i class="icon-envelope fa fa-envelope icon-fixed-width fa fa-fw"></i> Notification settings</a>
 					</li>
 
 					<li class="divider"></li>
@@ -39,29 +39,29 @@
 
 				<#if can.do("Department.Manage", department)>
 					<li><a href="<@routes.admin.createsubdepartment department />">
-						<i class="icon-plus icon-fixed-width"></i> Create sub-department</a>
+						<i class="icon-plus fa fa-plus icon-fixed-width fa fa-fw"></i> Create sub-department</a>
 					</li>
 				</#if>
 				<#if can.do("Department.Manage", department)>
 					<li><a href="<@routes.admin.editdepartment department />">
-						<i class="icon-plus icon-fixed-width"></i> Edit department</a>
+						<i class="icon-plus fa fa-plus icon-fixed-width fa fa-fw"></i> Edit department</a>
 					</li>
 				</#if>
 				<#if can.do("Module.Create", department)>
 					<li><a href="<@routes.admin.createmodule department />">
-						<i class="icon-plus icon-fixed-width"></i> Create module</a>
+						<i class="icon-plus fa fa-plus icon-fixed-width fa fa-fw"></i> Create module</a>
 					</li>
 				</#if>
 				<#if department.children?has_content && can.do("Department.ArrangeRoutesAndModules", department)>
 					<li class="divider"></li>
 
 					<li><a href="<@routes.admin.sortmodules department />">
-						<i class="icon-random icon-fixed-width"></i> Arrange modules</a>
+						<i class="icon-random fa fa-random icon-fixed-width fa fa-fw"></i> Arrange modules</a>
 					</li>
 				</#if>
 				<#if department.children?has_content && can.do("Department.ArrangeRoutesAndModules", department)>
 					<li><a href="<@routes.admin.sortroutes department />">
-						<i class="icon-random icon-fixed-width"></i> Arrange routes</a>
+						<i class="icon-random fa fa-random icon-fixed-width fa fa-fw"></i> Arrange routes</a>
 					</li>
 				</#if>
 			</ul>
@@ -76,9 +76,9 @@
 
 		<#if !modules?has_content>
 			<#if department.children?has_content>
-				<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't directly contain any modules. Check subdepartments.</p>
+				<p class="alert alert-info"><i class="icon-info-sign fa fa-info-circle"></i> This department doesn't directly contain any modules. Check subdepartments.</p>
 			<#else>
-				<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't contain any modules.</p>
+				<p class="alert alert-info"><i class="icon-info-sign fa fa-info-circle"></i> This department doesn't contain any modules.</p>
 			</#if>
 		</#if>
 
@@ -90,14 +90,14 @@
 				<div class="clearfix">
 					<div class="btn-group section-manage-button">
 						<#if can_manage>
-							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench fa fa-wrench"></i> Manage <span class="caret"></span></a>
 							<ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.admin.moduleperms module />">
-									<i class="icon-user"></i> Edit module permissions
+									<i class="icon-user fa fa-user"></i> Edit module permissions
 								</a></li>
 					  		</ul>
 						<#else>
-							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this module"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this module"><i class="icon-wrench fa fa-wrench"></i> Manage <span class="caret"></span></a>
 						</#if>
 					</div>
 
@@ -111,9 +111,9 @@
 
 		<#if !departmentRoutes?has_content>
 			<#if department.children?has_content>
-				<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't directly contain any routes. Check subdepartments.</p>
+				<p class="alert alert-info"><i class="icon-info-sign fa fa-info-circle"></i> This department doesn't directly contain any routes. Check subdepartments.</p>
 			<#else>
-				<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't contain any routes.</p>
+				<p class="alert alert-info"><i class="icon-info-sign fa fa-info-circle"></i> This department doesn't contain any routes.</p>
 			</#if>
 		</#if>
 
@@ -125,14 +125,14 @@
 				<div class="clearfix">
 					<div class="btn-group section-manage-button">
 						<#if can_manage>
-							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench fa fa-wrench"></i> Manage <span class="caret"></span></a>
 							<ul class="dropdown-menu pull-right">
 								<li><a href="<@routes.admin.routeperms route />">
-									<i class="icon-user"></i> Edit route permissions
+									<i class="icon-user fa fa-user"></i> Edit route permissions
 								</a></li>
 							</ul>
 						<#else>
-							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this route"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+							<a class="btn btn-medium dropdown-toggle disabled" title="You do not have permission to manage this route"><i class="icon-wrench fa fa-wrench"></i> Manage <span class="caret"></span></a>
 						</#if>
 					</div>
 

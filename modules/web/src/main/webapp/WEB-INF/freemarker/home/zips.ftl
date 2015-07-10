@@ -14,7 +14,7 @@
 
 <div class="zip-complete alert alert-success" style="display: none;">
 	<h3>ZIP file generated successfully</h3>
-	<p><a href="<@routes.zipComplete jobId />" class="btn"><i class="icon-download"></i> Download ZIP file</a></p>
+	<p><a href="<@routes.zipComplete jobId />" class="btn"><i class="icon-download fa fa-arrow-circle-o-down"></i> Download ZIP file</a></p>
 </div>
 
 <a class="btn" href="${returnTo}">Done</a>

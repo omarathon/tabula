@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
+
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import scala.collection.JavaConverters._
 
@@ -25,7 +27,8 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with SchedulesNotifications[Assignment, Assignment]
 		with AutowiringUserLookupComponent
 		with AutowiringAssessmentMembershipServiceComponent
-		with UpdatesStudentMembership {
+		with UpdatesStudentMembership
+		with GeneratesTriggers[Assignment] {
 
 	var service = Wire.auto[AssessmentService]
 
@@ -215,6 +218,14 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 				}
 
 			submissionNotifications ++ feedbackNotifications
+		}
+	}
+
+	override def generateTriggers(commandResult: Assignment): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+		if (commandResult.closeDate != null && commandResult.closeDate.isAfterNow) {
+			Seq(AssignmentClosedTrigger(commandResult.closeDate, commandResult))
+		} else {
+			Seq()
 		}
 	}
 

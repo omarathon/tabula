@@ -21,7 +21,7 @@
 					<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}">
 						<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 						<input type="hidden" name="action" value="remove" />
-						<button class="btn btn-mini btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
+						<button class="btn btn-mini btn-info"><i class="icon-eye-close fa fa-eye-slash"></i> Disable God mode</button>
 					</@f.form>
 				</div>
 			</#if>
@@ -92,7 +92,7 @@
 										<span>${component.siteHeader?default('Tabula')}</span>
 									</#if>
 								</#compress></span>
-								<#if !(jumbotron!false)><span class="more-link"><i class="icon-caret-down"></i></span></#if>
+								<#if !(jumbotron!false)><span class="more-link"><i class="icon-caret-down fa fa-caret-down"></i></span></#if>
 							</h1>
 
 							<h2 id="strapline">
@@ -114,7 +114,7 @@
 							</#if>
 
 							<#if (activeSpringProfiles!"") == "sandbox">
-								<span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="left" data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i class="icon-sun"></i> Sandbox</span>
+								<span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="left" data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i class="icon-sun fa fa-sun-o"></i> Sandbox</span>
 								<script>
 									jQuery(function($){
 										$('#sandbox-label').popover();
@@ -244,7 +244,7 @@
 									<#if user?? && user.sysadmin>
 										<div id="sysadmin-link">
 											<div class="btn-group">
-												<a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog icon-white"></i> System <span class="caret"></span></a>
+												<a id="sysadmin-button" class="btn btn-inverse dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog fa fa-cog icon-white fa fa-white"></i> System <span class="caret"></span></a>
 												<ul class="dropdown-menu pull-right">
 													<#if user.sysadmin>
 														<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
@@ -267,7 +267,7 @@
 										</script>
 									<#elseif user?? && user.masquerader>
 										<div id="sysadmin-link">
-											<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-user icon-white"></i> Masquerade</a>
+											<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-user fa fa-user icon-white fa fa-white"></i> Masquerade</a>
 										</div>
 									</#if>
 

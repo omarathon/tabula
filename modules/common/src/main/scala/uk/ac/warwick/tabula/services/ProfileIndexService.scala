@@ -1,41 +1,28 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
+import java.io.File
+
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
+import org.apache.lucene.analysis.{Analyzer, TokenStream}
+import org.apache.lucene.analysis.core.{KeywordAnalyzer, LowerCaseFilter, StopFilter, WhitespaceAnalyzer}
+import org.apache.lucene.analysis.miscellaneous.{ASCIIFoldingFilter, PerFieldAnalyzerWrapper}
+import org.apache.lucene.analysis.standard.{StandardFilter, StandardTokenizer}
+import org.apache.lucene.document.Document
+import org.apache.lucene.index.Term
+import org.apache.lucene.queryparser.classic.ParseException
+import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search._
+import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
-import org.springframework.beans.factory.annotation.Value
-import java.io.File
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.Member
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper
-import org.apache.lucene.analysis.core.KeywordAnalyzer
-import org.apache.lucene.document.Document
-import org.apache.lucene.analysis.Analyzer
-import org.apache.lucene.analysis.standard.StandardTokenizer
-import java.io.Reader
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
-import org.apache.lucene.analysis.standard.StandardFilter
-import org.apache.lucene.analysis.core.StopFilter
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter
-import org.apache.lucene.analysis.core.LowerCaseFilter
-import org.apache.lucene.analysis.TokenFilter
-import org.apache.lucene.analysis.TokenStream
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.lucene.DelimitByCharacterFilter
-import uk.ac.warwick.tabula.lucene.SurnamePunctuationFilter
-import uk.ac.warwick.tabula.lucene.SynonymAwareWildcardMultiFieldQueryParser
 import uk.ac.warwick.tabula.data.MemberDao
-import org.apache.lucene.queryparser.classic.ParseException
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import org.apache.lucene.search.BooleanQuery
-import org.apache.lucene.search.BooleanClause.Occur
-import org.apache.lucene.search.TermQuery
-import org.apache.lucene.index.Term
+import uk.ac.warwick.tabula.data.model.{Department, Member, MemberUserType, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
-import org.apache.lucene.search.WildcardQuery
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.lucene.{DelimitByCharacterFilter, SurnamePunctuationFilter, SynonymAwareWildcardMultiFieldQueryParser}
+
+import scala.collection.JavaConverters._
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -78,7 +65,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 				bq.add(deptQuery, Occur.MUST)
 			}
 
-			if (!userTypes.isEmpty) {
+			if (userTypes.nonEmpty) {
 				// Restrict user type
 				val typeQuery = new BooleanQuery
 				for (userType <- userTypes)
@@ -92,6 +79,16 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			inUseQuery.add(new TermQuery(new Term("inUseFlag", "Active")), Occur.SHOULD)
 			inUseQuery.add(new WildcardQuery(new Term("inUseFlag", "Inactive - Starts *")), Occur.SHOULD)
 			bq.add(inUseQuery, Occur.MUST)
+
+			// Course ended in the previous 6 months
+			val courseEndedQuery = NumericRangeQuery.newLongRange(
+				"courseEndDate",
+				DateTime.now.minusMonths(6).getMillis,
+				FarAwayDateTime.plusYears(100).getMillis,
+				true,
+				true
+			)
+			bq.add(courseEndedQuery, Occur.MUST)
 
 			search(bq) transformAll { toItems }
 		} catch {
@@ -127,6 +124,8 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	final override val IncrementalBatchSize = 1500
+
+	final val FarAwayDateTime = DateTime.now.plusYears(100)
 
 	var dao = Wire.auto[MemberDao]
 
@@ -198,10 +197,15 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		// Treat permanently withdrawn students as inactive
 		item match {
 			case student: StudentMember if student.freshStudentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>
-				val status = student.mostSignificantCourseDetails.map { _.statusOnRoute }.orNull
-				if (status != null && status.code == "P") indexPlain(doc, "inUseFlag", Some("Inactive"))
-				else indexPlain(doc, "inUseFlag", Option(item.inUseFlag))
-			case _ => indexPlain(doc, "inUseFlag", Option(item.inUseFlag))
+				indexPlain(doc, "inUseFlag", Option("Active")) //  students should always be active; use the course date for filtering
+				if (student.mostSignificantCourseDetails.get.isEnded) {
+					doc add dateField("courseEndDate", student.mostSignificantCourseDetails.get.endDate.toDateTimeAtStartOfDay)
+				} else {
+					doc add dateField("courseEndDate", FarAwayDateTime) // Index a date in the future so range queries work
+				}
+			case _ =>
+				indexPlain(doc, "inUseFlag", Option(item.inUseFlag))
+				doc add dateField("courseEndDate", FarAwayDateTime) // Index a date in the future so range queries work
 		}
 
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
@@ -222,7 +226,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	}
 
 	private def indexSeq(doc: Document, fieldName: String, values: Seq[_]) = {
-		if (!values.isEmpty)
+		if (values.nonEmpty)
 			doc add seqField(fieldName, values)
 	}
 

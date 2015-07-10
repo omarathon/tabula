@@ -57,7 +57,7 @@
 
 		<@f.form method="post" action="${url('/sysadmin/god')}">
 			<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
-			<button class="btn btn-large btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
+			<button class="btn btn-large btn-warning"><i class="icon-eye-open fa fa-eye"></i> Enable God mode</button>
 		</@f.form>
 	</div>
 </#if>

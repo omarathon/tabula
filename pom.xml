@@ -271,7 +271,7 @@
 							<failOnNoGitDirectory>true</failOnNoGitDirectory>
 							<gitDescribe>
 								<skip>false</skip>
-								<always>false</always>
+								<always>true</always>
 								<abbrev>7</abbrev>
 								<dirty>-devel</dirty>
 								<forceLongFormat>false</forceLongFormat>

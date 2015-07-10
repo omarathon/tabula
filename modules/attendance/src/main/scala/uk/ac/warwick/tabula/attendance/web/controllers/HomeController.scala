@@ -33,11 +33,11 @@ class HomeController extends AttendanceController {
 
 		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}
 
-		if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
+		if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships)
 			Redirect(Routes.Profile.home)
-			else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships) {
+			else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
 					Redirect(getViewDepartmentUrl(info.viewPermissions.head))
-			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships) {
+			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
 					Redirect(getManageDepartmentUrl(info.managePermissions.head))
 			} else {
 				Mav("home",
@@ -52,12 +52,12 @@ class HomeController extends AttendanceController {
 	}
 
 	def getViewDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringAcademicYear2014) Routes.View.department(department)
+		if (features.attendanceMonitoringVersion2) Routes.View.department(department)
 		else Routes.old.department.view(department)
 	}
 
 	def getManageDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringAcademicYear2014) Routes.Manage.department(department)
+		if (features.attendanceMonitoringVersion2) Routes.Manage.department(department)
 		else Routes.old.department.manage(department)
 	}
 

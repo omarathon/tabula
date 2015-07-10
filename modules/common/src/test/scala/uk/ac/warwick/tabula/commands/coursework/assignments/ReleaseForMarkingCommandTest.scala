@@ -1,10 +1,11 @@
-package uk.ac.warwick.tabula.coursework.commands.assignments
+package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{FirstMarkersMap, Feedback, UserGroup, Assignment, Module}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FirstMarkersMap, Module, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, StateServiceComponent, AssessmentServiceComponent, AssessmentService, FeedbackService, StateService}
+import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent, FeedbackService, FeedbackServiceComponent, StateService, StateServiceComponent}
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+
+import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 

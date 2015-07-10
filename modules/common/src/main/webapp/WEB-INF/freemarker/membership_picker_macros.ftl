@@ -25,7 +25,7 @@
 	   data-trigger="hover"
 	   data-html="true"
 	   data-content="${popoverText}"
-			><i class="icon-question-sign"></i></a>
+			><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>
 
 <#--
@@ -85,17 +85,17 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		<#local membersGroup=status.actualValue />
 	</@spring.bind>
 
-	<#local includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span></#local>
-	<#local pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Pending deletion</span></#local>
-	<#local excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#local>
-	<#local sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#local>
+	<#local includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up fa fa-hand-o-up"></i></span><span class="hide">Added</span></#local>
+	<#local pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove fa fa-times"></i></span><span class="hide">Pending deletion</span></#local>
+	<#local excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle fa fa-ban"></i></span><span class="hide">Removed</span></#local>
+	<#local sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt fa fa-list-alt"></i></span><span class="hide">SITS</span></#local>
 
 	<#local membershipInfo = command.membershipInfo />
 	<#local hasMembers = membershipInfo.totalCount gt 0 />
 
 
 	<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
-	<#-- <p class="alert alert-success"><i class="icon-ok"></i> This ${name} is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
+	<#-- <p class="alert alert-success"><i class="icon-ok fa fa-check"></i> This ${name} is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 
 	<p>
 		<#if linkedUpstreamAssessmentGroups?has_content>
@@ -131,7 +131,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			<a class="btn btn-success restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
 		</#if>
 
-		<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb"></i> Javascript is required for editing</small></span>
+		<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb fa fa-lightbulb-o"></i> Javascript is required for editing</small></span>
 	</p>
 
 	<#if hasMembers>
@@ -161,7 +161,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 								<#elseif item.userId?has_content>
 									<@form.selector_check_row "modifyEnrolment" item.userId />
 								<#else>
-									<i class="icon-ban-circle use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
+									<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 								</#if>
 							</td>
 							<td class="source">
@@ -237,12 +237,12 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
 			</p>
 			<p class="alert">
-				<i class="icon-lightbulb icon-large"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
+				<i class="icon-lightbulb fa fa-lightbulb-o icon-large fa fa-lg"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
 				as other University systems won't know about any changes you make here.
 			</p>
 			<#-- SOMETIME
 			<div>
-				<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
+				<a href="#" class="btn"><i class="icon-user fa fa-user"></i> Lookup user</a>
 			</div>
 			-->
 			<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
@@ -370,7 +370,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		</#if>
 		initEnrolment();
 
-		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this ${name}.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
+		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign fa fa-exclamation-triangle"></i> Your changes will not be recorded until you save this ${name}.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {

@@ -50,7 +50,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<#-- <div> opened above -->
 		<#if department.parent?? || department.children?has_content>
 			<a class="use-tooltip" title="Related departments" data-toggle="dropdown" data-container="body" data-target=".dropdown">
-				<i class="icon-caret-down<#if !use_h4> icon-large</#if>"></i>
+				<i class="icon-caret-down fa fa-caret-down<#if !use_h4> icon-large fa fa-lg</#if>"></i>
 			</a>
 			<#-- cross-app singleton introductory text -->
 			<#if showIntro("related-depts", "anywhere")>
@@ -64,7 +64,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				   data-title="Related departments"
 				   data-placement="bottom"
 				   data-html="true"
-				   data-content="${introText}"><i class="icon-question-sign"></i></a>
+				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 			<#-- the dropdown itself -->
 			<div class="dropdown">
@@ -313,7 +313,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<source src="${filePath}" type="${mimeType}" />
 		</video>
 	</#if>
-	<a class="long-running use-tooltip" href="${filePath}" title="${title}"><i class="icon-download"></i><#if text?has_content> ${text}</#if></a>
+	<a class="long-running use-tooltip" href="${filePath}" title="${title}"><i class="icon-download fa fa-arrow-circle-o-down"></i><#if text?has_content> ${text}</#if></a>
 </#macro>
 
 <#macro role_definition_description role_definition><#compress>
@@ -324,7 +324,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <#macro display_deleted_attachments attachments visible="">
 	<ul class="deleted-files ${visible}">
 		<#list attachments as files>
-			<li class="muted deleted"><i class="icon-file-alt"></i> ${files.name}</li>
+			<li class="muted deleted"><i class="icon-file-alt fa fa-file-o"></i> ${files.name}</li>
 		</#list>
 	</ul>
 </#macro>
@@ -418,14 +418,14 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<#else>
 				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
 			</#if> >
-			<i class="icon-envelope-alt"></i> ${title}
+			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
 		<a data-content="There is a known issue with sending emails to long lists of students. If the 'Email these students' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
 		   title=""
-		   href="#"><i class="icon-question-sign"></i></a>
+		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
 
@@ -462,13 +462,14 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<@bulk_email emails title subject />
 </#macro>
 
-<#macro help_popover id title="" content="">
+<#macro help_popover id title="" content="" html=false>
 	<a class="use-popover"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"
+	   <#if html>data-html="true"</#if>
 	>
-		<i class="icon-question-sign"></i>
+		<i class="icon-question-sign fa fa-question-circle"></i>
 	</a>
 
 </#macro>

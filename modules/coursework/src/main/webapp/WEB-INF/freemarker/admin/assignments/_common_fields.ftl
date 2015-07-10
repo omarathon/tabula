@@ -63,6 +63,21 @@ so that they can be passed around between requests.
 			</script>
 		</#if>
 	</@form.labelled_row>
+
+	<#assign automaticallyReleaseToMarkersHelp>
+		When using a marking workflow, automatically release all submissions to markers when the assignment closes.
+		Any late submissions or submissions within an extension will be released when they are received.<br />
+		<strong>Note:</strong> Students who do not submit will not be released automatically and will need to be released manually.
+	</#assign>
+	<@form.row>
+		<@form.field>
+			<label class="checkbox">
+				<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
+				Automatically release to markers
+				<@fmt.help_popover id="automaticallyReleaseToMarkersHelp" content="${automaticallyReleaseToMarkersHelp}" html=true />
+			</label>
+		</@form.field>
+	</@form.row>
 </#if>
 
 <#if features.collectMarks>

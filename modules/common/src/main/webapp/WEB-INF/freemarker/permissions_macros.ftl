@@ -8,14 +8,14 @@
 	<#if bindingError?has_content>
 		<p class="alert alert-error">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<i class="icon-warning-sign"></i> <#noescape>${bindingError}</#noescape>
+			<i class="icon-warning-sign fa fa-exclamation-triangle"></i> <#noescape>${bindingError}</#noescape>
 		</p>
 	</#if>
 
 	<#if users?has_content && role?has_content>
 		<div id="permissionsMessage" class="alert alert-success">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<p><i class="icon-ok"></i>
+			<p><i class="icon-ok fa fa-check"></i>
 				<#list users?keys as key>
 					<strong>${users[key].getFullName()}</strong> <#if users[key].getFullName()!=""> (${key})</#if>
 				</#list>
@@ -52,7 +52,7 @@
 							<input type="hidden" name="_command" value="add">
 							<input type="hidden" name="roleDefinition" value="${roleDefinition}">
 							<input type="hidden" name="usercodes">
-							<button class="btn btn-mini" type="submit"><i class="icon-plus"></i></button>
+							<button class="btn btn-mini" type="submit"><i class="icon-plus fa fa-plus"></i></button>
 						</form>
 					<#else>
 						<#local popoverText>
@@ -67,7 +67,7 @@
 					
 						<button class="btn btn-mini use-tooltip disabled" type="button" 
 										data-html="true"
-										data-title="${popoverText}"><i class="icon-plus"></i></button>
+										data-title="${popoverText}"><i class="icon-plus fa fa-plus"></i></button>
 					</#if>
 				</td>
 			</tr>
@@ -85,7 +85,7 @@
 									<input type="hidden" name="_command" value="remove">
 									<input type="hidden" name="roleDefinition" value="${roleDefinition}">
 									<input type="hidden" name="usercodes" value="${u.userId}">
-									<a class="btn btn-danger btn-mini removeUser"><i class="icon-white icon-remove"></i></a>
+									<a class="btn btn-danger btn-mini removeUser"><i class="icon-white fa fa-white icon-remove fa fa-times"></i></a>
 								</form>
 							<#else>
 								<#local popoverText>
@@ -100,7 +100,7 @@
 							
 								<button class="btn btn-danger btn-mini use-tooltip disabled" type="button" 
 												data-html="true"
-												data-title="${popoverText}"><i class="icon-white icon-remove"></i></button>
+												data-title="${popoverText}"><i class="icon-white fa fa-white icon-remove fa fa-times"></i></button>
 							</#if>
 						</td>
 					</tr>
@@ -144,18 +144,18 @@
 
 	<#if isTarget!false><strong class="text-success"></#if>
 
-	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
+	<span class="permission"><i class="icon-lock fa fa-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
 	<#if showScopes && scope?? && scope?size != 0>
-		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
+		on <span class="scope"><i class="icon-bookmark fa fa-bookmark"></i> ${scope.toString}</span>
 	<#elseif showScopes && permission.scoped>
-		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
+		<i class="icon-globe fa fa-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
 	</#if>
 
 	<#if isTarget!false></strong></#if>
 </#macro>
 
 <#macro debugRole role showScopes=true>
-<span class="role"><i class="icon-user"></i> ${role.definition.description}</span><#if showScopes && role.scope??> on <span class="scope"><i class="icon-bookmark"></i> ${role.scope.toString}</span></#if>
+<span class="role"><i class="icon-user fa fa-user"></i> ${role.definition.description}</span><#if showScopes && role.scope??> on <span class="scope"><i class="icon-bookmark fa fa-bookmark"></i> ${role.scope.toString}</span></#if>
 	<#if role.explicitPermissions?size gt 0 || role.subRoles?size gt 0>
 	<ul>
 		<#list role.subRoles as subRole>

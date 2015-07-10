@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackDueGeneralNotification, FeedbackDueExtensionNotification, FeedbackPublishedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FinaliseFeedbackNotification, FeedbackDueGeneralNotification, FeedbackDueExtensionNotification, FeedbackPublishedNotification}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -99,14 +99,18 @@ trait PublishFeedbackNotificationCompletion extends CompletesNotifications[Publi
 	self: PublishFeedbackCommandState with NotificationHandling =>
 
 	def notificationsToComplete(commandResult: PublishFeedbackCommand.PublishFeedbackResults): CompletesNotificationsResult = {
+		val feedbackNotifications = commandResult.notifications.flatMap(_.entities).flatMap(feedback =>
+			notificationService.findActionRequiredNotificationsByEntityAndType[FinaliseFeedbackNotification](feedback)
+		)
 		if (!assignment.needsFeedbackPublishing) {
 			CompletesNotificationsResult(
-				notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
+				feedbackNotifications ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
 				submitter.apparentUser
 			)
 		} else {
-			EmptyCompletesNotificationsResult
+			CompletesNotificationsResult(feedbackNotifications, submitter.apparentUser)
 		}
 	}
 }

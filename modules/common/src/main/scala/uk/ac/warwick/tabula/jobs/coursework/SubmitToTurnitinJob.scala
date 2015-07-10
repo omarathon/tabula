@@ -1,23 +1,21 @@
-package uk.ac.warwick.tabula.coursework.jobs
+package uk.ac.warwick.tabula.jobs.coursework
 
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification, TurnitinClassDeletedNotification}
-
-import scala.annotation.tailrec
-import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
-import uk.ac.warwick.tabula.data.model.{Notification, Assignment, OriginalityReport}
+import uk.ac.warwick.tabula.commands.coursework.turnitin.HasTurnitinApi
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinClassDeletedNotification, TurnitinJobErrorNotification, TurnitinJobSuccessNotification}
+import uk.ac.warwick.tabula.data.model.{Assignment, Notification, OriginalityReport}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.AssessmentService
-import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
-import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import uk.ac.warwick.tabula.services.OriginalityReportService
-import language.implicitConversions
+import uk.ac.warwick.tabula.services.jobs.JobInstance
+import uk.ac.warwick.tabula.services.turnitin.Turnitin._
+import uk.ac.warwick.tabula.services.turnitin._
+import uk.ac.warwick.tabula.services.{AssessmentService, OriginalityReportService}
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+
+import scala.annotation.tailrec
+import scala.collection.JavaConverters._
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -41,7 +39,7 @@ abstract class DescribableJob(instance: JobInstance) extends Describable[Nothing
  */
 @Component
 class SubmitToTurnitinJob extends Job
-	with TurnitinTrait with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering {
+	with HasTurnitinApi with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering {
 
 	val identifier = SubmitToTurnitinJob.identifier
 
@@ -119,7 +117,7 @@ class SubmitToTurnitinJob extends Job
 		def removeDefunctSubmissions() {
 			// delete files in turnitin that aren't in the assignment any more
 			for (info <- existingSubmissions) {
-				val exists = assignment.submissions.exists { submission =>
+				val exists = assignment.submissions.asScala.exists { submission =>
 					submission.allAttachments.exists { attachment =>
 						attachment.id == info.title // title is used to store ID
 					}
@@ -138,10 +136,10 @@ class SubmitToTurnitinJob extends Job
 			var uploadsDone = 0
 			var uploadsFailed = 0
 			var failedUploads = Map[String, String]()
-			val allAttachments = assignment.submissions flatMap { _.allAttachments }
+			val allAttachments = assignment.submissions.asScala.flatMap { _.allAttachments }
 			val uploadsTotal = allAttachments.size
 
-			assignment.submissions foreach { submission =>
+			assignment.submissions.asScala.foreach { submission =>
 				debug("Submission ID: " + submission.id)
 				debug("submission.allAttachments: (" + submission.allAttachments.size + ")")
 
@@ -201,7 +199,7 @@ class SubmitToTurnitinJob extends Job
 				}
 			} else {
 
-				val attachments = assignment.submissions.flatMap(_.allAttachments)
+				val attachments = assignment.submissions.asScala.flatMap(_.allAttachments)
 
 				val originalityReports = for (report <- reports) yield {
 
