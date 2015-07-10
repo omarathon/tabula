@@ -32,7 +32,16 @@ jQuery(function($){
 			$(this).after(rowMap[$(this).data('entity')]);
 		});
 
-		$table.sortableTable();
+		$table.sortableTable({
+			textExtraction: function(node) {
+				var $el = $(node);
+				if ($el.data('sortby')) {
+					return $el.data('sortby');
+				} else {
+					return $el.text().trim();
+				}
+			}
+		});
 		$table.on('sortStart', function(){
 			$table.find('tr[data-forentity]').detach();
 		}).on('sortEnd', function(){
@@ -71,9 +80,17 @@ jQuery(function($){
 	var checkDistributeButton = function(){
 		var result = $studentTable.find('input:checked').length > 0 && entityTable.getTable().find('input:checked').length > 0;
 		if (result) {
-			$distrubuteButton.attr('disabled', false);
+			$distrubuteButton.attr({
+				'disabled': false,
+				'title': 'Selected students will be equally distributed between selected personal tutors'
+			});
+			$distrubuteButton.addClass('btn-primary');
 		} else {
-			$distrubuteButton.attr('disabled', true);
+			$distrubuteButton.attr({
+				'disabled': true,
+				'title': 'You need to select some students and personal tutors to allocate'
+			});
+			$distrubuteButton.removeClass('btn-primary');
 		}
 	};
 	$studentTable.sortableTable().on('click', 'input', checkDistributeButton);

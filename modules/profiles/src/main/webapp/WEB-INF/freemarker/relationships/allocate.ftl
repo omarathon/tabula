@@ -7,7 +7,7 @@
 <#assign uploadFormAction><@routes.relationship_allocate_upload department relationshipType /></#assign>
 <#assign previewFormAction><@routes.relationship_allocate_preview department relationshipType /></#assign>
 
-<@fmt.deptheader "Allocate ${relationshipType.description?lower_case}s" "in" department routes "deptheaderroute" "with-settings" />
+<@fmt.deptheader "Allocate ${relationshipType.description}s" "in" department routes "deptheaderroute" "with-settings" />
 
 <div class="tabbable">
 	<ul class="nav nav-tabs">
@@ -206,10 +206,10 @@
 						</tr>
 						</thead>
 						<tbody>
-							<#list allocated?sort_by("displayName") as entityData>
+							<#list allocated?sort_by("sortName") as entityData>
 								<tr data-entity="${entityData.entityId}" <#if command.expanded[entityData.entityId]!false>class="expanded"</#if>>
-									<td class="check"><input type="checkbox" name="entities" value="${entityData.entityId}"></td>
-									<td class="full-name">${entityData.displayName}</td>
+									<td class="check"><input type="checkbox" name="entities" value="${entityData.entityId}" /></td>
+									<td class="full-name" data-sortby="${entityData.sortName}">${entityData.displayName}</td>
 									<td class="counter">${entityData.students?size}</td>
 									<td class="toggle">
 										<i title="Edit students allocated to this ${relationshipType.agentRole}" class="icon-edit icon-large icon-fixed-width <#if !entityData.students?has_content>icon-muted</#if>"></i>

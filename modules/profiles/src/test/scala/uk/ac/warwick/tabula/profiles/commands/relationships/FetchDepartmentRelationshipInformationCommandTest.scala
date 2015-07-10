@@ -23,10 +23,10 @@ trait StudentAssociationFixture {
 	val mockDbUnallocated = Seq(student8, student9, student10, student11)
 
 	val mockDbAllocated = Seq(
-		StudentAssociationEntityData("1", "Fred", null, null, Seq()),
-		StudentAssociationEntityData("2", "Jeff", null, null, Seq(student1, student2)),
-		StudentAssociationEntityData("3", "Steve", null, null, Seq(student3, student4)),
-		StudentAssociationEntityData("4", null, null, null, Seq(student5, student6, student7))
+		StudentAssociationEntityData("1", "Fred", "Fred", null, null, Seq()),
+		StudentAssociationEntityData("2", "Jeff", "Jeff", null, null, Seq(student1, student2)),
+		StudentAssociationEntityData("3", "Steve", "Steve", null, null, Seq(student3, student4)),
+		StudentAssociationEntityData("4", null, null, null, null, Seq(student5, student6, student7))
 	)
 }
 
@@ -43,11 +43,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			val profileService = smartMock[ProfileService]
 			profileService.getAllMembersWithUserId("cusfal") returns Seq(Fixtures.staff("0770884", "cusfal"))
 			relationshipService.getStudentAssociationEntityData(null, null, Seq("0770884")) returns Seq(
-				StudentAssociationEntityData("1", null, null, null, Seq()),
-				StudentAssociationEntityData("2", null, null, null, Seq(student1, student2)),
-				StudentAssociationEntityData("3", null, null, null, Seq(student3, student4)),
-				StudentAssociationEntityData("4", null, null, null, Seq(student5, student6, student7)),
-				StudentAssociationEntityData("0770884", null, null, null, Seq())
+				StudentAssociationEntityData("1", null, null, null, null, Seq()),
+				StudentAssociationEntityData("2", null, null, null, null, Seq(student1, student2)),
+				StudentAssociationEntityData("3", null, null, null, null, Seq(student3, student4)),
+				StudentAssociationEntityData("4", null, null, null, null, Seq(student5, student6, student7)),
+				StudentAssociationEntityData("0770884", null, null, null, null, Seq())
 			)
 		}
 	}

@@ -363,6 +363,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		case class StudentAssociationEntityDataSingle(
 			entityId: String,
 			displayName: String,
+			sortName: String,
 			isHomeDepartment: Option[Boolean],
 			capacity: Option[Int],
 			student: StudentAssociationData
@@ -390,12 +391,13 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.map(r => StudentAssociationEntityDataSingle(
 				r(0).asInstanceOf[String],
 				Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+				Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
 				Option(r(3)).map(_.asInstanceOf[String] == department.id),
 				None,
 				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
 			))
 
-		val externalAssociations = session.newCriteria[ExternalStudentRelationship]
+		val externalAssociations: Seq[StudentAssociationEntityDataSingle] = session.newCriteria[ExternalStudentRelationship]
 			.createAlias("studentCourseDetails", "course")
 			.add(Restrictions.and(
 				Restrictions.eq("relationshipType", relationshipType),
@@ -413,6 +415,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			.map(r => StudentAssociationEntityDataSingle(
 				r(0).asInstanceOf[String],
 				r(0).asInstanceOf[String],
+				r(0).asInstanceOf[String],
 				None,
 				None,
 				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
@@ -421,6 +424,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		val dbEntities = (memberAssociations ++ externalAssociations).groupBy(_.entityId).values.map(entityList => StudentAssociationEntityData(
 			entityList.head.entityId,
 			entityList.head.displayName,
+			entityList.head.sortName,
 			entityList.head.isHomeDepartment,
 			entityList.head.capacity,
 			entityList.map(_.student)
@@ -441,13 +445,14 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 				.map(r => StudentAssociationEntityData(
 					r(0).asInstanceOf[String],
 					Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+					Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
 					Option(r(3)).map(_.asInstanceOf[String] == department.id),
 					None,
 					Nil
 				))
 		}
 
-		dbEntities ++ additionalEntities
+		(dbEntities ++ additionalEntities).sortBy(_.sortName)
 	}
 
 	def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship] = {

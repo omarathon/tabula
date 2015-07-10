@@ -108,13 +108,7 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 		val allocatedWithRemovals = filteredAllocated.map(entityData => {
 			if (removals.containsKey(entityData.entityId)) {
 				val theseRemovals = removals.get(entityData.entityId).asScala
-				StudentAssociationEntityData(
-					entityData.entityId,
-					entityData.displayName,
-					entityData.isHomeDepartment,
-					entityData.capacity,
-					entityData.students.filterNot(student => theseRemovals.contains(student.universityId))
-				)
+				entityData.updateStudents(entityData.students.filterNot(student => theseRemovals.contains(student.universityId)))
 			} else {
 				entityData
 			}
@@ -122,13 +116,7 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 
 		val allocatedWithAdditionsAndRemovals = allocatedWithRemovals.map(entityData => {
 			if (additions.containsKey(entityData.entityId)) {
-				StudentAssociationEntityData(
-					entityData.entityId,
-					entityData.displayName,
-					entityData.isHomeDepartment,
-					entityData.capacity,
-					entityData.students ++ additions.get(entityData.entityId).asScala.flatMap(universityId => allStudents.find(_.universityId == universityId))
-				)
+				entityData.updateStudents(entityData.students ++ additions.get(entityData.entityId).asScala.flatMap(universityId => allStudents.find(_.universityId == universityId)))
 			} else {
 				entityData
 			}

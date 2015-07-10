@@ -113,7 +113,7 @@
 															
 								<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
 									<li><a href="<@routes.relationship_allocate dept relationshipType />">
-										<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description?lower_case}s</a>
+										<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
 									</li>
 								</#if>
 							</#list>

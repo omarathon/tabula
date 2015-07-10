@@ -27,6 +27,7 @@ case class StudentAssociationData(
 case class StudentAssociationEntityData(
 	entityId: String,
 	displayName: String,
+	sortName: String,
 	isHomeDepartment: Option[Boolean],
 	capacity: Option[Int],
 	students: Seq[StudentAssociationData]
@@ -34,6 +35,7 @@ case class StudentAssociationEntityData(
 	def updateStudents(newStudents: Seq[StudentAssociationData]): StudentAssociationEntityData = StudentAssociationEntityData(
 		entityId = this.entityId,
 		displayName = this.displayName,
+		sortName = this.sortName,
 		isHomeDepartment = this.isHomeDepartment,
 		capacity = this.capacity,
 		students = newStudents
