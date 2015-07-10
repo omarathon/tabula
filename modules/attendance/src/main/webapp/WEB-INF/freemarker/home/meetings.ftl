@@ -4,6 +4,7 @@
 			Specified monitoring point is not a Meeting point
 		</div>
 	<#else>
+		<h3 class="modal-header">Meetings with ${student.fullName}</h3>
 
 		<p>
 			Monitoring point requires ${command.point.meetingQuantity}

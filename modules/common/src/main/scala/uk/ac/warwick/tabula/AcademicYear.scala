@@ -65,6 +65,11 @@ case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Conve
 		if (date.getMonthOfYear < 10) endYear else startYear
 	}
 
+	def isSITSInFlux(date: DateTime): Boolean = {
+		val juneThisYear = new DateMidnight(this.endYear, DateTimeConstants.JUNE, 1)
+		juneThisYear.isBefore(date)
+	}
+
 }
 
 object AcademicYear {
@@ -133,11 +138,6 @@ object AcademicYear {
 				// Fall back to guessing behaviour
 				guessSITSAcademicYearByDate(date)
 		}
-	}
-
-	def isSITSInFlux(date: DateTime, termService: TermService): Boolean = {
-		val thisAcademicYear = findAcademicYearContainingDate(date, termService)
-		date.getMonthOfYear >= DateTimeConstants.JUNE && thisAcademicYear.getYear(date.toLocalDate) == thisAcademicYear.endYear
 	}
 
 }

@@ -9,6 +9,9 @@
 			<#if features.attendanceMonitoringAcademicYear2014>
 				<h3><a id="manage-department-${department.code}" href="<@routes.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 			</#if>
+			<#if features.attendanceMonitoringAcademicYear2015>
+				<h3><a id="manage-department-${department.code}" href="<@routes.manageHomeForYear department '2015'/>">${department.name} 15/16</a></h3>
+			</#if>
 		</li>
 	</ul>
 

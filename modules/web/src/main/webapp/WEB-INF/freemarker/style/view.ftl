@@ -3,13 +3,13 @@
 <div class="row">
 	<div id="navcol" class="span3">
 		<ul id="navbar" class="nav nav-pills nav-stacked">
-			<li><a href="#container"><i class="icon-chevron-right"></i> Introduction</a></li>
-			<li><a href="#colour"><i class="icon-chevron-right"></i> Colour palette</a></li>
-			<li><a href="#buttons"><i class="icon-chevron-right"></i> Buttons</a></li>
-			<li><a href="#labels"><i class="icon-chevron-right"></i> Labels</a></li>
-			<li><a href="#badges"><i class="icon-chevron-right"></i> Badges</a></li>
-			<li><a href="#alerts"><i class="icon-chevron-right"></i> Alerts</a></li>
-			<li><a href="#tables"><i class="icon-chevron-right"></i> Tables</a></li>
+			<li><a href="#container"><i class="icon-chevron-right fa fa-chevron-right"></i> Introduction</a></li>
+			<li><a href="#colour"><i class="icon-chevron-right fa fa-chevron-right"></i> Colour palette</a></li>
+			<li><a href="#buttons"><i class="icon-chevron-right fa fa-chevron-right"></i> Buttons</a></li>
+			<li><a href="#labels"><i class="icon-chevron-right fa fa-chevron-right"></i> Labels</a></li>
+			<li><a href="#badges"><i class="icon-chevron-right fa fa-chevron-right"></i> Badges</a></li>
+			<li><a href="#alerts"><i class="icon-chevron-right fa fa-chevron-right"></i> Alerts</a></li>
+			<li><a href="#tables"><i class="icon-chevron-right fa fa-chevron-right"></i> Tables</a></li>
 		</ul>
 	</div>
 	

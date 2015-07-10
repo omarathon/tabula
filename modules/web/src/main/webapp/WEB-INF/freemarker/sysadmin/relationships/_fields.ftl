@@ -6,7 +6,7 @@
 			<@f.input path="id" cssClass="text" />
 			<a class="use-popover" data-html="true"
 		     data-content="A unique identifier. Set this to something descriptive, using alphanumeric chars, - and _ only, so it's easy to see in the database. e.g. 'personalTutor'">
-		   	<i class="icon-question-sign"></i>
+		   	<i class="icon-question-sign fa fa-question-circle"></i>
 		  </a>
 		</@form.labelled_row>
 	<#else>
@@ -22,7 +22,7 @@
 			<@f.input path="urlPart" cssClass="text" />
 			<a class="use-popover" data-html="true"
 		     data-content="A string that can be used as part of the URL. e.g. 'tutor'">
-		   	<i class="icon-question-sign"></i>
+		   	<i class="icon-question-sign fa fa-question-circle"></i>
 		  </a>
 		</@form.labelled_row>
 	<#else>
@@ -37,7 +37,7 @@
 		<@f.input path="description" cssClass="text" />
 		<a class="use-popover" data-html="true"
 	     data-content="A descriptive name for this type of relationship. Capitalise accordingly; e.g. 'Personal Tutor'">
-	   	<i class="icon-question-sign"></i>
+	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
 	
@@ -45,7 +45,7 @@
 		<@f.input path="agentRole" cssClass="text" />
 		<a class="use-popover" data-html="true"
 	     data-content="How you'd refer to a single agent in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutor'">
-	   	<i class="icon-question-sign"></i>
+	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
 	
@@ -53,7 +53,7 @@
 		<@f.input path="studentRole" cssClass="text" />
 		<a class="use-popover" data-html="true"
 	     data-content="How you'd refer to a single student in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutee'">
-	   	<i class="icon-question-sign"></i>
+	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
 	
@@ -63,7 +63,7 @@
 			Tabula (Local)
 			<a class="use-popover" data-html="true"
 		     data-content="By default, information will be input directly into Tabula.">
-		   	<i class="icon-question-sign"></i>
+		   	<i class="icon-question-sign fa fa-question-circle"></i>
 		  </a>
 		</label>
 		<label class="radio">
@@ -71,7 +71,7 @@
 			SITS
 			<a class="use-popover" data-html="true"
 		     data-content="By default, information will be imported from SITS. Relies on code existing to know how to import this type.">
-		   	<i class="icon-question-sign"></i>
+		   	<i class="icon-question-sign fa fa-question-circle"></i>
 		  </a>
 		</label>
 	</@form.labelled_row>
@@ -93,7 +93,7 @@
 					Expect Undergraduates to always have a relationship of this type
 					<a class="use-popover" data-html="true"
 						 data-content="If enabled, on undergraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign"></i>
+						<i class="icon-question-sign fa fa-question-circle"></i>
 					</a>
 				</@form.label>
 			<@f.errors path="expectedUG" cssClass="error" />
@@ -107,7 +107,7 @@
 					Expect Taught Postgraduates to always have a relationship of this type
 					<a class="use-popover" data-html="true"
 						 data-content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign"></i>
+						<i class="icon-question-sign fa fa-question-circle"></i>
 					</a>
 				</@form.label>
 			<@f.errors path="expectedPGT" cssClass="error" />
@@ -121,7 +121,7 @@
 					Expect Research Postgraduates to always have a relationship of this type
 					<a class="use-popover" data-html="true"
 						 data-content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign"></i>
+						<i class="icon-question-sign fa fa-question-circle"></i>
 					</a>
 				</@form.label>
 			<@f.errors path="expectedPGR" cssClass="error" />
@@ -132,7 +132,7 @@
 		<@f.input path="sortOrder" cssClass="text" />
 		<a class="use-popover" data-html="true"
 	     data-content="Sort order when viewing multiple relationships. Lower numbers appear first. Identical numbers are ordered alphabetically by ID.">
-	   	<i class="icon-question-sign"></i>
+	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
 

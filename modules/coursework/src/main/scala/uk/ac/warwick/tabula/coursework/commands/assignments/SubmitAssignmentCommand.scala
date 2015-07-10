@@ -169,7 +169,7 @@ class SubmitAssignmentCommand(
 		zipService.invalidateSubmissionZip(assignment)
 		service.saveSubmission(submission)
 		monitoringPointProfileTermAssignmentService.updateCheckpointsForSubmission(submission)
-		if (features.attendanceMonitoringAcademicYear2014)
+		if (features.attendanceMonitoringVersion2)
 			attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
 		submission
 	}

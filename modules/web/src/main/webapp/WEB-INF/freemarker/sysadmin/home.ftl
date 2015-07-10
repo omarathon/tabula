@@ -8,18 +8,18 @@
 
 <div class="span8">
 <h2>Normal regular stuff</h2>
-<p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-fixed-width icon-lock"></i> Permissions helper</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/departments/" />"><i class="icon-fixed-width icon-sitemap"></i> List all departments in the system</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/relationships" />"><i class="icon-fixed-width icon-heart-empty"></i> Student relationship types</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/attendancetemplates" />"><i class="icon-fixed-width icon-copy"></i> Attendance monitoring templates</a></p>
-<p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-fixed-width icon-eye-open"></i> Masquerade</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/audit/search" />"><i class="icon-fixed-width icon-list-alt"></i> List audit events (Index version)</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />"><i class="icon-fixed-width icon-refresh"></i> Background jobs</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/emails/list" context="/scheduling" />"><i class="icon-fixed-width icon-envelope-alt"></i> Email queue</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/features" />"><i class="icon-fixed-width icon-flag-alt"></i> Set feature flags</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/statistics" />"><i class="icon-fixed-width icon-bar-chart"></i> Internal statistics</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />"><i class="icon-fixed-width icon-time"></i> Complete scheduled notifications</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/event-calendar" />"><i class="icon-fixed-width icon-calendar"></i> Upcoming event calendar</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/permissions-helper" />"><i class="icon-fixed-width fa fa-fw icon-lock fa fa-lock"></i> Permissions helper</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/departments/" />"><i class="icon-fixed-width fa fa-fw icon-sitemap fa fa-sitemap"></i> List all departments in the system</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/relationships" />"><i class="icon-fixed-width fa fa-fw icon-heart-empty fa fa-heart-o"></i> Student relationship types</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/attendancetemplates" />"><i class="icon-fixed-width fa fa-fw icon-copy fa fa-files-o"></i> Attendance monitoring templates</a></p>
+<p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-fixed-width fa fa-fw icon-eye-open fa fa-eye"></i> Masquerade</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/audit/search" />"><i class="icon-fixed-width fa fa-fw icon-list-alt fa fa-list-alt"></i> List audit events (Index version)</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />"><i class="icon-fixed-width fa fa-fw icon-refresh fa fa-refresh"></i> Background jobs</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/emails/list" context="/scheduling" />"><i class="icon-fixed-width fa fa-fw icon-envelope-alt fa fa-envelope-o"></i> Email queue</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/features" />"><i class="icon-fixed-width fa fa-fw icon-flag-alt fa fa-flag-o"></i> Set feature flags</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/statistics" />"><i class="icon-fixed-width fa fa-fw icon-bar-chart fa fa-bar-chart-o"></i> Internal statistics</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />"><i class="icon-fixed-width fa fa-fw icon-time fa fa-clock-o"></i> Complete scheduled notifications</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/event-calendar" />"><i class="icon-fixed-width fa fa-fw icon-calendar fa fa-calendar"></i> Upcoming event calendar</a></p>
 
 <h2>File syncing</h2>
 <p><a class="btn" href="<@url page="/sysadmin/sync" context="/scheduling" />">Run file syncing</a></p>
@@ -33,9 +33,9 @@
 <@f.form method="post" action="${url('/sysadmin/god')}">
 	<#if user.god>
 		<input type="hidden" name="action" value="remove" />
-		<button id="disable-godmode-button" class="btn btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
+		<button id="disable-godmode-button" class="btn btn-info"><i class="icon-eye-close fa fa-eye-slash"></i> Disable God mode</button>
 	<#else>
-		<button id="enable-godmode-button" class="btn btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
+		<button id="enable-godmode-button" class="btn btn-warning"><i class="icon-eye-open fa fa-eye"></i> Enable God mode</button>
 	</#if>
 </@f.form>
 

@@ -57,7 +57,7 @@ class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: Current
 
 		if (features.attendanceMonitoringMeetingPointType) {
 			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
-			if (features.attendanceMonitoringAcademicYear2014)
+			if (features.attendanceMonitoringVersion2)
 				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 

@@ -10,7 +10,7 @@
 
 			<h3 class="permissionTitle">Route Managers</h3> <a class="use-popover colour-h3" id="popover-routemanager" data-html="true"
 			   data-original-title="Route Managers"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "routemanager-table" scope "RouteManagerRoleDefinition" "route managers" />
 		</div>
@@ -22,7 +22,7 @@
 
 			<h3 class="permissionTitle">Route Assistants</h3> <a class="use-popover colour-h3" id="popover-routeassistant" data-html="true"
 			   data-original-title="Route Assistants"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "routeassistant-table" scope "RouteAssistantRoleDefinition" "route assistants" />
 		</div>
@@ -36,7 +36,7 @@
 
 			<h3 class="permissionTitle">Route Auditors</h3> <a class="use-popover colour-h3" id="popover-routeauditor" data-html="true"
 			   data-original-title="Route Auditors"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "routeauditor-table" scope "RouteAuditorRoleDefinition" "route auditors" />
 		</div>

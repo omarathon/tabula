@@ -20,7 +20,7 @@
 				<@form.row>
 					<@form.field>
 						<@form.flexipicker name="usercode" placeholder="Type a name or usercode" cssClass="input-append" />
-						<button type="submit" class="btn" style="margin-top: -10px"><i class="icon-eye-open"></i> Mask</button>
+						<button type="submit" class="btn" style="margin-top: -10px"><i class="icon-eye-open fa fa-eye"></i> Mask</button>
 						<@f.errors path="usercode" cssClass="error" />
 					</@form.field>
 				</@form.row>
@@ -34,19 +34,19 @@
 			<@f.form method="post" action="${url('/admin/masquerade')}">
 				<input type="hidden" name="returnTo" value="${returnTo!""}" />
 				<input type="hidden" name="action" value="remove" />
-				<button type="submit" class="btn"><i class="icon-eye-close"></i> Unmask</button>
+				<button type="submit" class="btn"><i class="icon-eye-close fa fa-eye-slash"></i> Unmask</button>
 			</@f.form>
 
 		</#if>
 
 		<#if (returnTo!"")?length gt 0>
-			<p><a href="${returnTo}" class="btn"><i class="icon-reply"></i> Return to previous page</a></p>
+			<p><a href="${returnTo}" class="btn"><i class="icon-reply fa fa-reply"></i> Return to previous page</a></p>
 		</#if>
 	</div>
 	<#if (activeSpringProfiles!"") == "sandbox" && masqueradeDepartments?size gt 0>
 		<div class="span6">
 			<div class="alert alert-block">
-				<h3><i class="icon-sun"></i> Sandbox data</h3>
+				<h3><i class="icon-sun fa fa-sun-o"></i> Sandbox data</h3>
 
 				<p>The following users are available for masquerading in the Sandbox system:</p>
 
@@ -84,7 +84,7 @@
 					var $li = $(this);
 					var userId = $li.data('userid');
 
-					var $button = $('<button class="btn btn-mini" type="button"><i class="icon-eye-open"></i> Mask</button>');
+					var $button = $('<button class="btn btn-mini" type="button"><i class="icon-eye-open fa fa-eye"></i> Mask</button>');
 					$button.on('click', function(e) {
 						e.preventDefault();
 						e.stopPropagation();

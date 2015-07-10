@@ -7,7 +7,7 @@
 		<p>No custom roles have been created yet. Click <strong>Create</strong> below to make one.</p>
 	</#if>
 
-	<p><a class="btn" href="<@routes.admin.addcustomrole department />"><i class="icon-plus"></i> Create</a></p>
+	<p><a class="btn" href="<@routes.admin.addcustomrole department />"><i class="icon-plus fa fa-plus"></i> Create</a></p>
 
 	<#if customRoles?has_content>
 		<table class="table table-bordered table-striped custom-roles">
@@ -26,11 +26,11 @@
 						<td>${customRoleDefinition.name}</td>
 						<td>
 							${customRoleDefinition.baseRoleDefinition.description}
-							<a class="btn btn-mini" href="<@routes.admin.customroleoverrides customRoleDefinition />"><i class="icon-edit"></i> +<@fmt.p customRoleDefinition.overrides?size "override"/></a>
+							<a class="btn btn-mini" href="<@routes.admin.customroleoverrides customRoleDefinition />"><i class="icon-edit fa fa-pencil-square-o"></i> +<@fmt.p customRoleDefinition.overrides?size "override"/></a>
 						</td>
 						<td>
-							<a class="btn btn-mini" href="<@routes.admin.editcustomrole customRoleDefinition />"><i class="icon-edit"></i> Modify</a>
-							<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.admin.deletecustomrole customRoleDefinition />" data-toggle="modal" data-target="#custom-roles-modal"<#if !canDelete> title="You can't delete this custom role as it is in use by <@fmt.p info.grantedRoles "granted role" /> and <@fmt.p info.derivedRoles "derived role definition" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>
+							<a class="btn btn-mini" href="<@routes.admin.editcustomrole customRoleDefinition />"><i class="icon-edit fa fa-pencil-square-o"></i> Modify</a>
+							<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.admin.deletecustomrole customRoleDefinition />" data-toggle="modal" data-target="#custom-roles-modal"<#if !canDelete> title="You can't delete this custom role as it is in use by <@fmt.p info.grantedRoles "granted role" /> and <@fmt.p info.derivedRoles "derived role definition" />."</#if>><i class="icon-remove fa fa-times icon-white fa fa-inverse"></i> Delete</a>
 						</td>
 					</tr>
 				</#list>

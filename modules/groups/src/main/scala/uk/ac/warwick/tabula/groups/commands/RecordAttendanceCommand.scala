@@ -183,7 +183,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		}.toSeq
 
 		monitoringPointGroupProfileService.updateCheckpointsForAttendance(attendances)
-		if (features.attendanceMonitoringAcademicYear2014)
+		if (features.attendanceMonitoringVersion2)
 			attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
 
 		(occurrence, attendances)

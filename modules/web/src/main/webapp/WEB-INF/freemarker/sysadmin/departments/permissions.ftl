@@ -19,7 +19,7 @@
 
 			<h3 class="permissionTitle">Departmental admins</h3> <a class="use-popover colour-h3" id="popover-deptadmins" data-html="true"
 			   data-original-title="Departmental admins"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
 		</div>
@@ -32,7 +32,7 @@
 
 			<h3 class="permissionTitle">Departmental User Access Manager</h3> <a class="use-popover colour-h3" id="popover-uam" data-html="true"
 			   data-original-title="Departmental User Access Manager"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable deptperms_url "deptuam-table" department "UserAccessMgrRoleDefinition" "user access managers" />
 		</div>

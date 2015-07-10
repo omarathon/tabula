@@ -20,12 +20,12 @@
 	<ul>
 		<#list node.roles as role>
 			<li>
-				<i class="icon-user" title="Role"></i> <#noescape>${roleDescription(role.definition)}</#noescape>: <@render_users role.users />
+				<i class="icon-user fa fa-user" title="Role"></i> <#noescape>${roleDescription(role.definition)}</#noescape>: <@render_users role.users />
 			</li>
 		</#list>
 		<#list node.permissions as permission>
 			<li>
-				<i class="icon-lock" title="Permission"></i> ${permission.permission.description}: <@render_users permission.users />
+				<i class="icon-lock fa fa-lock" title="Permission"></i> ${permission.permission.description}: <@render_users permission.users />
 			</li>
 		</#list>
 		<#list node.children as child>
