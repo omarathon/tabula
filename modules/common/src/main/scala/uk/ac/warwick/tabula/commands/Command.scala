@@ -426,6 +426,10 @@ abstract class Description {
 		property("member", member.universityId)
 	}
 
+	def studentRelationshipType(relationshipType: StudentRelationshipType) = {
+		property("studentRelationshipType", relationshipType.agentRole)
+	}
+
 	def route(route: Route) = {
 		if (route.adminDepartment != null) department(route.adminDepartment)
 		property("route", route.code)

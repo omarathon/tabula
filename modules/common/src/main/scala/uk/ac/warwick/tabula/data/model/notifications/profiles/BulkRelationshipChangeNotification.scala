@@ -12,7 +12,7 @@ import scala.annotation.meta.getter
 abstract class BulkRelationshipChangeNotification extends Notification[StudentRelationship, Unit] {
 	@(transient @getter) val templateLocation: String
 
-	def relationshipType = entities(0).relationshipType
+	def relationshipType = entities.head.relationshipType
 
 	var relationshipService = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
@@ -51,7 +51,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 
 	def newAgents = entities.filter(_.isCurrent).flatMap(_.agentMember)
 
-	def student = entities(0).studentCourseDetails.student
+	def student = entities.head.studentCourseDetails.student
 	def recipients = Seq(student.asSsoUser)
 
 	def url: String = Routes.profile.view(student)

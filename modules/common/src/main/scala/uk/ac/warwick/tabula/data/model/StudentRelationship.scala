@@ -115,6 +115,7 @@ object StudentRelationship {
 		rel.agentMember = agent
 		rel.relationshipType = relType
 		rel.studentMember = student
+		rel.startDate = DateTime.now
 		rel
 	}
 
@@ -123,6 +124,7 @@ object StudentRelationship {
 		rel.agentMember = agent
 		rel.relationshipType = relType
 		rel.studentCourseDetails = studentCourseDetails
+		rel.startDate = DateTime.now
 		rel
 	}
 
@@ -134,6 +136,7 @@ object ExternalStudentRelationship {
 		rel.agent = agent
 		rel.relationshipType = relType
 		rel.studentMember = student
+		rel.startDate = DateTime.now
 		rel
 	}
 	
@@ -142,6 +145,7 @@ object ExternalStudentRelationship {
 		rel.agent = agent
 		rel.relationshipType = relType
 		rel.studentCourseDetails = studentCourseDetails
+		rel.startDate = DateTime.now
 		rel
 	}
 }

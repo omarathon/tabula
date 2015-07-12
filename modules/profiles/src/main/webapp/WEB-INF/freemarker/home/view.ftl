@@ -96,30 +96,30 @@
 					  <a class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
 					  <ul class="dropdown-menu pull-right">	
 							<li><a href="<@routes.deptperms dept/>">
-								<i class="icon-user"></i> Edit departmental permissions
+								<i class="icon-fixed-width icon-user"></i> Edit departmental permissions
 							</a></li>
 							
 							<li><a href="<@routes.filter_students dept/>">
-								<i class="icon-group"></i> View students
+								<i class="icon-fixed-width icon-group"></i> View students
 							</a></li>
 							
 							<#list dept.displayedStudentRelationshipTypes as relationshipType>
 								<li><a href="<@routes.relationship_agents dept relationshipType />">
-									<i class="icon-eye-open"></i> ${relationshipType.description}s
+									<i class="icon-fixed-width icon-eye-open"></i> ${relationshipType.description}s
 								</a></li>
 								<li><a href="<@routes.relationship_missing dept relationshipType />">
-									<i class="icon-eye-close"></i> Students with no ${relationshipType.description}
+									<i class="icon-fixed-width icon-eye-close"></i> Students with no ${relationshipType.description}
 								</a></li>
 															
 								<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
 									<li><a href="<@routes.relationship_allocate dept relationshipType />">
-										<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
+										<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
 									</li>
 								</#if>
 							</#list>
 							
 							<li><a href="<@routes.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
-								<i class="icon-list-alt"></i> Settings</a>
+								<i class="icon-fixed-width icon-list-alt"></i> Settings</a>
 							</li>
 					  </ul>
 					</div>
