@@ -1,9 +1,9 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#macro reportLoader reportUrl>
+<#macro reportLoader reportUrl commandName="command">
 	<script>
 		window.ReportBuilder = {};
 	</script>
-	<@f.form method="get" action="" commandName="command" cssClass="form-inline double-submit-protection">
+	<@f.form method="get" action="${reportUrl}" commandName="${commandName}" cssClass="form-inline double-submit-protection">
 		<label>Start date</label>
 		<@f.input id="startDate" path="startDate" cssClass="date-picker input-small" />
 		<label>End date</label>

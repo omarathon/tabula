@@ -4,7 +4,7 @@
 <h1>Unrecorded event attendance by module</h1>
 
 <#assign reportUrl><@routes.reports.unrecordedSmallGroupsByModule department academicYear /></#assign>
-<@reports_macros.reportLoader reportUrl>
+<@reports_macros.reportLoader reportUrl "filteredAttendanceCommand">
 	<ul class="dropdown-menu">
 		<li>
 			<a href="#" data-href="<@routes.reports.unrecordedSmallGroupsByModuleDownloadCsv department academicYear />">

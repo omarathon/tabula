@@ -4,7 +4,7 @@
 <h1>Missed event attendance by module</h1>
 
 <#assign reportUrl><@routes.reports.missedSmallGroupsByModule department academicYear /></#assign>
-<@reports_macros.reportLoader reportUrl>
+<@reports_macros.reportLoader reportUrl "filteredAttendanceCommand">
 	<ul class="dropdown-menu">
 		<li>
 			<a href="#" data-href="<@routes.reports.missedSmallGroupsByModuleDownloadCsv department academicYear />">
