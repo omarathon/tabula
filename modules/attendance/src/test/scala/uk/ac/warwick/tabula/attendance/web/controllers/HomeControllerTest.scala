@@ -48,7 +48,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be("redirect:/attendance/profile")
 
 	}}
@@ -63,7 +63,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/view/$departmentCode")
 
 	}}
@@ -79,7 +79,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		controller.features.attendanceMonitoringVersion2 = false
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/$departmentCode")
 
 	}}
@@ -94,7 +94,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
 
 	}}
@@ -110,7 +110,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		controller.features.attendanceMonitoringVersion2 = false
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/2013")
 
 	}}
@@ -125,7 +125,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be("home")
 
 	}}
@@ -140,7 +140,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be("home")
 
 	}}
@@ -155,7 +155,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map()
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be("home")
 
 	}}
@@ -170,7 +170,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			relationshipTypesMap = Map(relationshipType -> true)
 		)
 
-		val mav = controller.home(command)
+		val mav = controller.home(command, null)
 		mav.viewName should be("home")
 
 	}}
