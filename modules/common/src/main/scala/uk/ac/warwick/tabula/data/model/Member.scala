@@ -339,8 +339,10 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3007 We shouldn't swim downstream to the StudentCourseDetails or StudentCourseYearDetails for things here,
 		// rely on them swimming up.
 
-		// TAB-3598 - Add study departments for any current course
-		val studyDepartments = freshStudentCourseDetails.filterNot(_.isEnded).flatMap { scd => Option(scd.department) }
+		// TAB-3598 - Add study departments and routes for any current course
+		val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
+		val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
+		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.route }.toStream
 
 		// Cache the def result
 		val mostSignificantCourse = mostSignificantCourseDetails
@@ -368,10 +370,7 @@ class StudentMember extends Member with StudentProperties {
 			}
 		}
 
-		// Despite the above, it's still ok to do this as it only includes current information, so it's not swimming downstream
-		val currentRoute: Stream[PermissionsTarget] = mostSignificantCourse.map { _.route }.toStream
-
-		departments #::: modules #::: smallGroups #::: currentRoute
+		departments #::: modules #::: smallGroups #::: currentCourseRoutes
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
