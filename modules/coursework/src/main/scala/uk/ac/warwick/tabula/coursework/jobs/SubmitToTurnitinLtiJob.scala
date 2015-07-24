@@ -73,6 +73,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 			while (!allPapersSubmitted & retries <= WaitingRetries) {
 				Thread.sleep(WaitingSleep)
+				// wait for the Turnitin assignment id to be updated - if it already has a turnitin assignment id, that's fine
 				if (assignment.turnitinId.nonEmpty) {
 					assignment.submissions.asScala.foreach(submission => {
 						submission.allAttachments.foreach(attachment => {
@@ -87,7 +88,8 @@ class SubmitToTurnitinLtiJob extends Job
 
 							// not actually the email firstname and lastname of the student, as per existing job.
 							val submitResponse = turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
-										s"${submission.userId}@TurnitinLti.warwick.ac.uk",attachment.name, submission.userId, "Student")
+										s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment.name,
+										attachment.id, submission.userId, "Student")
 							// TODO keep track of failed uploads
 							debug("submitResponse: " + submitResponse)
 							if (!submitResponse.success) {

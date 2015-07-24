@@ -37,8 +37,9 @@ class TurnitinLtiSubmitAssignmentController extends BaseSysadminController {
 		if (errors.hasErrors){
 			form()
 		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
+			val response: TurnitinLtiResponse = cmd.apply()
+			Mav("sysadmin/turnitinlti/submit-assignment-done",
+				"response" -> response)
 		}
 }
 
@@ -100,6 +101,28 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 
 	@annotation.RequestMapping(method=Array(POST))
 	def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+		if (errors.hasErrors){
+			form()
+		} else {
+			cmd.apply()
+			Redirect("/sysadmin/turnitinlti")
+		}
+}
+
+@Controller
+@RequestMapping(value = Array("/sysadmin/turnitinlti/conformancetester"))
+class LtiConformanceTesterController extends BaseSysadminController {
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("ltiConformanceTesterCommand")
+	def ltiConformanceTesterCommand(user: CurrentUser) = LtiConformanceTesterCommand(user)
+
+	@annotation.RequestMapping(method=Array(GET, HEAD))
+	def form() = Mav("sysadmin/turnitinlti/conformance-tester")
+
+	@annotation.RequestMapping(method=Array(POST))
+	def add(@Valid @ModelAttribute("ltiConformanceTesterCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
 		if (errors.hasErrors){
 			form()
 		} else {

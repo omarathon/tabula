@@ -19,28 +19,32 @@ import com.google.api.client.auth.oauth.OAuthHmacSigner
 import com.google.gdata.client.authn.oauth.{OAuthUtil, OAuthParameters}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.CurrentUser
+import org.xml.sax.SAXParseException
+import scala.Option
 
 object TurnitinLtiService {
+
+	val AssignmentPrefix = "Assignment-"
 
 	/**
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
 	 */
-	def classIdFor(assignment: Assignment, prefix: String) = ClassId(prefix + "-" + assignment.module.code)
+	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"${prefix}-${assignment.module.code}")
 
 	/**
 	 * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same assignment.
 	 */
-	def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
+	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"${AssignmentPrefix}${assignment.id}")
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(module.code.toUpperCase + " - " + module.name)
+		ClassName(s"${module.code.toUpperCase}-${module.name}")
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
+		AssignmentName(s"${assignment.name}(${assignment.academicYear.toString})")
 	}
 }
 
@@ -94,7 +98,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 				// TODO callback url should be a property
-				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/turnitin-response",
+				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-submit-assignment-response/assignment/${assignment.id}",
 				"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes") ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
 			// actually, expect a 302
@@ -123,10 +127,10 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				<message>Your file has been saved successfully.</message>
 			</response>
 	 */
-	def submitPaper(assignment: Assignment,	paperUrl: String,	userEmail: String, filename: String,
+	def submitPaper(assignment: Assignment,	paperUrl: String, userEmail: String, filename: String, title: String,
 									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequestAdvanced(
 
-		apiSubmitPaperEndpoint + "/" + assignment.turnitinId,
+		s"${apiSubmitPaperEndpoint}/${assignment.turnitinId}",
 		Map(
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
@@ -135,7 +139,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
 			"roles" -> "Learner",
 			"custom_submission_url" -> paperUrl,
-			"custom_submission_title" -> filename,
+			"custom_submission_title" -> title,
 			"custom_submission_filename" -> filename
 
 		)
@@ -172,7 +176,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
-		apiListEndpoints + "/" + turnitinAssignmentId, Map()) {
+		s"${apiListEndpoints}/${turnitinAssignmentId}", Map()) {
 		request =>
 			request >:+ {
 				(headers, request) =>
@@ -182,6 +186,26 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 						}
 					}
 			}
+	}
+
+	def ltiConformanceTest(endpoint: String, secret: String, user: CurrentUser) = {
+				doRequestForLtiTesting(
+			endpoint,
+				secret,
+				Map(
+					"custom_debug" -> "true",
+					"resource_link_id" -> "1234567"
+				)){
+					request =>
+						request >:+ {
+							(headers, request) =>
+								request >- {
+									(html) => {
+										TurnitinLtiResponse.fromHtml(html.contains("message request is valid"), html)
+									}
+								}
+						}
+				}
 	}
 
 	def userParams(email: String, firstName: String, lastName: String): Map[String, String] = {
@@ -198,12 +222,35 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		"User-Agent" -> userAgent
 	)
 
+	def doRequestForLtiTesting (endpoint: String, secret: String, params: Map[String, String])
+														 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
+
+		val signedParams = getSignedParams(params, endpoint, Some(secret))
+
+		val req = (url(endpoint) <:< Map()).POST << signedParams
+
+		logger.info("doRequest: " + signedParams)
+
+		try {
+			http.x(transform(req))
+		} catch {
+			case e: IOException => {
+				logger.error("Exception contacting Turnitin", e)
+				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
+			}
+			case e: SAXParseException => {
+				logger.error("Unexpected response from Turnitin", e)
+				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
+			}
+		}
+	}
+
 	def doRequestAdvanced(endpoint: String, params: Map[String, String])
 											 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
-		val signedParams = getSignedParams(params, endpoint)
+		val signedParams = getSignedParams(params, endpoint, None)
 
-		val req =	(url(endpoint) <:< Map()).POST << signedParams
+		val req = (url(endpoint) <:< Map()).POST << signedParams
 
 		logger.info("doRequest: " + signedParams)
 
@@ -221,25 +268,26 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		}
 	}
 
-	def getSignedParams(params: Map[String, String], endpoint: String): Map[String, String] = {
+	def getSignedParams(params: Map[String, String], endpoint: String, optionalSecret: Option[String]): Map[String, String] = {
 		val hmacSigner = new OAuthHmacSigner()
-		hmacSigner.clientSharedSecret = sharedSecretKey
+		hmacSigner.clientSharedSecret = optionalSecret.getOrElse(sharedSecretKey)
 
 		val oauthparams = new OAuthParameters()
 		oauthparams.setOAuthConsumerKey(turnitinAccountId)
 		oauthparams.setOAuthNonce(OAuthUtil.getNonce())
 		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp())
 		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
+		oauthparams.setOAuthCallback("about:blank")
 
-		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
+//		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
 
-		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala
+		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
 
 		val signatureBaseString = OAuthUtil.getSignatureBaseString(endpoint, "POST", allParams.asJava)
 		val signature = hmacSigner.computeSignature(signatureBaseString)
 
 		oauthparams.addCustomBaseParameter("oauth_signature", signature)
-		val allParamsIncludingSignature = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala
+		val allParamsIncludingSignature = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
 		allParamsIncludingSignature
 	}
 }

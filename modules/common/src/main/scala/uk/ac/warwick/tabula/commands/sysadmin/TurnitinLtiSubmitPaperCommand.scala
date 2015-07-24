@@ -35,7 +35,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 
 		// TODO fix!
-		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, "test.doc", user.universityId, "SYSADMIN")
+		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, "test.doc", "testtitle", user.universityId, "SYSADMIN")
 
 	}
 
