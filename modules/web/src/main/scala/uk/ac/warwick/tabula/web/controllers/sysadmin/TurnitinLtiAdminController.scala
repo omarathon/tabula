@@ -126,7 +126,9 @@ class LtiConformanceTesterController extends BaseSysadminController {
 		if (errors.hasErrors){
 			form()
 		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
+
+			val response: TurnitinLtiResponse = cmd.apply()
+			Mav("sysadmin/turnitinlti/conformancetester-result",
+				"response" -> response)
 		}
 }
