@@ -16,7 +16,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	private var unapprovedExtensions: Seq[Extension] = Seq()
 
-	mustBeLinked(assignment, module)
+	mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
 	PermissionCheck(Permissions.Assignment.Update, assignment)
 
 	this.copyFrom(assignment)

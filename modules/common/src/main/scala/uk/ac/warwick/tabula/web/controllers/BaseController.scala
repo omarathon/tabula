@@ -84,6 +84,7 @@ trait ControllerImports {
 	final val PUT = RequestMethod.PUT
 	final val HEAD = RequestMethod.HEAD
 	final val POST = RequestMethod.POST
+	final val DELETE = RequestMethod.DELETE
 
 	type RequestMapping = org.springframework.web.bind.annotation.RequestMapping
 }

@@ -78,7 +78,7 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 
 	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent with ProfileServiceComponent =>
 	
-	mustBeLinked(mandatory(assignment), mandatory(module))
+	mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]

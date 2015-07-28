@@ -752,7 +752,6 @@ trait BooleanAssignmentProperties {
 	}
 }
 
-
 object BooleanAssignmentProperties extends BooleanAssignmentProperties {
 	def apply(assignment: Assignment) = copyBooleansTo(assignment)
 }

@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.validation.Valid
 
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats, WorkflowStageHealth}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{DeleteAssignmentCommand, EditAssignmentCommand, SubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilters, CourseworkFilter}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -24,21 +25,23 @@ import scala.util.Try
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}"))
 class AssignmentController extends ApiController
 	with GetAssignmentApi
+	with EditAssignmentApi
+	with DeleteAssignmentApi
 	with AssignmentToJsonConverter
 	with AssignmentStudentToJsonConverter
-	with ReplacingAssignmentStudentMessageResolver
+	with ReplacingAssignmentStudentMessageResolver {
+	validatesSelf[SelfValidating]
+}
 
 trait GetAssignmentApi {
 	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-	validatesSelf[SelfValidating]
-
 	@ModelAttribute("getCommand")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
+	def get(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
@@ -54,7 +57,8 @@ trait GetAssignmentApi {
 		}
 	}
 
-	override def binding[A](binder: WebDataBinder, cmd: A) {
+	@InitBinder(Array("getCommand"))
+	def getBinding(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
 			override def fromString(name: String) = CourseworkFilters.of(name)
 			override def toString(filter: CourseworkFilter) = filter.getName
@@ -63,7 +67,39 @@ trait GetAssignmentApi {
 
 }
 
-trait AssignmentStudentToJsonConverter {
+trait SubmissionToJsonConverter {
+	self: ApiController =>
+
+	def jsonSubmissionObject(student: SubmissionAndFeedbackCommand.Student): Map[String, Any] = {
+		student.coursework.enhancedSubmission.map { enhancedSubmission =>
+			val submission = enhancedSubmission.submission
+
+			Map(
+				"id" -> submission.id,
+				"downloaded" -> enhancedSubmission.downloaded,
+				"late" -> submission.isLate,
+				"authorisedLate" -> submission.isAuthorisedLate,
+				"attachments" -> submission.allAttachments.map { attachment => Map(
+					"filename" -> attachment.name,
+					"id" -> attachment.id,
+					"originalityReport" -> Option(attachment.originalityReport).map { report => Map(
+						"similarity" -> JInteger(report.similarity),
+						"overlap" -> JInteger(report.overlap),
+						"webOverlap" -> JInteger(report.webOverlap),
+						"studentOverlap" -> JInteger(report.studentOverlap),
+						"publicationOverlap" -> JInteger(report.publicationOverlap),
+						"reportUrl" -> (toplevelUrl + Routes.coursework.admin.assignment.turnitin.report(submission, attachment))
+					)}.orNull
+				)},
+				"submittedDate" -> Option(submission.submittedDate).map(DateFormats.IsoDateTime.print).orNull,
+				"wordCount" -> submission.assignment.wordCountField.flatMap(submission.getValue).map { formValue => JInteger(Try(formValue.value.toInt).toOption) }.orNull,
+				"suspectPlagiarised" -> submission.suspectPlagiarised
+			)
+		}.orNull
+	}
+}
+
+trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
 	self: AssignmentStudentMessageResolver with ApiController =>
 
 	def jsonAssignmentStudentObject(student: SubmissionAndFeedbackCommand.Student): Map[String, Any] = {
@@ -93,33 +129,7 @@ trait AssignmentStudentToJsonConverter {
 			)
 		)
 
-		val submissionDetails = Map(
-			"submission" -> student.coursework.enhancedSubmission.map { enhancedSubmission =>
-				val submission = enhancedSubmission.submission
-
-				Map(
-					"id" -> submission.id,
-					"downloaded" -> enhancedSubmission.downloaded,
-					"late" -> submission.isLate,
-					"authorisedLate" -> submission.isAuthorisedLate,
-					"attachments" -> submission.allAttachments.map { attachment => Map(
-						"filename" -> attachment.name,
-						"id" -> attachment.id,
-						"originalityReport" -> Option(attachment.originalityReport).map { report => Map(
-							"similarity" -> JInteger(report.similarity),
-							"overlap" -> JInteger(report.overlap),
-							"webOverlap" -> JInteger(report.webOverlap),
-							"studentOverlap" -> JInteger(report.studentOverlap),
-							"publicationOverlap" -> JInteger(report.publicationOverlap),
-							"reportUrl" -> (toplevelUrl + Routes.coursework.admin.assignment.turnitin.report(submission, attachment))
-						)}.orNull
-					)},
-					"submittedDate" -> Option(submission.submittedDate).map(DateFormats.IsoDateTime.print).orNull,
-					"wordCount" -> submission.assignment.wordCountField.flatMap(submission.getValue).map { formValue => JInteger(Try(formValue.value.toInt).toOption) }.orNull,
-					"suspectPlagiarised" -> submission.suspectPlagiarised
-				)
-			}.orNull
-		)
+		val submissionDetails = Map("submission" -> jsonSubmissionObject(student))
 
 		val extensionDetails = Map(
 			"extension" -> student.coursework.enhancedExtension.map { enhancedExtension =>
@@ -181,5 +191,75 @@ trait ReplacingAssignmentStudentMessageResolver extends AssignmentStudentMessage
 			.replace("[STUDENT]", studentId)
 			.replace("[FIRST_MARKER]", firstMarker)
 			.replace("[SECOND_MARKER]", secondMarker)
+	}
+}
+
+trait EditAssignmentApi {
+	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter with GetAssignmentApi =>
+
+	@ModelAttribute("editCommand")
+	def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand =
+		new EditAssignmentCommand(module, assignment, user)
+
+	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+	def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentCommand, errors: Errors) = {
+		request.copyTo(command, errors)
+
+		globalValidator.validate(command, errors)
+		command.validate(errors)
+		command.afterBind()
+
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val assignment = command.apply()
+
+			// Return the GET representation
+			get(getCommand(assignment.module, assignment), errors, assignment)
+		}
+	}
+}
+
+class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCommand] {
+
+	// set defaults to null
+	openEnded = null
+	collectMarks = null
+	collectSubmissions = null
+	restrictSubmissions = null
+	allowLateSubmissions = null
+	allowResubmission = null
+	displayPlagiarismNotice = null
+	allowExtensions = null
+	summative = null
+	dissertation = null
+	includeInFeedbackReportWithoutSubmissions = null
+	automaticallyReleaseToMarkers = null
+	automaticallySubmitToTurnitin = null
+
+}
+
+trait DeleteAssignmentApi {
+	self: ApiController =>
+
+	@ModelAttribute("deleteCommand")
+	def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
+		val command = new DeleteAssignmentCommand(module, assignment)
+		command.confirm = true
+		command
+	}
+
+	@RequestMapping(method = Array(DELETE), produces = Array("application/json"))
+	def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteAssignmentCommand, errors: Errors) = {
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			command.apply()
+
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok"
+			)))
+		}
 	}
 }

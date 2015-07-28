@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignment = null)
 	extends Command[Assignment] with SelfValidating with SchedulesNotifications[Assignment, Assignment] {
 	
-	mustBeLinked(assignment, module)
+	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Assignment.Delete, assignment)
 
 	var confirm: JBoolean = false
