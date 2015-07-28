@@ -101,12 +101,15 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 
 	@annotation.RequestMapping(method=Array(POST))
 	def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
-		if (errors.hasErrors){
-			form()
-		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
-		}
+	if (errors.hasErrors){
+		form()
+	} else {
+		val response: TurnitinLtiResponse = cmd.apply()
+		Mav("sysadmin/turnitinlti/submission-result",
+			"response" -> response,
+			"submission_info" -> response.submissionInfo)
+	}
+
 }
 
 @Controller

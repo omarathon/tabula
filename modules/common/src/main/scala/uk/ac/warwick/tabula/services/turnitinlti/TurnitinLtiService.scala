@@ -12,7 +12,7 @@ import org.apache.http.protocol.HttpContext
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport, Assignment}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import com.google.api.client.auth.oauth.OAuthHmacSigner
@@ -21,6 +21,8 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.CurrentUser
 import org.xml.sax.SAXParseException
 import scala.Option
+import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
+import uk.ac.warwick.tabula.data.SessionComponent
 
 object TurnitinLtiService {
 
@@ -52,7 +54,8 @@ object TurnitinLtiService {
  * Service for accessing the Turnitin LTI plagiarism API.
  */
 @Service("turnitinLTIService")
-class TurnitinLtiService extends Logging with DisposableBean with InitializingBean {
+class TurnitinLtiService extends Logging with DisposableBean with InitializingBean
+	with AutowiringOriginalityReportServiceComponent {
 
 	/** Turnitin LTI account id */
 	@Value("${TurnitinLti.aid}") var turnitinAccountId: String = null
@@ -98,6 +101,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 				// TODO callback url should be a property
+				// TODO should we also add job id here, to update the progress???
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-submit-assignment-response/assignment/${assignment.id}",
 				"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes") ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
@@ -127,7 +131,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				<message>Your file has been saved successfully.</message>
 			</response>
 	 */
-	def submitPaper(assignment: Assignment,	paperUrl: String, userEmail: String, filename: String, title: String,
+	def submitPaper(assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment,
 									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequestAdvanced(
 
 		s"${apiSubmitPaperEndpoint}/${assignment.turnitinId}",
@@ -139,8 +143,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
 			"roles" -> "Learner",
 			"custom_submission_url" -> paperUrl,
-			"custom_submission_title" -> title,
-			"custom_submission_filename" -> filename
+			"custom_submission_title" -> attachment.id,
+			"custom_submission_filename" -> attachment.name
 
 		)
 			++ userParams(userEmail, userFirstName, userLastName) ) {
@@ -151,7 +155,22 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 					request <>  {
 						(node) => {
 							val response = TurnitinLtiResponse.fromXml(node)
-							if (response.success) logger.info("turnitin submission id: " + response.turnitinSubmissionId())
+							if (response.success) {
+//								val originalityReport = originalityReportService.getOriginalityReportByFileId("testtitle")
+								val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
+								if (originalityReport.isDefined) {
+									// TODO delete existing similarity values???
+									originalityReport.get.turnitinId = response.turnitinSubmissionId
+									originalityReport.get.reportReceived = false
+								} else {
+									val report = new OriginalityReport
+									report.turnitinId = response.turnitinSubmissionId
+									attachment.originalityReport = report
+									originalityReportService.saveOriginalityReport(attachment)
+								}
+								logger.info("originality report already exists: " + originalityReport.isDefined)
+								logger.info("turnitin submission id: " + response.turnitinSubmissionId())
+							}
 							else logger.info("failure")
 							response
 						}
@@ -167,9 +186,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				(headers, request) =>
 					request >- {
 						(json) => {
-							val response = TurnitinLtiResponse.fromJson(json)
-							if (response.success) response.submissionInfo
-							response
+							TurnitinLtiResponse.fromJson(json)
 						}
 					}
 			}

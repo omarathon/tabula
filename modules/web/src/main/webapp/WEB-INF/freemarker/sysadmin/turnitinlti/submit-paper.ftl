@@ -10,6 +10,10 @@
 			<@f.input path="assignment" cssClass="text" value=""/>
 		</@form.labelled_row>
 
+		<@form.labelled_row "attachment" "Attachment">
+			<@f.input path="attachment" cssClass="text" value=""/>
+		</@form.labelled_row>
+
 		<@form.labelled_row "paperUrl" "URL to paper">
 			<@f.input path="paperUrl" cssClass="text" value=""/>
 		</@form.labelled_row>

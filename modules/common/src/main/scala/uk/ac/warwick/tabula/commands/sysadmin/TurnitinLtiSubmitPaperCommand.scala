@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.validation.Errors
 import java.net.{MalformedURLException, URL}
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 
 object TurnitinLtiSubmitPaperCommand {
 	def apply(user: CurrentUser) =
@@ -35,7 +35,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 
 		// TODO fix!
-		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, "test.doc", "testtitle", user.universityId, "SYSADMIN")
+		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, attachment, user.universityId, "SYSADMIN")
 
 	}
 
@@ -43,7 +43,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 
 trait TurnitinLtiSubmitPaperCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.GodMode)
+		p.PermissionCheck(Permissions.ManageEmergencyMessage)
 	}
 }
 
@@ -75,4 +75,5 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 trait TurnitinLtiSubmitPaperCommandState {
 	var paperUrl: String = _
 	var assignment: Assignment = _
+	var attachment: FileAttachment = _
 }

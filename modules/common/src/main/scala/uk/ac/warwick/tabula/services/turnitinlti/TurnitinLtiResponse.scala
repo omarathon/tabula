@@ -83,42 +83,49 @@ case class TurnitinLtiResponse(
 }
 	 *
 	 */
-	def submissionInfo() = {
+	def submissionInfo():SubmissionReults = {
 
-		// TODO do this properly
+		val results = new SubmissionReults()
+
 			JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
 				theJson.get("outcome_originalityreport") match {
 					case Some(reports: Map[String, Any] @unchecked) =>
 						reports.get("breakdown") match {
 							case Some(breakdowns: Map[String, Double] @unchecked) =>
-								breakdowns.foreach { case (key, value) =>
-									debug("KEY: " + key)
-									debug("VALUE: " + value)
+								breakdowns.get("publications_score") match {
+									case (publicationsScore) =>
+										results.publication_overlap = publicationsScore
 								}
-								reports.get("numeric") match {
-									case Some(numerics: Map[String, Double] @unchecked) =>
-										numerics.foreach { case (key, value) =>
-											debug("NUMERICS KEY: " + key)
-											debug("NUMERICS VALUE: " + value)
-										}
-									case _ => Nil
+								breakdowns.get("internet_score") match {
+									case (internetScore) =>
+										results.web_overlap = internetScore
 								}
-								reports.get("text") match {
-									case Some(text: String) => {
-										debug("text : " + text)
-									}
-									case _ => Nil
+								breakdowns.get("submitted_works_score") match {
+									case (submittedWorksScore) =>
+										results.student_overlap = submittedWorksScore
 								}
 							case _ => Nil
 						}
+								reports.get("numeric") match {
+									case Some(numerics: Map[String, Double] @unchecked) =>
+										numerics.get("score") match {
+											case (score) =>
+												results.similarity = score
+										}
+									case _ => Nil
+								}
+
+							case _ => Nil
+						}
 					case _ => Nil
-				}
-			case _ => Nil
 		}
+		results
 	}
 
 }
+
+case class SubmissionReults(var similarity:Option[Double] = None, var student_overlap: Option[Double] = None, var web_overlap: Option[Double] = None, var publication_overlap: Option[Double] = None)
 
 object TurnitinLtiResponse extends Logging {
 

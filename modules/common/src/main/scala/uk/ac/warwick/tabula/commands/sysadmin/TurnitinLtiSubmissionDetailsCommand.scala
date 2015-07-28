@@ -30,9 +30,7 @@ class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends
 	self: TurnitinLtiSubmissionDetailsCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
-
 		turnitinLtiService.getSubmissionDetails(turnitinSubmissionId, user)
-
 	}
 
 }
