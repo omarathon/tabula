@@ -156,7 +156,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 						(node) => {
 							val response = TurnitinLtiResponse.fromXml(node)
 							if (response.success) {
-//								val originalityReport = originalityReportService.getOriginalityReportByFileId("testtitle")
 								val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 								if (originalityReport.isDefined) {
 									// TODO delete existing similarity values???
