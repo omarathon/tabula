@@ -10,6 +10,7 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, AcademicYear, CurrentUser}
@@ -28,6 +29,7 @@ class ModuleAssignmentsController extends ApiController
 	with ListAssignmentsForModuleApi
 	with CreateAssignmentApi
 	with AssignmentToJsonConverter
+	with AssessmentMembershipInfoToJsonConverter
 
 trait ListAssignmentsForModuleApi {
 	self: ApiController with AssignmentToJsonConverter =>
@@ -56,97 +58,7 @@ trait ListAssignmentsForModuleApi {
 	}
 }
 
-trait AssignmentToJsonConverter {
-	self: ApiController =>
 
-	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
-		val basicInfo = Map(
-			"id" -> assignment.id,
-			"archived" -> assignment.archived,
-			"academicYear" -> assignment.academicYear.toString,
-			"name" -> assignment.name,
-			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
-			"collectMarks" -> assignment.collectMarks,
-			"markingWorkflow" -> Option(assignment.markingWorkflow).map { mw => Map(
-				"id" -> mw.id,
-				"name" -> mw.name
-			)}.orNull,
-			"feedbackTemplate" -> Option(assignment.feedbackTemplate).map { ft => Map(
-				"id" -> ft.id,
-				"name" -> ft.name
-			)}.orNull,
-			"summative" -> assignment.summative,
-			"dissertation" -> assignment.dissertation
-		)
-
-		val submissionsInfo =
-			if (assignment.collectSubmissions) {
-				Map(
-					"collectSubmissions" -> true,
-					"displayPlagiarismNotice" -> assignment.displayPlagiarismNotice,
-					"restrictSubmissions" -> assignment.restrictSubmissions,
-					"allowLateSubmissions" -> assignment.allowLateSubmissions,
-					"allowResubmission" -> assignment.allowResubmission,
-					"allowExtensions" -> assignment.allowExtensions,
-					"fileAttachmentLimit" -> assignment.attachmentLimit,
-					"fileAttachmentTypes" -> assignment.fileExtensions,
-					"submissionFormText" -> assignment.commentField.map { _.value }.getOrElse(""),
-					"wordCountMin" -> assignment.wordCountField.map { _.min }.orNull,
-					"wordCountMax" -> assignment.wordCountField.map { _.max }.orNull,
-					"wordCountConventions" -> assignment.wordCountField.map { _.conventions }.getOrElse(""),
-					"submissions" -> assignment.submissions.size(),
-					"unapprovedExtensions" -> assignment.countUnapprovedExtensions
-				)
-			} else {
-				Map(
-					"collectSubmissions" -> false
-				)
-			}
-
-
-		val membershipInfo = assignment.membershipInfo
-		val studentMembershipInfo = Map(
-			"studentMembership" -> Map(
-				"total" -> membershipInfo.totalCount,
-				"linkedSits" -> membershipInfo.sitsCount,
-				"included" -> membershipInfo.usedIncludeCount,
-				"excluded" -> membershipInfo.usedExcludeCount
-			),
-			"sitsLinks" -> assignment.upstreamAssessmentGroups.map { uag => Map(
-				"moduleCode" -> uag.moduleCode,
-				"assessmentGroup" -> uag.assessmentGroup,
-				"occurrence" -> uag.occurrence,
-				"sequence" -> uag.sequence
-			)}
-		)
-
-		val datesInfo =
-			if (assignment.openEnded) {
-				Map(
-					"openEnded" -> true,
-					"opened" -> assignment.isOpened,
-					"closed" -> false,
-					"openDate" -> DateFormats.IsoDateTime.print(assignment.openDate)
-				)
-			} else {
-				Map(
-					"openEnded" -> false,
-					"opened" -> assignment.isOpened,
-					"closed" -> assignment.isClosed,
-					"openDate" -> DateFormats.IsoDateTime.print(assignment.openDate),
-					"closeDate" -> DateFormats.IsoDateTime.print(assignment.closeDate),
-					"feedbackDeadline" -> assignment.feedbackDeadline.map(DateFormats.IsoDate.print).orNull
-				)
-			}
-
-		val countsInfo = Map(
-			"feedback" -> assignment.countFullFeedback,
-			"unpublishedFeedback" -> assignment.countUnreleasedFeedback
-		)
-
-		basicInfo ++ submissionsInfo ++ studentMembershipInfo ++ datesInfo ++ countsInfo
-	}
-}
 
 trait CreateAssignmentApi {
 	self: ApiController =>

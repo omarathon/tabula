@@ -174,6 +174,9 @@ class SmallGroupSet
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
+
+	// Gets a breakdown of the membership for this small group set.
+	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroups, Some(members))
 	
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||

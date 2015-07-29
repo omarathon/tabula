@@ -1064,6 +1064,13 @@
 			</dependency>
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>groups</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>profiles</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
