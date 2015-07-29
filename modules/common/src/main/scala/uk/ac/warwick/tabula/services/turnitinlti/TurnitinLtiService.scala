@@ -22,11 +22,22 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.xml.sax.SAXParseException
 import scala.Option
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
-import uk.ac.warwick.tabula.data.SessionComponent
+import uk.ac.warwick.tabula.jobs.FailedJobException
+import org.apache.commons.io.FilenameUtils._
+import scala.Some
 
 object TurnitinLtiService {
 
 	val AssignmentPrefix = "Assignment-"
+
+	/**
+	 * Quoted supported types are...
+	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
+	 */
+	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
+
+	def validFileType(file: FileAttachment): Boolean =
+		validExtensions contains getExtension(file.name).toLowerCase
 
 	/**
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
@@ -100,20 +111,20 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
-				// TODO callback url should be a property
+				// TODO callback url should be a property - routes?
 				// TODO should we also add job id here, to update the progress???
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-submit-assignment-response/assignment/${assignment.id}",
 				"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes") ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
-			// actually, expect a 302
+			// expect a 302
 				request >:+ {
 					(headers, request) =>
-						request >- {
+						val location = headers("location").headOption
+						if (!location.isDefined) throw new FailedJobException(s"Failed. Could not submit the assignment")
+							request >- {
 							(html) => {
 								// listen to callback for actual response
-								val response = TurnitinLtiResponse.fromHtml(html.contains("Moved"), html)
-								if (!response.success) logger.error("Unexpected response submitting assignment to Turnitin")
-								response
+								TurnitinLtiResponse.redirect(location.get)
 							}
 						}
 				}
@@ -167,10 +178,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 									attachment.originalityReport = report
 									originalityReportService.saveOriginalityReport(attachment)
 								}
-								logger.info("originality report already exists: " + originalityReport.isDefined)
-								logger.info("turnitin submission id: " + response.turnitinSubmissionId())
-							}
-							else logger.info("failure")
+							}	else logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
 							response
 						}
 					}
@@ -244,8 +252,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		val signedParams = getSignedParams(params, endpoint, Some(secret))
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
-
-		logger.info("doRequest: " + signedParams)
 
 		try {
 			http.x(transform(req))

@@ -139,8 +139,6 @@ object TurnitinLtiResponse extends Logging {
 	}
 
 	def fromHtml(success: Boolean, html: String) = {
-		logger.info("html response: " + html)
-		logger.info("successful: " + success)
 		new TurnitinLtiResponse(success, html = Some(html))
 	}
 

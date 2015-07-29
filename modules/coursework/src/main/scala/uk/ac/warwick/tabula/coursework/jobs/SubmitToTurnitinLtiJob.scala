@@ -2,19 +2,16 @@ package uk.ac.warwick.tabula.coursework.jobs
 
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
 import uk.ac.warwick.tabula.data.model.{FileAttachment, FileAttachmentToken, Assignment}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import uk.ac.warwick.tabula.services.turnitinlti.AutowiringTurnitinLtiServiceComponent
+import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiService, AutowiringTurnitinLtiServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.services.turnitin.TurnitinSubmissionInfo
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.coursework.web.Routes
 
@@ -26,7 +23,8 @@ object SubmitToTurnitinLtiJob {
 
 @Component
 class SubmitToTurnitinLtiJob extends Job
-	with TurnitinTrait with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering
+//	with NotifyingJob[Seq[TurnitinSubmissionInfo]]
+  with Logging with FreemarkerRendering
 	with AutowiringAssessmentServiceComponent with AutowiringTurnitinLtiServiceComponent
 	with AutowiringFileAttachmentServiceComponent with AutowiringOriginalityReportServiceComponent {
 
@@ -34,10 +32,11 @@ class SubmitToTurnitinLtiJob extends Job
 
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-	// TODO check email from Turnitin re requirements here
+	// Turnitin have requested that submissions should be sent at a rate of no more than 1 per second
+	val WaitingSleep = 2000
 	val WaitingRetries = 5
-	val WaitingSleep = 20000
 
+	// TODO
 	var sendNotifications = true
 
 	def run(implicit job: JobInstance) {
@@ -52,15 +51,10 @@ class SubmitToTurnitinLtiJob extends Job
 			val id = job.getString("assignment")
 			assessmentService.getAssignmentById(id) getOrElse (throw obsoleteJob)
 		}}
-		val classId = classIdFor(assignment, api.classPrefix)
-		val assignmentId = assignmentIdFor(assignment)
-		val assignmentName = assignmentNameFor(assignment)
 
 		def run() {
 			updateStatus("Submitting to Turnitin...")
 			updateProgress(10) // update the progress bar
-
-			debug(s"Submitting assignment in ${classId.value}, ${assignmentId.value}")
 
 			val submitAssignmentResponse = turnitinLtiService.submitAssignment(assignment, job.user)
 
@@ -76,40 +70,49 @@ class SubmitToTurnitinLtiJob extends Job
 				Thread.sleep(WaitingSleep)
 				// wait for the Turnitin assignment id to be updated - if it already has a turnitin assignment id, that's fine
 				if (assignment.turnitinId.nonEmpty) {
-					updateStatus("Submitting papers to Turnitin...")
-					updateProgress(20)
+					updateStatus("Submitting papers to Turnitin")
+
+					var uploadsDone = 0
+					var resultsReceived = 0
+					var uploadsFailed = 0
+					var failedUploads = Map[String, String]()
+					val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments } // what about incompatible files?
+					val uploadsTotal = allAttachments.size
 
 					assignment.submissions.asScala.foreach(submission => {
-						submission.allAttachments.foreach(attachment => {
+
+						for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
 							 val token: FileAttachmentToken = getToken(attachment)
 
 							val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
 
-							// TODO remove submissions no longer in the assignment
-
-							// TODO we need to ensure we don't resubmit the same papers again.
+							// TODO don't resubmit the same papers again.
 							// There is a resubmission endpoint which we can use
 
 							// not actually the email firstname and lastname of the student, as per existing implementation.
 							val submitResponse = turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
 										s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.userId, "Student")
 							// TODO keep track of failed uploads
-							// TODO get percentage of papers submitted, to updateProgress accordingly
 							debug("submitResponse: " + submitResponse)
 							if (!submitResponse.success) {
 								logger.warn("Failed to upload '" + attachment.name + "' - " + submitResponse.statusMessage)
+								uploadsFailed += 1
+								failedUploads += (attachment.name -> submitResponse.statusMessage.getOrElse("failed upload"))
 								includesFailedSubmissions = true
 							} else {
 								logger.info("turnitin submission id: " + submitResponse.turnitinSubmissionId)
 							}
-						})
+							uploadsDone += 1
+						}
+						updateProgress(10 + ((uploadsDone * 40) / uploadsTotal)) // 10% to 50%
 					})
 
 					allPapersSubmitted = true
 
 					var submissionResultsFailed = 0
 
-					// TODO go through each one, get results from Turnitin, then update the OriginalityReport
+					updateStatus("Getting similarity reports from Turnitin")
+
 					assignment.submissions.asScala.foreach(submission => {
 						submission.allAttachments.foreach(attachment => {
 							val originalityReport = transactional(readOnly=true) {
@@ -133,7 +136,10 @@ class SubmitToTurnitinLtiJob extends Job
 								logger.warn(s"Failed to find originality report for attachment $attachment.id")
 								submissionResultsFailed += 1
 							}
+							resultsReceived += 1
 						})
+
+						updateProgress(10 + (((resultsReceived * 40) / uploadsTotal)*2)) // 50% to 90%
 					})
 
 					retries = WaitingRetries
@@ -142,7 +148,8 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			transactional() {
-				job.succeeded = allPapersSubmitted && !includesFailedSubmissions
+				job.succeeded = true
+				updateProgress(100)
 			}
 
 		}
