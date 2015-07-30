@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.services.{IncludeType, AssessmentMembershipInfo}
+import uk.ac.warwick.tabula.services.{ExcludeType, AssessmentMembershipInfo}
 
 trait AssessmentMembershipInfoToJsonConverter {
 
@@ -11,7 +11,7 @@ trait AssessmentMembershipInfoToJsonConverter {
 			"linkedSits" -> membershipInfo.sitsCount,
 			"included" -> membershipInfo.usedIncludeCount,
 			"excluded" -> membershipInfo.usedExcludeCount,
-			"users" -> membershipInfo.items.filter(i => i.itemType == IncludeType && !i.extraneous).map { item =>
+			"users" -> membershipInfo.items.filterNot(_.itemType == ExcludeType).map { item =>
 				Seq(
 					item.userId.map { "userId" -> _ },
 					item.universityId.map { "universityId" -> _ }
