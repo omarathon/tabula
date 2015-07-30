@@ -83,9 +83,9 @@ case class TurnitinLtiResponse(
 }
 	 *
 	 */
-	def submissionInfo():SubmissionReults = {
+	def submissionInfo():SubmissionResults = {
 
-		val results = new SubmissionReults()
+		val results = new SubmissionResults()
 
 			JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
@@ -125,7 +125,7 @@ case class TurnitinLtiResponse(
 
 }
 
-case class SubmissionReults(var similarity:Option[Double] = None, var student_overlap: Option[Double] = None, var web_overlap: Option[Double] = None, var publication_overlap: Option[Double] = None)
+case class SubmissionResults(var similarity:Option[Double] = None, var student_overlap: Option[Double] = None, var web_overlap: Option[Double] = None, var publication_overlap: Option[Double] = None)
 
 object TurnitinLtiResponse extends Logging {
 

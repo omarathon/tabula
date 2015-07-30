@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.xml.sax.SAXParseException
 import scala.Option
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
-import uk.ac.warwick.tabula.jobs.FailedJobException
 import org.apache.commons.io.FilenameUtils._
 import scala.Some
 
@@ -120,7 +119,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (!location.isDefined) throw new FailedJobException(s"Failed. Could not submit the assignment")
+						if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
 								// listen to callback for actual response
@@ -169,7 +168,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 							if (response.success) {
 								val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 								if (originalityReport.isDefined) {
-									// TODO delete existing similarity values???
 									originalityReport.get.turnitinId = response.turnitinSubmissionId
 									originalityReport.get.reportReceived = false
 								} else {
