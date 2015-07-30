@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 
 object TurnitinLtiViewReportCommand {
 	def apply(user: CurrentUser) =
@@ -30,13 +31,13 @@ class TurnitinLtiViewReportCommandInternal(val user: CurrentUser) extends Comman
 	self: TurnitinLtiViewReportCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
-		turnitinLtiService.getOriginalityReportUrl(turnitinSubmissionId, user)
+		turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
 	}
 
 }
 
 trait TurnitinLtiViewReportCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	def permissionsCheck(p: PermissionsChecking) {
+	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ManageEmergencyMessage)
 	}
 }
@@ -45,13 +46,15 @@ trait TurnitinLtiViewReportValidation extends SelfValidating {
 	self: TurnitinLtiViewReportCommandState =>
 
 	override def validate(errors: Errors) {
-		if (turnitinSubmissionId.isEmptyOrWhitespace) {
-			errors.rejectValue("turnitinSubmissionId", "turnitin.submission.empty")
+		if (attachment.originalityReport == null) {
+			errors.rejectValue("fileAttachment", "fileattachment.originalityReport.empty")
+		} else if (attachment.originalityReport.turnitinId.isEmptyOrWhitespace) {
+			errors.rejectValue("fileAttachment", "fileattachment.originalityReport.invalid")
 		}
 	}
 }
 
 trait TurnitinLtiViewReportCommandState {
-//	var assignment: Assignment = _
-	var turnitinSubmissionId: String = _
+	var assignment: Assignment = _
+	var attachment: FileAttachment = _
 }

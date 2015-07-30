@@ -6,8 +6,12 @@
 
 		<@f.errors cssClass="error form-errors" />
 
-		<@form.labelled_row "turnitinSubmissionId" "Turnitin Submission ID">
-			<@f.input path="turnitinSubmissionId" cssClass="text" />
+		<@form.labelled_row "assignment" "Assignment">
+			<@f.input path="assignment" cssClass="text" />
+		</@form.labelled_row>
+
+		<@form.labelled_row "attachment" "Attachment">
+			<@f.input path="attachment" cssClass="text" value=""/>
 		</@form.labelled_row>
 
 	<div class="submit-buttons">
