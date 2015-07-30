@@ -135,3 +135,26 @@ class LtiConformanceTesterController extends BaseSysadminController {
 				"response" -> response)
 		}
 }
+
+@Controller
+@RequestMapping(value = Array("/sysadmin/turnitinlti/viewreport"))
+class TurnitinLtiViewReportController extends BaseSysadminController {
+
+	validatesSelf[SelfValidating]
+
+	@ModelAttribute("turnitinLtiViewReportCommand")
+	def turnitinLtiViewReportCommand(user: CurrentUser) = TurnitinLtiViewReportCommand(user)
+
+	@annotation.RequestMapping(method=Array(GET, HEAD))
+	def form() = Mav("sysadmin/turnitinlti/view-report-form")
+
+	@annotation.RequestMapping(method=Array(POST))
+	def add(@Valid @ModelAttribute("turnitinLtiViewReportCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+		if (errors.hasErrors){
+			form()
+		} else {
+			val response: TurnitinLtiResponse = cmd.apply()
+			Mav("sysadmin/turnitinlti/view-report",
+				"response" -> response)
+		}
+}

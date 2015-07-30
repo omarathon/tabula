@@ -199,6 +199,26 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
+	def getOriginalityReportUrl(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
+		s"${apiReportLaunch}/${turnitinSubmissionId}", Map(
+			"roles" -> "Instructor",
+			"context_id" -> "TestModule-po206",
+			"context_title" -> "PO206 - Politics in the United Kingdom"
+		) ++ userParams(user.email, user.firstName, user.lastName)) {
+		request =>
+		// expect a 302
+			request >:+ {
+				(headers, request) =>
+					val location = headers("location").headOption
+					if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
+					request >- {
+						(html) => {
+							TurnitinLtiResponse.redirect(location.get)
+						}
+					}
+			}
+	}
+
 	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
 		s"${apiListEndpoints}/${turnitinAssignmentId}", Map()) {
 		request =>
@@ -211,6 +231,21 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 					}
 			}
 	}
+
+	// this one does work!!!
+//	def getOriginalityReportUrl(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = {
+//
+//		val response = doRequest(
+//			s"${apiReportLaunch}/${turnitinSubmissionId}", Map(
+//				"roles" -> "Instructor",
+//				"context_id" -> "TestModule-po206",
+//				"context_title" -> "PO206 - Politics in the United Kingdom"
+//			) ++ userParams(user.email, user.firstName, user.lastName))
+//		response
+//	}
+
+
+
 
 	def ltiConformanceTest(endpoint: String, secret: String, user: CurrentUser) = {
 				doRequestForLtiTesting(
@@ -289,6 +324,33 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 		}
 	}
+
+//	def doRequest(endpoint: String, params: Map[String, String]): TurnitinLtiResponse = {
+//
+//		val req =	(url(endpoint) <:< Map()).POST << getSignedParams(params, endpoint, None)
+//
+//		val request: Handler[TurnitinLtiResponse] =
+//			req >:+ { (headers, req) =>
+//				val location = headers("location").headOption
+//				if (location.isDefined) req >- { (text) => TurnitinLtiResponse.redirect(location.get) }
+//				else req >- { (html) => TurnitinLtiResponse.fromHtml(html.nonEmpty, html) }
+//			}
+//
+//		try {
+//			val response = http.x(request)
+//			logger.info("Response: " + response)
+//			response
+//		} catch {
+//			case e: IOException => {
+//				logger.error("Exception contacting Turnitin", e)
+//				new TurnitinLtiResponse(false, diagnostic = Some(e.getMessage))
+//			}
+//			case e: SAXParseException => {
+//				logger.error("Unexpected response from Turnitin", e)
+//				new TurnitinLtiResponse(false, diagnostic = Some (e.getMessage))
+//			}
+//		}
+//	}
 
 	def getSignedParams(params: Map[String, String], endpoint: String, optionalSecret: Option[String]): Map[String, String] = {
 		val hmacSigner = new OAuthHmacSigner()
