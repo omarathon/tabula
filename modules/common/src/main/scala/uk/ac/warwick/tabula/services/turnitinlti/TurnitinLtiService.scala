@@ -25,6 +25,8 @@ import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import org.apache.commons.io.FilenameUtils._
 import scala.Some
 import uk.ac.warwick.tabula.api.web.Routes
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.DateTime
 
 object TurnitinLtiService {
 
@@ -86,6 +88,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val userAgent = "Tabula, Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
+	val DateFormat = ISODateTimeFormat.dateTimeNoMillis()
+
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
 			setRedirectStrategy(new DefaultRedirectStrategy {
@@ -111,6 +115,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
+				"custom_duedate" -> DateFormat.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
 				// TODO should we also add job id here, to update the progress?
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
 //				,"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes"
