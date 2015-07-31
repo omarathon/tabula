@@ -24,6 +24,7 @@ import scala.Option
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import org.apache.commons.io.FilenameUtils._
 import scala.Some
+import uk.ac.warwick.tabula.api.web.Routes
 
 object TurnitinLtiService {
 
@@ -110,10 +111,10 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
-				// TODO callback url should be a property - routes?
-				// TODO should we also add job id here, to update the progress???
-				"ext_resource_tool_placement_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-submit-assignment-response/assignment/${assignment.id}",
-				"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes") ++ userParams(user.email, user.firstName, user.lastName)) {
+				// TODO should we also add job id here, to update the progress?
+				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
+//				,"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes"
+			) ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
 			// expect a 302
 				request >:+ {

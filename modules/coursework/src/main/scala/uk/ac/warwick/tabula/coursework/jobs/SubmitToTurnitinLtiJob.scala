@@ -4,6 +4,7 @@ package uk.ac.warwick.tabula.coursework.jobs
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
@@ -199,7 +200,7 @@ class SubmitToTurnitinLtiJob extends Job
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
 			def hasTurnitinId() = {
 				Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
-				assignment.turnitinId.nonEmpty
+				assignment.turnitinId.hasText
 			}
 
 			hasTurnitinId() match {
