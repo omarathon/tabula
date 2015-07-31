@@ -8,13 +8,14 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiSubmissionInfo, TurnitinLtiService, AutowiringTurnitinLtiServiceComponent}
+import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiResponse, TurnitinLtiSubmissionInfo, TurnitinLtiService, AutowiringTurnitinLtiServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
+import scala.annotation.tailrec
 
 object SubmitToTurnitinLtiJob {
 	val identifier = "turnitin-submit-lti"
@@ -60,16 +61,15 @@ class SubmitToTurnitinLtiJob extends Job
 			updateStatus("Submitting to Turnitin...")
 			updateProgress(10) // update the progress bar
 
-			// TODO try 5 times
-			submitAssignment()
+			submitAssignment(WaitingRequestsToTurnitinRetries)
 
-			awaitTurnitinId(assignment)
+			awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
 
 			updateStatus("Submitting papers to Turnitin")
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType(_)) }
 			val uploadsTotal = allAttachments.size
 
-			val failedUploads = submitPapers(assignment, uploadsTotal)
+			submitPapers(assignment, uploadsTotal)
 
 			updateStatus("Getting similarity reports from Turnitin")
 			val originalityReports = retrieveResults(uploadsTotal)
@@ -87,47 +87,34 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
-		def submitAssignment() {
-			val submitAssignmentResponse = turnitinLtiService.submitAssignment(assignment, job.user)
-
-			if (!submitAssignmentResponse.success) {
-				throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + Some(submitAssignmentResponse.statusMessage))
+		@tailrec
+		private def submitAssignment(retries: Int): TurnitinLtiResponse = {
+			def submit()  = {
+				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				turnitinLtiService.submitAssignment(assignment, job.user)
+			}
+			submit() match {
+				case response if response.success => response
+				case response if retries == 0 => throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + Some(response.statusMessage))
+				case _ => submitAssignment(retries -1)
 			}
 		}
 
-		private def submitPapers(assignment: Assignment, uploadsTotal: Int): (Map[String, String]) = {
+		private def submitPapers(assignment: Assignment, uploadsTotal: Int): Map[String, String] = {
 
-			var uploadsDone: Int = 0
 			var failedUploads = Map[String, String]()
+			var uploadsDone: Int = 0
 
 			assignment.submissions.asScala.foreach(submission => {
-
 				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
-					Thread.sleep(WaitingRequestsToTurnitinSleep)
-					val token: FileAttachmentToken = getToken(attachment)
-
-					val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
-
 					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
-
-						var successfulUpload = false
-						var retries = 0
-						while (!successfulUpload && retries <= WaitingRequestsToTurnitinRetries) {
-							Thread.sleep(WaitingRequestsToTurnitinSleep)
-							// not actually the email firstname and lastname of the student, as per existing implementation.
-							val submitResponse = turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
-								s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.userId, "Student")
-							debug("submitResponse: " + submitResponse)
-							if (!submitResponse.success) { // add to faileduploads if it's the last attempt
-								logger.warn(s"Failed to upload '${attachment.name}' - ${submitResponse.statusMessage}, attempt number: ${retries}")
-								retries += 1
-								if (retries == WaitingRequestsToTurnitinRetries) failedUploads += (attachment.name -> submitResponse.statusMessage.getOrElse("failed upload"))
-							} else {
-								successfulUpload = true
-								logger.info("turnitin submission id: " + submitResponse.turnitinSubmissionId)
+						val token: FileAttachmentToken = getToken(attachment)
+						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
+						val submitPaper = submitSinglePaper(attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries, failedUploads)
+							if (!submitPaper.success) {
+								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
 							}
-						}
 					}
 					uploadsDone += 1
 				}
@@ -136,6 +123,23 @@ class SubmitToTurnitinLtiJob extends Job
 
 			if (failedUploads.nonEmpty) logger.error("Not all papers were submitted to Turnitin successfully.")
 			failedUploads
+		}
+
+		@tailrec
+		private def submitSinglePaper(attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment,
+														retries: Int, failedUploads: Map[String, String]): TurnitinLtiResponse = {
+
+			def submit() = {
+				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
+					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.userId, "Student")
+			}
+
+			submit() match {
+				case response if response.success => response
+				case response if retries == 0 => response // (  failedUploads += (("yeah","haha" )))// += (attachment.name -> "haha" )) //response.statusMessage.getOrElse("failed upload")))
+				case _ => submitSinglePaper(attachmentAccessUrl, submission, attachment, retries-1, failedUploads)
+			}
 		}
 
 		def retrieveResults(uploadsTotal: Int): (Seq[OriginalityReport]) = {
@@ -190,18 +194,23 @@ class SubmitToTurnitinLtiJob extends Job
 			pushNotification(job, notification)
 		}
 
-		private def awaitTurnitinId(assignment: Assignment) {
+		@tailrec
+		private def awaitTurnitinId(assignment: Assignment, retries: Int): String = {
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
-			var retries = 0
-			while (assignment.turnitinId.isEmpty && retries <= WaitingRequestsFromTurnitinCallbacksRetries) {
+			def hasTurnitinId() = {
 				Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
-				retries += 1
-				if (retries == WaitingRequestsFromTurnitinCallbacksRetries) {
+				assignment.turnitinId.nonEmpty
+			}
+
+			hasTurnitinId() match {
+				case true => assignment.turnitinId
+				case false if retries == 0 => {
 					if (sendNotifications) {
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
 				}
+				case _ => awaitTurnitinId(assignment, retries - 1)
 			}
 		}
 	}
