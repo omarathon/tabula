@@ -69,7 +69,7 @@ class SubmitToTurnitinLtiJob extends Job
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType(_)) }
 			val uploadsTotal = allAttachments.size
 
-			submitPapers(assignment, uploadsTotal)
+			val failedUploads = submitPapers(assignment, uploadsTotal)
 
 			updateStatus("Getting similarity reports from Turnitin")
 			val originalityReports = retrieveResults(uploadsTotal)
@@ -111,7 +111,7 @@ class SubmitToTurnitinLtiJob extends Job
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
 						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
-						val submitPaper = submitSinglePaper(attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries, failedUploads)
+						val submitPaper = submitSinglePaper(attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
 							if (!submitPaper.success) {
 								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
 							}
@@ -127,7 +127,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 		@tailrec
 		private def submitSinglePaper(attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment,
-														retries: Int, failedUploads: Map[String, String]): TurnitinLtiResponse = {
+														retries: Int): TurnitinLtiResponse = {
 
 			def submit() = {
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
@@ -137,8 +137,8 @@ class SubmitToTurnitinLtiJob extends Job
 
 			submit() match {
 				case response if response.success => response
-				case response if retries == 0 => response // (  failedUploads += (("yeah","haha" )))// += (attachment.name -> "haha" )) //response.statusMessage.getOrElse("failed upload")))
-				case _ => submitSinglePaper(attachmentAccessUrl, submission, attachment, retries-1, failedUploads)
+				case response if retries == 0 => response
+				case _ => submitSinglePaper(attachmentAccessUrl, submission, attachment, retries-1)
 			}
 		}
 
