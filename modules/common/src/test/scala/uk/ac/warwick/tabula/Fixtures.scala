@@ -351,14 +351,15 @@ object Fixtures extends Mockito {
 		scheme: AttendanceMonitoringScheme,
 		name: String = "name",
 		startWeek: Int = 0,
-		endWeek: Int = 0
+		endWeek: Int = 0,
+		academicYear: AcademicYear = AcademicYear(2014)
 	) = {
 		val point = new AttendanceMonitoringPoint
 		point.scheme = scheme
 		point.name = name
 		point.startWeek = startWeek
 		point.endWeek = endWeek
-		point.startDate = AcademicYear(2014).dateInTermOne.toLocalDate
+		point.startDate = academicYear.dateInTermOne.toLocalDate
 		point.endDate = point.startDate.plusWeeks(endWeek - startWeek).plusDays(6)
 		point
 	}
