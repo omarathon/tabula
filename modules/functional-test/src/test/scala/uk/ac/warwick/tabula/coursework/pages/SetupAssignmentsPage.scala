@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 
 
 class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDriver) extends WebBrowser with Matchers with Eventually with IntegrationPatience {
-	val thisYear = FunctionalTestAcademicYear.current
+	val thisYear = FunctionalTestAcademicYear.currentSITS
 	val url = s"${FunctionalTestProperties.SiteRoot}/coursework/admin/department/$departmentCode/setup-assignments?academicYear=${thisYear}"
 
 	def shouldBeCurrentPage() {

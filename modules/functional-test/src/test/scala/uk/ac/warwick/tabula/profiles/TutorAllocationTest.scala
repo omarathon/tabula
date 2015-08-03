@@ -88,7 +88,6 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 		checkbox(cssSelector(".entities tbody tr td.check input")).select()
 
 		And("I choose to distribute to a single entity")
-		singleSel(cssSelector("[name=distributeAction]")).value = "DistributeToSelected"
 		eventually{
 			find(cssSelector("button[name=action][value=Distribute]")).get.isEnabled should be {true}
 		}
