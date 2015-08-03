@@ -18,7 +18,7 @@ class ScalaRestrictionTest extends TestBase {
 			Seq(modules, Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		)
 
-		mrRestriction.get.toString should be ("ScalaRestriction[underlying=(moduleRegistration.module in (Module[advanced foraging], Module[fungal forays]) and moduleRegistration.year in (14/15)),aliases=Map()]")
+		mrRestriction.get.toString should be ("ScalaRestriction[underlying=(moduleRegistration.module in (Module[advanced foraging], Module[fungal forays]) and moduleRegistration.year in (15/16)),aliases=Map()]")
 	}
 
 	@Test def validateNoModuleRestriction: Unit = {

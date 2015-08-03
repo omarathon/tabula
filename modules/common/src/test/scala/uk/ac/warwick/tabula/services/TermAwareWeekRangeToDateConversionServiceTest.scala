@@ -20,7 +20,7 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 
 	val autumnTerm = mock[Term]
 	autumnTerm.getTermType returns TermType.autumn
-	autumnTerm.getStartDate returns new DateMidnight(2014, DateTimeConstants.NOVEMBER, 1).toDateTime
+	autumnTerm.getStartDate returns new DateMidnight(2015, DateTimeConstants.NOVEMBER, 1).toDateTime
 
 	val mockTf = smartMock[TermService]
 	val converter = new TermAwareWeekToDateConverterComponent with TermServiceComponent {
