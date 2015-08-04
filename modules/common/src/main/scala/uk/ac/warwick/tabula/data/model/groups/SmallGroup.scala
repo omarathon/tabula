@@ -137,9 +137,10 @@ class SmallGroup
     }
   }
 
-  def duplicateTo(groupSet: SmallGroupSet, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroup = {
+  def duplicateTo(groupSet: SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroup = {
     val newGroup = new SmallGroup()
-    if (copyEvents) newGroup.events = events.map(_.duplicateTo(newGroup))
+		if (!transient) newGroup.id = id
+    if (copyEvents) newGroup.events = events.map(_.duplicateTo(newGroup, transient = transient))
     newGroup.groupSet = groupSet
     newGroup.name = name
 		newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup

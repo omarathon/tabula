@@ -130,12 +130,13 @@ class DepartmentSmallGroupSet
 		"name" -> name,
 		"department" -> department)
 
-	def duplicateTo(department: Department, year: AcademicYear = academicYear, copyMembership: Boolean = true): DepartmentSmallGroupSet = {
+	def duplicateTo(transient: Boolean, department: Department = department, academicYear: AcademicYear = academicYear, copyMembership: Boolean = true): DepartmentSmallGroupSet = {
 		val newSet = new DepartmentSmallGroupSet()
-		newSet.academicYear = year
+		if (!transient) newSet.id = id
+		newSet.academicYear = academicYear
 		newSet.archived = archived
 		newSet.memberQuery = memberQuery
-		newSet.groups = groups.asScala.map(_.duplicateTo(newSet, copyMembership = copyMembership)).asJava
+		newSet.groups = groups.asScala.map(_.duplicateTo(newSet, transient = transient, copyMembership = copyMembership)).asJava
 		if (copyMembership) newSet._membersGroup = _membersGroup.duplicate()
 		newSet.department = department
 		newSet.name = name

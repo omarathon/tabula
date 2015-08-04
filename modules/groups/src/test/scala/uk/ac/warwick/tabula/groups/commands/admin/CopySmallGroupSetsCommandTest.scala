@@ -48,7 +48,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 	@Test def apply(): Unit = new CommandFixture {
 		val copy = new SmallGroupSet()
 		val source = new SmallGroupSet() {
-			override def duplicateTo(module: Module, assessmentGroups: JavaImports.JList[AssessmentGroup], year: AcademicYear, copyGroups: Boolean, copyEvents: Boolean, copyMembership: Boolean): SmallGroupSet =
+			override def duplicateTo(transient: Boolean, module: Module, assessmentGroups: JavaImports.JList[AssessmentGroup], academicYear: AcademicYear, copyGroups: Boolean, copyEvents: Boolean, copyMembership: Boolean): SmallGroupSet =
 				copy
 		}
 

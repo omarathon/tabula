@@ -87,7 +87,7 @@ class SmallGroupTest extends TestBase with Mockito {
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
     val event:SmallGroupEvent = new SmallGroupEvent{
-      override def duplicateTo(g: SmallGroup) = clonedEvent
+      override def duplicateTo(g: SmallGroup, transient: Boolean) = clonedEvent
     }
 
     val sourceSet = new SmallGroupSet
@@ -112,7 +112,7 @@ class SmallGroupTest extends TestBase with Mockito {
     targetSet.defaultMaxGroupSize = 10
     targetSet.defaultMaxGroupSizeEnabled = true
 
-    val target = source.duplicateTo(targetSet )
+    val target = source.duplicateTo(targetSet, transient = true)
 
     // id is not copied, otherwise it wouldn't be transient
     target.id should be(null) // Don't duplicate IDs

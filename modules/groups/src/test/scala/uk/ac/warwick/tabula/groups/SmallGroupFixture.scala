@@ -118,7 +118,7 @@ class SmallGroupSetBuilder(){
   val template = new SmallGroupSet
 
   def build = {
-    val set = template.duplicateTo(template.module)
+    val set = template.duplicateTo(transient = false)
     if (template.module != null){
       template.module.groupSets.add(set)
     }
@@ -162,10 +162,10 @@ class SmallGroupSetBuilder(){
 class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
 
   template.id = UUID.randomUUID.toString
-  def build:SmallGroup = template.duplicateTo(template.groupSet)
+  def build:SmallGroup = template.duplicateTo(template.groupSet, transient = false)
 
   def copyOf(group:SmallGroup):SmallGroupBuilder = {
-    new SmallGroupBuilder(group.duplicateTo(group.groupSet))
+    new SmallGroupBuilder(group.duplicateTo(group.groupSet, transient = false))
   }
 
   def withEvents(events: Seq[SmallGroupEvent]): SmallGroupBuilder = {
@@ -200,7 +200,7 @@ class SmallGroupEventBuilder(){
 
   val template = new SmallGroupEvent
 
-  def build = template.duplicateTo(template.group)
+  def build = template.duplicateTo(template.group, transient = false)
 
   def withTutors(members:UserGroup):SmallGroupEventBuilder = {
     template.tutors = members

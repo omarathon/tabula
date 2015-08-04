@@ -38,8 +38,8 @@ abstract class CopySmallGroupSetsCommandInternal(val department: Department, val
 			val set = state.smallGroupSet
 
 			val copy = set.duplicateTo(
-				module = set.module,
-				year = targetAcademicYear,
+				transient = true,
+				academicYear = targetAcademicYear,
 				copyGroups = state.copyGroups || set.linked,
 				copyEvents = state.copyGroups && state.copyEvents,
 				copyMembership = false
@@ -62,7 +62,7 @@ abstract class CopySmallGroupSetsCommandInternal(val department: Department, val
 					smallGroupService.getDepartmentSmallGroupSets(department, targetAcademicYear)
 						.find(_.name == link.name)
 						.getOrElse {
-							link.duplicateTo(department, year = targetAcademicYear, copyMembership = false)
+							link.duplicateTo(transient = true, academicYear = targetAcademicYear, copyMembership = false)
 						}
 
 				smallGroupService.saveOrUpdate(copiedDepartmentSmallGroupSet)

@@ -29,7 +29,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     source.weekRanges = Seq(WeekRange(1))
 
     val targetGroup = new SmallGroup()
-    val clone = source.duplicateTo(targetGroup)
+    val clone = source.duplicateTo(targetGroup, transient = true)
 
     clone.id should be(null) // Don't duplicate IDs
     clone.day should be (source.day)

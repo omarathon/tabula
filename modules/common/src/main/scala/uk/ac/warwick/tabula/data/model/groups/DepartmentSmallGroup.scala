@@ -81,8 +81,9 @@ class DepartmentSmallGroup
 		"name" -> name,
 		"set" -> groupSet)
 
-	def duplicateTo(groupSet: DepartmentSmallGroupSet, copyMembership: Boolean = true): DepartmentSmallGroup = {
+	def duplicateTo(groupSet: DepartmentSmallGroupSet, transient: Boolean, copyMembership: Boolean = true): DepartmentSmallGroup = {
 		val newGroup = new DepartmentSmallGroup()
+		if (!transient) newGroup.id = id
 		newGroup.groupSet = groupSet
 		newGroup.name = name
 		if (copyMembership) newGroup._studentsGroup = _studentsGroup.duplicate()

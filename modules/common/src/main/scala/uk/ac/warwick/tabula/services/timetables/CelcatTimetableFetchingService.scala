@@ -59,17 +59,25 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
 	class AutowiringCelcatConfiguration extends CelcatConfiguration {
-		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-				staffListInBSV = true
-			),
-			"es" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-				staffListInBSV = false
-			)
-		)
+		private val chemistryConfiguration =
+			if (Wire.property("${environment.production}").toBoolean)
+				Some("ch" -> CelcatDepartmentConfiguration(
+					baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+					staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+					staffListInBSV = true
+				))
+			else None
+
+		private val engineeringConfiguration = Some("es" -> CelcatDepartmentConfiguration(
+			baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+			staffListInBSV = false
+		))
+
+		val departmentConfiguration =	Seq(
+			chemistryConfiguration,
+			engineeringConfiguration
+		).flatten.toMap
+
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
 		val cacheEnabled = true
