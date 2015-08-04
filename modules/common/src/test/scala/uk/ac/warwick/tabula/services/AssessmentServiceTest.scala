@@ -925,11 +925,13 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val resultForDifferentYear = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
 		resultForDifferentYear.size should be (0)
 
+		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
 		// now register the student on a module:
-		val mr = Fixtures.moduleRegistration(scd, module1, new java.math.BigDecimal("12.0"), new AcademicYear(2015), "A")
+		val mr = Fixtures.moduleRegistration(scd, module1, new java.math.BigDecimal("12.0"), currentAcademicYear, "A")
 
 		// this shouldn't affect anything if the assignment is not for that module:
-		scyd.academicYear = new AcademicYear(2015)
+		scyd.academicYear = currentAcademicYear
 		val resultWhenSomeMR = assignmentService.filterAssignmentsByCourseAndYear(Seq(assignment1, assignment2), scyd)
 		resultWhenSomeMR.size should be (2)
 

@@ -28,7 +28,7 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 		val service = new AbstractMonitoringPointProfileTermAssignmentService with ServiceTestSupport
 
 		val academicYear2012 = AcademicYear(2012)
-		val academicYear2015 = AcademicYear(2015)
+		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val student = Fixtures.student("1234")
 
@@ -46,7 +46,7 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 		assignment.addSubmission(submission)
 
 		mockProfileService.getMemberByUniversityId(student.universityId) returns Option(student)
-		mockTermService.getAcademicWeekForAcademicYear(submission.assignment.closeDate, academicYear2015) returns 3
+		mockTermService.getAcademicWeekForAcademicYear(submission.assignment.closeDate, currentAcademicYear) returns 3
 
 		val module1 = Fixtures.module("aa101")
 		module1.id = "aa101"
@@ -57,24 +57,24 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 
 		mockAssignmentService.getAssignmentById(assignment.id) returns Option(assignment)
 
-		val week5StartDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1)
-		val week5EndDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8)
-		val week15StartDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.DECEMBER, 1)
-		val week15EndDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.DECEMBER, 8)
+		val week5StartDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val week5EndDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 8)
+		val week15StartDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 1)
+		val week15EndDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 8)
 
 		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
 		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
 		val weeksForYear = Seq(week5pair, week15pair)
-		mockTermService.getAcademicWeeksForYear(new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+		mockTermService.getAcademicWeeksForYear(new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
 
 	}
 
 	trait Year2PointSetFixture extends StudentFixture {
 		val year2PointSet = new MonitoringPointSet
-		year2PointSet.academicYear = academicYear2015
+		year2PointSet.academicYear = currentAcademicYear
 		year2PointSet.year = 2
 
-		service.monitoringPointService.getPointSetForStudent(student, academicYear2015) returns Option(year2PointSet)
+		service.monitoringPointService.getPointSetForStudent(student, currentAcademicYear) returns Option(year2PointSet)
 
 	}
 
@@ -131,7 +131,7 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 	@Test
 	def noPointSet() { new ValidYear2PointFixture {
 
-		service.monitoringPointService.getPointSetForStudent(student, academicYear2015) returns None
+		service.monitoringPointService.getPointSetForStudent(student, currentAcademicYear) returns None
 		service.getCheckpointsForSubmission(submission).size should be (0)
 
 	}}
