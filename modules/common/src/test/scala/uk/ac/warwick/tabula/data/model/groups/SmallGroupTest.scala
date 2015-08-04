@@ -114,8 +114,8 @@ class SmallGroupTest extends TestBase with Mockito {
 
     val target = source.duplicateTo(targetSet )
 
-    // id is not copeied, otherwise it wouldn't be transient
-    target.id should be(source.id)
+    // id is not copied, otherwise it wouldn't be transient
+    target.id should be(null) // Don't duplicate IDs
     target.name should be(source.name)
     target.groupSet should not be source.groupSet
     target.groupSet should be(targetSet)

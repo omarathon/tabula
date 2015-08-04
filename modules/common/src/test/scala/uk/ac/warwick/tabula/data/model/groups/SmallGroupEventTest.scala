@@ -31,7 +31,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     val targetGroup = new SmallGroup()
     val clone = source.duplicateTo(targetGroup)
 
-    clone.id should be(source.id)
+    clone.id should be(null) // Don't duplicate IDs
     clone.day should be (source.day)
     clone.endTime should be(source.endTime)
     clone.group should be(targetGroup)

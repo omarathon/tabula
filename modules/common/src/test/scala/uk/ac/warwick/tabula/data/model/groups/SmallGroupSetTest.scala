@@ -53,7 +53,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 
     val clone = source.duplicateTo(cloneModule)
 
-    clone.id should be(source.id)
+    clone.id should be(null) // Don't duplicate IDs
     clone.academicYear should be (source.academicYear)
     clone.allocationMethod should be (source.allocationMethod)
     clone.allowSelfGroupSwitching.booleanValue should be {false}
