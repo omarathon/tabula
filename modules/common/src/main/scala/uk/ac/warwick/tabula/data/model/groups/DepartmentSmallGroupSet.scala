@@ -130,14 +130,13 @@ class DepartmentSmallGroupSet
 		"name" -> name,
 		"department" -> department)
 
-	def duplicateTo(department: Department, assessmentGroups: JList[AssessmentGroup] = JArrayList()): DepartmentSmallGroupSet = {
+	def duplicateTo(department: Department, year: AcademicYear = academicYear, copyMembership: Boolean = true): DepartmentSmallGroupSet = {
 		val newSet = new DepartmentSmallGroupSet()
-		newSet.id = id
-		newSet.academicYear = academicYear
+		newSet.academicYear = year
 		newSet.archived = archived
 		newSet.memberQuery = memberQuery
-		newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
-		newSet._membersGroup = _membersGroup.duplicate()
+		newSet.groups = groups.asScala.map(_.duplicateTo(newSet, copyMembership = copyMembership)).asJava
+		if (copyMembership) newSet._membersGroup = _membersGroup.duplicate()
 		newSet.department = department
 		newSet.name = name
 		newSet

@@ -25,7 +25,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 
     val cloneGroup = new SmallGroup
     val group:SmallGroup  = new SmallGroup(){
-      override def duplicateTo(groupSet:SmallGroupSet) = cloneGroup
+      override def duplicateTo(groupSet:SmallGroupSet, copyEvents: Boolean = true, copyMembership: Boolean = true) = cloneGroup
     }
     source.id = "testId"
     source.academicYear = AcademicYear(2001)

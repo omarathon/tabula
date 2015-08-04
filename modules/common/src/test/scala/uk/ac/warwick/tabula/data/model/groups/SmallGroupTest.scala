@@ -87,7 +87,7 @@ class SmallGroupTest extends TestBase with Mockito {
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
     val event:SmallGroupEvent = new SmallGroupEvent{
-      override def duplicateTo(g:SmallGroup) = clonedEvent
+      override def duplicateTo(g: SmallGroup) = clonedEvent
     }
 
     val sourceSet = new SmallGroupSet

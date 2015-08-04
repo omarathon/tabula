@@ -276,19 +276,18 @@ class SmallGroupSet
 		"name" -> name,
 		"module" -> module)
 
-  def duplicateTo( module:Module, assessmentGroups:JList[AssessmentGroup] = JArrayList()):SmallGroupSet = {
+  def duplicateTo(module:Module, assessmentGroups: JList[AssessmentGroup] = JArrayList(), year: AcademicYear = academicYear, copyGroups: Boolean = true, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroupSet = {
     val newSet = new SmallGroupSet()
-    newSet.id = id
-    newSet.academicYear = academicYear
+    newSet.academicYear = year
     newSet.allocationMethod = allocationMethod
     newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
     newSet.collectAttendance = collectAttendance
     newSet.format = format
-    newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
-    newSet._membersGroup = _membersGroup.duplicate()
-    newSet.membershipService= membershipService
+    if (copyGroups) newSet.groups = groups.asScala.map(_.duplicateTo(newSet, copyEvents = copyEvents, copyMembership = copyMembership)).asJava
+    if (copyMembership) newSet._membersGroup = _membersGroup.duplicate()
+    newSet.membershipService = membershipService
     newSet.module = module
     newSet.name = name
     newSet.permissionsService = permissionsService
