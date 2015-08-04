@@ -51,8 +51,10 @@ class SubmitToTurnitinJob extends Job
 
 	var sendNotifications = true
 
-	def run(implicit job: JobInstance) {
-		new Runner(job).run()
+	def run(implicit job: JobInstance) = {
+		transactional() {
+			new Runner(job).run()
+		}
 	}
 
 	// Job is a shared service, so rather than pass objects between methods,
