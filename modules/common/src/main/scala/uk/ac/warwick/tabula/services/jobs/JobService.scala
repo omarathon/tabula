@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.jobs.{FailedJobException, Job, JobPrototype, ObsoleteJobException}
+import uk.ac.warwick.userlookup.User
 
 trait JobServiceComponent {
 	def jobService: JobService
@@ -70,20 +71,26 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		jobs.find(identifier == _.identifier)
 
 	def add(user: Option[CurrentUser], prototype: JobPrototype): JobInstance = {
+		add(user.map(_.realId), user.map(_.apparentId), prototype)
+	}
+
+	def add(user: User, prototype: JobPrototype): JobInstance = {
+		add(Some(user.getUserId), Some(user.getUserId), prototype)
+	}
+
+	private def add(realUserId: Option[String], apparentUserId: Option[String], prototype: JobPrototype) = {
 		if (findJob(prototype.identifier).isEmpty) {
 			throw new IllegalArgumentException("No Job found to handle '%s'" format prototype.identifier)
 		}
-		
+
 		val instance = JobInstanceImpl.fromPrototype(prototype)
-		user foreach { u =>
-			instance.realUser = u.realId
-			instance.apparentUser = u.apparentId
-		}
-		
+		realUserId.foreach(id => instance.realUser = id)
+		apparentUserId.foreach(id => instance.apparentUser = id)
+
 		// Do we already have an outstanding job with these details? Outstanding; just return that.
 		jobDao.findOutstandingInstance(instance) getOrElse {
 			jobDao.saveJob(instance)
-			
+
 			instance
 		}
 	}

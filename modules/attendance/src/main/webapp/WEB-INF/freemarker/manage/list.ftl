@@ -1,6 +1,25 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#escape x as x?html>
 
+<div class="btn-toolbar dept-toolbar">
+	<div class="btn-group dept-settings">
+		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-calendar"></i>
+			${academicYear.label}
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu pull-right">
+			<li><a href="<@routes.manageDepartment department />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
+			<#if features.attendanceMonitoringAcademicYear2014>
+				<li><a href="<@routes.manageHomeForYear department '2014' />"><#if academicYear.startYear == 2014><strong>14/15</strong><#else>14/15</#if></a></li>
+			</#if>
+			<#if features.attendanceMonitoringAcademicYear2015>
+				<li><a href="<@routes.manageHomeForYear department '2015' />"><#if academicYear.startYear == 2015><strong>15/16</strong><#else>15/16</#if></a></li>
+			</#if>
+		</ul>
+	</div>
+</div>
+
 <#macro deptheaderroutemacro dept>
 	<@routes.manageHomeForYear dept command.academicYear.startYear?c />
 </#macro>

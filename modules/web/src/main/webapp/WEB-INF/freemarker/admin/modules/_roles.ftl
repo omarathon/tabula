@@ -10,7 +10,7 @@
 
 			<h3 class="permissionTitle">Module Managers</h3> <a class="use-popover colour-h3" id="popover-modulemanager" data-html="true"
 			   data-original-title="Module Managers"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "modulemanager-table" scope "ModuleManagerRoleDefinition" "module managers" />
 		</div>
@@ -22,7 +22,7 @@
 
 			<h3 class="permissionTitle">Module Assistants</h3> <a class="use-popover colour-h3" id="popover-moduleassistant" data-html="true"
 			   data-original-title="Module Assistants"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "moduleassistant-table" scope "ModuleAssistantRoleDefinition" "module assistants" />
 		</div>
@@ -36,7 +36,7 @@
 
 			<h3 class="permissionTitle">Module Auditors</h3> <a class="use-popover colour-h3" id="popover-moduleauditor" data-html="true"
 			   data-original-title="Module Auditors"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
 			<@pm.roleTable perms_url "moduleauditor-table" scope "ModuleAuditorRoleDefinition" "module auditors" />
 		</div>

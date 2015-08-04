@@ -43,6 +43,14 @@ object FiltersStudents {
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 			"mostSignificantCourse.route" -> AliasAndJoinType("route"),
 			"route.teachingInfo" -> AliasAndJoinType("teachingInfo", JoinType.LEFT_OUTER_JOIN)
+		),
+		"allRelationships" -> Seq(
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.allRelationships" -> AliasAndJoinType("allRelationships")
+		),
+		"statusOnRoute" -> Seq(
+			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
+			"mostSignificantCourse.statusOnRoute" -> AliasAndJoinType("statusOnRoute")
 		)
 	).toMap
 

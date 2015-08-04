@@ -7,7 +7,7 @@
 
 <div id="route-permissions-page">
 	<div class="pull-right">
-		<div><a class="btn" href="<@routes.admin.permissions route />"><i class="icon-lock"></i> Advanced</a></div>
+		<div><a class="btn" href="<@routes.admin.permissions route />"><i class="icon-lock fa fa-lock"></i> Advanced</a></div>
 		<br>
 		<div class="pull-right"><a href="<@routes.admin.rolesDepartment route.department />"><strong>About roles</strong></a></div>
 	</div>

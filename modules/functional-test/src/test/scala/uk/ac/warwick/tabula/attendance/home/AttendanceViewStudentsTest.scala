@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.attendance.home
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import org.openqa.selenium.By
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
-import org.scalatest.selenium.WebBrowser.go
 
 class AttendanceViewStudentsTest extends AttendanceFixture with GivenWhenThen{
 

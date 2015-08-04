@@ -8,7 +8,7 @@
 	<#if command.monitoringPoints?size == 0>
 		<div class="striped-section">
 			<div class="pull-right">
-				<a href="<@url page="/sysadmin/pointsettemplates/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+				<a href="<@url page="/sysadmin/pointsettemplates/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus fa fa-plus"></i> Create new point</a>
 			</div>
 			<h2 class="section-title">Monitoring points</h2>
 			<div class="striped-section-contents">
@@ -20,7 +20,7 @@
 	<#else>
 		<div class="striped-section">
 			<div class="pull-right">
-            	<a href="<@url page="/sysadmin/pointsettemplates/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+            	<a href="<@url page="/sysadmin/pointsettemplates/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus fa fa-plus"></i> Create new point</a>
             </div>
 			<h2 class="section-title">Monitoring points</h2>
         	<div class="striped-section-contents">
@@ -31,7 +31,7 @@
 						<div class="span12">
 							<div class="pull-right">
 								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/pointsettemplates/add/points/edit/${pointCount}?form=true"/>">Update</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/pointsettemplates/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove"></i></a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/pointsettemplates/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove fa fa-times"></i></a>
 							</div>
 							${point.name} (week ${point.validFromWeek} - ${point.requiredFromWeek})
 

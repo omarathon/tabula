@@ -1,7 +1,15 @@
-<#macro reportLoader reportUrl>
+<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#macro reportLoader reportUrl commandName="command">
 	<script>
 		window.ReportBuilder = {};
 	</script>
+	<@f.form method="get" action="${reportUrl}" commandName="${commandName}" cssClass="form-inline double-submit-protection">
+		<label>Start date</label>
+		<@f.input id="startDate" path="startDate" cssClass="date-picker input-small" />
+		<label>End date</label>
+		<@f.input id="endDate" path="endDate" cssClass="date-picker input-small" />
+		<button type="submit" class="btn">Submit</button>
+	</@f.form>
 	<div class="loading">
 		<p><em>Building report&hellip;</em></p>
 	
@@ -14,11 +22,11 @@
 		<p>Report complete</p>
 		<div class="btn-toolbar">
 			<a href="#" class="show-data btn" data-loading-text="Building table, please wait&hellip;">
-				<i class="icon-eye-open"></i> Show
+				<i class="icon-eye-open fa fa-eye"></i> Show
 			</a>
 			<div class="download btn-group ">
 				<a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
-					<i class="icon-download"></i> Download&hellip;
+					<i class="icon-download fa fa-arrow-circle-o-down"></i> Download&hellip;
 					<span class="caret"></span>
 				</a>
 				<#nested />
@@ -46,6 +54,10 @@
 		jQuery(function($){
 			$.ajax('${reportUrl}', {
 				type: 'POST',
+				data: {
+					'startDate' : $('#startDate').val(),
+					'endDate' : $('#endDate').val()
+				},
 				success: function(data) {
 					clearTimeout(progressStepperTimeout);
 					var $mainContent = $('#main-content');
@@ -230,9 +242,9 @@
 					)
 				});
 				container.append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-warning-sign icon-fixed-width late').prop('title', 'Unrecorded'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-warning-sign fa fa-exclamation-triangle icon-fixed-width fa fa-fw late').prop('title', 'Unrecorded'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-remove icon-fixed-width unauthorised').prop('title', 'Missed monitoring points'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-remove fa fa-times icon-fixed-width fa fa-fw unauthorised').prop('title', 'Missed monitoring points'))
 				);
 				return container;
 			};
@@ -254,20 +266,20 @@
 				var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0;
 				$.each(window.ReportBuilder.reportData.points, function(i, point){
 					if (attendance[point.id] == undefined) {
-						container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width')));
+						container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw')));
 					} else {
 						if (attendance[point.id] === 'attended') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-ok attended')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-ok fa fa-check attended')));
 						} else if (attendance[point.id] === 'authorised') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-remove-circle authorised')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-remove-circle fa fa-times-circle-o authorised')));
 						} else if (attendance[point.id] === 'unauthorised') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-remove unauthorised')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-remove fa fa-times unauthorised')));
 							missedCount++;
 						} else if (point.late == 'true') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-warning-sign late')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-warning-sign fa fa-exclamation-triangle late')));
 							unrecordedCount++;
 						} else {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-minus unrecorded')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-minus fa fa-minus unrecorded')));
 						}
 					}
 				});
@@ -315,9 +327,9 @@
 					)
 				});
 				container.append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-warning-sign icon-fixed-width late').prop('title', 'Unrecorded'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-warning-sign fa fa-exclamation-triangle icon-fixed-width fa fa-fw late').prop('title', 'Unrecorded'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-remove icon-fixed-width unauthorised').prop('title', 'Missed events'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('icon-remove fa fa-times icon-fixed-width fa fa-fw unauthorised').prop('title', 'Missed events'))
 				);
 				return container;
 			};
@@ -339,20 +351,20 @@
 				var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0;
 				$.each(window.ReportBuilder.reportData.events, function(i, event){
 					if (attendance[event.id] == undefined) {
-						container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width')));
+						container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw')));
 					} else {
 						if (attendance[event.id] === 'attended') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-ok attended')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-ok fa fa-ok attended')));
 						} else if (attendance[event.id] === 'authorised') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-remove-circle authorised')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-remove-circle fa fa-times-circle-o authorised')));
 						} else if (attendance[event.id] === 'unauthorised') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-remove unauthorised')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-remove fa fa-times unauthorised')));
 							missedCount++;
 						} else if (event.late == 'true') {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-warning-sign late')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-warning-sign fa fa-exclamation-triangle late')));
 							unrecordedCount++;
 						} else {
-							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width icon-minus unrecorded')));
+							container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw icon-minus fa fa-minus unrecorded')));
 						}
 					}
 				});
@@ -429,7 +441,7 @@
 			var counts = window.ReportBuilder.reportData.counts[student.universityId];
 			$.each(window.ReportBuilder.reportData.modules, function(i, module){
 				if (counts[module.id] == undefined) {
-					container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width')));
+					container.append($('<td/>').append($('<i/>').addClass('icon-fixed-width fa fa-fw')));
 				} else {
 					container.append(
 						$('<td/>').addClass('unrecorded').append(

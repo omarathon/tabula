@@ -2,15 +2,17 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.validation.Valid
 
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.api.web.helpers._
 import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats, WorkflowStageHealth}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{DeleteAssignmentCommand, EditAssignmentCommand, SubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilters, CourseworkFilter}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
@@ -24,21 +26,24 @@ import scala.util.Try
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}"))
 class AssignmentController extends ApiController
 	with GetAssignmentApi
+	with EditAssignmentApi
+	with DeleteAssignmentApi
 	with AssignmentToJsonConverter
+	with AssessmentMembershipInfoToJsonConverter
 	with AssignmentStudentToJsonConverter
-	with ReplacingAssignmentStudentMessageResolver
+	with ReplacingAssignmentStudentMessageResolver {
+	validatesSelf[SelfValidating]
+}
 
 trait GetAssignmentApi {
 	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-	validatesSelf[SelfValidating]
-
 	@ModelAttribute("getCommand")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
+	def get(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
@@ -54,7 +59,8 @@ trait GetAssignmentApi {
 		}
 	}
 
-	override def binding[A](binder: WebDataBinder, cmd: A) {
+	@InitBinder(Array("getCommand"))
+	def getBinding(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
 			override def fromString(name: String) = CourseworkFilters.of(name)
 			override def toString(filter: CourseworkFilter) = filter.getName
@@ -63,123 +69,72 @@ trait GetAssignmentApi {
 
 }
 
-trait AssignmentStudentToJsonConverter {
-	self: AssignmentStudentMessageResolver with ApiController =>
+trait EditAssignmentApi {
+	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter with GetAssignmentApi =>
 
-	def jsonAssignmentStudentObject(student: SubmissionAndFeedbackCommand.Student): Map[String, Any] = {
-		val userDetails = Map("universityId" -> student.user.getWarwickId)
+	@ModelAttribute("editCommand")
+	def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand =
+		new EditAssignmentCommand(module, assignment, user)
 
-		val workflowDetails = Map(
-			"state" -> Map(
-				"progress" -> Map(
-					"percentage" -> student.progress.percentage,
-					"health" -> WorkflowStageHealth.fromCssClass(student.progress.t).toString,
-					"stateCode" -> student.progress.messageCode,
-					"state" -> getMessageForStudent(student, student.progress.messageCode)
-				),
-				"nextStage" -> student.nextStage.map { stage => Map(
-					"name" -> stage.toString,
-					"action" -> getMessageForStudent(student, stage.actionCode)
-				)}.orNull,
-				"stages" -> student.stages.values.map { progress => Map(
-					"stage" -> progress.stage.toString,
-					"action" -> getMessageForStudent(student, progress.stage.actionCode),
-					"stateCode" -> progress.messageCode,
-					"state" -> getMessageForStudent(student, progress.messageCode),
-					"health" -> progress.health.toString,
-					"completed" -> progress.completed,
-					"preconditionsMet" -> progress.preconditionsMet
-				)}
-			)
-		)
+	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+	def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentCommand, errors: Errors) = {
+		request.copyTo(command, errors)
 
-		val submissionDetails = Map(
-			"submission" -> student.coursework.enhancedSubmission.map { enhancedSubmission =>
-				val submission = enhancedSubmission.submission
+		globalValidator.validate(command, errors)
+		command.validate(errors)
+		command.afterBind()
 
-				Map(
-					"id" -> submission.id,
-					"downloaded" -> enhancedSubmission.downloaded,
-					"late" -> submission.isLate,
-					"authorisedLate" -> submission.isAuthorisedLate,
-					"attachments" -> submission.allAttachments.map { attachment => Map(
-						"filename" -> attachment.name,
-						"id" -> attachment.id,
-						"originalityReport" -> Option(attachment.originalityReport).map { report => Map(
-							"similarity" -> JInteger(report.similarity),
-							"overlap" -> JInteger(report.overlap),
-							"webOverlap" -> JInteger(report.webOverlap),
-							"studentOverlap" -> JInteger(report.studentOverlap),
-							"publicationOverlap" -> JInteger(report.publicationOverlap),
-							"reportUrl" -> (toplevelUrl + Routes.coursework.admin.assignment.turnitin.report(submission, attachment))
-						)}.orNull
-					)},
-					"submittedDate" -> Option(submission.submittedDate).map(DateFormats.IsoDateTime.print).orNull,
-					"wordCount" -> submission.assignment.wordCountField.flatMap(submission.getValue).map { formValue => JInteger(Try(formValue.value.toInt).toOption) }.orNull,
-					"suspectPlagiarised" -> submission.suspectPlagiarised
-				)
-			}.orNull
-		)
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val assignment = command.apply()
 
-		val extensionDetails = Map(
-			"extension" -> student.coursework.enhancedExtension.map { enhancedExtension =>
-				val extension = enhancedExtension.extension
-
-				Map(
-					"id" -> extension.id,
-					"state" -> extension.state.description,
-					"expired" -> (extension.state == ExtensionState.Approved && !enhancedExtension.within),
-					"expiryDate" -> extension.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
-					"requestedExpiryDate" -> extension.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull
-				)
-			}.orNull
-		)
-
-		val feedbackDetails = Map(
-			"feedback" -> student.coursework.enhancedFeedback.map { enhancedFeedback =>
-				val feedback = enhancedFeedback.feedback
-
-				Map(
-					"id" -> feedback.id,
-					"downloaded" -> enhancedFeedback.downloaded,
-					"onlineViewed" -> enhancedFeedback.onlineViewed
-				)
-			}.orNull
-		)
-
-		val courseworkDetails = submissionDetails ++ extensionDetails ++ feedbackDetails
-
-		userDetails ++ workflowDetails ++ courseworkDetails
+			// Return the GET representation
+			get(getCommand(assignment.module, assignment), errors, assignment)
+		}
 	}
 }
 
-trait AssignmentStudentMessageResolver {
-	def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String
+class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCommand] {
+
+	// set defaults to null
+	openEnded = null
+	collectMarks = null
+	collectSubmissions = null
+	restrictSubmissions = null
+	allowLateSubmissions = null
+	allowResubmission = null
+	displayPlagiarismNotice = null
+	allowExtensions = null
+	summative = null
+	dissertation = null
+	includeInFeedbackReportWithoutSubmissions = null
+	automaticallyReleaseToMarkers = null
+	automaticallySubmitToTurnitin = null
+
 }
 
-trait ReplacingAssignmentStudentMessageResolver extends AssignmentStudentMessageResolver {
+trait DeleteAssignmentApi {
 	self: ApiController =>
 
-	def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String = {
-		val studentId = student.user.getWarwickId
+	@ModelAttribute("deleteCommand")
+	def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
+		val command = new DeleteAssignmentCommand(module, assignment)
+		command.confirm = true
+		command
+	}
 
-		val firstMarker =
-			student.coursework.enhancedSubmission
-				.flatMap { s => Option(s.submission) }
-				.flatMap { _.firstMarker }
-				.map { _.getWarwickId }
-				.getOrElse("first marker")
+	@RequestMapping(method = Array(DELETE), produces = Array("application/json"))
+	def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteAssignmentCommand, errors: Errors) = {
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			command.apply()
 
-		val secondMarker =
-			student.coursework.enhancedSubmission
-				.flatMap { s => Option(s.submission) }
-				.flatMap { _.secondMarker }
-				.map { _.getWarwickId }
-				.getOrElse("second marker")
-
-		getMessage(key, args)
-			.replace("[STUDENT]", studentId)
-			.replace("[FIRST_MARKER]", firstMarker)
-			.replace("[SECOND_MARKER]", secondMarker)
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok"
+			)))
+		}
 	}
 }

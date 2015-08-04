@@ -9,6 +9,9 @@
 			<#if features.attendanceMonitoringAcademicYear2014>
 				<h3><a href="<@routes.profileForYear student '2014' />">14/15</a></h3>
 			</#if>
+			<#if features.attendanceMonitoringAcademicYear2015>
+				<h3><a href="<@routes.profileForYear student '2015' />">15/16</a></h3>
+			</#if>
 		</li>
 	</ul>
 <#else>

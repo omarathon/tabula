@@ -29,12 +29,12 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	}
 
 	trait FeatureEnabledFixture extends Fixture {
-		cmd.features.attendanceMonitoringAcademicYear2014 = true
+		cmd.features.attendanceMonitoringVersion2 = true
 	}
 
 	@Test
 	def featureTest() { new Fixture {
-		cmd.features.attendanceMonitoringAcademicYear2014 = false
+		cmd.features.attendanceMonitoringVersion2 = false
 		cmd.applyInternal()
 		verify(cmd.attendanceMonitoringService, times(0)).listSchemesForMembershipUpdate
 		deserializeFilterCalled should be {false}

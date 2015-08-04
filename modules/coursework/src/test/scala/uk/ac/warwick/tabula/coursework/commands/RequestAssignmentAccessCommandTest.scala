@@ -5,7 +5,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.assignments.RequestAssignmentAccessCommand
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationService, MaintenanceModeService, UserLookupService}
+import uk.ac.warwick.tabula.services._
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -40,6 +40,7 @@ object RequestAssignmentAccessCommandTest {
 		bean(){mock[UserLookupService]}
 		bean(){mock[Configuration]}
 		bean(){mock[Features]}
+		bean(){mock[TriggerService]}
 	}
 }
 

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
@@ -24,6 +24,7 @@ object AllAttendanceReportCommand {
 			with ComposableCommand[AllAttendanceReportCommandResult]
 			with ReportPermissions
 			with AllAttendanceReportCommandState
+			with ReportCommandRequest
 			with ReadOnly with Unaudited
 }
 
@@ -34,15 +35,17 @@ class AllAttendanceReportCommandInternal(
 )
 	extends CommandInternal[AllAttendanceReportCommandResult] with TaskBenchmarking {
 
-	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
+	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
 	override def applyInternal() = {
 		val allStudentData = benchmarkTask("allStudentData") {
 			profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(department, Seq(), academicYear)
 		}
 		val studentPointMap = benchmarkTask("studentPointMap") {
-			allStudentData.map(studentData => studentData -> attendanceMonitoringService.listStudentsPoints(studentData, department, academicYear))
-				.filter(_._2.nonEmpty)
+			allStudentData.map(studentData => studentData ->
+				attendanceMonitoringService.listStudentsPoints(studentData, department, academicYear)
+					.filter(p => (p.startDate.isEqual(startDate) || p.startDate.isAfter(startDate)) && (p.startDate.isEqual(endDate) || p.startDate.isBefore(endDate)))
+			).filter(_._2.nonEmpty)
 		}.toMap
 		val checkpointMap = benchmarkTask("checkpointMap") {
 			attendanceMonitoringService.getAllCheckpointData(studentPointMap.values.flatten.toSeq.distinct).groupBy(_.point)

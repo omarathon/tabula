@@ -86,7 +86,7 @@ class UploadedFileTest extends TestBase with Mockito{
 		uploadedFile.attached.size should be (2)
 		}
 		uploadedFile.attached.get(0).name should be (multiSystemFile.getOriginalFilename)
-		uploadedFile.attached.get(1).name should not be (multiAppleDouble.getOriginalFilename)
+		uploadedFile.attached.get(1).name should not be multiAppleDouble.getOriginalFilename
 	}
 
 

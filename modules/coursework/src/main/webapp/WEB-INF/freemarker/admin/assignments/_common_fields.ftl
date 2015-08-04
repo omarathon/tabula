@@ -43,16 +43,24 @@ so that they can be passed around between requests.
 		</div>
 		<#if disabled && command.markingWorkflow??>
 			<label class="checkbox">
-				<@f.checkbox path="removeWorkflow" id="removeWorkflow"/>
+				<input type="checkbox" id="removeWorkflowPreview" />
 				Remove marking workflow
 			</label>
 			<div class="alert alert-warning" id="removeWorkflowMessage" style="margin-bottom: 0; <#if !command.removeWorkflow>display: none;</#if>">
-				This cannot be undone. If you remove the marking workflow you will lose access to any existing marker feedback
-				 and will not be able to add another workflow or re-apply the current workflow.
+				This cannot be undone. If you remove the marking workflow:
+				<ul>
+					<li>you will lose access to any existing marker feedback</li>
+					<li>you will not be able to add another workflow</li>
+					<li>you will not be able to re-apply the current workflow</li>
+				</ul>
+				<label class="checkbox">
+					<@f.checkbox path="removeWorkflow" id="removeWorkflow"/>
+					Confirm that you wish to remove the marking workflow
+				</label>
 			</div>
 			<script>
 				jQuery(function($){
-					$('#removeWorkflow').on('change', function(){
+					$('#removeWorkflowPreview').on('change', function(){
 						if ($(this).is(':checked')) {
 							$('#removeWorkflowMessage').show();
 						} else {
@@ -63,6 +71,21 @@ so that they can be passed around between requests.
 			</script>
 		</#if>
 	</@form.labelled_row>
+
+	<#assign automaticallyReleaseToMarkersHelp>
+		When using a marking workflow, automatically release all submissions to markers when the assignment closes.
+		Any late submissions or submissions within an extension will be released when they are received.<br />
+		<strong>Note:</strong> Students who do not submit will not be released automatically and will need to be released manually.
+	</#assign>
+	<@form.row>
+		<@form.field>
+			<label class="checkbox">
+				<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
+				Automatically release to markers
+				<@fmt.help_popover id="automaticallyReleaseToMarkersHelp" content="${automaticallyReleaseToMarkersHelp}" html=true />
+			</label>
+		</@form.field>
+	</@form.row>
 </#if>
 
 <#if features.collectMarks>

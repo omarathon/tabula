@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick</groupId>
 		<artifactId>warwick</artifactId>
-		<version>4</version>
+		<version>5</version>
 	</parent>
 
 	<groupId>uk.ac.warwick.tabula</groupId>
@@ -271,7 +271,7 @@
 							<failOnNoGitDirectory>true</failOnNoGitDirectory>
 							<gitDescribe>
 								<skip>false</skip>
-								<always>false</always>
+								<always>true</always>
 								<abbrev>7</abbrev>
 								<dirty>-devel</dirty>
 								<forceLongFormat>false</forceLongFormat>
@@ -436,7 +436,7 @@
 		<repository>
 			<id>nexus</id>
 			<name>Internal Nexus Repository</name>
-			<url>http://mvn.elab.warwick.ac.uk/nexus/content/groups/public</url>
+			<url>https://mvn.elab.warwick.ac.uk/nexus/content/groups/public</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -1058,6 +1058,13 @@
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>courses</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>groups</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

@@ -263,6 +263,7 @@
 								<include>profiles-render.js</include>
 								<include>profiles-admin.js</include>
 								<include>fullcalendar.js</include>
+								<include>allocate-associations.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

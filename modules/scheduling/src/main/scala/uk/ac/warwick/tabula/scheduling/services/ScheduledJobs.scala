@@ -34,6 +34,7 @@ class ScheduledJobs {
 	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
 	var termService = Wire[TermService]
+	var triggerService = Wire[TriggerService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 
@@ -94,6 +95,14 @@ class ScheduledJobs {
 			}
 		}
 
+	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
+	def processTriggers(): Unit =
+		if (features.schedulingTriggers) maintenanceGuard {
+			exceptionResolver.reportExceptions {
+				triggerService.processTriggers()
+			}
+		}
+
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def processEmailQueue(): Unit =
 		if (features.schedulingNotificationEmails) maintenanceGuard {
@@ -137,7 +146,8 @@ class ScheduledJobs {
 				UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
 			}
 			exceptionResolver.reportExceptions {
-				if (AcademicYear.isSITSInFlux(DateTime.now, termService)) {
+				val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+				if (thisAcademicYear.isSITSInFlux(DateTime.now)) {
 					UnlinkAttendanceMonitoringSchemeCommand().apply()
 				}
 			}

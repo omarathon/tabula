@@ -4,6 +4,6 @@
  -->
 <#macro profile_link user_id>
 	<a class="ajax-modal profile-link" href="/profiles/view/subset/${user_id}" data-target="#profile-modal">
-		<i class="icon-info-sign"></i>
+		<i class="icon-info-sign fa fa-info-circle"></i>
 	</a>
 </#macro>

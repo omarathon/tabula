@@ -3,9 +3,27 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#import "../attendance_variables.ftl" as attendance_variables />
 
-<div class="pull-right">
+<div class="btn-toolbar dept-toolbar">
+	<div class="btn-group dept-settings">
+		<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+			<i class="icon-calendar"></i>
+			${academicYear.label}
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu pull-right">
+			<li><a href="<@routes.agentView relationshipType />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
+			<#if features.attendanceMonitoringAcademicYear2014>
+				<li><a href="<@routes.agentHomeForYear relationshipType '2014' />"><#if academicYear.startYear == 2014><strong>14/15</strong><#else>14/15</#if></a></li>
+			</#if>
+			<#if features.attendanceMonitoringAcademicYear2015>
+				<li><a href="<@routes.agentHomeForYear relationshipType '2015' />"><#if academicYear.startYear == 2015><strong>15/16</strong><#else>15/16</#if></a></li>
+			</#if>
+		</ul>
+	</div>
+
 	<@fmt.bulk_email_students students=studentAttendance.students />
 </div>
+
 <h1 class="with-settings">My ${relationshipType.studentRole}s</h1>
 
 <#if studentAttendance.totalResults == 0>

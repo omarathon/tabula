@@ -84,7 +84,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 		if (features.attendanceMonitoringMeetingPointType) {
 			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
-			if (features.attendanceMonitoringAcademicYear2014)
+			if (features.attendanceMonitoringVersion2)
 				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 

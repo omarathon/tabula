@@ -36,7 +36,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-		if (doFind && linkToSits && !AcademicYear.isSITSInFlux(DateTime.now, termService)) {
+		if (doFind && linkToSits && !scheme.academicYear.isSITSInFlux(DateTime.now)) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
 			scheme.members.excludedUserIds = excludedStudentIds.asScala

@@ -34,6 +34,21 @@ so that they can be passed around between requests.
 						</label>
 					</@form.field>
 				</@form.row>
+
+				<#assign automaticallySubmitToTurnitinHelp>
+					Automatically submit all submissions to Turnitin when the assignment closes.
+					Any late submissions or submissions within an extension will be submitted when they are received.
+				</#assign>
+				<@form.row>
+					<@form.field>
+						<label class="checkbox">
+							<@f.checkbox path="automaticallySubmitToTurnitin" id="automaticallySubmitToTurnitin" />
+							Automatically submit to Turnitin
+							<@fmt.help_popover id="automaticallySubmitToTurnitinHelp" content="${automaticallySubmitToTurnitinHelp}" html=true />
+						</label>
+					</@form.field>
+				</@form.row>
+
 				<#if features.assignmentMembership>
 					<@form.row>
 						<@form.label></@form.label>

@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.{ResultSet, Types}
 
+import uk.ac.warwick.tabula.services.ProfileService
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
@@ -15,9 +17,10 @@ import javax.sql.DataSource
 import uk.ac.warwick.membership.{MembershipInterfaceException, MembershipInterfaceWrapper}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, Member, MemberUserType}
+import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, MemberUserType}
 import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, Student}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.scheduling.commands.imports._
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory}
@@ -34,7 +37,7 @@ trait ProfileImporter {
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
-	def membershipInfoForIndividual(member: Member): Option[MembershipInformation]
+	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -107,13 +110,13 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			MembershipInformation(member, photoFor(member.universityId))
 		}
 
-	def membershipInfoForIndividual(member: Member): Option[MembershipInformation] = {
-		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> member.universityId)).asScala.toList match {
+	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
+		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId)).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
 					MembershipInformation(
 						mem.head,
-						photoFor(member.universityId)
+						photoFor(universityId)
 					)
 				)
 		}
@@ -122,6 +125,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 @Profile(Array("sandbox")) @Service
 class SandboxProfileImporter extends ProfileImporter {
+	var profileService = Wire[ProfileService]
+
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
 		memberInfo map { info => info.member.userType match {
 			case Student => studentMemberDetails(importCommandFactory)(info)
@@ -293,28 +298,30 @@ class SandboxProfileImporter extends ProfileImporter {
 			}
 		}.toSeq
 
-	def membershipInfoForIndividual(member: Member): Option[MembershipInformation] =
-		Some(MembershipInformation(
-			MembershipMember(
-				member.universityId,
-				member.homeDepartment.code,
-				member.email,
-				member.groupName,
-				member.title,
-				member.firstName,
-				member.lastName,
-				member.jobTitle,
-				member.dateOfBirth,
-				member.userId,
-				DateTime.now.minusYears(1).toLocalDate,
-				DateTime.now.plusYears(2).toLocalDate,
-				member.lastUpdatedDate,
-				member.phoneNumber,
-				member.gender,
-				member.homeEmail,
-				member.userType
-			), () => None
-		))
+	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] =
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId).map { member =>
+			MembershipInformation(
+				MembershipMember(
+					member.universityId,
+					member.homeDepartment.code,
+					member.email,
+					member.groupName,
+					member.title,
+					member.firstName,
+					member.lastName,
+					member.jobTitle,
+					member.dateOfBirth,
+					member.userId,
+					DateTime.now.minusYears(1).toLocalDate,
+					DateTime.now.plusYears(2).toLocalDate,
+					member.lastUpdatedDate,
+					member.phoneNumber,
+					member.gender,
+					member.homeEmail,
+					member.userType
+				), () => None
+			)
+		}
 
 }
 
@@ -458,7 +465,7 @@ object ProfileImporter extends Logging {
 	}
 
 	val GetMembershipByUniversityIdInformation = """
-		select * from cmsowner.uow_current_members where university_number in (:universityIds) and its_usercode is not null
+		select * from cmsowner.uow_current_members where university_number in (:universityIds)
 		"""
 
 	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
@@ -468,7 +475,7 @@ object ProfileImporter extends Logging {
 	}
 
 	val GetMembershipByDepartmentInformation = """
-		select * from cmsowner.uow_current_members where id_dept = :departmentCode and its_usercode is not null
+		select * from cmsowner.uow_current_members where id_dept = :departmentCode
 		"""
 
 	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
@@ -479,23 +486,23 @@ object ProfileImporter extends Logging {
 
 	private def membershipToMember(rs: ResultSet) =
 		MembershipMember(
-			universityId 			= rs.getString("university_number"),
-			departmentCode			= rs.getString("id_dept"),
-			email					= rs.getString("email"),
-			targetGroup				= rs.getString("desc_target_group"),
-			title					= rs.getString("pref_title"),
-			preferredForenames		= rs.getString("pref_forenames"),
-			preferredSurname		= rs.getString("pref_surname"),
-			position				= rs.getString("desc_position"),
-			dateOfBirth				= sqlDateToLocalDate(rs.getDate("dob")),
-			usercode				= rs.getString("its_usercode"),
-			startDate				= sqlDateToLocalDate(rs.getDate("dt_start")),
-			endDate					= sqlDateToLocalDate(rs.getDate("dt_end")),
-			modified				= sqlDateToDateTime(rs.getDate("dt_modified")),
-			phoneNumber				= rs.getString("tel_business"),
-			gender					= Gender.fromCode(rs.getString("gender")),
+			universityId 						= rs.getString("university_number"),
+			departmentCode					= rs.getString("id_dept"),
+			email										= rs.getString("email"),
+			targetGroup							= rs.getString("desc_target_group"),
+			title										= rs.getString("pref_title"),
+			preferredForenames			= rs.getString("pref_forenames"),
+			preferredSurname				= rs.getString("pref_surname"),
+			position								= rs.getString("desc_position"),
+			dateOfBirth							= sqlDateToLocalDate(rs.getDate("dob")),
+			usercode								= rs.getString("its_usercode").maybeText.getOrElse(s"u${rs.getString("university_number")}"),
+			startDate								= sqlDateToLocalDate(rs.getDate("dt_start")),
+			endDate									= sqlDateToLocalDate(rs.getDate("dt_end")),
+			modified								= sqlDateToDateTime(rs.getDate("dt_modified")),
+			phoneNumber							= rs.getString("tel_business"),
+			gender									= Gender.fromCode(rs.getString("gender")),
 			alternativeEmailAddress	= rs.getString("external_email"),
-			userType				= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
+			userType								= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
 		)
 
 	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =

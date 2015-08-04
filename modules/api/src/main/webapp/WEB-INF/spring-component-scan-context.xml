@@ -10,4 +10,6 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.jobs" />
 
+	<context:component-scan base-package="uk.ac.warwick.tabula.groups.services" />
+
 </beans>

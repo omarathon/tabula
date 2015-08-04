@@ -157,5 +157,10 @@
 			<artifactId>courses</artifactId>
 			<classifier>jar</classifier>
 		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>groups</artifactId>
+			<classifier>jar</classifier>
+		</dependency>
 	</dependencies>
 </project>

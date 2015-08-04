@@ -7,6 +7,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.triggers.{AssignmentClosedTrigger, Trigger}
 import uk.ac.warwick.tabula.helpers.{LazyLists, LazyMaps, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -32,6 +33,7 @@ object AddAssignmentsCommand {
 			with AddAssignmentsDescription
 			with AddAssignmentsPermissions
 			with AddAssignmentsCommandState
+			with AddAssignmentsCommandTriggers
 }
 
 /**
@@ -318,4 +320,13 @@ trait AddAssignmentsCommandState {
 
 	@BeanProperty
 	val defaultOpenEnded = false
+}
+
+trait AddAssignmentsCommandTriggers extends GeneratesTriggers[Seq[Assignment]] {
+
+	def generateTriggers(assignments: Seq[Assignment]): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
+		assignments.filter(assignment => assignment.closeDate != null && assignment.closeDate.isAfterNow).map(assignment =>
+			AssignmentClosedTrigger(assignment.closeDate, assignment)
+		)
+	}
 }

@@ -91,6 +91,18 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 		}
 	}
 
+	def displayIfEmpty(courseType: CourseType, department: Department): Boolean = {
+		courseType match {
+			case CourseType.UG =>
+				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedUG.booleanValue)
+			case CourseType.PGT =>
+				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGT.booleanValue)
+			case CourseType.PGR =>
+				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGR.booleanValue)
+			case _ => false
+		}
+	}
+
 	def isExpected(studentCourseDetails: StudentCourseDetails): Boolean = displayIfEmpty(studentCourseDetails)
 
 	def isDefaultExpected(courseType: CourseType): Boolean = courseType match {

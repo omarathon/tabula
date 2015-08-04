@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula
 import uk.ac.warwick.util.termdates.{TermFactoryImpl, Term, TermFactory}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term.TermType
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, DateTime}
 
 /**
  * Various bits of logic cherry-picked from TermFactory, VacationAwareTermFactory, WeekToDateConverter et al
@@ -70,4 +70,10 @@ case class FunctionalTestAcademicYear(startYear: Int) extends Ordered[Functional
 object FunctionalTestAcademicYear{
 	private lazy val termFactory = new TermFactoryImpl
 	def current = new AcademicDateHelper(termFactory).getAcademicYearContainingDate(DateTime.now)
+	def currentSITS =
+		if (DateTime.now.getMonthOfYear >= DateTimeConstants.AUGUST) {
+			FunctionalTestAcademicYear(DateTime.now.getYear)
+		} else {
+			FunctionalTestAcademicYear(DateTime.now.getYear - 1)
+		}
 }

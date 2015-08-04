@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.{Features, CurrentUser}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.{AcademicYear, Features, CurrentUser}
 import uk.ac.warwick.tabula.attendance.commands.HomeCommand
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.web.Routes
@@ -28,36 +28,48 @@ class HomeController extends AttendanceController {
 	def createCommand(user: CurrentUser) = HomeCommand(user)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation]) = {
+	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @RequestParam(value = "academicYear", required = false) academicYearOverride: AcademicYear) = {
 		val info = cmd.apply()
 
 		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}
 
-		if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
+		if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships)
 			Redirect(Routes.Profile.home)
-			else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships) {
+			else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
 					Redirect(getViewDepartmentUrl(info.viewPermissions.head))
-			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships) {
+			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
 					Redirect(getManageDepartmentUrl(info.managePermissions.head))
 			} else {
+				val academicYear = Option(academicYearOverride) match {
+					case Some(year) =>
+						year
+					case _ =>
+						if (features.attendanceMonitoringAcademicYear2015)
+							AcademicYear(2015)
+						else if (features.attendanceMonitoringAcademicYear2014)
+							AcademicYear(2014)
+						else
+							AcademicYear(2013)
+				}
 				Mav("home",
 					"hasProfile" -> info.hasProfile,
 					"relationshipTypesMap" -> info.relationshipTypesMap,
 					"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
 					"hasAnyRelationships" -> hasAnyRelationships,
 					"viewPermissions" -> info.viewPermissions,
-					"managePermissions" -> info.managePermissions
+					"managePermissions" -> info.managePermissions,
+					"academicYear" -> academicYear
 				)
 		}
 	}
 
 	def getViewDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringAcademicYear2014) Routes.View.department(department)
+		if (features.attendanceMonitoringVersion2) Routes.View.department(department)
 		else Routes.old.department.view(department)
 	}
 
 	def getManageDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringAcademicYear2014) Routes.Manage.department(department)
+		if (features.attendanceMonitoringVersion2) Routes.Manage.department(department)
 		else Routes.old.department.manage(department)
 	}
 

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoin
 import uk.ac.warwick.tabula.data.{AttendanceMonitoringDao, AttendanceMonitoringDaoComponent}
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent, UserGroupMembershipHelper, UserLookupComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
+import org.joda.time.DateTime
 
 class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
@@ -18,6 +19,9 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 	}
 
 	trait CheckpointFixture {
+
+		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+
 		val service = new AbstractAttendanceMonitoringService with ServiceTestSupport
 
 		val department = Fixtures.department("it")
@@ -29,13 +33,13 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = department
-		scheme.academicYear = AcademicYear(2014)
+		scheme.academicYear = currentAcademicYear
 		service.membersHelper.findBy(MemberOrUser(member1).asUser) returns Seq(scheme)
 		service.membersHelper.findBy(MemberOrUser(member2).asUser) returns Seq(scheme)
 
-		val point1 = Fixtures.attendanceMonitoringPoint(scheme, "point1", 2, 2)
-		val point2 = Fixtures.attendanceMonitoringPoint(scheme, "point2", 4, 4)
-		val point3 = Fixtures.attendanceMonitoringPoint(scheme, "point3", 4, 4)
+		val point1 = Fixtures.attendanceMonitoringPoint(scheme, "point1", 2, 2, currentAcademicYear)
+		val point2 = Fixtures.attendanceMonitoringPoint(scheme, "point2", 4, 4, currentAcademicYear)
+		val point3 = Fixtures.attendanceMonitoringPoint(scheme, "point3", 4, 4, currentAcademicYear)
 		scheme.points = JArrayList(point1, point2, point3)
 		val passedCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, member1, AttendanceState.fromCode("attended"))
 		val missedCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, member1, AttendanceState.fromCode("unauthorised"))
@@ -44,13 +48,13 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
 	@Test
 	def setAttendance() { new CheckpointFixture { withUser("cusfal") {
-		member1.mostSignificantCourse.beginDate = AcademicYear(2014).dateInTermOne.minusMonths(1).toLocalDate
+		member1.mostSignificantCourse.beginDate = currentAcademicYear.dateInTermOne.minusMonths(1).toLocalDate
 
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1, withFlush = true) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
-		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), AcademicYear(2014)) returns None
+		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), currentAcademicYear) returns None
 
 		val result = service.setAttendance(
 			member1,
@@ -66,18 +70,18 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 
 	@Test
 	def updateCheckpointTotal() { new CheckpointFixture { withUser("cusfal") {
-		member1.mostSignificantCourse.beginDate = AcademicYear(2014).dateInTermOne.minusMonths(1).toLocalDate
+		member1.mostSignificantCourse.beginDate = currentAcademicYear.dateInTermOne.minusMonths(1).toLocalDate
 
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
 		service.attendanceMonitoringDao.getCheckpoints(Seq(point1, point2, point3), member1, withFlush = true) returns
 			Map(point1 -> passedCheckpoint, point2 -> missedCheckpoint, point3 -> authorisedCheckpoint)
-		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), AcademicYear(2014)) returns None
+		service.attendanceMonitoringDao.getCheckpointTotal(member1, Option(department), currentAcademicYear) returns None
 
 		val result = service.updateCheckpointTotal(
 			member1,
 			department,
-			AcademicYear(2014)
+			currentAcademicYear
 		)
 		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdate(result)
 		result.attended should be (1)

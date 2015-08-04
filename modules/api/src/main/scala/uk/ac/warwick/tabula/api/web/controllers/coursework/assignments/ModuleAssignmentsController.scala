@@ -10,7 +10,8 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddAssignmentCommand
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
+import uk.ac.warwick.tabula.coursework.commands.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
@@ -28,6 +29,7 @@ class ModuleAssignmentsController extends ApiController
 	with ListAssignmentsForModuleApi
 	with CreateAssignmentApi
 	with AssignmentToJsonConverter
+	with AssessmentMembershipInfoToJsonConverter
 
 trait ListAssignmentsForModuleApi {
 	self: ApiController with AssignmentToJsonConverter =>
@@ -56,97 +58,7 @@ trait ListAssignmentsForModuleApi {
 	}
 }
 
-trait AssignmentToJsonConverter {
-	self: ApiController =>
 
-	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
-		val basicInfo = Map(
-			"id" -> assignment.id,
-			"archived" -> assignment.archived,
-			"academicYear" -> assignment.academicYear.toString,
-			"name" -> assignment.name,
-			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
-			"collectMarks" -> assignment.collectMarks,
-			"markingWorkflow" -> Option(assignment.markingWorkflow).map { mw => Map(
-				"id" -> mw.id,
-				"name" -> mw.name
-			)}.orNull,
-			"feedbackTemplate" -> Option(assignment.feedbackTemplate).map { ft => Map(
-				"id" -> ft.id,
-				"name" -> ft.name
-			)}.orNull,
-			"summative" -> assignment.summative,
-			"dissertation" -> assignment.dissertation
-		)
-
-		val submissionsInfo =
-			if (assignment.collectSubmissions) {
-				Map(
-					"collectSubmissions" -> true,
-					"displayPlagiarismNotice" -> assignment.displayPlagiarismNotice,
-					"restrictSubmissions" -> assignment.restrictSubmissions,
-					"allowLateSubmissions" -> assignment.allowLateSubmissions,
-					"allowResubmission" -> assignment.allowResubmission,
-					"allowExtensions" -> assignment.allowExtensions,
-					"fileAttachmentLimit" -> assignment.attachmentLimit,
-					"fileAttachmentTypes" -> assignment.fileExtensions,
-					"submissionFormText" -> assignment.commentField.map { _.value }.getOrElse(""),
-					"wordCountMin" -> assignment.wordCountField.map { _.min }.orNull,
-					"wordCountMax" -> assignment.wordCountField.map { _.max }.orNull,
-					"wordCountConventions" -> assignment.wordCountField.map { _.conventions }.getOrElse(""),
-					"submissions" -> assignment.submissions.size(),
-					"unapprovedExtensions" -> assignment.countUnapprovedExtensions
-				)
-			} else {
-				Map(
-					"collectSubmissions" -> false
-				)
-			}
-
-
-		val membershipInfo = assignment.membershipInfo
-		val studentMembershipInfo = Map(
-			"studentMembership" -> Map(
-				"total" -> membershipInfo.totalCount,
-				"linkedSits" -> membershipInfo.sitsCount,
-				"included" -> membershipInfo.usedIncludeCount,
-				"excluded" -> membershipInfo.usedExcludeCount
-			),
-			"sitsLinks" -> assignment.upstreamAssessmentGroups.map { uag => Map(
-				"moduleCode" -> uag.moduleCode,
-				"assessmentGroup" -> uag.assessmentGroup,
-				"occurrence" -> uag.occurrence,
-				"sequence" -> uag.sequence
-			)}
-		)
-
-		val datesInfo =
-			if (assignment.openEnded) {
-				Map(
-					"openEnded" -> true,
-					"opened" -> assignment.isOpened,
-					"closed" -> false,
-					"openDate" -> DateFormats.IsoDateTime.print(assignment.openDate)
-				)
-			} else {
-				Map(
-					"openEnded" -> false,
-					"opened" -> assignment.isOpened,
-					"closed" -> assignment.isClosed,
-					"openDate" -> DateFormats.IsoDateTime.print(assignment.openDate),
-					"closeDate" -> DateFormats.IsoDateTime.print(assignment.closeDate),
-					"feedbackDeadline" -> assignment.feedbackDeadline.map(DateFormats.IsoDate.print).orNull
-				)
-			}
-
-		val countsInfo = Map(
-			"feedback" -> assignment.countFullFeedback,
-			"unpublishedFeedback" -> assignment.countUnreleasedFeedback
-		)
-
-		basicInfo ++ submissionsInfo ++ studentMembershipInfo ++ datesInfo ++ countsInfo
-	}
-}
 
 trait CreateAssignmentApi {
 	self: ApiController =>
@@ -180,47 +92,61 @@ trait CreateAssignmentApi {
 	}
 }
 
-class CreateAssignmentRequest extends JsonApiRequest[AddAssignmentCommand]
+trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiRequest[A]
 	with BooleanAssignmentProperties {
 
-	@BeanProperty var name: String = _
-	@BeanProperty var openDate: DateTime = _
-	@BeanProperty var closeDate: DateTime = _
-	@BeanProperty var academicYear: AcademicYear = _
-	@BeanProperty var feedbackTemplate: FeedbackTemplate = _
-	@BeanProperty var markingWorkflow: MarkingWorkflow = _
-	@BeanProperty var includeUsers: JList[String] = JArrayList()
-	@BeanProperty var upstreamGroups: JList[UpstreamGroup] = JArrayList()
-	@BeanProperty var fileAttachmentLimit: JInteger = 1
-	@BeanProperty var fileAttachmentTypes: JList[String] = JArrayList()
-	@BeanProperty var minWordCount: JInteger = _
-	@BeanProperty var maxWordCount: JInteger = _
-	@BeanProperty var wordCountConventions: String = "Exclude any bibliography or appendices."
+	@BeanProperty var name: String = null
+	@BeanProperty var openDate: DateTime = null
+	@BeanProperty var closeDate: DateTime = null
+	@BeanProperty var academicYear: AcademicYear = null
+	@BeanProperty var feedbackTemplate: FeedbackTemplate = null
+	@BeanProperty var markingWorkflow: MarkingWorkflow = null
+	@BeanProperty var includeUsers: JList[String] = null
+	@BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
+	@BeanProperty var fileAttachmentLimit: JInteger = null
+	@BeanProperty var fileAttachmentTypes: JList[String] = null
+	@BeanProperty var minWordCount: JInteger = null
+	@BeanProperty var maxWordCount: JInteger = null
+	@BeanProperty var wordCountConventions: String = null
 
-	override def copyTo(state: AddAssignmentCommand, errors: Errors) {
-		state.name = name
-		state.openDate = openDate
-		state.closeDate = closeDate
-		state.academicYear = academicYear
-		state.feedbackTemplate = feedbackTemplate
-		state.markingWorkflow = markingWorkflow
-		state.massAddUsers = includeUsers.asScala.mkString("\n")
-		state.upstreamGroups = upstreamGroups
-		state.fileAttachmentLimit = fileAttachmentLimit
-		state.fileAttachmentTypes = fileAttachmentTypes
-		state.wordCountMin = minWordCount
-		state.wordCountMax = maxWordCount
-		state.wordCountConventions = wordCountConventions
-		state.openEnded = openEnded
-		state.collectMarks = collectMarks
-		state.collectSubmissions = collectSubmissions
-		state.restrictSubmissions = restrictSubmissions
-		state.allowLateSubmissions = allowLateSubmissions
-		state.allowResubmission = allowResubmission
-		state.displayPlagiarismNotice = displayPlagiarismNotice
-		state.allowExtensions = allowExtensions
-		state.summative = summative
-		state.dissertation = dissertation
-		state.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
+	override def copyTo(state: A, errors: Errors) {
+		Option(name).foreach { state.name = _ }
+		Option(openDate).foreach { state.openDate = _ }
+		Option(closeDate).foreach { state.closeDate = _ }
+		Option(academicYear).foreach { state.academicYear = _ }
+		Option(feedbackTemplate).foreach { state.feedbackTemplate = _ }
+		Option(markingWorkflow).foreach { state.markingWorkflow = _ }
+		Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
+		Option(upstreamGroups).foreach { state.upstreamGroups = _ }
+		Option(fileAttachmentLimit).foreach { state.fileAttachmentLimit = _ }
+		Option(fileAttachmentTypes).foreach { state.fileAttachmentTypes = _ }
+		Option(minWordCount).foreach { state.wordCountMin = _ }
+		Option(maxWordCount).foreach { state.wordCountMax = _ }
+		Option(wordCountConventions).foreach { state.wordCountConventions = _ }
+		Option(openEnded).foreach { state.openEnded = _ }
+		Option(collectMarks).foreach { state.collectMarks = _ }
+		Option(collectSubmissions).foreach { state.collectSubmissions = _ }
+		Option(restrictSubmissions).foreach { state.restrictSubmissions = _ }
+		Option(allowLateSubmissions).foreach { state.allowLateSubmissions = _ }
+		Option(allowResubmission).foreach { state.allowResubmission = _ }
+		Option(displayPlagiarismNotice).foreach { state.displayPlagiarismNotice = _ }
+		Option(allowExtensions).foreach { state.allowExtensions = _ }
+		Option(summative).foreach { state.summative = _ }
+		Option(dissertation).foreach { state.dissertation = _ }
+		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }
+		Option(automaticallyReleaseToMarkers).foreach { state.automaticallyReleaseToMarkers = _ }
+		Option(automaticallySubmitToTurnitin).foreach { state.automaticallySubmitToTurnitin = _ }
 	}
+
+}
+
+class CreateAssignmentRequest extends AssignmentPropertiesRequest[AddAssignmentCommand] {
+
+	// Default values
+	includeUsers = JArrayList()
+	upstreamGroups = JArrayList()
+	fileAttachmentLimit = 1
+	fileAttachmentTypes = JArrayList()
+	wordCountConventions = "Exclude any bibliography or appendices."
+
 }
