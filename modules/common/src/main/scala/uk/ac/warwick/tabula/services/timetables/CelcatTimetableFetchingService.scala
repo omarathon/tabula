@@ -15,7 +15,7 @@ import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AcademicYear}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
@@ -58,18 +58,29 @@ case class CelcatDepartmentConfiguration(
 trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponent {
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
-	class AutowiringCelcatConfiguration extends CelcatConfiguration {
-		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-				staffListInBSV = true
-			),
-			"es" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-				staffListInBSV = false
-			)
-		)
+	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
+		private val chemistryConfiguration =
+			Option(features).filter(_.celcatTimetablesChemistry).map { _ =>
+				"ch" -> CelcatDepartmentConfiguration(
+					baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+					staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+					staffListInBSV = true
+				)
+			}
+
+		private val engineeringConfiguration =
+			Option(features).filter(_.celcatTimetablesEngineering).map { _ =>
+				"es" -> CelcatDepartmentConfiguration(
+					baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+					staffListInBSV = false
+				)
+			}
+
+		val departmentConfiguration =	Seq(
+			chemistryConfiguration,
+			engineeringConfiguration
+		).flatten.toMap
+
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
 		val cacheEnabled = true

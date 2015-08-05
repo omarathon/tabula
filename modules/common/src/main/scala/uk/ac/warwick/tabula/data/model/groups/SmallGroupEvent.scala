@@ -101,9 +101,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     tutors.hasSameMembersAs(other.tutors)
   }
 
-  def duplicateTo(group:SmallGroup):SmallGroupEvent= {
+  def duplicateTo(group: SmallGroup, transient: Boolean): SmallGroupEvent = {
     val newEvent = new SmallGroupEvent
-    newEvent.id = id
+		if (!transient) newEvent.id = id
     newEvent.day = day
     newEvent.endTime = endTime
     newEvent.group = group

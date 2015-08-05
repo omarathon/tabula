@@ -106,3 +106,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>
 <#macro withdrawnStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/withdrawn" /></#macro>
 <#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
+
+<#macro copyDepartment department><@_u page="/admin/department/${department.code}/groups/copy" /></#macro>
+<#macro copyModule module><@_u page="/admin/module/${module.code}/groups/copy" /></#macro>

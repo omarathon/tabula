@@ -25,7 +25,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 
     val cloneGroup = new SmallGroup
     val group:SmallGroup  = new SmallGroup(){
-      override def duplicateTo(groupSet:SmallGroupSet) = cloneGroup
+      override def duplicateTo(groupSet:SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true) = cloneGroup
     }
     source.id = "testId"
     source.academicYear = AcademicYear(2001)
@@ -51,9 +51,9 @@ class SmallGroupSetTest extends TestBase with Mockito {
     val assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()
 
 
-    val clone = source.duplicateTo(cloneModule)
+    val clone = source.duplicateTo(module = cloneModule, transient = true)
 
-    clone.id should be(source.id)
+    clone.id should be(null) // Don't duplicate IDs
     clone.academicYear should be (source.academicYear)
     clone.allocationMethod should be (source.allocationMethod)
     clone.allowSelfGroupSwitching.booleanValue should be {false}
@@ -81,7 +81,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 		val source = new SmallGroupSet
 		source.defaultTutors = null
 		source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
-		val clone = source.duplicateTo(source.module)
+		val clone = source.duplicateTo(module = source.module, transient = true)
 		clone.defaultTutors.size should be (0)
 	}
 
@@ -92,7 +92,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
 		source.defaultMaxGroupSize = 3
 		source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
 		source.defaultTutors.asInstanceOf[UserGroup].sessionFactory = sessionFactory
-		val clone = source.duplicateTo(source.module)
+		val clone = source.duplicateTo(transient = true)
 		clone.studentsCanSeeOtherMembers should be {true}
 		clone.defaultMaxGroupSize should be (3)
 		source.studentsCanSeeOtherMembers = false

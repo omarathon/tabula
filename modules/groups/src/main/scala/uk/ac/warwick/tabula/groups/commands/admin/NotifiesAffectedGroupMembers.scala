@@ -16,7 +16,7 @@ trait SmallGroupSetCommand {
 trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet] {
 	this: SmallGroupSetCommand with UserLookupComponent =>
 
-	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(set.module)
+	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(transient = false)
 
 	def hasAffectedStudentsGroups(student: User) = {
 		val previousMembership = setBeforeUpdates.groups.asScala.find(_.students.users.contains(student))
@@ -48,7 +48,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	 * Just the groups in this set that are applicable to this tutor.
 	 */
 	def tutorsEvents(set: SmallGroupSet, tutor: User) = {
-		val clone = set.duplicateTo(set.module)
+		val clone = set.duplicateTo(transient = false)
 		for (clonedGroup <- clone.groups.asScala) {
 			clonedGroup.events.filterNot(_.tutors.users.contains(tutor)).foreach(clonedGroup.removeEvent)
 		}

@@ -47,6 +47,16 @@
 							<i class="icon-cloud-download icon-fixed-width"></i> Create small groups from Syllabus+
 						</@fmt.permission_button>
 					</li>
+					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign copy_url><@routes.copyDepartment department /></#assign>
+						<@fmt.permission_button
+							permission='SmallGroups.Create'
+							scope=department
+							action_descr='copy groups from previous years'
+							href=copy_url>
+							<i class="icon-share-alt icon-fixed-width"></i> Copy small groups from previous years
+						</@fmt.permission_button>
+					</li>
 					<#if features.smallGroupCrossModules>
 						<li>
 							<#assign cross_module_url><@routes.crossmodulegroups department /></#assign>
