@@ -108,7 +108,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 			assignment.submissions.asScala.foreach(submission => {
 				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
-					// Don't need to resubmit the same papers again.
+					// Don't resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
 						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
