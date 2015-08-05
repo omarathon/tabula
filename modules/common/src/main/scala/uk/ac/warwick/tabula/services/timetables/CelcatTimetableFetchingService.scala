@@ -52,34 +52,29 @@ case class CelcatDepartmentConfiguration(
 	baseUri: String,
 	excludedEventTypes: Seq[TimetableEventType] = Nil,
 	staffFilenameLookupStrategy: FilenameGenerationStrategy = FilenameGenerationStrategy.Default,
-	staffListInBSV: Boolean = false
-)
+	staffListInBSV: Boolean = false,
+	enabledFn: () => Boolean = { () => true }
+) {
+	def enabled = enabledFn()
+}
 
 trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponent {
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
 	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
-		private val chemistryConfiguration =
-			Option(features).filter(_.celcatTimetablesChemistry).map { _ =>
-				"ch" -> CelcatDepartmentConfiguration(
-					baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-					staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-					staffListInBSV = true
-				)
-			}
-
-		private val engineeringConfiguration =
-			Option(features).filter(_.celcatTimetablesEngineering).map { _ =>
-				"es" -> CelcatDepartmentConfiguration(
-					baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-					staffListInBSV = false
-				)
-			}
-
-		val departmentConfiguration =	Seq(
-			chemistryConfiguration,
-			engineeringConfiguration
-		).flatten.toMap
+		val departmentConfiguration =	Map(
+			"ch" -> CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+				staffListInBSV = true,
+				enabledFn = { () => features.celcatTimetablesChemistry }
+			),
+			"es" -> CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+				staffListInBSV = false,
+				enabledFn = { () => features.celcatTimetablesEngineering }
+			)
+		)
 
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
@@ -222,7 +217,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	def getTimetableForStudent(universityId: UniversityId): Try[Seq[TimetableEvent]] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
 			case FoundUser(u) if u.getDepartmentCode.hasText =>
-				configs.get(u.getDepartmentCode.toLowerCase).map { config =>
+				configs.get(u.getDepartmentCode.toLowerCase).filter(_.enabled).map { config =>
 					doRequest(s"${u.getWarwickId}.ics", config)
 				}.getOrElse(Success(Nil))
 			case FoundUser(u) =>
@@ -236,11 +231,11 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		userLookup.getUserByWarwickUniId(universityId) match {
 			// User in a department with a config
 			case FoundUser(u) if u.getDepartmentCode.hasText && configs.contains(u.getDepartmentCode.toLowerCase) =>
-				configs.get(u.getDepartmentCode.toLowerCase)
+				configs.get(u.getDepartmentCode.toLowerCase).filter(_.enabled)
 
 			// Look for a BSV-style config that contains the user
 			case FoundUser(u) =>
-				configs.values
+				configs.values.filter(_.enabled)
 					.filter { _.staffFilenameLookupStrategy == FilenameGenerationStrategy.BSV }
 					.find { lookupCelcatIDFromBSV(u.getWarwickId, _).isDefined }
 
