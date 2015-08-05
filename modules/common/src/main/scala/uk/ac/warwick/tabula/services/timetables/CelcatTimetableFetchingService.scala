@@ -60,17 +60,21 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 
 	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
 		private val chemistryConfiguration =
-			Some("ch" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-				staffListInBSV = true
-			)).filter(_ => features.celcatTimetablesChemistry)
+			Option(features).filter(_.celcatTimetablesChemistry).map { _ =>
+				"ch" -> CelcatDepartmentConfiguration(
+					baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+					staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+					staffListInBSV = true
+				)
+			}
 
 		private val engineeringConfiguration =
-			Some("es" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-				staffListInBSV = false
-			)).filter(_ => features.celcatTimetablesEngineering)
+			Option(features).filter(_.celcatTimetablesEngineering).map { _ =>
+				"es" -> CelcatDepartmentConfiguration(
+					baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+					staffListInBSV = false
+				)
+			}
 
 		val departmentConfiguration =	Seq(
 			chemistryConfiguration,
