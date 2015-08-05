@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
 
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinLtiJob
 
 /**
  * Creates a job that submits the assignment to Turnitin.
@@ -23,7 +24,10 @@ class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, va
 
 	var jobService = Wire[JobService]
 
-	def applyInternal() = jobService.add(Option(user), SubmitToTurnitinJob(assignment))
+	def applyInternal() = {
+		if (features.turnitinLTI) jobService.add(Option(user), SubmitToTurnitinLtiJob(assignment))
+		else jobService.add(Option(user), SubmitToTurnitinJob(assignment))
+	}
 
 	def describe(d: Description) = d.assignment(assignment)
 

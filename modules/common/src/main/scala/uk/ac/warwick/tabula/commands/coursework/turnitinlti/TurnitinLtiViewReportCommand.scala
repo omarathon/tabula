@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.sysadmin
+package uk.ac.warwick.tabula.commands.coursework.turnitinlti
 
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -13,12 +13,13 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.web.Mav
 
 object TurnitinLtiViewReportCommand {
 	def apply(user: CurrentUser) =
 		new TurnitinLtiViewReportCommandInternal(user)
 				with TurnitinLtiViewReportCommandPermissions
-				with ComposableCommand[TurnitinLtiResponse]
+				with ComposableCommand[Mav]
 			with ReadOnly with Unaudited
 			with TurnitinLtiViewReportCommandState
 			with TurnitinLtiViewReportValidation
@@ -26,12 +27,14 @@ object TurnitinLtiViewReportCommand {
 			with Logging
 }
 
-class TurnitinLtiViewReportCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse]{
+class TurnitinLtiViewReportCommandInternal(val user: CurrentUser) extends CommandInternal[Mav]{
 
 	self: TurnitinLtiViewReportCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
-		turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
+		val response = turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
+		if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")
+		else Mav("admin/assignments/turnitin/report_error", "problem" -> "no-object")
 	}
 
 }

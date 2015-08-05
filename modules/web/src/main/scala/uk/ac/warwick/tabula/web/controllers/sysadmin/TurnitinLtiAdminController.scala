@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiResponse
+import uk.ac.warwick.tabula.commands.coursework.turnitinlti.TurnitinLtiViewReportCommand
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/sysadmin/turnitinlti"))
@@ -149,12 +151,10 @@ class TurnitinLtiViewReportController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/view-report-form")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiViewReportCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("turnitinLtiViewReportCommand") cmd: Appliable[Mav], errors: Errors) =
 		if (errors.hasErrors){
 			form()
 		} else {
-			val response: TurnitinLtiResponse = cmd.apply()
-			Mav("sysadmin/turnitinlti/view-report",
-				"response" -> response)
+			cmd.apply()
 		}
 }

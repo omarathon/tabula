@@ -14,7 +14,11 @@
 			Publications: ${r.publicationOverlap}%
 		</p>
 		<p>
-			<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+			<#if !features.turnitinLTI>
+				<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+			<#elseif r.turnitinId?has_content><a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-lti-report/${attachment.id}'/>">View full report</a>
+			<#else> This report is no longer available. If you need access to the full report please contact webteam@warwick.ac.uk
+			</#if>
 		</p>
 	</div>
 	<script type="text/javascript">
