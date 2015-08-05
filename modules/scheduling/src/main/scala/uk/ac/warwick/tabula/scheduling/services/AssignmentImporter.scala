@@ -32,7 +32,7 @@ trait AssignmentImporter {
 
 	def getAllGradeBoundaries: Seq[GradeBoundary]
 
-	def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).previous.previous.yearsSurrounding(1, 0)
+	def yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
