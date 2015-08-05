@@ -15,7 +15,7 @@ import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AcademicYear}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
@@ -58,20 +58,19 @@ case class CelcatDepartmentConfiguration(
 trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponent {
 	val celcatConfiguration = new AutowiringCelcatConfiguration
 
-	class AutowiringCelcatConfiguration extends CelcatConfiguration {
+	class AutowiringCelcatConfiguration extends CelcatConfiguration with AutowiringFeaturesComponent {
 		private val chemistryConfiguration =
-			if (Wire.property("${environment.production}").toBoolean)
-				Some("ch" -> CelcatDepartmentConfiguration(
-					baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-					staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
-					staffListInBSV = true
-				))
-			else None
+			Some("ch" -> CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
+				staffListInBSV = true
+			)).filter(_ => features.celcatTimetablesChemistry)
 
-		private val engineeringConfiguration = Some("es" -> CelcatDepartmentConfiguration(
-			baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-			staffListInBSV = false
-		))
+		private val engineeringConfiguration =
+			Some("es" -> CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
+				staffListInBSV = false
+			)).filter(_ => features.celcatTimetablesEngineering)
 
 		val departmentConfiguration =	Seq(
 			chemistryConfiguration,
