@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
-import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiResponse, TurnitinLtiSubmissionInfo, TurnitinLtiService, AutowiringTurnitinLtiServiceComponent}
+import uk.ac.warwick.tabula.services.turnitinlti.{TurnitinLtiResponse, TurnitinLtiService, AutowiringTurnitinLtiServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
@@ -26,7 +26,7 @@ object SubmitToTurnitinLtiJob {
 
 @Component
 class SubmitToTurnitinLtiJob extends Job
-	with NotifyingJob[Seq[TurnitinLtiSubmissionInfo]]
+	with NotifyingJob[Seq[OriginalityReport]]
   with Logging with FreemarkerRendering
 	with AutowiringAssessmentServiceComponent with AutowiringTurnitinLtiServiceComponent
 	with AutowiringFileAttachmentServiceComponent with AutowiringOriginalityReportServiceComponent {
@@ -83,6 +83,7 @@ class SubmitToTurnitinLtiJob extends Job
 				pushNotification(job, notification)
 			}
 			transactional() {
+				updateStatus("Generated a report.")
 				job.succeeded = true
 				updateProgress(100)
 			}
@@ -108,7 +109,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 			assignment.submissions.asScala.foreach(submission => {
 				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
-					// Don't resubmit the same papers again.
+					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
 						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
@@ -133,7 +134,7 @@ class SubmitToTurnitinLtiJob extends Job
 			def submit() = {
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
 				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
-					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.userId, "Student")
+					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.universityId, "Student")
 			}
 
 			submit() match {

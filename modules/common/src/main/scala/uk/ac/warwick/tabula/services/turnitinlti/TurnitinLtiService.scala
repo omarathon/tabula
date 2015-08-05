@@ -350,3 +350,11 @@ trait TurnitinLtiServiceComponent {
 trait AutowiringTurnitinLtiServiceComponent extends TurnitinLtiServiceComponent {
 	var turnitinLtiService = Wire[TurnitinLtiService]
 }
+
+case class ClassName(val value: String)
+
+case class ClassId(val value: String)
+
+case class AssignmentName(val value: String)
+
+case class AssignmentId(val value: String)
