@@ -20,10 +20,8 @@ import com.google.gdata.client.authn.oauth.{OAuthUtil, OAuthParameters}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.CurrentUser
 import org.xml.sax.SAXParseException
-import scala.Option
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import org.apache.commons.io.FilenameUtils._
-import scala.Some
 import uk.ac.warwick.tabula.api.web.Routes
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.DateTime

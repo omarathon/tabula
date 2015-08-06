@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.turnitinlti
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
-import scala.Some
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
