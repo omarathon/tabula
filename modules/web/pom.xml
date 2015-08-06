@@ -20,7 +20,7 @@
 		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
 
 		<!-- Override module context -->
-		<tabula.module.context>/</tabula.module.context>
+		<tabula.module.context></tabula.module.context>
 	</properties>
 
 	<scm>
@@ -43,12 +43,12 @@
 								<phase>install</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}">
+										<sync todir="${deploy.dir}/ROOT">
 											<fileset
 												dir="${project.build.directory}/${project.build.finalName}" />
 										</sync>
 										<touch
-											file="${deploy.dir}/${project.artifactId}/WEB-INF/web.xml" />
+											file="${deploy.dir}/ROOT/WEB-INF/web.xml" />
 									</target>
 								</configuration>
 								<goals>
@@ -76,7 +76,7 @@
 								<phase>package</phase>
 								<configuration>
 									<target>
-										<sync todir="${deploy.dir}/${project.artifactId}/static">
+										<sync todir="${deploy.dir}/ROOT/static">
 											<fileset
 												dir="${project.build.directory}/${project.build.finalName}/static" />
 										</sync>
@@ -94,6 +94,8 @@
 	</profiles>
 
 	<build>
+		<finalName>ROOT</finalName>
+
 		<plugins>
 			<!-- Build the war -->
 			<plugin>
@@ -113,6 +115,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<warName>ROOT</warName>
 					<!-- Need to re-implement overlays here because by default we overlay
 						ourself! -->
 					<overlays>
