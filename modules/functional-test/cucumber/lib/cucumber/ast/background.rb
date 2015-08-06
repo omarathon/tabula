@@ -33,7 +33,7 @@ module Cucumber
           visitor.step_mother.after(hook_context) if @failed || @feature_elements.empty?
         end
       end
-      
+
       def with_visitor(scenario, visitor)
         if self != scenario && scenario.respond_to?(:with_visitor)
           scenario.with_visitor(visitor) do
@@ -43,7 +43,7 @@ module Cucumber
           yield
         end
       end
-      
+
       def accept_hook?(hook)
         if hook_context != self
           hook_context.accept_hook?(hook)

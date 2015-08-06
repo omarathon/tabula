@@ -16,7 +16,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 
 	val user = smartMock[CurrentUser]
 	user.universityId returns "9876543"
-	
+
 	trait Fixture {
 		val meeting = new MeetingRecord
 		meeting.creator = creator

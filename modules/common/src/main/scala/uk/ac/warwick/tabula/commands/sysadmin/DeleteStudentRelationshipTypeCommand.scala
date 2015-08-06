@@ -23,30 +23,30 @@ object DeleteStudentRelationshipTypeCommand {
 			with DeleteStudentRelationshipTypeCommandDescription
 }
 
-class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType) 
+class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType)
 	extends CommandInternal[StudentRelationshipType] with HasExistingStudentRelationshipType with SelfValidating {
 	this: RelationshipServiceComponent =>
-		
+
 	var confirm: Boolean = _
-		
+
 	override def applyInternal() = transactional() {
 		relationshipService.delete(relationshipType)
 		relationshipType
 	}
-		
+
 	def validate(errors: Errors) {
 		// Don't allow removal if non-empty
 		if (!relationshipType.empty) {
 			errors.reject("relationshipType.delete.nonEmpty")
 		}
-		
+
 		if (!confirm) errors.rejectValue("confirm", "relationshipType.delete.confirm")
 	}
 }
 
 trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	this: HasExistingStudentRelationshipType =>
-	
+
 	def permissionsCheck(p: PermissionsChecking) {
 		mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
@@ -55,7 +55,7 @@ trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermission
 
 trait DeleteStudentRelationshipTypeCommandDescription extends Describable[StudentRelationshipType] {
 	this: HasExistingStudentRelationshipType =>
-		
+
 	// describe the thing that's happening.
 	override def describe(d: Description) =
 		d.properties(

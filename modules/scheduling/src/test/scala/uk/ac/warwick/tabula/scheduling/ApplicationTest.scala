@@ -5,13 +5,13 @@ import uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin.SchedulingSysadm
 import org.springframework.beans.factory.annotation.Autowired
 
 class ApplicationTest extends AppContextTestBase {
-    
+
     @Autowired var sysadminController: SchedulingSysadminController = _
-       
+
     @Test def itWorks = {
     	assert(beans.containsBean("userLookup"))
     }
-    
+
     // Can resolve message codes from any controller
     @Test def messageResolving = {
     	sysadminController.getMessage("NotEmpty") should be ("You need to put something here.")

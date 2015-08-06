@@ -49,7 +49,7 @@ module Cucumber
         file = file.gsub(/\//, '\\') if Cucumber::WINDOWS && file && !ENV['CUCUMBER_FORWARD_SLASH_PATHS']
         @file = file
       end
-      
+
       def file_colon_line(line)
         "#{@file}:#{line}"
       end

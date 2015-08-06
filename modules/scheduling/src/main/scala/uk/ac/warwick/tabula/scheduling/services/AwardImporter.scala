@@ -40,7 +40,7 @@ trait AwardImporter extends Logging {
 		val results = getImportCommands().map { _.apply()._2 }
 
 		updateAwardMap()
-		
+
 		ImportAcademicInformationCommand.combineResults(results)
 	}
 

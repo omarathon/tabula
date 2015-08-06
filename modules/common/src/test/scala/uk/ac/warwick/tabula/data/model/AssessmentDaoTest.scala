@@ -136,7 +136,7 @@ class AssessmentDaoTest extends PersistenceTestBase {
 			}
 		}
 	}
-	
+
 	@Test def getExams: Unit = {
 		transactional { tx =>
 			new Fixture {

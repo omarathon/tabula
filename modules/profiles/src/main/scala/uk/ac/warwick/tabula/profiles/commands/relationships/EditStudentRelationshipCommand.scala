@@ -14,11 +14,11 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import org.springframework.validation.Errors
 
 /**
- * Command to edit the relationship for the StudentCourseDetails passed in, passing 
+ * Command to edit the relationship for the StudentCourseDetails passed in, passing
  * in the current agent to change. This is passed in to distinguish
- * which agent is being "changed" if a student has multiple agents, or that an 
+ * which agent is being "changed" if a student has multiple agents, or that an
  * agent is being added and the existing one shouldn't be removed.
- * 
+ *
  */
 class EditStudentRelationshipCommand(
 	val studentCourseDetails: StudentCourseDetails,
@@ -140,7 +140,7 @@ class EditStudentRelationshipCommand(
 
 			studentNotification ++ oldAgentNotifications ++ newAgentNotification
 		})
-		
+
 		notifications
 	}
 }

@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
     version="2.0">
-    
+
   <description>Joda Time Tag Library</description>
   <display-name>Joda Time</display-name>
   <tlib-version>1.1</tlib-version>
@@ -99,7 +99,7 @@ ReadableInstant or ReadablePartial to be formatted.
     </attribute>
     <attribute>
         <description>
-Formatting style to apply.  See 
+Formatting style to apply.  See
 org.joda.time.format.DateTimeFormat#forStyle()
 for more information on supported styles.
         </description>
@@ -109,7 +109,7 @@ for more information on supported styles.
     </attribute>
     <attribute>
         <description>
-Formatting pattern to apply.  See 
+Formatting pattern to apply.  See
 org.joda.time.format.DateTimeFormat#forPattern()
 for more information on supported patterns.
         </description>
@@ -172,7 +172,7 @@ Date/time to be parsed.
     </attribute>
     <attribute>
         <description>
-Formatting style to use.  See 
+Formatting style to use.  See
 org.joda.time.format.DateTimeFormat#forStyle()
 for more information on supported styles.
         </description>
@@ -182,7 +182,7 @@ for more information on supported styles.
     </attribute>
     <attribute>
         <description>
-Formatting pattern to use.  See 
+Formatting pattern to use.  See
 org.joda.time.format.DateTimeFormat#forPattern()
 for more information on supported patterns.
         </description>

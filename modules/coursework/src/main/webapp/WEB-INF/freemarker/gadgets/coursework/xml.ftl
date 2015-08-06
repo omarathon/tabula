@@ -10,22 +10,22 @@
       </Service>
     </OAuth>
   </ModulePrefs>
-<Content type="html" view="home,profile,default"><![CDATA[  
+<Content type="html" view="home,profile,default"><![CDATA[
 
 <div id="main-content" class="tabula-page">
 
 <@stylesheet "/static/css/gadget.css" />
-	 
+
 <div id="approval"></div>
 <div id="waiting"></div>
-<div id="main"></div> 
+<div id="main"></div>
 
 </div>
 <script type="text/javascript" src="https://start-test.warwick.ac.uk/static/gadgets/common/js/prototype-1.7.js"></script>
 <script type="text/javascript" src="https://start-test.warwick.ac.uk/static/gadgets/common/js/popup.js"></script>
 <script type="text/javascript" src="https://start-test.warwick.ac.uk/static/gadgets/common/js/warwick.js"></script>
 
-<script type="text/javascript"> 
+<script type="text/javascript">
 var prefs = new gadgets.Prefs();
 
 var config = {
@@ -37,7 +37,7 @@ gadgets.util.registerOnLoadHandler(function(){
  // This is a standard function to handle the three OAuth divs. It will usually be the same for every gadget
 var showOneSection = function(toshow) {
   var section;
-	
+
   var sections = [ 'main', 'approval', 'waiting' ];
   for (var i=0; i < sections.length; ++i) {
     var s = sections[i];
@@ -53,7 +53,7 @@ var showOneSection = function(toshow) {
   if (section) {
     // Adjust the height of (stretch) the gadget
     adjustHeightWithConstraints();
-		
+
     section.select('img').invoke('observe','load', function() {
       adjustHeightWithConstraints();
     });
@@ -69,16 +69,16 @@ var loadData = function() {
     /* Specify where to get the data (the URL), the type of data, the name of the OAuth service and the method of fetching the data */
 
     config.dataUrl + '?ts=' + new Date().getTime(),
-    gadgets.io.ContentType.HTML, 
-    "coursework", 
-    gadgets.io.MethodType.GET, 
+    gadgets.io.ContentType.HTML,
+    "coursework",
+    gadgets.io.MethodType.GET,
 
     /* Generic OAuth config */
 
-    showOneSection, 
-    "main", 
-    "waiting", 
-    "approval", 
+    showOneSection,
+    "main",
+    "waiting",
+    "approval",
 
     /* The callback - a function called when the data is fetched */
 
@@ -87,11 +87,11 @@ var loadData = function() {
       // We would use this to populate the content of the "main" div
       document.getElementById('main').innerHTML = data;
       showOneSection('main');
-    }, 
+    },
 
     /* Some boilerplate for the popup during OAuth authentication */
 
-    "personalize", 
+    "personalize",
     "approvaldone"
   );
 

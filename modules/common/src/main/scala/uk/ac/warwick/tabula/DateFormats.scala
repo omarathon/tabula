@@ -14,7 +14,7 @@ object DateFormats {
 	final val DatePicker = "dd-MMM-yyyy"
 	final val TimePicker = "HH:mm:ss"
 	final val NotificationDateOnlyPattern = "d MMMM yyyy"
-	final val NotificationDateTimePattern = NotificationDateOnlyPattern + " 'at' HH:mm:ss" 
+	final val NotificationDateTimePattern = NotificationDateOnlyPattern + " 'at' HH:mm:ss"
 	final val CSVDatePattern = "dd/MM/yyyy"       // we need the pattern for SpreadsheetHelpers
 	final val CSVDateTimePattern = "dd/MM/yyyy HH:mm"
 

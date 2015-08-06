@@ -4,7 +4,7 @@
 	<classpath>
 		<dir name="${rebel.workspace.path}/tabula/modules/coursework/target/classes" />
 	</classpath>
-	
+
 	<web>
 		<link target="/">
 			<dir name="${rebel.workspace.path}/tabula/modules/coursework/src/main/webapp/" />
@@ -14,5 +14,5 @@
 			<dir name="${rebel.workspace.path}/tabula/modules/common/src/main/webapp/WEB-INF/freemarker" />
 		</link>
 	</web>
-		
+
 </application>

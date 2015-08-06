@@ -13,7 +13,7 @@ class SearchAgentsCommand(user: CurrentUser) extends AbstractSearchProfilesComma
 	override def applyInternal() =
 		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
 		else Seq()
-		
+
 	private def queryMatches = {
 		profileIndexService.findWithQuery(query, Seq(), false, userTypes, true)
 	}

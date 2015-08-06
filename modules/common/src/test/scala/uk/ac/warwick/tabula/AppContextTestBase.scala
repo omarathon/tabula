@@ -31,16 +31,16 @@ trait FieldAccessByReflection{
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
-	
-	
-	
+
+
+
 }
 
 trait ContextSetup {
 	@Autowired var beans: AbstractAutowireCapableBeanFactory =_
-	
+
 	@Before def setupCtx() {
-		
+
 	}
 }
 
@@ -48,11 +48,11 @@ trait TransactionalTesting {
 	@Autowired var sessionFactory:SessionFactory =_
 	@Autowired var dataSource:DataSource =_
 	@Autowired var transactionManager:PlatformTransactionManager =_
-	
+
 	def session = sessionFactory.getCurrentSession
 
 	Transactions.enabled = true
-	
+
 	def transactional[A](f : TransactionStatus=>A) : A = {
 		val template = new TransactionTemplate(transactionManager)
 

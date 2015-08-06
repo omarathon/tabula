@@ -10,7 +10,12 @@
 
 <#macro _u page context='/attendance'><@url context=context page=page /></#macro>
 
-<#macro home><@_u page="/" /></#macro>
+<#macro home academicYear="">
+	<#if academicYear?has_content>
+		<@_u page="/?academicYear=${academicYear}" />
+	<#else>
+		<@_u page="/" />
+	</#if></#macro>
 
 <#-- OLD ROUTES -->
 

@@ -33,5 +33,5 @@ abstract class WebgroupRoleProvider[A <: BuiltInRole : ClassTag](role: A) extend
 	}
 
 	def rolesProvided = Set(classTag[A].runtimeClass.asInstanceOf[Class[Role]])
-	
+
 }

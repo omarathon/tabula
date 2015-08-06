@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 
 	val userLookupService = new MockUserLookup
-	
+
 	val service: CourseAndRouteService = new CourseAndRouteService with RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
 		val routeDao = new RouteDaoImpl
 		val courseDao = new CourseDaoImpl
@@ -31,7 +31,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 		val securityService = mock[SecurityService]
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
-	
+
 	@Before def wire {
 		service.routeDao.asInstanceOf[RouteDaoImpl].sessionFactory = sessionFactory
 		service.courseDao.asInstanceOf[CourseDaoImpl].sessionFactory = sessionFactory
@@ -42,14 +42,14 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 
 		service.securityService.can(isA[CurrentUser],isA[Permission],isA[PermissionsTarget] ) returns true
 	}
-	
+
 	@Test def crud = transactional { tx =>
 		// uses data created in data.sql
 		val g500 = service.getRouteByCode("g500").get
 		val g503 = service.getRouteByCode("g503").get
 		val g900 = service.getRouteByCode("g900").get
 		val g901 = service.getRouteByCode("g901").get
-		
+
 		service.allRoutes should be (Seq(g500, g503, g900, g901))
 
 		// behaviour of child/parent departments
@@ -70,7 +70,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set())
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set())
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, ch) should be (Set())
-			
+
 			service.addRouteManager(g503, "cuscav")
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage) should be (Set(g503))
 			service.routesWithPermission(currentUser, Permissions.MonitoringPoints.Manage, cs) should be (Set(g503))

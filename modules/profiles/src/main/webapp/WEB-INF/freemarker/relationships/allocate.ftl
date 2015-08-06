@@ -1,363 +1,342 @@
-<#assign department=allocateStudentsToRelationshipCommand.department />
-<#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
+<#escape x as x?html>
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
-<#macro student_item profile bindpath="">
-	<#if profile.mostSignificantCourseDetails??>
-		<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-		<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
-			<#local route = mostSignificantCourseDetails.route />
-		</#if>
-		<li class="student well well-small"
-		data-f-gender="${(profile.gender.dbValue)!}"
-		data-f-route="${(route.code)!}"
-		data-f-year="${(mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
-			<div class="profile clearfix">
-				<div class="name">
-					<h6>${profile.fullName}</h6>
-					${(route.name)!profile.homeDepartment.name}
+<#macro deptheaderroutemacro dept><@routes.relationship_allocate dept relationshipType /></#macro>
+<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<#assign manualFormAction><@routes.relationship_allocate department relationshipType /></#assign>
+<#assign uploadFormAction><@routes.relationship_allocate_upload department relationshipType /></#assign>
+<#assign previewFormAction><@routes.relationship_allocate_preview department relationshipType /></#assign>
+
+<@fmt.deptheader "Allocate ${relationshipType.description}s" "in" department routes "deptheaderroute" "with-settings" />
+
+<div class="tabbable">
+	<ul class="nav nav-tabs">
+		<li class="active">
+			<a href="#allocatestudents-tab1" data-toggle="tab">Manually allocate students</a>
+		</li>
+		<li>
+			<a href="#allocatestudents-tab2" data-toggle="tab">Upload spreadsheet</a>
+		</li>
+	</ul>
+</div>
+
+<div class="tab-content">
+	<div id="allocatestudents-tab1" class="tab-pane active fix-area allocate-associations">
+		<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
+			<@spring.bind path=path>
+			<div class="btn-group ${cssClass} <#if currentFilter == placeholder> empty-filter</#if>">
+				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+					<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
+					<span class="caret"></span>
+				</a>
+				<div class="dropdown-menu filter-list">
+					<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
+					<ul>
+						<#if customPicker?has_content>
+							<li>
+								<#noescape>${customPicker}</#noescape>
+							</li>
+						</#if>
+						<#if allItems?has_content>
+							<#list allItems as item>
+								<#local isValid = (allItems?size == validItems?size)!true />
+								<#if !isValid>
+									<#list validItems as validItem>
+										<#if ((validItem.id)!0) == ((item.id)!0)>
+											<#local isValid = true />
+										</#if>
+									</#list>
+								</#if>
+								<li class="check-list-item" data-natural-sort="${item_index}">
+									<label class="checkbox <#if !isValid>disabled</#if>">
+										<#nested item isValid/>
+									</label>
+								</li>
+							</#list>
+						<#else>
+							<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+						</#if>
+					</ul>
 				</div>
 			</div>
-			<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
-		</li>
-	</#if>
-</#macro>
+			</@spring.bind>
+		</#macro>
 
-<#escape x as x?html>
+		<#macro current_filter_value path placeholder><#compress>
+			<@spring.bind path=path>
+				<#if status.actualValue?has_content>
+					<#list status.actualValue as item><#nested item /><#if item_has_next>, </#if></#list>
+				<#else>
+				${placeholder}
+				</#if>
+			</@spring.bind>
+		</#compress></#macro>
 
-	<#macro deptheaderroutemacro dept>
-		<@routes.relationship_allocate dept relationshipType />
-	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes/>
+		<#function contains_by_code collection item>
+			<#list collection as c>
+				<#if c.code == item.code>
+					<#return true />
+				</#if>
+			</#list>
+			<#return false />
+		</#function>
 
-	<@fmt.deptheader "Allocate students" "to ${relationshipType.description}s" department routes "deptheaderroute" "with-settings" />
+		<@f.form commandName="command" action="${manualFormAction}" method="POST" cssClass="form-inline fetch">
+			<#list command.additions?keys as entity>
+				<#list command.additions[entity] as student>
+					<input type="hidden" name="additions[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.removals?keys as entity>
+				<#list command.removals[entity] as student>
+					<input type="hidden" name="removals[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.additionalEntities as entity>
+				<input type="hidden" name="additionalEntities" value="${entity}" />
+			</#list>
+			<div class="row-fluid">
+				<div class="span6 students">
+					<div class="header-with-tooltip">
+						<h3>Students</h3>
+						<span><@fmt.p unallocated?size "Unallocated student" /> found</span>
+					</div>
 
-	<noscript>
-		<div class="alert">This page requires Javascript.</div>
-	</noscript>
+					<div class="student-filter btn-group-group well well-small">
+						<#assign placeholder = "All routes" />
+						<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+						<#assign routesCustomPicker>
+							<div class="route-search input-append">
+								<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
+								<span class="add-on"><i class="icon-search"></i></span>
+							</div>
+						</#assign>
+						<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes validItems=command.visibleRoutes customPicker=routesCustomPicker cssClass="wide"; route, isValid>
+							<input type="checkbox" name="${status.expression}" value="${route.code}" data-short-value="${route.code?upper_case}" ${contains_by_code(command.routes, route)?string('checked','')} <#if !isValid>disabled</#if>>
+							<@fmt.route_name route false />
+						</@filter>
 
-	<div class="alert">
-		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		<h4>Students with multiple ${relationshipType.agentRole}s</h4>
+						<#assign placeholder = "All years" />
+						<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
+						<@filter "yearsOfStudy" placeholder currentfilter command.allYearsOfStudy command.allYearsOfStudy "Year " "" "narrow"; yearOfStudy>
+							<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
+							${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
+						${yearOfStudy}
+						</@filter>
 
-		<p>This page expects students to have exactly one ${relationshipType.agentRole}. If you allocate a student to a ${relationshipType.agentRole},
-		it will remove any existing ${relationshipType.agentRole}s that the student has. This makes this page unsuitable for students who
-		are expected to have multiple ${relationshipType.agentRole}s. You should edit multiple relationships on such students' individual
-		profile pages instead.</p>
+						<button class="btn btn-mini apply" type="submit">Apply</button>
 
-		<p>We hope to change this behaviour in the future to make it easier to manage ${relationshipType.agentRole}s for students.</p>
-	</div>
+						<br /><br />
 
-	<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand">
-
-		<div class="tabbable">
-			<ul class="nav nav-tabs">
-				<li class="active">
-					<a href="#allocatestudents-tab1" data-toggle="tab">Drag and drop</a>
-				</li>
-				<li style="display: none;">
-					<a href="#allocatestudents-tab2" data-toggle="tab">Upload spreadsheet</a>
-				</li>
-			</ul>
-
-			<div class="tab-content">
-				<div id="allocatestudents-tab1" class="tab-pane active">
-
-				<p>Drag students onto a ${relationshipType.agentRole} to allocate them to the ${relationshipType.agentRole}. Select multiple students by dragging a box around them.
-					 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key and drag to add to a selection.</p>
-
-				<@spring.hasBindErrors name="allocateStudentsToRelationshipCommand">
-					<#if errors.hasErrors()>
-						<div class="alert alert-error">
-							<h3>Some problems need fixing</h3>
-							<#if errors.hasGlobalErrors()>
-								<#list errors.globalErrors as e>
-									<div><@spring.message message=e /></div>
-								</#list>
-							<#elseif errors.hasFieldErrors('file')>
-								<#list errors.getFieldErrors('file') as e>
-									<div><@spring.message message=e /></div>
-								</#list>
-							<#else>
-								<div>See the errors below.</div>
-							</#if>
+						<div class="input-append">
+							<input class="input-xlarge" name="query" type="text" placeholder="Search these students" value="${command.query!}"/>
+							<button class="btn" type="submit"><i class="icon-search"></i></button>
 						</div>
+					</div>
+
+					<#assign singleUnallocated = unallocated?has_content && unallocated?size == 1 />
+					<#if unallocated?has_content>
+
+						<button class="btn distribute" name="action" value="${commandActions.Distribute}" type="submit">Distribute between selected personal tutors <i class="icon-arrow-right"></i></button>
+
+						<br /> <br />
+
+						<table class="table table-condensed table-bordered table-striped table-hover scrollable-tbody">
+							<thead>
+								<tr>
+									<th class="check for-check-all"></th>
+									<th class="single-name sortable">First name</th>
+									<th class="single-name sortable">Last name</th>
+									<th class="universityid sortable">ID</th>
+								</tr>
+							</thead>
+							<tbody>
+								<#list unallocated as studentData>
+									<tr>
+										<td class="check"><input type="checkbox" name="allocate" value="${studentData.universityId}" <#if singleUnallocated>checked</#if>></td>
+										<td class="single-name">${studentData.firstName}</td>
+										<td class="single-name">${studentData.lastName}</td>
+										<td class="universityid">${studentData.universityId} <@pl.profile_link studentData.universityId /></td>
+									</tr>
+								</#list>
+							</tbody>
+						</table>
+
 					</#if>
-				</@spring.hasBindErrors>
 
-				<div class="fix-area">
-
-
-				<div class="tabula-dnd"
-						 data-item-name="student"
-						 data-text-selector=".name h6"
-						 data-use-handle="false"
-						 data-selectables=".students .drag-target"
-						 data-scroll="true"
-						 data-remove-tooltip="Remove this student from this ${relationshipType.agentRole}">
-					<div class="fix-header pad-when-fixed">
-						<div class="btn-toolbar">
-							<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
-							   href="#" >
-								<i class="icon-random"></i> Randomly allocate
-							</a>
-							<a href="#" title="" class="btn use-popover .tabulaPopover-init" data-disabled-on="no-allocation" data-title="Remove All Allocations" data-html="true" data-trigger="hover"
-							   data-content=
-								'<div class="alert" >Are you sure you want to remove all existing allocations
-								including ${department.name} students allocated by other departments?</div>
-								<button id="confirm-remove-all" type="button" class="btn btn-primary">Confirm</button>'
-							   data-original-title="Remove All Allocations">
-								<i class="icon-arrow-left"></i> Remove all
-								<div id="remove-all-tutors" data-toggle="return"></div>
-							</a>
-						</div>
-
-					<div class="row-fluid">
-						<div class="span5"><h3>Students</h3></div>
-						<div class="span2">
-						</div>
-						<div class="span5">
-							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">
-								Add ${relationshipType.agentRole}s</button>
-							<h3>${relationshipType.agentRole?cap_first}s</h3>
-
-						</div>
-
-					</div>
-
-
-
-
-					</div><!-- end fix-header -->
-
-					<div class="row-fluid fix-on-scroll-container">
-						<div class="span5">
-							<div id="studentslist"
-									 class="students tabula-filtered-list"
-									 data-item-selector=".student-list li">
-								<div class="well ">
-										<h4>Students with no ${relationshipType.agentRole}</h4>
-										<#if features.personalTutorAssignmentFiltering>
-											<div class="filter" id="filter-by-gender-controls">
-												<select data-filter-attr="fGender">
-													<option data-filter-value="*">Any Gender</option>
-													<option data-filter-value="M">Male</option>
-													<option data-filter-value="F">Female</option>
-												</select>
-											</div>
-											<div class="filter" id="filter-by-year-controls">
-												<select data-filter-attr="fYear">
-													<option data-filter-value="*">Any Year of study</option>
-													<#list allocateStudentsToRelationshipCommand.allMembersYears as year>
-														<option data-filter-value="${year}">Year ${year}</option>
-													</#list>
-												</select>
-											</div>
-											<div class="filter" id="filter-by-route-controls">
-												<select data-filter-attr="fRoute">
-													<option data-filter-value="*">Any Route</option>
-													<#list allocateStudentsToRelationshipCommand.allMembersRoutes as route>
-														<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
-													</#list>
-												</select>
-											</div>
-										</#if>
-									<div class="student-list drag-target">
-										<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
-											<@spring.bind path="unallocated">
-												<#assign students = status.actualValue />
-												<#list students as student>
-													<@student_item student "${status.expression}[${student_index}]" />
-												</#list>
-											</@spring.bind>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="span2">
-							<#-- I, for one, welcome our new jumbo icon overlords -->
-							<div class="direction-icon">
-								<i class="icon-arrow-right"></i>
-							</div>
-						</div>
-
-						<#-- Modal to add students manually -->
-						<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
-							<div class="modal-header">
-								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-								<h3 id="add-agents-label">Add ${relationshipType.agentRole}s</h3>
-							</div>
-
-							<div class="modal-body">
-								<p>
-									Lookup ${relationshipType.agentRole}s by typing their names, usercodes or university IDs below, then click <code>Add</code>.
-								</p>
-
-								<@form.labelled_row "additionalAgents" "${relationshipType.agentRole?cap_first}s">
-									<@form.flexipicker path="additionalAgents" placeholder="User name" membersOnly="true" list=true multiple=true />
-								</@form.labelled_row>
-							</div>
-
-							<div class="modal-footer">
-								<button type="button" class="btn btn-primary refresh-form">Add</button>
-							</div>
-						</div>
-
-						<div class="span5">
-							<div id="agentslist" class="agents fix-on-scroll clearfix">
-
-
-								<#macro agent_item university_id full_name existing_students=[]>
-									<div class="drag-target well clearfix agent-${university_id}">
-										<div class="agent-header">
-											<a href="#" class="delete pull-right" data-toggle="tooltip" title="Remove ${full_name}">
-												<i class="icon-remove icon-large"></i>
-											</a>
-
-											<#local popoverHeader>${full_name}'s ${relationshipType.studentRole}s</#local>
-
-											<h4 class="name">
-												${full_name}
-											</h4>
-
-											<div class="well-count">
-												<#local count = existing_students?size />
-												<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
-
-												<a id="show-list-${university_id}" class="show-list" title="View students" data-container=".agent-${university_id}" data-title="${popoverHeader}" data-placement="left"><i class="icon-edit"></i></a>
-											</div>
-										</div>
-
-										<ul class="drag-list hide" data-bindpath="mapping[${university_id}]">
-											<#list existing_students as student>
-												<@student_item student "mapping[${university_id}][${student_index}]" />
-											</#list>
-										</ul>
-									</div>
-								</#macro>
-
-								<#list allocateStudentsToRelationshipCommand.mapping?keys?sort_by("lastName") as agent>
-									<#assign existingStudents = mappingById[agent.universityId]![] />
-
-									<@agent_item agent.universityId agent.fullName existingStudents />
-								</#list>
-							</div>
-						</div>
-					</div>
 				</div>
 
-						<div class="submit-buttons fix-footer">
-							<button type="submit" class="btn btn-primary">Continue</button>
-							<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
-						</div>
+				<div class="span6 entities">
+					<div class="header-with-tooltip">
+						<h3>${relationshipType.description}s</h3>
+						<span><@fmt.p allocated?size "${relationshipType.description}" /> found</span>
+					</div>
+
+					<div class="student-filter btn-group-group well well-small">
+						<#assign placeholder = "All ${relationshipType.description}s" />
+						<#assign currentfilter><@current_filter_value "entityTypes" placeholder; entityType>${command.allEntityTypesLabels[entityType]}</@current_filter_value></#assign>
+						<@filter path="entityTypes" placeholder=placeholder currentFilter=currentfilter allItems=command.allEntityTypes validItems=command.allEntityTypes cssClass="wide"; entityType, isValid>
+							<input type="checkbox" name="${status.expression}" value="${entityType}" data-short-value="${command.allEntityTypesLabels[entityType]}"
+								${command.entityTypes?seq_contains(entityType)?string('checked','')}
+							>
+							${command.allEntityTypesLabels[entityType]}
+						</@filter>
+
+						<button class="btn btn-mini apply" type="submit">Apply</button>
+
+						<br /><br />
+
+						<button type="button" class="btn" data-toggle="modal" data-target="#add-agents">
+							Add ${relationshipType.agentRole}s</button>
+					</div>
+
+					<button class="btn remove-all" name="action" value="${commandActions.RemoveFromAll}" type="submit" title="You need to select some personal tutors from which to remove students">
+						<i class="icon-arrow-left"></i> Remove all students from selected ${relationshipType.description}(s)
+					</button>
+
+					<br /> <br />
+
+					<table class="table table-condensed table-bordered table-striped table-hover scrollable-tbody">
+						<thead >
+						<tr>
+							<th class="check for-check-all"></th>
+							<th class="full-name sortable">${relationshipType.description}s name</th>
+							<th class="counter sortable">Students</th>
+							<th class="edit"></th>
+						</tr>
+						</thead>
+						<tbody>
+							<#list allocated?sort_by("sortName") as entityData>
+								<tr data-entity="${entityData.entityId}" <#if command.expanded[entityData.entityId]!false>class="expanded"</#if>>
+									<td class="check"><input type="checkbox" name="entities" value="${entityData.entityId}" /></td>
+									<td class="full-name" data-sortby="${entityData.sortName}">${entityData.displayName}</td>
+									<td class="counter">${entityData.students?size}</td>
+									<td class="toggle">
+										<i title="Edit students allocated to this ${relationshipType.agentRole}" class="icon-edit icon-large icon-fixed-width <#if !entityData.students?has_content>icon-muted</#if>"></i>
+										<input type="hidden" name="expanded[${entityData.entityId}]" value="${(command.expanded[entityData.entityId]!false)?string}" />
+									</td>
+								</tr>
+								<#list entityData.students?sort_by("lastName", "firstName") as studentData>
+									<tr data-forentity="${entityData.entityId}" class="forentity <#if !studentData_has_next>last</#if>">
+										<td class="student" colspan="3">${studentData.firstName} ${studentData.lastName} (${studentData.universityId})  <@pl.profile_link studentData.universityId /></td>
+										<td class="remove">
+											<button title="Remove" class="btn btn-link" type="submit" name="removeSingleCombined" value="removeSingle-${entityData.entityId}-${studentData.universityId}"><i class="icon-remove icon-large icon-fixed-width"></i></button>
+										</td>
+									</tr>
+								</#list>
+							</#list>
+						</tbody>
+					</table>
+
+				</div>
+			</div>
+
+			<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 id="add-agents-label">Add ${relationshipType.agentRole}s</h3>
+				</div>
+
+				<div class="modal-body">
+					<p>
+						Lookup ${relationshipType.agentRole}s by typing their names, usercodes or university IDs below, then click <code>Add</code>.
+					</p>
+
+					<@form.labelled_row "additionalEntityUserIds" "${relationshipType.agentRole?cap_first}s">
+						<@form.flexipicker path="additionalEntityUserIds" placeholder="User name" membersOnly="true" list=true multiple=true />
+					</@form.labelled_row>
+				</div>
+
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" name="action" value="${commandActions.AddAdditionalEntities}">Add</button>
+				</div>
+			</div>
+		</@f.form>
+
+		<@f.form commandName="command" action="${previewFormAction}" method="POST" cssClass="form-inline preview">
+			<#list command.additions?keys as entity>
+				<#list command.additions[entity] as student>
+				<input type="hidden" name="additions[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.removals?keys as entity>
+				<#list command.removals[entity] as student>
+				<input type="hidden" name="removals[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.additionalEntities as entity>
+				<input type="hidden" name="additionalEntities" value="${entity}" />
+			</#list>
+			<input type="hidden" name="allocationType" value="${allocationTypes.Add}" />
+
+			<div class="submit-buttons fix-footer">
+				<button type="submit" class="btn btn-primary">Save</button>
+				<a href="<@routes.home />" class="btn">Cancel</a>
+			</div>
+		</@f.form>
+	</div>
+
+	<div class="tab-pane" id="allocatestudents-tab2">
+		<@f.form commandName="uploadCommand" action="${uploadFormAction}" method="POST" cssClass="form-inline" enctype="multipart/form-data">
+			<#list command.additions?keys as entity>
+				<#list command.additions[entity] as student>
+					<input type="hidden" name="additions[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.removals?keys as entity>
+				<#list command.removals[entity] as student>
+					<input type="hidden" name="removals[${entity}]" value="${student}" />
+				</#list>
+			</#list>
+			<#list command.additionalEntities as entity>
+				<input type="hidden" name="additionalEntities" value="${entity}" />
+			</#list>
+
+			<#assign introText>
+				<p>The spreadsheet must be in <samp>.xlsx</samp> format (created in Microsoft Excel 2007 or newer, or another compatible spreadsheet application). You can download a template spreadsheet which is correctly formatted, ready for completion.<p>
+				<p>The spreadsheet must contain two columns, headed:<p>
+				<ul>
+					<li><b>student_id</b> - contains the student's University ID number (also known as the library card number)</li>
+					<li><b>agent_id</b> - contains the ${relationshipType.agentRole}'s University ID number</li>
+				</ul>
+				<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
+				<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
+			</#assign>
+
+			<p>You can set ${relationshipType.agentRole}s for many students at once by uploading a spreadsheet.
+				<a href="#"
+				   id="agent-intro"
+				   class="use-introductory"
+				   data-hash="${introHash("agent-intro")}"
+				   data-title="${relationshipType.agentRole} spreadsheet"
+				   data-trigger="click"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-content="${introText}"><i class="icon-question-sign"></i></a></p>
+
+			<ol>
+				<li>
+					<button type="submit" class="btn" name="templateWithChanges" value="true"><i class="icon-download"></i> Download a template spreadsheet</button>
+					<br />
+					This will be prefilled with the names and University ID numbers of students and their ${relationshipType.agentRole} (if they have one) in ${department.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+					<br /><br />
+					<div class="alert alert-info">
+						<p>This will include any changes made in the drag and drop tab. You can also <a href="<@routes.relationship_template department relationshipType />">download a template without these changes</a>.</p>
+					</div>
+				</li>
+				<li><strong>Allocate students</strong> to ${relationshipType.agentRole}s using the dropdown menu in the <strong>${relationshipType.agentRole?cap_first} name</strong> column or by typing a ${relationshipType.agentRole}'s University ID into the <strong>agent_id</strong> column. The <strong>agent_id</strong> field will be updated with the University ID for that ${relationshipType.agentRole} if you use the dropdown.</li>
+				<li><strong>Save</strong> your updated spreadsheet.</li>
+				<li><@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" ><input type="file" name="file.upload"  /> </@form.labelled_row></li>
+			</ol>
 
 
-				</div><!-- end fix-area -->
+			<div class="submit-buttons">
+				<button class="btn btn-primary btn-large" name="doPreviewSpreadsheetUpload"><i class="icon-upload icon-white"></i> Upload</button>
+			</div>
+		</@f.form>
+	</div>
+</div>
 
-				</div><!-- end 1st tab -->
-
-				<div class="tab-pane" id="allocatestudents-tab2">
-					<#include "upload_form.ftl" />
-				</div><!-- end 2nd tab-->
-
-			</div><!-- end tab-content -->
-
-		</div> <!-- end tabbable -->
-
-	</@f.form>
-
-	<script type="text/javascript">
-		(function($) {
-
-			// TAB-2627
-			$('.tabbable ul li').show();
-
-			<!-- TAB-1266 - warning popup for 'Remove All' button -->
-			$('body').on('click','.popover #confirm-remove-all', function() {
-				$('#remove-all-tutors').trigger('click');
-				$(this).closest('.popover').find('.close').trigger('click');
-			});
-
-			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
-			$('#studentslist').css('min-height', function() {
-				return $('#agentslist').outerHeight();
-			});
-
-			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
-			var singleColumnDragTargetHeight =  $('#agentslist .drag-target').outerHeight(true);
-
-			$(window).scroll(function() {
-				fixHeaderFooter.fixDirectionIcon();
-				fixHeaderFooter.fixTargetList('#agentslist'); // eg. personal tutors column
-			});
-
-			// onload reformat agents layout
-			formatAgentsLayout();
-
-			// debounced on window resize, reformat agents layout...
-			on_resize(formatAgentsLayout);
-
-			// when new agents are added, reformat agents layout...
-			$('#add-agents').on('hidden', formatAgentsLayout());
-
-			function formatAgentsLayout() {
-				var agentslist = $('#agentslist');
-				var heightOfSingleColumnList = agentslist.find('.drag-target').length * singleColumnDragTargetHeight;
-
-				if(agentslist.height() > fixHeaderFooter.viewableArea()) {
-					agentslist.addClass('drag-list-two-col');
-				} else if(fixHeaderFooter.viewableArea() > heightOfSingleColumnList) {
-					agentslist.removeClass('drag-list-two-col');
-				}
-			}
-
-
-			$('.btn.refresh-form').on('click', function(e) {
-				var $form = $(e.target).closest('form');
-				$form.prepend($('<input />').attr({type: 'hidden', name: 'action', value: 'refresh'}));
-				$form.submit();
-			});
-
-			$('#agentslist .agent-header > .delete').on('click', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				// Get the drag and drop instance
-				var dnd = $('.tabula-dnd').data('tabula-dnd');
-				var $container = $(this).closest('.drag-target')
-				var $dragList = $container.find('.drag-list');
-
-				dnd.batchMove([{
-					target: $('.return-list'),
-					items: $dragList.find('li'),
-					sources: $dragList
-				}]);
-
-				$container.remove();
-				formatAgentsLayout(); // after deleting item from list, re-format the grid layout for the agents
-			});
-
-			// When the return list has changed, make sure the filter is re-run
-			$('.return-list').on('changed.tabula', function(e) {
-				// Make sure it exists before doing it
-				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');
-				if (filter) {
-					filter.filter();
-				}
-			});
-
-
-			// debounced on_resize to avoid retriggering while resizing window
-			function on_resize(c,t) {
-				onresize = function() {
-					clearTimeout(t);
-					t = setTimeout(c,100)
-				};
-				return c;
-			}
-
-		})(jQuery);
-	</script>
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 </#escape>

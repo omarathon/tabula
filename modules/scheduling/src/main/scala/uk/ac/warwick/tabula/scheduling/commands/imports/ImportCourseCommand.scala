@@ -52,7 +52,7 @@ class ImportCourseCommand(info: CourseInfo)
 			courseDao.saveOrUpdate(course)
 		}
 
-		val result = 
+		val result =
 			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
 			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
 			else ImportAcademicInformationCommand.ImportResult()

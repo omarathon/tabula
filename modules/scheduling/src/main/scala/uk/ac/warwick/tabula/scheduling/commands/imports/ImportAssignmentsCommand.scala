@@ -38,7 +38,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	var assignmentImporter = Wire[AssignmentImporter]
 	var assessmentMembershipService = Wire[AssessmentMembershipService]
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	
+
 	val ImportGroupSize = 100
 
 	def applyInternal() {
@@ -176,7 +176,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		}.getOrElse(Seq())
 	}
 
-	
+
 	def saveGroups(groups: Seq[UpstreamAssessmentGroup]) = transactional() {
 		logger.debug("Importing " + groups.size + " assessment groups")
 		benchmark("Import " + groups.size + " groups") {

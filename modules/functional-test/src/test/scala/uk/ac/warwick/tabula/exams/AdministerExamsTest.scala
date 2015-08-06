@@ -3,9 +3,12 @@ package uk.ac.warwick.tabula.exams
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
+import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 
 class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen {
+
+	val year = FunctionalTestAcademicYear.currentSITS.startYear
 
 	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
 
@@ -31,7 +34,7 @@ class AdministerExamsTest extends ExamFixtures
 			click on createNewExam
 
 			Then("This should show the create exam page")
-			currentUrl should include("/admin/module/xxx01/2014/exams/new")
+			currentUrl should include(s"/admin/module/xxx01/$year/exams/new")
 			pageSource contains "Create exam for" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -40,7 +43,7 @@ class AdministerExamsTest extends ExamFixtures
 			submit()
 
 			Then("The user should be returned to the department module page")
-			currentUrl should include("/admin/department/xxx/2014")
+			currentUrl should include(s"/admin/department/xxx/$year")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
 
@@ -70,7 +73,7 @@ class AdministerExamsTest extends ExamFixtures
 			submit()
 
 			Then("The user should be returned to the department module page")
-			currentUrl should include("/admin/department/xxx/2014")
+			currentUrl should include(s"/admin/department/xxx/$year")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
 

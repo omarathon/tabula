@@ -36,7 +36,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def saveOrUpdate(teachingInfo: ModuleTeachingInformation) = session.saveOrUpdate(teachingInfo)
 	def delete(teachingInfo: ModuleTeachingInformation) = session.delete(teachingInfo)
 
-	def getByCode(code: String) = 
+	def getByCode(code: String) =
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 
 	def getAllByCodes(codes: Seq[String]): Seq[Module] = {
@@ -52,7 +52,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.add(is("module.code", moduleCode.toLowerCase))
 			.add(is("department.code", departmentCode.toLowerCase))
 			.uniqueResult
-	
+
 	def getById(id: String) = getById[Module](id)
 
 	def stampMissingFromImport(staleModuleCodes: Seq[String]) = {

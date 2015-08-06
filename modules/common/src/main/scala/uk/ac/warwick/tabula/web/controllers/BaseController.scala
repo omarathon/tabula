@@ -84,12 +84,21 @@ trait ControllerImports {
 	final val PUT = RequestMethod.PUT
 	final val HEAD = RequestMethod.HEAD
 	final val POST = RequestMethod.POST
+	final val DELETE = RequestMethod.DELETE
 
 	type RequestMapping = org.springframework.web.bind.annotation.RequestMapping
 }
 
 trait PreRequestHandler {
 	def preRequest
+}
+
+trait MessageResolver {
+	/**
+	 * Resolve a message from messages.properties. This is the same way that
+	 * validation error codes are resolved.
+	 */
+	def getMessage(key: String, args: Object*): String
 }
 
 /**
@@ -104,7 +113,8 @@ abstract class BaseController extends ControllerMethods
 	with Daoisms
 	with StringUtils
 	with ControllerImports
-	with PreRequestHandler {
+	with PreRequestHandler
+	with MessageResolver {
 
 	@Required @Resource(name = "validator") var globalValidator: Validator = _
 

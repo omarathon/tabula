@@ -30,9 +30,9 @@ sealed trait MemberOrUser{
 	def email: String
 	def asUser: User
 	def asMember: Option[Member]
-	
+
 	override def hashCode = universityId.hashCode
-	
+
 	override def equals(other: Any) = other match {
 		case other: MemberOrUser => other.universityId == universityId
 		case _ => false

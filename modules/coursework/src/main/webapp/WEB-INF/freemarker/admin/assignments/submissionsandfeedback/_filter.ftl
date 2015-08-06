@@ -5,7 +5,7 @@
 		<@f.select path="filter" cssClass="span4">
 			<@f.options items=allFilters itemValue="name" itemLabel="description" />
 		</@f.select>
-		
+
 		<#list allFilters as filter>
 			<#if filter.parameters?size gt 0>
 				<fieldset data-filter="${filter.name}" class="form-horizontal filter-options"<#if filter.name != submissionAndFeedbackCommand.filter.name> style="display: none;"</#if>>
@@ -23,7 +23,7 @@
 							</#if>
 						</@form.labelled_row>
 					</#list>
-					
+
 					<@form.row>
 						<@form.field>
 							<button class="btn btn-primary" type="submit">Filter</button>
@@ -33,16 +33,16 @@
 			</#if>
 		</#list>
 	</div>
-	
+
 	<script type="text/javascript">
 		jQuery(function($) {
 			$('.filter-form select[name=filter]').on('keyup change', function() {
 				var $select = $(this);
 				var val = $select.val();
-				
+
 				var $options = $select.closest('form').find('.filter fieldset[data-filter="' + val + '"]');
 				var $openOptions = $select.closest('form').find('.filter .filter-options:visible');
-				
+
 				var cb = function() {
 					if ($options.length) {
 						$options.slideDown();
@@ -50,7 +50,7 @@
 						$select.closest('form').submit();
 					}
 				};
-				
+
 				if ($openOptions.length) {
 					$openOptions.slideUp('fast', cb);
 				} else {

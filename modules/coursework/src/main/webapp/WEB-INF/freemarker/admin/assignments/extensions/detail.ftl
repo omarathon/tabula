@@ -100,7 +100,7 @@
 							</ul>
 						</dd>
 					</#if>
-					
+
 					<#if student??>
 						<#if student.mobileNumber??><dt>Mobile number</dt><dd>${student.mobileNumber}</dd></#if>
 						<#if student.phoneNumber?? && student.phoneNumber != student.mobileNumber!""><dt>Telephone number</dt><dd>${student.phoneNumber}</dd></#if>
@@ -110,7 +110,7 @@
 							Further details for this user are not available in Tabula.
 						</div>
 					</#if>
-					
+
 				</dl>
 			</details>
 

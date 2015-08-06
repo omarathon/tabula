@@ -17,22 +17,22 @@ object TimeBuilder {
 	private val formatterMap = new DateTimeFormatterCache
 
 	/* called with just a DateTime - use the default arguments */
-	def format(time: ReadablePartial): String = 
+	def format(time: ReadablePartial): String =
 		format(time=time,
 			twentyFourHour=true,
 			includeSeconds=false)
 
 	/* everything is specified, including whether minutes should be included */
-	def format(time: ReadablePartial, 
+	def format(time: ReadablePartial,
 			twentyFourHour: Boolean,
 			includeSeconds: Boolean) = {
 		val pattern = new StringBuilder
-		
+
 		if (twentyFourHour) pattern.append("HH:mm")
 		else pattern.append("h:mm")
-		
+
 		if (includeSeconds) pattern.append(":ss")
-		
+
 		if (!twentyFourHour) pattern.append("a")
 
 		// We convert the output to lowercase because we don't want AM/PM, we want am/pm
@@ -46,13 +46,13 @@ class TimeBuilder extends TemplateMethodModelEx {
 
 	/** For Freemarker */
 	override def exec(list: JList[_]) = {
-		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
-		
+		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+
 		val time = args.head match {
 			case partial: ReadablePartial => partial
 			case _ => throw new IllegalArgumentException("Bad time argument")
 		}
-		
+
 		args.tail match {
 			case Seq(twentyFourHour: JBoolean, secs: JBoolean) =>
 				format(time=time,

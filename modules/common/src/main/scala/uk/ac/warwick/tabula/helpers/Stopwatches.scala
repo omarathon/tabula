@@ -14,7 +14,7 @@ object Stopwatches {
 				stopwatch.stop()
 			}
 		}
-		
+
 		def isFinished = !stopwatch.hasRunningTask()
 	}
 

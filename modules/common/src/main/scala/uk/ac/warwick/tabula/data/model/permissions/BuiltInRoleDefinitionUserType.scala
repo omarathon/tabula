@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDefinition, String] {
-	
+
 	val relationshipService = promise { Wire[RelationshipService] }
 
 	val basicType = StandardBasicTypes.STRING
@@ -30,7 +30,7 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 			case "SupervisorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(supervisor)"
 			case _ => legacy
 		}
-		
+
 		string match {
 			case r"([A-Za-z]+)${roleName}\(\*\)" => {
 				SelectorBuiltInRoleDefinition.of(roleName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
@@ -40,13 +40,13 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 					case Some(selector) => selector
 					case _ => relationshipService.get.getStudentRelationshipTypeByUrlPart(id).get // Fall back to url, just in case
 				}
-				
+
 				SelectorBuiltInRoleDefinition.of(roleName, selector)
 			}
 			case _ => RoleDefinition.of(string)
 		}
 	}
-	
+
 	override def convertToValue(definition: BuiltInRoleDefinition) = definition match {
 		case defn: SelectorBuiltInRoleDefinition[_] => "%s(%s)".format(defn.getName, defn.selector.id)
 		case _ => definition.getName

@@ -335,5 +335,5 @@ class CreateMonitoringPointCommandTest extends TestBase with Mockito {
 			errors.getFieldError("assignmentSubmissionAssignments") should not be null
 		}
 	}
-	
+
 }

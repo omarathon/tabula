@@ -21,7 +21,7 @@ import uk.ac.warwick.spring.Wire
 @RequestMapping(Array("/module/{module}/{assignment}/rate"))
 @Controller
 class FeedbackRatingController extends CourseworkController {
-	
+
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
@@ -29,11 +29,11 @@ class FeedbackRatingController extends CourseworkController {
 	@ModelAttribute def cmd(
 		@PathVariable("assignment") assignment: Assignment,
 		@PathVariable("module") module: Module,
-		user: CurrentUser) = 
+		user: CurrentUser) =
 		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(command: RateFeedbackCommand): Mav = 
+	def form(command: RateFeedbackCommand): Mav =
 		Mav("submit/rating").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))

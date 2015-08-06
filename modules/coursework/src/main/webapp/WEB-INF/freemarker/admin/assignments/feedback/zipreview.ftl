@@ -22,11 +22,11 @@
 </#if>
 
 <@spring.bind path="items">
-<#assign itemsList=status.actualValue /> 
+<#assign itemsList=status.actualValue />
 <p>
 	<#if itemsList?size gt 0>
 		I've ${verbed_your_noun} and I found feedback for <@fmt.p itemsList?size "student"/>.
-		
+
 		<#if hasErrors>
 		However, there were some problems with its contents, which are shown below.
 		You'll need to correct these problems with the zip and try again.
@@ -86,7 +86,7 @@
 </ul>
 </div>
 </#if>
-	
+
 <@spring.bind path="items">
 <#assign itemList=status.actualValue />
 <#if itemList?size gt 0>

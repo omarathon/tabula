@@ -12,7 +12,7 @@ object TurnitinDates {
 
 	def gmtTimestamp = {
 		val s = timestampFormat print DateTime.now
-		s.substring(0, s.length - 1) // Must have only the first digit of the minutes! 
+		s.substring(0, s.length - 1) // Must have only the first digit of the minutes!
 	}
 
 	def yearsFromNow(years: Int) = dateFormat print DateTime.now.plusYears(years)

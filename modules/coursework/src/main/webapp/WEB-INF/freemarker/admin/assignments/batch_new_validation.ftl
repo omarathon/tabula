@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 Included directly in batch_new_select.ftl, and also rendered separately by another
 controller method so that we can validate through AJAX.

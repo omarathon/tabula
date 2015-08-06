@@ -27,7 +27,7 @@ object AuditEventIndexService {
 
 trait AuditEventNoteworthySubmissionsService {
 	final val DefaultMaxEvents = 50
-	
+
 	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents
 }
@@ -43,7 +43,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	def student(user: User) = search(termQuery("students", user.getWarwickId))
 
 	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
-	
+
 	def findPublishFeedbackEvents(dept: Department) = {
 		val searchResults = search(all(
 			termQuery("eventType", "PublishFeedback"),
@@ -63,10 +63,10 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	}
 
 
-	
+
 	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
-		
+
 		val searchResults = search(
 			query = all(termQuery("eventType", "SubmitAssignment"),
 						some(moduleTerms:_*)
@@ -75,7 +75,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			sort = reverseDateSort,
 			last = last,
 			token = token)
-			
+
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
 
@@ -87,9 +87,9 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	).transformAll(toParsedAuditEvents)
 
 
-	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = 
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] =
 		publishFeedbackForStudent(assignment, student.getWarwickId)
-	
+
 	def publishFeedbackForStudent(assignment: Assignment, warwickId: String): Seq[AuditEvent] = search(
 		query = all(
 			termQuery("eventType", "PublishFeedback"),
@@ -98,7 +98,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		)
 	).transformAll(toParsedAuditEvents)
 	.sortBy(_.eventDate).reverse
-	
+
 	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
 		query = all(
 			termQuery("eventType", "SubmitAssignment"),
@@ -107,12 +107,12 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		)
 	).transformAll(toParsedAuditEvents)
 	.sortBy(_.eventDate).reverse
-	
-	
+
+
 
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
-		
+
 		val searchResults = search(
 			query = all(termQuery("eventType", "SubmitAssignment"),
 						termQuery("submissionIsNoteworthy", "true"),
@@ -122,7 +122,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			sort = reverseDateSort,
 			last = last,
 			token = token)
-		
+
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
 
@@ -142,7 +142,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 				)
 			)
 		).sortBy(_.eventDate).reverse
-		
+
 		// take most recent event and find submissions made before then.
 		val submissions1: Seq[Submission] = allDownloaded.headOption match {
 			case None => Nil
@@ -173,7 +173,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
 			})
 	}
-	
+
 	def latestAssignmentEvent(assignment: Assignment, eventName: String) = {
 		search(all(
 			termQuery("eventType", "ViewOnlineFeedback"),
@@ -210,7 +210,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			.groupBy( _._1)
 			.map(x => x._2.maxBy(_._2))
 			.toSeq
-			
+
 	def whoDownloadedFeedback(assignment: Assignment) =
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
@@ -221,7 +221,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			.filterNot { _ == null }
 			.distinct
 
-	def mapToAssignments(results: RichSearchResults) = 
+	def mapToAssignments(results: RichSearchResults) =
 		results.transformAll(toParsedAuditEvents)
 		.flatMap(_.assignmentId)
 		.flatMap(assignmentService.getAssignmentById)
@@ -312,13 +312,13 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 
 		new PerFieldAnalyzerWrapper(token, mappings)
 	}
-	
+
 	override val IdField = "id"
 	override def getId(item: AuditEvent) = item.id.toString
-	
+
 	override val UpdatedDateField = "eventDate"
 	override def getUpdatedDate(item: AuditEvent) = item.eventDate
-	
+
 	override def listNewerThan(startDate: DateTime, batchSize: Int) =
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
@@ -430,7 +430,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 			max = count)
 		docs.transformAll(toItems)
 	}
-	
+
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
 		case Some(value: String) =>
 			doc add plainStringField(field, value, isStored = false)
@@ -438,7 +438,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 			doc add plainStringField(field, value.toString, isStored = false)
 		case _ => // missing or not a string
 	}
-	
+
 	private def addSequenceToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field).collect {
 		case ids: JList[_] => doc add seqField(field, ids.asScala)
 		case ids: Seq[_] => doc add seqField(field, ids)
@@ -446,14 +446,14 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		case other: AnyRef => logger.warn("Collection field " + field + " was unexpected type: " + other.getClass.getName)
 		case _ =>
 	}
-	
+
 	val SingleDataFields = Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")
 	val SequenceDataFields = Seq("students", "attachments")
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {
 		SingleDataFields.foreach(addFieldToDoc(_, data, doc))
-		
+
 		// sequence-type fields
 		SequenceDataFields.foreach(addSequenceToDoc(_, data, doc))
 	}

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.services.jobs._
 
 trait JobTestHelp {
 	def createJobs: Array[Job]
-	
+
 	val dao = new MockJobDao
 	lazy val service = {
 		val s = new JobService
@@ -13,7 +13,7 @@ trait JobTestHelp {
 		s.jobs foreach { _.jobService = s }
 		s
 	}
-	
+
 	lazy final val allJobs: Array[Job] = createJobs
-	
+
 }

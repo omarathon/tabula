@@ -10,27 +10,27 @@ import uk.ac.warwick.tabula.data.MarkingWorkflowDao
 import uk.ac.warwick.tabula.permissions._
 
 class DeleteMarkingWorkflowCommand(val department: Department, val markingWorkflow: MarkingWorkflow) extends Command[Unit] with SelfValidating {
-	
+
 	mustBeLinked(markingWorkflow, department)
 	PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
-	
+
 	var dao = Wire.auto[MarkingWorkflowDao]
-	
+
 	override def applyInternal() {
 		transactional() {
 			department.removeMarkingWorkflow(markingWorkflow)
 		}
 	}
-	
+
 	def validate(errors: Errors) {
 		// can't delete a markingWorkflow that's being referenced by assignments.
 		if (!dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).isEmpty) {
 			errors.reject("markingWorkflow.inuse")
 		}
 	}
-	
+
 	override def describe(d: Description) {
-		
+
 	}
-	
+
 }

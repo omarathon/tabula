@@ -8,10 +8,10 @@ package uk.ac.warwick.tabula.helpers
 trait Products {
 	/** Is the first value of this Product2 null? */
 	def nullKey[A,B](p:Product2[A,B]) = p._1 == null
-	
+
 	/** Is the second value of this Product2 null?
 	 *  Useful for filtering a Map:
-	 * 
+	 *
 	 *	  map.filterNot(nullValue)
 	 */
 	def nullValue[A,B](p:Product2[A,B]) = p._2 == null

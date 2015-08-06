@@ -37,17 +37,17 @@
 	<#assign is_alumni=user.alumni />
 	<#assign is_marker=nonempty(assignmentsForMarking) />
 	<#assign is_admin=(nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)) />
-	
+
 	<#if !is_alumni && !is_student && !is_marker && !is_admin> <#-- Don't just show an empty page -->
 		<p class="lead muted">
 			This is a service for managing coursework assignments and feedback
 		</p>
-		
+
 		<p>
 			You do not currently have permission to manage any assignments or feedback. Please contact your
 			departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
 		</p>
-				
+
 		<script type="text/javascript">
 			jQuery(function($) {
 				$('#email-support-link').on('click', function(e) {

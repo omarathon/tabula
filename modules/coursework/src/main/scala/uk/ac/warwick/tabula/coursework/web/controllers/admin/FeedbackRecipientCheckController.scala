@@ -19,8 +19,8 @@ import uk.ac.warwick.tabula.data.model.Assignment
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class FeedbackRecipientCheckController extends CourseworkController {
-	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new FeedbackRecipientCheckCommand(module, assignment)
 
 	@RequestMapping()

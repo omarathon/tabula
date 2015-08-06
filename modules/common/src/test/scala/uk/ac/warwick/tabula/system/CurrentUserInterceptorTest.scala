@@ -18,37 +18,37 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions.Permission
 
 class CurrentUserInterceptorTest extends TestBase with Mockito {
-	
+
 	val interceptor = new CurrentUserInterceptor
-	
+
 	val roleService = mock[RoleService]
 	val profileService = mock[ProfileService]
 	val departmentService = mock[ModuleAndDepartmentService]
 	val userLookup = new MockUserLookup
-	
+
 	interceptor.roleService = roleService
 	interceptor.userLookup = userLookup
 	interceptor.profileService = profileService
 	interceptor.departmentService = departmentService
 
 	departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns (Set())
-	
+
 	@Test def foundUser {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)
@@ -56,24 +56,24 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (false)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def foundUserWithProfile {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
-		
+
 		val member = mock[Member]
 		profileService.getMemberByUser(user, true, true) returns (Some(member))
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)
@@ -81,23 +81,23 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (false)
 		currentUser.profile should be (Some(member))
 	}
-	
+
 	@Test def notFoundUser {
 		val user = new User("cuscav")
 		user.setFoundUser(false)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser.isInstanceOf[AnonymousUser] should be (true)
 		currentUser.apparentUser.isInstanceOf[AnonymousUser] should be (true)
 		currentUser.god should be (false)
@@ -105,30 +105,30 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (false)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def masquerading {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		val masque = new User("cusebr")
 		masque.setFoundUser(true)
-		
+
 		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (true)
 		userLookup.users += ("cusebr" -> masque)
-		
+
 		profileService.getMemberByUser(masque, true, true) returns (None)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.masqueradeCookie, "cusebr"))
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (masque)
 		currentUser.god should be (false)
@@ -136,30 +136,30 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (false)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def masqueradeAttemptButNotMasquerader {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		val masque = new User("cusebr")
 		masque.setFoundUser(true)
-		
+
 		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (false)
 		userLookup.users += ("cusebr" -> masque)
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.masqueradeCookie, "cusebr"))
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)
@@ -167,25 +167,25 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (false)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def sysadmin {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (true)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)
@@ -193,26 +193,26 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (true)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def god {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (true)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.godModeCookie, "true"))
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (true)
@@ -220,26 +220,26 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		currentUser.sysadmin should be (true)
 		currentUser.profile should be ('empty)
 	}
-	
+
 	@Test def godNotSysadmin {
 		val user = new User("cuscav")
 		user.setFoundUser(true)
-		
+
 		roleService.hasRole(isA[CurrentUser], isEq(Sysadmin())) returns (false)
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.godModeCookie, "true"))
-		
+
 		profileService.getMemberByUser(user, true, true) returns (None)
-		
+
 		val resp = new MockHttpServletResponse
-		
+
 		interceptor.preHandle(req, resp, null) should be (true)
-		
+
 		val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
 		currentUser should not be (null)
-		
+
 		currentUser.realUser should be (user)
 		currentUser.apparentUser should be (user)
 		currentUser.god should be (false)

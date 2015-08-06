@@ -14,11 +14,11 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions._
 
 class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
-	
+
 	PermissionCheck(Permissions.GodMode)
-	
+
 	var action: String = _
-	
+
 	def applyInternal() = {
 		if (action == "remove") Some(newCookie(false))
 		else Some(newCookie(true))
@@ -28,7 +28,7 @@ class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 		name = CurrentUser.godModeCookie,
 		value = isGod.toString,
 		path = "/")
-	
+
 	def describe(d: Description) = d.properties(
 		"action" -> action
 	)

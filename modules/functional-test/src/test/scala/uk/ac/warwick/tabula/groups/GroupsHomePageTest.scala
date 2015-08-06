@@ -21,7 +21,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
 
 		When("I Log in as the student and view the groups page")
-		signIn as(P.Student1)  to (Path("/groups"))
+		signIn as(P.Student1)  to (Path("/groups/"))
 
 		Then("I should not see the unreleased groupset")
 		val groupsPage = new GroupsHomePage
@@ -42,7 +42,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
 
 		When("I Log in as the student and view the groups page")
-		signIn as(P.Student1)  to (Path("/groups"))
+		signIn as(P.Student1)  to (Path("/groups/"))
 
 		Then("I should see the released groupset")
 		val groupsPage = new GroupsHomePage
@@ -53,7 +53,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 	"Department Admin" should "be offered a link to the department's group pages" in {
 		Given("the administrator is logged in and viewing the groups home page")
-			signIn as(P.Admin1)  to (Path("/groups"))
+			signIn as(P.Admin1)  to (Path("/groups/"))
 			pageTitle should be ("Tabula - Small Group Teaching")
 
 	  When("the administrator clicks to view the admin page")

@@ -20,19 +20,19 @@ class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 		val map = ReflectionHelper.allNotifications
 		map.contains("SubmissionDueGeneral") should be (true)
 	}
-	
+
 	@Test def allPermissions = {
-		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be (true) 
+		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be (true)
 	}
-	
+
 	@Test def groupedPermissions = {
-		ReflectionHelper.groupedPermissions("Module").contains(("Module.Create", "Module.Create")) should be (true) 
+		ReflectionHelper.groupedPermissions("Module").contains(("Module.Create", "Module.Create")) should be (true)
 	}
 
 }
 
 class CatchAllUrlStreamHandlerFactory extends URLStreamHandlerFactory {
-	override def createURLStreamHandler(protocol: String) = 
+	override def createURLStreamHandler(protocol: String) =
 		if ("vfszip".equals(protocol) || "zip".equals(protocol)) new CatchAllUrlHandler
 		else null
 }

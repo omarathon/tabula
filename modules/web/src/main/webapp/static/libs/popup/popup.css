@@ -14,7 +14,7 @@
 .WPopupGlass,
 .WPopupBox,
 .WPopupBoxContent {
-  position: absolute; 
+  position: absolute;
   z-index: 1000;
 }
 
@@ -50,7 +50,7 @@
 }
 
 .popup a:hover {
-	text-decoration:underline;	
+	text-decoration:underline;
 }
 
 .WPopupCloseButton img {

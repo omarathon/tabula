@@ -28,7 +28,7 @@ module Cucumber
         if String === regexp
           p = Regexp.escape(regexp)
           p = p.gsub(/\\\$\w+/, '(.*)') # Replace $var with (.*)
-          regexp = Regexp.new("^#{p}$") 
+          regexp = Regexp.new("^#{p}$")
         end
         @rb_language, @regexp, @proc = rb_language, regexp, proc
         @rb_language.available_step_definition(regexp_source, file_colon_line)
@@ -66,7 +66,7 @@ module Cucumber
       def file_colon_line
         @proc.file_colon_line
       end
-    
+
       def file
         @file ||= file_colon_line.split(':')[0]
       end

@@ -1,12 +1,12 @@
 TextListController = function (target, formField){
 	this.newItemHead = '<li class="item"><span>';
 	this.newItemTail = '</span><a class="close" href="#"></a></li>';
-	
+
 	this.formField = jQuery(formField);
-	
+
 	this.container = jQuery(target);
 	this.inputContainer = jQuery(".inputContainer", this.container);
-	
+
 	this.seperator = ',';
 	this.minInputWidth = 75; // px
 	this.preventDuplicates = false;
@@ -23,17 +23,17 @@ TextListController.prototype = {
 
 	bindInputBoxEvents: function (){
 		var self = this;
-		
+
 		jQuery("input", this.inputContainer).on('keyup', function(event){
 			if(event.keyCode == "32" || event.keyCode == "13"){ //' ' or Enter
 		        var newItem = jQuery(this).val();
 		        newItem = self.sanitiseInput(newItem);
-		        
+
 		        // If it was a space, remove the last item
 		        if(event.keyCode == "32")
 		        	newItem = newItem.substring(0, newItem.length-1);
-		        	
-		        	
+
+
 				if(self.preventDuplicates && self.isDuplicate(newItem)){
 					jQuery(this).val(newItem);
 				} else {
@@ -49,7 +49,7 @@ TextListController.prototype = {
 		    			items.last().remove();
 						self.syncFormField();
 						self.resizeInputContainer();
-		    		
+
 			    		// Prevent annoying "bip" from being at start of list
 			    		event.stopPropagation();
 			    		event.preventDefault();
@@ -65,7 +65,7 @@ TextListController.prototype = {
 	    		return false;
 			}
 		});
-		
+
 		// if there is any text remaining in the input box when it loses focus convert it into a new item
 		jQuery("input", this.inputContainer).on('focusout', function(event){
 			if(jQuery(this).val() !== ""){
@@ -75,12 +75,12 @@ TextListController.prototype = {
 					jQuery(this).val(newItem);
 				} else {
 					self.addItem(newItem);
-					jQuery(this).val('');	
+					jQuery(this).val('');
 				}
 		    }
 		});
 	},
-	
+
 	bindRemoveItemEvent: function(){
 		var self = this;
 		this.container.on("click", ".item a.close", function(event){
@@ -93,7 +93,7 @@ TextListController.prototype = {
 			event.preventDefault();
 		});
 	},
-	
+
 	initaliseListItems: function(){
 		var items = this.formField.val().split(this.seperator);
 		for(var i=0; i<items.length; i++){
@@ -103,7 +103,7 @@ TextListController.prototype = {
 		}
 		this.resizeInputContainer();
 	},
-	
+
 	syncFormField: function(){
 		this.formField.val(''); //clear the form field
 		var items = jQuery(".item", this.container);
@@ -114,13 +114,13 @@ TextListController.prototype = {
 		});
 		this.formField.val(newValue);
 	},
-	
+
 	addItem: function(text){
 		this.inputContainer.before(this.newItemHead + text + this.newItemTail);
 		this.syncFormField();
 		this.resizeInputContainer();
 	},
-	
+
 	sanitiseInput: function(text){
 		// strip any instances of the separator from the new item
 		var result = text.replace(new RegExp(this.seperator, 'g') , '');
@@ -130,7 +130,7 @@ TextListController.prototype = {
 		}
 		return result;
 	},
-	
+
 	isDuplicate: function(text){
 		var result = false;
 		var items = jQuery(".item", this.container)
@@ -139,7 +139,7 @@ TextListController.prototype = {
 			if(item.find("span").html() == text){
 				item.animate({backgroundColor:'#00AACC'}, 500, function(){
 					item.animate({backgroundColor:'#0074CC'}, 500);
-				}); 
+				});
 				result=true;
 			}
 		});

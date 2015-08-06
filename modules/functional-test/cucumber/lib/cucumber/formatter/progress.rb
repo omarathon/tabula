@@ -23,11 +23,11 @@ module Cucumber
         progress(status)
         @status = status
       end
-      
+
       def before_outline_table(outline_table)
         @outline_table = outline_table
       end
-      
+
       def after_outline_table(outline_table)
         @outline_table = nil
       end

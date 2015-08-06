@@ -14,8 +14,8 @@ class CSVViewTest extends TestBase {
 		val request = new MockHttpServletRequest
 		val response = new MockHttpServletResponse
 		view.render(null, request, response)
-		
+
 		response.getContentAsString.trim should be (text)
 	}
-	
+
 }

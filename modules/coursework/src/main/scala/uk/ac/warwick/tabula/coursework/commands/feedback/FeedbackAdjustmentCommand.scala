@@ -145,7 +145,7 @@ trait FeedbackAdjustmentCommandState {
 
 	var actualMark: String = _
 	var actualGrade: String = _
-	
+
 	var reason: String = _
 	var comments: String = _
 

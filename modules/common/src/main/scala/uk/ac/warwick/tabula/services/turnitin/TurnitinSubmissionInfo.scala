@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 
 /*
  * Typical <object> response when listing submissions
- * 
+ *
    <object>
 		<userid>-1</userid>
 		<firstname>0123001</firstname>
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 		<student_responses>
 		</student_responses>
 	</object>
- * 
+ *
  */
 
 /**
@@ -41,9 +41,9 @@ case class TurnitinSubmissionInfo(
 	val studentPaperOverlap: Option[Int]) {
 	/** If plagiarism checking hasn't been done yet, it will have a score of -1. */
 	def hasBeenChecked = similarityScore != -1
-	
+
 	/** Whether this appears to match up with the given FileAttachment according to our naming conventions,
-	 * which is to extract the ID from the paper title and compare that against the FileAttachment ID. 
+	 * which is to extract the ID from the paper title and compare that against the FileAttachment ID.
 	 */
 	def matches(attachment: FileAttachment) = title == attachment.id
 }

@@ -17,16 +17,16 @@ import scala.collection.JavaConverters._
  */
 class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
 	extends Command[Either[RenderableZip, JobInstance]] with ReadOnly {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
-	
+
 	var assignmentService = Wire[AssessmentService]
 	var zipService = Wire[ZipService]
 	var feedbackDao = Wire[FeedbackDao]
 	var jobService = Wire[JobService]
 
-	
+
 	var filename: String = _
 
 	var students: JList[String] = JArrayList()

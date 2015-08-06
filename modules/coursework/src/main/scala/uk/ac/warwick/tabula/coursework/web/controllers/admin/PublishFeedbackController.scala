@@ -19,7 +19,7 @@ class PublishFeedbackController extends CourseworkController {
 
 	type PublishFeedbackCommand = Appliable[PublishFeedbackCommand.PublishFeedbackResults] with PublishFeedbackCommandState
 	validatesSelf[SelfValidating]
-	
+
 	@ModelAttribute("publishFeedbackCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
 		PublishFeedbackCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 	}

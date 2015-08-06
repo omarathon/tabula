@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.permissions._
 
 class DownloadAttachmentCommand(
-		val module: Module, 
-		val assignment: Assignment, 
+		val module: Module,
+		val assignment: Assignment,
 		val submission: Submission,
 		val student: Option[Member])
 		extends Command[Option[RenderableFile]] with ReadOnly {

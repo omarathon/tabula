@@ -21,7 +21,7 @@ object ListStudentRelationshipTypesCommand {
 
 class ListStudentRelationshipTypesCommandInternal extends CommandInternal[Seq[StudentRelationshipType]] {
 	this: RelationshipServiceComponent =>
-		
+
 	override def applyInternal() = relationshipService.allStudentRelationshipTypes
 }
 

@@ -212,7 +212,7 @@ object Permissions {
 		case object Read extends Permission("View feedback")
 		case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
 	}
-	
+
 	object AssignmentMarkerFeedback {
 		case object Manage extends Permission("Manage marker feedback")
 		case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")

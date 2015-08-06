@@ -22,7 +22,7 @@ class FeedbackTemplateController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
 		val dept = cmd.department
-		
+
 		val model = Mav("admin/feedbackforms/manage-feedback-templates",
 			"department" -> dept
 		)
@@ -45,15 +45,15 @@ class FeedbackTemplateController extends CourseworkController {
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
 class EditFeedbackTemplateController extends CourseworkController {
-	
+
 	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
 		= new EditFeedbackTemplateCommand(dept, template)
-	
+
 	@RequestMapping(method=Array(GET))
 	def edit(cmd:EditFeedbackTemplateCommand, errors:Errors) = {
 		val dept = cmd.department
 		val template = cmd.template
-		
+
 		cmd.id = template.id
 		cmd.name = template.name
 		cmd.description = template.description
@@ -76,13 +76,13 @@ class EditFeedbackTemplateController extends CourseworkController {
 			model
 		}
 	}
-	
+
 }
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
 class DeleteFeedbackTemplateController extends CourseworkController {
-	
+
 	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
 		= new DeleteFeedbackTemplateCommand(dept, template)
 
@@ -90,7 +90,7 @@ class DeleteFeedbackTemplateController extends CourseworkController {
 	def deleteCheck(cmd:DeleteFeedbackTemplateCommand, errors:Errors) = {
 		val template = cmd.template
 		val dept = cmd.department
-		
+
 		cmd.id = template.id
 		val model = Mav("admin/feedbackforms/delete-feedback-template",
 			"department" -> dept,
@@ -106,5 +106,5 @@ class DeleteFeedbackTemplateController extends CourseworkController {
 		val model = Mav("ajax_success").noNavigation()
 		model
 	}
-	
+
 }

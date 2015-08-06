@@ -9,5 +9,5 @@ Uploaded attachments:
 
 <#list submission.allAttachments as attachment>
 - ${attachment.name}
-</#list>  
+</#list>
 </#if>

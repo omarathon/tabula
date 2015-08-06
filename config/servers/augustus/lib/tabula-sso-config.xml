@@ -9,7 +9,7 @@
     <enabled>true</enabled>
     <datasource>java:comp/env/jdbc/TabulaDS</datasource>
   </cluster>
-	<!-- mode can be 'old' or 'new' this defines if the SSOClientFilter should use 
+	<!-- mode can be 'old' or 'new' this defines if the SSOClientFilter should use
 		the old WarwickSSO cookie or the newer SSO-SSC-* cookies -->
 	<mode>new</mode>
 	<origin>
@@ -29,7 +29,7 @@
 		</attributeauthority>
 	</origin>
 	<shire>
-		<!-- To get redirects working properly, pages need to know where to redirect back to after login 
+		<!-- To get redirects working properly, pages need to know where to redirect back to after login
 			This is the request parameter key that contains the real url of the webpage, it is used to generate
 			correct redirects. -->
 		<uri-header>x-requested-uri</uri-header>
@@ -61,7 +61,7 @@
 	</logout>
   <oauth>
     <enabled>true</enabled>
-    <!-- Location of the OAuth service --> 
+    <!-- Location of the OAuth service -->
     <service>
       <location>https://websignon.warwick.ac.uk/origin/oauth/service</location>
     </service>

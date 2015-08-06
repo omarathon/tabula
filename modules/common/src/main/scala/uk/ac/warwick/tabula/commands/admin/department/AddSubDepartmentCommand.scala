@@ -29,7 +29,7 @@ object AddSubDepartmentCommand {
 
 class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInternal[Department] with AddSubDepartmentCommandState {
 	self: ModuleAndDepartmentServiceComponent =>
-	
+
 	def applyInternal() = transactional() {
 		val d = new Department
 		d.code = code
@@ -53,7 +53,7 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		// Code must be non-empty and start with parent code
-		if (!code.hasText) { 
+		if (!code.hasText) {
 			errors.rejectValue("code", "department.code.empty")
 		} else {
 			if (code.endsWith("-")) {
@@ -66,12 +66,12 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 			if (code.length > 20) {
 				errors.rejectValue("code", "department.code.tooLong", Array(20: java.lang.Integer), "")
 			}
-			
+
 			// Code must only include lowercase and hyphen
 			if (!code.matches("""[a-z0-9\-]+""")) {
 				errors.rejectValue("code", "department.code.badFormat")
 			}
-			
+
 			// Code must not already exist
 			if (moduleAndDepartmentService.getDepartmentByCode(code).isDefined) {
 				errors.rejectValue("code", "department.code.exists")
@@ -96,7 +96,7 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 				errors.rejectValue("name", "department.name.tooLong", Array(100: java.lang.Integer), "")
 			}
 		}
-		
+
 		// Filter rule must not be null
 		if (filterRule == null) {
 			errors.rejectValue("filterRule", "department.filterRule.empty")
@@ -105,7 +105,7 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 			if (filterRule == AllMembersFilterRule && parent.filterRule != AllMembersFilterRule) {
 				errors.rejectValue("filterRule", "department.filterRule.contradictory")
 			}
-				
+
 			if ((filterRule == UndergraduateFilterRule && parent.filterRule == PostgraduateFilterRule) ||
 				(filterRule == PostgraduateFilterRule && parent.filterRule == UndergraduateFilterRule)) {
 				errors.rejectValue("filterRule", "department.filterRule.contradictory")
@@ -116,7 +116,7 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 
 trait AddSubDepartmentCommandState {
 	def parent: Department
-	
+
 	var code: String = parent.code + "-"
 	var name: String = parent.name + " "
 	var filterRule: FilterRule = Option(parent.filterRule).getOrElse(AllMembersFilterRule)
@@ -124,7 +124,7 @@ trait AddSubDepartmentCommandState {
 
 trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: AddSubDepartmentCommandState =>
-		
+
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Department.Manage, mandatory(parent))
 	}
@@ -132,7 +132,7 @@ trait AddSubDepartmentCommandPermissions extends RequiresPermissionsChecking wit
 
 trait AddSubDepartmentCommandDescription extends Describable[Department] {
 	self: AddSubDepartmentCommandState =>
-		
+
 	def describe(d: Description) {
 		d.department(parent)
 	}

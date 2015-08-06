@@ -16,59 +16,59 @@ import scala.collection.JavaConverters._
 class UserLookupTagTest extends TestBase with Mockito {
 
 	val tag = new UserLookupTag
-	
+
 	val userLookup = new MockUserLookup
 	tag.userLookup = userLookup
-	
+
 	userLookup.registerUsers("cuscav", "cusebr")
 	userLookup.getUserByUserId("cuscav").setWarwickId("0672089")
 	userLookup.getUserByUserId("cusebr").setWarwickId("0672088")
-	
+
 	@Test def singleId = withUser("cuscav") {
 		val dept = Fixtures.department("in")
-		
+
 		// Use a SimpleHash as a workaround to wrapping things manually
 		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("id", "cuscav")
-		
+
 		val writer = new StringWriter
-		
+
 		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
 		val body = mock[TemplateDirectiveBody]
-		
+
 		val params = new java.util.HashMap[String, TemplateModel]
 		params.put("id", model.get("id"))
-				
+
 		tag.execute(env, params, null, body)
-		
+
 		verify(body, times(1)).render(writer)
-		
+
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_user")) should be (userLookup.getUserByUserId("cuscav"))
 	}
-	
+
 	@Test def multipleIds = withUser("cuscav") {
 		val dept = Fixtures.department("in")
-		
+
 		// Use a SimpleHash as a workaround to wrapping things manually
 		val ids: JList[String] = JArrayList()
 		ids.add("cuscav")
 		ids.add("cusebr")
-		
+
 		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
 		model.put("ids", ids)
-		
+
 		val writer = new StringWriter
-		
+
 		val env = new Environment(new Template("temp", new StringReader(""), null), model, writer)
 		val body = mock[TemplateDirectiveBody]
-		
+
 		val params = new java.util.HashMap[String, TemplateModel]
 		params.put("ids", model.get("ids"))
-				
+
 		tag.execute(env, params, null, body)
-		
+
 		verify(body, times(1)).render(writer)
-		
+
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("missing_ids")) should be (Seq())
 		DeepUnwrap.unwrap(env.getCurrentNamespace().get("returned_users")) should be (Map(
 			"cuscav" -> userLookup.getUserByUserId("cuscav"),
@@ -131,5 +131,5 @@ class UserLookupTagTest extends TestBase with Mockito {
 			"0672088" -> userLookup.getUserByUserId("cusebr")
 		))
 	}
-	
+
 }

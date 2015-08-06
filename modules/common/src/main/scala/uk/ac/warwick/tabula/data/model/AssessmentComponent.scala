@@ -63,10 +63,10 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
 	@Column(nullable=false)
 	var assessmentType: AssessmentType = _
-	
+
 	/**
 	 * Read-only mapping of upstream groups. Used by AssignmentMembershipDao to inform Hibernate of how to join properly.
-	 * 
+	 *
 	 * Note that this ISN'T really OneToMany
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
@@ -113,7 +113,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		assessmentType = other.assessmentType
 		marksCode = other.marksCode
 	}
-	
+
 	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)
 }
 

@@ -64,8 +64,8 @@
 							</ul>
 							<p>on ${scope.toString}.</p>
 						</#local>
-					
-						<button class="btn btn-mini use-tooltip disabled" type="button" 
+
+						<button class="btn btn-mini use-tooltip disabled" type="button"
 										data-html="true"
 										data-title="${popoverText}"><i class="icon-plus fa fa-plus"></i></button>
 					</#if>
@@ -97,8 +97,8 @@
 									</ul>
 									<p>on ${scope.toString}.</p>
 								</#local>
-							
-								<button class="btn btn-danger btn-mini use-tooltip disabled" type="button" 
+
+								<button class="btn btn-danger btn-mini use-tooltip disabled" type="button"
 												data-html="true"
 												data-title="${popoverText}"><i class="icon-white fa fa-white icon-remove fa fa-times"></i></button>
 							</#if>

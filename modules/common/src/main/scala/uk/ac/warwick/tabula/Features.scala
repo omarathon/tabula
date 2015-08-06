@@ -123,6 +123,8 @@ abstract class Features {
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
+	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
+	@Value("${features.celcatTimetablesEngineering:true}") var celcatTimetablesEngineering = defaults.celcatTimetablesEngineering
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -194,6 +196,8 @@ class FeaturesMessage {
 	@BeanProperty var showModuleResults = true
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false
+	@BeanProperty var celcatTimetablesChemistry = true
+	@BeanProperty var celcatTimetablesEngineering = true
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true

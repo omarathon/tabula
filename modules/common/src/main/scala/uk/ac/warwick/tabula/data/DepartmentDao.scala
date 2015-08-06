@@ -26,7 +26,7 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 		allDepartments.filterNot(_.hasParent)
 
 	// Fetches modules eagerly
-	def getByCode(code: String) =	code.maybeText.flatMap { code => 
+	def getByCode(code: String) =	code.maybeText.flatMap { code =>
 		session.newQuery[Department]("from Department d left join fetch d.modules where d.code = :code")
 			.setString("code", code.toLowerCase())
 			.uniqueResult

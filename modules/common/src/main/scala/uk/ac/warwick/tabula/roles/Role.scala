@@ -12,12 +12,12 @@ trait RoleDefinition {
 	 * The canonical machine-readable name for this role. Used for listing and (for built-ins) as a database identifier
 	 */
 	def getName: String
-	
+
 	/**
 	 * A short description of this definition; usually a human-readable version of getName
 	 */
 	def description: String
-	
+
 	/**
 	 * Whether this role can be assigned to a user in the system. Return false for inferred roles
 	 */
@@ -67,7 +67,7 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 
 	def subRoles(scope: Option[PermissionsTarget]) =
 		subRoleDefinitions map { defn => RoleBuilder.build(defn, scope, defn.getName) }
-	
+
 	def mayGrant(permission: Permission) =
 		scopedPermissions.contains(permission) ||
 		scopelessPermissions.contains(permission) ||
@@ -89,7 +89,7 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 		case that: SelectorBuiltInRoleDefinition[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
 		case _ => false
 	}
-	
+
 	override def equals(other: Any) = other match {
 		case that: SelectorBuiltInRoleDefinition[A] =>
 			new EqualsBuilder()
@@ -98,13 +98,13 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 			.build()
 		case _ => false
 	}
-	
-	override def hashCode() = 
+
+	override def hashCode() =
 		new HashCodeBuilder()
 		.append(getName)
 		.append(selector)
 		.build()
-		
+
 	override def toString() = "%s(%s)".format(super.toString(), selector)
 
 	def duplicate(selector: Option[PermissionsSelector[A]]): SelectorBuiltInRoleDefinition[A]
@@ -112,7 +112,7 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 
 object SelectorBuiltInRoleDefinition {
 	private val ObjectClassPrefix = RoleDefinition.getClass.getPackage.getName + "."
-	
+
 	def of[A <: PermissionsSelector[A]](name: String, selector: Object): SelectorBuiltInRoleDefinition[A] = {
 		try {
 			// Go through the magical hierarchy

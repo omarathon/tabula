@@ -25,33 +25,33 @@ import uk.ac.warwick.tabula.data.model.Submission
  */
 class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment)
 	extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Manage, assignment)
 	PermissionCheck(Permissions.Submission.Delete, assignment)
 
 	var submissionService = Wire.auto[SubmissionService]
 	var feedbackService = Wire.auto[FeedbackService]
-	
+
 	var zipService = Wire.auto[ZipService]
 	var userLookup = Wire.auto[UserLookupService]
-	
+
     var students: JList[String] = JArrayList()
     var submissionOrFeedback: String = ""
 	var confirm: Boolean = false
-	
+
 	val SubmissionOnly = "submissionOnly"
 	val FeedbackOnly = "feedbackOnly"
 	val SubmissionAndFeedback = "submissionAndFeedback"
-	
+
 	def shouldDeleteSubmissions = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == SubmissionOnly
 	def shouldDeleteFeedback = submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly
 
-	def applyInternal() = {			
+	def applyInternal() = {
 		val submissions = if (shouldDeleteSubmissions) {
 			val submissions = for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) yield {
 				HibernateHelpers.initialiseAndUnproxy(submission.allAttachments)
-				submissionService.delete(mandatory(submission))				
+				submissionService.delete(mandatory(submission))
 				submission
 			}
 			zipService.invalidateSubmissionZip(assignment)
@@ -67,7 +67,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 			zipService.invalidateFeedbackZip(assignment)
 			feedbacks
 		} else Nil
-		
+
 		(submissions, feedbacks)
 	}
 
@@ -79,7 +79,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 		for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) {
 			if (mandatory(feedback).assignment != assignment) errors.reject("feedback.bulk.wrongassignment")
 		}
-		
+
 		if (!Seq(SubmissionOnly, FeedbackOnly, SubmissionAndFeedback).contains(submissionOrFeedback)) {
 			errors.rejectValue("submissionOrFeedback", "invalid")
 		}
@@ -89,8 +89,8 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 		prevalidate(errors)
 		if (!confirm) errors.rejectValue("confirm", "submissionOrFeedback.delete.confirm")
 	}
-	
-	
+
+
 	def getStudentsAsUsers(): JList[User] =
 		userLookup.getUsersByWarwickUniIds(students).values.toSeq
 
@@ -101,7 +101,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])) = {
 		val (submissions, feedbacks) = result
 		val attachments = submissions.flatMap { _.allAttachments } ++ feedbacks.flatMap { _.attachments }
-		
+
 		d.assignment(assignment)
 			.property("submissionsDeleted" -> submissions.length)
 			.property("feedbacksDeleted" -> feedbacks.length)

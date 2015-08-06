@@ -35,7 +35,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider with TaskBenchmarking {
 
 		eventRoles #::: groupRoles
 	}
-	
+
 	def rolesProvided = Set(classOf[SmallGroupTutor], classOf[SmallGroupEventTutor])
-	
+
 }

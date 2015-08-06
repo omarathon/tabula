@@ -11,9 +11,9 @@ class TurnitinResponseTest extends TestBase {
 		response.submissionsList.size should be (10)
 		response.submissionsList.count(_.hasBeenChecked) should be (4)
 	}
-	
+
 	val PartlyScoredSubmissions = """
-	
+
 <returndata>
 	<object>
 		<userid>-1</userid>
@@ -208,7 +208,7 @@ class TurnitinResponseTest extends TestBase {
 	<rcode>72</rcode>
 	<rmessage>Successful!</rmessage>
 </returndata>
-		
+
 	"""
 }
 

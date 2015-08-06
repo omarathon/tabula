@@ -15,20 +15,20 @@ import org.apache.tiles.TilesException
 class CustomFreemarkerExceptionHandler extends TemplateExceptionHandler {
 	lazy val handler = Wire[ExceptionHandler]
 	lazy val production = Wire.property("${environment.production}").toBoolean
-	
+
 	def handleTemplateException(exception: TemplateException, env: Environment, out: Writer) {
 		// Ignore Tiles errors, since they are just multiple errors
 		if (ExceptionUtils.retrieveException(exception, classOf[TilesException]) == null) {
 			val token = ExceptionTokens.newToken // TODO output the token to HTML
 			val request = None // TODO would like to get current request
-	
+
 			handler.exception(ExceptionContext(token, exception, request))
-			
+
 			// On production, we just ignore errors and let the template carry on. We'll get the email anyway
-			val delegate = 
+			val delegate =
 				if (production) TemplateExceptionHandler.IGNORE_HANDLER
 				else TemplateExceptionHandler.HTML_DEBUG_HANDLER
-		
+
 			delegate.handleTemplateException(exception, env, out)
 		}
 	}

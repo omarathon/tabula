@@ -19,7 +19,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 		relationshipService.allStudentRelationshipTypes returns Seq(tutorRelationshipType)
 		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns Option(tutorRelationshipType)
 	}
-	
+
 	trait Fixture {
 		def testObject: TestSupport
 	}
@@ -97,7 +97,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 		val command = new ExpireRelationshipsOnOldCoursesCommandInternal(thisStudent) with TestSupport
 		override val testObject = command
 	}
-	
+
 	@Test
 	def apply(): Unit = new ApplyFixture with StudentWithOneCurrentOneEndedCourse {
 		command.applyInternal()

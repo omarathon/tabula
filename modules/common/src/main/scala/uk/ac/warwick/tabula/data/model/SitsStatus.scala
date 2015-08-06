@@ -24,7 +24,7 @@ class SitsStatus {
 	var fullName: String = _
 
 	var lastUpdatedDate = DateTime.now
-	
+
 	override def toString = fullName.toLowerCase()
 
 }

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, StaffMember}
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
-	
+
 	@Test
 	def describeShouldIncludeNewTutorAndStudent { new TutorFixture {
 		val command = new EditStudentRelationshipCommand(studentCourseDetails, tutorRelationshipType, Seq(oldTutor), NoCurrentUser(), false)

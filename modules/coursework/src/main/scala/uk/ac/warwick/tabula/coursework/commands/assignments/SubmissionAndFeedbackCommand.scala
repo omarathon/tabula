@@ -77,15 +77,15 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
 
 	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent with ProfileServiceComponent =>
-	
-	mustBeLinked(mandatory(assignment), mandatory(module))
+
+	mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
 
 	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
 	val enhancedFeedbacksCommand = new ListFeedbackCommand(module, assignment)
-	
+
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
 	// When we call export commands, we may want to further filter by a subset of student IDs
@@ -176,26 +176,26 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 			} else {
 				userFilter.head
 			}
-			
+
 			if (usersSubmissions.size > 1) throw new IllegalStateException("More than one Submission for " + uniId)
 			if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + uniId)
 
 			val enhancedSubmissionForUniId = usersSubmissions.headOption
-			
+
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
 				new ExtensionListItem(
 					extension=extension,
 					within=assignment.isWithinExtension(user)
 				)
 			}
-			
+
 			val coursework = WorkflowItems(
 				user,
-				enhancedSubmission=enhancedSubmissionForUniId, 
+				enhancedSubmission=enhancedSubmissionForUniId,
 				enhancedFeedback=enhancedFeedbackForUniId(uniId),
 				enhancedExtension=enhancedExtensionForUniId
 			)
-			
+
 			val progress = courseworkWorkflowService.progress(assignment)(coursework)
 
 			Student(
@@ -217,25 +217,25 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 				}
 			)
 		}}
-		
-		val membersWithPublishedFeedback = submitted.filter { student => 
+
+		val membersWithPublishedFeedback = submitted.filter { student =>
 			student.coursework.enhancedFeedback exists { _.feedback.checkedReleased }
 		}
 
 		// True if any feedback exists that's been published. To decide whether to show whoDownloaded count.
 		val hasPublishedFeedback = membersWithPublishedFeedback.nonEmpty
-		
+
 		val stillToDownload = membersWithPublishedFeedback.filterNot(_.coursework.enhancedFeedback.exists(_.downloaded))
-		
-		val studentsFiltered = benchmarkTask("Do filtering") { 
+
+		val studentsFiltered = benchmarkTask("Do filtering") {
 			val allStudents = (unsubmitted ++ submitted).filter(filter.predicate(filterParameters.asScala.toMap))
-			val studentsFiltered = 
+			val studentsFiltered =
 				if (students.isEmpty) allStudents
 				else allStudents.filter { student => students.contains(student.user.getWarwickId) }
-			
+
 			studentsFiltered
 		}
-		
+
 		SubmissionAndFeedbackResults(
 			students=studentsFiltered,
 			whoDownloaded=whoDownloaded,
@@ -245,7 +245,7 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 			mustReleaseForMarking=assignment.mustReleaseForMarking
 		)
 	}
-	
+
 	def validate(errors: Errors) {
 		Option(filter) foreach { _.validate(filterParameters.asScala.toMap)(errors) }
 	}

@@ -20,20 +20,20 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 
 	def add(criterion: Criterion) = chainable { c.add(criterion) }
 	def add(restriction: ScalaRestriction) = chainable {
-		restriction.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType) }
+		restriction.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType, aliasAndJoinType.withClause) }
 		c.add(restriction.underlying)
 	}
 	def addOrder(order: Order) = chainable { c.addOrder(order) }
 	def addOrder(order: ScalaOrder) = chainable {
-		order.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType) }
+		order.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType, aliasAndJoinType.withClause) }
 		c.addOrder(order.underlying)
 	}
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
 	def setFetchMode(associationPath: String, mode: FetchMode) = chainable { c.setFetchMode(associationPath, mode) }
-	def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN) = chainable {
+	def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN, withClause: Option[Criterion] = None) = chainable {
 		aliases.put(property, alias) match {
-			case None => c.createAlias(property, alias, joinType)
+			case None => c.createAlias(property, alias, joinType, withClause.orNull)
 			case Some(existing) if existing == alias => // duplicate
 			case Some(other) => throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
 		}
@@ -83,7 +83,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 class ProjectedScalaCriteria[A, B](c: ScalaCriteria[A]) {
 	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria
 	@inline private def chainable(fn: => Unit) = { fn; this }
-	
+
 	/** Returns a typed Seq of the results. */
 	def seq: Seq[B] = c.listOf[B].asScala
 

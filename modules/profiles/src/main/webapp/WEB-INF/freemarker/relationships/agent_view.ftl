@@ -7,7 +7,7 @@
 	<div class="pull-right">
 		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
 			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
-				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
+				<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
 			</a>
 		</#if>
 	</div>
@@ -73,7 +73,7 @@
 											</#list>
 										</tbody>
 									</table>
-									
+
 									<p>
 										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 									</p>

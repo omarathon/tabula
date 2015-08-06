@@ -25,9 +25,9 @@ trait AssignmentImporter {
 	 * passing each ModuleRegistration item to the given callback for it to process.
 	 */
 	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
-	
+
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
-	
+
 	def getAllAssessmentComponents: Seq[AssessmentComponent]
 
 	def getAllGradeBoundaries: Seq[GradeBoundary]
@@ -95,17 +95,17 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 
 @Profile(Array("sandbox")) @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
-	
+
 	def allMembers(callback: UpstreamModuleRegistration => Unit) = {
 		var moduleCodesToIds = Map[String, Seq[Range]]()
-		 
+
 		for {
 			(code, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
 			moduleCode <- route.moduleCodes
 		} {
 			val range = route.studentsStartId to route.studentsEndId
-			
+
 			moduleCodesToIds = moduleCodesToIds + (
 				moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
 			)
@@ -128,7 +128,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 		)
 
 	}
-	
+
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
 		for {
 			(code, d) <- SandboxData.Departments.toSeq
@@ -143,7 +143,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			ag.sequence = "A01"
 			ag
 		}
-	
+
 	def getAllAssessmentComponents: Seq[AssessmentComponent] =
 		for {
 			(code, d) <- SandboxData.Departments.toSeq

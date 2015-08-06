@@ -9,16 +9,16 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType
 
 class RoleDefinitionConverter extends TwoWayConverter[String, RoleDefinition] with Daoisms {
-	
+
 	val builtInUserType = new BuiltInRoleDefinitionUserType
-	
+
 	override def convertLeft(definition: RoleDefinition) = Option(definition) match {
 		case Some(builtIn: BuiltInRoleDefinition) => builtInUserType.convertToValue(builtIn)
 		case Some(custom: CustomRoleDefinition) => custom.getId
 		case _ => null
 	}
-  
-	override def convertRight(name: String) = 
+
+	override def convertRight(name: String) =
 		if (!name.hasText) null
 		else getById[CustomRoleDefinition](name) getOrElse { try { builtInUserType.convertToObject(name) } catch { case e: IllegalArgumentException => null } }
 

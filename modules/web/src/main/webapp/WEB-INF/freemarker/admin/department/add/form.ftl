@@ -16,7 +16,7 @@
 	<@form.labelled_row "name" "Department name">
 		<@f.input path="name" cssClass="text" />
 	</@form.labelled_row>
-	
+
 	<@form.labelled_row "filterRule" "Filter rule">
 		<@f.select path="filterRule" id="filterRule">
 			<@f.options items=allFilterRules itemLabel="name" itemValue="name" />

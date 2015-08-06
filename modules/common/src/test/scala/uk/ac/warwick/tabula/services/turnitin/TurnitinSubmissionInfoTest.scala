@@ -10,7 +10,7 @@ class TurnitinSubmissionInfoTest extends TestBase {
 	def matchingAttachments() {
 		val attachment = new FileAttachment
 		attachment.id = "12345"
-			
+
 		newSubmissionInfoWithTitle("12345").matches(attachment) should be {true}
 		newSubmissionInfoWithTitle("12346").matches(attachment) should be {false}
 		newSubmissionInfoWithTitle("what on earth is this").matches(attachment) should be {false}

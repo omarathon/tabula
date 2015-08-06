@@ -86,7 +86,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
-		@RequestParam searchDepartment: Department, 
+		@RequestParam searchDepartment: Department,
 		@RequestParam searchAcademicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) = {

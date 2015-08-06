@@ -27,7 +27,7 @@
 			<@pm.roleTable perms_url "routeassistant-table" scope "RouteAssistantRoleDefinition" "route assistants" />
 		</div>
 	</div>
-	
+
 	<div class="row-fluid">
 		<div class="span6">
 			<#assign popover>

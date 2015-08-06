@@ -9,7 +9,7 @@ Uploaded attachments:
 
 <#list submission.allAttachments as attachment>
 - ${attachment.name}
-</#list>  
+</#list>
 </#if>
 
 <#-- Only show these links if it's an email. -->

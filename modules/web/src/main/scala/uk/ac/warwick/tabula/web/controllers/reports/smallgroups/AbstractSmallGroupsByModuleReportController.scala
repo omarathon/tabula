@@ -19,7 +19,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 
 	val filePrefix: String
 
-	def page(department: Department, academicYear: AcademicYear): Mav
+	def page(cmd: Appliable[AllSmallGroupsReportCommandResult], department: Department, academicYear: AcademicYear): Mav
 
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =

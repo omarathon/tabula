@@ -3,8 +3,9 @@ package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommand, SmallGroupsReportFilters}
+import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommandResult, AllSmallGroupsReportCommand, SmallGroupsReportFilters}
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 
 @Controller
@@ -18,7 +19,11 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 	override val filePrefix: String = "missed-small-groups-by-module"
 
 	@RequestMapping(method = Array(GET))
-	def page(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	override def page(
+		@ModelAttribute("filteredAttendanceCommand") cmd: Appliable[AllSmallGroupsReportCommandResult],
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = {
 		Mav("reports/smallgroups/missedByModule").crumbs(
 			ReportsBreadcrumbs.Home.Department(department),
 			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),

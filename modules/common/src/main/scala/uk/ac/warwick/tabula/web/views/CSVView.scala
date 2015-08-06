@@ -16,7 +16,7 @@ class CSVView(var filename: String = "tabula-data.csv", var csv: Any) extends Vi
 		val out = response.getWriter
 		out.println(csv.toString)
 	}
-	
+
 	// for testing
 	def getAsString = csv.toString
 }

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class DownloadSelectedFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute
 	def singleFeedbackCommand(
 		@PathVariable("module") module: Module,
@@ -46,7 +46,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute def singleFeedbackCommand(
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,
@@ -200,13 +200,13 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
 class DownloadAllFeedback extends CourseworkController {
 	var fileServer = Wire.auto[FileServer]
-	
+
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new AdminGetAllFeedbackCommand(module, assignment)
-	
+
 	@RequestMapping
 	def download(
-			cmd: AdminGetAllFeedbackCommand, 
+			cmd: AdminGetAllFeedbackCommand,
 			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}

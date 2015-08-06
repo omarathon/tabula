@@ -34,15 +34,15 @@ class Address extends GeneratedId with ToString {
 	var line5: String = _
 	var postcode: String = _
 	var telephone: String = _
-	
+
 	@transient var addressType: AddressType = null
-	
+
 	def isEmpty = {
 		!(StringUtils.hasText(line1) || StringUtils.hasText(line2) || StringUtils.hasText(line3) ||
 		StringUtils.hasText(line4) || StringUtils.hasText(line5) || StringUtils.hasText(postcode) ||
 		StringUtils.hasText(telephone))
 	}
-		
+
 	def toStringProps = Seq(
 		"line1" -> line1,
 		"line2" -> line2,

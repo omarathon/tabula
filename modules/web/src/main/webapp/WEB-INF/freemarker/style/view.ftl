@@ -12,17 +12,17 @@
 			<li><a href="#tables"><i class="icon-chevron-right fa fa-chevron-right"></i> Tables</a></li>
 		</ul>
 	</div>
-	
+
 	<div id="intro" class="span6">
 		<h2>Tabula style guide</h2>
-		
+
 		<p>This page is a rendering, in Tabula itself, of the
 		<a href="https://warwick.ac.uk/services/its/intranet/projects/webdev/tabulastyleguide">canonical Tabula style guide</a>.
 		<br />
 		That page may contain fuller descriptive information.</p>
 
 		<h3 id="colour">Colour palette</h3>
-		
+
 		<div class="scrolling-container">
 			<table class="table table-bordered table-striped">
 				<thead>
@@ -150,9 +150,9 @@
 				</tbody>
 			</table>
 		</div>
-		
+
 		<h3 id="buttons">Buttons</h3>
-		
+
 		<table class="table table-bordered table-striped">
 		    <thead>
 		      <tr>
@@ -204,29 +204,29 @@
 		      </tr>
 		    </tbody>
 		</table>
-		
+
 		<h4>Examples</h4>
-		
+
 		<p>
 			<button class="btn btn-primary">Confirm</button> <a class="btn" href="#">Cancel</a>
 		</p>
-			
+
 		<p>Wording, such as 'or', is not necessary between these two buttons. Primary action first, secondary action...err...second.
 		Confirm/Cancel buttons should be <span class="use-tooltip" title="in the area of the page typically visible without scrolling">above the fold</span>
 		at the top of the page, and in particular above any preview lists or data tables in workflows completed in stages.</p>
-		
+
 		<p>
 			<button class="btn btn-danger">Delete</button>
 		</p>
-		
+
 		<p>
 			<button class="btn btn-info">Show all modules</button>
 		</p>
-		
+
 		<p>We'd expect the Default, Primary, Info and Danger buttons to be used most often. Success, Warning and Inverse buttons to be used much more rarely and with caution!</p>
-		
+
 		<h3 id="labels">Labels</h3>
-		
+
 		<table class="table table-bordered table-striped">
 		    <thead>
 		      <tr>
@@ -285,9 +285,9 @@
 		      </tr>
 		    </tbody>
 		</table>
-		
+
 		<h3 id="badges">Badges</h3>
-		
+
 		<table class="table table-bordered table-striped">
 		    <thead>
 		      <tr>
@@ -365,34 +365,34 @@
 		      </tr>
 		    </tbody>
 		</table>
-		
+
 		<h3 id="alerts">Alerts</h3>
-		
+
 		<div class="alert">
 		  <button type="button" class="close" data-dismiss="alert">×</button>
 		  <strong>Warning!</strong> Best check yo self, you're not looking too good.
 		</div>
-		
+
 		<div class="alert alert-error">
 		  <button type="button" class="close" data-dismiss="alert">×</button>
 		  <strong>Oh snap!</strong> Change a few things up and try submitting again.
 		</div>
-		            
+
 		<div class="alert alert-success">
 		  <button type="button" class="close" data-dismiss="alert">×</button>
 		  <strong>Well done!</strong> You successfully read this important alert message.
 		</div>
-		
+
 		<div class="alert alert-info">
 		  <button type="button" class="close" data-dismiss="alert">×</button>
 		  <strong>Heads up!</strong> This alert needs your attention, but it's not super important.
 		</div>
-		
+
 		<h3 id="tables">Tables</h3>
-		
+
 		<p>Use tables for data, not for layout. If it doesn't need a header row, consider if it needs to be a table.
 		Ensure that headers have correct structural markup:</p>
-		
+
 		<pre>&lt;thead&gt;
 	&lt;tr&gt;
 		&lt;th&gt;Header 1&lt;/th&gt;
@@ -402,11 +402,11 @@
 
 		<p>Group data rows in <code>&lt;tbody /&gt;</code> tag pairs. If all data rows are in one group, wrap them all in a single
 		<code>&lt;tbody&gt;&lt;/tbody&gt;</code> pair.</p>
-		
+
 		<p>Give tables a class of <code>table</code> to setup some basic styles.
 		In most cases, clarity will be improved by adding classes of <code>table-bordered</code> and, optionally, <code>table-striped</code>,
 		as used on this page. Use <code>table-condensed</code> where appropriate to reduce the need for scrolling.</p>
-		
+
 		<p>Where we have long tables or lists of data, only the table/list should scroll vertically, not the whole page.
 		Any <span class="use-tooltip" title="introductory content and instructions">rubric</span>
 		and action buttons should always be visible
@@ -414,16 +414,16 @@
 		Wrap tables in a container with class of <code>scrolling-container</code>, to limit height to a maximum of 600px.
 		For different height limits, you can define a container class in <i>embeddable.less</i> using the mixin
 		<code>.scrollOver(<i>NNN</i>px)</code></p>
-		
+
 		<p>We have a jQuery plugin to support sortable columns. Append the following script, substituting an appropriate selector
 		for the table:</p>
-		
+
 		<pre>&lt;script type="text/javascript"&gt;
 	(function($) {
 		$("#my-table-for-sorting").sortableTable();
 	})(jQuery);
 &lt;/script&gt;</pre>
-		
+
 		<p>Then use <code>&lt;th class="sortable"&gt;&lt;/th&gt;</code>
 		to make columns sortable.</p>
 	</div>

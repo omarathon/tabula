@@ -60,7 +60,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 
 		updatedFeedback
 	}
-	
+
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
 		// warn if feedback for this student is already uploaded
 		assignment.feedbacks.find { feedback => feedback.universityId == item.uniNumber && feedback.hasAttachments } match {
@@ -87,11 +87,11 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 		item.ignoredFileNames = withSameName.map(_.attached.name).toSet -- item.duplicateFileNames
 		item.isModified =  (attachmentNames -- item.ignoredFileNames).nonEmpty
 	}
-	
+
 	def describe(d: Description) = d
 		.assignment(assignment)
 		.studentIds(items.map { _.uniNumber })
-		
+
 	override def describeResult(d: Description, feedbacks: Seq[Feedback]) = {
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })

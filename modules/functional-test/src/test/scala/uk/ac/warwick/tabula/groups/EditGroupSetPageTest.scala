@@ -7,7 +7,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 	"Department Admin" should "be able to view the Edit page for an existing group" in {
 		Given("I am logged in as admin")
-			signIn as(P.Admin1)  to (Path("/groups"))
+			signIn as(P.Admin1)  to (Path("/groups/"))
 		And("I view the small group page for test services")
 			val groupsPage = new SmallGroupTeachingPage("xxx")
 			go to groupsPage.url
@@ -27,7 +27,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			enableFeature("smallGroupTeachingStudentSignUp")
 
 		When("I log in as admin")
-			signIn as(P.Admin1)  to (Path("/groups"))
+			signIn as(P.Admin1)  to (Path("/groups/"))
 
 		And(" I view the edit properties page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url
@@ -58,7 +58,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
 
 		When("I log in as admin")
-			signIn as(P.Admin1)  to (Path("/groups"))
+			signIn as(P.Admin1)  to (Path("/groups/"))
 
 		And("I view the edit groups page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula
 import scala.util.matching.Regex
 
 object UniversityId {
-	
+
 	val ExpectedLength = 7
 
 	/**
@@ -16,9 +16,9 @@ object UniversityId {
 		case universityIdPattern() => true
 		case _ => false
 	}
-	
-	def zeroPad(id: String): String = 
+
+	def zeroPad(id: String): String =
 		if (id.length < ExpectedLength) "0"*(ExpectedLength-id.length) + id
 		else id
-	
+
 }

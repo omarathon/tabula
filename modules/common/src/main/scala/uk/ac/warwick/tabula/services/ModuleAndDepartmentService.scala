@@ -126,7 +126,7 @@ class ModuleAndDepartmentService extends Logging {
 	def save(dept: Department) = transactional() {
 		departmentDao.save(dept)
 	}
-	
+
 	def saveOrUpdate(module: Module) = transactional() {
 		moduleDao.saveOrUpdate(module)
 	}
@@ -138,7 +138,7 @@ class ModuleAndDepartmentService extends Logging {
 	def delete(teachingInfo: ModuleTeachingInformation) = transactional() {
 		moduleDao.delete(teachingInfo)
 	}
-	
+
 	def stampMissingModules(seenCodes: Seq[String]) = transactional() {
 		moduleDao.stampMissingFromImport(moduleDao.allModules.map(_.code) filterNot seenCodes.contains)
 	}

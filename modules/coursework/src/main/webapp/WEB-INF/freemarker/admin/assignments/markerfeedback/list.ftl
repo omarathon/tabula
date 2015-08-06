@@ -225,6 +225,7 @@
 	</div>
 	<#if markerFeedback?has_content>
 		<#list markerFeedback as stage>
+			<#assign isModeration = (stage.roleName!"")?starts_with("Moderator") />
 			<div class="well workflow-role form-post-container">
 				<h3>${stage.roleName}</h3>
 				<@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>

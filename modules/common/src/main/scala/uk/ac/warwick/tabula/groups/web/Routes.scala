@@ -44,6 +44,9 @@ object Routes {
 
 		def allocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
 
+		def copy(department: Department) = context + s"/admin/department/${encoded(department.code)}/groups/copy"
+		def copy(module: Module) = context + s"/admin/module/${encoded(module.code)}/groups/copy"
+
 		object reusable {
 			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format (encoded(department.code))
 			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format (encoded(department.code))

@@ -16,7 +16,7 @@ import org.springframework.validation.Errors
 
 class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: User, val submitter: CurrentUser)
 	extends UploadFeedbackCommand[List[MarkerFeedback]](module, assignment, marker) with CanProxy {
-	
+
 	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 	if(submitter.apparentUser != marker) {
 		PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -89,7 +89,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 			List(markerFeedbacks)
 		}
 	}
-	
+
 	override def validateExisting(item: FeedbackItem, errors: Errors) {
 
 		// warn if feedback for this student is already uploaded
@@ -113,7 +113,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, marker: Us
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })
 	}
-	
+
 	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]) = {
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })

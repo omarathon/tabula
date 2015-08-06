@@ -15,16 +15,16 @@ import uk.ac.warwick.tabula.web.Mav
 
 class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment, val fileId: String, val user: CurrentUser)
 	extends Command[Mav] with ReadOnly with Unaudited with CompletesNotifications[Mav] {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, assignment)
-	
+
 	var turnitinService = Wire[Turnitin]
 	var originalityReportService = Wire[OriginalityReportService]
 
 	def applyInternal() = {
 		debug("Getting document viewer URL for FileAttachment %s", fileId)
-		
+
 		turnitinService.login(user) match {
 			case Some(session) =>
 
@@ -72,7 +72,7 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
  */
 @Controller
 class TurnitinReportController extends CourseworkController {
-	
+
 	@ModelAttribute def command(
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,

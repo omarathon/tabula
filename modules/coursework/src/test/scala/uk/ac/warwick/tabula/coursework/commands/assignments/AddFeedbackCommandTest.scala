@@ -22,19 +22,19 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
 	assignment.module = module
-	
+
 	val userLookup = new MockUserLookup
 	val user = new User("student")
 	user.setFoundUser(true)
 	user.setWarwickId("1010101")
 	userLookup.users += ("student" -> user)
-	
+
 	@Test def duplicateFileNames = withUser("cuscav") {
 		val cmd = new AddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
 		cmd.fileDao = dao
 		cmd.uniNumber = "1010101"
-			
+
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
@@ -51,7 +51,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		val item = new FeedbackItem("1010101")
 		item.file = file
 		cmd.items.add(item)
-		
+
 		// Add an existing feedback with the same name and content - will be ignored
 		val feedback = Fixtures.assignmentFeedback("1010101")
 		feedback.addAttachment(a)
@@ -64,14 +64,14 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		feedback.addAttachment(b2)
 
 		assignment.feedbacks.add(feedback)
-		
+
 		item.submissionExists should be (false)
-		
+
 		val errors = new BindException(cmd, "command")
 		cmd.postExtractValidation(errors)
-		
+
 		errors.hasErrors should be (false)
-		
+
 		item.submissionExists should be (true)
 		item.ignoredFileNames should be (Set("file.txt"))
 		item.duplicateFileNames should be (Set("file2.txt"))

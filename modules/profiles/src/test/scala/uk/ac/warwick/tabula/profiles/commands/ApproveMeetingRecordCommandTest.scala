@@ -23,7 +23,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 	trait Fixture {
 		val student = Fixtures.student(universityId = "0123456")
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 		val meetingRecord = new MeetingRecord
@@ -64,7 +64,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def validApproval() {
 		val student = Fixtures.student(universityId = "0123456")
-		
+
 		val meetingRecord = new MeetingRecord
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
@@ -89,7 +89,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def deletedMeetingRecord() {
 		val student = Fixtures.student(universityId = "0123456")
-		
+
 		val meetingRecord = new MeetingRecord
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")

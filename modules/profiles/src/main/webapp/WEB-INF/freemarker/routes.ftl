@@ -27,7 +27,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
 <#macro relationship_missing department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
 <#macro relationship_allocate department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate" /></#macro>
-<#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/template" /></#macro>
+<#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/template" /></#macro>
+<#macro relationship_allocate_upload department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/upload" /></#macro>
+<#macro relationship_allocate_preview department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/preview" /></#macro>
+<#macro relationship_allocate_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old" /></#macro>
+<#macro relationship_template_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old/template" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode currentAgent>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />

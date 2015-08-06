@@ -24,7 +24,7 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be(
 			"Term 1, weeks 1-10; Christmas vacation, w/c Mon 12<sup>th</sup> Dec 2011 - w/c Mon 2<sup>nd</sup> Jan 2012"
 		)
-		
+
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = true) should be("1")
 		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = true) should be("7")
 		formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = true) should be("02/01")
@@ -48,7 +48,7 @@ class WholeWeekFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be(
 			"Term 1, weeks 1-10; Christmas vacation, w/c Mon 12<sup>th</sup> Dec 2011 - w/c Mon 2<sup>nd</sup> Jan 2012"
 		)
-		
+
 		formatter.format(Seq(WeekRange(4)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = true) should be("4")
 		formatter.format(Seq(WeekRange(10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = true) should be("10")
 		formatter.format(Seq(WeekRange(13)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = true) should be("26/12")

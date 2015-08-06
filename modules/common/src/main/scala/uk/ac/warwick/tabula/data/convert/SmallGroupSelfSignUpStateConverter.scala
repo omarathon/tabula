@@ -5,9 +5,9 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class SmallGroupSelfSignUpStateConverter extends TwoWayConverter[String, SmallGroupSetSelfSignUpState] {
-	
-	override def convertRight(value: String) = 
-		if (value.hasText) SmallGroupSetSelfSignUpState(value) 
+
+	override def convertRight(value: String) =
+		if (value.hasText) SmallGroupSetSelfSignUpState(value)
 		else null
 
 	override def convertLeft(state: SmallGroupSetSelfSignUpState) = Option(state).map { _.name }.orNull

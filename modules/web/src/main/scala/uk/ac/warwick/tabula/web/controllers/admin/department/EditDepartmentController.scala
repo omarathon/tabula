@@ -17,13 +17,13 @@ class EditDepartmentController extends AdminController {
 
 	validatesSelf[SelfValidating]
 	type EditDepartmentCommand = Appliable[Department] with EditDepartmentCommandState
-	
-	@ModelAttribute("allFilterRules") 
+
+	@ModelAttribute("allFilterRules")
 	def allFilterRules = Department.FilterRule.allFilterRules
 
 	@ModelAttribute("editDepartmentCommand")
 	def command(@PathVariable("department") department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))
-	
+
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm() = Mav("admin/department/edit/form")
 

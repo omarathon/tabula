@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class PermissionUserType extends AbstractBasicUserType[Permission, String] {
-	
+
 	val relationshipService = promise { Wire[RelationshipService] }
 
 	val basicType = StandardBasicTypes.STRING
@@ -18,7 +18,7 @@ class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 
 	val nullValue = null
 	val nullObject = null
-	
+
 	override def convertToObject(string: String) = {
 		string match {
 			case r"([A-Za-z\.]+)${permissionName}\(\*\)" => {
@@ -35,7 +35,7 @@ class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 			case _ => Permissions.of(string)
 		}
 	}
-	
+
 	override def convertToValue(permission: Permission) = permission match {
 		case sperm: SelectorPermission[_] => "%s(%s)".format(sperm.getName, sperm.selector.id)
 		case _ => permission.getName

@@ -6,9 +6,9 @@
 	</div>
 
 	<div class="modal-body">
-		<p>Notify these people via email of this change. Note that only students/${relationshipType.agentRole}s 
+		<p>Notify these people via email of this change. Note that only students/${relationshipType.agentRole}s
 		whose allocations have been changed will be notified.</p>
-		
+
 		<div class="control-group">
 			<div class="controls">
 				<label class="checkbox">

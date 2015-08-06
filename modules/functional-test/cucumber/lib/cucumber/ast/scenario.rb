@@ -4,23 +4,23 @@ module Cucumber
   module Ast
     class Scenario #:nodoc:
       include FeatureElement
-      
+
       attr_reader :name, :line
-      
-      class EmptyBackground 
+
+      class EmptyBackground
         def failed?
           false
         end
-        
+
         def feature_elements
           []
         end
-        
+
         def step_collection(step_invocations)
           StepCollection.new(step_invocations)
         end
       end
-      
+
       def initialize(background, comment, tags, line, keyword, name, steps)
         @background = background || EmptyBackground.new
         @comment, @tags, @line, @keyword, @name = comment, tags, line, keyword, name
@@ -29,13 +29,13 @@ module Cucumber
         step_invocations = steps.map{|step| step.step_invocation}
         @steps = @background.step_collection(step_invocations)
         @background.feature_elements << self
-        
+
         @exception = @executed = nil
       end
 
       def accept(visitor)
         return if Cucumber.wants_to_quit
-        
+
         with_visitor(visitor) do
           visitor.visit_comment(@comment) unless @comment.empty?
           visitor.visit_tags(@tags)
@@ -54,7 +54,7 @@ module Cucumber
       def failed?
         @steps.failed? || !!@exception
       end
-      
+
       def fail!(exception)
         @exception = exception
         @current_visitor.visit_exception(@exception, :failed)
@@ -93,16 +93,16 @@ module Cucumber
         sexp += steps if steps.any?
         sexp
       end
-      
-      
+
+
       def with_visitor(visitor)
         @current_visitor = visitor
         yield
         @current_visitor = nil
       end
-      
+
       private
-      
+
       def skip_hooks?
         @background.failed? || @executed
       end

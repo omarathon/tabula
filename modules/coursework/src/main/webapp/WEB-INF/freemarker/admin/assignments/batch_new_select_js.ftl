@@ -12,9 +12,9 @@ jQuery(function($){
 	// editable name field
 	$('.editable-name').each(function() {
 		var $this = $(this);
-		
+
 		var $target = $('<a class="name-edit-link"><i class="icon-pencil"></i></a>');
-		
+
 		$this.editable({
 			toggle: 'manual',
 			mode: 'inline',
@@ -32,24 +32,24 @@ jQuery(function($){
 		}).on('hidden', function() {
 			$target.show();
 		});
-		
+
 		$this.after($target.on('click', function(e) {
 			e.stopPropagation();
 			$this.editable('toggle');
 		})).after('&nbsp;');
 	});
-	
-	
+
+
 
 	var optionGroupCount = $('#options-buttons .options-button').length;
 
 	var $form = $('#batch-add-form');
-	
+
 	// reload page when academic field dropdown changes, as it changes the contents of the list.
 	$('#academicYearSelect, #includeSubDepartmentsSelect').change(function(){
 		$form.find('input[name=action]').val('change-year');
 		$form.submit();
-	}); 
+	});
 
 	// When clicking Next, set the action parameter to the relevant value before submitting
 	$form.find('button[data-action]').click(function(event){
@@ -58,7 +58,7 @@ jQuery(function($){
 			$form.find('input[name=action]').val(action);
 		}
 	});
-	
+
 	// Disable submit buttons after form is submitted.
 	$form.submit(function() {
 		var $buttons = $('button[data-action], #batch-add-submit-button');
@@ -118,8 +118,8 @@ jQuery(function($){
 			}
 		})
 		.on('mousedown', 'a.name-edit-link', function(e){
-			// prevent td.selected toggling when clicking the edit link. 
-			e.stopPropagation(); 
+			// prevent td.selected toggling when clicking the edit link.
+			e.stopPropagation();
 		});
 
 	$(document).mouseup(function(){
@@ -165,22 +165,22 @@ jQuery(function($){
 				if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
 					// grab all the submittable fields and clone them to the main page form
 					var fields = $optsModalBody.find('[name]').clone();
-	
+
 					// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
 					// Z. Nobody knows what happens after Z...
 					var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
 					var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
 					optionGroupCount = optionGroupCount + 1;
-	
+
 					var $group = $('<div>').addClass('options-button');
 					var $hidden = $('<div>').addClass('options-group').data('group', groupName);
 					var $button = $('<button class="btn btn-block"></button>').html('Re-use options ').append($groupNameLabel);
 					$button.data('group', groupName);
 					$group.append($button);
 					$group.append($hidden);
-	
+
 					// button behaviour already wired by an on() call.
-	
+
 					// rename all the fields to sit under an optionsMap entry.
 					fields.each(function(i, field){
 						var prefix = "optionsMap["+groupName+"].";
@@ -192,10 +192,10 @@ jQuery(function($){
 						field.name =  prefix + field.name;
 						$hidden.append(field);
 					});
-	
+
 					$opts.append($group);
 					$optsModal.modal('hide');
-	
+
 					applyGroupNameToSelected(groupName);
 				}
 			});
@@ -244,7 +244,7 @@ jQuery(function($){
 		$selectedRows.find('.dates-label').html(openDate + (openEnded ? ' (open ended)' : ' - ' + closeDate));
 		$datesModal.modal('hide');
 	});
-	
+
 	// Wire all "Re-use options" buttons, present and future
 	$('#options-buttons').on('click', '.options-button > button', function() {
 		applyGroupNameToSelected($(this).data('group'));

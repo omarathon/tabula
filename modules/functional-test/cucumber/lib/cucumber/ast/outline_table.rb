@@ -35,7 +35,7 @@ module Cucumber
           cells.create_step_invocations!(scenario_outline)
         end
       end
-      
+
       def example_rows
         cells_rows[1..-1]
       end
@@ -48,13 +48,13 @@ module Cucumber
         @scenario_outline.language
       end
 
-      class ExampleRow < Cells #:nodoc:        
+      class ExampleRow < Cells #:nodoc:
         class InvalidForHeaderRowError < NoMethodError
           def initialize(*args)
             super 'This is a header row and cannot pass or fail'
           end
         end
-        
+
         attr_reader :scenario_outline # https://rspec.lighthouseapp.com/projects/16211/tickets/342
 
         def initialize(table, cells)
@@ -66,7 +66,7 @@ module Cucumber
           @scenario_outline = scenario_outline
           @step_invocations = scenario_outline.step_invocations(self)
         end
-        
+
         def skip_invoke!
           @step_invocations.each do |step_invocation|
             step_invocation.skip_invoke!
@@ -94,7 +94,7 @@ module Cucumber
               @cells.each do |cell|
                 visitor.visit_table_cell(cell)
               end
-              
+
               visitor.visit_exception(@scenario_exception, :failed) if @scenario_exception
             end
           end
@@ -117,15 +117,15 @@ module Cucumber
         def accept_hook?(hook)
           @table.accept_hook?(hook)
         end
-        
+
         def exception
           @exception || @scenario_exception
         end
-        
+
         def fail!(exception)
           @scenario_exception = exception
         end
-        
+
         # Returns true if one or more steps failed
         def failed?
           raise InvalidForHeaderRowError if header?

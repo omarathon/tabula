@@ -101,12 +101,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails", FetchMode.JOIN)
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
 			}
-	
+
 			val checkpoints = criteria.seq
-	
+
 			val result = checkpoints
 				.map(checkpoint => (checkpoint.student, checkpoint))
-	
+
 			if (mostSiginificantOnly)
 				result.filter { case(student, checkpoint) =>
 					val pointSet = checkpoint.point.pointSet

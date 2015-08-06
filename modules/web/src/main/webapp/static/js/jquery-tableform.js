@@ -8,7 +8,7 @@ jQuery.fn.tableForm = function(options) {
 
         var doNothing = function(){};
         var setupFunction = options.setup || doNothing;
-        
+
         var addButtonClass = options.addButtonClass || 'add-button';
         var headerClass = options.headerClass || 'header-row';
         var rowClass = options.rowClass || 'table-row';

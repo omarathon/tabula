@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<style type="text/css">
-		body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif 
+		body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
 		}
 	</style>
 	<title>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case}) - ${feedback.assignment.name}</title>

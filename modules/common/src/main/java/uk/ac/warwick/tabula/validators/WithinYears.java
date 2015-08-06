@@ -12,15 +12,15 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=WithinYearsValidatorForReadableInstant.class)
 public @interface WithinYears {
-	
+
 	int maxFuture() default Integer.MAX_VALUE;
-	
+
 	int maxPast() default Integer.MAX_VALUE;
-	
+
 	Class<?>[] groups() default { };
-	
+
 	Class<? extends Payload>[] payload() default {};
-	
+
 	String message() default "{uk.ac.warwick.tabula.validators.WithinYears.message}";
 
 }

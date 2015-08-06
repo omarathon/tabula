@@ -17,13 +17,13 @@ import scala.reflect._
  * (i.e. on construction). These are then evaluated on bind.
  */
 trait PermissionsChecking extends PermissionsCheckingMethods  {
-	
+
 	type PermissionsCheckMultiMap = mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]]
 		with mutable.MultiMap[Permission, Option[PermissionsTarget]]
-	
+
 	private def newMap(): PermissionsCheckMultiMap = new mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]]
 		with mutable.MultiMap[Permission, Option[PermissionsTarget]]
-	
+
 	var permissionsAnyChecks: PermissionsCheckMultiMap = newMap()
 	var permissionsAllChecks: PermissionsCheckMultiMap = newMap()
 
@@ -66,7 +66,7 @@ trait PermissionsCheckingMethods extends Logging {
 			logger.info("Not displaying assessment as it doesn't belong to specified module")
 			throw new ItemNotFoundException(assessment, "Not displaying assessment as it doesn't belong to specified module")
 		}
-	
+
 	def mustBeLinked(set: SmallGroupSet, module: Module) =
 		if (mandatory(mandatory(set).module).id != mandatory(module).id) {
 			logger.info("Not displaying small group set as it doesn't belong to specified module")

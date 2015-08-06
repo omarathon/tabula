@@ -51,7 +51,7 @@ class ImportSitsStatusCommand(info: SitsStatusInfo) extends Command[(SitsStatus,
 			sitsStatusDao.saveOrUpdate(sitsStatus)
 		}
 
-		val result = 
+		val result =
 			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
 			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
 			else ImportAcademicInformationCommand.ImportResult()

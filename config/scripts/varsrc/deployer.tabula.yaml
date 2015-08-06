@@ -1,6 +1,6 @@
---- !ruby/object:Deployment 
-apaches: 
-- !ruby/object:Apache 
+--- !ruby/object:Deployment
+apaches:
+- !ruby/object:Apache
   name: tabula-web
   port_balancer: !ruby/object:HAProxySocketBalancer
     balanced_group: tabula-web
@@ -15,7 +15,7 @@ apaches:
   apache_dir: "/usr/local/apache"
   restart_command: "echo 'not restarting apache' "
   state: balanced
-- !ruby/object:Apache 
+- !ruby/object:Apache
   name: tabula-api
   port_balancer: !ruby/object:HAProxySocketBalancer
     balanced_group: tabula-api
@@ -37,9 +37,8 @@ war_names:
 - api
 - attendance
 - courses
-- groups
 - profiles
-- web
+- ROOT
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
@@ -59,7 +58,7 @@ scheduler_instance: !ruby/object:Tomcat
   war_names:
   - scheduling
   test_path: /scheduling/test/up
-  requests: 
+  requests:
      /scheduling/test/up: 200
 instances:
   tabula-web:
@@ -74,9 +73,9 @@ instances:
     excluded_war_names:
     - scheduling
     - api
-    test_path: /web/test/up
-    requests: 
-       /web/test/up: 200
+    test_path: /test/up
+    requests:
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
@@ -92,9 +91,9 @@ instances:
     excluded_war_names:
     - scheduling
     - api
-    test_path: /web/test/up
-    requests: 
-       /web/test/up: 200
+    test_path: /test/up
+    requests:
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
@@ -111,7 +110,7 @@ instances:
     war_names:
     - api
     test_path: /api/test/up
-    requests: 
+    requests:
        /api/test/up: 200
   - !ruby/object:Tomcat
     deployment_state: old
@@ -124,7 +123,7 @@ instances:
     war_names:
     - api
     test_path: /api/test/up
-    requests: 
+    requests:
        /api/test/up: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: n.howes@warwick.ac.uk

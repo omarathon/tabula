@@ -24,7 +24,7 @@ class ManageRoleTag extends TemplateDirectiveModel {
 
 	@Autowired var securityService: SecurityService = _
 	@Autowired var permissionsService: PermissionsService = _
-	
+
 	lazy val permissionsConverter = new PermissionUserType
 	lazy val roleDefinitionConverter = new BuiltInRoleDefinitionUserType
 
@@ -34,7 +34,7 @@ class ManageRoleTag extends TemplateDirectiveModel {
 		body: TemplateDirectiveBody) = {
 
 		val wrapper = env.getObjectWrapper()
-		
+
 		val user = RequestInfo.fromThread.get.user
 
 		val permission = unwrap(params.get("permission")).asInstanceOf[Permission]
@@ -46,17 +46,17 @@ class ManageRoleTag extends TemplateDirectiveModel {
 		if (body == null) {
 			throw new TemplateException("ManageRoleTag: must have a body", env);
 		}
-		
+
 		if (permissionName != null) {
-			val perm = 
+			val perm =
 				if (permission != null) permission
 				else permissionsConverter.convertToObject(permissionName)
 			val canDelegate = securityService.canDelegate(user, perm, scope) || user.god
-			
-			val deniedPermissions = 
+
+			val deniedPermissions =
 				if (canDelegate) Seq()
 				else Seq(perm)
-			
+
 			env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
 			env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
 		} else if (roleDefinition != null || roleName != null) {
@@ -65,12 +65,12 @@ class ManageRoleTag extends TemplateDirectiveModel {
 				else permissionsService.getCustomRoleDefinitionById(roleName).getOrElse {
 					roleDefinitionConverter.convertToObject(roleName)
 				}
-			
+
 			val allPermissions = definition.allPermissions(Option(scope)).keys
 			val deniedPermissions = allPermissions.filterNot(securityService.canDelegate(user, _, scope))
-			
+
 			val canDelegate = deniedPermissions.isEmpty || user.god
-			
+
 			env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
 			env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
 		} else {

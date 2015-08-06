@@ -28,7 +28,7 @@
 		<!-- Scheduling is NEVER skinny -->
 		<profile>
 			<id>skinny</id>
-			
+
 			<build>
 				<plugins>
 					<plugin>
@@ -46,7 +46,7 @@
 				</plugins>
 			</build>
 		</profile>
-	
+
 		<!-- deploy to container -->
 		<profile>
 			<id>deploy</id>
@@ -101,8 +101,8 @@
 					</execution>
 				</executions>
 				<configuration>
-					<!-- TODO it's possible to get this out of sync with the definition in the 
-						top level pom, but we need to have this here so that we can overlay Freemarker 
+					<!-- TODO it's possible to get this out of sync with the definition in the
+						top level pom, but we need to have this here so that we can overlay Freemarker
 						from other modules -->
 					<overlays>
 						<overlay>
@@ -137,7 +137,7 @@
 	</build>
 
 	<dependencies>
-		<!-- Project dependencies - need a dependency on any module that runs a 
+		<!-- Project dependencies - need a dependency on any module that runs a
 			job -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>

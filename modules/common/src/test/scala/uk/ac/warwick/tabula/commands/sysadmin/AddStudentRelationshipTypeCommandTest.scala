@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceCo
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
-	
+
 	private trait Fixture {
 		val commandInternal = new AddStudentRelationshipTypeCommandInternal with RelationshipServiceComponent {
 			var relationshipService = mock[RelationshipService]
 		}
 	}
-	
+
 	@Test
 	def objectApplyCreatesCommand() {
 		new Fixture {
@@ -24,13 +24,13 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			command.isInstanceOf[Appliable[StudentRelationshipType]] should be(true)
 		}
 	}
-	
+
 	@Test
 	def commandCreatesRelationshipWhenApplied() {
 		new Fixture {
 			commandInternal.id = "theId"
 			commandInternal.urlPart = "theUrlPart"
-			commandInternal.description = "role description"		
+			commandInternal.description = "role description"
 			commandInternal.agentRole = "agent"
 			commandInternal.studentRole = "student"
 			commandInternal.defaultSource = StudentRelationshipSource.SITS
@@ -44,7 +44,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 
 			newType.id should be ("theId")
 			newType.urlPart should be ("theUrlPart")
-			newType.description should be ("role description")		
+			newType.description should be ("role description")
 			newType.agentRole should be ("agent")
 			newType.studentRole should be ("student")
 			newType.defaultSource should be (StudentRelationshipSource.SITS)
@@ -70,7 +70,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			val describable = new ModifyStudentRelationshipTypeCommandDescription with StudentRelationshipTypeProperties {
 				val eventName: String = "test"
 			}
-			
+
 			describable.id = "theId"
 			describable.urlPart = "theUrlPart"
 			describable.description = "role description"
@@ -84,7 +84,7 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			)
 		}
 	}
-	
+
 	@Test
 	def permissionsRequireGlobalStudentRelationshipTypeCreate {
 		new Fixture {
@@ -94,14 +94,14 @@ class AddStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
-	
+
 	@Test
 	def duplicateValidation {
 		new Fixture {
 			commandInternal.id = "newId"
-				
+
 			val existing = StudentRelationshipType("existing", "existing", "existing", "existing")
-				
+
 			commandInternal.relationshipService.getStudentRelationshipTypeByUrlPart("url") returns (None)
 			commandInternal.relationshipService.getStudentRelationshipTypeByUrlPart("existing") returns (Some(existing))
 

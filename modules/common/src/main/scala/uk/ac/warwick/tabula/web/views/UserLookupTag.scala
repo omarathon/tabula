@@ -43,7 +43,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 		if (body == null) {
 			throw new TemplateException("UserLookupTag: must have a body", env);
 		}
-		
+
 		if (user.nonEmpty) {
 			val userId = user.get
 

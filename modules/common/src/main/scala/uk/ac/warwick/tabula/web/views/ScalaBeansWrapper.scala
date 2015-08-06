@@ -28,7 +28,7 @@ import org.hibernate.proxy.HibernateProxyHelper
  * in Freemarker template engine.
  */
 class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0) with Logging {
-	
+
 	var securityService = Wire[SecurityService]
 
 	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
@@ -67,12 +67,12 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
 	}
-	
+
 	/**
 	 * A model that will expose all Scala getters that has zero parameters
 	 * to the FM Hash#get method so can retrieve it without calling with parenthesis.
 	 */
-	
+
 	/**
 	 * Also understands regular JavaBean getters, useful when a Java bean has been extended
 	 * in Scala to implement Any. If both getter type is present, one will overwrite
@@ -86,13 +86,13 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 		def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
 
 		def isGetter(m: Getter) = !m.getName.endsWith("_$eq") && m.getParameterTypes.length == 0
-		
+
 		val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 		def generateGetterInformation(cls: Class[_]) = {
 			val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
 			def isJavaGetter(m: Method) = javaGetterRegex.pattern.matcher(m.getName).matches
-			
+
 			def parse(m: Method, name: String) = {
 				val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
         val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
@@ -108,10 +108,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
             }
           }
 					else (_)=>Nil
-				
+
 				(name -> (m, perms))
 			}
-			
+
 			val scalaPairs = for (m <- cls.getMethods if isGetter(m) && !isJavaGetter(m)) yield {
 				parse(m, m.getName)
 			}
@@ -122,11 +122,11 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 				}
 				parse(m, name)
 			}
-			
+
 			// TAB-766 Add the scala pairs after so they override the java ones of the same name
 			javaPairs.toMap ++ scalaPairs.toMap
 		}
-		
+
 		// Cache child properties for the life of this model, so that their caches are useful when a property is accessed twice.
 		// Not the same as TAB-469, which would cache for longer than the life of a request, causing memory leaks. This cache
 		// will use a bit more memory but it won't leak outside of a request.
@@ -147,21 +147,21 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 
 		def user = RequestInfo.fromThread.get.user
 
-		def canDo(perms: Seq[Permission]) = perms forall { 
+		def canDo(perms: Seq[Permission]) = perms forall {
 			case permission: ScopelessPermission => securityService.can(user, permission)
-			case permission if classOf[PermissionsTarget].isInstance(sobj) => 
+			case permission if classOf[PermissionsTarget].isInstance(sobj) =>
 				securityService.can(user, permission, sobj.asInstanceOf[PermissionsTarget])
 			case permission => {
 				logger.warn("Couldn't check for permission %s against object %s because it isn't a PermissionsTarget".format(permission.toString, sobj.toString))
 				false
 			}
 		}
-		
+
 		override def get(key: String): TemplateModel = {
 			cachedResults.getOrElseUpdate(key,{
 				val gtr= getters.get(key)
 				gtr match {
-					case Some((getter, permissions)) => 
+					case Some((getter, permissions)) =>
 						if (canDo(permissions(sobj))) {
 							val res = getter.invoke(sobj)
 							wrapper.wrap(res)
@@ -174,7 +174,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 				}}
 			)
 		}
-	
+
 		def checkInnerClasses(key: String): Option[TemplateModel] = {
 			try {
 				Some(wrapper.wrap(Class.forName(objectClass.getName + key + "$").getField("MODULE$").get(null)))
@@ -183,14 +183,14 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_0
 					None
 			}
 		}
-	
+
 		override def isEmpty = false
-		
+
 		def clearCaches() {
 			cachedResults.clear()
 		}
 	}
-	
+
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
 		type PermissionsFetcher = Any=>Seq[Permission]

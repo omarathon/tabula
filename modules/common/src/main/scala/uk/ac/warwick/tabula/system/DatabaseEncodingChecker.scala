@@ -17,9 +17,9 @@ import javax.sql.DataSource
  * The select query is currently Oracle specific, so this isn't loaded in tests.
  */
 trait DatabaseEncodingChecker extends InitializingBean with Logging {
-	
+
 	val testString = "a-\u01ee"
-		
+
 	def fetchString: String
 
 	override def afterPropertiesSet {
@@ -31,11 +31,11 @@ trait DatabaseEncodingChecker extends InitializingBean with Logging {
 			logger.debug("Retrieved Unicode string from database in one piece, international characters should be okay")
 		}
 	}
-	
+
 }
 
 class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: SessionFactory) extends DatabaseEncodingChecker {
-		
+
 	override def fetchString = closeThis(sessionFactory.openSession()) { session =>
 		val query = session.createSQLQuery("select :string from dual")
 		query.setString("string", testString)
@@ -45,15 +45,15 @@ class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: Se
 }
 
 class DataSourceDatabaseEncodingChecker @Autowired() (val dataSource: DataSource) extends DatabaseEncodingChecker {
-	
-	override def fetchString = closeThis(dataSource.getConnection) { conn => 
+
+	override def fetchString = closeThis(dataSource.getConnection) { conn =>
 		closeThis(conn.prepareStatement("select ? from dual")) { stmt =>
 			stmt.setString(1, testString)
-			closeThis(stmt.executeQuery()) { rs => 
+			closeThis(stmt.executeQuery()) { rs =>
 				rs.next()
 				rs.getString(1)
 			}
 		}
 	}
-	
+
 }

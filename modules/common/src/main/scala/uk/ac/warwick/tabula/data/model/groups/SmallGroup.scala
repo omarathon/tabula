@@ -51,7 +51,7 @@ class SmallGroup
 		with ToEntityReference {
 	type Entity = SmallGroup
 	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
-	
+
 	@transient var permissionsService = Wire[PermissionsService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
@@ -70,7 +70,7 @@ class SmallGroup
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "group_id")
 	@BatchSize(size=200)
@@ -89,7 +89,7 @@ class SmallGroup
 	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@JoinColumn(name = "linked_dept_group_id")
 	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
-	
+
 	def permissionsParents = Option(groupSet).toStream
 	override def humanReadableId = name
 
@@ -137,15 +137,15 @@ class SmallGroup
     }
   }
 
-  def duplicateTo(groupSet: SmallGroupSet): SmallGroup = {
+  def duplicateTo(groupSet: SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroup = {
     val newGroup = new SmallGroup()
-    newGroup.id = id
-    newGroup.events = events.map(_.duplicateTo(newGroup))
+		if (!transient) newGroup.id = id
+    if (copyEvents) newGroup.events = events.map(_.duplicateTo(newGroup, transient = transient))
     newGroup.groupSet = groupSet
     newGroup.name = name
 		newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup
     newGroup.permissionsService = permissionsService
-		if (_studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
+		if (copyMembership && _studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
 		newGroup.settings = Map() ++ (if (settings != null) settings else Map())
     newGroup
   }
@@ -153,7 +153,7 @@ class SmallGroup
 	def postLoad {
 		ensureSettings
 	}
-	
+
 	def hasScheduledEvents = events.exists(!_.isUnscheduled)
 
 	override def toEntityReference = new SmallGroupEntityReference().put(this)

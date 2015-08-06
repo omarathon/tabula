@@ -10,7 +10,7 @@
 	<h1 class="with-settings">Hello, ${user.firstName}</h1>
 <#else>
 	<h1 class="with-settings">Hello</h1>
-</#if>	
+</#if>
 
 <#include "_admin.ftl" />
 

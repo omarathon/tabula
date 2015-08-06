@@ -6,12 +6,12 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 
 final class DelimitByCharacterFilter(val source: TokenStream, val character: Char) extends TokenFilter(source) {
-	
+
 	val term = addAttribute(classOf[CharTermAttribute])
-	
+
 	var useRemainingText = false
 	var remainingText: String = _
-	
+
 	override def incrementToken(): Boolean = {
 		val text = if (!useRemainingText) {
 			if (!source.incrementToken()) ""
@@ -43,16 +43,16 @@ final class DelimitByCharacterFilter(val source: TokenStream, val character: Cha
 			false
 		}
 	}
-	
+
 	private def setTermBuffer(buffer: String) = {
 		val length = buffer.length
-		
+
 		// This is a no-op if the length is shorter or the same
 		term.resizeBuffer(length)
-		
+
 		// Copy characters into the target buffer
 		buffer.getChars(0, length, term.buffer, 0)
 		term.setLength(length)
 	}
-	
+
 }

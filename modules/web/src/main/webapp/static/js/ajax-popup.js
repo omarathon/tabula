@@ -84,11 +84,11 @@ exports.wireAjaxPopupLinks = function($container) {
 	        width = 300,
 	        height = 300,
 	        pointAt = link;
-	
+
 	    if ($link.data('popup-target') !== null) {
 	        pointAt = $link.closest($link.data('popup-target'));
 	    }
-	
+
 	    var decorate = function($root) {
 	        if ($root.find('html').length > 0) {
 	            // dragged in a whole document from somewhere, whoops. Replace it
@@ -102,10 +102,10 @@ exports.wireAjaxPopupLinks = function($container) {
 	        $root.find('input[type=submit]').click(function(e){
 	            e.preventDefault();
 	            var $form = $(this).closest('form');
-	
+
 	            // added ZLJ Aug 10th to make a unique URL which IE8 will load
 	            var $randomNumber = Math.floor(Math.random() * 10000000);
-	
+
 	            // this line doesn't work in IE8 (IE8 bug) - need to make the URL
 	            // unique using generated random number
 	            //jQuery.post($form.attr('action'), $form.serialize(), function(data){
@@ -122,7 +122,7 @@ exports.wireAjaxPopupLinks = function($container) {
 	            window.location.reload();
 	        }
 	    };
-	
+
 	    e.preventDefault();
 	    popup.setContent("Loading&hellip;");
 	    popup.setSize(width, height);
@@ -141,7 +141,7 @@ exports.wireAjaxPopupLinks = function($container) {
 $(function() {
 	ajaxPopup = new WPopupBox();
 
-	exports.wireAjaxPopupLinks($('#container'));	
+	exports.wireAjaxPopupLinks($('#container'));
 });
 
 

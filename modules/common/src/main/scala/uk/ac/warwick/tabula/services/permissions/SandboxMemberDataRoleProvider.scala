@@ -14,31 +14,31 @@ import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 /**
- * Role provider that only runs in the sandbox environment, where there are no 
+ * Role provider that only runs in the sandbox environment, where there are no
  * member details for the currently logged in user.
  */
 @Profile(Array("sandbox")) @Component
 class SandboxMemberDataRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
-	
+
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
-	
+
 	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for SandboxMemberDataRoleProvider"){
 		if (user.realUser.isLoggedIn) {
 			val allDepartments = departmentService.get.allDepartments.toStream
-			
+
 			val member = new RuntimeMember(user) {
 				this.homeDepartment = allDepartments.head
 				override def affiliatedDepartments = allDepartments
 				override def touchedDepartments = allDepartments
 			}
-			
+
 			UniversityMemberRole(member) #:: (member.userType match {
 				case Staff | Emeritus => allDepartments map StaffRole
 				case _ => Stream.empty[Role]
 			})
 		} else Stream.empty
 	}
-	
+
 	def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
 
 }

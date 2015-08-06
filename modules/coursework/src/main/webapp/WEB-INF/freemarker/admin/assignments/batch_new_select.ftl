@@ -40,7 +40,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 	<div class="row-fluid">
 	<div class="span10">
-	
+
 	<div id="batch-add-errors">
 	<#include "batch_new_validation.ftl" />
 	</div>
@@ -138,10 +138,10 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <tr class="itemContainer">
 	<td>
-	
+
 		<#-- saved options for the assignment stored here -->
 		<@hidden_properties />
-		
+
 		<#if step="select">
 			<@f.checkbox path="include" cssClass="collection-checkbox" />
 		<#else>
@@ -164,7 +164,7 @@ first page of the form to setup a bunch of assignments from SITS.
 	<td class="selectable">
 		<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
 		<#-- TODO expose as click-to-edit -->
-		
+
 		<#-- render all field errors for assignmentItems[x] -->
 		<@f.errors path="" cssClass="error" />
 		<#-- render all field errors for assignmentItems[x].* -->
@@ -214,7 +214,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#if step='select'>
 
 	<button class="btn btn-large btn-primary btn-block" data-action="options">Next</button>
-	
+
 	<#-- This is for if you go Back from step 2, to remember previous options -->
 	<#list command.optionsMap?keys as optionsId>
 		<div class="options-group">
@@ -253,8 +253,8 @@ first page of the form to setup a bunch of assignments from SITS.
 			</@spring.nestedPath>
 		</div>
 	</div>
-</#list> 
- 
+</#list>
+
 </div>
 </#if>
 

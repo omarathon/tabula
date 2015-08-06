@@ -89,7 +89,7 @@ module Cucumber
         end
 
         def build
-          row = cells.elements.map do |elt| 
+          row = cells.elements.map do |elt|
             value = elt.cell.text_value.strip
             value
           end

@@ -210,7 +210,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			case _ => this.users == other.users
 		}
 	}
-	
+
 	def knownType = this
 }
 
@@ -255,7 +255,7 @@ trait UnspecifiedTypeUserGroup {
 
 	def copyFrom(otherGroup: UnspecifiedTypeUserGroup): Unit
 	def duplicate(): UnspecifiedTypeUserGroup
-	
+
 	val universityIds: Boolean
 	def knownType: KnownTypeUserGroup
 }

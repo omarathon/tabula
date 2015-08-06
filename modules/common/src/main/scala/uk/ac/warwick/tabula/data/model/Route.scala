@@ -52,7 +52,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	var active: Boolean = _
 
 	override def toString = "Route[" + code + "]"
-	
+
 	def permissionsParents = teachingDepartments.toStream
 	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
@@ -60,7 +60,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
 	@BatchSize(size=100)
 	var monitoringPointSets: JList[MonitoringPointSet] = JArrayList()
-	
+
 	var missingFromImportSince: DateTime = _
 
 	var teachingDepartmentsActive: Boolean = false

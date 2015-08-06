@@ -10,11 +10,11 @@ trait BindListenerBinding extends CustomDataBinder {
 
 	override def bind(request: ServletRequest) {
 		super.bind(request)
-		
+
 		// Custom onBind methods
 		if (target.isInstanceOf[BindListener]) {
 			target.asInstanceOf[BindListener].onBind(super.getBindingResult)
 		}
 	}
-	
+
 }

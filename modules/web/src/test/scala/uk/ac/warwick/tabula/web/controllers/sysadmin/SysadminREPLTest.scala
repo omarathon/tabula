@@ -7,6 +7,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 class SysadminREPLTest extends TestBase {
 	@Test def repl {
 		val repl = new SpelExpressionParser
-		
+
 	}
 }

@@ -20,10 +20,10 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 
 	var assignmentName: String = _
 	var deptCode: String = _
-	
+
 	@WithinYears(maxPast = 3, maxFuture = 3)
 	var openDate: DateTime = _
-	
+
 	@WithinYears(maxPast = 3, maxFuture = 3)
 	var closeDate: DateTime = _
 

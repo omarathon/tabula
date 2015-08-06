@@ -1,9 +1,9 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#macro reportLoader reportUrl>
+<#macro reportLoader reportUrl commandName="command">
 	<script>
 		window.ReportBuilder = {};
 	</script>
-	<@f.form method="get" action="" commandName="command" cssClass="form-inline double-submit-protection">
+	<@f.form method="get" action="${reportUrl}" commandName="${commandName}" cssClass="form-inline double-submit-protection">
 		<label>Start date</label>
 		<@f.input id="startDate" path="startDate" cssClass="date-picker input-small" />
 		<label>End date</label>
@@ -12,12 +12,12 @@
 	</@f.form>
 	<div class="loading">
 		<p><em>Building report&hellip;</em></p>
-	
+
 		<div class="progress progress-striped active">
 			<div class="bar" style="width: 10%;"></div>
 		</div>
 	</div>
-	
+
 	<div class="complete alert alert-success" style="display: none;">
 		<p>Report complete</p>
 		<div class="btn-toolbar">
@@ -33,14 +33,14 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="alert alert-error" style="display: none;">
 		<p>There was a problem generating the report. If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a>.</p>
 	</div>
-	
+
 	<div class="report-target"></div>
 	<form class="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></form>
-	
+
 	<script>
 		var progress = 10, stepProgress = function() {
 			progress = progress + 5;
@@ -101,12 +101,12 @@
 								}
 							}
 						}
-	
+
 						$(result).appendTo($('form.report-target-form'));
-	
+
 						$mainContent.find('div.loading').hide();
 						$mainContent.find('div.complete').show();
-	
+
 						$mainContent.find('div.complete div.download ul.dropdown-menu a').on('click', function(e) {
 							e.preventDefault();
 							$('form.report-target-form').prop('action', $(this).data('href')).submit();
