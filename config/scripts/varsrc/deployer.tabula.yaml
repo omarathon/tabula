@@ -38,7 +38,7 @@ war_names:
 - attendance
 - courses
 - profiles
-- web
+- ROOT
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "master"
@@ -73,9 +73,9 @@ instances:
     excluded_war_names:
     - scheduling
     - api
-    test_path: /web/test/up
+    test_path: /test/up
     requests:
-       /web/test/up: 200
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
@@ -91,9 +91,9 @@ instances:
     excluded_war_names:
     - scheduling
     - api
-    test_path: /web/test/up
+    test_path: /test/up
     requests:
-       /web/test/up: 200
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
