@@ -45,7 +45,7 @@
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
 									<artifactId>web</artifactId>
-									<bundleFileName>web.war</bundleFileName>
+									<bundleFileName>ROOT.war</bundleFileName>
 									<contextRoot>/</contextRoot>
 								</webModule>
 								<webModule>

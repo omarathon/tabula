@@ -24,7 +24,7 @@ war_names:
 - courses
 - groups
 - profiles
-- web
+- ROOT
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
 branch: "develop"
@@ -58,9 +58,9 @@ instances:
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
-    test_path: /web/test/up
+    test_path: /test/up
     requests: 
-       /web/test/up: 200
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
@@ -76,9 +76,9 @@ instances:
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
     excluded_war_names:
     - scheduling
-    test_path: /web/test/up
+    test_path: /test/up
     requests: 
-       /web/test/up: 200
+       /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
        /groups/test/up: 200
