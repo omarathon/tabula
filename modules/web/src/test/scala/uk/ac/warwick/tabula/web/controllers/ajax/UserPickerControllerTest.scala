@@ -1,11 +1,8 @@
-package uk.ac.warwick.tabula.web.controllers
+package uk.ac.warwick.tabula.web.controllers.ajax
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.JsonObjectMapperFactory
-import uk.ac.warwick.tabula.MockUserLookup
 import java.io.StringWriter
 
-import uk.ac.warwick.tabula.web.controllers.common.UserPickerController
+import uk.ac.warwick.tabula.{JsonObjectMapperFactory, MockUserLookup, TestBase}
 
 class UserPickerControllerTest extends TestBase {
 	

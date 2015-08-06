@@ -12,7 +12,7 @@ class AppVersionController {
   @Value("${git.commit}") var gitSha:String= _
 	@Value("${git.describe}") var gitDesc:String = _
 
-	@RequestMapping(Array("/api/version"))
+	@RequestMapping(Array("/version"))
 	def showTime = new ResponseEntity("%s - %s - %s".format(buildTime, gitSha, gitDesc), plainTextHeaders, HttpStatus.OK)
 
 	def plainTextHeaders = new HttpHeaders {

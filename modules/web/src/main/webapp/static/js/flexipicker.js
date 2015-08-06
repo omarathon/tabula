@@ -267,7 +267,7 @@ FlexiPicker.prototype.search = function (query, options) {
 		this.currentSearch = null;
 	}
 	this.currentSearch = $.ajax({
-		url: '/api/flexipicker/query.json',
+		url: '/ajax/flexipicker/query.json',
 		dataType: 'json',
 		data: {
 			includeUsers: this.includeUsers,
@@ -407,7 +407,7 @@ var ModulePicker = function (options) {
 				self.currentSearch = null;
 			}
 			self.currentSearch = $.ajax({
-				url: '/api/modulepicker/query',
+				url: '/ajax/modulepicker/query',
 				dataType: 'json',
 				data: {
 					query: query,
@@ -545,7 +545,7 @@ var AssignmentPicker = function (options) {
 				self.currentSearch = null;
 			}
 			self.currentSearch = $.ajax({
-				url: '/api/assignmentpicker/query',
+				url: '/ajax/assignmentpicker/query',
 				dataType: 'json',
 				data: {
 					query: query
@@ -657,7 +657,7 @@ var RoutePicker = function (options) {
 				self.currentSearch = null;
 			}
 			self.currentSearch = $.ajax({
-				url: '/api/routepicker/query',
+				url: '/ajax/routepicker/query',
 				dataType: 'json',
 				data: {
 					query: query

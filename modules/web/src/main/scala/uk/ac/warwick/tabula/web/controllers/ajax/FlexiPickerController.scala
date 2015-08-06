@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.common
+package uk.ac.warwick.tabula.web.controllers.ajax
 
 import java.io.{UnsupportedEncodingException, Writer}
 import java.net.URLEncoder
@@ -16,24 +16,20 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.common.FlexiPickerController.{FlexiPickerState, FlexiPickerResult, FlexiPickerCommand}
+import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerState, FlexiPickerResult, FlexiPickerCommand}
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
 import uk.ac.warwick.userlookup.{Group, User}
 
 import scala.collection.JavaConversions._
 
-
 @Controller
 class FlexiPickerController extends BaseController {
 	var json = Wire[ObjectMapper]
 
-	@RequestMapping(value = Array("/api/flexipicker/form"))
-	def form: Mav = Mav("api/flexipicker/form").noLayout()
-
 	@ModelAttribute("command")
 	def createCommand() = FlexiPickerCommand()
 
-	@RequestMapping(value = Array("/api/flexipicker/query.json"))
+	@RequestMapping(value = Array("/ajax/flexipicker/query.json"))
 	def queryJson(@ModelAttribute("command") form: Appliable[FlexiPickerResult] with FlexiPickerState, out: Writer) = {
 		var results: FlexiPickerResult = null
 
