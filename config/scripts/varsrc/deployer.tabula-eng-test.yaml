@@ -62,7 +62,6 @@ instances:
        /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
-       /groups/test/up: 200
        /attendance/test/up: 200
        /api/test/up: 200
   - !ruby/object:Tomcat
@@ -80,7 +79,6 @@ instances:
        /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
-       /groups/test/up: 200
        /attendance/test/up: 200
        /api/test/up: 200
 lockfile: /tmp/tabula_deploy.running
