@@ -115,6 +115,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<warName>ROOT</warName>
 					<!-- Need to re-implement overlays here because by default we overlay
 						ourself! -->
 					<overlays>
