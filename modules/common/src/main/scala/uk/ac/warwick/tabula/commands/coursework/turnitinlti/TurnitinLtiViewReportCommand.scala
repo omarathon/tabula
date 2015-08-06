@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Module, FileAttachment, Assignment}
 import uk.ac.warwick.tabula.web.Mav
+import org.apache.http.HttpStatus
 
 object TurnitinLtiViewReportCommand {
 	def apply(module: Module, assignment: Assignment, attachment: FileAttachment, user: CurrentUser) =
@@ -37,8 +38,12 @@ class TurnitinLtiViewReportCommandInternal(
 
 	override def applyInternal() = transactional() {
 		val response = turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
-		if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")
-		else Mav("admin/assignments/turnitin/report_error", "problem" -> "no-object")
+		if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.SC_OK) {
+			Mav("admin/assignments/turnitinlti/report_error", "problem" -> s"unexpected-response-code")
+		}	else {
+				if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")
+				else Mav("admin/assignments/turnitinlti/report_error", "problem" -> "no-object")
+		}
 	}
 
 }

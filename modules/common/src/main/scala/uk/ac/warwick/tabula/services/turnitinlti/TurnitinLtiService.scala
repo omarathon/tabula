@@ -5,7 +5,7 @@ import java.io.IOException
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.{HttpRequest, HttpResponse}
+import org.apache.http.{HttpStatus, HttpRequest, HttpResponse}
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.protocol.HttpContext
@@ -27,6 +27,7 @@ import scala.Some
 import uk.ac.warwick.tabula.api.web.Routes
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.DateTime
+import scala.util.{Failure, Success, Try}
 
 object TurnitinLtiService {
 
@@ -106,7 +107,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	override def afterPropertiesSet {}
 
 	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
-		doRequestAdvanced(
+		doRequest(
 			apiSubmitAssignment,
 			Map(
 				"roles" -> "Instructor",
@@ -148,7 +149,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			</response>
 	 */
 	def submitPaper(assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment,
-									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequestAdvanced(
+									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequest(
 
 		s"${apiSubmitPaperEndpoint}/${assignment.turnitinId}",
 		Map(
@@ -190,7 +191,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	}
 
-	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
+	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
 		s"${apiSubmissionDetails}/${turnitinSubmissionId}", Map()) {
 		request =>
 			request >:+ {
@@ -203,14 +204,14 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
-		s"${apiReportLaunch}abcde/${attachment.originalityReport.turnitinId}", Map(
+	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequest(
+		s"${apiReportLaunch}aggghh/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
-		) ++ userParams(user.email, user.firstName, user.lastName)) {
+		) ++ userParams(user.email, user.firstName, user.lastName),
+		expectedStatusCode = Some(HttpStatus.SC_MOVED_TEMPORARILY)) {
 		request =>
-		// expect a 302
 			request >:+ {
 				(headers, request) =>
 					val location = headers("location").headOption
@@ -230,7 +231,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
+	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
 		s"${apiListEndpoints}/${turnitinAssignmentId}", Map()) {
 		request =>
 			request >:+ {
@@ -242,10 +243,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 					}
 			}
 	}
-
-
-
-
 
 	def ltiConformanceTest(endpoint: String, secret: String, user: CurrentUser) = {
 				doRequestForLtiTesting(
@@ -302,17 +299,25 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		}
 	}
 
-	def doRequestAdvanced(endpoint: String, params: Map[String, String])
-											 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
+	def doRequest(endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None)
+							 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
 		val signedParams = getSignedParams(params, endpoint, None)
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
 
 		logger.info("doRequest: " + signedParams)
-
 		try {
-			http.x(transform(req))
+			if (expectedStatusCode.isDefined){
+				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
+					case Success(response) => response
+					case Failure(StatusCode(code, contents)) =>
+						logger.warn(s"Not expected http status code")
+						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
+					case _ =>
+						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))
+				}
+			} else http.x(transform(req))
 		} catch {
 			case e: IOException => {
 				logger.error("Exception contacting Turnitin", e)

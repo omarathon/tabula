@@ -14,7 +14,8 @@ case class TurnitinLtiResponse(
 	val redirectUrl: Option[String] = None,
 	val json: Option[String] = None,
 	val html: Option[String] = None,
-	val xml: Option[Elem] = None) extends Logging {
+	val xml: Option[Elem] = None,
+	val responseCode: Option[Int] = None) extends Logging {
 
 	def turnitinSubmissionId(): String = {
 		(xml.get \\ "lis_result_sourcedid").text
