@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.common
+package uk.ac.warwick.tabula.web.controllers.ajax
 
 import java.io.Writer
 
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.web.controllers.common.UserPickerController.UserPickerCommand
+import uk.ac.warwick.tabula.web.controllers.ajax.UserPickerController.UserPickerCommand
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -21,10 +21,10 @@ import scala.collection.JavaConverters._
 class UserPickerController extends BaseController {
 	var json = Wire.auto[ObjectMapper]
 
-	@RequestMapping(value = Array("/api/userpicker/form"))
-	def form: Mav = Mav("api/userpicker/form").noLayout()
+	@RequestMapping(value = Array("/ajax/userpicker/form"))
+	def form: Mav = Mav("ajax/userpicker/form").noLayout()
 
-	@RequestMapping(value = Array("/api/userpicker/query.json"))
+	@RequestMapping(value = Array("/ajax/userpicker/query.json"))
 	def queryJson(form: UserPickerCommand, out: Writer) = {
 		def toJson(user: User) = Map(
 			"value" -> user.getUserId,
@@ -34,11 +34,11 @@ class UserPickerController extends BaseController {
 		json.writeValue(out, (form.apply() map toJson));
 	}
 
-	@RequestMapping(value = Array("/api/userpicker/query"))
+	@RequestMapping(value = Array("/ajax/userpicker/query"))
 	def query(form: UserPickerCommand, out: Writer) = {
 		val foundUsers = form.apply()
 		val (staff, students) = foundUsers.partition { _.isStaff }
-		Mav("api/userpicker/results",
+		Mav("ajax/userpicker/results",
 			"staff" -> staff,
 			"students" -> students).noLayout()
 	}

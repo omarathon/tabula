@@ -20,7 +20,7 @@ function getUserPicker() {
             this.setContent("Loading&hellip;");
             this.targetInput = targetInput;
             this.setSize(targetWidth,targetHeight);
-            $.get('/api/userpicker/form', function (data) {
+            $.get('/ajax/userpicker/form', function (data) {
                 _userPicker.setContent(data);
                 _userPicker.setSize(targetWidth,targetHeight);
                 _userPicker.show();
@@ -47,7 +47,7 @@ function getUserPicker() {
                         trim($lastname.val()).length > 2) {
                     $results.html('Loading&hellip;');
                     if ($xhr) $xhr.abort();
-                    $xhr = jQuery.get('/api/userpicker/query',  {
+                    $xhr = jQuery.get('/ajax/userpicker/query',  {
                         firstName: $firstname.val(),
                         lastName: $lastname.val(),
                         isUniId: _userPicker.isUniId

@@ -17,11 +17,11 @@ RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
 RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 
 # Add trailing slash because otherwise ensadness occurs
+RewriteRule ^/api$ /api/ [QSA,L,R=301]
 RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
-RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
 
 # Remove legacy /web context

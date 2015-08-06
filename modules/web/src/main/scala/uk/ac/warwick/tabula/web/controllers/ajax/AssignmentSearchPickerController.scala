@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.common
+package uk.ac.warwick.tabula.web.controllers.ajax
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
-@RequestMapping(value = Array("/api/assignmentpicker/query"))
+@RequestMapping(value = Array("/ajax/assignmentpicker/query"))
 class AssignmentSearchPickerController extends BaseController {
 
 	@ModelAttribute("command")
