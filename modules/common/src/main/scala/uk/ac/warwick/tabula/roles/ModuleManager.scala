@@ -8,9 +8,9 @@ case class DepartmentModuleManager(department: model.Department) extends BuiltIn
 case class ModuleManager(module: model.Module) extends BuiltInRole(ModuleManagerRoleDefinition, module)
 
 case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Module Manager"
-	
+
 	GeneratesSubRole(ModuleAssistantRoleDefinition)
 
 	GrantsScopedPermission(
@@ -19,7 +19,7 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 
 		Submission.SendReceipt,
 		Submission.Delete,
-		
+
 		AssignmentFeedback.Publish,
 
 		SmallGroups.Archive,

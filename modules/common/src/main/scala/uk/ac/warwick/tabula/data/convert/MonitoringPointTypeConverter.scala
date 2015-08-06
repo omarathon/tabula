@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointType
 
 class MonitoringPointTypeConverter extends TwoWayConverter[String, MonitoringPointType] {
-	
-	override def convertRight(value: String) = 
+
+	override def convertRight(value: String) =
 		if (value.hasText) MonitoringPointType.fromCode(value)
 		else null
 

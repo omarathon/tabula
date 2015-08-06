@@ -99,13 +99,13 @@ object ExportAttendanceToSitsService {
 @Service
 class ExportAttendanceToSitsServiceImpl
 	extends AbstractExportAttendanceToSitsService with AutowiringSitsDataSourceComponent
-	
+
 @Profile(Array("sandbox"))
 @Service
 class ExportAttendanceToSitsSandboxService extends ExportAttendanceToSitsService {
 	def exportToSits(report: MonitoringPointReport) = false
 }
-	
+
 
 trait SitsDataSourceComponent {
 	def sitsDataSource: DataSource

@@ -86,7 +86,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 	def getDepartmentSmallGroupSetById(id: String) = smallGroupDao.getDepartmentSmallGroupSetById(id)
 	def getDepartmentSmallGroupById(id: String) = smallGroupDao.getDepartmentSmallGroupById(id)
-	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = 
+	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) =
 		smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber).getOrElse {
 			val newOccurrence = new SmallGroupEventOccurrence()
 			newOccurrence.event = event
@@ -119,11 +119,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		.filterNot { sg => sg.groupSet.deleted || sg.groupSet.archived }
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
-		val autoEnrolled = 
+		val autoEnrolled =
 			membershipDao.getSITSEnrolledSmallGroupSets(user)
 				 .filterNot { _.members.excludesUser(user) }
 
-		val manuallyEnrolled = 
+		val manuallyEnrolled =
 			groupSetManualMembersHelper.findBy(user)
 				.filterNot { sgs => sgs.deleted || sgs.archived }
 
@@ -132,7 +132,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 				.filterNot { dsgs => dsgs.deleted || dsgs.archived }
 				.flatMap { _.linkedSets.asScala }
 				.filterNot { sgs => sgs.deleted || sgs.archived }
-		
+
 		(autoEnrolled ++ manuallyEnrolled ++ linked).distinct
 	}
 
@@ -164,7 +164,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			}
 		}
 	}
-	
+
 	def saveOrUpdateAttendance(
 		studentId: String,
 		event: SmallGroupEvent,
@@ -173,7 +173,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		user: CurrentUser
 	): SmallGroupEventAttendance = {
 		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
-		
+
 		val attendance = smallGroupDao.getAttendance(studentId, occurrence).getOrElse({
 			val newAttendance = new SmallGroupEventAttendance
 			newAttendance.occurrence = occurrence
@@ -188,8 +188,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		smallGroupDao.saveOrUpdate(attendance)
 		attendance
 	}
-	
-	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = 
+
+	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] =
 		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup)
 
 	def removeFromSmallGroups(modReg: ModuleRegistration) {
@@ -218,7 +218,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			case group: UnspecifiedTypeUserGroup => group.asInstanceOf[UserGroup]
 		})
 	}
-	
+
 	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
 		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}

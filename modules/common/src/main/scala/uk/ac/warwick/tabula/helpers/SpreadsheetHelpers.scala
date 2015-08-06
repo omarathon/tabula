@@ -24,7 +24,7 @@ trait SpreadsheetHelpers {
 }
 
 object SpreadsheetHelpers extends SpreadsheetHelpers {
-	
+
 	val MaxDepartmentNameLength = 31 - 11
 
 	// trim the department name down to 20 characters. Excel sheet names must be 31 chars or less so
@@ -88,7 +88,7 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 		cell.setCellStyle(style)
 		cell.setCellValue(value)
 	}
-	
+
 	def addDateCell(value: DateTime, row: XSSFRow, style: XSSFCellStyle) {
 		addDateCell(Option(value).map { _.toLocalDate }.orNull, row, style)
 	}
@@ -111,10 +111,10 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 	def formatWorksheet(sheet: XSSFSheet, cols: Int) {
 		(0 to cols).map(sheet.autoSizeColumn)
 	}
-	
+
 	/**
 	 * If simpleHeaders is set to true, the parser will:
-	 * 
+	 *
 	 * - lower-case all headers
 	 * - trim the header and remove all non-ascii characters
 	 */
@@ -123,15 +123,15 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
-		
-		reader.getSheetsData.asScala.toSeq.flatMap { sheet => 
+
+		reader.getSheetsData.asScala.toSeq.flatMap { sheet =>
 			val handler = new XslxParser(styles, sst, simpleHeaders)
 			val parser = handler.fetchSheetParser
-			
+
 			val sheetSource = new InputSource(sheet)
 			parser.parse(sheetSource)
 			sheet.close()
-			
+
 			handler.rows.toSeq
 		}
 	}
@@ -143,7 +143,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 	var isParsingHeader = true // flag to parse the first row for column headers
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
-	
+
 	var rows: scala.collection.mutable.MutableList[Map[String, String]] = scala.collection.mutable.MutableList()
 	var currentRow = scala.collection.mutable.Map[String, String]()
 
@@ -163,7 +163,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 		isParsingHeader = row == 0
 		currentRow = scala.collection.mutable.Map[String, String]()
 	}
-	
+
 	def formatHeader(rawValue: String) = {
 		if (simpleHeaders) rawValue.trim().toLowerCase.replaceAll("[^\\x00-\\x7F]", "")
 		else rawValue

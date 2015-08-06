@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 This section contains the form fields that can apply to a group of
 assignments, as well as to an individual one.

@@ -31,7 +31,7 @@ trait JavaImports {
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
 	type JBigDecimal = java.math.BigDecimal
-	
+
 	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
 	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
 	def JMap[K, V](elems: (K, V)*) = mutable.Map[K, V](elems: _*).asJava
@@ -64,7 +64,7 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJBigDecimal(bd: Option[BigDecimal]) = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
-	
+
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial
 	 * value for a variable that needs a mutable JList.
@@ -87,7 +87,7 @@ trait JavaImports {
 			if (!orig.isEmpty) list.addAll(orig)
 			list
 		}
-		
+
 		def apply[A](orig: GenTraversableOnce[A]): java.util.ArrayList[A] = {
 			if (orig.isEmpty)
 				new java.util.ArrayList[A]
@@ -95,7 +95,7 @@ trait JavaImports {
 				new java.util.ArrayList[A](orig.toIndexedSeq.asJavaCollection)
 		}
 	}
-	
+
 	/**
 	 * Allows you to create an empty Java HashSet, useful as an initial
 	 * value for a variable that needs a mutable JSet.
@@ -119,7 +119,7 @@ trait JavaImports {
 			set
 		}
 	}
-	
+
 	/**
 	 * Allows you to create an empty Java HashMap, useful as an initial
 	 * value for a variable that needs a mutable JMap.
@@ -130,13 +130,13 @@ trait JavaImports {
 			elements foreach { case (key, value) => map.put(key, value) }
 			map
 		}
-		
+
 		def apply[K, V](orig: Map[K, V]): java.util.HashMap[K, V] = {
 			val map = new java.util.HashMap[K, V]()
 			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
 			map
 		}
-		
+
 		def apply[K, V](orig: JMap[K, V]): java.util.HashMap[K, V] = {
 			val map = new java.util.HashMap[K, V]()
 			if (!orig.isEmpty) map.putAll(orig)
@@ -167,7 +167,7 @@ trait JavaImports {
 			map
 		}
 	}
-	
+
 	/**
 	 * Allows you to create an empty Java ConcurrentHashMap, useful as an initial
 	 * value for a variable that needs a mutable JConcurrentMap.
@@ -178,13 +178,13 @@ trait JavaImports {
 			elements foreach { case (key, value) => map.put(key, value) }
 			map
 		}
-		
+
 		def apply[K, V](orig: Map[K, V]): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
 			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
 			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
 			map
 		}
-		
+
 		def apply[K, V](orig: JMap[K, V]): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
 			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
 			if (!orig.isEmpty) map.putAll(orig)
@@ -195,7 +195,7 @@ trait JavaImports {
 
 trait ScalaConcurrentMapHelpers[K, V] {
 	self: JavaImports.JConcurrentMap[K, V] =>
-		
+
 	def getOrElseUpdate(key: K, op: => V): V =
 		Option(get(key)) match {
 			case Some(v) => v

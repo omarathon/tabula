@@ -23,11 +23,11 @@ import uk.ac.warwick.tabula.services.AutowiringAuditEventIndexServiceComponent
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object AuditLogQueryCommand {
-			
+
 	type AuditLogQueryCommand = Appliable[AuditLogQueryResults] with AuditLogQueryCommandState
-	
+
 	val pageSize = 100
-	
+
 	def apply(): AuditLogQueryCommand =
 		new AuditLogQueryCommandInternal
 			with ComposableCommand[AuditLogQueryResults]
@@ -35,7 +35,7 @@ object AuditLogQueryCommand {
 			with AutowiringAuditEventServiceComponent
 			with AutowiringAuditEventIndexServiceComponent
 			with Unaudited with ReadOnly
-			
+
 	case class AuditLogQueryResults(
 		results: Seq[AuditEvent],
 		pageNumber: Int,
@@ -46,7 +46,7 @@ object AuditLogQueryCommand {
 
 class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults] with AuditLogQueryCommandState with TaskBenchmarking {
 	self: AuditEventServiceComponent with AuditEventIndexServiceComponent =>
-		
+
 	def applyInternal() = {
 		val start = (page * pageSize) + 1
 		val max = pageSize
@@ -58,7 +58,7 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 				auditEventIndexService.listRecent(page * pageSize, pageSize)
 			}
 		}
-		
+
 		AuditLogQueryResults(
 			results = benchmarkTask("Parse into rich audit items") { recent.map(toRichAuditItem) },
 			pageNumber = page,
@@ -66,7 +66,7 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 			endIndex = end
 		)
 	}
-	
+
 	def toRichAuditItem(item: AuditEvent) = item.copy(parsedData = auditEventService.parseData(item.data))
 }
 
@@ -84,9 +84,9 @@ trait AuditLogQueryCommandState {
 @Controller
 @RequestMapping(Array("/sysadmin/audit/search"))
 class AuditLogController extends BaseSysadminController {
-	
+
 	var auditEventIndexService = Wire[AuditEventIndexService]
-	
+
 	@ModelAttribute("auditLogQuery") def command: AuditLogQueryCommand = AuditLogQueryCommand()
 	@ModelAttribute("lastIndexTime") def lastIndexTime = auditEventIndexService.lastIndexTime
 	@ModelAttribute("lastIndexDuration") def lastIndexDuration = auditEventIndexService.lastIndexDuration
@@ -94,7 +94,7 @@ class AuditLogController extends BaseSysadminController {
 	@annotation.RequestMapping
 	def searchAll(@ModelAttribute("auditLogQuery") command: AuditLogQueryCommand): Mav = {
 		val results = command.apply()
-		
+
 		Mav("sysadmin/audit/list",
 			"items" -> results.results,
 			"fromIndex" -> true,

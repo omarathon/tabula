@@ -57,7 +57,7 @@ module Cucumber
 
         runner = configuration.build_runner(step_mother, @out_stream)
         step_mother.visitor = runner # Needed to support World#announce
-        
+
         runner.visit_features(features)
 
         failure = if tag_excess.any?

@@ -58,7 +58,7 @@ object DurationFormatter {
 		period = stripMinutes(period, duration)
 		period
 	}
-	
+
 	private def stripTime(period: Period, duration: Duration): Period =
 		if (duration.getStandardDays >= 7)
 			period.withHours(0).withMinutes(0).withSeconds(0)

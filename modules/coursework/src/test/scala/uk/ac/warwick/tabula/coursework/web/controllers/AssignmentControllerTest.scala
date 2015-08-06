@@ -22,7 +22,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val module = assignment.module
 		val form = new SubmitAssignmentCommand(module, assignment, currentUser)
 		val errors = new BindException(form, "command")
-		
+
 		val feedbackService = smartMock[FeedbackService]
 		val feedback = new AssignmentFeedback()
 		feedbackService.getAssignmentFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
@@ -56,5 +56,5 @@ class AssignmentControllerTest extends TestBase with Mockito {
 			}
 		}
 	}
-	
+
 }

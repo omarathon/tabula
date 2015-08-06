@@ -37,7 +37,7 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 	@Test
 	def viewMeetingRecordCommandUsesRelationshipTypeFromParameter(){
 		val modals = new MeetingRecordModal() with ModalTestSupport
-		
+
 		val relationshipType1 = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationshipType2 = StudentRelationshipType("supervisor", "supervisor", "research supervisor", "research supervisee")
 
@@ -52,7 +52,7 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 
 		val rels = Seq(new MemberStudentRelationship)
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		
+
 		modals.relationshipService.findCurrentRelationships(relationshipType, scd) returns rels
 
 		modals.allRelationships(scd, relationshipType) should be(rels)

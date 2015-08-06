@@ -17,7 +17,7 @@ trait AutowiringMarkingWorkflowServiceComponent extends MarkingWorkflowServiceCo
 
 trait MarkingWorkflowService {
 	def save(markingWorkflow: MarkingWorkflow): Unit
-	
+
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment]
 
@@ -28,9 +28,9 @@ trait MarkingWorkflowService {
 abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
 	self: MarkingWorkflowDaoComponent
 		with Logging =>
-			
+
 	def save(markingWorkflow: MarkingWorkflow) = markingWorkflowDao.save(markingWorkflow)
-	
+
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 

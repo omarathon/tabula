@@ -44,7 +44,7 @@ class AddMarkingWorkflowCommandInternal(department: Department) extends ModifyMa
 
 trait AddMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidation {
 	self: MarkingWorkflowCommandState =>
-		
+
 	// For validation. Not editing an existing MarkingWorkflow so return None
 	def currentMarkingWorkflow = None
 
@@ -53,7 +53,7 @@ trait AddMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidati
 
 trait AddMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: MarkingWorkflowCommandState =>
-		
+
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, mandatory(department))
 	}
@@ -61,7 +61,7 @@ trait AddMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking w
 
 trait AddMarkingWorkflowCommandDescription extends Describable[MarkingWorkflow] {
 	self: MarkingWorkflowCommandState =>
-		
+
 	def describe(d: Description) {
 		d.department(department)
 	}

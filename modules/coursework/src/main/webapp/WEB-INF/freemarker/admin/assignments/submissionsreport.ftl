@@ -10,7 +10,7 @@
 	<#if submissionOnly?size gt 0>
 	<div class="alert alert-error">
 		<p><i class="icon-remove"></i> These users have submitted to the assignment, but no feedback has been uploaded for them.</p>
-		
+
 		<ul class="user-list">
 		<#list submissionOnly as u>
 			<li>${u.warwickId!}</li>
@@ -18,11 +18,11 @@
 		</ul>
 	</div>
 	</#if>
-	
+
 	<#if feedbackOnly?size gt 0>
 	<div class="alert alert-error">
 		<p><i class="icon-remove"></i> There is feedback or marks for these users but they did not submit an assignment to this system.</p>
-		
+
 		<ul class="user-list">
 		<#list feedbackOnly as u>
 			<li>${u.warwickId!}</li>
@@ -30,7 +30,7 @@
 		</ul>
 	</div>
 	</#if>
-	
+
 	<#if hasNoAttachments?size == assignment.feedbacks?size>
 		<div class="alert alert-warn">
 			<p><i class="icon-remove"></i> None of the submissions have any feedback.</p>
@@ -43,7 +43,7 @@
 				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
-		</div>	
+		</div>
 	</#if>
 
 	<#if hasNoMarks?size == assignment.feedbacks?size>
@@ -58,7 +58,7 @@
 				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
-		</div>	
+		</div>
 	</#if>
 
 	<#if plagiarised?size == 0>
@@ -67,7 +67,7 @@
 		</div>
 	<#else>
 		<div class="alert alert-warn">
-			<p><i class="icon-remove"></i> 
+			<p><i class="icon-remove"></i>
 			<#if plagiarised?size == 1>
 				It is suspected that the submission received from the following student is plagiarised.  Feedback for this student will not be published.
 			<#else>
@@ -79,14 +79,14 @@
 				<li>${u.warwickId!}</li>
 			</#list>
 			</ul>
-		</div>	
+		</div>
 	</#if>
 
 	<p>
 		The above discrepancies are provided for information.
-		It is up to you to decide whether to continue publishing. 
+		It is up to you to decide whether to continue publishing.
 	</p>
-	
+
 
 <#else>
 	<div class="alert alert-success">

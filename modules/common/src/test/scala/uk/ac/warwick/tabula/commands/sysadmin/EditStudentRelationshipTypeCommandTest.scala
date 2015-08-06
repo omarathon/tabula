@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceCo
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
-	
+
 	private trait Fixture {
-		val testRelationshipType = new StudentRelationshipType 
+		val testRelationshipType = new StudentRelationshipType
 		testRelationshipType.id = "trtId"
 		testRelationshipType.urlPart = "trt-url"
-		testRelationshipType.description = "trt role description"		
+		testRelationshipType.description = "trt role description"
 		testRelationshipType.agentRole = "trt agent"
 		testRelationshipType.studentRole = "trt student"
 		testRelationshipType.defaultSource = StudentRelationshipSource.Local
@@ -23,12 +23,12 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 		testRelationshipType.expectedPGT = false
 		testRelationshipType.expectedPGR = false
 		testRelationshipType.sortOrder = 9
-		
+
 		val commandInternal = new EditStudentRelationshipTypeCommandInternal(testRelationshipType) with RelationshipServiceComponent {
 			var relationshipService = mock[RelationshipService]
 		}
 	}
-	
+
 	@Test
 	def objectApplyCreatesCommand() {
 		new Fixture {
@@ -37,13 +37,13 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			command.isInstanceOf[Appliable[StudentRelationshipType]] should be(true)
 		}
 	}
-	
+
 	@Test
 	def commandEditsRelationshipWhenApplied() {
 		new Fixture {
 			commandInternal.id = "theId"
 			commandInternal.urlPart = "theUrlPart"
-			commandInternal.description = "role description"		
+			commandInternal.description = "role description"
 			commandInternal.agentRole = "agent"
 			commandInternal.studentRole = "student"
 			commandInternal.defaultSource = StudentRelationshipSource.SITS
@@ -57,7 +57,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 
 			testRelationshipType.id should be ("theId")
 			testRelationshipType.urlPart should be ("theUrlPart")
-			testRelationshipType.description should be ("role description")		
+			testRelationshipType.description should be ("role description")
 			testRelationshipType.agentRole should be ("agent")
 			testRelationshipType.studentRole should be ("student")
 			testRelationshipType.defaultSource should be (StudentRelationshipSource.SITS)
@@ -83,7 +83,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			val describable = new ModifyStudentRelationshipTypeCommandDescription with StudentRelationshipTypeProperties {
 				val eventName: String = "test"
 			}
-			
+
 			describable.id = "theId"
 			describable.urlPart = "theUrlPart"
 			describable.description = "role description"
@@ -97,7 +97,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			)
 		}
 	}
-	
+
 	@Test
 	def permissionsRequireGlobalStudentRelationshipTypeUpdate {
 		new Fixture {
@@ -109,12 +109,12 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
-	
+
 	@Test
 	def duplicateValidation {
-		new Fixture {				
+		new Fixture {
 			val existing = StudentRelationshipType("existing", "existing", "existing", "existing")
-				
+
 			commandInternal.relationshipService.getStudentRelationshipTypeByUrlPart("url") returns (None)
 			commandInternal.relationshipService.getStudentRelationshipTypeByUrlPart("existing") returns (Some(existing))
 			commandInternal.relationshipService.getStudentRelationshipTypeByUrlPart(testRelationshipType.urlPart) returns (Some(testRelationshipType))
@@ -128,7 +128,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			errors = new BindException(commandInternal, "command")
 			commandInternal.validate(errors)
 			errors.hasErrors should be (false)
-			
+
 			// doesn't fail when it matches itself
 			commandInternal.urlPart = testRelationshipType.urlPart
 			errors = new BindException(commandInternal, "command")

@@ -39,11 +39,11 @@ class CustomDataBinderTest extends TestBase {
 
 		binder.bind(pvs)
 	}
-	
+
 	trait HasValue {
 		var lazyList:JList[String] = LazyLists.create()
 	}
-	
+
 	class TestCommand extends HasValue
 
 }

@@ -58,7 +58,7 @@ class SubmitAssignmentCommand(
 	 */
 	private def buildEmptyFields: JMap[String, FormValue] = {
 		val fields = JHashMap(assignment.submissionFields.map { field => field.id -> field.blankFormValue }.toMap)
-		
+
 		LazyMap.decorate(fields, new Factory {
 			def create() = new FormValue {
 				val field = null
@@ -176,7 +176,7 @@ class SubmitAssignmentCommand(
 
 	override def describe(d: Description) =	{
 		d.assignment(assignment)
-		
+
 		assignment.submissions.asScala.find(_.universityId == user.universityId).map { existingSubmission =>
 			d.properties(
 				"existingSubmission" -> existingSubmission.id,

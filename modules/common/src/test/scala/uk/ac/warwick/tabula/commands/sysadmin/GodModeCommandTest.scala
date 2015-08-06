@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.commands.sysadmin
 import uk.ac.warwick.tabula.{CurrentUser, TestBase}
 
 class GodModeCommandTest extends TestBase {
-	
+
 	@Test def set {
 		val cmd = new GodModeCommand
-			
+
 		val cookie = cmd.applyInternal
 		cookie should be ('defined)
 		cookie.map { cookie =>
@@ -15,11 +15,11 @@ class GodModeCommandTest extends TestBase {
 			cookie.cookie.getPath() should be ("/")
 		}
 	}
-	
+
 	@Test def remove {
 		val cmd = new GodModeCommand
 		cmd.action = "remove"
-			
+
 		val cookie = cmd.applyInternal
 		cookie should be ('defined)
 		cookie.map { cookie =>

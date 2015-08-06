@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.permissions._
 @RequestMapping(value = Array("/admin/module/{module}/assignments/picker"))
 class AssignmentPickerController extends CourseworkController {
 	@Autowired var json: ObjectMapper = _
-	
+
 	@ModelAttribute def command(@PathVariable("module") module: Module) = new AssignmentPickerCommand(module)
 
 	@RequestMapping
@@ -49,10 +49,10 @@ class AssignmentPickerController extends CourseworkController {
 
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
 	PermissionCheck(Permissions.Assignment.Read, module)
-	
+
 	var assignmentService = Wire.auto[AssessmentService]
-	
+
 	var searchTerm: String = ""
-		
+
 	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.adminDepartment)
 }

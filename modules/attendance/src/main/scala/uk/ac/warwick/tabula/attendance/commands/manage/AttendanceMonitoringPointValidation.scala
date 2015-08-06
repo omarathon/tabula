@@ -143,7 +143,7 @@ trait AttendanceMonitoringPointValidation {
 
 		}
 	}
-	
+
 	def validateCanPointBeEditedByDate(
 		errors: Errors,
 		startDate: LocalDate,

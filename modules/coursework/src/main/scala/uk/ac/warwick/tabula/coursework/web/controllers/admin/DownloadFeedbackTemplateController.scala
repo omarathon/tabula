@@ -17,15 +17,15 @@ import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/feedback-templates/download/{template}/{filename}"))
 class DownloadFeedbackTemplateController extends CourseworkController {
-	
+
 	@Autowired var fileServer:FileServer =_
 
 	@ModelAttribute def command(
-		@PathVariable("department") department: Department, 
-		@PathVariable("template") template: FeedbackTemplate, 
-		@PathVariable("filename") filename: String, 
-		user:CurrentUser) = 
-			new DownloadFeedbackTemplateCommand(department, template, filename, user)	
+		@PathVariable("department") department: Department,
+		@PathVariable("template") template: FeedbackTemplate,
+		@PathVariable("filename") filename: String,
+		user:CurrentUser) =
+			new DownloadFeedbackTemplateCommand(department, template, filename, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def getAttachment(command:DownloadFeedbackTemplateCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {

@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 Adding or editing a custom role definition
 

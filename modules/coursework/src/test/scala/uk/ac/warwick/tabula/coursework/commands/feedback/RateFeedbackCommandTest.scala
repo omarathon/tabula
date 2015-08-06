@@ -19,24 +19,24 @@ class RateFeedbackCommandTest extends TestBase {
 		val (feedback,_,_,_) = deepFeedback
 		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
 		command.features = emptyFeatures
-		
+
 		command.wasPrompt.value = null
 		command.wasPrompt.unset = true
 		command.wasHelpful.value = null
 		command.wasHelpful.unset = true
-		val errors = new BindException(command, "command") 
+		val errors = new BindException(command, "command")
 		command.validate(errors)
 		withClue(errors) { errors.hasErrors should be (false) }
 	}
-	
+
 	@Test def invalidRating {
 		val (feedback,_,_,_) = deepFeedback
 		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
 		command.features = emptyFeatures
-		
+
 		command.wasPrompt.value = null
 		command.wasPrompt.unset = false
-		val errors = new BindException(command, "command") 
+		val errors = new BindException(command, "command")
 		command.validate(errors)
 		errors.hasFieldErrors("wasPrompt") should be (true)
 	}

@@ -17,9 +17,9 @@ import uk.ac.warwick.tabula.permissions._
 @RequestMapping(value=Array("/admin/department/{department}/markingworkflows"))
 class ListMarkingWorkflowController extends CourseworkController {
 	import ListMarkingWorkflowController._
-	
+
 	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = new Form(department, isExam = false)
-	
+
 	@RequestMapping
 	def list(@ModelAttribute("command") form: Form): Mav = {
 		Mav("admin/markingworkflows/list",
@@ -27,11 +27,11 @@ class ListMarkingWorkflowController extends CourseworkController {
 				"isExams" -> false)
 		    .crumbsList(getCrumbs(form))
 	}
-	
+
 	def getCrumbs(form: Form) = Seq (
 		Breadcrumbs.Department(form.department)
 	)
-	
+
 }
 
 @Controller
@@ -54,7 +54,7 @@ class ExamListMarkingWorkflowController extends ExamsController {
 object ListMarkingWorkflowController {
 	class Form(val department: Department, val isExam: Boolean) extends Command[Seq[Map[String, Any]]] with ReadOnly with Unaudited {
 		PermissionCheck(Permissions.MarkingWorkflow.Read, department)
-	
+
 		var dao = Wire.auto[MarkingWorkflowDao]
 
 		def applyInternal() = {

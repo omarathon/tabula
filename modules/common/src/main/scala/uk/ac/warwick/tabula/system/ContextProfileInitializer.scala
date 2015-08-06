@@ -26,7 +26,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
 	override def initialize(ctx: ConfigurableWebApplicationContext) = {
 		logger.info("Initialising context")
-		
+
 		Wire.ignoreMissingContext = true
 
 		val profiles = resolve()
@@ -87,9 +87,9 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 class CompositePropertySource(name: String) extends PropertySource[Unit](name, ()) {
 	val mutableSources = new MutablePropertySources
 
-	def addRequiredSource(src: Option[PropertySource[_]]) = 
+	def addRequiredSource(src: Option[PropertySource[_]]) =
 		mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
-		
+
 	def addOptionalSource(src: Option[PropertySource[_]]) = src match {
 		case Some(src) => mutableSources.addLast(src)
 		case None =>
@@ -100,13 +100,13 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, (
 		case "false" => false
 		case _ => default
 	}
-	
+
 	def getString(prop: String): Object = getProperty(prop) match {
 		case value: Any => value.toString
 		case _ => null
 	}
-	
+
 	override def getProperty(prop: String): Object =
 		(mutableSources.find { _.containsProperty(prop) } map { _.getProperty(prop) }).orNull
-	
+
 }

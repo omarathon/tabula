@@ -1,6 +1,6 @@
---- !ruby/object:Deployment 
-apaches: 
-- !ruby/object:Apache 
+--- !ruby/object:Deployment
+apaches:
+- !ruby/object:Apache
   name: tabula-test
   port_balancer: !ruby/object:HAProxySocketBalancer
     balanced_group: tabula-web
@@ -22,7 +22,6 @@ war_names:
 - api
 - attendance
 - courses
-- groups
 - profiles
 - web
 checkout_base: "/var/src/checkout"
@@ -44,7 +43,7 @@ scheduler_instance: !ruby/object:Tomcat
   war_names:
   - scheduling
   test_path: /scheduling/test/up
-  requests: 
+  requests:
      /scheduling/test/up: 200
 instances:
   tabula-test:
@@ -59,7 +58,7 @@ instances:
     excluded_war_names:
     - scheduling
     test_path: /web/test/up
-    requests: 
+    requests:
        /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
@@ -77,7 +76,7 @@ instances:
     excluded_war_names:
     - scheduling
     test_path: /web/test/up
-    requests: 
+    requests:
        /web/test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200

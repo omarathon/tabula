@@ -48,16 +48,16 @@ class UserPickerController extends BaseController {
 object UserPickerController {
 	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
 		PermissionCheck(Permissions.UserPicker)
-		
+
 		var userLookup = Wire.auto[UserLookupService]
-	
+
 		var firstName: String = ""
 		var lastName: String = ""
-			
+
 		def applyInternal() = {
 			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq
 			if (users.size < 10) users ++= (userLookup.findUsersWithFilter(filterBackwards).asScala.toSeq filter { !users.contains(_) })
-			
+
 			users
 		}
 

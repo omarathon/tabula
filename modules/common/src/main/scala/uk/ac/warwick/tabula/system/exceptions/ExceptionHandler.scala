@@ -79,9 +79,9 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 
 	private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
 		val info = RequestInfo.fromThread
-		
+
 		val env = if (production) "PROD" else "TEST"
-		
+
 		message.setTo(recipient)
 		message.setSubject("[HFCX] (%s) %s %s" format (env, userId(info), context.token))
 		message.setText(renderToString(template, Map(

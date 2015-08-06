@@ -8,9 +8,7 @@ import uk.ac.warwick.tabula.api.web.helpers.{SmallGroupToJsonConverter, SmallGro
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
-import uk.ac.warwick.tabula.groups.commands.admin.{AdminSmallGroupsHomeCommand, AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSetMethods
+import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 

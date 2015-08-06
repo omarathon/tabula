@@ -12,7 +12,7 @@
 <@f.errors cssClass="error" />
 
 <p>
-You can delete an assignment if it's been created in error. 
+You can delete an assignment if it's been created in error.
 </p>
 
 <@f.errors path="confirm" cssClass="error" />

@@ -10,14 +10,14 @@ import org.mockito.Matchers
 import uk.ac.warwick.tabula.attendance.commands.view.old.{ViewMonitoringPointsState, ViewMonitoringPointsCommand}
 
 class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
-	
+
 	trait CommandTestSupport extends ViewMonitoringPointsState
 	with TermServiceComponent with ProfileServiceComponent with MonitoringPointServiceComponent {
 		val termService = mock[TermService]
 		val profileService = mock[ProfileService]
 		val monitoringPointService = mock[MonitoringPointService]
 	}
-	
+
 	trait Fixture {
 		val thisAcademicYear = AcademicYear(2013)
 		val user = mock[CurrentUser]
@@ -27,7 +27,7 @@ class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
 
 		val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
-		
+
 		val dept = Fixtures.department("arc", "School of Architecture")
 
 		val route1 = Fixtures.route("a501", "Architecture BA")
@@ -58,7 +58,7 @@ class ViewMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.profileService.allSprStatuses(dept) returns Seq(sprF, sprP)
 		command.profileService.allModesOfAttendance(dept) returns Seq(moaFT, moaPT)
 	}
-	
+
 	@Test
 	def onBindCanSeeAllRoutesNoFilter() { new DeptAdminCommand {
 		command.onBind(null)

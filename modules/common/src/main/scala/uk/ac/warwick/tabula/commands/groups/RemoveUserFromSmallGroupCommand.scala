@@ -8,16 +8,16 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
 
 class RemoveUserFromSmallGroupCommand(val user: User, val group: SmallGroup) extends Command[UnspecifiedTypeUserGroup] {
-	
+
 	PermissionCheck(Permissions.SmallGroups.Update, group)
-	
+
 	def applyInternal() = {
 		val ug = group.students
 		ug.remove(user)
 		ug
 	}
 
-	override def describe(d: Description) = 
+	override def describe(d: Description) =
 		d.smallGroup(group).properties(
 			"usercode" -> user.getUserId,
 			"universityId" -> user.getWarwickId

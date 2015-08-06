@@ -11,7 +11,7 @@ trait MeetingRecordNotificationTrait {
 	def relationship: StudentRelationship
 
 	def url = Routes.profile.view(
-			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(s"Student member for relationship ${meeting.relationship.id} not found")), 
+			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(s"Student member for relationship ${meeting.relationship.id} not found")),
 			meeting)
 
 	def agentRole = meeting.relationship.relationshipType.agentRole

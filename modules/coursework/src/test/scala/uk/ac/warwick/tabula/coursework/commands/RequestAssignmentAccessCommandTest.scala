@@ -55,9 +55,9 @@ trait AssignmentFixture extends Mockito{
 	val student = newTestUser("student")
 	val admin1 = newTestUser("admin1")
 	val admin2 = newTestUser("admin2")
-	
+
 	userLookup.getUsersByUserIds(ownersGroup.includedUserIds.asJava) returns JMap("admin1" -> admin1, "admin2" -> admin2)
-	
+
 	val department = new Department
 	val permissionsService = mock[PermissionsService]
 	permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns ownersGroup

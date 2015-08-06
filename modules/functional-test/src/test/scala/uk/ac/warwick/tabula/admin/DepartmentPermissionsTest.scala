@@ -21,7 +21,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
 		filteredUsercodes.foreach(_.size should be(0))
 	}
-	
+
 	private def gotoPermissionsScreen(parentElement: String, preExistingCount: Int) {
 		When("I go the admin page")
 		click on linkText("Go to the Test Services admin page")
@@ -51,7 +51,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 
 	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
 		gotoPermissionsScreen(parentElement, preExistingCount)
-		
+
 		When("I enter a usercode in the picker")
 		click on cssSelector(s"$parentElement .pickedUser")
 		enter(permittedUser.usercode)

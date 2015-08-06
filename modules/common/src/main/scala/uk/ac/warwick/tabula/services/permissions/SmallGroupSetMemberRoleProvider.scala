@@ -29,16 +29,16 @@ class SmallGroupSetMemberRoleProvider extends RoleProvider with TaskBenchmarking
 			}
 		  .distinct
 
-		val memberRoles: Stream[Role] = memberSets.map { set => 
+		val memberRoles: Stream[Role] = memberSets.map { set =>
 			customRoleFor(set.module.adminDepartment)(SmallGroupSetMemberRoleDefinition, set).getOrElse(SmallGroupSetMember(set))
 		}
-		val viewerRoles: Stream[Role] = memberSets.filter { _.studentsCanSeeOtherMembers }.map { set => 
+		val viewerRoles: Stream[Role] = memberSets.filter { _.studentsCanSeeOtherMembers }.map { set =>
 			customRoleFor(set.module.adminDepartment)(SmallGroupSetViewerRoleDefinition, set).getOrElse(SmallGroupSetViewer(set))
 		}
 
 		memberRoles #::: viewerRoles
 	}
-	
+
 	def rolesProvided = Set(classOf[SmallGroupSetMember], classOf[SmallGroupSetViewer])
-	
+
 }

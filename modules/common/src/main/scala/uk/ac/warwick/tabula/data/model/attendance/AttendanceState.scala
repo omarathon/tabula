@@ -33,7 +33,7 @@ class AttendanceStateUserType extends AbstractBasicUserType[AttendanceState, Str
 	val nullObject = null
 
 	override def convertToObject(string: String) = AttendanceState.fromCode(string)
-	
+
 	override def convertToValue(state: AttendanceState) = state.dbValue
 
 }

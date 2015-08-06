@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.SubmissionService
 
 /** Class to expose bean properties via constructor.
- * 
+ *
  *  It currently takes a single entity, as we're currently only interested in
  *  simple relations between agents (users) and entities (objects),
  *  eg. Student does Submission
@@ -59,7 +59,7 @@ object Activity {
 				None
 		}
 	}
-	
+
 //	private def splitCamelCase(src: String): String = src.replaceAll(
 //		String.format("%s|%s|%s",
 //			"(?<=[A-Z])(?=[A-Z][a-z])",

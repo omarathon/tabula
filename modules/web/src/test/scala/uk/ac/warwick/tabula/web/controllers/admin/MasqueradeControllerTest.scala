@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.{Cookie, Routes}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class MasqueradeControllerTest extends TestBase with Mockito {
-	
+
 	val controller = new MasqueradeController
 
 	@Test def createCommand = withUser("cuscav") {

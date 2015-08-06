@@ -50,7 +50,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 		FreemarkerModel(ReleaseSmallGroupSetsNotification.templateLocation,
 			Map("user" -> recipient, "groups" -> groups, "profileUrl" -> url)
 		)
-	
+
 	def url: String = {
 		if (isStudent) {
 			Routes.profiles.profile.mine

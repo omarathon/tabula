@@ -29,7 +29,7 @@
 </#list>
 <#else>
 <p>It seems that you're on this module, but no assignments have been set up here.</p>
-	
+
 <p>See your module tutor if you have an assignment to submit and aren't sure how you
 should be submitting it.</p>
 </#if>

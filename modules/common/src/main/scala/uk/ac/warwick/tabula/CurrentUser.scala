@@ -54,24 +54,24 @@ class CurrentUser(
 	def departmentName = apparentUser.getDepartment
 	/** Email address of the apparent user. */
 	def email = apparentUser.getEmail
-	/** User code of the apparent user. */	
+	/** User code of the apparent user. */
 	def userId = apparentUser.getUserId
 
 	/** Is of type Postgraduate research student (FT )? (includes PT) */
 	def isPGR = apparentUser.getExtraProperty("warwickitsclass") == "PG(R)"
-	
+
 	/** Is of type Student? (includes PGT) */
 	def isStudent = apparentUser.isStudent
-	
+
 	/** Is of type Staff? (includes PGR) */
 	def isStaff = apparentUser.isStaff
 
 	def isAlumni = apparentUser.isAlumni
-	
+
 	def isMember = isStudent || isStaff
 
 	override def toString = {
-		if (!idForPermissions.hasText) "Anonymous user" 
+		if (!idForPermissions.hasText) "Anonymous user"
 		else {
 			val builder = new StringBuilder("User ")
 			builder append idForPermissions

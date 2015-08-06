@@ -30,7 +30,7 @@
 			<id>skinny</id>
 			<build>
 				<finalName>tabula</finalName>
-			
+
 				<plugins>
 					<plugin>
 						<artifactId>maven-ear-plugin</artifactId>
@@ -39,7 +39,7 @@
 							<defaultJavaBundleDir>lib/</defaultJavaBundleDir>
 							<skinnyWars>true</skinnyWars>
 							<packagingExcludes>**/*.zip</packagingExcludes>
-							
+
 							<!-- We need to specify our modules explicitly (unfortunately) because otherwise they come out as courses-XX-SNAPSHOT.war -->
 							<modules>
 								<webModule>
@@ -68,12 +68,6 @@
 								</webModule>
 								<webModule>
 									<groupId>uk.ac.warwick.tabula</groupId>
-									<artifactId>groups</artifactId>
-									<bundleFileName>groups.war</bundleFileName>
-									<contextRoot>/groups</contextRoot>
-								</webModule>
-								<webModule>
-									<groupId>uk.ac.warwick.tabula</groupId>
 									<artifactId>attendance</artifactId>
 									<bundleFileName>attendance.war</bundleFileName>
 									<contextRoot>/attendance</contextRoot>
@@ -83,7 +77,7 @@
 					</plugin>
 				</plugins>
 			</build>
-			
+
 			<dependencies>
 				<!-- For each module, include both the war type and the pom type - the pom type resolves dependencies into lib/ -->
 				<dependency>
@@ -98,7 +92,7 @@
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
-				
+
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
 					<artifactId>api</artifactId>
@@ -111,7 +105,7 @@
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
-				
+
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
 					<artifactId>courses</artifactId>
@@ -124,7 +118,7 @@
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>
-				
+
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
 					<artifactId>profiles</artifactId>
@@ -134,19 +128,6 @@
 				<dependency>
 					<groupId>uk.ac.warwick.tabula</groupId>
 					<artifactId>profiles</artifactId>
-					<version>${project.version}</version>
-					<type>pom</type>
-				</dependency>
-				
-				<dependency>
-					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>groups</artifactId>
-					<version>${project.version}</version>
-					<type>war</type>
-				</dependency>
-				<dependency>
-					<groupId>uk.ac.warwick.tabula</groupId>
-					<artifactId>groups</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
 				</dependency>

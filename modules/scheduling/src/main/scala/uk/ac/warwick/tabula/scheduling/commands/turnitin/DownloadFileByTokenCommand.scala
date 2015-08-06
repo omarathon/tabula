@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import org.joda.time.DateTime
 
 object DownloadFileByTokenCommand {
-	def apply(submission: Submission, fileAttachment: FileAttachment, token: FileAttachmentToken ) = 
+	def apply(submission: Submission, fileAttachment: FileAttachment, token: FileAttachmentToken ) =
 		new DownloadFileByTokenCommandInternal(submission, fileAttachment, token)
 		with ComposableCommand[RenderableFile]
 		with DownloadFileByTokenCommandState

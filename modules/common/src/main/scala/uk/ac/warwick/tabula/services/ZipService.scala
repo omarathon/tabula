@@ -31,7 +31,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
-	
+
 	val idSplitSize = 4
 
 	logger.info("Creating ZipService")
@@ -69,7 +69,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		feedback.attachments.asScala.map { (attachment) =>
 			ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
-	
+
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
 			ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
@@ -164,7 +164,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 
 	def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): File =
 		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
-	
+
 	private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
 		meetingRecord.attachments.asScala.map { (attachment) =>
 			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)

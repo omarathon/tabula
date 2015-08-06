@@ -37,7 +37,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	@Before def before {
 		userLookup = mock[UserLookupService]
 		userLookup.getUserByUserId(any[String]) answers { id =>
-			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())			
+			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())
 		}
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
@@ -55,17 +55,17 @@ class AssignmentMembershipTest extends TestBase with Mockito {
       s
     }
 	}
-	
+
 	@Test def whenEmpty {
 		val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody)).items
 		membership.size should be (0)
 	}
-	
+
 	@Test def emptyWithNone {
 		val membership = assignmentMembershipService.determineMembership(Nil, None).items
 		membership.size should be (0)
 	}
-	
+
 	@Test def plainSits {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(nobody)).items
@@ -73,7 +73,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
 	}
-	
+
 	@Test def plainSitsWithNone {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), None).items
@@ -81,7 +81,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		membership(0).user.getFullName should be ("Roger Aaaaf")
 		membership(1).user.getFullName should be ("Roger Aaaag")
 	}
-	
+
 	@Test def includeAndExclude {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val others = UserGroup.ofUsercodes
@@ -91,17 +91,17 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
 
 		membership.size should be (3)
-		
+
 		membership(0).user.getFullName should be ("Roger Aaaaa")
 		membership(0).itemType should be (IncludeType)
 		membership(0).itemTypeString should be ("include")
 		membership(0).extraneous should be (false)
-		
+
 		membership(1).user.getFullName should be ("Roger Aaaaf")
 		membership(1).itemType should be (ExcludeType)
 		membership(1).itemTypeString should be ("exclude")
 		membership(1).extraneous should be (false)
-		
+
 		membership(2).user.getFullName should be ("Roger Aaaag")
 		membership(2).itemType should be (SitsType)
 		membership(2).itemTypeString should be ("sits")
@@ -114,11 +114,11 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     users(0).getFullName should be ("Roger Aaaaa")
     users(1).getFullName should be ("Roger Aaaag")
 	}
-	
+
 	/**
 	 * Test that the "extraneous" flag is set because "aaaaf" is already
 	 * part of the SITS group, and excluded code "aaaah" is not in the
-	 * group anyway so the exclusion does nothing. 
+	 * group anyway so the exclusion does nothing.
 	 */
 	@Test def redundancy {
 		val upstream = newAssessmentGroup(Seq("0000005", "0000006"))

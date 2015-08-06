@@ -19,22 +19,22 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup, SmallG
 )
 abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 	import GrantedPermission.OverrideType
-	
+
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.EAGER)
 	@JoinColumn(name="usergroup_id")
 	private var _users: UserGroup = UserGroup.ofUsercodes
 	def users: UnspecifiedTypeUserGroup = _users
-	
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionUserType")
 	var permission: Permission = _
-	
+
 	/*
 	 * TODO Deny not currently supported by SecurityService because the value isn't passed through!
 	 */
 	var overrideType: OverrideType = _
-	
+
 	var scope: A
-	
+
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad() {
 		ensureUsers
@@ -52,7 +52,7 @@ object GrantedPermission {
 	type OverrideType = Boolean
 	val Allow: OverrideType = true
 	val Deny: OverrideType = false
-	
+
 	def apply[A <: PermissionsTarget](scope: A, permission: Permission, overrideType: OverrideType): GrantedPermission[A] =
 		(scope match {
 			case dept: Department => new DepartmentGrantedPermission(dept, permission, overrideType)
@@ -65,7 +65,7 @@ object GrantedPermission {
 			case event: SmallGroupEvent => new SmallGroupEventGrantedPermission(event, permission, overrideType)
 			case _ => throw new IllegalArgumentException("Cannot define new permissions for " + scope)
 		}).asInstanceOf[GrantedPermission[A]]
-	
+
 	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
@@ -76,8 +76,8 @@ object GrantedPermission {
 		case _: SmallGroupSet => true
 		case _: SmallGroupEvent => true
 		case _ => false
-	} 
-	
+	}
+
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedPermission]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedPermission]
@@ -89,11 +89,11 @@ object GrantedPermission {
 		case t if isSubtype(t, classTag[SmallGroupEvent]) => classOf[SmallGroupEventGrantedPermission]
 		case _ => classOf[GrantedPermission[_]]
 	}
-  
+
   private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
-	
+
 	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag] = 
+	def discriminator[A <: PermissionsTarget : ClassTag] =
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
@@ -115,7 +115,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -128,7 +128,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -141,7 +141,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -154,7 +154,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -167,7 +167,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -180,7 +180,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
@@ -206,7 +206,7 @@ object GrantedPermission {
 		this.permission = permission
 		this.overrideType = overrideType
 	}
-	
+
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")

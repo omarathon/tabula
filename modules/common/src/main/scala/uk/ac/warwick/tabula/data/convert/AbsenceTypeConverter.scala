@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.AbsenceType
 
 class AbsenceTypeConverter extends TwoWayConverter[String, AbsenceType] {
-	
-	override def convertRight(value: String) = 
+
+	override def convertRight(value: String) =
 		if (value.hasText) AbsenceType.fromCode(value)
 		else null
 

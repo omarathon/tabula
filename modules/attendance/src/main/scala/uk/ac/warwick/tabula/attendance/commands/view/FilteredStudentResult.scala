@@ -22,9 +22,9 @@ case class FilteredStudentsAttendanceResult(
 )
 
 trait BuildsFilteredStudentsAttendanceResult extends TaskBenchmarking with GroupsPoints {
-	
+
 	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
-	
+
 	def buildAttendanceResult(
 		totalResults: Int,
 		students: Seq[StudentMember],

@@ -10,7 +10,7 @@ class JobContextTests extends AppContextTestBase {
 	@Autowired var jobService: JobService = _
 
 	@Test def jobInstanceSerialization() {
-		val id = transactional { t => 
+		val id = transactional { t =>
 			val jsi = new JobInstanceImpl
 			jsi.data = """{"How" : "Data"}"""
 			jsi.json = Map("How" -> "Json")
@@ -24,16 +24,16 @@ class JobContextTests extends AppContextTestBase {
 			jsiLoaded.succeeded should be {true}
 		}
 	}
-	
+
 	@Test def load() {
 		val id = jobService.add(None, TestingJob("anything really")).id
 		jobService.getInstance(id) map { instance =>
 			jobService.run()
 		} orElse fail()
-		
+
 		// Check that the flags have actually been updated.
 		jobService.getInstance(id) map { instance =>
-			
+
 			withClue("Started") { instance.started should be {true} }
 			withClue("Finished") { instance.finished should be {true} }
 			withClue("Succeeded") { instance.succeeded should be {true} }

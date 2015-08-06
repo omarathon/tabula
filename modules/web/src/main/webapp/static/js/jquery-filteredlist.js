@@ -21,11 +21,11 @@ For example (using both checkboxes and a dropdown):
 			<div class="filters">
 				<div class="filter">
 					<label>
-						Male 
+						Male
 						<input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked">
 					</label>
 					<label>
-						Female 
+						Female
 						<input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked">
 					</label>
 				</div>
@@ -37,16 +37,16 @@ For example (using both checkboxes and a dropdown):
 					</select>
 				</div>
 			</div>
-			
+
 			<ul class="items">
 				<li class="student" data-f-gender="M" data-f-year="1">Student 1</li>
 				<li class="student" data-f-gender="M" data-f-year="2">Student 2</li>
 				<li class="student" data-f-gender="F" data-f-year="3">Student 3</li>
 			</ul>
 		</div>
-		
+
 Adding the class tabula-filtered-list to the container allows for automatic
-configuration without being invoked via Javascript. 
+configuration without being invoked via Javascript.
 
 A special-case (for <select> filters) is data-filter-value="*", which effectively
 disables that filter by allowing any value to be displayed.
@@ -64,7 +64,7 @@ Options: (all of these options can be set as data- attributes)
   var FilteredList = function(element, options) {
   	var self = this; // take a selfie
   	var $el = $(element);
-    
+
     if (options && typeof(options) === 'object') this.options = options;
     else this.options = {};
 
@@ -76,11 +76,11 @@ Options: (all of these options can be set as data- attributes)
 		this.filter = function() {
 			var items = $el.find(itemSelector);
 			var controls = $el.find(filterSelector).find(filterControls);
-			
+
 			// get a list of (json-stringed) name/value pairs for attributes to hide
     	var hidden = controls.map(function(e,control) {
         var $control = $(control);
-        
+
         switch ($control.prop('tagName').toLowerCase()) {
         	case 'input':
         		switch ($control.attr('type').toLowerCase()) {
@@ -100,7 +100,7 @@ Options: (all of these options can be set as data- attributes)
         		if ($control.find('option:selected').data('filter-value') === '*') {
         			return;
         		}
-        	
+
         		return $control.find('option[data-filter-value]').map(function(i, opt) {
         			var $option = $(opt);
         			if (! $option.is(":selected")) { // unselected means we will hide any items with this attribute
@@ -113,11 +113,11 @@ Options: (all of these options can be set as data- attributes)
         		console.error('Unsupported filter control: ' + $control.prop('tagName'));
         }
     	});
-    	
+
     	function setVisibility(element, hiddenAttrs) {
 		    var $element = $(element);
 		    var data = $element.data();
-		
+
 		    // convert any data-f-* attributes into JSON
 		    // n.b. jQuery data() camel-cases attributes;
 		    // it converts data-f-Bar="foo" into data()[fBar]=foo
@@ -129,7 +129,7 @@ Options: (all of these options can be set as data- attributes)
 		        stringData.push(JSON.stringify(o));
 		      }
 		    }
-		
+
 		    // if this element has any attributes on the hidden list, it
 		    // should not be visible. Otherwise, show it.
 		    var visible = true;
@@ -141,15 +141,15 @@ Options: (all of these options can be set as data- attributes)
 		    });
 		    $element.toggle(visible);
 			}
-    	
+
       // now go through all the items and hide/show each as appropriate
 	    items.each(function(i, ele) {
 	    	setVisibility(ele, hidden);
 	    });
-	    
+
 	    $el.trigger('filteredList.changed');
 		};
-		
+
 		$el.find(filterSelector).find(filterControls).on('change input keyup', this.filter);
 		this.filter();
 	};
@@ -157,7 +157,7 @@ Options: (all of these options can be set as data- attributes)
   // The jQuery plugin itself is a basic adapter around FilteredList
   $.fn.filteredList = function(options) {
 		var filter = this.data(DataName);
-		
+
     if (options === 'filter') {
       filter.filter();
     } else {
@@ -166,7 +166,7 @@ Options: (all of these options can be set as data- attributes)
       	$(element).data(DataName, filter);
 			});
 		}
-		
+
 		return this;
 	};
 })(jQuery);

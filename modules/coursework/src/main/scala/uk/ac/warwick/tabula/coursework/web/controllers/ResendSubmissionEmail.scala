@@ -16,15 +16,15 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/resend-receipt"))
 class ResendSubmissionEmail extends CourseworkController {
-	
+
 	var submissionService = Wire.auto[SubmissionService]
 
 	hideDeletedItems
-	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new SendSubmissionReceiptCommand(
-			module, assignment, 
-			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)), 
+			module, assignment,
+			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)),
 			user)
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -33,7 +33,7 @@ class ResendSubmissionEmail extends CourseworkController {
 	@RequestMapping(method = Array(POST))
 	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
 		val sent = form.apply()
-		
+
 		Mav("submit/receipt",
 			"submission" -> form.submission,
 			"module" -> form.module,

@@ -23,7 +23,7 @@ object EditMarkingWorkflowCommand {
 }
 
 /** Edit an existing markingWorkflow. */
-class EditMarkingWorkflowCommandInternal(department: Department, val markingWorkflow: MarkingWorkflow) 
+class EditMarkingWorkflowCommandInternal(department: Department, val markingWorkflow: MarkingWorkflow)
 	extends ModifyMarkingWorkflowCommand(department) with EditMarkingWorkflowCommandState {
 	self: MarkingWorkflowServiceComponent =>
 
@@ -96,7 +96,7 @@ trait MarkerRemovalAware {
 
 trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: EditMarkingWorkflowCommandState =>
-		
+
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(markingWorkflow), mandatory(department))
 		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
@@ -105,7 +105,7 @@ trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking 
 
 trait EditMarkingWorkflowCommandDescription extends Describable[MarkingWorkflow] {
 	self: EditMarkingWorkflowCommandState =>
-		
+
 	def describe(d: Description) {
 		d.department(department).markingWorkflow(markingWorkflow)
 	}

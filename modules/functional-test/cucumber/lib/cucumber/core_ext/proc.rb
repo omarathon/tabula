@@ -1,7 +1,7 @@
 # Proc extension to get more location info out of a proc
 class Proc #:nodoc:
   PROC_PATTERN = /[\d\w]+@(.+):(\d+).*>/
-  
+
   def to_comment_line
     "# #{file_colon_line}"
   end
@@ -21,9 +21,9 @@ class Proc #:nodoc:
   else
     # This Ruby implementation doesn't implement Proc#to_s correctly
     STDERR.puts "*** THIS RUBY IMPLEMENTATION DOESN'T REPORT FILE AND LINE FOR PROCS ***"
-    
+
     def file_colon_line
       "UNKNOWN:-1"
     end
   end
-end 
+end

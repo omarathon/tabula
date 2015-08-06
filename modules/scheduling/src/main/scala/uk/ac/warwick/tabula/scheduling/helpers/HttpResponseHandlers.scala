@@ -5,7 +5,7 @@ import org.apache.http.client.ResponseHandler
 
 trait HttpResponseHandlers {
 	def handle[A](fn: => (HttpResponse => A)) = new FunctionalResponseHandler[A](fn)
-	
+
 	def convert[A,B](pair: uk.ac.warwick.util.collections.Pair[A, B]) = (pair.getLeft, pair.getRight)
 }
 

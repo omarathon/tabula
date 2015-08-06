@@ -35,37 +35,37 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 
 		val command = new RevokeRoleCommandInternal(department) with CommandTestSupport[Department] with RevokeRoleCommandValidation
 	}
-	
+
 	@Test def nonExistingRole { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (None)
-				
+
 		// Doesn't blow up, just a no-op
 		command.applyInternal() should be (null)
 
 		verify(command.permissionsService, times(0)).saveOrUpdate(any[GrantedRole[_]])
 	}}
-	
+
 	@Test def itWorksWithExisting { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.userLookup.registerUsers("cuscav", "cusebr")
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
-				
+
 		val grantedRole = command.applyInternal()
 		(grantedRole.eq(existing)) should be (true)
-		
+
 		grantedRole.roleDefinition should be (singlePermissionsRoleDefinition)
 		grantedRole.users.size should be (1)
 		grantedRole.users.knownType.includesUserId("cuscav") should be (false)
@@ -77,36 +77,36 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
-	
+
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 		existing.users.knownType.addUserId("cusebr")
 		existing.users.knownType.addUserId("cuscav")
-		
+
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
 		command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns true
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
 		errors.hasErrors should be (false)
 	}}}
-	
+
 	@Test def noUsercodes { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -115,19 +115,19 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def usercodeNotInGroup { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cuscao")
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 		existing.users.knownType.addUserId("cusebr")
 
 		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -136,13 +136,13 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("userId.notingroup")
 	}}}
-	
+
 	@Test def noRole { withUser("cuscav", "0672089") { new Fixture {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.permissionsService.getGrantedRole(department, null) returns (None)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -151,11 +151,11 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def cantRevokeWhatYouDontHave { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cusebr")
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 		existing.users.knownType.addUserId("cusebr")

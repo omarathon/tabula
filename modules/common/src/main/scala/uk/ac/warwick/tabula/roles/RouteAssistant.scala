@@ -10,14 +10,14 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 case class RouteAssistant(route: model.Route) extends BuiltInRole(RouteAssistantRoleDefinition, route)
 
 case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Route Assistant"
-	
+
 	GeneratesSubRole(RouteAuditorRoleDefinition)
 
 	GrantsScopedPermission(
 		MonitoringPoints.Record,
-		
+
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 

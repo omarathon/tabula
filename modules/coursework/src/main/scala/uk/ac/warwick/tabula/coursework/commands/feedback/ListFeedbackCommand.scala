@@ -12,10 +12,10 @@ import uk.ac.warwick.userlookup.User
 class ListFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[ListFeedbackResult] with ReadOnly with Unaudited {
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
-	
+
 	var auditIndexService = Wire[AuditEventIndexService]
 	var userLookup = Wire[UserLookupService]
-	
+
 	override def applyInternal() = {
 		ListFeedbackResult(
 			auditIndexService.feedbackDownloads(assignment).map(userIdToUser),

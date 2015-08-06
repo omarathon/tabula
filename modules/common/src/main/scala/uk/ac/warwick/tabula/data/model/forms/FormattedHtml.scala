@@ -12,6 +12,6 @@ trait FormattedHtml {
 		val nodes = Splitter.split(raw).map { p => <p>{ p }</p> }
 		(NodeSeq fromSeq nodes).toString
 	} getOrElse ("")
-	
+
 	def formattedHtml(string: String): String = formattedHtml(Option(string))
 }

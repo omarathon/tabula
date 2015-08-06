@@ -48,14 +48,14 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.coursework.commands.assignments.StudentCourseworkFullScreenCommand
 
 @Controller class HomeController extends CourseworkController {
-	
+
 	hideDeletedItems
 
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
 	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser) =
 		cmd.apply() match {
-			case Some(info) => 
+			case Some(info) =>
 				Mav("home/view",
 					"student" -> MemberOrUser(user.profile, user.apparentUser),
 					"enrolledAssignments" -> info.enrolledAssignments,
@@ -71,8 +71,8 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.StudentCourseworkFul
 }
 
 object CourseworkHomepageCommand {
-	type AssignmentInfo = Map[String, Any] 
-	
+	type AssignmentInfo = Map[String, Any]
+
 	case class CourseworkHomepageInformation(
 		val enrolledAssignments: Seq[AssignmentInfo],
 		val historicAssignments: Seq[AssignmentInfo],
@@ -81,7 +81,7 @@ object CourseworkHomepageCommand {
 		val ownedModules: Set[Module],
 		val activities: PagedActivities
 	)
-	
+
 	def apply(user: CurrentUser) =
 		new CourseworkHomepageCommandInternal(user)
 			with ComposableCommand[Option[CourseworkHomepageInformation]]
@@ -93,11 +93,11 @@ object CourseworkHomepageCommand {
 }
 
 class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandInternal[Option[CourseworkHomepageInformation]] with TaskBenchmarking {
-	self: ModuleAndDepartmentServiceComponent with 
+	self: ModuleAndDepartmentServiceComponent with
 		  AssessmentServiceComponent with
-		  ActivityServiceComponent with 
+		  ActivityServiceComponent with
 		  SecurityServiceComponent =>
-	
+
 	def applyInternal() = {
 		if (user.loggedIn) {
 			val ownedDepartments = benchmarkTask("Get owned departments") {
@@ -111,11 +111,11 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				assessmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
 			}
 			// add the number of submissions to each assignment for marking
-			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") { 
+			val assignmentsForMarkingInfo = benchmarkTask("Get markers submissions") {
 				for (assignment <- assignmentsForMarking) yield {
 					val submissions = assignment.getMarkersSubmissions(user.apparentUser)
 					val markerFeedbacks = submissions.flatMap( submission => assignment.getAllMarkerFeedbacks(submission.universityId, user.apparentUser))
-			
+
 					Map(
 						"assignment" -> assignment,
 						"isFeedbacksToManage" -> !markerFeedbacks.isEmpty,
@@ -125,7 +125,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 					)
 				}
 			}
-			
+
 			val courseworkInformation = StudentCourseworkFullScreenCommand(MemberOrUser(None, user.apparentUser)).apply()
 
 			Some(CourseworkHomepageInformation(
@@ -135,7 +135,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				assignmentsForMarking = assignmentsForMarkingInfo,
 				ownedDepartments = ownedDepartments,
 				ownedModules = ownedModules,
-				
+
 				activities = pagedActivities
 			))
 		} else {
@@ -146,13 +146,13 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 	def webgroupsToMap(groups: Seq[Group]) = groups
 		.map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
 		.sortBy { _._1 }
-	
+
 }
 
 @Controller class HomeActivitiesPageletController extends CourseworkController {
-	
+
 	hideDeletedItems
-	
+
 	@ModelAttribute("command") def command(
 		user: CurrentUser,
 		@PathVariable("doc") doc: Int,
@@ -164,7 +164,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
 		try {
 			cmd.apply() match {
-				case Some(pagedActivities) => 
+				case Some(pagedActivities) =>
 					Mav("home/activities",
 						"activities" -> pagedActivities,
 						"async" -> true).noLayout
@@ -189,8 +189,8 @@ object CourseworkHomepageActivityPageletCommand {
 
 class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, doc: Int, field: Long, token: Long) extends CommandInternal[Option[PagedActivities]] {
 	self: ActivityServiceComponent =>
-		
-	def applyInternal() = 
+
+	def applyInternal() =
 		if (user.loggedIn) Some(activityService.getNoteworthySubmissions(user, doc, field, token))
 		else None
 }

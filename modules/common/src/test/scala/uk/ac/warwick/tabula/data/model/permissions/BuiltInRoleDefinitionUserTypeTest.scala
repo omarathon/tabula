@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.services.RelationshipService
 
 class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
-  
+
 	@Test def convertToObject() {
 		val t = new BuiltInRoleDefinitionUserType
 		t.convertToObject("DepartmentalAdministratorRoleDefinition") should be (DepartmentalAdministratorRoleDefinition)
@@ -16,7 +16,7 @@ class BuiltInRoleDefinitionUserTypeTest extends TestBase with Mockito {
 		t.convertToObject("SubmitterRoleDefinition") should be (SubmitterRoleDefinition)
 		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
-  
+
 	@Test def convertToValue() {
 		val t = new BuiltInRoleDefinitionUserType
 		t.convertToValue(DepartmentalAdministratorRoleDefinition) should be ("DepartmentalAdministratorRoleDefinition")

@@ -108,11 +108,11 @@ module Cucumber
         return e if Cucumber.use_full_backtrace
         pwd = /#{Regexp.escape(Dir.pwd)}\//m
         (e.backtrace || []).each{|line| line.gsub!(pwd, "./")}
-        
+
         filtered = (e.backtrace || []).reject do |line|
           BACKTRACE_FILTER_PATTERNS.detect { |p| line =~ p }
         end
-        
+
         if Cucumber::JRUBY && e.class.name == 'NativeException'
           # JRuby's NativeException ignores #set_backtrace.
           # We're fixing it.

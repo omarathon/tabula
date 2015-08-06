@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.permissions._
 
 
 class DownloadAllSubmissionsCommand(
-		val module: Module, 
-		val assignment: Assignment, 
-		val filename: String) 
+		val module: Module,
+		val assignment: Assignment,
+		val filename: String)
 		extends Command[RenderableZip] with ReadOnly {
 
 	mustBeLinked(assignment, module)

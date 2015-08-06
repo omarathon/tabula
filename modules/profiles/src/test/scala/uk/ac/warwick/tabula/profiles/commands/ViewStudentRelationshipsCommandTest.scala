@@ -21,7 +21,7 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 		// give them both the same surname, just to prove that we don't accidentally merge users when sorting
 		val staff1 = new StaffMember(id = "111").tap(_.lastName = "Smith")
 		val staff2 = new StaffMember(id = "222").tap(_.lastName = "Smith")
-		
+
 		val student1 = Fixtures.student(universityId = "1")
 		val student2 = Fixtures.student(universityId = "2")
 		val student3 = Fixtures.student(universityId = "3")

@@ -7,11 +7,11 @@ import java.util.UUID
 class MockJobDao extends JobDao {
 
 	val instances = ArrayBuffer[JobInstance]()
-	
+
 	def findOutstandingInstances(max: Int) = {
 		instances.iterator.filterNot( _.started ).take(max).toSeq
 	}
-	
+
 	def findOutstandingInstance(example: JobInstance) = {
 		instances.filterNot( _.started ).find { inst =>
 			inst.jobType == example.jobType &&
@@ -24,15 +24,15 @@ class MockJobDao extends JobDao {
 		instances += instance
 		instance
 	}
-	
+
 	def unfinishedInstances = instances.toSeq.filterNot( _.finished )
-	
+
 	def listRecent(start: Int, count: Int) = instances.toSeq.filter( _.finished ).slice(start, start+count)
-	
+
 	def getById(id:String) = instances.find( id == _.id )
-	
+
 	def clear = instances.clear
-	
+
 	def update(instance: JobInstance) {}
 
 }

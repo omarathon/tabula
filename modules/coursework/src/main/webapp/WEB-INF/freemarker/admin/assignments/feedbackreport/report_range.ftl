@@ -6,7 +6,7 @@
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3>Feedback report for ${department.name}</h3>
 	</div>
-	
+
 	<@f.form method="post" action="${url('/coursework/admin/department/${department.code}/reports/feedback/')}" commandName="feedbackReportCommand">
 	<div class="modal-body">
 		<p>Generate report for assignments with closing dates </p>
@@ -23,6 +23,6 @@
 		<input type="submit" value="Confirm" class="btn btn-primary">
 		<a data-dismiss="modal" class="close-model btn" href="#">Cancel</a>
 	</div>
-	
-	</@f.form>	
+
+	</@f.form>
 </#escape>

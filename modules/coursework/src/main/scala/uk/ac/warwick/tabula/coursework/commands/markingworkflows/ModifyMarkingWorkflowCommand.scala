@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.services.MarkingWorkflowServiceComponent
 
 /** Abstract base command for either creating or editing a MarkingWorkflow */
-abstract class ModifyMarkingWorkflowCommand(val department: Department) 
+abstract class ModifyMarkingWorkflowCommand(val department: Department)
 	extends CommandInternal[MarkingWorkflow] with BindListener with MarkingWorkflowCommandState {
 	self: MarkingWorkflowServiceComponent =>
 
@@ -75,7 +75,7 @@ trait MarkingWorkflowCommandState {
 
 trait MarkingWorkflowCommandValidation extends SelfValidating {
 	self: MarkingWorkflowCommandState =>
-		
+
 	// Subclasses can provide the "current" markingWorkflow if one applies, for validation.
 	def currentMarkingWorkflow: Option[MarkingWorkflow]
 

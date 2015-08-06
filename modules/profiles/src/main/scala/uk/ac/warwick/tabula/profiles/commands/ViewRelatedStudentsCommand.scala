@@ -29,7 +29,7 @@ object ViewRelatedStudentsCommand{
 
 trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	self: ProfileServiceComponent =>
-	
+
 	val currentMember: Member
 	val relationshipType: StudentRelationshipType
 
@@ -46,7 +46,7 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
-	
+
 	lazy val allCourses =
 		profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil)
 	lazy val allDepartments = allCourses.flatMap(c => Option(c.department)).distinct

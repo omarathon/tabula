@@ -6,10 +6,10 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{TermServiceImpl, TermService}
 
 class WeekRangeTest extends TestBase {
-	
+
 	val termService = new TermServiceImpl
 	WeekRange.termService = termService
-	
+
 	@Test
 	def fromString {
 		WeekRange.fromString("3") should be (WeekRange(3))
@@ -17,7 +17,7 @@ class WeekRangeTest extends TestBase {
 		WeekRange.fromString("3-10") should be (WeekRange(3,10))
 		WeekRange.fromString("3  -  10") should be (WeekRange(3,10))
 	}
-	
+
 	@Test
 	def combine {
 		WeekRange.combine(Seq()) should be (Seq())
@@ -27,7 +27,7 @@ class WeekRangeTest extends TestBase {
 		WeekRange.combine(Seq(1,2,3)) should be (Seq(WeekRange(1, 3)))
 		WeekRange.combine(Seq(3,6,9,11,4,5,1)) should be (Seq(WeekRange(1), WeekRange(3, 6), WeekRange(9), WeekRange(11)))
 	}
-	
+
 	@Test
 	def termWeekRanges {
 		WeekRange.termWeekRanges(AcademicYear.parse("11/12")) should be (Seq(WeekRange(1, 10), WeekRange(15, 24), WeekRange(30, 39)))

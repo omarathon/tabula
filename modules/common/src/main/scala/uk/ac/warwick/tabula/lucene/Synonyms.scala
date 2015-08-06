@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.lucene
 
 object Synonyms {
-	
+
 	// TODO this is so very rubbish
 	// Collected from http://search.warwick.ac.uk/search/admin/editNameSynonyms.html 13/12/12
-	
+
 	// Turn scalastyle off because string literals are ok(-ish) here
 	// scalastyle:off
 	val names = Map(
@@ -136,6 +136,6 @@ object Synonyms {
 		"tom" -> Set("thomas"),
 		"wahlberg" -> Set("wahlburg"),
 		"wahlburg" -> Set("wahlberg"),
-		"william" -> Set("bill", "billy")			
+		"william" -> Set("bill", "billy")
 	)
 }

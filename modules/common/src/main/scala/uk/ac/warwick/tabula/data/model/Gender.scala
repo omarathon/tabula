@@ -30,7 +30,7 @@ class GenderUserType extends AbstractBasicUserType[Gender, String] {
 	val nullObject = null
 
 	override def convertToObject(string: String) = Gender.fromCode(string)
-	
+
 	override def convertToValue(gender: Gender) = gender.dbValue
 
 }

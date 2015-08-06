@@ -32,12 +32,12 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 	extends CommandInternal[Map[String, Seq[GroupedMonitoringPoint]]] with ViewMonitoringPointsState with BindListener with GroupMonitoringPointsByTerm {
 
 	self: ProfileServiceComponent with MonitoringPointServiceComponent with PermissionsAwareRoutes =>
-	
+
 	def applyInternal() = {
 		val pointSets = monitoringPointService.findPointSetsForStudents(students, academicYear)
 		groupSimilarPointsByTerm(pointSets.flatMap(_.points.asScala), allRoutes, academicYear)
 	}
-	
+
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
 		if (!hasBeenFiltered) {

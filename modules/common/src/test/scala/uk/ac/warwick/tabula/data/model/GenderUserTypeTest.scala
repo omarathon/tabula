@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Gender._
 
 class GenderUserTypeTest extends TestBase {
-  
+
 	@Test def convertToObject() {
 		val t = new GenderUserType
 		t.convertToObject("M") should be (Male)
@@ -13,7 +13,7 @@ class GenderUserTypeTest extends TestBase {
 		t.convertToObject("P") should be (Unspecified)
 		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
-  
+
 	@Test def convertToValue() {
 		val t = new GenderUserType
 		t.convertToValue(Male) should be ("M")

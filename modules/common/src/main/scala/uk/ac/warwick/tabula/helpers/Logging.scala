@@ -54,7 +54,7 @@ trait Logging {
 		timed(description, level, minMillis, stopWatch, logger) { timer =>
 			fn
 		}
-	
+
 	/**
 	 * The same as benchmark, but passes the StopWatch as a callback to the function
 	 */

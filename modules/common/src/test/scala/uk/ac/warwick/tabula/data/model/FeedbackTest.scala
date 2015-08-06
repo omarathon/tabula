@@ -61,31 +61,31 @@ class FeedbackPersistenceTest extends PersistenceTestBase {
 		// TAB-667
 		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
-			
+
 			session.save(attachment)
 			attachment
 		}
-		
+
 		val (feedback, feedbackAttachment) = flushing(session) {
 			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
-			
+
 			val assignment = new Assignment
 			session.save(assignment)
-			
+
 			feedback.assignment = assignment
-			
+
 			val attachment = new FileAttachment
 			feedback.addAttachment(attachment)
-			
+
 			session.save(feedback)
 			(feedback, attachment)
 		}
-		
+
 		// Ensure everything's been persisted
 		orphanAttachment.id should not be (null)
 		feedback.id should not be (null)
 		feedbackAttachment.id should not be (null)
-		
+
 		// Can fetch everything from db
 		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
@@ -94,7 +94,7 @@ class FeedbackPersistenceTest extends PersistenceTestBase {
 		}
 
 		flushing(session) { session.delete(feedback) }
-		
+
 		// Ensure we can't fetch the feedback or attachment, but all the other objects are returned
 		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
@@ -102,7 +102,7 @@ class FeedbackPersistenceTest extends PersistenceTestBase {
 			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (null)
 		}
 	}
-	
-		
+
+
 
 }

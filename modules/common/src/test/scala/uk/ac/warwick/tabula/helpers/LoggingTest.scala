@@ -38,7 +38,7 @@ class LoggingTest extends TestBase with Logging {
 			Thread.sleep(50)
 			ranFn = true
 		}
-		
+
 		// The last thing is still there because benchmarking is disabled, but we still ran the function
 		ranFn should be (true)
 		TestLoggerFactory.retrieveEvents(testLogger).map(e => (e.getLevel, e.getMessage)).last should be (

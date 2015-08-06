@@ -79,7 +79,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		values.find( _.name == field.name )
 	}
-	
+
 	def isForUser(user: User) = universityId == user.getWarwickId || userId == user.getUserId
 
 	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(universityId)

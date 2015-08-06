@@ -64,7 +64,7 @@ class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: A
 
 trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: DownloadFeedbackAsPdfState =>
-	
+
 	def permissionsCheck(p: PermissionsChecking) {
 		notDeleted(assignment)
 		mustBeLinked(assignment, module)
@@ -78,7 +78,7 @@ trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with 
 
 trait DownloadFeedbackAsPdfAudit extends Describable[Feedback] {
 	self: DownloadFeedbackAsPdfState =>
-	
+
 	def describe(d: Description) {
 		d.feedback(feedback)
 	}

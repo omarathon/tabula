@@ -49,17 +49,17 @@ trait MaintenanceModeService extends MaintenanceStatus {
 
 	var until: Option[DateTime]
 	var message: Option[String]
-	
-	def update(message: MaintenanceModeMessage) = {		
+
+	def update(message: MaintenanceModeMessage) = {
 		this.message = Option(message.message)
 		this.until = message.until match {
 			case -1 => None
 			case millis => Some(new DateTime(millis))
 		}
-		
+
 		if (message.enabled) this.enable
 		else this.disable
-		
+
 		this
 	}
 }
@@ -78,7 +78,7 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	def exception(callee: Describable[_]) = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
 		logger.info("[Maintenance Reject] " + m)
-		
+
 		new MaintenanceModeEnabledException(until, message)
 	}
 
@@ -148,9 +148,9 @@ class MaintenanceModeListener extends QueueListener with InitializingBean with L
 						case _ =>
 				}
 		}
-		
+
 		override def afterPropertiesSet = {
 				queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
 		}
-	
+
 }

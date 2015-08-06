@@ -21,10 +21,10 @@ class AddModuleController extends AdminController {
 
 	@ModelAttribute("addModuleCommand")
 	def command(@PathVariable("dept") department: Department): AddModuleCommand = AddModuleCommand(mandatory(department))
-	
+
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("dept") department: Department) = {
-		Mav("admin/modules/add/form", 
+		Mav("admin/modules/add/form",
 			"department" -> department
 		)
 	}

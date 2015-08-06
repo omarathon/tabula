@@ -21,9 +21,9 @@ module Cucumber
       def tag_name(tag_name)
         @counts[tag_name] += 1
       end
-      
+
       private
-  
+
       def print_summary(features)
         matrix = @counts.to_a.sort{|paira, pairb| paira[0] <=> pairb[0]}.transpose
         table = Cucumber::Ast::Table.new(matrix)

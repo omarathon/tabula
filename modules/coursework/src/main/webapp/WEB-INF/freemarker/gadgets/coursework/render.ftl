@@ -7,7 +7,7 @@
 </h2>
 
 <p>
-This is a test gadget. If you can see your name above it means that the gadget has 
+This is a test gadget. If you can see your name above it means that the gadget has
 successfully made an authenticated OAuth request back to Tabula.
 </p>
 

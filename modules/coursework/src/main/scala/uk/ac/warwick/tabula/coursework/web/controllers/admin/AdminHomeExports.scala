@@ -11,9 +11,9 @@ import scala.xml._
 
 object AdminHomeExports {
 	class XMLBuilder(val department: Department, val info: DepartmentHomeInformation) extends AdminHomeExport {
-	
+
 		var topLevelUrl: String = Wire.property("${toplevel.url}")
-	
+
 		// Pimp XML elements to allow a map mutator for attributes
 		implicit class PimpedElement(elem: Elem) {
 			def %(attrs:Map[String,Any]) = {
@@ -21,7 +21,7 @@ object AdminHomeExports {
 				(elem /: seq) ( _ % _ )
 			}
 		}
-		
+
 		def toXMLString(value: Option[Any]): String = value match {
 			case Some(o: Option[Any]) => toXMLString(o)
 			case Some(i: ReadableInstant) => isoFormat(i)
@@ -31,30 +31,30 @@ object AdminHomeExports {
 			case Some(other) => other.toString
 			case None => ""
 		}
-		
+
 		def toXML = {
 			val assignments = info.modules.flatMap { _.assignments.asScala }.filter { a => !a.deleted && !a.archived }
-			
+
 			<assignments>
 				{ assignments map assignmentElement }
 			</assignments>
 		}
-		
+
 		def assignmentElement(assignment: Assignment) = {
 			<assignment>
 
 			</assignment> % assignmentData(assignment)
 		}
 	}
-	
+
 	trait AdminHomeExport {
 		val department: Department
 		val info: DepartmentHomeInformation
 		def topLevelUrl: String
-		
+
 		val isoFormatter = DateFormats.IsoDateTime
 		def isoFormat(i: ReadableInstant) = isoFormatter print i
-		
+
 		protected def assignmentData(assignment: Assignment): Map[String, Any] = Map(
 			"module-code" -> assignment.module.code,
 			"id" -> assignment.id,

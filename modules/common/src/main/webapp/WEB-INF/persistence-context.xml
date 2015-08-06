@@ -19,17 +19,17 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
-	
+
 	<bean id="hibernateLifecycle" class="uk.ac.warwick.tabula.data.HibernateLifecycle"
 		p:sessionFactory-ref="sessionFactory" />
-	
+
 	<import resource="hibernate-packages-context.xml" />
-	
+
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan-ref="hibernatePackages"
 		p:hibernateProperties-ref="hibernateProperties" />
-	
+
 	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 
@@ -45,14 +45,14 @@
 		    	</props>
 		    </property>
 		</bean>
-		
+
 		<bean id="sitsDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
 		    <property name="url" value="${sits.db.url}"/>
 		    <property name="username" value="${sits.db.username}"/>
 		    <property name="password" value="${sits.db.password}"/>
 		</bean>
-		
+
 		<bean id="membershipDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
 		    <property name="url" value="${membership.db.url}"/>
@@ -60,13 +60,13 @@
 		    <property name="password" value="${membership.db.password}"/>
 		</bean>
 	</beans>
-	
+
 	<beans profile="dev,sandbox,production,console">
-	
+
 		<bean id="tabulaEncodingChecker" class="uk.ac.warwick.tabula.system.SessionFactoryDatabaseEncodingChecker"
 			c:sessionFactory-ref="sessionFactory"
 		 />
-		 
+
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
@@ -77,9 +77,9 @@
 			<prop key="defaultNChar">true</prop>
 			<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
 		</util:properties>
-		
+
 		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />
-		
+
 		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper">
 			<property name="membershipInterface">
 				<bean class="org.springframework.remoting.rmi.RmiProxyFactoryBean" autowire-candidate="false">
@@ -87,47 +87,47 @@
 					<property name="serviceInterface" value="uk.ac.warwick.membership.MemberInterface" />
 					<property name="lookupStubOnStartup" value="false" />
 					<property name="refreshStubOnConnectFailure" value="true" />
-				</bean>	
+				</bean>
 			</property>
 			<property name="auth">
 				<bean class="uk.ac.warwick.membership.Auth" autowire-candidate="false">
 					<property name="serviceName" value="${membership.rmi.auth.serviceName}" />
 					<property name="userName" value="${membership.rmi.auth.username}" />
 					<property name="password" value="${membership.rmi.auth.password}" />
-				</bean>		
+				</bean>
 			</property>
 		</bean>
-		
+
 	</beans>
-	
+
 	<beans profile="dev,sandbox,production">
 
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:comp/env/jdbc/TabulaDS"/>
 	    </bean>
-	    
+
 	</beans>
-	
+
 	<beans profile="dev,production">
 	    <bean id="sitsDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:comp/env/jdbc/SITSDS"/>
 		   <property name="lookupOnStartup" value="false" />
 	       <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
-	    
+
 	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:comp/env/jdbc/MembershipDS"/>
 		   <property name="lookupOnStartup" value="false" />
 		   <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
 	</beans>
-	
+
 	<beans profile="sandbox,test">
 		<jdbc:embedded-database id="sitsDataSource" />
-		
+
 		<jdbc:embedded-database id="membershipDataSource" />
 	</beans>
-	
+
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
 
@@ -135,28 +135,28 @@
 
 		<import resource="hibernate-test-scripts-context.xml" />
 
-		<bean id="dataSourceInitialiser" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
+		<bean id="dataSourceInitialiser" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner"
 			p:dataSource-ref="dataSource"
 			p:scripts-ref="testScripts" />
 
 		<!-- We have sits.sql to make some tables and data but we just want a blank
 		     datasource here - sits.sql is used by the importer test only -->
-		<bean id="sitsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
+		<bean id="sitsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner"
 			p:dataSource-ref="sitsDataSource" />
-			
-		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
+
+		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner"
 			p:dataSource-ref="membershipDataSource"
 			p:scripts="membership.sql" />
-		
+
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
 			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.hsql.HSQLDialect</prop>
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
 			<!-- <prop key="hibernate.show_sql">true</prop>  -->
 		</util:properties>
-		
+
 		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper" />
-		
+
 	</beans>
 
 </beans>

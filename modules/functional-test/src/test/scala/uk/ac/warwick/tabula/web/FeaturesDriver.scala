@@ -18,14 +18,14 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 		val buttonText = state.toString
 		val button = featureForm.findElement(By.xpath(s"./input[@type='submit' and @value='$buttonText']"))
 		button.click()
-		
+
 		// wait a second here in the hope that all apps have received the message.
 		// even better would be to register our own JMS consumer and wait until *we* see the message
 		eventually {
 			isFeatureEnabled(name) should be (state)
 		}
 	}
-	
+
 	def enableFeature(name:String) {
 		setFeatureState(name, true)
 	}
@@ -33,12 +33,12 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 	def disableFeature(name:String) {
 		setFeatureState(name, false)
 	}
-	
+
 	def isFeatureEnabled(name: String) = {
-		Seq("", "/attendance", "/coursework", "/groups", "/profiles", "/scheduling").forall { context =>
+		Seq("", "/attendance", "/coursework", "/profiles", "/scheduling").forall { context =>
 			val uri = FunctionalTestProperties.SiteRoot + context + "/test/feature/" + name
 			val req = url(uri)
-			
+
 			val resp = http.when(_ == HttpStatus.SC_OK) { req.as_str }
 			resp.toBoolean
 		}

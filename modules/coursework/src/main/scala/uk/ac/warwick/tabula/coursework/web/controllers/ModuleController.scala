@@ -16,13 +16,13 @@ class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.
 class ModuleController extends CourseworkController {
 
 	hideDeletedItems
-	
+
 	@ModelAttribute def command(@PathVariable("module") module: Module) = new ViewModuleCommand(module)
 
 	@RequestMapping
 	def viewModule(@ModelAttribute cmd: ViewModuleCommand) = {
 		val module = cmd.apply()
-		
+
 		Mav("submit/module",
 			"module" -> module,
 			"assignments" -> module.assignments

@@ -72,7 +72,6 @@
 		<module>modules/attendance</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
-		<module>modules/groups</module>
 		<module>modules/scheduling</module>
 		<module>modules/api</module>
 

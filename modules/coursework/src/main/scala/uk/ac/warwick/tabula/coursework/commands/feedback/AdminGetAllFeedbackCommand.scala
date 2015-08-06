@@ -12,10 +12,10 @@ import uk.ac.warwick.tabula.data.model.Module
 
 
 class AdminGetAllFeedbackCommand(module: Module, assignment: Assignment) extends Command[RenderableZip] with ReadOnly {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
-	
+
 	var zipService = Wire.auto[ZipService]
 
 	override def applyInternal() = {

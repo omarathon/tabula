@@ -15,7 +15,7 @@ import language.implicitConversions
  */
 class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser)
 	extends Command[Boolean] with Notifies[Boolean, Submission] with ReadOnly {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 

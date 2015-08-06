@@ -37,7 +37,7 @@ case class RecipientCheckReport(
  * when feedback is published.
  */
 class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignment) extends Command[RecipientCheckReport] with Unaudited with ReadOnly {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 

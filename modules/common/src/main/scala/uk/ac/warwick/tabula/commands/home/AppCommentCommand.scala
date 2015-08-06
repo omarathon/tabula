@@ -19,9 +19,9 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] wit
 	var mailSender = Wire[WarwickMailSender]("mailSender")
 	var adminMailAddress = Wire.property("${mail.admin.to}")
 	var freemarker = Wire.auto[Configuration]
-	
+
 	lazy val template: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
-	
+
 	var componentName: String = _
 
 	var message: String = _
@@ -34,7 +34,7 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] wit
 	var os: String = _
 	var resolution: String = _
 	var ipAddress: String = _
-	
+
 	if (user != null && user.loggedIn) {
 		if (!usercode.hasText) usercode = user.apparentId
 		if (!name.hasText) name = user.fullName
@@ -42,7 +42,7 @@ class AppCommentCommand(user: CurrentUser) extends Command[Future[JBoolean]] wit
 	}
 
 	def applyInternal() = {
-		val mail = createMessage(mailSender) { mail => 
+		val mail = createMessage(mailSender) { mail =>
 			mail setTo adminMailAddress
 			mail setFrom adminMailAddress
 			mail setSubject encodeSubject("Tabula feedback")

@@ -478,7 +478,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 	}
 
 	private def getRelevantPoints(points: Seq[MonitoringPoint], attendance: SmallGroupEventAttendance, studentMember: StudentMember): Seq[MonitoringPoint] = {
-		points.filter(point => 
+		points.filter(point =>
 			// Is it the correct type
 			point.pointType == MonitoringPointType.SmallGroup
 			// Is the attendance inside the point's weeks
@@ -491,7 +491,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
 		)
 	}
-	
+
 	private def checkQuantity(point: MonitoringPoint, attendance: SmallGroupEventAttendance, studentMember: StudentMember): Boolean = {
 		if (point.smallGroupEventQuantity == 1) {
 			true

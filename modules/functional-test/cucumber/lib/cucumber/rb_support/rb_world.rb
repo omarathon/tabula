@@ -13,7 +13,7 @@ module Cucumber
         rb = @__cucumber_step_mother.load_programming_language('rb')
         rb.execute_transforms([arg]).first
       end
-    
+
       attr_writer :__cucumber_step_mother, :__natural_language
 
       # Call a step from within a step definition. This method is aliased to
@@ -67,11 +67,11 @@ module Cucumber
       end
 
       # The default implementation of Object#inspect recursively
-      # traverses all instance variables and invokes inspect. 
+      # traverses all instance variables and invokes inspect.
       # This can be time consuming if the object graph is large.
       #
-      # This can cause unnecessary delays when certain exceptions 
-      # occur. For example, MRI internally invokes #inspect on an 
+      # This can cause unnecessary delays when certain exceptions
+      # occur. For example, MRI internally invokes #inspect on an
       # object that raises a NoMethodError. (JRuby does not do this).
       #
       # A World object can have many references created by the user

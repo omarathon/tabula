@@ -9,6 +9,7 @@
 	<#assign title="Reports" />
 	<#assign name="reports" />
 	<#assign nonav=false />
+	<#assign homeUrl><@routes.reports.home /></#assign>
 <#elseif requestPath?starts_with('/admin/')>
 	<#assign bodyClass="admin-page" />
 	<#assign siteHeader="Administration & Permissions" />
@@ -16,6 +17,15 @@
 	<#assign title="Administration & Permissions" />
 	<#assign name="admin" />
 	<#assign nonav=false />
+	<#assign homeUrl><@routes.admin.home /></#assign>
+<#elseif requestPath?starts_with('/groups/')>
+	<#assign bodyClass="groups-page" />
+	<#assign siteHeader="Small Group Teaching" />
+	<#assign subsite=true />
+	<#assign title="Small Group Teaching" />
+	<#assign name="groups" />
+	<#assign nonav=false />
+	<#assign homeUrl><@routes.groups.home /></#assign>
 <#else>
 	<#assign bodyClass="tabula-page" />
 	<#assign siteHeader="Tabula" />

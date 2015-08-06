@@ -47,7 +47,6 @@ RewriteCond %{REQUEST_URI} !^/coursework/(.*)
 RewriteCond %{REQUEST_URI} !^/web/(.*)
 RewriteCond %{REQUEST_URI} !^/profiles/(.*)
 RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
-RewriteCond %{REQUEST_URI} !^/groups/(.*)
 RewriteCond %{REQUEST_URI} !^/attendance/(.*)
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}/web$1 [QSA,P,L]

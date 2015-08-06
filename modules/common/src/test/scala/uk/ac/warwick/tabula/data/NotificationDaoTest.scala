@@ -103,7 +103,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		department.permissionsService = permissionsService
 		session.save(department)
-		
+
 		assignment.module = module
 		session.save(assignment)
 

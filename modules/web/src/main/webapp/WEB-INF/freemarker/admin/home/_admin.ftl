@@ -1,11 +1,11 @@
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments) || nonempty(ownedRouteDepartments)>
 	<h2 class="section">Administration</h2>
 
-	<div class="row-fluid">	
+	<div class="row-fluid">
 		<div class="span6">
 			<#if nonempty(ownedModuleDepartments)>
 				<h6>My managed <@fmt.p number=ownedModuleDepartments?size singular="module" shownumber=false /></h6>
-				
+
 				<ul class="links">
 					<#list ownedModuleDepartments as department>
 						<li>
@@ -14,10 +14,10 @@
 					</#list>
 				</ul>
 			</#if>
-			
+
 			<#if nonempty(ownedRouteDepartments)>
 				<h6>My managed <@fmt.p number=ownedRouteDepartments?size singular="route" shownumber=false /></h6>
-				
+
 				<ul class="links">
 					<#list ownedRouteDepartments as department>
 						<li>
@@ -29,7 +29,7 @@
 
 			<#if nonempty(ownedDepartments)>
 				<h6>My department-wide <@fmt.p number=ownedDepartments?size singular="responsibility" plural="responsibilities" shownumber=false /></h6>
-			
+
 				<ul class="links">
 					<#list ownedDepartments as department>
 						<li>

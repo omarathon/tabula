@@ -17,7 +17,7 @@ object StudentRelationshipTemplateCommand {
 
 	val agentLookupSheetName = "AgentLookup"
 	val sheetPassword = "roygbiv"
-	
+
 	def apply(department: Department, relationshipType: StudentRelationshipType) =
 		new StudentRelationshipTemplateCommandInternal(department, relationshipType)
 			with AutowiringRelationshipServiceComponent
@@ -80,15 +80,15 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		val agentLookupRange = StudentRelationshipTemplateCommand.agentLookupSheetName + "!$A2:$B" + (allocations.length + 1)
 
 		allocations.foreach{ agent =>
-			agent.students.foreach{ student => 
+			agent.students.foreach{ student =>
 				val row = sheet.createRow(sheet.getLastRowNum + 1)
-	
+
 				row.createCell(0).setCellValue(student.universityId)
 				row.createCell(1).setCellValue(s"${student.firstName} ${student.lastName}")
-	
+
 				val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
 				agentNameCell.setCellValue(agent.displayName)
-	
+
 				row.createCell(3).setCellFormula(
 					"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
 				)

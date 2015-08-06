@@ -19,10 +19,10 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 trait StudentRelationshipTypeController extends BaseSysadminController {
 	validatesSelf[SelfValidating]
-	
+
 	override final def binding[A](binder: WebDataBinder, cmd: A) {
 		binder.registerCustomEditor(classOf[StudentRelationshipSource], new AbstractPropertyEditor[StudentRelationshipSource] {
-			override def fromString(code: String) = StudentRelationshipSource.fromCode(code)			
+			override def fromString(code: String) = StudentRelationshipSource.fromCode(code)
 			override def toString(source: StudentRelationshipSource) = source.dbValue
 		})
 	}
@@ -31,9 +31,9 @@ trait StudentRelationshipTypeController extends BaseSysadminController {
 @Controller
 @RequestMapping(value = Array("/sysadmin/relationships"))
 class ListStudentRelationshipTypesController extends StudentRelationshipTypeController {
-	@ModelAttribute("listStudentRelationshipTypesCommand") 
+	@ModelAttribute("listStudentRelationshipTypesCommand")
 		def listStudentRelationshipTypesCommand = ListStudentRelationshipTypesCommand()
-		
+
 	@annotation.RequestMapping
 	def list(@ModelAttribute("listStudentRelationshipTypesCommand") cmd: Appliable[Seq[StudentRelationshipType]]) =
 		Mav("sysadmin/relationships/list",
@@ -44,12 +44,12 @@ class ListStudentRelationshipTypesController extends StudentRelationshipTypeCont
 @Controller
 @RequestMapping(value = Array("/sysadmin/relationships/add"))
 class AddStudentRelationshipTypeController extends StudentRelationshipTypeController {
-	@ModelAttribute("addStudentRelationshipTypeCommand") 
+	@ModelAttribute("addStudentRelationshipTypeCommand")
 		def addStudentRelationshipTypeCommand = AddStudentRelationshipTypeCommand()
-		
+
 	@annotation.RequestMapping(method=Array(GET, HEAD))
 	def form() = Mav("sysadmin/relationships/add")
-		
+
 	@annotation.RequestMapping(method=Array(POST))
 	def add(@Valid @ModelAttribute("addStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){
@@ -63,13 +63,13 @@ class AddStudentRelationshipTypeController extends StudentRelationshipTypeContro
 @Controller
 @RequestMapping(value = Array("/sysadmin/relationships/{relationshipType}/edit"))
 class EditStudentRelationshipTypeController extends StudentRelationshipTypeController {
-	@ModelAttribute("editStudentRelationshipTypeCommand") 
-		def editStudentRelationshipTypeCommand(@PathVariable relationshipType: StudentRelationshipType) = 
+	@ModelAttribute("editStudentRelationshipTypeCommand")
+		def editStudentRelationshipTypeCommand(@PathVariable relationshipType: StudentRelationshipType) =
 			EditStudentRelationshipTypeCommand(relationshipType)
-		
+
 	@annotation.RequestMapping(method=Array(GET, HEAD))
 	def form() = Mav("sysadmin/relationships/edit")
-		
+
 	@annotation.RequestMapping(method=Array(POST))
 	def edit(@Valid @ModelAttribute("editStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){
@@ -83,13 +83,13 @@ class EditStudentRelationshipTypeController extends StudentRelationshipTypeContr
 @Controller
 @RequestMapping(value = Array("/sysadmin/relationships/{relationshipType}/delete"))
 class DeleteStudentRelationshipTypeController extends StudentRelationshipTypeController {
-	@ModelAttribute("deleteStudentRelationshipTypeCommand") 
-		def deleteStudentRelationshipTypeCommand(@PathVariable relationshipType: StudentRelationshipType) = 
+	@ModelAttribute("deleteStudentRelationshipTypeCommand")
+		def deleteStudentRelationshipTypeCommand(@PathVariable relationshipType: StudentRelationshipType) =
 			DeleteStudentRelationshipTypeCommand(relationshipType)
-		
+
 	@annotation.RequestMapping(method=Array(GET, HEAD))
 	def form() = Mav("sysadmin/relationships/delete")
-		
+
 	@annotation.RequestMapping(method=Array(POST))
 	def delete(@Valid @ModelAttribute("deleteStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){

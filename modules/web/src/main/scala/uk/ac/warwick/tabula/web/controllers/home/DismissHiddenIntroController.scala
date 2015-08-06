@@ -17,23 +17,23 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 class DismissHiddenIntroController extends TabulaHomepageController {
 
 	validatesSelf[DismissHiddenIntroCommand]
-	
+
 	var userSettingsService = Wire.auto[UserSettingsService]
-	
-	private def getUserSettings(user: CurrentUser) = 
-		userSettingsService.getByUserId(user.apparentId) 
-		
-	@ModelAttribute def command(user: CurrentUser, @PathVariable("settingHash") hash: String) = {	
+
+	private def getUserSettings(user: CurrentUser) =
+		userSettingsService.getByUserId(user.apparentId)
+
+	@ModelAttribute def command(user: CurrentUser, @PathVariable("settingHash") hash: String) = {
 		val usersettings = getUserSettings(user)
-		usersettings match { 
+		usersettings match {
 			case Some(setting) => new DismissHiddenIntroCommand(user, setting, hash)
 			case None => new DismissHiddenIntroCommand(user, new UserSettings(user.apparentId), hash)
 		}
 	}
 
-	
+
 	@RequestMapping(method=Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, command: DismissHiddenIntroCommand, errors:Errors) = {		
+	def viewSettings(user: CurrentUser, command: DismissHiddenIntroCommand, errors:Errors) = {
 		 Mav(new JSONView(Map("dismiss" -> command.dismiss)))
 	}
 

@@ -15,18 +15,18 @@ import uk.ac.warwick.tabula.services.AssessmentService
 class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with RequestLevelCaching[(CurrentUser, String), Seq[Assessment]] {
 
 	val assignmentService = promise { Wire[AssessmentService] }
-	
+
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
 		def getRoles(assessmentsForMarker: Stream[Assessment]) = assessmentsForMarker.map{ assessment =>
 			customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
-		} 
-		
+		}
+
 		scope match {
 			case department: Department =>
 				getRoles(cachedBy((user, scope.toString)) {
 					assignmentService.get.getAssignmentsByDepartmentAndMarker(department, user)
 				}.toStream)
-			
+
 			case module: Module =>
 				getRoles(cachedBy((user, scope.toString)) {
 					assignmentService.get.getAssignmentsByModuleAndMarker(module, user).toStream
@@ -39,7 +39,7 @@ class MarkerRoleProvider extends RoleProvider with TaskBenchmarking with Request
 			case _ => Stream.empty
 		}
 	}
-	
+
 	def rolesProvided = Set(classOf[Marker])
-	
+
 }

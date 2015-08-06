@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
  * Returns the job instance ID for status tracking.
  */
 class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance] {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 

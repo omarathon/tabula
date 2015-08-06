@@ -10,18 +10,18 @@ import resource.managed
  */
 class DatabaseScriptRunner extends InitializingBean {
     val populator = new ResourceDatabasePopulator
-    
+
     var dataSource:DataSource =_
-    
+
     def setScripts(scripts: Array[Resource]) = {
     	populator.setScripts(scripts: _*)
     }
-    
+
 	def addScript(path:String) = {
 	  populator.addScript(new ClassPathResource(path))
 	  this
 	}
-    
+
 	def afterPropertiesSet = {
 //		val populator = new ResourceDatabasePopulator
 //		for (script <- scripts)
@@ -30,5 +30,5 @@ class DatabaseScriptRunner extends InitializingBean {
 		for (connection <- managed(dataSource.getConnection))
 			populator.populate(connection)
 	}
-	
+
 }

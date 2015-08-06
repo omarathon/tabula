@@ -18,14 +18,14 @@ class MyCommand {
 }
 
 class BindStatusTest extends TestBase {
-	
+
 	@Test def bindList {
 		val ctx = new GenericWebApplicationContext
-		
+
 		val req = new MockHttpServletRequest
 		req.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx)
 		val request = new RequestContext(req, new HashMap[String,Object])
-		
+
 		val command = new MyCommand
 		val attachment = new FileAttachment
 		command.attached.add(attachment)

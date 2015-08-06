@@ -23,18 +23,18 @@ class CookiesTest extends TestBase {
 		cookies.getBoolean("isNasty", false) should be (false)
 		cookies.getBoolean("isNonsense", false) should be (false)
 	}
-	
+
 	@Test
 	def magicCookie {
 		val httpCookie = new http.Cookie("name", "Billy")
 		val magicCookie = new Cookie(httpCookie)
-		
+
 		magicCookie.path should be (null)
 		magicCookie.value should be ("Billy")
-		
+
 		magicCookie.path = "/path"
 		magicCookie.value = "myvalue"
-			
+
 		httpCookie.getPath() should be ("/path")
 		httpCookie.getValue() should be ("myvalue")
 	}
@@ -48,25 +48,25 @@ class CookiesTest extends TestBase {
 		cookies.getBoolean("a", false) should be (false)
 		cookies.getBoolean("a", true) should be (true)
 	}
-	
+
 	@Test def constructor {
 		val cookie1 = new Cookie("name", "something")
 		cookie1.cookie.getName() should be ("name")
 		cookie1.cookie.getValue() should be ("something")
 		cookie1.cookie.getPath() should be (null)
-		
+
 		val cookie2 = new Cookie("name", "something", "/yes")
 		cookie2.cookie.getName() should be ("name")
 		cookie2.cookie.getValue() should be ("something")
 		cookie2.cookie.getPath() should be ("/yes")
 	}
-	
+
 	@Test def implicitResponse {
 		import Cookies._
-		
+
 		val response = new MockHttpServletResponse
 		response.addCookie(new Cookie("name", "something"))
-		
+
 		response.getCookie("name").getValue() should be ("something")
 	}
 

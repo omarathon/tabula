@@ -39,12 +39,12 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			dao.deleteOldTemporaryFiles should be (36) // 50 files, 14 days of leeway
 		}
 	}
-	
+
 	@After def bangtidy() { transactional { tx =>
-		session.createQuery("delete from FileAttachment").executeUpdate() 
+		session.createQuery("delete from FileAttachment").executeUpdate()
 	}}
-	
-	@Test def crud = transactional { tx => 
+
+	@Test def crud = transactional { tx =>
 		dao.attachmentDir = createTemporaryDirectory
 		dao.attachmentDir.list.size should be (0)
 		val attachments = for (i <- 1 to 10) yield {
@@ -53,23 +53,23 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
 			attachment.fileDao = dao
 			dao.savePermanent(attachment)
-			
+
 			attachment.hash should be ("f95a27f06df98ba26182c22e277af960c0be9be6")
 
 			attachment
 		}
-		
+
 		for (attachment <- attachments) {
 			dao.getFileById(attachment.id) should be (Some(attachment))
 			dao.getFileByStrippedId(attachment.id.replaceAll("\\-", "")) should be (Some(attachment))
 			dao.getFilesCreatedOn(attachment.dateUploaded, 10, "") should be (Seq(attachment))
 			dao.getFilesCreatedOn(attachment.dateUploaded, 10, attachment.id) should be (Seq())
 		}
-		
-		dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), 1) should be (Seq(attachments.head))		
+
+		dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), 1) should be (Seq(attachments.head))
 		dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 1) should be (Seq(attachments(4)))
 		dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 10) should be (attachments.slice(4, 10))
-		
+
 		dao.getAllFileIds() should be ((attachments map { _.id }).toSet)
 		dao.getAllFileIds(Some(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0))) should be ((attachments.slice(0, 4) map { _.id }).toSet)
 	}
@@ -137,5 +137,5 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 	}
 
 	private def readStream(is:InputStream, encoding:String) = new String(FileCopyUtils.copyToByteArray(is), encoding)
-	
+
 }

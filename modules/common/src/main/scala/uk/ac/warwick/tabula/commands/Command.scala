@@ -78,8 +78,8 @@ trait Appliable[A]{
  * especially if we might want to audit log it. Anything that
  * adds or changes any data is a candidate. Read-only queries,
  * not so much (unless we're interested in when a thing is observed/downloaded).
- * 
- * Commands should implement work(), and 
+ *
+ * Commands should implement work(), and
  *
  * <h2>Renaming a Command</h2>
  *
@@ -116,15 +116,15 @@ trait Command[A] extends Describable[A] with Appliable[A]
 			handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 		}
 	}
-	
+
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
-	
+
 	private def benchmarkDescription = {
 		val event = Event.fromDescribable(this)
 		EventDescription.generateMessage(event, "command").toString()
 	}
 
-	/** 
+	/**
 		Subclasses do their work in here.
 
 		Classes using a command should NOT call this method! call apply().
@@ -156,7 +156,7 @@ trait Command[A] extends Describable[A] with Appliable[A]
 
 abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
 	private var _promise = Promises.promise[A]
-	
+
 	final def get = promisedValue
 	final def promisedValue = _promise.get
 	final def promisedValue_=(value: => A) = {
@@ -168,12 +168,12 @@ abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
 object Command {
 	val MillisToSlowlog = 5000
 	val slowLogger = LoggerFactory.getLogger("uk.ac.warwick.tabula.Command.SLOW_LOG")
-	
+
 	// TODO this will break if we start doing stuff in parallols
 	private val threadLocal = new ThreadLocal[Option[uk.ac.warwick.util.core.StopWatch]] {
 		override def initialValue = None
 	}
-	
+
 	def getOrInitStopwatch() =
 		threadLocal.get match {
 			case Some(sw) => sw
@@ -182,9 +182,9 @@ object Command {
 				threadLocal.set(Some(sw))
 				sw
 		}
-	
+
 	def endStopwatching() { threadLocal.remove() }
-	
+
 	def timed[A](fn: uk.ac.warwick.util.core.StopWatch => A): A = {
 		val currentStopwatch = threadLocal.get
 		if (!currentStopwatch.isDefined) {
@@ -292,7 +292,7 @@ abstract class Description {
 		if (submission.assignment != null) assignment(submission.assignment)
 		this
 	}
-	
+
 	/**
 	 * University IDs
 	 */
@@ -302,7 +302,7 @@ abstract class Description {
 	 * List of Submissions IDs
 	 */
 	def submissions(submissions: Seq[Submission]) = property("submissions" -> submissions.map(_.id))
-	
+
 	def fileAttachments(attachments: Seq[FileAttachment]) = property("attachments" -> attachments.map(_.id))
 
 	def assessment(assessment: Assessment) = assessment match {
@@ -343,7 +343,7 @@ abstract class Description {
 		if (memberNote.member != null) member(memberNote.member)
 		this
 	}
-	
+
 	/**
 	 * Record small group set, plus its module and department if available.
 	 */
@@ -387,7 +387,7 @@ abstract class Description {
 		if (departmentSmallGroup.groupSet != null) departmentSmallGroupSet(departmentSmallGroup.groupSet)
 		this
 	}
-	
+
 	/**
 	 * Record small group event, plus its group, set, module and department if available.
 	 */

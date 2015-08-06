@@ -7,8 +7,8 @@ class TestValidScalaObject {
     this()
     name = n
   }
-  
+
   @NotEmpty
   var name:String =_
 }
-    
+

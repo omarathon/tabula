@@ -28,11 +28,11 @@
       assigned a type, it will be treated as a String and included without any
       special handling.
       </p>
-      
+
       <p>
       <strong>Example : </strong>
       </p>
-      
+
       <pre>
       &lt;code&gt;
                 &lt;tiles:insertAttribute name=&quot;body&quot; /&gt;
@@ -183,7 +183,7 @@
       <strong>Add an element to the surrounding list. Equivalent to 'putAttribute',
       but for list element.</strong>
       </p>
-      
+
       <p>
       Add an element to the surrounding list. This tag can only be used inside
       'putListAttribute' or 'addListAttribute' tags. Value can come from a direct
@@ -330,7 +330,7 @@
       <p>
       <strong>Example : </strong>
       </p>
-      
+
       <pre>
       &lt;code&gt;
                 &lt;tiles:insertDefinition name=&quot;.my.tiles.defininition flush=&quot;true&quot;&gt;
@@ -447,11 +447,11 @@
       <p>
       You must specify <code>template</code> attribute, for inserting a template
       </p>
-      
+
       <p>
       <strong>Example : </strong>
       </p>
-      
+
       <pre>
       &lt;code&gt;
                 &lt;tiles:insertTemplate template=&quot;/basic/myLayout.jsp&quot; flush=&quot;true&quot;&gt;
@@ -641,7 +641,7 @@
       <strong> Render the value of the specified template attribute to the current
       Writer</strong>
       </p>
-      
+
       <p>
       Retrieve the value of the specified template attribute property, and render
       it to the current Writer as a String. The usual toString() conversions is

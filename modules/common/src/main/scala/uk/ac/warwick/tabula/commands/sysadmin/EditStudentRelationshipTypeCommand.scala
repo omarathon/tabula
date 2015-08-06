@@ -18,12 +18,12 @@ object EditStudentRelationshipTypeCommand {
 			with ModifyStudentRelationshipTypeCommandDescription
 }
 
-class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType) 
+class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType)
 	extends ModifyStudentRelationshipTypeCommandInternal with HasExistingStudentRelationshipType {
 	this: RelationshipServiceComponent =>
-		
+
 	this.copyFrom(relationshipType)
-		
+
 	override def applyInternal() = transactional() {
 		copyTo(relationshipType)
 		relationshipService.saveOrUpdate(relationshipType)
@@ -33,7 +33,7 @@ class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRe
 
 trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	this: HasExistingStudentRelationshipType =>
-	
+
 	def permissionsCheck(p: PermissionsChecking) {
 		mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)

@@ -193,7 +193,7 @@ class AssessmentMembershipServiceImpl
 		def gradeBoundaryMatchesMark(gb: GradeBoundary) = gb.minimumMark <= mark && gb.maximumMark >= mark
 
 		component.marksCode match {
-			case code: String => 
+			case code: String =>
 				dao.getGradeBoundaries(code).filter(gradeBoundaryMatchesMark)
 			case _ =>
 				Seq()

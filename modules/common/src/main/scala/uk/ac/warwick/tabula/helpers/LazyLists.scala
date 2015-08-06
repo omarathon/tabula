@@ -14,7 +14,7 @@ import uk.ac.warwick.util.collections.LazyList
  * empty widget at index 5 so that there isn't an NPE.
  */
 object LazyLists {
-	
+
 	class FuncFactory[A](fn: () => A) extends LazyList.Factory[A] {
 		override def create = fn()
 	}
@@ -26,10 +26,10 @@ object LazyLists {
 	def create[A: ClassTag](list: JList[A] = JArrayList[A]()): JList[A] = {
 		val constructor = classTag[A].runtimeClass.getDeclaredConstructor()
 		val factory = () => constructor.newInstance().asInstanceOf[A]
-		
+
 		createWithFactory[A](factory, list)
 	}
-	
+
 	def createWithFactory[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
 		LazyList.decorate(list, new FuncFactory(fn)).asInstanceOf[JList[A]]
 

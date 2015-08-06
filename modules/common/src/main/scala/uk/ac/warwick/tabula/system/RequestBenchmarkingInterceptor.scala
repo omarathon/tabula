@@ -12,36 +12,36 @@ import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.tabula.commands.Command
 
 class RequestBenchmarkingInterceptor extends HandlerInterceptorAdapter with TaskBenchmarking {
-	
+
 		override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 			if (Logging.benchmarking) {
 				val description = RequestInfo.fromThread.map { info =>
-					val userId = 
+					val userId =
 						if (info.user.masquerading) s"${info.user.apparentId} (really ${info.user.realId})"
 						else if (info.user.exists) info.user.realId
 						else "anon"
-							
+
 					val url = info.requestedUri
-							
-					"[%s] %s".format(userId, url)					
+
+					"[%s] %s".format(userId, url)
 				}.getOrElse("[unknown request]")
-				
+
 				val stopWatch = Command.getOrInitStopwatch
 				stopWatch.start(description)
 			}
-			
+
 			true
 		}
-		
+
 		override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
 			if (Logging.benchmarking) {
 				val stopwatch = Command.getOrInitStopwatch
 				stopwatch.stop()
-				
+
 				if (stopwatch.getTotalTimeMillis > Command.MillisToSlowlog) {
 					Command.slowLogger.warn(stopwatch.prettyPrint)
 				}
-				
+
 				Command.endStopwatching
 			}
 		}

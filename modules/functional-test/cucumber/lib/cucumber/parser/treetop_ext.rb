@@ -22,7 +22,7 @@ module Cucumber
         super(message)
       end
     end
-    
+
     module TreetopExt #:nodoc:
       def parse_or_fail(source, file=nil, filter=nil, line_offset=0)
         parse_tree = parse(source)

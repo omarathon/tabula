@@ -48,29 +48,29 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	}
 
 	/**
-	 * The scope of the GrantedRole is what the permissions contained within are granted against, 
+	 * The scope of the GrantedRole is what the permissions contained within are granted against,
 	 * which is a PermissionsTarget.
 	 */
 	var scope: A
-	
+
 	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
 	/**
-	 * Build a Role from this definition 
+	 * Build a Role from this definition
 	 */
 	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
 	def mayGrant(target: Permission) = Option(replaceableRoleDefinition).fold(false) { _.mayGrant(target) }
-	
+
 	/**
 	 * Provides a route to Department from the scope, so that we can look for custom definitions.
-	 * 
+	 *
 	 * In almost all cases, Department will be one of the permissionsParents of the scope (maybe multiple
 	 * levels up), but providing a direct link here means we don't have to iterate up the tree.
 	 */
 	def scopeDepartment: Option[Department]
-	
+
 	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
@@ -111,7 +111,7 @@ object GrantedRole {
 		case _: SmallGroupEvent => true
 		case _ => false
 	}
-	
+
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedRole]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedRole]
@@ -127,7 +127,7 @@ object GrantedRole {
   private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 
   def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag] = 
+	def discriminator[A <: PermissionsTarget : ClassTag] =
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 
@@ -139,9 +139,9 @@ object GrantedRole {
 	}
 
 	@transient var scope: PermissionsTarget = null
-	
+
 	def scopeDepartment = None
-	
+
 	override def build() = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
 }
 
@@ -150,7 +150,7 @@ object GrantedRole {
  */
 case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition {
 	def permissions(scope: Option[PermissionsTarget]) =
-		delegate.permissions(Some(null)).map { 
+		delegate.permissions(Some(null)).map {
 			case (perm, Some(null)) => (perm, None)
 			case (perm, s) => (perm, s)
 		}
@@ -175,7 +175,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Department = _
-	
+
 	def scopeDepartment = Some(scope)
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
@@ -189,7 +189,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Module = _
-	
+
 	def scopeDepartment = Some(scope.adminDepartment)
 }
 @Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
@@ -203,7 +203,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Route = _
-	
+
 	def scopeDepartment = Some(scope.adminDepartment)
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
@@ -217,9 +217,9 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Member = _
-	
+
 	def scopeDepartment = scope match {
-		case student: StudentMember => 
+		case student: StudentMember =>
 			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.orElse(Option(student.homeDepartment))
 		case _ => Option(scope.homeDepartment)
 	}
@@ -235,7 +235,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Assignment = _
-	
+
 	def scopeDepartment = Some(scope.module.adminDepartment)
 }
 @Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
@@ -249,7 +249,7 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroup = _
-	
+
 	def scopeDepartment = Some(scope.groupSet.module.adminDepartment)
 }
 @Entity @DiscriminatorValue("SmallGroupSet") class SmallGroupSetGrantedRole extends GrantedRole[SmallGroupSet] {
@@ -277,6 +277,6 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroupEvent = _
-	
+
 	def scopeDepartment = Some(scope.group.groupSet.module.adminDepartment)
 }

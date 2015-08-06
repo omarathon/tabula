@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class DayOfWeekConverter extends TwoWayConverter[String, DayOfWeek] {
 
-	override def convertRight(value: String) = 
+	override def convertRight(value: String) =
 		if (value.hasText) try { DayOfWeek(value.toInt) } catch { case e: NumberFormatException => null }
 		else null
 

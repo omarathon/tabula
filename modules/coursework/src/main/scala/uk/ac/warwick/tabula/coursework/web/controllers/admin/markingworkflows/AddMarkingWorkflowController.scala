@@ -21,15 +21,15 @@ class AddMarkingWorkflowController extends CourseworkController {
 
 	// tell @Valid annotation how to validate
 	validatesSelf[SelfValidating]
-	
-	@ModelAttribute("command") 
+
+	@ModelAttribute("command")
 	def cmd(@PathVariable("department") department: Department) = AddMarkingWorkflowCommand(department)
-	
+
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
 		Mav("admin/markingworkflows/add", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
 	}
-	
+
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {
 		if (errors.hasErrors) {

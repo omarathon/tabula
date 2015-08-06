@@ -18,14 +18,14 @@
 <#list collection as u>
 	<tr>
 		<td>${u.fullName}</td>
-		
+
 		<td class="user-id">
 			<#if RequestParameters.isUniId = "true">
 				${u.warwickId!}
 			<#else>
 				${u.userId}
 			</#if>
-		
+
 		</td>
 	</tr>
 </#list>
