@@ -30,7 +30,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
       val cmd = mock[ReleaseSmallGroupSetCommand]
-      controller.form(cmd).viewName should be("admin/groups/release")
+      controller.form(cmd).viewName should be("groups/admin/groups/release")
       controller.form(cmd).map should be(Map())
     }
   }
@@ -42,7 +42,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 			val cmd = mock[ReleaseSmallGroupSetCommand]
       when(cmd.apply()).thenReturn(Seq(ReleasedSmallGroupSet(new SmallGroupSet(), releasedToStudents = true, releasedToTutors = true)))
 
-      controller.submit(cmd).viewName should be("admin/groups/single_groupset")
+      controller.submit(cmd).viewName should be("groups/admin/groups/single_groupset")
 
       verify(cmd, times(1)).apply()
     }
@@ -97,7 +97,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     department.code = "xyz"
     val mav = controller.form(model, department, AcademicYear(2014))
     mav.toModel.get("department") should be(Some(department))
-    mav.viewName should be("admin/groups/bulk-release")
+    mav.viewName should be("groups/admin/groups/bulk-release")
   }
 
 

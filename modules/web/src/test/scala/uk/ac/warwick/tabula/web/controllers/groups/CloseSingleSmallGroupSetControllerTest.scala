@@ -26,7 +26,7 @@ class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	@Test
 	def showsForm() {
 		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
-		controller.form(mockCommand).viewName should be("admin/groups/open")
+		controller.form(mockCommand).viewName should be("groups/admin/groups/open")
 	}
 
 

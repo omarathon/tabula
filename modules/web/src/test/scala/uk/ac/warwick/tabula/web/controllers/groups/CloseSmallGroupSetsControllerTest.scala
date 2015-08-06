@@ -69,7 +69,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			val controller = new OpenAllSmallGroupSetsController()
 			department.code = "XYZ"
 
-			controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department).viewName should be("admin/groups/bulk-open")
+			controller.form(controller.newViewModelOpen(department, SmallGroupSetSelfSignUpState.Closed), department).viewName should be("groups/admin/groups/bulk-open")
 		}
 	}
 
