@@ -25,7 +25,7 @@ class AssessmentGroup extends GeneratedId {
 	depending on which type of entity we're linking an
 	AssessmentComponent to...
 	 */
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
@@ -46,7 +46,7 @@ class AssessmentGroup extends GeneratedId {
 	var assessmentComponent: AssessmentComponent = _
 
 	var occurrence: String = _
-	
+
 	def toUpstreamAssessmentGroup(academicYear: AcademicYear): Option[UpstreamAssessmentGroup] = {
 		if (academicYear == null || assessmentComponent == null || occurrence == null) {
 			None

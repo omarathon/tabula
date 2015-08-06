@@ -51,12 +51,12 @@ in future. Please try to rate solely on the quality of the feedback.
 	<p><strong>Feedback on my work&hellip;</strong></p>
 
 	<div class="rating-question">
-    <div>&hellip;was returned in the agreed timeframe</div> 
+    <div>&hellip;was returned in the agreed timeframe</div>
     <@yesnonone "wasPrompt" />
     </div>
-    
+
     <div class="rating-question">
-    <div>&hellip;has been helpful</div> 
+    <div>&hellip;has been helpful</div>
     <@yesnonone "wasHelpful" />
     </div>
 <#--
@@ -64,7 +64,7 @@ in future. Please try to rate solely on the quality of the feedback.
 	<#list 1..topstars as stars>
 	    <input type="radio" name="rating" value="${stars}" <#if rating?? && rating = stars>checked</#if> />
 	</#list>
-	
+
 	<noscript>${topstars}
 	<div><input type="checkbox" name="unset"> withdraw your rating</div>
 	<input type="submit" value="Rate" />

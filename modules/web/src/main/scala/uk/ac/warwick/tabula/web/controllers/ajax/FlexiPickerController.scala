@@ -48,20 +48,20 @@ object FlexiPickerController {
 	type FlexiPickerResult = List[Map[String, String]]
 
 	val NewStarterUserTypeString = "New Starter"
-	
+
 	object FlexiPickerCommand {
-		def apply() = 
-			new FlexiPickerCommand() 
+		def apply() =
+			new FlexiPickerCommand()
 				with ComposableCommand[FlexiPickerResult]
 				with AutowiringUserLookupComponent
 				with AutowiringProfileServiceComponent
 				with FlexiPickerPermissions
 				with ReadOnly with Unaudited
 	}
-	
+
 	class FlexiPickerCommand extends CommandInternal[FlexiPickerResult] with FlexiPickerState with Logging {
 		self: UserLookupComponent with ProfileServiceComponent =>
-		
+
 		def applyInternal() = {
 			var results = List[Map[String, String]]()
 
@@ -164,7 +164,7 @@ object FlexiPickerController {
 						if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
 						else profileService.getMemberByUser(user, disableFilter = true).isDefined
 				})
-				
+
 				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary && isNotNewStarter
 			}
 
@@ -223,7 +223,7 @@ object FlexiPickerController {
 			case _ => Map.empty
 		}
 	}
-	
+
 	trait FlexiPickerState {
 		val EnoughResults = 10
 		var includeUsers = true
@@ -233,11 +233,11 @@ object FlexiPickerController {
 		var exact = false
 		var universityId = false    // when returning users, use university ID as value
 		var tabulaMembersOnly = false // filter out anyone who isn't in the Tabula members db
-		
+
 		def hasQuery: Boolean = query.hasText
 	}
-	
-	trait FlexiPickerPermissions extends RequiresPermissionsChecking {	
+
+	trait FlexiPickerPermissions extends RequiresPermissionsChecking {
 		override def permissionsCheck(p: PermissionsChecking) {
 			p.PermissionCheck(Permissions.UserPicker)
 		}

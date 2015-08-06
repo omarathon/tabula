@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 // scalastyle:off magic.number
 class MarksExtractionListenerTest extends TestBase with Logging {
-	
+
 	@Test def readOLE2ExcelFile() {
 		closeThis(new ByteArrayInputStream(resourceAsBytes("marks.xls"))) { fin =>
 			closeThis(new POIFSFileSystem(fin).createDocumentInputStream("Workbook")) { din =>

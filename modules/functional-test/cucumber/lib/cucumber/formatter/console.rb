@@ -91,7 +91,7 @@ module Cucumber
         return unless options[:snippets]
         undefined = step_mother.steps(:undefined)
         return if undefined.empty?
-        
+
         unknown_programming_language = step_mother.unknown_programming_language?
         snippets = undefined.map do |step|
           step_name = Undefined === step.exception ? step.exception.step_name : step.name

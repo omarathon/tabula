@@ -18,54 +18,54 @@ import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
 
 class DownloadFileControllerTest extends TestBase with MockitoSugar {
-	
+
 	val controller = new DownloadFileController
-	
+
 	implicit val request = new MockHttpServletRequest
 	implicit val response = new MockHttpServletResponse
-	
+
 	@Test
 	def validFile() {
 		val macGenerator = new SHAMessageAuthenticationCodeGenerator("someSalt")
 		val fileDao = mock[FileDao]
-		
+
 		val attachment = new FileAttachment
-		
+
 		val file = createTemporaryFile
 		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
 		attachment.file = file
-		
+
 		when(fileDao.getFileById("abc")) thenReturn(Some(attachment))
-		
+
 		controller.macGenerator = macGenerator
 		controller.fileDao = fileDao
 		controller.fileServer = new FileServer
 		controller.fileServer.features = new FeaturesImpl
 		controller.fileServer.features.xSendfile = false
-		
+
 		controller.serve("abc", macGenerator.generateMessageAuthenticationCode("abc"))
-		
+
 		response.getStatus should be (HttpStatus.SC_OK)
 		response.getContentAsString should be ("yes")
 	}
-	
+
 	@Test
 	def invalidMac() {
 		val macGenerator = new SHAMessageAuthenticationCodeGenerator("someSalt")
-		
+
 		controller.macGenerator = macGenerator
 		controller.serve("abc", "abc")
-		
+
 		response.getStatus should be (HttpStatus.SC_BAD_REQUEST)
 	}
-	
+
 	@Test
 	def invalidSecret() {
 		val macGenerator = new SHAMessageAuthenticationCodeGenerator
-		
+
 		controller.macGenerator = macGenerator
 		controller.serve("abc", "abc")
-		
+
 		response.getStatus should be (HttpStatus.SC_BAD_REQUEST)
 	}
 

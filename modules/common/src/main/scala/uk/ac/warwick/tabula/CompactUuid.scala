@@ -19,7 +19,7 @@ object CompactUuid {
 	val UuidSplit = new Regex("(.{8})(.{4})(.{4})(.{4})(.{12})")
 
 	val BASE = 16
-	
+
 	def uncompact(compactUuid: String): Option[String] =
 		try {
 			decode64(compactUuid).toString(BASE) match {

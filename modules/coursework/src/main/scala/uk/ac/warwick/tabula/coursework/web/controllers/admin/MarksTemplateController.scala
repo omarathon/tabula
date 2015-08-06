@@ -20,7 +20,7 @@ import uk.ac.warwick.userlookup.User
 class AssignmentMarksTemplateController extends CourseworkController {
 
 	var assignmentMembershipService = Wire[AssessmentMembershipService]
-	
+
 	@ModelAttribute("command")
 	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		GenerateMarksTemplateCommand(

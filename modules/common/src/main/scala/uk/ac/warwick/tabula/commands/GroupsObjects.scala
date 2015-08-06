@@ -10,11 +10,11 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
 trait GroupsObjects[A >: Null, B >: Null] extends PopulateOnForm {
-	
-	/** Mapping from B to an ArrayList of As. */	
+
+	/** Mapping from B to an ArrayList of As. */
 	var mapping: JMap[B, JList[A]] =
 		LazyMaps.create { key: B => JArrayList(): JList[A] }.asJava
-	
+
 	var unallocated: JList[A] = LazyLists.createWithFactory { () => null } // grower, not a shower
 
 	def populate(): Unit

@@ -27,10 +27,10 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 	@Test def createAndList = transactional { tx =>
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipDao.saveOrUpdate(relationshipType)
-		
+
 		val student = Fixtures.student(universityId = "1000001", userId="student")
 		memberDao.saveOrUpdate(student)
-		
+
 		val creator = Fixtures.staff(universityId = "0000001", userId="staff1")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 

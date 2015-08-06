@@ -30,7 +30,7 @@ module Cucumber
     class RbLanguage
       include LanguageSupport::LanguageMethods
       attr_reader :current_world
-      
+
       def initialize(step_mother)
         @step_mother = step_mother
         @step_definitions = []
@@ -129,7 +129,7 @@ module Cucumber
       def begin_scenario(scenario)
         begin_rb_scenario(scenario)
       end
-      
+
       def end_scenario
         @current_world = nil
       end

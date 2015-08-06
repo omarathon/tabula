@@ -27,7 +27,7 @@
 			<#if originalException.scope??>
 				<#if originalException.scope?is_sequence>
 					<input type="hidden" name="scopeType" value="${originalException.scope[0].class.name}" />
-					
+
 					<#attempt>
 						<input type="hidden" name="scope" value="${originalException.scope[0].id}" />
 					<#recover>
@@ -35,7 +35,7 @@
 					</#attempt>
 				<#else>
 					<input type="hidden" name="scopeType" value="${originalException.scope.class.name}" />
-					
+
 					<#attempt>
 						<input type="hidden" name="scope" value="${originalException.scope.id!}" />
 					<#recover>

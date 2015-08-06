@@ -12,13 +12,13 @@ class StudentRelationshipTest extends TestBase with Mockito {
 
 	@Test def agentMember {
 		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		
+
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
 		staff.lastName = "Taff"
-			
+
 		val student = Fixtures.student(universityId="0205225")
-		
+
 		val rel = StudentRelationship(staff, relType, student)
 		rel.isAgentMember should be (true)
 
@@ -34,13 +34,13 @@ class StudentRelationshipTest extends TestBase with Mockito {
 
 	@Test def toStringMethod() {
 		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		
+
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
 		staff.lastName = "Taff"
-			
+
 		val student = Fixtures.student(universityId="0205225")
-		
+
 		val rel = StudentRelationship(staff, relType, student)
 		rel.id = "hibernateid"
 		rel.toString should be ("MemberStudentRelationship[hibernateid][agent=0672089,relationshipType=StudentRelationshipType(tutor),student=0205225]")

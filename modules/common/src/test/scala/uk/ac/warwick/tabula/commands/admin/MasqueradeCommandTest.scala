@@ -20,10 +20,10 @@ class MasqueradeCommandTest extends TestBase with Mockito {
 
 		val command = new MasqueradeCommandInternal(user) with CommandTestSupport
 	}
-	
+
 	@Test def set { new Fixture {
 		command.usercode = "cusebr"
-			
+
 		val cookie = command.applyInternal()
 		cookie should be ('defined)
 		cookie.map { cookie =>
@@ -32,17 +32,17 @@ class MasqueradeCommandTest extends TestBase with Mockito {
 			cookie.cookie.getPath() should be ("/")
 		}
 	}}
-	
+
 	@Test def setInvalidUser { new Fixture {
 		command.usercode = "undefined"
-			
+
 		val cookie = command.applyInternal()
 		cookie should be ('empty)
 	}}
-	
+
 	@Test def remove { new Fixture {
 		command.action = "remove"
-			
+
 		val cookie = command.applyInternal()
 		cookie should be ('defined)
 		cookie.map { cookie =>

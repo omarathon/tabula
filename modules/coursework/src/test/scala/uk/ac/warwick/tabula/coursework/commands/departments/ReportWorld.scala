@@ -91,7 +91,7 @@ trait ReportWorld extends TestBase with Mockito {
 		val assignment = assignmentObj.asInstanceOf[Assignment]
 		assignment.submissions
 	}
-		
+
 
 	var feedbackService = mock[FeedbackService]
 	feedbackService.getAssignmentFeedbackByUniId(any[Assignment], any[String]) answers { argsObj => {
@@ -146,8 +146,8 @@ trait ReportWorld extends TestBase with Mockito {
 
 		assignment
 	}
-	
-	
+
+
 
 	def addFeedback(assignment:Assignment) {
 		withFakeTime(dateTime(2013, 3, 13)) {

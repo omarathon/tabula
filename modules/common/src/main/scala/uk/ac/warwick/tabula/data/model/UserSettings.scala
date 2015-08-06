@@ -13,32 +13,32 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
 	@Column(unique = true)
 	var userId: String = _
-	
+
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission) getOrElse(AlertsNoteworthySubmissions)
 	def alertsSubmission_= (alert: String) = settings += (Settings.AlertsSubmission -> alert)
-	
+
 	def hiddenIntros = getStringSeqSetting(Settings.HiddenIntros) getOrElse(Nil)
 	def hiddenIntros_= (hiddenIntro: Seq[String]) = settings += (Settings.HiddenIntros -> hiddenIntro)
-	
+
 	// It's okay for this to be null - the null choice is to use the department's setting
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem).orNull
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
-	
+
 	def bulkEmailSeparator = getStringSetting(Settings.BulkEmailSeparator) getOrElse(DefaultBulkEmailSeparator)
 	def bulkEmailSeparator_= (separator: String) = settings += (Settings.BulkEmailSeparator -> separator)
 
 	def profilesDefaultView = getStringSetting(Settings.ProfilesDefaultView) getOrElse(DefaultProfilesDefaultView)
 	def profilesDefaultView_= (view: String) = settings += (Settings.ProfilesDefaultView -> view)
-	
+
 	def string(key: String) = getStringSetting(key).orNull
-		
+
 	def this(userId: String) = {
 		this()
-		this.userId = userId		
+		this.userId = userId
 	}
-			
+
 	override def toString = "UserSettings [" + settings + "]"
-	
+
 	def permissionsParents = Stream.empty
 }
 
@@ -46,22 +46,22 @@ object UserSettings {
 	val AlertsAllSubmissions = "allSubmissions"
 	val AlertsNoteworthySubmissions = "lateSubmissions"
 	val AlertsNoSubmissions = "none"
-		
+
 	val DefaultBulkEmailSeparator = ";"
 
 	val DefaultProfilesDefaultView = "gadget"
-	
+
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
 		val WeekNumberingSystem = "weekNumberSystem"
 		val BulkEmailSeparator = "bulkEmailSeparator"
 		val ProfilesDefaultView = "profilesDefaultView"
-			
+
 		def hiddenIntroHash(mappedPage: String, setting: String) = {
 			val popover = mappedPage + ":" + setting
 			val shaHash = DigestUtils.shaHex(popover)
-			
+
 			shaHash
 		}
 	}

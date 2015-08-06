@@ -11,14 +11,14 @@ trait RelationshipChangingCommand {
 	val department: Department
 	val relationshipType: StudentRelationshipType
 	val apparentUser: User
-	
+
 	var relationshipService: RelationshipService
 	var profileService: ProfileService
 }
 
 trait NotifiesAffectedStudents extends Notifies[Seq[StudentRelationshipChange], Seq[StudentRelationship]] {
 	this: RelationshipChangingCommand =>
-		
+
 	var notifyStudent: Boolean = false
 	var notifyOldAgents: Boolean = false
 	var notifyNewAgent: Boolean = false

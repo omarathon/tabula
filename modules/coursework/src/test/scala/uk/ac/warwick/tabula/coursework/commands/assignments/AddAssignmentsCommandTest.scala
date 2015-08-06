@@ -63,7 +63,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 		validator.validate(errors)
 		errors.hasErrors should be {false}
 	}}
-	
+
 	@Test def applyCommand() { new Fixture { withUser("cuscav") {
 		val cmd = new AddAssignmentsCommandInternal(thisDepartment, currentUser) with AddAssignmentsCommandState
 			with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent {
@@ -116,7 +116,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
 		cmd.optionsMap("A").allowExtensions.booleanValue should be (right = true)
 	}}
-	
+
 	private def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
 		val item = new AssignmentItem(include, "A", assignment)
 		item.optionsId = optionsId
@@ -125,6 +125,6 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 		item.openEnded = openEnded
 		item
 	}
-	
+
 
 }

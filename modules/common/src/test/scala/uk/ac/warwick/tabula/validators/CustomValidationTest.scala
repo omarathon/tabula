@@ -13,5 +13,5 @@ class CustomValidationTest extends TestBase {
       validator.validate(new TestValidScalaObject("")) should not be('empty)
       validator.validate(new TestValidScalaObject("a")) should be('empty)
     }
-	
+
 }

@@ -130,7 +130,7 @@ trait SettingsMap extends HasSettings {
 		settings -= key
 		this
 	}
-	
+
 	protected def +=(kv: (String, Any)): this.type = {
 		settings += kv
 		this

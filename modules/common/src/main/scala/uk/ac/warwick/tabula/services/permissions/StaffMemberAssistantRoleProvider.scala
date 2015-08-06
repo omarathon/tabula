@@ -18,15 +18,15 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
  */
 @Component
 class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarking {
-	
+
 	val roleService = promise { Wire[RoleService] }
 	val roleProviders = promise { Wire.all[RoleProvider] }
 	val profileService = promise { Wire[ProfileService] }
-	
+
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
 		profileService.get.findStaffMembersWithAssistant(user.apparentUser).toStream.flatMap { staff =>
 			// Treat it as a masquerade, so if we have any role providers that explicitly ignore masquerade this is taken into account
-			val staffCurrentUser = 
+			val staffCurrentUser =
 				new CurrentUser(
 					realUser = user.apparentUser,
 					apparentUser = staff.asSsoUser,
@@ -35,12 +35,12 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
 					masquerader = false,
 					god = false
 				)
-			
+
 			roleService.get.getRolesFor(staffCurrentUser, scope)
 		}
 	}
-	
-	def rolesProvided = 
+
+	def rolesProvided =
 		roleProviders.get.toSet[RoleProvider].filterNot { _.isInstanceOf[StaffMemberAssistantRoleProvider] }.flatMap { _.rolesProvided }
 
 }

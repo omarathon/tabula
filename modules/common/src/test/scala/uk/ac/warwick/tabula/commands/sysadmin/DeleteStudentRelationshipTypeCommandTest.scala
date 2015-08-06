@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceCo
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
-	
+
 	private trait Fixture {
-		val testRelationshipType = new StudentRelationshipType 
+		val testRelationshipType = new StudentRelationshipType
 		testRelationshipType.id = "trtId"
 		testRelationshipType.urlPart = "trt-url"
-		testRelationshipType.description = "trt role description"		
+		testRelationshipType.description = "trt role description"
 		testRelationshipType.agentRole = "trt agent"
 		testRelationshipType.studentRole = "trt student"
 		testRelationshipType.defaultSource = StudentRelationshipSource.Local
@@ -23,12 +23,12 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 		testRelationshipType.expectedPGT = false
 		testRelationshipType.expectedPGR = false
 		testRelationshipType.sortOrder = 9
-		
+
 		val commandInternal = new DeleteStudentRelationshipTypeCommandInternal(testRelationshipType) with RelationshipServiceComponent {
 			var relationshipService = mock[RelationshipService]
 		}
 	}
-	
+
 	@Test
 	def objectApplyCreatesCommand() {
 		new Fixture {
@@ -39,7 +39,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			command.asInstanceOf[HasExistingStudentRelationshipType].relationshipType should be (testRelationshipType)
 		}
 	}
-	
+
 	@Test
 	def commandDeletesRelationshipWhenApplied() {
 		new Fixture {
@@ -66,7 +66,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			)
 		}
 	}
-	
+
 	@Test
 	def permissionsRequireGlobalStudentRelationshipTypeDelete {
 		new Fixture {
@@ -78,20 +78,20 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}
 	}
-	
+
 	@Test
 	def emptyValidation {
 		new Fixture {
 			var relationshipService = mock[RelationshipService]
 			relationshipService.countStudentsByRelationship(testRelationshipType) returns (5)
 			testRelationshipType.relationshipService = relationshipService
-			
+
 			commandInternal.confirm = true
 
 			var errors = new BindException(commandInternal, "command")
 			commandInternal.validate(errors)
 			errors.hasErrors should be (true)
-			
+
 			relationshipService = mock[RelationshipService]
 			relationshipService.countStudentsByRelationship(testRelationshipType) returns (0)
 			testRelationshipType.relationshipService = relationshipService
@@ -101,7 +101,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			errors.hasErrors should be (false)
 		}
 	}
-	
+
 	@Test
 	def confirmValidation {
 		new Fixture {
@@ -112,7 +112,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			var errors = new BindException(commandInternal, "command")
 			commandInternal.validate(errors)
 			errors.hasErrors should be (true)
-			
+
 			commandInternal.confirm = true
 
 			errors = new BindException(commandInternal, "command")

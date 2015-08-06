@@ -9,11 +9,11 @@ class ModuleCodeConverter extends TwoWayConverter[String, Module] {
 
 	@Autowired var service: ModuleAndDepartmentService = _
 
-	override def convertRight(code: String) = 
+	override def convertRight(code: String) =
 		service.getModuleByCode(sanitise(code)).getOrElse {
 			service.getModuleById(code).orNull
 		}
-	
+
 	override def convertLeft(module: Module) = (Option(module) map { _.code }).orNull
 
 	def sanitise(code: String) = {

@@ -14,7 +14,7 @@ import javax.validation.Valid
 @Controller
 @RequestMapping(value = Array("/turnitin/submission/{submission}/attachment/{fileAttachment}"))
 class DownloadFileByTokenController extends BaseController with Logging {
-	
+
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")

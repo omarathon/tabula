@@ -6,7 +6,7 @@
  		<param-name>ssoclient.config</param-name>
  		<param-value>/tabula-sso-config.xml</param-value>
   </context-param>
-  
+
   <listener>
     <listener-class>uk.ac.warwick.sso.client.SSOConfigLoader</listener-class>
   </listener>
@@ -14,13 +14,13 @@
   <!-- Listener to load up Spring -->
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener> 
-  
+  </listener>
+
   <context-param>
 		<param-name>contextInitializerClasses</param-name>
 		<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer</param-value>
   </context-param>
-   
+
   <!-- Servlet will latch on to the context loaded above, and serve requests -->
   <servlet>
     <servlet-name>spring</servlet-name>
@@ -28,7 +28,7 @@
 		<init-param>
 		  <param-name>contextConfigLocation</param-name>
 		  <param-value>/WEB-INF/*-context.xml</param-value>
-		</init-param> 
+		</init-param>
 		<init-param>
 		  <param-name>contextInitializerClasses</param-name>
 		  <param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer</param-value>
@@ -39,8 +39,8 @@
     <servlet-name>spring</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
-  
-  
+
+
   <filter>
   	<filter-name>filters</filter-name>
   	<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -55,9 +55,9 @@
   	<dispatcher>REQUEST</dispatcher>
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
-   
-  
-  <!-- To make Freemarker templates available to Tiles -->  
+
+
+  <!-- To make Freemarker templates available to Tiles -->
   <servlet>
     <servlet-name>freemarkerServlet</servlet-name>
     <servlet-class>uk.ac.warwick.tabula.web.views.CustomFreemarkerServlet</servlet-class>
@@ -73,12 +73,12 @@
   	<servlet-name>freemarkerServlet</servlet-name>
   	<url-pattern>*.ftl</url-pattern>
   </servlet-mapping>
-  
+
   <!-- Help JSP taglibs to work properly within Freemarker http://freemarker.sourceforge.net/docs/pgui_misc_servlet.html -->
   <listener>
     <listener-class>freemarker.ext.jsp.EventForwarding</listener-class>
-  </listener>  
-  
+  </listener>
+
   <!-- SSO -->
   <servlet>
     <servlet-name>ShireServlet</servlet-name>
@@ -96,20 +96,20 @@
   	<servlet-name>LogoutServlet</servlet-name>
   	<url-pattern>/sso/logout</url-pattern>
   </servlet-mapping>
-  
+
   <error-page>
     <error-code>404</error-code>
     <location>/error/404</location>
   </error-page>
-  
+
   <error-page>
     <error-code>500</error-code>
     <location>/error</location>
   </error-page>
-  
-  <error-page> 
-    <exception-type>java.lang.Throwable</exception-type> 
-    <location>/error</location> 
+
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/error</location>
   </error-page>
 
 </web-app>

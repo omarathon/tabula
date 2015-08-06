@@ -85,9 +85,9 @@ class SessionCache {
 trait WebsignonMethods extends Matchers  with Eventually{
 	import WebBrowser._ // include methods like "go to"
 	implicit val webDriver: WebDriver // let the trait know this will be implemented
-	
+
 	// nested objects so we can say "signIn as(user) to (url)".
-	// with Java punctuation it would be "(signIn.as(user)).to(url)". 
+	// with Java punctuation it would be "(signIn.as(user)).to(url)".
 	//
 	// (currently requires that the user's first name is the usercode, to check signed-in-ness)
 	object signIn {
@@ -156,5 +156,5 @@ trait WebsignonMethods extends Matchers  with Eventually{
 	}
 
 
-	
+
 }

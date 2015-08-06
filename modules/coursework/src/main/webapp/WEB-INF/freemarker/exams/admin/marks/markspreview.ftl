@@ -15,32 +15,32 @@
 
 <div class="fix-area">
 	<@f.form method="post" action="${formUrl}" commandName=commandName>
-	
+
 	<#assign isfile=RequestParameters.isfile/>
-	
+
 	<#if isfile = "true">
 		<#assign text_acknowledge="I've ${verbed_your_noun} and I found marks for"/>
 		<#assign text_problems="However, there were some problems with its contents, which are shown below.
 				You'll need to correct these problems with the spreadsheet and try again.
 				If you choose to confirm without fixing the spreadsheet any rows with errors
 				will be ignored."/>
-		<#assign column_headings_warning="Remember that the first row in all spreadsheets is assumed to be column headings and ignored."/>				
+		<#assign column_headings_warning="Remember that the first row in all spreadsheets is assumed to be column headings and ignored."/>
 	<#else>
 		<#assign text_acknowledge="You are submitting marks for "/>
 		<#assign text_problems="However, there were some problems, which are shown below.
 				You'll need to return to the previous page, correct these problems and try again.
 				If you choose to confirm without fixing the data any rows with errors
-				will be ignored."/>			
+				will be ignored."/>
 		<#assign column_headings_warning=""/>
 
 	</#if>
-	
-		
+
+
 	<h1>Submit marks for ${exam.name}</h1>
 	<#assign verbed_your_noun="received your files"/>
-	
+
 	<@spring.bind path="marks">
-	<#assign itemsList=status.actualValue /> 
+	<#assign itemsList=status.actualValue />
 	<#assign modifiedCount = 0 />
 	<#list itemsList as item>
 		<#if item.valid><#assign modifiedCount = modifiedCount + 1 /></#if>
@@ -56,7 +56,7 @@
 		</#if>
 	</p>
 	</@spring.bind>
-		
+
 	<@spring.bind path="marks">
 		<#assign itemList=status.actualValue />
 		<#if itemList?size gt 0>
@@ -75,7 +75,7 @@
 						<#else>
 							<#assign errorClass="alert-success" />
 						</#if>
-						
+
 						<tr class="${errorClass}">
 							<@f.hidden path="universityId" />
 							<@f.hidden path="actualMark" />
@@ -86,7 +86,7 @@
 									${status.value}
 								</@spring.bind>
 								<@f.errors path="universityId" cssClass="error" />
-								
+
 								<#if item.modified>
 									<div class="warning">
 										Mark for this student already uploaded - previous mark will be overwritten when you click Confirm.
@@ -119,7 +119,7 @@
 			</table>
 		</#if>
 	</@spring.bind>
-	
+
 	<div class="submit-buttons fix-footer">
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">

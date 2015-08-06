@@ -8,7 +8,7 @@
 		regardless of when the email reaches you.
 	</div>
 	</#if>
-	
+
 	<div class="submission-receipt-container is-stackable">
 	<div class="submission-receipt">
 	<h3>Submission receipt</h3>
@@ -57,14 +57,14 @@
 			</div>
 		</form>
 	</#if>
-	
+
 	<#if assignment.hasReleasedFeedback && !feedback??>
 		<h3>Expecting your feedback?</h3>
 		<p>
-			There is no feedback available for you yet. 
-			If you've been told to come here to retrieve your feedback 
-			then you'll need to get in touch directly with your 
-			course/module convenor to see why it hasn't been published yet. 
+			There is no feedback available for you yet.
+			If you've been told to come here to retrieve your feedback
+			then you'll need to get in touch directly with your
+			course/module convenor to see why it hasn't been published yet.
 			<#if !features.emailStudents>
 				When it's published you'll receive an automated email.
 			</#if>

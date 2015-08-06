@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.events.Event
 
 // scalastyle:off magic.number
 class AuditEventServiceTest extends PersistenceTestBase {
-	
+
 	val service = new AuditEventServiceImpl with SessionComponent {
 		def session = sessionFactory.getCurrentSession
 	}

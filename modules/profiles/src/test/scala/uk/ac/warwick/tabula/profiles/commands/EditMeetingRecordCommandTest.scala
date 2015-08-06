@@ -46,7 +46,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 
 		var approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser) with ApproveMeetingRecordState with MeetingRecordDaoComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent 
+			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent
 			with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
 				val meetingRecordDao = smartMock[MeetingRecordDao]
 				val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
@@ -95,7 +95,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		// The student is now happy with the record and approves it
 		approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser)
 			with ApproveMeetingRecordState with MeetingRecordDaoComponent with SecurityServiceComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent 
+			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent
 			with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent {
 				val meetingRecordDao = mock[MeetingRecordDao]
 				val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]

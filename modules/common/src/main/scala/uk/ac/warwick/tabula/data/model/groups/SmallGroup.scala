@@ -51,7 +51,7 @@ class SmallGroup
 		with ToEntityReference {
 	type Entity = SmallGroup
 	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
-	
+
 	@transient var permissionsService = Wire[PermissionsService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
@@ -70,7 +70,7 @@ class SmallGroup
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "group_id")
 	@BatchSize(size=200)
@@ -89,7 +89,7 @@ class SmallGroup
 	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@JoinColumn(name = "linked_dept_group_id")
 	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
-	
+
 	def permissionsParents = Option(groupSet).toStream
 	override def humanReadableId = name
 
@@ -153,7 +153,7 @@ class SmallGroup
 	def postLoad {
 		ensureSettings
 	}
-	
+
 	def hasScheduledEvents = events.exists(!_.isUnscheduled)
 
 	override def toEntityReference = new SmallGroupEntityReference().put(this)

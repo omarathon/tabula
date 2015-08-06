@@ -23,25 +23,25 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging with Task
 	var config: Configuration = _
 
 	logger.info("Creating custom freemarker servlet")
-	
-	val MISSING_CONFIG_MESSAGE = 
+
+	val MISSING_CONFIG_MESSAGE =
 		"Couldn't find config in servlet attribute 'freemarkerConfiguration' - " +
 		"should have been exported by ServletContextAttributeExporter"
-			
+
 	def templateName(request: HttpServletRequest, response: HttpServletResponse) = {
 		val path = requestUrlToTemplatePath(request)
-		
+
 		try {
 			Some(config.getTemplate(path, deduceLocale(path, request, response)).getName)
 		} catch {
 			case e: FileNotFoundException => None
 		}
 	}
-		
-	override def doGet(request: HttpServletRequest, response: HttpServletResponse) = 
+
+	override def doGet(request: HttpServletRequest, response: HttpServletResponse) =
 		benchmarkTask(templateName(request, response).getOrElse("[not found template]")) { super.doGet(request, response) }
-	
-	override def doPost(request: HttpServletRequest, response: HttpServletResponse) = 
+
+	override def doPost(request: HttpServletRequest, response: HttpServletResponse) =
 		benchmarkTask(templateName(request, response).getOrElse("[not found template]")) { super.doPost(request, response) }
 
 	/**

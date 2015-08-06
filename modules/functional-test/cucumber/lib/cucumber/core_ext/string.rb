@@ -6,9 +6,9 @@ class String #:nodoc:
       gsub(/^ {0,#{-n}}/, "")
     end
   end
-  
+
   if (Cucumber::JRUBY && Cucumber::RAILS) || Cucumber::RUBY_1_9
-    # Workaround for http://tinyurl.com/55uu3u 
+    # Workaround for http://tinyurl.com/55uu3u
     alias jlength length
   else
     require 'jcode'

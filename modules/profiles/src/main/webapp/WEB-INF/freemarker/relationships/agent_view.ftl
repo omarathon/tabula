@@ -73,7 +73,7 @@
 											</#list>
 										</tbody>
 									</table>
-									
+
 									<p>
 										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 									</p>

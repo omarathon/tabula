@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.coursework.commands.feedback.PublishFeedbackCommand.
 object PublishFeedbackCommand {
 	case class MissingUser(universityId: String)
 	case class BadEmail(user: User, exception: Exception = null)
-	
+
 	case class PublishFeedbackResults(
 		notifications: Seq[Notification[AssignmentFeedback, Assignment]] = Nil,
 		missingUsers: Seq[MissingUser] = Nil,
@@ -141,7 +141,7 @@ trait PublishFeedbackCommandState {
 			errors.reject("feedback.publish.nofeedback")
 		}
 	}
-	
+
 	def validateGrades: ValidateAndPopulateFeedbackResult = {
 		feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease.map(_._3), gradeGenerator)
 	}

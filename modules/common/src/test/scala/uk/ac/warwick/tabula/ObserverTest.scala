@@ -9,14 +9,14 @@ import java.security.InvalidKeyException
 class ObserverTest extends TestBase {
 
 	import Reactor._
-	
+
 	class Service {
 		var changedState = EventSource[Boolean]
 		def updateState(state:Boolean) {
 			changedState.emit(state)
 		}
 	}
-	
+
 	class ServiceObserver(service:Service) {
 		var enabled = false
 
@@ -25,11 +25,11 @@ class ObserverTest extends TestBase {
 		}
 
 	}
-	
+
 	@Test def listening {
 		val service = new Service
 		val observer = new ServiceObserver(service)
-		
+
 		observer.enabled should be (false)
 		service updateState true
 
@@ -37,7 +37,7 @@ class ObserverTest extends TestBase {
 		service updateState false
 
 		observer.enabled should be (false)
-		
+
 	}
 
 	// Exceptions thrown in observers bubble up to emit().

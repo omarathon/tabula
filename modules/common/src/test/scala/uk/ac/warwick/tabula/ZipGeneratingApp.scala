@@ -8,7 +8,7 @@ import language.implicitConversions
 
 object ZipGeneratingApp extends App with ZipCreator {
 	def zipDir = new File(System.getProperty("java.io.tmpdir"))
-	 
+
 	implicit def stringStream(text:String): InputStream = new ByteArrayInputStream(text.getBytes("UTF-8"))
 
 	val zip = getZip("euros-uncompatibles", Seq(

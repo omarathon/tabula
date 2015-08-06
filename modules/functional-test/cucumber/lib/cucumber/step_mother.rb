@@ -14,7 +14,7 @@ module Cucumber
       super %{Undefined step: "#{step_name}"}
       @step_name = step_name
     end
-    
+
     def nested!
       @nested = true
     end
@@ -102,8 +102,8 @@ module Cucumber
       programming_language
     end
 
-    # Loads a natural language. This has the effect of aliasing 
-    # Step Definition keywords for all of the registered programming 
+    # Loads a natural language. This has the effect of aliasing
+    # Step Definition keywords for all of the registered programming
     # languages (if they support aliasing). See #load_programming_language
     #
     def load_natural_language(lang)
@@ -159,7 +159,7 @@ module Cucumber
       else
         answer = mri_gets(timeout_seconds)
       end
-      
+
       if(answer)
         announce(answer)
         answer
@@ -210,7 +210,7 @@ module Cucumber
 
         action, step_name, table_or_string = output[1], output[2], output[3]
         if table_or_string.to_s.strip =~ /^\|/
-          table_or_string = table(table_or_string) 
+          table_or_string = table(table_or_string)
         elsif table_or_string.to_s.strip =~ /^"""/
           table_or_string = py_string(table_or_string.gsub(/^\n/, ""))
         end
@@ -260,7 +260,7 @@ module Cucumber
     end
 
     def step_match(step_name, name_to_report=nil) #:nodoc:
-      matches = @programming_languages.map do |programming_language| 
+      matches = @programming_languages.map do |programming_language|
         programming_language.step_matches(step_name, name_to_report)
       end.flatten
       raise Undefined.new(step_name) if matches.empty?
@@ -286,7 +286,7 @@ module Cucumber
     end
 
     def unmatched_step_definitions
-      @programming_languages.map do |programming_language| 
+      @programming_languages.map do |programming_language|
         programming_language.unmatched_step_definitions
       end.flatten
     end
@@ -317,7 +317,7 @@ module Cucumber
         programming_language.alias_adverbs(@adverbs)
       end
     end
-    
+
     def before(scenario) #:nodoc:
       return if options[:dry_run] || @current_scenario
       @current_scenario = scenario
@@ -325,7 +325,7 @@ module Cucumber
         programming_language.before(scenario)
       end
     end
-    
+
     def after(scenario) #:nodoc:
       @current_scenario = nil
       return if options[:dry_run]
@@ -333,14 +333,14 @@ module Cucumber
         programming_language.after(scenario)
       end
     end
-    
+
     def after_step #:nodoc:
       return if options[:dry_run]
       @programming_languages.each do |programming_language|
         programming_language.execute_after_step(@current_scenario)
       end
     end
-    
+
     def after_configuration(configuration) #:nodoc
       @programming_languages.each do |programming_language|
         programming_language.after_configuration(configuration)

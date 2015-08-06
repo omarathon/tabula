@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework
 import uk.ac.warwick.tabula.BrowserTest
 
 class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixtures {
-	
+
 	// TAB-413, TAB-415
 	"Student" should "be able to submit assignment after validation errors without re-uploading file" in {
 		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
@@ -35,7 +35,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 			}
 		}
 	}
-	
+
 	"Student" should "be able to submit assignment" in {
 		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
 			submitAssignment(P.Student1, "xxx01", "Fully featured assignment", assignmentId, "/file1.txt")

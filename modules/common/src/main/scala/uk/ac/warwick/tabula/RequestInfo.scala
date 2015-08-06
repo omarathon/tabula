@@ -47,13 +47,13 @@ object RequestInfo {
 		fromThread foreach { _.requestLevelCache.shutdown() }
 		threadLocal.remove()
 	}
-	
+
 	def mappedPage = {
 		// get the @RequestMapping (without path variables resolved), so that users don't get the same popup again
 		// for a given kind of page with only variables changing
 		val requestAttributes = RequestContextHolder.getRequestAttributes.asInstanceOf[ServletRequestAttributes]
 		val mappedPage = requestAttributes.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST).toString
-		
+
 		mappedPage
 	}
 }

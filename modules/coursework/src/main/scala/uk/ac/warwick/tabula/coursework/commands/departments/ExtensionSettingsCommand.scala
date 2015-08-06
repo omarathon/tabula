@@ -13,14 +13,14 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 
 
 class ExtensionSettingsCommand (val department:Department) extends Command[Unit] with SelfValidating {
-	
+
 	PermissionCheck(Permissions.Department.ManageExtensionSettings, department)
 
 	var allowExtensionRequests:Boolean = department.allowExtensionRequests
 	var extensionGuidelineSummary:String = department.extensionGuidelineSummary
 	var extensionGuidelineLink:String = department.extensionGuidelineLink
 	var extensionManagers: JList[String] = JArrayList()
-	
+
 	extensionManagers.addAll(department.extensionManagers.knownType.includedUserIds.asJava)
 
 	val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""

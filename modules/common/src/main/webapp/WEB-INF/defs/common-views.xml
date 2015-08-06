@@ -9,7 +9,7 @@
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
-  
+
   <!-- Bare layout - used for AJAX responses -->
   <definition name="none" template="/WEB-INF/freemarker/layouts/none.ftl">
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
@@ -21,12 +21,12 @@
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
-  
+
   <!-- Embedded layout - no surrounding HTML, but includes scripts required
   	for embedding in a Sitebuilder page. TODO implement embedded.ftl -->
   <definition name="embedded" template="/WEB-INF/freemarker/layouts/none.ftl">
     <put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
     <put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
   </definition>
-  
+
 </tiles-definitions>

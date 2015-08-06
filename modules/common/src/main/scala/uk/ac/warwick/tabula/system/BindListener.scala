@@ -5,7 +5,7 @@ import scala.reflect._
 
 trait BindListener {
 	def onBind(result:BindingResult)
-	
+
 	implicit class RichBindingResult(result: BindingResult) {
 		def target[A : ClassTag]: Option[A] = result.getTarget match {
 			case a:A => Option(a)

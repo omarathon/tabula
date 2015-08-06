@@ -11,7 +11,7 @@ class SearchProfilesCommand(val currentMember: Member, user: CurrentUser) extend
 	override def applyInternal() =
 		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
 		else Seq()
-		
+
 	private def queryMatches = {
 		val depts = (currentMember.affiliatedDepartments ++ moduleService.departmentsWithPermission(user, Permissions.Profiles.ViewSearchResults)).distinct
 		val deptsAndDescendantDepts = depts.flatMap(dept => {

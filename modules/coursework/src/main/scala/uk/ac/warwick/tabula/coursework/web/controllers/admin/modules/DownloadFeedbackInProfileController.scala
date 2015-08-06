@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/{student}"))
 class DownloadFeedbackInProfileController extends CourseworkController {
-	
+
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("student") student: Member)

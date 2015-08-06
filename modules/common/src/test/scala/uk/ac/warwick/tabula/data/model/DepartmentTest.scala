@@ -196,50 +196,50 @@ class DepartmentTest extends TestBase with Mockito {
 		deptRoutesRule.matches(notStudentMember, Option(otherDepartment)) should be {false}
 
 	}}
-	
+
 	@Test
 	def replacedRoleDefinitionFor() {
 		val department = new Department
-		
+
 		val roleDefinition = DepartmentalAdministratorRoleDefinition
-		
+
 		department.replacedRoleDefinitionFor(roleDefinition) should be ('empty)
-		
+
 		val customDefinition = new CustomRoleDefinition
 		customDefinition.baseRoleDefinition = roleDefinition
-		
+
 		department.customRoleDefinitions.add(customDefinition)
-		
+
 		customDefinition.replacesBaseDefinition = false
-		
+
 		department.replacedRoleDefinitionFor(roleDefinition) should be ('empty)
-		
+
 		customDefinition.replacesBaseDefinition = true
-		
+
 		department.replacedRoleDefinitionFor(roleDefinition) should be (Some(customDefinition))
 	}
-	
+
 	@Test
 	def replacedRoleDefinitionForSelector() {
 		val department = new Department
-		
+
 		val selector = new StudentRelationshipType
-		
+
 		val customDefinition = new CustomRoleDefinition
 		customDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(selector)
-		
+
 		assert(StudentRelationshipAgentRoleDefinition(selector) === StudentRelationshipAgentRoleDefinition(selector))
-		
+
 		department.customRoleDefinitions.add(customDefinition)
-		
+
 		customDefinition.replacesBaseDefinition = true
-		
+
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be ('empty)
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be ('empty)
-		
+
 		customDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)
-		
+
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be (Some(customDefinition))

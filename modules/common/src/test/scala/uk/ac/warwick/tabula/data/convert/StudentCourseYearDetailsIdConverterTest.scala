@@ -21,16 +21,16 @@ class StudentCourseYearDetailsIdConverterTest extends TestBase with Mockito {
 
 		converter.convertRight("foo") should be (scyd)
 	}
-	
+
 	@Test def invalidInput {
 
 		converter.convertRight("bar") should be (null)
 	}
-	
+
 	@Test def formatting {
 		val scyd = new StudentCourseYearDetails
 		scyd.id = "foo"
-		
+
 		converter.convertLeft(scyd) should be ("foo")
 		converter.convertLeft(null) should be (null)
 	}

@@ -32,7 +32,7 @@ abstract class FeedbackTemplateCommand(val department:Department)
 	override def describe(d:Description) {
 		d.department(department)
 	}
-	
+
 	override def describeResult(d: Description, templates: Seq[FeedbackTemplate]) {
 		d.department(department)
 		 .property("feedbackTemplate" -> templates.map { _.id })
@@ -41,7 +41,7 @@ abstract class FeedbackTemplateCommand(val department:Department)
 }
 
 class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplateCommand(department) {
-	
+
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, department)
 
 	override def applyInternal() = {
@@ -54,19 +54,19 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 					feedbackForm.attachFile(attachment)
 					department.feedbackTemplates.add(feedbackForm)
 					session.saveOrUpdate(feedbackForm)
-					
+
 					feedbackForm
 				}
 			} else Nil
 			session.saveOrUpdate(department)
-			
+
 			feedbackTemplates
 		}
 	}
 }
 
 class EditFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) {
-	
+
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 
@@ -90,14 +90,14 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 			session.update(feedbackTemplate)
 			// invalidate any zip files for linked assignments
 			feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
-			
+
 			Seq(feedbackTemplate)
 		}
 	}
 }
 
 class DeleteFeedbackTemplateCommand(department:Department, val template: FeedbackTemplate) extends FeedbackTemplateCommand(department) with Logging {
-	
+
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 

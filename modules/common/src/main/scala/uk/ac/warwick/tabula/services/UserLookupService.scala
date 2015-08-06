@@ -29,15 +29,15 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 
 trait UserLookupService extends UserLookupInterface {
 	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
-	
+
 	/**
 	 * Takes a List of universityIds, and returns a Map that maps universityIds to Users. Users found
 	 * in the local cache will be taken from there (and not searched for), and all other
 	 * users will be searched for and entered into the cache.
-	 * 
+	 *
 	 * All universityIds will be returned in the Map, but ones that weren't found will map to
 	 * AnonymousUser objects.
-	 * 
+	 *
 	 * @param ids Seq[UniversityId]
 	 * @return Map[UniversityId, User]
 	 */
@@ -47,7 +47,7 @@ trait UserLookupService extends UserLookupInterface {
 
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService
 	with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
-	
+
 	var profileService = Wire[ProfileService]
 
 	override def getUserByUserId(id: String) = super.getUserByUserId(id) match {
@@ -63,7 +63,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 
 	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) =
 		UserByWarwickIdCache.get(id)
-		
+
 	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
 		UserByWarwickIdCache.get(ids.asJava).asScala.toMap
 
@@ -91,16 +91,16 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 			.map { _.asSsoUser }
 			.getOrElse { getUserByWarwickUniIdFromUserLookup(id) }
 	}
-	
+
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = {
 		val dbUsers =
 			if (skipMemberLookup) Map.empty
 			else profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
 
-		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id => 
+		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id =>
 			id -> getUserByWarwickUniIdFromUserLookup(id)
 		}.toMap
-		
+
 		dbUsers ++ others
 	}
 
@@ -125,7 +125,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 		cache.setAsynchronousUpdateEnabled(true)
 		cache
 	}
-	
+
 	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 

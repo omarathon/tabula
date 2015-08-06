@@ -20,7 +20,7 @@ class ExtensionSettingsController extends CourseworkController {
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
 	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(mandatory(dept))
-	
+
 	validatesSelf[ExtensionSettingsCommand]
 
 	// Add the common breadcrumbs to the model.

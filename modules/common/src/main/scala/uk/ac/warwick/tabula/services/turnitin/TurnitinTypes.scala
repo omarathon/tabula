@@ -24,12 +24,12 @@ object AnyDocumentTitle {
     }
 }
 
-class DocumentTitle(val id: String, val extension: String) extends AnyDocumentTitle( id + "." + extension ) 
+class DocumentTitle(val id: String, val extension: String) extends AnyDocumentTitle( id + "." + extension )
 object DocumentTitle {
     private val Pattern = new Regex("(.+)\\.(.+?)")
     def apply(id:String, extension:String) = new DocumentTitle(id, extension)
 
-    // unapply method is for matching, so you can do e.g. 
+    // unapply method is for matching, so you can do e.g.
     // docTitle match { case DocumentTitle(id, extension) => ... }
     def unapply(thing: Any): Option[(String,String)] = thing match {
 				case s: CharSequence => s match {

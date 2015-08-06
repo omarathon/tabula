@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
  */
 class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignment) extends Command[RenderableZip]
 	with ReadOnly with Logging {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 

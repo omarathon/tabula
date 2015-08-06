@@ -22,9 +22,9 @@ object ActivityService {
 @Service
 class ActivityService {
 	import ActivityService._
-	
+
 	private val StreamSize = 8
-	
+
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssessmentService]
 	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
@@ -32,23 +32,23 @@ class ActivityService {
 	// first page
 	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, StreamSize)
-		
+
 		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
-	
+
 	// following pages
 	def getNoteworthySubmissions(user: CurrentUser, doc: Int, field: Long, token: Long): PagedActivities = {
 		// slightly ugly implicit cast required, as we need a FieldDoc whose constructor expects a java Object[]
 		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:JLong))
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
-		
+
 		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
-	
+
 	private def getModules(user: CurrentUser): Seq[Module] = {
 		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
 		val adminModules = moduleService.modulesInDepartmentsWithPermission(user, Permissions.Module.ManageAssignments)
-		
+
 		(ownedModules ++ adminModules).toSeq
 	}
 }

@@ -7,10 +7,10 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.LocalTime
 
 class JodaLocalTimeConverter extends TwoWayConverter[String, LocalTime] {
-	
+
 	val formatter = DateTimeFormat.forPattern(DateFormats.TimePicker)
 
-	override def convertRight(text: String) = 
+	override def convertRight(text: String) =
 		if (text.hasText) try {	LocalTime.parse(text, formatter) } catch {	case e: IllegalArgumentException => null }
 		else null
 

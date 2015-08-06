@@ -14,7 +14,7 @@ class CourseCreationFixtureCommand extends CommandInternal[Course] {
 	var courseCode: String = _
 	var courseName: String = _
 
-	protected def applyInternal() = 
+	protected def applyInternal() =
 		transactional() {
 			val c = courseDao.getByCode(courseCode).getOrElse(new Course)
 			c.code = courseCode

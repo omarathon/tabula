@@ -9,15 +9,15 @@ import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class PublishFeedbackCommandTest extends TestBase with Mockito {
-	
+
 	@Test
 	def validation() {
 		val now = dateTime(2012, 12).withDayOfMonth(25)
 		val closeDateBefore = now.minusDays(2)
 		val closeDateAfter = now.plusDays(2)
-		
+
 		withFakeTime(now) {
-			
+
 			/* a whole */ new World {
 				assignment.closeDate = closeDateAfter
 				assignment.openEnded = false
@@ -32,17 +32,17 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
 				command.validate(errors)
 				errors.hasGlobalErrors should be {false}
 			}
-			
+
 			/* Brave */ new World {
 				assignment.openEnded = true
 				command.validate(errors)
 				errors.hasGlobalErrors should be {false}
 			}
-			
+
 		}
 	}
-	
-	
+
+
 	// reusable environment
 	trait World {
 		val user = new User("admin")
@@ -55,5 +55,5 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
 		feedback.assignment = assignment
 		assignment.feedbacks = JArrayList( feedback )
 	}
-	
+
 }

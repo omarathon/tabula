@@ -89,7 +89,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
 	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
-	
+
 	var missingFromImportSince: DateTime = _
 
 	override def toString = "Module[" + code + "]"

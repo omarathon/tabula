@@ -64,8 +64,8 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 
 		converter.setObjectMapper(mapper)
 	}
-	
-	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory = 
+
+	override def createDataBinderFactory(binderMethods: JList[InvocableHandlerMethod]): ServletRequestDataBinderFactory =
 		new CustomDataBinderFactory(binderMethods.asScala.toList, getWebBindingInitializer())
 
 }

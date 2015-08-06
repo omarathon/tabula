@@ -24,25 +24,25 @@ object DateBuilder {
 		false -> _relativeWords.mapValues(_.toLowerCase))
 
 	/* called with just a DateTime - use the default arguments */
-	def format(date: ReadableDateTime): String = 
-		format(date=date, 
-			includeSeconds=false, 
-			includeAt=true, 
-			includeTimezone=false, 
-			capitalise=true, 
+	def format(date: ReadableDateTime): String =
+		format(date=date,
+			includeSeconds=false,
+			includeAt=true,
+			includeTimezone=false,
+			capitalise=true,
 			relative=true,
 			split=false,
 			shortMonth=false,
 			includeTime=true)
 
 	/* everything is specified, including whether minutes should be included */
-	def format(date: ReadableDateTime, 
-			includeSeconds: Boolean, 
-			includeAt: Boolean, 
-			includeTimezone: Boolean, 
-			capitalise: Boolean, 
-			relative: Boolean, 
-			split: Boolean, 
+	def format(date: ReadableDateTime,
+			includeSeconds: Boolean,
+			includeAt: Boolean,
+			includeTimezone: Boolean,
+			capitalise: Boolean,
+			relative: Boolean,
+			split: Boolean,
 			shortMonth: Boolean,
 			includeTime: Boolean) = {
 		if (includeTime) {
@@ -87,22 +87,22 @@ class DateBuilder extends TemplateMethodModelEx {
 
 	/** For Freemarker */
 	override def exec(list: JList[_]) = {
-		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
-		
+		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+
 		val date = args.head match {
 			case partial: LocalDate => partial.toDateTimeAtStartOfDay
 			case local:LocalDateTime => local.toDateTime
 			case instant: ReadableDateTime => instant
 			case _ => throw new IllegalArgumentException("Bad date argument")
 		}
-		
+
 		args.tail match {
 			case Seq(secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
-				format(date=date, 
-					includeSeconds=secs, 
-					includeAt=at, 
-					includeTimezone=tz, 
-					capitalise=caps, 
+				format(date=date,
+					includeSeconds=secs,
+					includeAt=at,
+					includeTimezone=tz,
+					capitalise=caps,
 					relative=relative,
 					split=split,
 					shortMonth=shortMonth,

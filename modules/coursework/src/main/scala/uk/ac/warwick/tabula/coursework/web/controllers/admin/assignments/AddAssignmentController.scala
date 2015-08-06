@@ -53,7 +53,7 @@ class AddAssignmentController extends CourseworkController {
 			Redirect(Routes.admin.module(form.module))
 		}
 	}
-	
+
 	@RequestMapping(method = Array(POST), params = Array("action=refresh"))
 	def submit(form: AddAssignmentCommand) = {
 		// No validation here

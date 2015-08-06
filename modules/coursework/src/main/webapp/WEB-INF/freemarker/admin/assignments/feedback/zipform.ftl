@@ -34,7 +34,7 @@
 <input type="file" name="file.upload" multiple />
 </@form.labelled_row>
 
-</td>	
+</td>
 <td id="zip-column">
 
 <h3>&hellip;or use a Zip file <img src="/static/images/icons/package-x-generic.png" alt="" style="margin-bottom: -8px"></h3>

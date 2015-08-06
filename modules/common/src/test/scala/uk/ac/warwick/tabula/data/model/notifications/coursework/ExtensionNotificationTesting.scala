@@ -14,5 +14,5 @@ trait ExtensionNotificationTesting { m: Mockito =>
 		n.userLookup = mockUserLookup
 		mockUserLookup.getUserByUserId(student.getUserId) returns (student)
 	}
-	
+
 }

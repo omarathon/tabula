@@ -15,13 +15,13 @@ import uk.ac.warwick.tabula.data.model.Department
 class AddSubDepartmentController extends AdminController {
 
 	validatesSelf[SelfValidating]
-	
-	@ModelAttribute("allFilterRules") 
+
+	@ModelAttribute("allFilterRules")
 	def allFilterRules = Department.FilterRule.allFilterRules
 
 	@ModelAttribute("addSubDepartmentCommand")
 	def command(@PathVariable("department") department: Department) = AddSubDepartmentCommand(mandatory(department))
-	
+
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm() = Mav("admin/department/add/form")
 

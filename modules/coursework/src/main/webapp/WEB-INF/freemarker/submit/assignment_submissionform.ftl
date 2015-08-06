@@ -164,7 +164,7 @@
 			</#if>
 		</div>
 	</@f.form>
-	
+
 <#elseif !submission??>
 
 	<#if assignment.archived>

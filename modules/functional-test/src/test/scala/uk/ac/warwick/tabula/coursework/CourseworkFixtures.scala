@@ -328,12 +328,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		val module = getModuleInfo(moduleCode)
 		if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
 			click on module.findElement(By.className("section-title"))
-			
+
 			eventuallyAjax {
 				module.getAttribute("class") should include ("expanded")
 			}
 		}
-		
+
 		val assignmentBlocks = module.findElements(By.className("assignment-info")).asScala
 
 		if (assignmentBlocks.isEmpty)

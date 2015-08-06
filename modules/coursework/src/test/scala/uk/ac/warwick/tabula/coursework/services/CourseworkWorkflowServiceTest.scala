@@ -13,16 +13,16 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 
 // scalastyle:off magic.number
 class CourseworkWorkflowServiceTest extends TestBase {
-	
+
 	val department = Fixtures.department("in", "IT Services")
 	val module = Fixtures.module("in101", "Introduction to Web Development")
 	val assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
 	module.adminDepartment = department
-	
+
 	val service = new CourseworkWorkflowService
 	service.features = Features.empty
-	
+
 	private def workflowItems(
 			student:User = null,
 			submission: Option[Submission]=None,
@@ -34,52 +34,52 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			withinExtension: Boolean=false) =
 		WorkflowItems(
 			student,
-			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) }, 
+			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) },
 			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed, null) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
-		
+
 	@Test def stagesForAssignment() {
 		import CourseworkWorkflowStages._
-		
+
 		assignment.collectMarks = false
 		assignment.collectSubmissions = false
 		assignment.markingWorkflow = null
 		assignment.genericFeedback = "Some feedback no doubt"
-		
+
 		service.features.turnitin = false
 		service.features.markingWorkflows = false
 		department.plagiarismDetectionEnabled = false
-		
+
 		// Default stages
 		service.getStagesFor(assignment) should be (Seq(
 			AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
-		
+
 		assignment.collectMarks = true
-		
+
 		service.getStagesFor(assignment) should be (Seq(
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
-		
+
 		assignment.collectSubmissions = true
-		
+
 		service.getStagesFor(assignment) should be (Seq(
 			CourseworkWorkflowStages.Submission, DownloadSubmission,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
-		
+
 		service.features.turnitin = true
 		department.plagiarismDetectionEnabled = true
-		
+
 		service.getStagesFor(assignment) should be (Seq(
 			CourseworkWorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
-		
+
 		service.features.markingWorkflows = true
 		assignment.markingWorkflow = Fixtures.studentsChooseMarkerWorkflow("my workflow")
-		
+
 		service.getStagesFor(assignment) should be (Seq(
 			CourseworkWorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking,
@@ -93,19 +93,19 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
 	}
-	
+
 	@Test def progress() {
 		// Start with a very basic assignment, only the 3 core feedback workflows.
 		assignment.collectMarks = false
 		assignment.collectSubmissions = false
 		assignment.markingWorkflow = null
 		department.plagiarismDetectionEnabled = false
-		
+
 		// lines were getting a bit long...
 		import CourseworkWorkflowStages._
 		import WorkflowStages._
 		import WorkflowStageHealth._
-		
+
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))
 			p.stages should be (ListMap(
@@ -119,12 +119,12 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			p.messageCode should be ("workflow.AddFeedback.notUploaded")
 			p.cssClass should be ("success")
 		}
-		
+
 		val feedback = Fixtures.assignmentFeedback("0672089")
 		feedback.assignment = assignment
 		feedback.attachments.add(new FileAttachment)
 		assignment.genericFeedback = "Thanks for not including herons"
-		
+
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback)))
 			p.stages should be (ListMap(
@@ -138,7 +138,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			p.messageCode should be ("workflow.ReleaseFeedback.notReleased")
 			p.cssClass should be ("warning")
 		}
-		
+
 		feedback.released = true
 
 
@@ -156,7 +156,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			p.cssClass should be ("warning")
 		}
 
-		
+
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=true, onlineFeedbackViewed=true))
 			p.stages should be (ListMap(
@@ -170,7 +170,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			p.messageCode should be ("workflow.DownloadFeedback.downloaded")
 			p.cssClass should be ("success")
 		}
-		
+
 		// TODO do a fuller example that tests the submission and marking bits too
 	}
 

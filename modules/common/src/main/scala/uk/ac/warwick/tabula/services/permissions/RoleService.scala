@@ -18,16 +18,16 @@ import uk.ac.warwick.tabula.data.model.Department
  */
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
-	
+
 	def rolesProvided: Set[Class[_ <: Role]]
-	
+
 	/**
 	 * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
 	 */
 	def isExhaustive = false
-	
+
 	protected def customRoleFor[A <: PermissionsTarget](department: Option[Department])(definition: RoleDefinition, scope: A): Option[Role] =
-		department.flatMap { d => 
+		department.flatMap { d =>
 			customRoleFor(d)(definition, scope)
 		}
 
@@ -62,7 +62,7 @@ trait RoleProvider {
  */
 trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
 	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getRolesFor(user) }
-	
+
 	def getRolesFor(user: CurrentUser): Stream[Role]
 }
 
@@ -76,7 +76,7 @@ case class PermissionDefinition(permission: Permission, scope: Option[Permission
  */
 trait PermissionsProvider {
 	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
-	
+
 	/**
 	 * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
 	 */
@@ -89,7 +89,7 @@ trait PermissionsProvider {
  */
 trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
 	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getPermissionsFor(user) }
-	
+
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition]
 }
 
@@ -101,13 +101,13 @@ trait RoleService {
 
 @Service
 class RoleServiceImpl extends RoleService with Logging {
-	
+
 	/** Spring should wire in all beans that extend RoleProvider */
 	@Autowired var roleProviders: Array[RoleProvider] = Array()
-	
+
 	/** Spring should wire in all beans that extend PermissionsProvider */
 	@Autowired var permissionsProviders: Array[PermissionsProvider] = Array()
-	
+
 	/**
 	 * Go through all the permissions providers iteratively for the scope and then any
 	 * parents of the scope, collecting a stream of all the explicitly granted permissions
@@ -121,28 +121,28 @@ class RoleServiceImpl extends RoleService with Logging {
 				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
 				val stream = hasResults flatMap { _._2 }
-				
+
 				// For each of the parents, call the stack again, excluding any exhaustive providers that have returned results
 				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
 
 				stream #::: next
 			}
 		}
-		
+
 		streamScoped(permissionsProviders.toStream, scope)
 	}
-		
-	
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = {	
+
+
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = {
 		// Split providers into Scopeless and scoped
 		val (scopeless, scoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
-		
+
 		// We only need to do scopeless once
 		// (we call the (User, Target) method signature otherwise it bypasses the request level caching)
 		val scopelessStream = scopeless.toStream flatMap { _.asInstanceOf[ScopelessRoleProvider].getRolesFor(user, null) }
-		
-		/* We don't want to needlessly continue to interrogate scoped providers even after they 
-		 * have returned something that isn't an empty Seq. Anything that isn't an empty Seq 
+
+		/* We don't want to needlessly continue to interrogate scoped providers even after they
+		 * have returned something that isn't an empty Seq. Anything that isn't an empty Seq
 		 * can be treated as the final action of this provider EXCEPT in the case of the custom
 		 * role provider, so we special-case that */
 		def streamScoped(providers: Stream[RoleProvider], scope: PermissionsTarget): Stream[Role] = {
@@ -157,20 +157,20 @@ class RoleServiceImpl extends RoleService with Logging {
 				stream #::: next
 			}
 		}
-				
+
 		scopelessStream #::: streamScoped(scoped.toStream, scope)
 	}
-	
+
 	def hasRole(user: CurrentUser, role: Role) = {
 		val targetClass = role.getClass
-		
+
 		// Go through the list of RoleProviders and get any that provide this role
 		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap {
 			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user, null)
 			case provider if role.scope.isDefined => provider.getRolesFor(user, role.scope.get)
 			case _ => Seq()
 		}
-		
+
 		allRoles contains role
 	}
 

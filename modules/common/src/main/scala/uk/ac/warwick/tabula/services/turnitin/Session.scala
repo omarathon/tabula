@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.helpers.Products._
  * user.
  */
 class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods with Logging {
-	
+
 	/**
 	 * The API calls are split out into TurnitinMethods - the body of this class mostly contains
 	 * the supporting methods for generating the valid signed Turnitin requests. The API methods
@@ -79,19 +79,19 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 				new TurnitinResponse(code = 9001, diagnostic = Some (e.getMessage))
 		}
 	}
-	
+
 	def getRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
 		pdata: Option[FileData], // optional file to put in "pdata" parameter
 		params: (String, String)*) = {
-		
+
 		val fullParameters = calculateParameters(functionId, params:_*)
 		val postWithParams = turnitin.endpoint.POST << fullParameters
 		val req = addPdata(pdata, postWithParams)
 		logger.debug("doRequest: " + fullParameters)
 		req
 	}
-	
+
 	def calculateParameters(functionId: String, params: (String, String)*) = {
 		val parameters = (Map("fid" -> functionId) ++ commonParameters ++ params).filterNot(nullValue)
 		parameters + md5hexparam(parameters)
@@ -152,18 +152,18 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		"dis" -> "1", // disable emails
 		"src" -> turnitin.integrationId) ++ subAccountParameter ++ sessionIdParameter
 
-	/** Optional sub-account ID */ 
-	private def subAccountParameter: Map[String, String] = 
-		if (turnitin.said == null || turnitin.said.isEmpty) 
+	/** Optional sub-account ID */
+	private def subAccountParameter: Map[String, String] =
+		if (turnitin.said == null || turnitin.said.isEmpty)
 			Map.empty
-		else 
+		else
 			Map("said" -> turnitin.said)
-			
+
 	/** Optional session ID */
 	private def sessionIdParameter: Map[String, String] = {
-		if (sessionId == null) 
+		if (sessionId == null)
 			Map.empty
-		else 
+		else
 			Map("session-id" -> sessionId)
 	}
 

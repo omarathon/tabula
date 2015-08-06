@@ -33,10 +33,10 @@ trait MemberDao {
 	def listUpdatedSince(startDate: DateTime): Scrollable[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department): Scrollable[Member]
 	def countUpdatedSince(startDate: DateTime): Int
-	
+
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
-	
+
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 	def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
@@ -46,10 +46,10 @@ trait MemberDao {
 		restrictions: Seq[ScalaRestriction]
 	): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
-	
+
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
-	
+
 	def getFreshUniversityIds(): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def getDisability(code: String): Option[Disability]
@@ -154,7 +154,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 					)
 					.addOrder(asc("universityId"))
 
-			if (eagerLoad) {		
+			if (eagerLoad) {
 				criteria
 					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)

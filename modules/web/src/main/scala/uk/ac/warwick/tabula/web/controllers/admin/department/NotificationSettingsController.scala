@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Department
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/notification"))
 class NotificationSettingsController extends AdminController {
-	
+
 	type NotificationSettingsCommand = Appliable[Department]
 
 	validatesSelf[SelfValidating]

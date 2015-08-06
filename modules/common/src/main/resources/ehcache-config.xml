@@ -26,7 +26,7 @@ under the License.
   <!--
     Mandatory Default Cache configuration. These settings will be applied to caches
     created programmatically using CacheManager.add(String cacheName).
-    
+
     The defaultCache has an implicit name "default" which is a reserved cache name.
   -->
   <defaultCache
@@ -37,7 +37,7 @@ under the License.
     overflowToDisk="false"
     diskPersistent="false"
     memoryStoreEvictionPolicy="LFU"/>
-     
+
   <cache name="UserByWarwickIdCache"
     maxElementsInMemory="3000"
     maxElementsOnDisk="70000"
@@ -46,7 +46,7 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
-     
+
   <cache name="GrantedRolesForUser"
     maxElementsInMemory="1000"
     maxElementsOnDisk="5000"
@@ -55,7 +55,7 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
-     
+
   <cache name="GrantedRolesForGroup"
     maxElementsInMemory="100"
     maxElementsOnDisk="500"
@@ -64,7 +64,7 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
-     
+
   <cache name="GrantedPermissionsForUser"
     maxElementsInMemory="1000"
     maxElementsOnDisk="5000"
@@ -73,7 +73,7 @@ under the License.
     diskSpoolBufferSizeMB="20"
     memoryStoreEvictionPolicy="LFU"
      />
-     
+
   <cache name="GrantedPermissionsForGroup"
     maxElementsInMemory="100"
     maxElementsOnDisk="500"

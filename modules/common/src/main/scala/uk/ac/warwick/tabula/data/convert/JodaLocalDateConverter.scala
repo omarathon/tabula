@@ -6,10 +6,10 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class JodaLocalDateConverter extends TwoWayConverter[String, LocalDate] {
-	
+
 	val formatter = DateTimeFormat.forPattern(DateFormats.DatePicker)
 
-	override def convertRight(text: String) = 
+	override def convertRight(text: String) =
 		if (text.hasText) try {	LocalDate.parse(text, formatter)	} catch {	case e: IllegalArgumentException => null }
 		else null
 

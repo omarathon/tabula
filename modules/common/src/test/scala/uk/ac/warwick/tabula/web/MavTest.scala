@@ -4,16 +4,16 @@ import uk.ac.warwick.tabula.TestBase
 import org.springframework.web.servlet.view.RedirectView
 
 class MavTest extends TestBase {
-	
+
 	@Test def itWorks {
-		val mav = Mav("my/view", 
+		val mav = Mav("my/view",
 			"steve" -> "loves you",
 			"yes" -> false
 		).crumbs(
 			BreadCrumb("title", "/url"),
 			BreadCrumb("title2", "/url2", "tooltip")
 		).bodyClasses("body", "rocking").withTitle("my title").xml().toModelAndView
-		
+
 		mav.getViewName should be ("my/view")
 		mav.getModel.get("steve") should be ("loves you")
 		mav.getModel.get("yes").toString should be (false.toString)

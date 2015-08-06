@@ -17,7 +17,7 @@ class SLF4JEventListener extends EventListener {
 		logger.info(s.toString)
 	}
 
-	override def onException(event: Event, exception: Throwable) {		
+	override def onException(event: Event, exception: Throwable) {
 		val s = generateMessage(event, "failed-event")
 		logger.info(s.toString)
 	}
@@ -27,7 +27,7 @@ class SLF4JEventListener extends EventListener {
 object EventDescription {
 	val QUOTE = "\""
 	val ESCQUOTE = "\\" + QUOTE
-	
+
 	def generateMessage(event: Event, eventStage: String = "event") = {
 		val s = new StringBuilder
 		s ++= eventStage ++ "=" ++ event.name

@@ -13,21 +13,21 @@ class FeaturesControllerTest extends TestBase with MockitoSugar {
 		val controller = new FeaturesController
 		controller.features = features
 		controller.queue = mock[Queue]
-		
+
 		controller.afterPropertiesSet
-		
+
 		controller.currentValues should not be ('empty)
-		
+
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (false)
-		
+
 		features.emailStudents = true
-		
+
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (true)
-	
-		withUser("cuscav") {	
+
+		withUser("cuscav") {
 			controller.update("emailStudents", false)
 		}
-		
+
 		controller.currentValues.find { _.name == "emailStudents" }.get.value should be (false)
 	}
 

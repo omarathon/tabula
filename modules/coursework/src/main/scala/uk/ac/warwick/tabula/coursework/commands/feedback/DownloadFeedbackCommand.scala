@@ -36,7 +36,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 	 * In either case if it's not found, None is returned.
 	 */
 	def applyInternal() = {
-		val result: Option[RenderableFile] = 
+		val result: Option[RenderableFile] =
 			filename match {
 				case filename: String if filename.hasText =>
 					feedback.attachments.find(_.name == filename).map(new RenderableAttachment(_))

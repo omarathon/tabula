@@ -29,7 +29,7 @@ module Cucumber
           "#{file}:#{lines.join(':')}"
         end
         @io.puts files.join(' ')
-        
+
         # Flusing output to rerun tempfile here...
         @io.flush
         @io.close

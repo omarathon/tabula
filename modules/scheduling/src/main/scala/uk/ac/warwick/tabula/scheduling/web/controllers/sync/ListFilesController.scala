@@ -13,36 +13,36 @@ import uk.ac.warwick.tabula.helpers.StringUtils
 @Controller
 @RequestMapping(value = Array("/sync/listFiles.json"))
 class ListFilesController extends BaseController {
-	import ListFilesController._		
-	
+	import ListFilesController._
+
 	var fileDao = Wire.auto[FileDao]
-	
+
 	@RequestMapping
 	def list(@RequestParam("start") startDateMillis: Long, @RequestParam(value="startFromId", required=false) startingId: String) = {
 		if (startDateMillis < 0) throw new IllegalArgumentException("start must be specified")
 		val startDate = new DateTime(startDateMillis)
-		
-		val files = 
+
+		val files =
 			if (startingId.hasText) fileDao.getFilesCreatedOn(startDate, MaxResponses, startingId)
 			else fileDao.getFilesCreatedSince(startDate, MaxResponses)
-			
-		val lastFileUploadedDate = 
+
+		val lastFileUploadedDate =
 			if (!files.isEmpty) files.last.dateUploaded.getMillis
 			else null
-			
+
 		val json = Map(
 			"createdSince" -> startDate.getMillis,
 			"lastFileReceived" -> lastFileUploadedDate,
 			"maxResponses" -> MaxResponses,
-			"files" -> (files map { 
+			"files" -> (files map {
 				file => Map(
-					"id" -> file.id, 
+					"id" -> file.id,
 					"createdDate" -> file.dateUploaded.getMillis,
 					"hash" -> file.hash
-				) 
+				)
 			})
 		)
-		
+
 		Mav(new JSONView(json))
 	}
 
@@ -50,8 +50,8 @@ class ListFilesController extends BaseController {
 
 object ListFilesController {
 	val MaxResponses = 10000
-	
+
 	val StartParam = "start"
-	
+
 	val StartFromIdParam = "startFromId"
 }

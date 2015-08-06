@@ -75,13 +75,13 @@ class ExamsAdminHomeDefaultAcademicYearController extends ExamsController {
 class ExamsAdminDepartmentHomeController extends ExamsController {
 
 	hideDeletedItems
-	
+
 	@ModelAttribute def command(@PathVariable dept: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
 		new ExamsAdminDepartmentHomeCommand(dept, academicYear, user)
 
 	@ModelAttribute("academicYears") def academicYearChoices: JList[AcademicYear] =
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
-	
+
 	@RequestMapping
 	def adminDepartment(cmd: ExamsAdminDepartmentHomeCommand, @PathVariable dept: Department, @PathVariable academicYear: AcademicYear) = {
 		val result = cmd.apply()
@@ -103,7 +103,7 @@ class ExamsAdminModuleHomeController extends ExamsController {
 	hideDeletedItems
 
 	@Autowired var examService: AssessmentService = _
-	
+
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, user: CurrentUser) =
 		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
@@ -111,11 +111,11 @@ class ExamsAdminModuleHomeController extends ExamsController {
 	@ModelAttribute("examMap")
 	def examMap(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
 		examService.getExamsByModules(Seq(module), academicYear).withDefaultValue(Seq())
-	
+
 	@RequestMapping
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module], @PathVariable academicYear: AcademicYear) = {
 		val module = cmd.apply()
-		
+
 		if (ajax) Mav("exams/admin/modules/admin_partial").noLayout()
 		else Mav("exams/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment, academicYear))
 	}

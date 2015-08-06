@@ -18,10 +18,10 @@ import scala.collection.JavaConverters._
  */
 class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
 	extends Command[Either[RenderableZip, JobInstance]] with ReadOnly {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
-	
+
 	var zipService = Wire[ZipService]
 	var submissionService = Wire[SubmissionService]
 	var jobService = Wire[JobService]
@@ -39,7 +39,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 				submission <- submissionService.getSubmissionByUniId(assignment, uniId)
 			) yield submission).asJava
 		}
-		
+
 		if (submissions.asScala.exists(_.assignment != assignment)) {
 			throw new IllegalStateException("Submissions don't match the assignment")
 		}

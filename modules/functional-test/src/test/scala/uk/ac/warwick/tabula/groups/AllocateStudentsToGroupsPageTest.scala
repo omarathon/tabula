@@ -34,7 +34,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		enableFeature("smallGroupAllocationFiltering")
 
 		When("I log in as a departmental administrator and visit the department groups page")
-		signIn as (P.Admin1) to (Path("/groups"))
+		signIn as (P.Admin1) to (Path("/groups/"))
 
 		And(" I view the 'allocate students' page for xxx987/Allocation Test Groupset")
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")

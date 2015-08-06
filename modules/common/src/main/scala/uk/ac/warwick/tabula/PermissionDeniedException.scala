@@ -31,7 +31,7 @@ class PermissionDeniedException(
 	cause: Throwable = null) extends RuntimeException(s"${user} can't perform ${permission} on ${scope match { case Some(o) => o; case _ => scope }}", cause) with UserError with PermissionsError {
 	override val httpStatus = HttpStatus.FORBIDDEN
 }
-	
+
 /**
  * Specific exception for when a student/person is not allowed to view
  * the submission/feedback/info page for an assignment. It is just so the

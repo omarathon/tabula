@@ -35,7 +35,7 @@ trait ValidatesCommand {
 	 */
 	@deprecated("Use validatesSelf[A <: SelfValidating] instead of this; validation logic should be tied in with the command", "31")
 	def validatesWith[A : ClassTag](fn: ValidatorMethod[A]) = _validatesWith[A](fn)
-	
+
 	private def _validatesWith[A : ClassTag](fn: ValidatorMethod[A]) {
 		if (validator != null) throw new IllegalStateException("Already set validator once")
 		validator = new ClassValidator[A] {

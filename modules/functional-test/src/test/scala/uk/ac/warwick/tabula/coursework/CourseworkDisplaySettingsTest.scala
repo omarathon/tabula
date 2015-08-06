@@ -9,17 +9,17 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 	"Department admin" should "be able to set display settings for a department" in as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
 		openDisplaySettings()
-		
+
 		checkbox("showStudentName").select()
-		
+
 		cssSelector("div.submit-buttons input.btn-primary").webElement.click()
 
 		// Ensure that we've been redirected back to the dept admin page
 		currentUrl should endWith ("/department/xxx/")
-		
+
 		// Check that when we go back to the page, all of the settings have been populated
 		openDisplaySettings()
-		
+
 		checkbox("showStudentName").isSelected should be (true)
 	}
 
@@ -35,7 +35,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 
 	  Then("the administrator can see the option to set a default signup method")
 			radioButtonGroup("defaultGroupAllocationMethod") should not be(null)
-			
+
 
 		When("the administrator selects 'Manual Allocation' and submits")
 			radioButtonGroup("defaultGroupAllocationMethod").value= "Manual"

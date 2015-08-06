@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.{ToStringStyle, ToStringBuilder, HashCod
 object RoleBuilder {
 	def build(definition: RoleDefinition, scope: Option[PermissionsTarget], name: String) =
 		new GeneratedRole(definition, scope, name)
-	
+
 	class GeneratedRole(definition: RoleDefinition, scope: Option[PermissionsTarget], val name: String) extends Role(definition, scope) {
 		override def getName = name
 

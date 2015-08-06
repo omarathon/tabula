@@ -18,7 +18,7 @@ trait HasExistingStudentRelationshipType {
 abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInternal[StudentRelationshipType]
 	with StudentRelationshipTypeProperties with SelfValidating {
 	this: RelationshipServiceComponent =>
-		
+
 	def copyFrom(tpe: StudentRelationshipType) {
 		id = tpe.id
 		urlPart = tpe.urlPart
@@ -32,7 +32,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 		expectedPGR = tpe.expectedPGR
 		sortOrder = tpe.sortOrder
 	}
-	
+
 	def copyTo(tpe: StudentRelationshipType) {
 		tpe.id = id
 		tpe.urlPart = urlPart
@@ -46,7 +46,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 		tpe.expectedPGR = expectedPGR
 		tpe.sortOrder = sortOrder
 	}
-		
+
 	def validate(errors: Errors) {
 		// Ensure that we don't dupe url part
 		relationshipService.getStudentRelationshipTypeByUrlPart(urlPart).filter { _.id != id }.foreach { dupe =>
@@ -67,7 +67,7 @@ trait ModifyStudentRelationshipTypeCommandDescription extends Describable[Studen
 }
 
 trait StudentRelationshipTypeProperties {
-	
+
 	@Length(min=1, max=20)
 	@Pattern(regexp="[A-Za-z0-9_\\-]+")
 	var id: String = _
@@ -75,26 +75,26 @@ trait StudentRelationshipTypeProperties {
 	@Length(min=1, max=50)
 	@Pattern(regexp="[A-Za-z0-9_\\-]+")
 	var urlPart: String = _
-	
+
 	@Length(min=1, max=50)
 	var agentRole: String = _
-	
+
 	@Length(min=1, max=50)
 	var studentRole: String = _
-	
+
 	@Length(min=1, max=50)
 	var description: String = _
-	
+
 	@NotNull
 	var defaultSource: StudentRelationshipSource = _
-	
+
 	var defaultDisplay: Boolean = true
 	var expectedUG: Boolean = false
 	var expectedPGT: Boolean = false
 	var expectedPGR: Boolean = false
-	
+
 	@Min(0)
 	@NotNull
 	var sortOrder: Int = 20
-	
+
 }

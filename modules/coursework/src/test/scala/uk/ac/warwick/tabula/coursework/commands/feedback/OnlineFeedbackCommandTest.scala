@@ -23,7 +23,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		val submission1 = new Submission("user1")
 
 		val feedback1 = new AssignmentFeedback
-		feedback1.assignment = assignment 
+		feedback1.assignment = assignment
 		val feedback2 = Fixtures.assignmentFeedback("user2")
 		feedback2.released = true
 		feedback2.assignment = assignment

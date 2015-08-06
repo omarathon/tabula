@@ -6,81 +6,81 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 
 class CustomRoleDefinitionTest extends TestBase {
-	
+
 	case object TestBuiltInDefinition extends BuiltInRoleDefinition {
 		import Permissions._
-		
+
 		override def description = "Test"
-		
+
 		GrantsScopelessPermission(ImportSystemData)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)
 		def canDelegateThisRolesPermissions:JBoolean = false
 
 	}
-	
+
 	@Test def polymorphicGetterAndSetter {
 		val crd = new CustomRoleDefinition
 		crd.baseRoleDefinition should be (null)
-		
+
 		crd.baseRoleDefinition = TestBuiltInDefinition
 		crd.baseRoleDefinition should be (TestBuiltInDefinition)
 		crd.builtInBaseRoleDefinition should be (TestBuiltInDefinition)
 		crd.customBaseRoleDefinition should be (null)
-		
+
 		val other = new CustomRoleDefinition
 		crd.baseRoleDefinition = other
 		crd.baseRoleDefinition should be (other)
 		crd.builtInBaseRoleDefinition should be (null)
 		crd.customBaseRoleDefinition should be (other)
 	}
-	
+
 	@Test def getPermissions {
 		val crd = new CustomRoleDefinition
 		crd.baseRoleDefinition = TestBuiltInDefinition
-		
+
 		val dept = Fixtures.department("in")
-		
+
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
 			Permissions.ImportSystemData -> None
 		))
-		
+
 		val ro1 = new RoleOverride
 		ro1.permission = Permissions.Module.ManageAssignments
 		ro1.overrideType = RoleOverride.Allow
-		
+
 		crd.overrides.add(ro1)
-		
+
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,
 			Permissions.Module.ManageAssignments -> Some(dept),
 			Permissions.ImportSystemData -> None
 		))
-		
+
 		val ro2 = new RoleOverride
 		ro2.permission = Permissions.Department.ManageExtensionSettings
 		ro2.overrideType = RoleOverride.Deny
-		
+
 		crd.overrides.add(ro2)
-		
+
 		crd.permissions(Some(dept)) should be (Map(
 			Permissions.Module.Create -> None,
 			Permissions.Module.ManageAssignments -> Some(dept),
 			Permissions.ImportSystemData -> None
 		))
-		
+
 		val crd2 = new CustomRoleDefinition
 		crd2.baseRoleDefinition = crd
-		
+
 		val ro3 = new RoleOverride
 		ro3.permission = Permissions.Department.ManageExtensionSettings
 		ro3.overrideType = RoleOverride.Allow
-		
+
 		crd2.overrides.add(ro3)
-		
+
 		crd2.permissions(Some(dept)) should be (Map(
 			Permissions.Department.ManageExtensionSettings -> Some(dept),
 			Permissions.Module.Create -> None,

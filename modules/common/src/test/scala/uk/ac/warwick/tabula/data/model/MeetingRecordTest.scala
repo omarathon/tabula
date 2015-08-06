@@ -6,7 +6,7 @@ import collection.JavaConversions._
 
 // scalastyle:off magic.number
 class MeetingRecordTest extends PersistenceTestBase {
-	
+
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 
 	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
@@ -62,30 +62,30 @@ class MeetingRecordTest extends PersistenceTestBase {
 
 	@Test def defaultConstructor = withFakeTime(aprilFool) {
 		val meeting = new MeetingRecord
-		
+
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)
-		
+
 		meeting.creator should be (null)
 		meeting.relationship should be (null)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
 		meeting should be ('approved)
 	}
-	
+
 	@Test def everydayConstructor = withFakeTime(aprilFool) {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		
+
 		val student = Fixtures.student(universityId = "1000001", userId="student")
-		
+
 		val creator = new StaffMember
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
-		
+
 		val meeting = new MeetingRecord(creator, relationship)
-		
+
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)
-		
+
 		meeting.creator should be (creator)
 		meeting.relationship should be (relationship)
 		meeting.meetingDate should be (null)

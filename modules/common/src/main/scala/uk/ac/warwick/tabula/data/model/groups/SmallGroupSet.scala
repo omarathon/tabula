@@ -25,7 +25,7 @@ object SmallGroupSet {
 		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
 		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
 	}
-	
+
 	// For sorting a collection by set name. Either pass to the sort function,
 	// or expose as an implicit val.
 	val NameOrdering = Ordering.by { set: SmallGroupSet => (set.name, set.id) }
@@ -86,7 +86,7 @@ class SmallGroupSet
 	var emailStudentsOnChange: JBoolean = true
 	@Column(name="email_tutors")
 	var emailTutorsOnChange: JBoolean = true
-  
+
   def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
   def fullyReleased = releasedToStudents && releasedToTutors
@@ -95,7 +95,7 @@ class SmallGroupSet
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
 	@NotNull
 	var format: SmallGroupFormat = _
-	
+
 	@Column(name="allocation_method")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
@@ -109,16 +109,16 @@ class SmallGroupSet
 	var openForSignups: Boolean = false
 
   def openState: SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed
-  
+
  	def openState_=(value:SmallGroupSetSelfSignUpState) : Unit = value match {
 	 	case SmallGroupSetSelfSignUpState.Open => openForSignups = true
 	 	case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
   }
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
 	var module: Module = _
-	
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "set_id")
 	@BatchSize(size=200)
@@ -151,7 +151,7 @@ class SmallGroupSet
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
-	
+
 	@Column(name="collect_attendance")
 	var collectAttendance: Boolean = true
 
@@ -169,7 +169,7 @@ class SmallGroupSet
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
 	@Column(name = "default_location")
 	var defaultLocation: Location = _
-	
+
 	def showAttendanceReports = !archived && !deleted && collectAttendance
 
 	// converts the assessmentGroups to upstream assessment groups
@@ -177,7 +177,7 @@ class SmallGroupSet
 
 	// Gets a breakdown of the membership for this small group set.
 	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroups, Some(members))
-	
+
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||
 		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
@@ -199,7 +199,7 @@ class SmallGroupSet
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
 		}
-	
+
 	def unallocatedStudents = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
 			val allocatedStudents = groups.asScala.flatMap { _.students.users }
@@ -207,7 +207,7 @@ class SmallGroupSet
 			allStudents diff allocatedStudents
 		}
 	}
-	
+
 	def unallocatedStudentsCount = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
@@ -252,9 +252,9 @@ class SmallGroupSet
 	}
 
 	def linked = allocationMethod == SmallGroupAllocationMethod.Linked
-	
+
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
-	
+
 	def permissionsParents = Option(module).toStream
 	override def humanReadableId = name
 

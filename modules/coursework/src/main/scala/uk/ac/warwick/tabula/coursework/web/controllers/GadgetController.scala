@@ -11,7 +11,7 @@ import java.util.Collections
 
 @Controller
 class GadgetController extends CourseworkController {
-	
+
 	// Jump on the back of the home page controller.
 	var homeController = Wire.auto[HomeController]
 
@@ -23,5 +23,5 @@ class GadgetController extends CourseworkController {
 	def render(user: CurrentUser) = {
 		homeController.home(CourseworkHomepageCommand(user), user).embedded
 	}
-		
+
 }

@@ -18,20 +18,20 @@ class JobQuery {
 class JobController extends BaseController {
 
 	@Autowired var jobService: JobService = _
-	
+
 	val pageSize = 100
 
 	@RequestMapping(Array("/list"))
 	def list(query: JobQuery) = {
 		val unfinished = jobService.unfinishedInstances
-		
+
 		val page = query.page
 		val start = (page * pageSize) + 1
 		val max = pageSize
 		val end = start + max - 1
-		
+
 		val recent = jobService.listRecent(page * pageSize, pageSize)
-		
+
 		Mav("sysadmin/jobs/list",
 			"unfinished" -> unfinished,
 			"finished" -> recent,
@@ -56,19 +56,19 @@ class JobController extends BaseController {
 			"jobId" -> id,
 			"jobStatus" -> (instance map (_.status) getOrElse (""))).noLayoutIf(ajax)
 	}
-	
+
 	@RequestMapping(Array("/kill"))
 	def kill(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id)
 		jobService.kill(instance.get)
 		Redirect(Routes.scheduling.jobs.list)
 	}
-	
+
 	@RequestMapping(Array("/run"))
 	def run(@RequestParam("id") id: String) = {
 		val instance = jobService.getInstance(id).get
 		val job = jobService.findJob(instance.jobType).get
-		
+
 		jobService.processInstance(instance, job)
 		Redirect(Routes.scheduling.jobs.list)
 	}

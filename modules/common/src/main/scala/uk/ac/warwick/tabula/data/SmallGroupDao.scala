@@ -24,7 +24,7 @@ trait SmallGroupDao {
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
 	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
-	
+
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
@@ -42,7 +42,7 @@ trait SmallGroupDao {
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
 	def findSmallGroupOccurrencesByGroup(group: SmallGroup): Seq[SmallGroupEventOccurrence]
 	def findSmallGroupOccurrencesByEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
-	
+
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendance]
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
@@ -64,7 +64,7 @@ trait SmallGroupDao {
 @Repository
 class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	import Order._
-	
+
 	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
@@ -117,8 +117,8 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("set.module", module))
 			.add(is("set.academicYear", year))
 			.seq
-			
-	def findSmallGroupOccurrencesByGroup(group: SmallGroup) = 
+
+	def findSmallGroupOccurrencesByGroup(group: SmallGroup) =
 		session.newCriteria[SmallGroupEventOccurrence]
 			.createAlias("event", "event")
 			.add(is("event.group", group))
@@ -131,13 +131,13 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("event", event))
 			.addOrder(asc("week"))
 			.seq
-			
+
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendance] =
 		session.newCriteria[SmallGroupEventAttendance]
 				.add(is("universityId", studentId))
 				.add(is("occurrence", occurrence))
 				.uniqueResult
-				
+
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit = session.delete(attendance)
 
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote] = {

@@ -24,9 +24,9 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	@OneToMany(mappedBy = "feedbackTemplate", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@BatchSize(size=200)
 	var assignments: JList[Assignment] = JArrayList()
-	
+
 	/* For permission parents, we include both the department and any assignments linked to this template */
-	def permissionsParents = 
+	def permissionsParents =
 		Option[PermissionsTarget](department).toStream.append(Option(assignments) match {
 			case Some(assignments) => assignments.asScala.toStream
 			case _ => Stream.empty

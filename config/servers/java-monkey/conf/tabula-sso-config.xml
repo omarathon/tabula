@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-  <httpbasic><allow>true</allow></httpbasic>   
+  <httpbasic><allow>true</allow></httpbasic>
   <mode>new</mode>
 
   <shire>

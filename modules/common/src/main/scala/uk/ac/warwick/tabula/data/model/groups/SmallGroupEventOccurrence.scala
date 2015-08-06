@@ -26,7 +26,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	var event: SmallGroupEvent = _
 
 	var week: SmallGroupEventOccurrence.WeekNumber = _
-	
+
 	@OneToMany(mappedBy = "occurrence", cascade=Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var attendance: JSet[SmallGroupEventAttendance] = JHashSet()

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
 class MeetingRecordApproverRoleProvider extends RoleProvider with TaskBenchmarking {
-	
+
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MeetingRecordApproverRoleProvider"){
 		scope match {
 			case meeting: MeetingRecord =>
@@ -24,7 +24,7 @@ class MeetingRecordApproverRoleProvider extends RoleProvider with TaskBenchmarki
 			case _ => Stream.empty
 		}
 	}
-	
+
 	def rolesProvided = Set(classOf[MeetingRecordApprover])
-	
+
 }

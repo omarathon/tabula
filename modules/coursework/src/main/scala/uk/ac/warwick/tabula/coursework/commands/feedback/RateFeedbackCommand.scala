@@ -31,11 +31,11 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 	def this(module: Module, assignment: Assignment, opt: Option[Feedback]) {
 		this(module, assignment, opt.orNull)
 	}
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Rate, feedback)
 
-	//	var rating:JInteger = _ 
+	//	var rating:JInteger = _
 
 	var wasPrompt: NullableBoolean =
 		NullableBoolean(Option(feedback).flatMap(_.ratingPrompt))
@@ -44,8 +44,8 @@ class RateFeedbackCommand(val module: Module, val assignment: Assignment, val fe
 		NullableBoolean(Option(feedback).flatMap(_.ratingHelpful))
 
 	//	var unset:Boolean = false
-	//	
-	//	def effectiveRating:JInteger = 
+	//
+	//	def effectiveRating:JInteger =
 	//		if (unset) null
 	//		else rating
 

@@ -39,7 +39,7 @@ abstract class ViewProfileController extends ProfilesController {
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
-	
+
 	def viewProfileForCourse(
 		studentCourseDetails: Option[StudentCourseDetails],
 		studentCourseYearDetails: Option[StudentCourseYearDetails],

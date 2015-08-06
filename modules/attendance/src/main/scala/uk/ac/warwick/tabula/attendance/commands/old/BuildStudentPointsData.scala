@@ -79,7 +79,7 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 						}
 					}.toMap
 				}
-				
+
 				val unrecorded = {
 					if (unrecordedCounts.size > 0)
 						unrecordedCounts.find{case(s, count) => student == s}.getOrElse((student, 0))._2

@@ -10,7 +10,7 @@ class MarkingWorkflowIdConverter extends TwoWayConverter[String, MarkingWorkflow
 		case Some(s) => s.id
 		case None => null
 	}
-	
+
 	override def convertRight(id: String) = getById[MarkingWorkflow](id).orNull
 
 }

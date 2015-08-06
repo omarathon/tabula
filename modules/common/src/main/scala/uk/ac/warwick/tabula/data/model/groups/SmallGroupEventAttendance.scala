@@ -15,20 +15,20 @@ import uk.ac.warwick.tabula.JavaImports._
 	new UniqueConstraint(columnNames = Array("occurrence_id", "universityId"))
 ))
 class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with Serializable {
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="occurrence_id")
 	var occurrence: SmallGroupEventOccurrence = _
-	
+
 	@NotNull
 	var universityId: String = _
-	
+
 	@NotNull
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
 	var state: AttendanceState = _
-	
+
 	var updatedDate: DateTime = _
-	
+
 	@NotNull
 	var updatedBy: String = _
 

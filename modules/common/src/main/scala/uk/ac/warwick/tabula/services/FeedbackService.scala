@@ -69,7 +69,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	def delete(feedback: Feedback) = transactional() {
 		dao.delete(feedback)
 	}
-	
+
 	def saveOrUpdate(feedback:Feedback){
 		session.saveOrUpdate(feedback)
 	}

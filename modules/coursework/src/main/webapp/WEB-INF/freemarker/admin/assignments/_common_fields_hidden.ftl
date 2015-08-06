@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 This must include all the fields that are included
 in _common_fields.ftl and _submissions_common_fields.ftl

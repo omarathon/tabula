@@ -84,13 +84,13 @@ class AdminAddMarksCommandInternal(val module: Module, val assessment: Assessmen
 
 		markList.toList
 	}
-	
+
 }
 
 trait AdminAddMarksCommandValidation extends ValidatesMarkItem {
-	
+
 	self: AdminAddMarksCommandState with UserLookupComponent =>
-	
+
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
 		assessment.allFeedback.find { (feedback) => feedback.universityId == mark.universityId && (feedback.hasMark || feedback.hasGrade) } match {
@@ -135,9 +135,9 @@ trait AdminAddMarksDescription extends Describable[Seq[Feedback]] {
 }
 
 trait AdminAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
-	
+
 	self: AdminAddMarksCommandState =>
-	
+
 	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case assignmentFeedback: AssignmentFeedback =>
 			Option(Notification.init(new FeedbackChangeNotification, submitter.apparentUser, assignmentFeedback, assignmentFeedback.assignment))

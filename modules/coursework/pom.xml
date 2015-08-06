@@ -17,7 +17,7 @@
 
 	<properties>
 		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
-		
+
 		<!-- TAB-46 We want this on /coursework, not /courses -->
 		<tabula.module.context>/coursework</tabula.module.context>
 	</properties>
@@ -98,7 +98,7 @@
 			<type>zip</type>
 			<scope>provided</scope>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
 			<artifactId>warwickutils_spring4-csv</artifactId>

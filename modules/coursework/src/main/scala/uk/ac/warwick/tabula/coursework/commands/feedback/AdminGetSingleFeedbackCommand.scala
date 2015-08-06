@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
-	
+
 	var zipService = Wire.auto[ZipService]
 
 	override def applyInternal() = {
@@ -32,11 +32,11 @@ class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feed
 class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
-	
+
 	var filename: String = _
 
 	private var fileFound: Boolean = _
-	
+
 	var callback: (RenderableFile) => Unit = _
 
 	def applyInternal() = {
@@ -49,7 +49,7 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 		}
 		attachment
 	}
-	
+
 	override def describe(d: Description) = {
 		d.assignment(assignment)
 		d.property("filename", filename)

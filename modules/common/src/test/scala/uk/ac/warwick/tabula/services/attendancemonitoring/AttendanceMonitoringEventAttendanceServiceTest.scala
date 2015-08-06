@@ -13,7 +13,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 	trait ServiceTestSupport extends SmallGroupServiceComponent with TermServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent {
-		
+
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val profileService = smartMock[ProfileService]
 		val smallGroupService = smartMock[SmallGroupService]

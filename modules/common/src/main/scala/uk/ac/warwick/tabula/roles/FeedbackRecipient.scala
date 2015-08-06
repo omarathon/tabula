@@ -6,13 +6,13 @@ import uk.ac.warwick.tabula.permissions.Permissions._
 /*
  * Allow students to receive their own feedback
  */
-case class FeedbackRecipient(feedback: model.Feedback) extends BuiltInRole(FeedbackRecipientRoleDefinition, feedback) 
+case class FeedbackRecipient(feedback: model.Feedback) extends BuiltInRole(FeedbackRecipientRoleDefinition, feedback)
 
 case object FeedbackRecipientRoleDefinition extends UnassignableBuiltInRoleDefinition {
-	
+
 	override def description = "Feedback Recipient"
-	
-	GrantsScopedPermission( 
+
+	GrantsScopedPermission(
 		AssignmentFeedback.Read,
 		AssignmentFeedback.Rate
 	)

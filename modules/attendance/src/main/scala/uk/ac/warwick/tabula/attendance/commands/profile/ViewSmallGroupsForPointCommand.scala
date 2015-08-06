@@ -89,7 +89,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 			groupData
 		)
 	}
-	
+
 	private def courseData = {
 		student.mostSignificantCourseDetails match {
 			case None => ViewSmallGroupsForPointCommandResult.Course("","",student.homeDepartment.name,"","","","")
@@ -105,7 +105,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 				)
 		}
 	}
-	
+
 	private def moduleData = {
 		student.mostSignificantCourseDetails.flatMap(scd =>
 			scd.freshStudentCourseYearDetails.find(_.academicYear == point.scheme.academicYear).map(scyd =>
@@ -122,7 +122,7 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 			)
 		).getOrElse(Seq())
 	}
-	
+
 	private def groupData = {
 		// Any day in this week is definitely before the start date of the point
 		val weekBeforePoint = termService.getAcademicWeekForAcademicYear(point.startDate.toDateTimeAtStartOfDay, point.scheme.academicYear) - 1

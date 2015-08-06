@@ -1,7 +1,7 @@
 module Cucumber
   module Ast
     # Step Definitions that match a plain text Step with a multiline argument table
-    # will receive it as an instance of Table. A Table object holds the data of a 
+    # will receive it as an instance of Table. A Table object holds the data of a
     # table parsed from a feature file and lets you access and manipulate the data
     # in different ways.
     #
@@ -22,15 +22,15 @@ module Cucumber
     class Table
       class Different < StandardError
         attr_reader :table
-        
+
         def initialize(table)
           super('Tables were not identical')
           @table = table
         end
       end
-      
+
       include Enumerable
-      
+
       NULL_CONVERSIONS = Hash.new(lambda{ |cell_value| cell_value }).freeze
 
       attr_accessor :file
@@ -96,7 +96,7 @@ module Cucumber
           row.to_hash
         end
       end
-      
+
       # Converts this table into a Hash where the first column is
       # used as keys and the second column is used as values
       #
@@ -107,7 +107,7 @@ module Cucumber
       #
       #   {'a' => '2', 'b' => '3'}
       #
-      # The table must be exactly two columns wide 
+      # The table must be exactly two columns wide
       #
       def rows_hash
         return @rows_hash if @rows_hash
@@ -158,7 +158,7 @@ module Cucumber
       #  | x             | y             |
       #
       #  table.match(/table:column_1_name,column_2_name/) #=> non-nil
-      #  
+      #
       # Note: must use 'table:' prefix on match
       def match(pattern)
         header_to_match = "table:#{headers.join(',')}"
@@ -183,7 +183,7 @@ module Cucumber
       #   | 123456       | xyz     |
       #   | 345678       | abc     |
       #
-      # A StepDefinition receiving this table can then map the columns 
+      # A StepDefinition receiving this table can then map the columns
       # with both Regexp and String:
       #
       #   table.map_headers!(/phone( number)?/i => :phone, 'Address' => :address)
@@ -229,8 +229,8 @@ module Cucumber
       end
 
       # Change how #hashes converts column values. The +column_name+ argument identifies the column
-      # and +conversion_proc+ performs the conversion for each cell in that column. If +strict+ is 
-      # true, an error will be raised if the column named +column_name+ is not found. If +strict+ 
+      # and +conversion_proc+ performs the conversion for each cell in that column. If +strict+ is
+      # true, an error will be raised if the column named +column_name+ is not found. If +strict+
       # is false, no error will be raised. Example:
       #
       #   Given /^an expense report for (.*) with the following posts:$/ do |table|
@@ -248,7 +248,7 @@ module Cucumber
       # Compares +other_table+ to self. If +other_table+ contains columns
       # and/or rows that are not in self, new columns/rows are added at the
       # relevant positions, marking the cells in those rows/columns as
-      # <tt>surplus</tt>. Likewise, if +other_table+ lacks columns and/or 
+      # <tt>surplus</tt>. Likewise, if +other_table+ lacks columns and/or
       # rows that are present in self, these are marked as <tt>missing</tt>.
       #
       # <tt>surplus</tt> and <tt>missing</tt> cells are recognised by formatters
@@ -277,7 +277,7 @@ module Cucumber
       # an Array of Hash (similar to the structure returned by #hashes).
       #
       # Calling this method is particularly useful in <tt>Then</tt> steps that take
-      # a Table argument, if you want to compare that table to some actual values. 
+      # a Table argument, if you want to compare that table to some actual values.
       #
       def diff!(other_table, options={})
         options = {:missing_row => true, :surplus_row => true, :missing_col => true, :surplus_col => false}.merge(options)
@@ -306,7 +306,7 @@ module Cucumber
         last_change = nil
         missing_row_pos = nil
         insert_row_pos  = nil
-        
+
         changes.each do |change|
           if(change.action == '-')
             missing_row_pos = change.position + inserted
@@ -335,9 +335,9 @@ module Cucumber
             end
           end
         end
-        
+
         clear_cache!
-        should_raise = 
+        should_raise =
           missing_row_pos && options[:missing_row] ||
           insert_row_pos  && options[:surplus_row] ||
           missing_col     && options[:missing_col] ||
@@ -363,7 +363,7 @@ module Cucumber
       def verify_column(column_name) #:nodoc:
         raise %{The column named "#{column_name}" does not exist} unless raw[0].include?(column_name)
       end
-      
+
       def verify_table_width(width) #:nodoc:
         raise %{The table must have exactly #{width} columns} unless raw[0].size == width
       end
@@ -396,7 +396,7 @@ module Cucumber
       def headers #:nodoc:
         raw.first
       end
-      
+
       def header_cell(col) #:nodoc:
         cells_rows[0][col]
       end
@@ -419,7 +419,7 @@ module Cucumber
         formatter = Formatter::Pretty.new(nil, io, options)
         formatter.instance_variable_set('@indent', options[:indent])
         TreeWalker.new(nil, [formatter]).visit_multiline_arg(self)
-        
+
         Term::ANSIColor.coloring = c
         io.rewind
         s = "\n" + io.read + (" " * (options[:indent] - 2))
@@ -515,7 +515,7 @@ module Cucumber
         end
 
         unmapped_cols.each_with_index do |col, col_index|
-          empty_col = (0...cell_matrix.length).map do |row| 
+          empty_col = (0...cell_matrix.length).map do |row|
             SurplusCell.new(nil, self, -1)
           end
           cols << empty_col
@@ -636,7 +636,7 @@ module Cucumber
           [:cell, @value]
         end
       end
-      
+
       class SurplusCell < Cell #:nodoc:
         def status
           :comment
