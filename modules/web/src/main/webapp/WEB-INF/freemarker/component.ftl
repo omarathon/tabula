@@ -2,7 +2,7 @@
 
 <#assign requestPath = (info.requestedUri.path!"") />
 
-<#if requestPath?starts_with('/reports/')>
+<#if requestPath == '/reports' || requestPath?starts_with('/reports/')>
 	<#assign bodyClass="reports-page" />
 	<#assign siteHeader="Reports" />
 	<#assign subsite=true />
@@ -10,7 +10,7 @@
 	<#assign name="reports" />
 	<#assign nonav=false />
 	<#assign homeUrl><@routes.reports.home /></#assign>
-<#elseif requestPath?starts_with('/admin/')>
+<#elseif requestPath == '/admin' || requestPath?starts_with('/admin/')>
 	<#assign bodyClass="admin-page" />
 	<#assign siteHeader="Administration & Permissions" />
 	<#assign subsite=true />
@@ -18,7 +18,7 @@
 	<#assign name="admin" />
 	<#assign nonav=false />
 	<#assign homeUrl><@routes.admin.home /></#assign>
-<#elseif requestPath?starts_with('/groups/')>
+<#elseif requestPath == '/groups' || requestPath?starts_with('/groups/')>
 	<#assign bodyClass="groups-page" />
 	<#assign siteHeader="Small Group Teaching" />
 	<#assign subsite=true />
