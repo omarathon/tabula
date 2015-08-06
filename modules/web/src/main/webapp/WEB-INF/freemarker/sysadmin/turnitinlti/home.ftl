@@ -6,8 +6,6 @@
 
 <p><a class="btn" href="<@url page="/sysadmin/turnitinlti/submissiondetails" />">Details of a Turnitin submission</a></p>
 
-<p><a class="btn" href="<@url page="/sysadmin/turnitinlti/viewreport" />">View report</a></p>
-
 <p><a class="btn" href="<@url page="/sysadmin/turnitinlti/listendpoints" />">List endpoints for an assignment</a></p>
 
 <p><a class="btn" href="<@url page="/sysadmin/turnitinlti/conformancetester" />">Conformance tester</a></p>

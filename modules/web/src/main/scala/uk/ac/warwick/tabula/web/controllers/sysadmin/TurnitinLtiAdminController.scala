@@ -9,8 +9,6 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiResponse
-import uk.ac.warwick.tabula.commands.coursework.turnitinlti.TurnitinLtiViewReportCommand
-import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/sysadmin/turnitinlti"))
@@ -135,26 +133,5 @@ class LtiConformanceTesterController extends BaseSysadminController {
 			val response: TurnitinLtiResponse = cmd.apply()
 			Mav("sysadmin/turnitinlti/conformancetester-result",
 				"response" -> response)
-		}
-}
-
-@Controller
-@RequestMapping(value = Array("/sysadmin/turnitinlti/viewreport"))
-class TurnitinLtiViewReportController extends BaseSysadminController {
-
-	validatesSelf[SelfValidating]
-
-	@ModelAttribute("turnitinLtiViewReportCommand")
-	def turnitinLtiViewReportCommand(user: CurrentUser) = TurnitinLtiViewReportCommand(user)
-
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/view-report-form")
-
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiViewReportCommand") cmd: Appliable[Mav], errors: Errors) =
-		if (errors.hasErrors){
-			form()
-		} else {
-			cmd.apply()
 		}
 }
