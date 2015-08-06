@@ -204,7 +204,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequestAdvanced(
-		s"${apiReportLaunch}/${attachment.originalityReport.turnitinId}", Map(
+		s"${apiReportLaunch}abcde/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
@@ -214,7 +214,13 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			request >:+ {
 				(headers, request) =>
 					val location = headers("location").headOption
-					// TODO actually, maybe don't just throw exception here!
+					// TODO we could parse the html instead of throwing an exception
+					/** If document cannot be found, we expect the following html
+					<div id="api_errorblock">
+						<h2>Sorry, we could not process your request</h2>
+						<p>The requested Object Result could not be found.</p>
+					</div>
+						**/
 					if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
 					request >- {
 						(html) => {
