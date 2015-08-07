@@ -78,7 +78,6 @@ instances:
        /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
-       /groups/test/up: 200
        /attendance/test/up: 200
   - !ruby/object:Tomcat
     deployment_state: old
@@ -96,7 +95,6 @@ instances:
        /test/up: 200
        /courses/test/up: 200
        /profiles/test/up: 200
-       /groups/test/up: 200
        /attendance/test/up: 200
   tabula-api:
   - !ruby/object:Tomcat
