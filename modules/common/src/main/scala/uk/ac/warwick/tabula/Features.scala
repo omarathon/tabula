@@ -42,6 +42,14 @@ abstract class Features {
 
 	// FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
 
+	@Value("${features.academicYear.2012:true}") var academicYear2012 = defaults.academicYear2012
+	@Value("${features.academicYear.2013:true}") var academicYear2013 = defaults.academicYear2013
+	@Value("${features.academicYear.2014:true}") var academicYear2014 = defaults.academicYear2014
+	@Value("${features.academicYear.2015:true}") var academicYear2015 = defaults.academicYear2015
+	@Value("${features.academicYear.2016:false}") var academicYear2016 = defaults.academicYear2016
+	@Value("${features.academicYear.2017:false}") var academicYear2017 = defaults.academicYear2017
+	@Value("${features.academicYear.2018:false}") var academicYear2018 = defaults.academicYear2018
+
 	@Value("${features.emailStudents:false}") var emailStudents = defaults.emailStudents
 	@Value("${features.collectRatings:true}") var collectRatings = defaults.collectRatings
 	@Value("${features.submissions:true}") var submissions = defaults.submissions
@@ -155,6 +163,14 @@ class FeaturesMessage {
 
 	// BeanProperty current required as Utils JsonMessageConverter uses Jackson
 	// without the Scala module.
+	@BeanProperty var academicYear2012 = true
+	@BeanProperty var academicYear2013 = true
+	@BeanProperty var academicYear2014 = true
+	@BeanProperty var academicYear2015 = true
+	@BeanProperty var academicYear2016 = false
+	@BeanProperty var academicYear2017 = false
+	@BeanProperty var academicYear2018 = false
+
 	@BeanProperty var emailStudents = false
 	@BeanProperty var xSendfile = true
 	@BeanProperty var activityStreams = true
