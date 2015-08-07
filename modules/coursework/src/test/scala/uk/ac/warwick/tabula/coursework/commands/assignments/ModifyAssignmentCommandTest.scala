@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.util.queue.Queue
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -276,5 +277,6 @@ object ModifyAssignmentCommandTest {
 		}
 		bean("dataSource"){mock[DataSource]}
 		bean(){mock[TriggerService]}
+		bean("indexTopic"){mock[Queue]}
 	}
 }

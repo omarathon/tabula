@@ -337,7 +337,6 @@ trait AllCompletedActionRequiredNotification extends ActionRequiredNotification 
 		completed = true
 		completedBy = user.getUserId
 		completedOn = DateTime.now
-		notificationService.update(Seq(this), user)
 	}
 }
 
@@ -347,6 +346,5 @@ trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotific
 
 	override final def actionCompleted(user: User) = transactional() {
 		dismiss(user)
-		notificationService.update(Seq(this), user)
 	}
 }
