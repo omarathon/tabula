@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Department, Route, Module}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.events.EventListener
+import uk.ac.warwick.util.queue.Queue
 
 class AdminDepartmentHomeCommandTest extends TestBase with Mockito with FunctionalContextTesting {
 
@@ -166,6 +167,7 @@ object AdminDepartmentHomeCommandTest {
 		bean(){mock[MaintenanceModeService]}
 		bean(){mock[Features]}
 		bean(){mock[TriggerService]}
+		bean("indexTopic"){mock[Queue]}
 		bean(){
 			val service = mock[ModuleAndDepartmentService]
 			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns Set.empty
