@@ -103,7 +103,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			sessionWithoutFreshFilters.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
 		}
-		
+
 		// Blitz the test department
 		transactional() {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) foreach { dept =>

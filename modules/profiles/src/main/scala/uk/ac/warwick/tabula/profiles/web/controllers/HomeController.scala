@@ -12,12 +12,12 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller class HomeController extends ProfilesController with ChecksAgent {
-	
+
 	var departmentService = Wire[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
-		
+
 	@ModelAttribute("command")
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
@@ -39,6 +39,6 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 			)
 		}
 	}
-	
+
 	@RequestMapping(Array("/view")) def redirectHome() = Redirect(Routes.home)
 }

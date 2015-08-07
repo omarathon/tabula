@@ -75,7 +75,7 @@ class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
  */
 abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assignment, val marker: User)
 	extends Command[A] with Daoisms with Logging with BindListener {
-	
+
 	// Permissions checks delegated to implementing classes FOR THE MOMENT
 
 	val uniNumberPattern = new Regex("""(\d{7,})""")
@@ -141,7 +141,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	private def validateUploadedFile(item: FeedbackItem, errors: Errors) {
 		val file = item.file
 		val uniNumber = item.uniNumber
-		
+
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
 		for((f, i) <- file.attached.zipWithIndex){
 			if (f.actualDataLength == 0) {
@@ -167,22 +167,22 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					case FoundUser(u) =>
 					case NoUser(u) => errors.rejectValue("uniNumber", "uniNumber.userNotFound", Array(uniNumber), "")
 				}
-				
+
 				validateExisting(item, errors)
 			}
 		} else {
 			errors.rejectValue("uniNumber", "NotEmpty")
 		}
 	}
-	
+
 	def validateExisting(item: FeedbackItem, errors: Errors)
 
 	private def processFiles(bits: Seq[(String, FileAttachment)]) {
-		
+
 		def store(itemMap: collection.mutable.Map[String, FeedbackItem], number: String, name: String, file: FileAttachment) =
 			itemMap.getOrElseUpdate(number, new FeedbackItem(uniNumber = number))
 				.file.attached.add(file)
-		
+
 		// go through individual files, extracting the uni number and grouping
 		// them into feedback items.
 		val itemMap = new collection.mutable.HashMap[String, FeedbackItem]()
@@ -205,21 +205,21 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				// one 7 digit number, this one might be okay.
 				store(itemMap, numbers.head, filenameOf(filename), file)
 			}
-			
+
 			// match potential module codes found in file path
 			val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map { _.subgroups(0)}.toList
-			
+
 			if(allModuleCodes.nonEmpty){
 				// the potential module code doesn't match this assignment's module code
 				if (!allModuleCodes.distinct.head.equals(assignment.module.code)){
 					moduleMismatchFiles.add(new ProblemFile(filename, file))
-				} 
+				}
 			}
-			
+
 		}
 		items = itemMap.values.toList
 	}
-	
+
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)
 

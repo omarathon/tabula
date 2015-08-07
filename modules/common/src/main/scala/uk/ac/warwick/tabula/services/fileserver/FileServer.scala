@@ -25,7 +25,7 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
 		}
 
 		out.addHeader("Content-Disposition", dispositionHeader)
-		
+
 		stream(file)
 	}
 }

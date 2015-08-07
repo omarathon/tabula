@@ -45,14 +45,14 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 	val excelContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	val WaitingRetries = 50
 	val WaitingSleep = 20000
-	
+
 	val ProgressGeneratedWorksheets = 5
 	val ProgressBuiltAssignmentData = 60
 	val ProgressPopulatedAssignments = 70
 	val ProgressPopulatedModules = 80
 	val ProgressFormattedSheets = 85
 	val ProgressDone = 100
-	
+
 	var sendEmails = true
 
 	def run(implicit job: JobInstance) = {

@@ -17,14 +17,15 @@ RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
 RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
 
 # Add trailing slash because otherwise ensadness occurs
+RewriteRule ^/api$ /api/ [QSA,L,R=301]
 RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
 RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
+RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
-RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
 
-# Remove /web context
+# Remove legacy /web context
 RewriteRule ^/web(.*)$ $1 [QSA,L,R=301]
 
 # Rewrite everything for coursework into the courses module
@@ -41,17 +42,6 @@ RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
 RewriteCond %{REQUEST_URI} ^/api/v1/(.*)
 RewriteRule (.*) http://127.0.0.1:${api:port}$1 [QSA,P,L]
 
-# Rewrite everything that isn't in a module to the web module
-RewriteCond %{REQUEST_URI} !^/exams/(.*)
-RewriteCond %{REQUEST_URI} !^/coursework/(.*)
-RewriteCond %{REQUEST_URI} !^/web/(.*)
-RewriteCond %{REQUEST_URI} !^/profiles/(.*)
-RewriteCond %{REQUEST_URI} !^/scheduling/(.*)
-RewriteCond %{REQUEST_URI} !^/groups/(.*)
-RewriteCond %{REQUEST_URI} !^/attendance/(.*)
-RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
-RewriteRule (.*) http://127.0.0.1:${proxy:port}/web$1 [QSA,P,L]
-
-# Else, go straight to app server
+# Go straight to app server
 RewriteCond %{REQUEST_URI} !^/errordocuments/(.*)
 RewriteRule (.*) http://127.0.0.1:${proxy:port}$1 [QSA,P,L]

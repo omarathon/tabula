@@ -12,17 +12,17 @@ import uk.ac.warwick.tabula.data.Transactions
 
 // scalastyle:off magic.number
 class JobTests extends TestBase with Mockito with JobTestHelp {
-	
+
 	val testingJob = new TestingJob
 	override def createJobs = Array[Job](testingJob)
-	
+
 	@Before def setup {
-		dao.clear	
+		dao.clear
 		val realUser = new User("real")
 		val fakeUser = new User("apparent")
 		currentUser = new CurrentUser(realUser, fakeUser)
 	}
-	
+
 	@Test def testingJobTest {
 		Transactions.disable {
 			dao.findOutstandingInstances(10).size should be (0)
@@ -35,6 +35,6 @@ class JobTests extends TestBase with Mockito with JobTestHelp {
 			myInstance.succeeded should be (true)
 			dao.findOutstandingInstances(10).size should be (0)
 		}
-	} 
-	
+	}
+
 }

@@ -60,7 +60,7 @@ module Cucumber
         @profiles = []
         @overridden_paths = []
         @options = default_options
-        
+
         @quiet = @disable_profile_loading = nil
       end
 
@@ -161,7 +161,7 @@ module Cucumber
             "several times, and this represents logical AND. Example: --tags @foo,~@bar --tags @zap.",
             "This represents the boolean expression (@foo || !@bar) && @zap.",
             "\n",
-            "Positive tags can be given a threshold to limit the number of occurrences.", 
+            "Positive tags can be given a threshold to limit the number of occurrences.",
             "Example: --tags @qa:3 will fail if there are more than 3 occurrences of the @qa tag.",
             "This can be practical if you are practicing Kanban or CONWIP.") do |v|
             @options[:tag_expressions] << v

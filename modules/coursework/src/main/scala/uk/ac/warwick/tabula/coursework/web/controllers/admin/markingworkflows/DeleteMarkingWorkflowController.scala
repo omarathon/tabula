@@ -20,16 +20,16 @@ class DeleteMarkingWorkflowController extends CourseworkController {
 
 	// tell @Valid annotation how to validate
 	validatesSelf[DeleteMarkingWorkflowCommand]
-	
-	@ModelAttribute("command") 
+
+	@ModelAttribute("command")
 	def cmd(@PathVariable("department") department: Department, @PathVariable("markingworkflow") markingWorkflow: MarkingWorkflow) =
 		new DeleteMarkingWorkflowCommand(department, markingWorkflow)
-	
+
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
 		Mav("admin/markingworkflows/delete").noLayoutIf(ajax)
 	}
-	
+
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
@@ -39,7 +39,7 @@ class DeleteMarkingWorkflowController extends CourseworkController {
 			Redirect(Routes.admin.markingWorkflow.list(cmd.department))
 		}
 	}
-	
+
 }
 
 @Controller

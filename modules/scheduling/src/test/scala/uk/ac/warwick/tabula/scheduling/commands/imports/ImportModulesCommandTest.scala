@@ -20,10 +20,10 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 		val moduleInfos = Seq(
             ModuleInfo("Science for Computers", "CS101", null, DegreeType.Undergraduate),
             ModuleInfo("Computers for Science", "CS102", null, DegreeType.Undergraduate))
-        
+
         // Mocks
 		val mockModuleService = mock[ModuleAndDepartmentService]
-		
+
 		// The class under test, with mocks wired
 		val command = new ImportModules with Logging with ModuleImporterComponent with ModuleAndDepartmentServiceComponent {
 			val moduleImporter = mock[ModuleImporter]
@@ -36,16 +36,16 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 		new Environment {
 			when(mockModuleService.getModuleByCode("CS101")) thenReturn None
 			when(mockModuleService.getModuleByCode("CS102")) thenReturn None
-			
+
 			command.importModules(moduleInfos, department)
-			
+
 			verify(mockModuleService, times(2)).saveOrUpdate(isA[Module])
 		}
 	}
 
 	// HFC-354
-	@Test 
-	def updateModuleName { 
+	@Test
+	def updateModuleName {
 		new Environment {
 			val existingModule = new Module {
 				code = "CS101"
@@ -60,8 +60,8 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 			existingModule.name should be ("Science for Computers")
 		}
 	}
-	
-	private def isA[A : ClassTag] = { 
+
+	private def isA[A : ClassTag] = {
 		org.mockito.Matchers.isA[A](classTag[A].runtimeClass.asInstanceOf[Class[A]])
 	}
 

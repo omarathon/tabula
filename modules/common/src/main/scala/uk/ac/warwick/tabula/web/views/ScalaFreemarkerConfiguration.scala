@@ -21,9 +21,9 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2_3_0) with ServletContextAware {
 	// Default constructor init
-	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)	
+	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
 	this.setAutoIncludes(List("/WEB-INF/freemarker/prelude.ftl"))
-	
+
 	// Note that this doesn't affect inside servlet; see CustomFreemarkerExceptionHandler
 	this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
 

@@ -255,8 +255,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def comments: Option[String] = commentsFormValue.map(_.value)
 
 	def commentsFormattedHtml: String = formattedHtml(comments)
-	
-	
+
+
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
 		Option(firstMarkerFeedback).getOrElse({

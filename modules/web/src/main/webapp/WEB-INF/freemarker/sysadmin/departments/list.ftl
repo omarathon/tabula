@@ -9,12 +9,12 @@
 		<#if !department.hasParent>
 			<@department_item department />
 		</#if>
-	</#list> 
+	</#list>
 </tbody>
 </table>
 
 <div id="department-list-edit-dropdown">
-	
+
 </div>
 
 <#macro department_item department>
@@ -25,7 +25,7 @@
 		</td>
 		<td>
 		<a href="<@url page="/sysadmin/departments/${department.code}/" />"><strong>${department.name}</strong></a>
-		
+
 		<#if department.children?has_content>
 			<table><tbody>
 			<#list department.children as child>
@@ -33,7 +33,7 @@
 			</#list>
 			</tbody></table>
 		</#if>
-		
+
 		</td>
 		<td>
 		<#--
@@ -43,7 +43,7 @@
 				<a href="#" class="btn btn-mini">New child</a>
 				<a href="#" class="btn btn-mini">Arrange modules</a>
 			</#if>
-			
+
 			-->
 		</td>
 	</tr>

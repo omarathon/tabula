@@ -23,8 +23,8 @@ class PermissionFunction extends TemplateMethodModelEx with Logging {
 
 		val currentUser = RequestInfo.fromThread.get.user
 
-		val arguments = args.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
-		
+		val arguments = args.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+
 		arguments match {
 			case Seq(actionName: String, item: PermissionsTarget) =>
 				securityService.can(currentUser, Permissions.of(actionName), item): JBoolean

@@ -1,5 +1,5 @@
 /**
- * Scripts used only by the small group teaching admin section. 
+ * Scripts used only by the small group teaching admin section.
  */
 (function ($) { "use strict";
 
@@ -33,10 +33,10 @@ $(function(){
 	});
 
     // Zebra striping on lists of modules/groups
-    $('.module-info').each(function(i, module) { 
+    $('.module-info').each(function(i, module) {
         exports.zebraStripeGroups($(module));
     });
-    
+
     $('.module-info.empty').css('opacity',0.66)
         .find('.module-info-contents').hide().end()
         .click(function(){
@@ -44,24 +44,24 @@ $(function(){
                 .find('.module-info-contents').show().end();
         })
         .hide();
-        
+
     $('.dept-show').click(function(event){
-    	event.preventDefault();   	
+		event.preventDefault();
     	var hideButton = $(this).find("a");
-    	
+
         $('.striped-section.empty').toggle('fast', function() {
         	if($('.module-info.empty').is(":visible")) {
         		hideButton.html('<i class="icon-eye-close"></i> Hide');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
-        		
-        	} else { 
+
+			} else {
         		hideButton.html('<i class="icon-eye-open"></i> Show');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
         	}
         });
 
     });
-    
+
     $('.show-archived-small-groups').click(function(e){
         e.preventDefault();
         $(e.target).hide().closest('.striped-section').find('.item-info.archived').show();

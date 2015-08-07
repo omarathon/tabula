@@ -82,7 +82,7 @@ trait ZipCreator extends Logging {
 
 	private def isOverSizeLimit(items: Seq[ZipItem]) =
 		items.map { _.length }.sum > MaxZipItemsSizeInBytes
-	
+
 	private val CompressionLevel = Deflater.BEST_COMPRESSION
 
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
@@ -92,12 +92,12 @@ trait ZipCreator extends Logging {
 		file.getParentFile.mkdirs
 		openZipStream(file) { (zip) =>
 			zip.setLevel(CompressionLevel)
-			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip 
+			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip
 			zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
 			writeItems(items, zip, progressCallback)
 		}
 	}
-	
+
 	private val UnusedFilenameAttempts = 100
 
 	/** Try 100 times to get an unused filename */
@@ -130,12 +130,12 @@ trait ZipCreator extends Logging {
 		}
 		writeFolder("", items)
 	}
-	
+
 	def trunc(name: String, limit: Int) =
 		if (name.length() <= limit) name
 		else {
 			val ext = FileUtils.getLowerCaseExtension(name)
-			if (ext.hasText) FileUtils.getFileNameWithoutExtension(name).safeSubstring(0, limit) + "." + ext 
+			if (ext.hasText) FileUtils.getFileNameWithoutExtension(name).safeSubstring(0, limit) + "." + ext
 			else name.substring(0, limit)
 		}
 
@@ -158,7 +158,7 @@ trait ZipCreator extends Logging {
 			if (zip != null) zip.close()
 		}
 	}
-	
+
 	private val BufferSizeInBytes = 4096 // 4kb
 
 	// copies from is to os, but doesn't close os

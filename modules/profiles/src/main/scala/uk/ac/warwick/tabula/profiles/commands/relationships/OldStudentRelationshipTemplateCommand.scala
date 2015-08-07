@@ -11,7 +11,7 @@ class OldStudentRelationshipTemplateCommand(val department: Department, val rela
 	extends Command[ExcelView] with ReadOnly with Unaudited with GeneratesStudentRelationshipWorkbook {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
-	
+
 	var service = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 

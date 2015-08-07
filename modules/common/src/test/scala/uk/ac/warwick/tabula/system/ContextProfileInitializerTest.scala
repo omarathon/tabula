@@ -20,7 +20,7 @@ class ContextProfileInitializerTest extends TestBase {
 				contain ("scheduling")
 		)
 	}
-	
+
 	@Test def prodNoWeb {
 		val initializer = new ContextProfileInitializer
 		initializer.testConfig = mockProperties(
@@ -34,12 +34,12 @@ class ContextProfileInitializerTest extends TestBase {
 				contain ("production")
 		)
 	}
-	
+
 	def mockProperties(pairs:(String, String)*) =
 		new MockPropertySource {
 			for ((key, value) <- pairs) {
 				setProperty(key, value)
 			}
 		}
-	
+
 }

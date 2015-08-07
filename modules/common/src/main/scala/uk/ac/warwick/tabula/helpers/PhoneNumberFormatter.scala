@@ -13,7 +13,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat._
 	Formats a phone number into a local format (for GB) or international format (for non-GB)
 */
 object PhoneNumberFormatter {
-	
+
 	private val util = PhoneNumberUtil.getInstance()
 	private val homeRegion = "GB"
 	private val homeCountryCode = util.getCountryCodeForRegion(homeRegion)
@@ -29,11 +29,11 @@ object PhoneNumberFormatter {
 	def format(unformatted: String) = {
 		try {
 			val number = util.parseAndKeepRawInput(unformatted, homeRegion)
-			
-			val format = 
+
+			val format =
 				if (number.getCountryCode == homeCountryCode) NATIONAL
 				else INTERNATIONAL
-				
+
 			util.format(number, format)
 		} catch {
 			// We don't understand how to parse this number

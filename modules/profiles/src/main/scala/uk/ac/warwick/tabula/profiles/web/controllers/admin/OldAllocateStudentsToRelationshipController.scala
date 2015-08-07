@@ -21,11 +21,11 @@ import scala.collection.JavaConverters._
 @Controller
 @RequestMapping(value=Array("/department/{department}/{relationshipType}/allocate-old"))
 class OldAllocateStudentsToRelationshipController extends ProfilesController {
-	
+
 	validatesSelf[OldAllocateStudentsToRelationshipCommand]
-	
+
 	@ModelAttribute
-	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = 
+	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
 		new OldAllocateStudentsToRelationshipCommand(department, relationshipType, user)
 
 	@RequestMapping
@@ -33,13 +33,13 @@ class OldAllocateStudentsToRelationshipController extends ProfilesController {
 		cmd.populate()
 		form(cmd)
 	}
-	
+
 	@RequestMapping(method=Array(POST), params=Array("action=refresh"))
 	def form(cmd: OldAllocateStudentsToRelationshipCommand) = {
 		cmd.sort()
 		Mav("relationships/allocate-old")
 	}
-	
+
 	@RequestMapping(method = Array(POST), params = Array("doPreviewSpreadsheetUpload", "action!=refresh"))
 	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: OldAllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
 		if (errors.hasErrors && errors.getFieldErrors.asScala.exists { _.getCode == "file.wrongtype.one" }) {

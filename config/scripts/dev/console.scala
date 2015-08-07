@@ -23,10 +23,10 @@ object App {
       f(session)
     } finally {
       if (session != null) session.close()
-    } 
+    }
   }
 
-  
+
 }
 
 App.context

@@ -20,7 +20,7 @@ trait AutowiringJobServiceComponent extends JobServiceComponent {
 @Service
 class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	import uk.ac.warwick.tabula.data.Transactions._
-	
+
 	// How many jobs to load and run each time
 	val RunBatchSize = 10
 
@@ -50,7 +50,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		 * TODO no handle on thread to actually kill it if it's running
 		 * right now.
 		 */
-		
+
 		// Don't fail if the job is finished
 		if (!instance.finished) {
 			transactional() {

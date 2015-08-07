@@ -15,7 +15,7 @@ import uk.ac.warwick.spring.Wire
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/display"))
 class DisplaySettingsController extends AdminController {
-	
+
 	var relationshipService = Wire[RelationshipService]
 
 	type DisplaySettingsCommand = Appliable[Department] with PopulateOnForm
@@ -33,7 +33,7 @@ class DisplaySettingsController extends AdminController {
 		cmd.populate()
 		viewSettings(dept)
 	}
-	
+
 	private def viewSettings(dept: Department) =
 		crumbed(Mav("admin/display-settings",
 			"department" -> dept,

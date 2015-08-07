@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinLtiJob
  * Returns the job instance ID for status tracking.
  */
 class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance] {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 

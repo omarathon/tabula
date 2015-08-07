@@ -36,7 +36,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
-	
+
 	var fileHasher = Wire[FileHasher]
 
 	val idSplitSize = 2
@@ -58,9 +58,9 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def targetFile(id: String): File = new File(attachmentDir, partition(id))
 	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
-	private def saveAttachment(file: FileAttachment) {	
+	private def saveAttachment(file: FileAttachment) {
 		session.saveOrUpdate(file)
-		
+
 		if (!file.hasData && file.uploadedData != null) {
 			persistFileData(file, file.uploadedData)
 		}
@@ -75,7 +75,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		file.temporary = false
 		saveAttachment(file)
 	}
-	
+
 	def saveOrUpdate(file: FileAttachment) = session.saveOrUpdate(file)
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
@@ -84,7 +84,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		directory.mkdirs()
 		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
 		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
-		
+
 		file.hash = fileHasher.hash(new FileInputStream(target))
 		session.saveOrUpdate(file)
 	}

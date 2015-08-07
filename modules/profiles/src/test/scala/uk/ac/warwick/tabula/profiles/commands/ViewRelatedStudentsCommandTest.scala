@@ -73,19 +73,19 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		result should be (Seq(courseDetails1, courseDetails2))
 
 	}}
-	
+
 	@Test
 	def helperFunctions() { new Fixture {
 		val mockProfileService = mock[ProfileService]
-		
+
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
-		
+
 		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, Nil) returns Seq(courseDetails1, courseDetails2)
-		
+
 		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
 			var profileService = mockProfileService
 		}
-		
+
 		command.allCourses should be (Seq(courseDetails1, courseDetails2))
 		command.allDepartments should be (Seq(testDepartment))
 		command.allRoutes should be (Seq(testRoute1, testRoute2))

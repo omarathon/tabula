@@ -48,29 +48,29 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		this()
 		this.group = _group
 	}
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_id", insertable = false, updatable = false)
 	var group: SmallGroup = _
-	
+
 	// Store Week Ranges as ACADEMIC week numbers - so week 1 is the first week of Autumn term, week 1 of spring term is 15 or 16, etc.
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.WeekRangeListUserType")
 	var weekRanges: Seq[WeekRange] = Nil
-	
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.DayOfWeekUserType")
 	var day: DayOfWeek = _
-	
+
 	var startTime: LocalTime = _
 	var endTime: LocalTime = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
 	var location: Location = _
-	
+
 	var title: String = _
-	
+
 	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
-		
+
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "tutorsgroup_id")
 	private var _tutors: UserGroup = UserGroup.ofUsercodes
@@ -82,9 +82,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		}
 	}
 	def tutors_=(group: UserGroup) { _tutors = group }
-	
+
 	def permissionsParents = Option(group).toStream
-	
+
 	def toStringProps = Seq(
 		"id" -> id,
 		"weekRanges" -> weekRanges,
@@ -101,9 +101,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     tutors.hasSameMembersAs(other.tutors)
   }
 
-  def duplicateTo(group:SmallGroup):SmallGroupEvent= {
+  def duplicateTo(group: SmallGroup, transient: Boolean): SmallGroupEvent = {
     val newEvent = new SmallGroupEvent
-    newEvent.id = id
+		if (!transient) newEvent.id = id
     newEvent.day = day
     newEvent.endTime = endTime
     newEvent.group = group

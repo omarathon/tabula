@@ -21,7 +21,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		val department = Fixtures.department("bs")
 		val module = Fixtures.module("bs101")
 		module.adminDepartment = department
-		
+
 		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
 
 		val assignment = Fixtures.assignment("Test")

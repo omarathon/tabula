@@ -19,8 +19,8 @@ import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term.TermType
 
 class RecordMonitoringPointCommandTest extends TestBase with Mockito {
-	
-	trait CommandStateTestSupport extends AttendanceMonitoringServiceComponent 
+
+	trait CommandStateTestSupport extends AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent with TermServiceComponent with SecurityServiceComponent {
 
 		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
@@ -28,7 +28,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		val termService = smartMock[TermService]
 		val securityService = smartMock[SecurityService]
 	}
-	
+
 	trait Fixture {
 		val thisUser = new User("cusfal")
 		thisUser.setIsLoggedIn(true)
@@ -66,7 +66,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		val student2point2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.Attended)
 		val student3point2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student3, AttendanceState.Attended)
 	}
-	
+
 	trait StateFixture extends Fixture {
 		val state = new RecordMonitoringPointCommandState with CommandStateTestSupport {
 			val templatePoint: AttendanceMonitoringPoint = point1
@@ -77,7 +77,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		state.profileService.getAllMembersWithUniversityIds(Seq(student1.universityId, student2.universityId)) returns Seq(student1, student2)
 		state.profileService.getAllMembersWithUniversityIds(Seq(student2.universityId, student3.universityId)) returns Seq(student2, student3)
 	}
-	
+
 	trait FilteredPointsFixture extends Fixture {
 		val thisFilteredPoints =
 			Map(
@@ -94,7 +94,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 				AttendanceMonitoringStudentData(student3.firstName, student3.lastName, student3.universityId, "", new LocalDate, null, null)
 			)
 	}
-	
+
 	@Test
 	def statePointsToRecord() {	new StateFixture with FilteredPointsFixture with StudentDatasFixture {
 		state.filteredPoints = thisFilteredPoints

@@ -49,7 +49,7 @@ class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 		points.remove(point)
 		point.pointSet = null
 	}
-	
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "route_id")
 	var route: Route = _
@@ -61,7 +61,7 @@ class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
 	var academicYear: AcademicYear = _
-	
+
 	def permissionsParents = Option(route).toStream
 
 }

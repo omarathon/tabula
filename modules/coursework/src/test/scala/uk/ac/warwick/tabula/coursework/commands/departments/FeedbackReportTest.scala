@@ -44,14 +44,14 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	@Test
 	def outstandingFeedbackCountTest() {
 		val report = getTestFeedbackReport
-		
+
 		assignmentOne.feedbacks.get(9).released = false
 		report.getFeedbackCount(assignmentOne) should be (FeedbackCount(9,0, dateTime(2013, 3, 25), dateTime(2013, 3, 25))) // 10 on time
 		val outstandingFeedbackCount = assignmentOne.submissions.size() - report.getFeedbackCount(assignmentOne).onTime
 		outstandingFeedbackCount should be (1)
 	}
-	
-	
+
+
 
 	/**
 	 * Checks that the dissertation feedback is counted as on time

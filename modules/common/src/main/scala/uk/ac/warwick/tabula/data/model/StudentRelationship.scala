@@ -46,7 +46,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	// at time of writing (2014-10-30) this isn't set anywhere in the app so do this directly in the database
 	@Column(name = "terminated")
 	var explicitlyTerminated: Boolean = _
-	
+
 	var percentage: JBigDecimal = null
 
 	// assume that all-numeric value is a member (not proven though)
@@ -58,7 +58,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	def agentLastName: String
 
 	def studentMember = Option(studentCourseDetails).map { _.student }
-	def studentMember_=(student: StudentMember) { 
+	def studentMember_=(student: StudentMember) {
 		student.mostSignificantCourseDetails.foreach { scd =>
 			studentCourseDetails = scd
 		}
@@ -78,16 +78,16 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 @DiscriminatorValue("member")
 class MemberStudentRelationship extends StudentRelationship {
 	def isAgentMember = true
-	
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = Array(CascadeType.PERSIST))
 	@JoinColumn(name = "agent")
 	var _agentMember: Member = _
 	def agentMember = Option(_agentMember)
 	def agentMember_=(member: Member) { _agentMember = member }
-	
+
 	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
-	
+
 	def agent = agentMember.map { _.universityId }.orNull
 
 	override def toEntityReference = new StudentRelationshipEntityReference().put(this)
@@ -139,7 +139,7 @@ object ExternalStudentRelationship {
 		rel.startDate = DateTime.now
 		rel
 	}
-	
+
 	def apply(agent: String, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails) = {
 		val rel = new ExternalStudentRelationship
 		rel.agent = agent

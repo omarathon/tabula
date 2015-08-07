@@ -10,14 +10,14 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 case class RouteAuditor(route: model.Route) extends BuiltInRole(RouteAuditorRoleDefinition, route)
 
 case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Route Auditor"
 
-	GrantsScopedPermission( 
+	GrantsScopedPermission(
 		Route.Administer,
-			
+
 		MonitoringPoints.View,
-		
+
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
 	  Profiles.Read.Timetable,
@@ -27,15 +27,15 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 
 		Profiles.Search,
 		Profiles.ViewSearchResults,
-		
+
 		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
-		
+
 		MemberNotes.Read,
-		
+
 		Profiles.Read.SmallGroups,
 		Profiles.Read.Coursework,
 		Profiles.Read.AccreditedPriorLearning,
-		
+
 		// Can read Coursework info for any student on this Route
 		Submission.Read,
 		AssignmentFeedback.Read,

@@ -34,12 +34,12 @@ Please specify what you would like to delete:
 </@spring.bind>
 
 </p>
-You only need to do this if if an erroneous submission has been made or the wrong feedback has been uploaded. 
+You only need to do this if if an erroneous submission has been made or the wrong feedback has been uploaded.
 If you are trying to re-use this assignment, you should go back and create a separate assignment instead.
 </p>
 <p>
 <@form.errors path="confirm" />
-<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submissions/feedback items.</@form.label> 
+<@form.label checkbox=true><@f.checkbox path="confirm" /> I confirm that I want to permanently delete these submissions/feedback items.</@form.label>
 </p>
 
 <div class="submit-buttons">

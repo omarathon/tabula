@@ -20,7 +20,7 @@ class ModuleDaoTest extends PersistenceTestBase {
 		val cs241 = dao.getByCode("cs241").get
 		val cs242 = dao.getByCode("cs242").get
 	}
-	
+
 	@Test def crud { transactional { tx =>
 		new Context {
 			dao.allModules should be (Seq(cs108, cs240, cs241, cs242))
@@ -89,5 +89,5 @@ class ModuleDaoTest extends PersistenceTestBase {
 		dao.getByCode("four").get.missingFromImportSince should be (previously)
 
 	}
-	
+
 }

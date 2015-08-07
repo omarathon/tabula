@@ -93,7 +93,7 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 }
 
 @Service("courseAndRouteService")
-class CourseAndRouteServiceImpl 
+class CourseAndRouteServiceImpl
 	extends AbstractCourseAndRouteService
 		with AutowiringRouteDaoComponent
 		with AutowiringCourseDaoComponent

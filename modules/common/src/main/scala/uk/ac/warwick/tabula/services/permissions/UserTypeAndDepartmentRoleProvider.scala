@@ -16,19 +16,19 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
-	
+
 	var profileService = Wire.auto[ProfileService]
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
-	
+
 	private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
 		val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
-		
+
 		memberRole #:: (member.userType match {
-			case Staff => member.affiliatedDepartments.map { department => 
-				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)) 
+			case Staff => member.affiliatedDepartments.map { department =>
+				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
 			}
-			case Emeritus => member.affiliatedDepartments.map { department => 
-				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)) 
+			case Emeritus => member.affiliatedDepartments.map { department =>
+				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
 			}
 			case _ => Stream.empty
 		})
@@ -58,7 +58,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 			else getRolesForSSO(user) :+ LoggedInRole(user.apparentUser)
 		} else Stream.empty
 	}
-	
+
 	def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
-	
+
 }

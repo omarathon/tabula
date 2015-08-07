@@ -28,33 +28,33 @@ object Turnitin {
 
 	def validFileType(file: FileAttachment): Boolean =
 		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
-		
+
 	/**
      * ID that we should store classes under. They are per-module so we base it on the module code.
      * This ID is stored within Turnitin and requests for the same ID should return the same class.
      */
     def classIdFor(assignment: Assignment, prefix: String) = ClassId(prefix + "-" + assignment.module.code)
-    
+
     /**
      * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
      * This ID is stored within Turnitin and requests for the same ID should return the same assignment.
      */
     def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
-    
+
     def classNameFor(assignment: Assignment) = {
         val module = assignment.module
         ClassName(module.code.toUpperCase + " - " + module.name)
     }
-    
+
     def assignmentNameFor(assignment: Assignment) = {
         AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
-    } 
+    }
 }
 
 /**
  * Service for accessing the Turnitin plagiarism API.
  *
- * You call login() first with a user's details, which if successful will give you a 
+ * You call login() first with a user's details, which if successful will give you a
  * Session that has methods that will be called as that user. When done you can call
  * logout() to end the session.
  */
@@ -73,7 +73,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 	// Warwick's API version
 	@Value("${turnitin.integration}") var integrationId: String = _
-	
+
 	@Value("${turnitin.class.prefix}") var classPrefix: String =_
 
 	/**
@@ -94,7 +94,7 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
 			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}	
+		}
 	}
 
 	override def destroy {
@@ -104,13 +104,13 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	override def afterPropertiesSet {
 
 	}
-	
+
 	def login(user: CurrentUser): Option[Session] = login( user.email, user.firstName, user.lastName )
-	
+
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
 		val userEmail = if (email == null || email.isEmpty) firstName + lastName + "@turnitin.warwick.ac.uk" else email
-			
+
 		session.userEmail = userEmail
 		session.userFirstName = firstName
 		session.userLastName = lastName

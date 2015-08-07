@@ -1,6 +1,6 @@
-// // // // // // // // // // // // // // // // // // // 
-// // // // // // //  js glass box  // // // // // // // 
-// // // // // // // // // // // // // // // // // // // 
+// // // // // // // // // // // // // // // // // // //
+// // // // // // //  js glass box  // // // // // // //
+// // // // // // // // // // // // // // // // // // //
 
 // don't redefine
 if (typeof WPopupBox === 'undefined') {
@@ -17,7 +17,7 @@ var ie_lt7 = /MSIE ((5\.5)|6)/.test(navigator.userAgent) && navigator.platform =
 
 var WPopupBox = function(config, options) {
   WPopupBox.jq = this.jq = (typeof jQuery != 'undefined');
-	
+
   if (!config || (!config.images && config.imageroot)) {
 	var imageroot = this.imageroot = (config||WPopupBox.defaultConfig).imageroot || '/static_war/popup/';
 	config = {
@@ -37,7 +37,7 @@ var WPopupBox = function(config, options) {
 	    rightArr : jsLoadImage(imageroot+'rightarr.png'),
 	    transparent : jsLoadImage(imageroot+'shim.gif')
 	  },
-	   margin : [ 10,13,20,16 ], //top right bottom left 
+	   margin : [ 10,13,20,16 ], //top right bottom left
 	   padding : [20,24,0,24],
 	   topArr : [38,18],
 	   bottArr : [37,20],
@@ -45,7 +45,7 @@ var WPopupBox = function(config, options) {
 	   rightArr : [20,39]
 	};
   }
-  
+
   if (this.jq) {
 	  this.config = [];
 	  jQuery.extend(this.config, WPopupBox.defaultConfig);
@@ -54,43 +54,43 @@ var WPopupBox = function(config, options) {
 	  this.config = $H(WPopupBox.defaultConfig).merge(config).toObject();
   }
   options = options || {};
-  
+
   var self = this;
- 
-  
+
+
   this.initialised = false;
-  
+
   this.showing = false;
- 
+
   this.glassElement = document.createElement('div');
   this.glassElement.className = 'WPopupGlass';
-  
+
   this.width = null;
   this.height = null;
   this.x = null;
   this.y = null;
-  
+
   this.topArrowOn = false;
   this.bottomArrowOn = false;
   this.leftArrowOn = false;
   this.rightArrowOn = false;
-  
+
   this.imageElements = {};
   this.imageElements.c = document.createElement('img');
   this.imageElements.c.className = 'c';
   this._setImage(this.imageElements.c, config.images.c.src);
-    
+
   var margin = config.margin;
   var dtop = margin[0];
   var dright = margin[1];
   var dbottom = margin[2];
   var dleft = margin[3];
-  
+
   this.extraHeight = dtop+dbottom+config.padding[0]+config.padding[2];
-  
+
   var i = this.imageElements;
   var r = this.glassElement;
-    
+
   i.tl = this._makeDiv('tl alpha', config.images.tl, dleft, dtop);
   i.tr = this._makeDiv('tr alpha', config.images.tr, dright, dtop);
   i.bl = this._makeDiv('bl alpha', config.images.bl, dleft, dbottom);
@@ -98,41 +98,41 @@ var WPopupBox = function(config, options) {
   i.t = this._makeEdge('t alpha', config.images.t, dleft, dtop);
   i.r = this._makeEdge('r alpha', config.images.r, dright, dtop);
   i.b = this._makeEdge('b alpha', config.images.b, dright, dbottom);
-  i.l = this._makeEdge('l alpha', config.images.l, dleft, dbottom);  
+  i.l = this._makeEdge('l alpha', config.images.l, dleft, dbottom);
   i.ta = this._makeDiv('tArr alpha', config.images.topArr, config.topArr[0], config.topArr[1]);
   i.ba = this._makeDiv('bArr alpha', config.images.bottArr, config.bottArr[0], config.bottArr[1]);
   i.la = this._makeDiv('lArr alpha', config.images.leftArr, config.leftArr[0], config.leftArr[1]);
   i.ra = this._makeDiv('rArr alpha', config.images.rightArr, config.rightArr[0], config.rightArr[1]);
-  
+
   var each = (this.jq) ? jQuery.each : function(arr, callback) {
 	 $A(arr).each(function(v,i){
 		 callback(i,v);
 	 })
   };
-  
+
   each([i.ta, i.ba, i.la, i.ra], function(index, im){
 	  im.style.display = 'none';
 	  im.style.position = 'relative';
   });
-   
+
   each([i.tl, i.tr, i.bl, i.br, i.t, i.r, i.b, i.l, i.c, i.ta, i.ba, i.la, i.ra], function(index, im){
 	  r.appendChild(im);
   });
-  
+
   i.t.style.left = this.config.margin[3] + 'px';
   i.b.style.left = this.config.margin[3] + 'px';
   i.c.style.left = this.config.margin[3] + 'px';
   i.l.style.top = this.config.margin[0] + 'px';
   i.r.style.top = this.config.margin[0] + 'px';
   i.c.style.top = this.config.margin[0] + 'px';
-  
+
   this.contentElement = document.createElement('div');
   this.contentElement.className = 'WPopupBoxContent';
-  
+
   // Optionally provide a div containing initial content.
   // It will be used as the root element.
   var existingElement = options.element;
-  
+
   if (existingElement) {
 	  this.rootElement = existingElement;
 	  this.setContentFromElement(existingElement);
@@ -140,12 +140,12 @@ var WPopupBox = function(config, options) {
 	  this.rootElement = document.createElement('div');
   }
   this.rootElement.className = 'WPopupBox';
-  
+
   this.hide();
-  
+
   this.rootElement.appendChild(this.glassElement);
   this.rootElement.appendChild(this.contentElement);
- 
+
   if (existingElement) {
 	  // we started off with some content so make sure it fits
 	  this.setSize(450,350);
@@ -158,20 +158,20 @@ var WPopupBox = function(config, options) {
 	  document.body.appendChild(this.rootElement);
 	  this.setSize(450,350);
   }
-  
+
   if (options.width) {
 	  if (options.height) {
-		 this.setSize(options.width, options.height);  
+		 this.setSize(options.width, options.height);
 	  } else {
 		 this.setSize(options.width, 350);
 		 this.setHeightToFit();
 	  }
   }
-  
+
   if (options.x && options.y) {
 	  this.setPosition(options.x, options.y);
   }
-  
+
   // monitor presses of Esc and close the popup if it's open
   if (this.jq) {
 	  jQuery(document).keydown(function(event){
@@ -189,7 +189,7 @@ var WPopupBox = function(config, options) {
 		  }
 	  }.bind(this));
   }
-	  
+
   this.initialised = true;
 };
 
@@ -200,22 +200,22 @@ WPopupBox.defaultConfig = {};
  */
 WPopupBox.prototype.setPosition = function(x,y) {
   this.x = x; this.y = y;
-  
+
   if (this.topArrowOn) {
-     y += this.imageElements.ta.clientHeight; 
+     y += this.imageElements.ta.clientHeight;
   }
-  
+
   if (this.leftArrowOn) {
 	 x += this.imageElements.la.clientWidth;
   }
-  
+
   	/**
 	 * Get the current viewport size.
 	 */
 	function getViewportSize()
 	{
 		 var size = [0, 0];
-		
+
 		 if (typeof window.innerWidth != 'undefined')
 		 {
 		   size = [
@@ -239,23 +239,23 @@ WPopupBox.prototype.setPosition = function(x,y) {
 		       document.getElementsByTagName('body')[0].clientHeight
 		   ];
 		 }
-		
+
 		 return size;
 	}
-	
+
 	/**
 	 * Get the current scroll position of the page.
 	 */
 	function getScrollingPosition()
 	{
 		 var position = [0, 0];
-		 if (typeof window.pageYOffset != 'undefined') 
+		 if (typeof window.pageYOffset != 'undefined')
 		 {
-		   position = [ window.pageXOffset,  
+		   position = [ window.pageXOffset,
 		                window.pageYOffset ];
-		 } 
+		 }
 		 else if (typeof document.documentElement.scrollTop
-		     != 'undefined' && document.documentElement.scrollTop > 0) 
+		     != 'undefined' && document.documentElement.scrollTop > 0)
 		 {
 		   position = [ document.documentElement.scrollLeft,
 		                document.documentElement.scrollTop ];
@@ -267,17 +267,17 @@ WPopupBox.prototype.setPosition = function(x,y) {
 		 }
 		 return position;
 	}
-  
+
   var viewportSize = getViewportSize();
   var scrollPosition = getScrollingPosition();
 
   // In firefox this doesn't include scrollbars, so knock 20px off just to be safe
   var windowHeight = viewportSize[1] + scrollPosition[1] - 20;
   var windowWidth = viewportSize[0] + scrollPosition[0] - 20;
-  
+
   var right = x + this.width;
   var bottom = y + this.height;
-  
+
   // scrolled off the right
   if (right > windowWidth) {
 	  x = windowWidth - this.width;
@@ -294,13 +294,13 @@ WPopupBox.prototype.setPosition = function(x,y) {
   if (y < 0) {
   	  y = 0;
   }
-  
+
   this.rootElement.style.left = x+'px';
   this.rootElement.style.top = y+'px';
   // move content element into place
   this.contentElement.style.left = (this.config.padding[3]) + 'px';
   this.contentElement.style.top = (this.config.padding[0]) + 'px';
- 
+
   var arrow = this.imageElements.ta;
   arrow.style.left = (this.width / 2 - arrow.clientWidth/2) + 'px';
   arrow.style.bottom = '10px';
@@ -309,9 +309,9 @@ WPopupBox.prototype.setPosition = function(x,y) {
   s.top = (this.height / 2 - this.imageElements.la.clientHeight/2) + 'px';
   s.marginLeft = '-5px';
   s.marginTop = '-' + Math.floor(this.config.leftArr[1]/2) + 'px';
-  
+
   s = this.imageElements.ra.style;
-//  s.top = (this.height / 2 - this.imageElements.ra.clientHeight/2) + 'px';  
+//  s.top = (this.height / 2 - this.imageElements.ra.clientHeight/2) + 'px';
   s.left = (this.width - this.config.margin[1]) + 'px' ;
   s.marginTop = '-' + Math.floor(this.config.rightArr[1]/2) + 'px';
 
@@ -319,7 +319,7 @@ WPopupBox.prototype.setPosition = function(x,y) {
   s.left = ((this.width - this.imageElements.ba.clientWidth) / 2) + 'px';
   s.top = this.height + 'px';
   s.marginTop = '-18px'; // probably some way of calculating this...
-  
+
 };
 
 WPopupBox.prototype.setSize = function(w,h) {
@@ -338,7 +338,7 @@ WPopupBox.prototype.setSize = function(w,h) {
  */
 WPopupBox.prototype.setHeightToFit = function() {
   if (this.everShown) {
-	  var contentHeight = this.contentElement.clientHeight;   
+	  var contentHeight = this.contentElement.clientHeight;
 	  this.setSize(this.width, contentHeight + this.extraHeight);
   } else {
 	  this.delayedSetHeight = true;
@@ -347,7 +347,7 @@ WPopupBox.prototype.setHeightToFit = function() {
 
 WPopupBox.prototype.increaseHeightToFit = function() {
 	  if (this.everShown) {
-		  var height = this.contentElement.clientHeight + this.extraHeight;   
+		  var height = this.contentElement.clientHeight + this.extraHeight;
 		  if (height > this.height) {
 			  this.setSize(this.width, height);
 		  }
@@ -383,7 +383,7 @@ WPopupBox.prototype.show = function() {
 };
 
 WPopupBox.prototype.toggle = function() {
-  if (this.isShowing()) 
+  if (this.isShowing())
   { this.hide(); } else { this.show(); }
 }
 
@@ -404,7 +404,7 @@ WPopupBox.prototype.setContent = function(content) {
 /**
  * Fetch the given URL as content and show the popup.
  * Equilent to old showPopup() function.
- * 
+ *
  * Valid options: {
  * 	 target: an element to point the popup at
  *   position: if set to 'right', it will use a left arrow to point. otherwise it will be below.
@@ -425,17 +425,17 @@ WPopupBox.prototype.showUrl = function(url, options) {
 		}
 		if (options.target) {
 			var t = options.target;
-			if (options.position === 'right') { popup.positionRight(t); } 
+			if (options.position === 'right') { popup.positionRight(t); }
 			else if (options.position === 'above') { popup.positionAbove(t); }
 			else { popup.positionBelow(t); }
 		}
-		
+
 		if (options.onComplete) {
 			options.onComplete(popup.contentElement);
 		}
 	};
 	var prototypeCallback = function(r) { callback(r.responseText); }
-	
+
 	if (this.jq) {
 		if (options.params) {
 			jQuery.ajax(url, {type:method, success:callback, data: options.params });
@@ -479,18 +479,18 @@ WPopupBox.prototype._afterContentSet = function() {
 			return false;
 		}).bind(this);
 	}
-	
+
 	closeImg = document.createElement('img');
 	closeImg.src = this.imageroot+'close.png';
 	closeImg.title = 'Close this popup';
 	closeImg.border = 0;
-	
+
 	//fudge since browsers don't agree on how to set float
 	this.closeButton.className = 'WPopupCloseButton';
 	this.closeButton.appendChild(closeImg);
-	
+
 	this.contentElement.insertBefore(this.closeButton, this.contentElement.firstChild);
-	
+
 	if (this.initialised) {
 		this.setHeightToFit();
 	}
@@ -498,8 +498,8 @@ WPopupBox.prototype._afterContentSet = function() {
 
 WPopupBox.prototype._repositionEdges = function() {
   var sideWidth = (this.width - this.config.margin[3] - this.config.margin[1]) + 'px';
-  var sideHeight = (this.height - this.config.margin[0] - this.config.margin[2]) + 'px';    
-  
+  var sideHeight = (this.height - this.config.margin[0] - this.config.margin[2]) + 'px';
+
   { var ims = this.imageElements;
    ims.t.style.width = sideWidth;
    ims.b.style.width = sideWidth;
@@ -566,7 +566,7 @@ WPopupBox.prototype.setBottomArrow = function() {
 
 WPopupBox.prototype.setLeftArrow = function() {
   this.imageElements.la.style.display = 'block';
-  this.leftArrowOn = true;	
+  this.leftArrowOn = true;
 };
 
 WPopupBox.prototype.setRightArrow = function() {
@@ -598,7 +598,7 @@ WPopupBox.prototype.positionBelow = function(el) {
   this.setTopArrow();
 
   var midpoint = this.getMidpoint(el);
-  
+
   this.setPosition(midpoint.x - ((this.width)/2),midpoint.y);
 };
 
@@ -613,31 +613,31 @@ WPopupBox.prototype.getMidpoint = function(el) {
 	if (el && el.x && el.y) {
       // el itself is the midpoint coordinates, return it
       return el;
-	}	
-	
+	}
+
 	var parentPosition, dimensions;
-	
+
 	if (this.jq) {
 		$el = jQuery(el);
-		
+
 		parentPosition = $el.offset();
 		var width = $el.outerWidth();
 		var height = $el.outerHeight();
-		
+
 		if ($el.css('display') === 'inline') {
 			var originalPosition = $el.css('position');
 			$el.css('position','absolute');
 			var absoluteWidth = $el.outerWidth();
 			var absoluteHeight = $el.outerHeight();
 			$el.css('position', originalPosition);
-			
+
 			if (width != absoluteWidth) {
 				width = (width+absoluteWidth) * 0.5;
 				height = (height+absoluteHeight) * 0.5;
 			}
 		}
-		
-		
+
+
 		return {
 			x: Math.floor(parentPosition.left + width/2),
 			y: Math.floor(parentPosition.top + height/2),
@@ -646,15 +646,15 @@ WPopupBox.prototype.getMidpoint = function(el) {
 			top: Math.floor(parentPosition.top),
 			bottom: Math.floor(parentPosition.top + height)
 		};
-		
+
 	} else {
 		el = $(el);
 		parentPosition = Position.cumulativeOffset(el);
 		dimensions = Element.getDimensions(el);
-		
+
 		var width = dimensions.width;
 		var height = dimensions.height;
-		
+
 		if (el.getStyle('display') === 'inline') {
 			// now get the absolute dimensions - for wrapped inline elements
 			var els = el.style;
@@ -671,7 +671,7 @@ WPopupBox.prototype.getMidpoint = function(el) {
 				width = (absDimensions.width + dimensions.width)/2;
 			}
 		}
-		
+
 		return {
 			x: Math.floor(parentPosition[0] + width/2),
 			y: Math.floor(parentPosition[1] + height),
@@ -682,7 +682,7 @@ WPopupBox.prototype.getMidpoint = function(el) {
 		};
 	}
 
-	
+
 };
 
 
@@ -690,9 +690,9 @@ WPopupBox.prototype.positionAbove = function(el) {
 	this.removeArrows();
 	this.setBottomArrow();
 	if (!this.jq) el = $(el);
-	  
+
 	var midpoint = this.getMidpoint(el);
-	
+
 	var x = midpoint.x - this.width/2;
 	var y = Math.max(0, midpoint.y - this.height - this.config.bottArr[1]);
 	this.setPosition(x, y);
@@ -704,19 +704,19 @@ WPopupBox.prototype.positionRight = function(el, hideArrows) {
 	} else {
 		this.setLeftArrow();
 	}
-	
+
 	var midpoint = this.getMidpoint(el);
-	
+
 	h = this.height;
-	
+
 	var scrollTop;
 	if (this.jq) scrollTop = jQuery(document.body).scrollTop();
 	else scrollTop = $(document.body).cumulativeScrollOffset()[1];
-	
+
 	x = Math.floor(midpoint.right);
-	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2)); 
+	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2));
 	this.setPosition(x,y);
-	
+
 	if (this.jq) {
 		var thisPosition = jQuery(this.rootElement).offset();
 		jQuery(this.imageElements.la).css('top', midpoint.y - thisPosition.top);
@@ -732,19 +732,19 @@ WPopupBox.prototype.positionLeft = function(el, hideArrows) {
 	} else {
 		this.setRightArrow();
 	}
-	
+
 	var midpoint = this.getMidpoint(el);
-	
+
 	h = this.height;
-	
+
 	var scrollTop;
 	if (this.jq) scrollTop = jQuery(document.body).scrollTop();
 	else scrollTop = $(document.body).cumulativeScrollOffset()[1];
-	
+
 	x = Math.floor(midpoint.left) - this.width;
-	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2)); 
+	y = Math.max(scrollTop, Math.floor(midpoint.y - h/2));
 	this.setPosition(x,y);
-	
+
 	if (this.jq) {
 		var thisPosition = jQuery(this.rootElement).offset();
 		jQuery(this.imageElements.ra).css('top', midpoint.y - thisPosition.top);
@@ -761,8 +761,8 @@ WPopupBox.hideSelectBoxes = function() {
 		jQuery('select').css('visibility','hidden');
 	else
 		$A(document.getElementsByTagName('select')).each(
-			function(select) { 
-				select.style.visibility = 'hidden'; 
+			function(select) {
+				select.style.visibility = 'hidden';
 			}
 		);
 };
@@ -774,10 +774,10 @@ WPopupBox.showSelectBoxes = function() {
 		jQuery('select').css('visibility','visible');
 	else
 		$A(document.getElementsByTagName('select')).each(
-			function(select) { 
-				select.style.visibility = 'visible'; 
+			function(select) {
+				select.style.visibility = 'visible';
 			}
 		);
-};	
+};
 
 };

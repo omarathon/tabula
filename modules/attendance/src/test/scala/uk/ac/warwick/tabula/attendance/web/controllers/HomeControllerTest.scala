@@ -19,7 +19,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
-		
+
 		val command = new HomeCommand(null) with Appliable[HomeInformation] with HomeCommandState with ModuleAndDepartmentServiceComponent
 			with CourseAndRouteServiceComponent with ProfileServiceComponent with RelationshipServiceComponent {
 

@@ -30,7 +30,7 @@
 		<div class="span6">
 			<#if nonempty(ownedModuleDepartments)>
 				<h6>My managed <@fmt.p number=ownedModuleDepartments?size singular="module" shownumber=false /></h6>
-				
+
 				<ul class="links">
 					<#list ownedModuleDepartments as department>
 						<li>
@@ -42,7 +42,7 @@
 
 			<#if nonempty(ownedDepartments)>
 				<h6>My department-wide <@fmt.p number=ownedDepartments?size singular="responsibility" plural="responsibilities" shownumber=false /></h6>
-			
+
 				<ul class="links">
 					<#list ownedDepartments as department>
 						<li>
@@ -53,19 +53,19 @@
 			</#if>
 		</div>
 	</div>
-	
+
 	<script type="text/javascript">
 		(function ($) {
 			if ($("#activities").length > 0) {
 				var sUrl = $("#activities").data("url");
 				$("#activity-fetcher").show().click(function(e) {
 					e.preventDefault();
-					
+
 					$.get(sUrl, function(pagelet) {
 						$("#activities tbody:last").after(pagelet);
 
 						$("#activity-fetcher").remove();
-						
+
 						$(".streaming").fadeIn("normal", function() {
 							var $streaming = $(this);
 							$streaming.replaceWith($streaming.contents());

@@ -9,7 +9,6 @@
     <file type="web" url="file://$PROJECT_DIR$/modules/api" />
     <file type="web" url="file://$PROJECT_DIR$/modules/attendance" />
     <file type="web" url="file://$PROJECT_DIR$/modules/coursework" />
-    <file type="web" url="file://$PROJECT_DIR$/modules/groups" />
     <file type="web" url="file://$PROJECT_DIR$/modules/home" />
     <file type="web" url="file://$PROJECT_DIR$/modules/profiles" />
     <file type="web" url="file://$PROJECT_DIR$/modules/scheduling" />
@@ -33,4 +32,3 @@
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
-

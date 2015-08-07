@@ -37,7 +37,7 @@ class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 	@Test def formatting() {
 		val workflow = new StudentsChooseMarkerWorkflow
 		workflow.id = "steve"
-		
+
 		converter.convertLeft(workflow) should be ("steve")
 		converter.convertLeft(null) should be (null)
 	}

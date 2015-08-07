@@ -7,7 +7,7 @@
 	<@spring.bind path="allocateStudentsToRelationshipCommand">
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
-	
+
 	<@f.form method="post" action=formDestination commandName="allocateStudentsToRelationshipCommand">
 		<@f.hidden name="confirmed" value="confirmed"/>
 		<@f.hidden path="spreadsheet"/>

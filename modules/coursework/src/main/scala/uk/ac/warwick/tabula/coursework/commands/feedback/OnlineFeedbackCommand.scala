@@ -32,7 +32,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 	val marker = submitter.apparentUser
 
 	def applyInternal() = {
-		val studentsWithSubmissionOrFeedback = 
+		val studentsWithSubmissionOrFeedback =
 			userLookup.getUsersByWarwickUniIds(
 				assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq
 			).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }

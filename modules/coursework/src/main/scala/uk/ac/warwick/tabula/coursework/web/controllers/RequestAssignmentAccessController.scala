@@ -20,7 +20,7 @@ class RequestAssignmentAccessController extends CourseworkController {
 	// clumsy way to prevent a user spamming admins with emails.
 	var requestedAccess = mutable.Queue[(String, String)]()
 
-	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+	@ModelAttribute def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		new RequestAssignmentAccessCommand(module, assignment, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -34,7 +34,7 @@ class RequestAssignmentAccessController extends CourseworkController {
 			if (!alreadyEmailed(user, form, assignment)) {
 				form.apply()
 			}
-	
+
 			Redirect(Routes.assignment(assignment)).addObjects("requestedAccess" -> true)
 		}
 	}

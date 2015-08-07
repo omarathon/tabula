@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.userlookup.User
 
 class UserConverterTest extends TestBase with Mockito {
-	
+
 	val converter = new UserConverter
 	val userLookup = mock[UserLookupService]
 	converter.userLookup = userLookup
-	
+
 	@Test def validInput {
 		val user = new User { setUserId("cuscav"); setFoundUser(true) }
 
@@ -33,7 +33,7 @@ class UserConverterTest extends TestBase with Mockito {
 
 		converter.convertRight("20X6") should be (new AnonymousUser)
 	}
-	
+
 	@Test def formatting {
 		converter.convertLeft(new User("cuscav")) should be ("cuscav")
 

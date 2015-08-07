@@ -9,7 +9,7 @@ import uk.ac.warwick.userlookup.User
 
 class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends StudentSubmissionAndFeedbackCommandState 
+	private trait CommandTestSupport extends StudentSubmissionAndFeedbackCommandState
 		with SubmissionServiceComponent with FeedbackServiceComponent with ProfileServiceComponent {
 		val submissionService = smartMock[SubmissionService]
 		val feedbackService = smartMock[FeedbackService]

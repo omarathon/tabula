@@ -31,7 +31,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	assignmentImporter.afterPropertiesSet
 
 	val NONE = AssessmentComponent.NoneAssessmentGroup
-	
+
 	@Test def groupImportSql {
 		// Not really testing AssignmentImporter but the behaviour of the query class for IN(..)
 		// parameters. The SQL has to have the brackets, and the parameter value has to be a
@@ -47,7 +47,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 		val sqlToUse = NamedParameterUtils.substituteNamedParameters(AssignmentImporter.GetAllAssessmentGroups, paramSource)
 		sqlToUse.trim should endWith ("(?, ?)")
 	}
-	
+
 	@Test def importMembers { withFakeTime(dateTime(2012, 5)) {
 		var members = ArrayBuffer[UpstreamModuleRegistration]()
 		assignmentImporter.allMembers { mr =>
@@ -82,7 +82,7 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	@Test def getAllAssessmentComponents { withFakeTime(dateTime(2012, 5)) {
 		val components = sorted(assignmentImporter.getAllAssessmentComponents)
 		val tuples = components map asTuple
-		
+
 		tuples should be (Seq(
 			("CH115-30","A","Chemicals Essay"),
 			("CH115-30","NONE","Students not registered for assessment"),

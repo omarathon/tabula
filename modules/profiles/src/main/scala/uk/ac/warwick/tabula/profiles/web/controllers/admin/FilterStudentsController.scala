@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 @Controller
 @RequestMapping(value=Array("/department/{department}/students"))
 class FilterStudentsController extends ProfilesController with CurrentSITSAcademicYear {
-	
+
 	validatesSelf[SelfValidating]
-	
+
 	@ModelAttribute("filterStudentsCommand")
 	def command(@PathVariable department: Department) =
 		FilterStudentsCommand(department, academicYear)
-		
+
 	@RequestMapping
 	def filter(@Valid @ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department) = {
 		if (errors.hasErrors) {

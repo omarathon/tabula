@@ -56,7 +56,7 @@ module Cucumber
         @pdf.text "Generated: #{Time.now.strftime("%Y-%m-%d %H:%M")}", :size => 10, :at => [0, 24]
         @pdf.text "Command: <code>cucumber #{ARGV.join(" ")}</code>", :size => 10, :at => [0,10]
         unless options[:dry_run]
-          @pdf.bounding_box [450,100] , :width => 100 do  
+          @pdf.bounding_box [450,100] , :width => 100 do
             @pdf.text 'Legend', :size => 10
             @status_colors.each do |k,v|
               @pdf.fill_color v
@@ -203,13 +203,13 @@ module Cucumber
       def scenario_name(keyword, name, file_colon_line, source_indent)
         feature_element_name(keyword, name)
       end
-      
+
       private
-      
+
       def encode(text)
         @coder.encode(text, :decimal)
       end
-      
+
       def colorize(text, status)
         keep_with do
           @doc.fill_color(@status_colors[status] || BLACK)
@@ -217,7 +217,7 @@ module Cucumber
           @doc.fill_color(BLACK)
         end
       end
-      
+
       def keep_with(&block)
         @buffer << block
       end
@@ -244,7 +244,7 @@ module Cucumber
         @pdf.move_down(20)
         @buffer = []
       end
-      
+
       def print_table(table, row_colors)
         rows = table.rows.map { |row| row.map{ |cell| encode(cell) }}
         headers = table.headers.map { |text| encode(text) }

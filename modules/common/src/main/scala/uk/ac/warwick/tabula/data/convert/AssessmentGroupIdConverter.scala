@@ -11,7 +11,7 @@ class AssessmentGroupIdConverter extends TwoWayConverter[String, AssessmentGroup
 
 	// Converter used for binding request
 	override def convertRight(id: String) = service.getAssessmentGroup(id).orNull
-	
+
 	// Formatter used for generating textual value in template
 	override def convertLeft(group: AssessmentGroup) = if (group == null) null else group.id
 

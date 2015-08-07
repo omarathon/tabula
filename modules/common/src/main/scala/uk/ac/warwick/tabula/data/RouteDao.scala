@@ -46,7 +46,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def findByDepartment(department:Department) =
 		session.newQuery[Route]("from Route r where adminDepartment = :dept").setEntity("dept",department).seq
-	
+
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]) = {
 		val hql = """
 				update Route r
@@ -56,11 +56,11 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 					r.adminDepartment = :department and
 					r.missingFromImportSince is null
 		"""
-		
-		val query = 
+
+		val query =
 			if (seenCodes.isEmpty) session.newQuery(hql)
 			else session.newQuery(hql + " and r.code not in (:seenCodes)").setParameterList("seenCodes", seenCodes)
-		 
+
 		query
 			.setParameter("now", DateTime.now)
 			.setEntity("department", dept)

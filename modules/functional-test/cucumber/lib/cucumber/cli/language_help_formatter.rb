@@ -14,13 +14,13 @@ Please help us complete the translation by translating the missing words in
 Then contribute back to the Cucumber project. Details here:
 http://wiki.github.com/aslakhellesoy/cucumber/spoken-languages
 }
-      
+
       class << self
         def list_languages(io)
           raw = Cucumber::LANGUAGES.keys.sort.map do |lang|
             [
-              lang, 
-              Cucumber::LANGUAGES[lang]['name'], 
+              lang,
+              Cucumber::LANGUAGES[lang]['name'],
               Cucumber::LANGUAGES[lang]['native']
             ]
           end
@@ -33,10 +33,10 @@ http://wiki.github.com/aslakhellesoy/cucumber/spoken-languages
           raw = Parser::NaturalLanguage::KEYWORD_KEYS.map do |key|
             [key, language.keywords(key).join(" / ")]
           end
-          
+
           print_table io, raw, :incomplete => language.incomplete?
         end
-      
+
         private
           def print_table(io, raw, options)
             table = Ast::Table.new(raw)
@@ -44,7 +44,7 @@ http://wiki.github.com/aslakhellesoy/cucumber/spoken-languages
             Ast::TreeWalker.new(nil, [formatter]).visit_multiline_arg(table)
           end
       end
-      
+
       def before_visit_multiline_arg(table)
         if @options[:incomplete]
           @io.puts(format_string(INCOMPLETE, :failed))
@@ -60,11 +60,11 @@ http://wiki.github.com/aslakhellesoy/cucumber/spoken-languages
           if(@options[:check_lang])
             @incomplete = Parser::NaturalLanguage.get(nil, value).incomplete?
           end
-          status = :comment 
+          status = :comment
         elsif @incomplete
           status = :undefined
         end
-        
+
         @col += 1
       end
     end

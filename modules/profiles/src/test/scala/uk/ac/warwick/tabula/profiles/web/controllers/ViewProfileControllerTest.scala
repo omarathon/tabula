@@ -13,7 +13,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	controller.smallGroupService = mock[SmallGroupService]
 	controller.profileService = mock[ProfileService]
 	controller.termService = mock[TermService]
-	
+
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
 	courseDetails.mostSignificant = true

@@ -8,7 +8,7 @@ case class AssignmentSubmitter(assignment: model.Assignment) extends BuiltInRole
 
 case object AssignmentSubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Enrolled On Assignment"
-	
+
 	GrantsScopedPermission(
 		Submission.Create,
 		Extension.MakeRequest

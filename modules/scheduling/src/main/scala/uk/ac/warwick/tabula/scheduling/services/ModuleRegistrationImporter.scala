@@ -35,16 +35,16 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Tas
 	import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
-	
+
 	lazy val queries = Seq(
 		new UnconfirmedModuleRegistrationsQuery(sits),
 		new ConfirmedModuleRegistrationsQuery(sits),
 		new AutoUploadedConfirmedModuleRegistrationsQuery(sits)
 	)
-	
+
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
 
-		benchmarkTask("Fetch module registrations") { 
+		benchmarkTask("Fetch module registrations") {
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
 				val params = HashMap(("universityId", universityId))
@@ -115,10 +115,10 @@ object ModuleRegistrationImporter {
 				from $sitsSchema.ins_stu stu -- student
 					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
-					
+
 					join $sitsSchema.srs_scj scj -- Student Course Join, needed for SCJ code
 						on scj.scj_sprc = spr.spr_code
-					
+
 					join $sitsSchema.cam_sms sms -- Student Module Selection (unconfirmed module choices)
 						on sms.spr_code = spr.spr_code
 
@@ -133,13 +133,13 @@ object ModuleRegistrationImporter {
 			smr_agrm, -- agreed overall module mark
 			smr_agrg -- agreed overall module grade
 				from $sitsSchema.ins_stu stu
-					join $sitsSchema.ins_spr spr 
+					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
-					
-					join $sitsSchema.srs_scj scj 
+
+					join $sitsSchema.srs_scj scj
 						on scj.scj_sprc = spr.spr_code
-					
-					join $sitsSchema.cam_smo smo 
+
+					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code
 						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z')) -- exclude WMG cancelled registrations
 
@@ -148,8 +148,8 @@ object ModuleRegistrationImporter {
 						and smo.ayr_code = smr.ayr_code
 						and smo.mod_code = smr.mod_code
 						and smo.mav_occur = smr.mav_occur
-					
-					join $sitsSchema.cam_ssn ssn 
+
+					join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
 				where stu.stu_code = :universityId"""
 
@@ -159,13 +159,13 @@ object ModuleRegistrationImporter {
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
-					join $sitsSchema.ins_spr spr 
+					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
-					
-					join $sitsSchema.srs_scj scj 
+
+					join $sitsSchema.srs_scj scj
 						on scj.scj_sprc = spr.spr_code
-					
-					join $sitsSchema.cam_smo smo 
+
+					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code
 						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
 
@@ -180,7 +180,7 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId
 					and ssn.ssn_sprc is null
 			"""
-						
+
 	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
 		var row = ModuleRegistrationRow(
 			resultSet.getString("scj_code"),
@@ -213,14 +213,14 @@ object ModuleRegistrationImporter {
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
 	}
-	
+
 	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
 	}
-	
+
 	class AutoUploadedConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, AutoUploadedConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))

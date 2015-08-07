@@ -17,7 +17,7 @@ jQuery(function($){ "use strict";
 	$('#feedback-check-recipient-results')
 		.html('<div class="alert"><p>Checking for potential problems with students\' email addresses&hellip;</p></div>')
 		.load('${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')}');
-		
+
 	$('#submissions-report-results')
 		.html('<div class="alert"><p>Comparing feedback list against submission list&hellip;</p></div>')
 		.load('${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions-report')}');
@@ -35,7 +35,7 @@ jQuery(function($){ "use strict";
 
 <p>This will publish feedback for <strong><@fmt.p unreleasedFeedbackCount "student"/></strong>.
 <#if feedbackCount != unreleasedFeedbackCount>
-There are ${feedbackCount} students in total but some have already had 
+There are ${feedbackCount} students in total but some have already had
 their feedback published. Those students won't be emailed again.
 </#if>
 </p>
@@ -45,7 +45,7 @@ their feedback published. Those students won't be emailed again.
 </#if>
 
 <p>
-Publishing feedback will make all currently uploaded feedback for this assignment available for students to download. 
+Publishing feedback will make all currently uploaded feedback for this assignment available for students to download.
 If more feedback is added later, it won't be published automatically.
 </p>
 

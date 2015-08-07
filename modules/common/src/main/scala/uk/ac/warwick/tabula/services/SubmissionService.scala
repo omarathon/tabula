@@ -40,7 +40,7 @@ class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging 
 
 	def getSubmissionsByAssignment(assignment: Assignment) : Seq[Submission] = {
 		session.newCriteria[Submission]
-			.add(is("assignment", assignment)).seq			
+			.add(is("assignment", assignment)).seq
 	}
 
 	def getSubmission(id: String) = getById[Submission](id)

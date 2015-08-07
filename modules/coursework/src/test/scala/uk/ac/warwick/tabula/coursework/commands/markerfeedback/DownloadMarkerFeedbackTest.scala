@@ -18,10 +18,10 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 	@Before
 	def setup() {
 		val attachment = new FileAttachment
-		
+
 		val file = createTemporaryFile()
 		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
-		
+
 		attachment.file = file
 
 		assignment.feedbacks.foreach{feedback =>

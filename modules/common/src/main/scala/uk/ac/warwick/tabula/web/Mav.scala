@@ -39,7 +39,7 @@ class Mav() {
 		map ++= items
 		this
 	}
-	
+
 	def addObjects(items: Map[String, Any]) = {
 		map ++= items
 		this
@@ -62,13 +62,13 @@ class Mav() {
 	 * Add a list of breadcrumbs to display in the navigation.
 	 */
 	def crumbs(pages: BreadCrumb*): Mav = crumbsList(pages.toSeq)
-	def crumbsList(pages: Seq[BreadCrumb]): Mav = addObjects("breadcrumbs" -> pages) 
-	
+	def crumbsList(pages: Seq[BreadCrumb]): Mav = addObjects("breadcrumbs" -> pages)
+
 	/**
 	 * Set a custom title
 	 */
 	def withTitle(title: String): Mav = addObjects("pageTitle" -> title)
-		
+
 	/**
 	 * Sets the layout parameter to "none" to
 	 * render the template without any surrounding stuff.
@@ -126,7 +126,7 @@ class Mav() {
 		mav.addAllObjects(toModel)
 		mav
 	}
-	
+
 	override def toString = {
 		val v = if (view != null) view else viewName
 		"Mav(" + v + ", " + map + ")"

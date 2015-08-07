@@ -19,7 +19,7 @@ module Cucumber
       (at_line?(syntax_node) || outline_at_line?(outline)) &&
       (matches_names?(syntax_node) || outline_matches_names?(outline))
     end
-    
+
     def at_line?(syntax_node)
       @lines.nil? || @lines.empty? || @lines.detect{|line| syntax_node.at_line?(line)}
     end
@@ -35,7 +35,7 @@ module Cucumber
     def outline_matches_names?(syntax_node)
       @name_regexps.nil? || @name_regexps.empty? || @name_regexps.detect{|name_regexp| syntax_node.outline_matches_name?(name_regexp)}
     end
-    
+
     def matches_names?(syntax_node)
       @name_regexps.nil? || @name_regexps.empty? || @name_regexps.detect{|name_regexp| syntax_node.matches_name?(name_regexp)}
     end

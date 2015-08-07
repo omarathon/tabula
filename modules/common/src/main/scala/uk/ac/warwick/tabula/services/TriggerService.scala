@@ -16,7 +16,7 @@ trait TriggerService {
 }
 
 abstract class AbstractTriggerService extends TriggerService with Logging {
-	
+
 	self: TriggerDaoComponent =>
 
 	val RunBatchSize = 10

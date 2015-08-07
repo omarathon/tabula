@@ -21,7 +21,7 @@ object AddStudentRelationshipTypeCommand {
 
 class AddStudentRelationshipTypeCommandInternal extends ModifyStudentRelationshipTypeCommandInternal {
 	this: RelationshipServiceComponent =>
-		
+
 	override def applyInternal() = transactional() {
 		val tpe = new StudentRelationshipType
 		copyTo(tpe)

@@ -148,7 +148,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			"relationship" -> relationship.relationshipType.toString()
 		)
 	}
-	
+
 	override def describeResult(d: Description, meeting: MeetingRecord) {
 		relationship.studentMember.map { d.member(_) }
 		d.properties(

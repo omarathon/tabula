@@ -29,11 +29,11 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 		val messageToSend = if (!features.emailStudents) {
 			prepareMessage(message) { helper =>
 				val oldTo = message.getRecipients(RecipientType.TO).map({_.toString}).mkString(", ")
-				
+
 				helper.setTo(Array(testEmailTo))
 				helper.setBcc(Array(): Array[String])
 				helper.setCc(Array(): Array[String])
-				
+
 				message.getContent match {
 					case contentString: String =>
 						helper.setText(s"$nonProductionMessage1$oldTo$nonProductionMessage2$contentString")
@@ -45,7 +45,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 
 			}
 		} else message
-		
+
 		delegate.send(messageToSend)
 	}
 
@@ -56,11 +56,11 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 	override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
 		Option(simpleMessage.getFrom) map {message.setFrom}
 		Option(simpleMessage.getReplyTo) map {message.setReplyTo}
-		
+
 		Option(simpleMessage.getTo) map {message.setTo}
 		message.setCc(Option(simpleMessage.getCc).getOrElse(Array(): Array[String]))
 		message.setBcc(Option(simpleMessage.getBcc).getOrElse(Array(): Array[String]))
-		
+
 		Option(simpleMessage.getSubject) map {message.setSubject}
 		Option(simpleMessage.getText) map {message.setText}
 	})

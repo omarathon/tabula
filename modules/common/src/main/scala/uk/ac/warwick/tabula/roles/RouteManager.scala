@@ -10,9 +10,9 @@ case class DepartmentRouteManager(department: model.Department) extends BuiltInR
 case class RouteManager(route: model.Route) extends BuiltInRole(RouteManagerRoleDefinition, route)
 
 case object RouteManagerRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Route Manager"
-	
+
 	GeneratesSubRole(RouteAssistantRoleDefinition)
 
 	GrantsScopedPermission(

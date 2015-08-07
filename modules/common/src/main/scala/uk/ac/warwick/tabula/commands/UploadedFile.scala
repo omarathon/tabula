@@ -34,7 +34,7 @@ class UploadedFile extends BindListener {
 
 	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
 	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
-		
+
 	// files bound from an upload request, prior to being persisted by `onBind`.
 	var upload: JList[MultipartFile] = JArrayList()
 
@@ -48,7 +48,7 @@ class UploadedFile extends BindListener {
 	def isMissing = !isExists
 	def isExists = hasUploads || hasAttachments
 
-	def size: Int = 
+	def size: Int =
 		if (hasAttachments) attached.size
 		else if (hasUploads) permittedUploads.size
 		else 0
@@ -58,16 +58,16 @@ class UploadedFile extends BindListener {
 
 	def hasAttachments = attached != null && !attached.isEmpty
 	def hasUploads = !permittedUploads.isEmpty
-	
+
 	/** Uploads excluding those that are empty or have bad names. */
 	def permittedUploads: JList[MultipartFile] = {
 		upload.asScala.filterNot { s =>
-			s.isEmpty || 
-			(disallowedFilenames contains s.getOriginalFilename) || 
+			s.isEmpty ||
+			(disallowedFilenames contains s.getOriginalFilename) ||
 			(disallowedPrefixes exists s.getOriginalFilename.startsWith)
 		}.asJava
 	}
-		
+
 	def isUploaded = hasUploads
 
 	/**
@@ -81,17 +81,17 @@ class UploadedFile extends BindListener {
 		if (maintenanceMode.enabled) {
 			throw new MaintenanceModeEnabledException(maintenanceMode.until, maintenanceMode.message)
 		}
-		
+
 		val bindResult = for (item <- attached.asScala) yield {
 			if (item != null && !item.temporary) {
 				result.reject("binding.reSubmission")
 				false
 			} else true
 		}
-		
+
 		// Early exit if we've failed binding
 		if (!bindResult.contains(false)) {
-		
+
 			if (hasUploads) {
 				// convert MultipartFiles into FileAttachments
 				transactional() {
@@ -113,12 +113,12 @@ class UploadedFile extends BindListener {
 				for (item <- attached.asScala if item.uploadedData != null)
 					fileDao.saveTemporary(item)
 			}
-		
+
 		}
 
 	}
-	
-	private def commaSeparated(csv: String) = 
+
+	private def commaSeparated(csv: String) =
 		if (csv == null) Nil
 		else csv.split(",").toList
 }

@@ -18,29 +18,29 @@ import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import uk.ac.warwick.tabula.roles.ModuleManager
 
 class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
-	
+
 	val provider = new DatabaseBackedRoleProvider
-	
+
 	val service = mock[PermissionsService]
 	provider.service = service
-	
+
 	val dept = Fixtures.department("in")
 	val module = Fixtures.module("in101")
 	module.adminDepartment = dept
-	
+
 	@Test def getRoles = withUser("cuscav") {
 		val gr1 = new DepartmentGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
 		val gr2 = new ModuleGrantedRole(module, ModuleManagerRoleDefinition)
-		
+
 		service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream(gr1, gr2).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
-		
+
 		// Can't do exact equality because a granted role with no overrides is still a generated role, not a strict built in role
 		val roles = provider.getRolesFor(currentUser, dept)
 		roles.size should be (2)
 		roles(0).explicitPermissions should be (DepartmentalAdministrator(dept).explicitPermissions)
 		roles(1).explicitPermissions should be (ModuleManager(module).explicitPermissions)
 	}
-	
+
 	@Test def noRoles = withUser("cuscav") {
 		service.getGrantedRolesFor[PermissionsTarget](currentUser) returns (Stream.empty)
 		provider.getRolesFor(currentUser) should be (Stream.empty)

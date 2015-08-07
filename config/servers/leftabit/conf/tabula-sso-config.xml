@@ -2,7 +2,7 @@
 <config>
   <httpbasic>
     <allow>true</allow>
-  </httpbasic>   
+  </httpbasic>
 
   <cluster>
     <enabled>true</enabled>

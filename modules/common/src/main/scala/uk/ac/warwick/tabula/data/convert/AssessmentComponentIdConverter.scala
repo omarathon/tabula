@@ -11,7 +11,7 @@ class AssessmentComponentIdConverter extends TwoWayConverter[String, AssessmentC
 
 	// Converter used for binding request
 	override def convertRight(id: String) = service.getAssessmentComponent(id).orNull
-	
+
 	// Formatter used for generating textual value in template
 	override def convertLeft(assignment: AssessmentComponent) = (Option(assignment) map { _.id }).orNull
 

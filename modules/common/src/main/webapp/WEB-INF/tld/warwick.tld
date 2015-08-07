@@ -9,7 +9,7 @@
 	<jsp-version>2.0</jsp-version>
 	<short-name>Utility tag library for Warwick apps</short-name>
 	<description> Custom tags used by the Warwick apps</description>
-	
+
 	<function>
 		<description> Escapes text so you can enter it into a Javascript string literal.
 			</description>
@@ -18,7 +18,7 @@
 		<function-signature>java.lang.String js(java.lang.String)</function-signature>
 		<example> ${warwick:js(someString)} </example>
 	</function>
-	
+
 	<function>
 		<description> Escapes HTML characters. </description>
 		<name>html</name>
@@ -26,7 +26,7 @@
 		<function-signature>java.lang.String html(java.lang.String)</function-signature>
 		<example> ${warwick:html(myText)} </example>
 	</function>
-	
+
 	<function>
     <description> Escapes only special HTML characters. </description>
     <name>specialHtml</name>
@@ -34,7 +34,7 @@
     <function-signature>java.lang.String specialHtml(java.lang.String)</function-signature>
     <example> ${warwick:specialHtml(myText)} </example>
   </function>
-	
+
 	<tag>
 		<name>collectionGrouper</name>
 		<tag-class>uk.ac.warwick.util.web.tags.CollectionGrouperTag</tag-class>
@@ -76,7 +76,7 @@
 			intended for use in a "tabindex" attribute on form elements, to specify the order
 			they are cycled through when the Tab keyboard key is pressed. </description>
 	</tag>
-	
+
 	<tag>
 		<name>copyright</name>
 		<tag-class>uk.ac.warwick.util.web.tags.CopyrightTag</tag-class>
@@ -94,12 +94,12 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>wrappingUrl</name>
 		<tag-class>uk.ac.warwick.util.web.tags.WrappingUrlTag</tag-class>
-		<description> Snips a long URL at each forward slash and puts a barely visible 
-			space before the next word, causing the browser to wrap to the next line 
+		<description> Snips a long URL at each forward slash and puts a barely visible
+			space before the next word, causing the browser to wrap to the next line
 			if necessary. </description>
 		<attribute>
 			<name>url</name>
@@ -107,7 +107,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<description>
 			Formats Joda DateTimes to the specified format
@@ -132,7 +132,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
-  
+
   <tag>
   	<description>List all values in an enum</description>
   	<name>enumValues</name>

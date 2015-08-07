@@ -82,8 +82,8 @@ module Cucumber
 (::)(::)(::)(::)(::)(::)(::)(::)(::)(::)(::)(::)(::)(::)(::)
 
                     DEPRECATION WARNING
-                    
-Future versions of Cucumber will not recognize #{keyword} 
+
+Future versions of Cucumber will not recognize #{keyword}
 unless it is followed by a colon. Make this change in
 your features now to prevent this warning from appearing.
 
@@ -168,13 +168,13 @@ EOS
       def embed(file, mime_type)
         broadcast(file, mime_type)
       end
-      
+
       private
-      
+
       def broadcast(*args, &block)
         message = extract_method_name_from(caller)
         message.gsub!('visit_', '')
-        
+
         if block_given?
           send_to_all("before_#{message}", *args)
           yield if block_given?
@@ -183,7 +183,7 @@ EOS
           send_to_all(message, *args)
         end
       end
-      
+
       def send_to_all(message, *args)
         @listeners.each do |listener|
           if listener.respond_to?(message)
@@ -191,11 +191,11 @@ EOS
           end
         end
       end
-      
+
       def extract_method_name_from(call_stack)
         call_stack[0].match(/in `(.*)'/).captures[0]
       end
-      
+
     end
   end
 end

@@ -22,7 +22,7 @@ class SortModulesController extends AdminController {
 
 	type SortModulesCommand = Appliable[Unit] with GroupsObjects[Module, Department] with SortModulesCommandState
 	validatesSelf[SelfValidating]
-	
+
 	@ModelAttribute("sortModulesCommand")
 	def command(@PathVariable department: Department): SortModulesCommand = SortModulesCommand(department)
 
@@ -43,7 +43,7 @@ class SortModulesController extends AdminController {
 			form(cmd).addObjects("saved" -> true)
 		}
 	}
-		
+
 	private def form(@ModelAttribute("sortModulesCommand") cmd: SortModulesCommand): Mav = {
 		if (!cmd.department.hasChildren && cmd.department.hasParent) {
 			// Sorting is done from the POV of the parent department.
@@ -52,5 +52,5 @@ class SortModulesController extends AdminController {
 			Mav("admin/modules/arrange/form")
 		}
 	}
-	
+
 }

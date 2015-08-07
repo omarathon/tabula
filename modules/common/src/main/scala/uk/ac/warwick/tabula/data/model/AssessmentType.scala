@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
   * such as assignment or exam or winter exam or... etc.
   *
   * While 'A' appears to be the only kind of assignment,
-  * 'E' is not the only kind of exam. 
+  * 'E' is not the only kind of exam.
   */
 case class AssessmentType(code: String) extends Convertible[String] {
 	def value = code

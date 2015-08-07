@@ -49,11 +49,11 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	}
 
 	def checkGod(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = if (user.god) Allow else Continue
-	
+
 	private def checkScopedPermission(
 		allPermissions: Seq[(Permission, Option[PermissionsTarget])],
 		user: CurrentUser,
-		permission: Permission, 
+		permission: Permission,
 		scope: PermissionsTarget
 	): Response = {
 		def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
@@ -62,11 +62,11 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 				(targetScope != null &&
 					targetScope.permissionsParents != null &&
 					targetScope.permissionsParents.exists(scopeMatches(permissionScope, _)))
-			
+
 		val matchingPermissions: Seq[Option[PermissionsTarget]] = (permission match {
 			case selectorPerm: SelectorPermission[_] => allPermissions.filter {
 				case (otherSelectorPerm: SelectorPermission[_], target)
-					if (otherSelectorPerm.getClass == selectorPerm.getClass) && 
+					if (otherSelectorPerm.getClass == selectorPerm.getClass) &&
 						 (selectorPerm <= otherSelectorPerm) => true
 				case _ => false
 			}
@@ -85,11 +85,11 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			case false => Continue
 		}
 	}
-	
+
 	def checkPermissions(
 		allPermissions: Seq[(Permission, Option[PermissionsTarget])],
-		user: CurrentUser, 
-		permission: Permission, 
+		user: CurrentUser,
+		permission: Permission,
 		scope: PermissionsTarget
 	): Response =
 		if (allPermissions == null || allPermissions.isEmpty) Continue
@@ -97,33 +97,33 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			case _: ScopelessPermission => if (allPermissions.exists{case(p, _) => p == permission}) Allow else Continue
 			case _ => checkScopedPermission(allPermissions, user, permission, scope)
 		}
-	
+
 	def checkPermissions(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = {
 		val explicitPermissions = roleService.getExplicitPermissionsFor(user, scope)
 		if (explicitPermissions == null || explicitPermissions.isEmpty) Continue
 		else {
 			val (allow, deny) = explicitPermissions.partition(_.permissionType)
-			
+
 			// Confusingly, we check for an "Allow" for the deny perms and then immediately deny it
 			val denyPerms = deny map { defn => defn.permission -> defn.scope}
-			
+
 			if (checkPermissions(denyPerms, user, permission, scope) != Continue) Deny
 			else {
 				val allowPerms = allow map { defn => defn.permission -> defn.scope}
-			
+
 				checkPermissions(allowPerms, user, permission, scope)
 			}
 		}
 	}
-			
+
 	// By using Some() here, we ensure that we return Deny if there isn't a role match - this must be the LAST permissions provider
 	def checkRoles(roles: Iterable[Role], user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = Some(
-		roles != null && (roles exists { role =>			
+		roles != null && (roles exists { role =>
 			checkPermissions(role.explicitPermissions, user, permission, scope) == Allow ||
 			checkRoles(role.subRoles, user, permission, scope) == Allow
 		})
 	)
-	
+
 	def checkRoles(delegatablePermissionsOnly:Boolean, user: CurrentUser, permission: Permission, scope: PermissionsTarget ): Response ={
 		val rolesToCheck = roleService.getRolesFor(user, scope).filter(r=>{
 			(! delegatablePermissionsOnly) ||r.definition.canDelegateThisRolesPermissions})
@@ -168,7 +168,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 			throw new IllegalStateException("No security rule handled request for " + user + " doing " + permission + " on " + scope)
 		}
 	}
-	
+
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
 	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
 

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.timetables.EventOccurrence
  * Note: start and end are *Seconds* since the epoch, not milliseconds!
  */
 case class FullCalendarEvent(title: String,
-														 fullTitle: String,	
+														 fullTitle: String,
 														 allDay: Boolean,
 														 start: Long,
 														 end: Long,

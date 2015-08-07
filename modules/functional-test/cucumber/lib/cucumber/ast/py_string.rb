@@ -36,7 +36,7 @@ module Cucumber
         return if Cucumber.wants_to_quit
         visitor.visit_py_string(to_s)
       end
-      
+
       def arguments_replaced(arguments) #:nodoc:
         string = @string
         arguments.each do |name, value|

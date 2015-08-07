@@ -64,7 +64,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 		"oldAgents" -> oldAgents,
 		"newAgents" -> newAgents
 	)
-	
+
 }
 
 /**

@@ -104,7 +104,7 @@ trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 		if (archive) {
 			super.permissionsCheck(p)
 		}
-		
+
 		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Create, mandatory(department))
 		else for (module <- modules) {
 			p.mustBeLinked(p.mandatory(module), mandatory(department))

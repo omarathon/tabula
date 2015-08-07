@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartment
 import uk.ac.warwick.tabula.web.controllers._
 
 @Controller class TabulaHomepageController extends BaseController {
-	
+
 	var moduleService = Wire[ModuleAndDepartmentService]
 	var routeService = Wire[CourseAndRouteService]
 	var permissionsService = Wire[PermissionsService]
@@ -33,7 +33,7 @@ import uk.ac.warwick.tabula.web.controllers._
 			permissionsService.getAllPermissionDefinitionsFor(user, Permissions.Profiles.ViewSearchResults).nonEmpty
 
 		val canViewExams = user.isStaff && moduleService.getDepartmentByCode(user.apparentUser.getDepartmentCode).exists(_.uploadMarksToSits)
-		
+
 	  Mav("home/view",
 	  	"ajax" -> ajax,
 			"canAdmin" -> canAdmin,

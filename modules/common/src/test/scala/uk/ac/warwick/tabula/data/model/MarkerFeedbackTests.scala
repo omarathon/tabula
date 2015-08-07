@@ -42,7 +42,7 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 			session.save(attachment)
 			attachment
 		}
-		
+
 		val feedback = flushing(session) {
 			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 			val assignment = new Assignment
@@ -51,23 +51,23 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 			session.save(feedback)
 			feedback
 		}
-		
+
 		val (markerFeedback, markerFeedbackAttachment) = flushing(session) {
 			val mf = new MarkerFeedback(feedback)
-			
+
 			val attachment = new FileAttachment
 			mf.addAttachment(attachment)
-			
+
 			session.save(mf)
 			(mf, attachment)
 		}
-		
+
 		// Ensure everything's been persisted
 		orphanAttachment.id should not be (null)
 		feedback.id should not be (null)
 		markerFeedback.id should not be (null)
 		markerFeedbackAttachment.id should not be (null)
-		
+
 		// Can fetch everything from db
 		session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 		session.get(classOf[Feedback], feedback.id) should be (feedback)
@@ -78,7 +78,7 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 		flushing(session) { session.delete(markerFeedback) }
 
 		session.clear()
-		
+
 		// Ensure we can't fetch the markerFeedback or attachment, but all the other objects are returned
 		session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 		session.get(classOf[Feedback], feedback.id) should be (feedback)

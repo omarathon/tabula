@@ -125,7 +125,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	private val properties = Set(
 		"assessmentGroup", "occurrence", "agreedGrade"
 	)
-	
+
 	override def describe(d: Description) = d.properties("scjCode" -> scjCode)
 
 }

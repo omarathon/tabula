@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.UniversityId
  * Convert left will always transform a User to a usercode.
  */
 class UserConverter extends TwoWayConverter[String, User] {
-	
+
 	var userLookup = Wire.auto[UserLookupService]
 
 	override def convertRight(userId: String) = {
@@ -28,6 +28,6 @@ class UserConverter extends TwoWayConverter[String, User] {
 		}
 	}
 
-	override def convertLeft(user: User) = (Option(user) map { _.getUserId }).orNull 
+	override def convertLeft(user: User) = (Option(user) map { _.getUserId }).orNull
 
 }

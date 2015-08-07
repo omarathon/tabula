@@ -14,11 +14,11 @@ import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import org.mockito.Mockito._
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
-	
+
 	val service: ModuleAndDepartmentService = new ModuleAndDepartmentService
 
 	val userLookupService = new MockUserLookup
-	
+
 	@Before def wire {
 		val departmentDao = new DepartmentDaoImpl
 		departmentDao.sessionFactory = sessionFactory
@@ -50,15 +50,15 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 
 
 	}
-	
+
 	@Test def crud = transactional { tx =>
 		// uses data created in data.sql
-		
+
 		val ch = service.getDepartmentByCode("ch").get
 		val cs = service.getDepartmentByCode("cs").get
 		val cssub1 = service.getDepartmentByCode("cs-subsidiary").get
 		val cssub2 = service.getDepartmentByCode("cs-subsidiary-2").get
-		
+
 		val cs108 = service.getModuleByCode("cs108").get
 		val cs240 = service.getModuleByCode("cs240").get
 		val cs241 = service.getModuleByCode("cs241").get
@@ -73,7 +73,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		cssub2.parent should be (cs)
 		ch.children.isEmpty should be (true)
 		cs241.adminDepartment should be (cssub1)
-		
+
 		service.getDepartmentByCode("ch") should be (Some(ch))
 		service.getDepartmentById(ch.id) should be (Some(ch))
 		service.getDepartmentByCode("wibble") should be (None)
@@ -82,7 +82,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		service.getDepartmentByCode("CH") should be (Some(ch))
 		service.getDepartmentByCode(null) should be (None)
 
-		
+
 		service.getModuleByCode("cs108") should be (Some(cs108))
 		service.getModuleById(cs108.id) should be (Some(cs108))
 		service.getModuleByCode("wibble") should be (None)
@@ -110,7 +110,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 
 			service.removeOwner(cs, "cuscav")
 			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
-			
+
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
 			service.modulesWithPermission(currentUser, Permissions.Module.ManageAssignments, ch) should be (Set())

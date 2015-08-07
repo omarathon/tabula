@@ -10,19 +10,19 @@ import org.joda.time.{DateTimeZone, Chronology, LocalDate, DateTime}
 import scala.beans.BeanProperty
 
 class JsonTest extends TestBase {
-	
+
 	val m = new JsonObjectMapperFactory().createInstance()
 
 	val now = new DateTime().withZone(DateTimeZone.UTC).withDate(2013,7,29).withTime(12,0,0,0)
-	
+
 	// Test DefaultScalaModule from https://github.com/FasterXML/jackson-module-scala
 	// which teaches Jackson about Scala collections.
 	@Test def encodeMap {
 		m.writeValueAsString(Map()) should be("{}")
-		
+
 		m.writeValueAsString(Map("animals" -> Array("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
 		m.writeValueAsString(Map("animals" -> JArrayList("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
-		
+
 		m.writeValueAsString(Map("animals" -> List("cat","dog"))) should be("""{"animals":["cat","dog"]}""")
 	}
 
@@ -34,7 +34,7 @@ class JsonTest extends TestBase {
 			case s: Seq[_] => s should be (Seq(1,2,3))
 		}
 	}
-	
+
 	@Test def parseNumbers {
 		val props = """{"age" : 23, "filetypes":["pdf","doc","docx"]}"""
 		val map = m.readValue(new StringReader(props), classOf[Map[String,Any]])
@@ -58,7 +58,7 @@ class JsonTest extends TestBase {
 		m.writeValueAsString(now.toLocalDate) should be ("[2013,7,29]")
 		m.readValue("[2013,7,29]", classOf[LocalDate])
 	}
-	
+
 	// was a bug in scala jackson module
 	@Test def mutableMapWorks {
 		m.writeValueAsString(MutableMap()) should be("{}")

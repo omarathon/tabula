@@ -11,25 +11,25 @@ import org.springframework.validation.DataBinder
 
 /**
  * Factory that creates a DataBinder instance every time an object needs binding
- * from a request. We use our own custom data binder. 
+ * from a request. We use our own custom data binder.
  */
-class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer) 
+class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer)
 	extends ServletRequestDataBinderFactory(binderMethods, initializer) {
-	
+
 	trait CustomDataBinderDependencies {
 		// dependency for PermissionsBinding
 		val securityService = Wire.auto[SecurityService]
 	}
-	
-	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= { 
-		new CustomDataBinder(target, objectName) 
+
+	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= {
+		new CustomDataBinder(target, objectName)
 				with CustomDataBinderDependencies
 				with PermissionsBinding
 				with AllowedFieldsBinding
 				with BindListenerBinding
 				with NoAutoGrownNestedPaths
 	}
-	
+
 }
 
 trait NoAutoGrownNestedPaths extends DataBinder {

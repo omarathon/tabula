@@ -46,10 +46,10 @@ class DownloadSubmissionsController extends CourseworkController {
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
 class DownloadMarkerSubmissionsController extends CourseworkController {
-	
+
 	@ModelAttribute("command")
 	def getMarkersSubmissionCommand(
-			@PathVariable("module") module: Module, 
+			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
 			@PathVariable("marker") marker: User,
 			submitter: CurrentUser
@@ -76,9 +76,9 @@ class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkControlle
 class DownloadAllSubmissionsController extends CourseworkController {
 
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			@PathVariable("filename") filename: String) = 
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
+			@PathVariable("filename") filename: String) =
 		new DownloadAllSubmissionsCommand(module, assignment, filename)
 
 	@RequestMapping
@@ -92,10 +92,10 @@ class DownloadAllSubmissionsController extends CourseworkController {
 class DownloadSingleSubmissionController extends CourseworkController {
 
 	var userLookup = Wire[UserLookupService]
-	
+
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("assignment") assignment: Assignment,
 			@PathVariable("submission") submission: Submission) =
 		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submission))
 
@@ -110,8 +110,8 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
 			@PathVariable("submission") submission: Submission ) = {
 		val student = profileService.getMemberByUser(userLookup.getUserByUserId(submission.userId))
 		new DownloadAttachmentCommand(module, assignment, mandatory(submission), student)
@@ -130,7 +130,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 class DownloadFeedbackSheetsController extends CourseworkController {
 
 	var userLookup = Wire.auto[UserLookupService]
-		
+
 	@ModelAttribute def feedbackSheetsCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new DownloadFeedbackSheetsCommand(module, assignment)
 

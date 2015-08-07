@@ -185,9 +185,9 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 			apply(students, entities.groupBy(_.students.size).toSeq.sortBy(_._1))
 		}
 	}
-	
+
 	private def removeSingle(initialState: StudentAssociationResult) = {
-		initialState.allocated.find(_.entityId == entityToRemoveFrom).foreach(entity => 
+		initialState.allocated.find(_.entityId == entityToRemoveFrom).foreach(entity =>
 			entity.students.find(_.universityId == studentToRemove).foreach(student => {
 				// Only add to removals if the association exists in the DB
 				if (dbAllocated.find(_.entityId == entity.entityId).get.students.map(_.universityId).contains(student.universityId)) {

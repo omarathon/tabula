@@ -23,9 +23,9 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 		val user = new User("cusebr")
 		val uri = "https://tabula.warwick.ac.uk/web/power/flight?super=magic"
 	 	val currentUser = new CurrentUser(user, user)
-		
+
 		val queryParams: Map[String, List[String]] = Uri.parse(uri).getQueryParameters().asScala.toMap.mapValues(_.asScala.toList)
-		
+
 		val info = new RequestInfo(currentUser, Uri.parse(uri), queryParams)
 		val request = testRequest(uri)
 		request.setMethod("GET")
@@ -38,26 +38,26 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 			handler.freemarker = newFreemarkerConfiguration
 			handler.production = true
 			handler.standby = true
-			
+
 			val mailSender = mock[WarwickMailSender]
-	   
+
 			val session = Session.getDefaultInstance(new Properties)
-			val mimeMessage = new MimeMessage(session)	   
+			val mimeMessage = new MimeMessage(session)
 			mailSender.createMimeMessage() returns mimeMessage
-			
+
 			handler.mailSender = mailSender
 			handler.recipient = "exceptions@warwick.ac.uk"
 			handler.afterPropertiesSet
-			
+
 			handler.exception(context)
-			
+
 			verify(mailSender, times(1)).send(mimeMessage)
-			
+
 			val text = mimeMessage.getContent match {
 				case string: String => string
 				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
 			}
-			
+
 			text should include ("env=PROD (standby)")
 			text should include ("time=")
 			text should include ("info.requestedUri="+uri)
@@ -68,5 +68,5 @@ class EmailingExceptionHandlerTest extends TestBase with Mockito {
 			text should include ("X-Requested-With: Coconuts")
 		}
 	}
-	
+
 }

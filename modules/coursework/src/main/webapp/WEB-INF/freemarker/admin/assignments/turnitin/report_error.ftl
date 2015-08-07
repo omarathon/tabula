@@ -6,7 +6,7 @@
 </p>
 <#elseif problem = "no-session">
 <p>
-  We couldn't log you in to Turnitin. 
+  We couldn't log you in to Turnitin.
 </p>
 <#elseif problem = "api-error">
 <p>

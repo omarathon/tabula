@@ -10,9 +10,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 
-class ScalaRestriction(val underlying: Criterion) extends Aliasable {	
+class ScalaRestriction(val underlying: Criterion) extends Aliasable {
 	def apply[A](c: ScalaCriteria[A]) = c.add(this)
-	
+
 	override final def equals(other: Any) = other match {
 		case that: ScalaRestriction =>
 			new EqualsBuilder()
@@ -21,13 +21,13 @@ class ScalaRestriction(val underlying: Criterion) extends Aliasable {
 				.build()
 		case _ => false
 	}
-	
+
 	override final def hashCode =
 		new HashCodeBuilder()
 			.append(underlying)
 			.append(aliases)
 			.build()
-			
+
 	override final def toString =
 		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("underlying", underlying)
@@ -37,7 +37,7 @@ class ScalaRestriction(val underlying: Criterion) extends Aliasable {
 
 object ScalaRestriction {
 	import Aliasable._
-	
+
 	def is(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
 
@@ -76,7 +76,7 @@ object ScalaRestriction {
 			collection.toSeq.distinct.foreach { prefix =>
 				criterion.add(like(property, prefix + "%"))
 			}
-			
+
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
 
@@ -107,7 +107,7 @@ object ScalaRestriction {
 
 trait Aliasable {
 	final val aliases: mutable.Map[String, AliasAndJoinType] = mutable.Map()
-	
+
 	def alias(property: String, aliasAndJoinType: AliasAndJoinType) = {
 		aliases.put(property, aliasAndJoinType) match {
 			case Some(other) if other.alias != aliasAndJoinType.alias =>

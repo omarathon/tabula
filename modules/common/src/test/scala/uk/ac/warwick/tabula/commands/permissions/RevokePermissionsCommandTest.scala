@@ -24,21 +24,21 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		val command = new RevokePermissionsCommandInternal(department) with CommandTestSupport[Department] with RevokePermissionsCommandValidation
 	}
-	
+
 	@Test def nonExistingPermission { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.overrideType = GrantedPermission.Allow
-		
+
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (None)
-				
+
 		// Doesn't blow up, just a no-op
 		command.applyInternal() should be (null)
 
 		verify(command.permissionsService, times(0)).saveOrUpdate(any[GrantedPermission[_]])
 	}}
-	
+
 	@Test def itWorksWithExisting { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.usercodes.add("cuscav")
@@ -46,17 +46,17 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		command.overrideType = GrantedPermission.Allow
 
 		command.userLookup.registerUsers("cuscav", "cusebr")
-		
+
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
 		existing.users.knownType.addUserId("cuscao")
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-				
+
 		val grantedPerm = command.applyInternal()
 		(grantedPerm.eq(existing)) should be (true)
-		
+
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
 		grantedPerm.users.size should be (1)
 		grantedPerm.users.knownType.includesUserId("cuscav") should be (false)
@@ -75,7 +75,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.overrideType = GrantedPermission.Allow
-		
+
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
@@ -83,17 +83,17 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (true)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
 		errors.hasErrors should be (false)
 	}}}
-	
+
 	@Test def noUsercodes { withUser("cuscav", "0672089") { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.overrideType = GrantedPermission.Allow
-		
+
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
@@ -101,7 +101,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (true)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -110,14 +110,14 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def usercodeNotInGroup { withUser("cuscav", "0672089") { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.usercodes.add("curef")
 		command.usercodes.add("cusebr")
 		command.usercodes.add("cuscao")
 		command.overrideType = GrantedPermission.Allow
-		
+
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
@@ -125,7 +125,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (true)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -134,14 +134,14 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("userId.notingroup")
 	}}}
-	
+
 	@Test def noPermission { withUser("cuscav", "0672089") { new Fixture {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.overrideType = GrantedPermission.Allow
 
 		command.permissionsService.getGrantedPermission(department, null, true) returns (None)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -150,13 +150,13 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("permission")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def cantRevokeWhatYouDontHave { withUser("cuscav", "0672089") { new Fixture {
 		command.permission = Permissions.Department.ManageExtensionSettings
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.overrideType = GrantedPermission.Allow
-		
+
 		val existing = GrantedPermission(department, Permissions.Department.ManageExtensionSettings, true)
 		existing.users.knownType.addUserId("cuscav")
 		existing.users.knownType.addUserId("cusebr")
@@ -164,7 +164,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 
 		command.permissionsService.getGrantedPermission(department, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		command.securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, department) returns (false)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -212,5 +212,5 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		command should be (anInstanceOf[RevokePermissionsCommandValidation])
 		command should be (anInstanceOf[Describable[GrantedPermission[Department]]])
 	}
-	
+
 }

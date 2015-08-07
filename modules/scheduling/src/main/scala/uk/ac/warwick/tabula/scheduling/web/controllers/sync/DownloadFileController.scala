@@ -18,11 +18,11 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 @Controller
 @RequestMapping(value = Array("/sync/getFile"))
 class DownloadFileController extends BaseController with Logging {
-	
+
 	var fileServer = Wire.auto[FileServer]
 	var macGenerator = Wire.auto[MessageAuthenticationCodeGenerator]
 	var fileDao = Wire.auto[FileDao]
-	
+
 	@RequestMapping
 	def serve(@RequestParam("id") id: String, @RequestParam("mac") mac: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		if (!macGenerator.isValidSalt) {
@@ -44,6 +44,6 @@ class DownloadFileController extends BaseController with Logging {
 
 object DownloadFileController {
 	val IdParam = "id"
-		
+
 	val MacParam = "mac"
 }

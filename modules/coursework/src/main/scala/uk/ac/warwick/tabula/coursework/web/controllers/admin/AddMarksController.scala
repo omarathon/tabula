@@ -39,7 +39,7 @@ class AddMarksController extends CourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(
-			@PathVariable module: Module, 
+			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
 	) = {

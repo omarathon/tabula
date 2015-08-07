@@ -14,7 +14,7 @@ trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDr
 
   def as[T](user: LoginDetails)(fn: =>T) = {
 		currentUser = user
-    signIn as(user) to (Path("/groups"))
+    signIn as(user) to (Path("/groups/"))
     fn
   }
 

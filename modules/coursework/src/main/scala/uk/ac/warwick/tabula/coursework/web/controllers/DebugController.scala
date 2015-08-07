@@ -18,5 +18,5 @@ class DebugController extends Daoisms {
 			out.write("Assignments: " + count)
 		}
 	}
-	
+
 }

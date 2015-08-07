@@ -21,25 +21,25 @@ class UserSettingsController extends BaseController {
 	type UserSettingsCommand = Appliable[UserSettings]
 
 	validatesSelf[SelfValidating]
-	
+
 	hideDeletedItems
-	
+
 	var userSettingsService = Wire.auto[UserSettingsService]
 	var moduleService = Wire[ModuleAndDepartmentService]
-	
-	private def getUserSettings(user: CurrentUser) = 
-		userSettingsService.getByUserId(user.apparentId) 
-		
-		
+
+	private def getUserSettings(user: CurrentUser) =
+		userSettingsService.getByUserId(user.apparentId)
+
+
 	@ModelAttribute("userSettingsCommand")
 	def command(user: CurrentUser): UserSettingsCommand = {
 		val usersettings = getUserSettings(user)
-		usersettings match { 
+		usersettings match {
 			case Some(setting) => UserSettingsCommand(user, setting)
 			case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
 		}
 	}
-	
+
 	@RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
 	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors:Errors, success: Boolean = false) = {
 		Mav("usersettings/form",

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 class UniversityIdTest extends TestBase {
-	
+
 	@Test def isValid() {
 		UniversityId.isValid("0672089") should be (true)
 		UniversityId.isValid("4072089") should be (true)

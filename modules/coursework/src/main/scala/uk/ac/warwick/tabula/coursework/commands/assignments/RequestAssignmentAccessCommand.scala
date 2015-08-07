@@ -15,9 +15,9 @@ import uk.ac.warwick.userlookup.User
  */
 class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, user: CurrentUser) extends Command[Seq[User]]
 	with Notifies[Seq[User], Assignment] with FreemarkerRendering with UnicodeEmails with Public {
-	
+
 	mustBeLinked(mandatory(assignment), mandatory(module))
-	
+
 	def admins = {
 		// lookup the admin users - used to determine the recipients  for notifications
 		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq

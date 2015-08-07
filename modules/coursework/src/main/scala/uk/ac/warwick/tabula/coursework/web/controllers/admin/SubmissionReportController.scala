@@ -17,12 +17,12 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.UserLookupService
 
 class SubmissionReportCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionsReport] with ReadOnly with Unaudited {
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	def applyInternal() = assignment.submissionsReport
-	
+
 }
 
 @Controller
@@ -31,14 +31,14 @@ class SubmissionReportController extends CourseworkController {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
-	
+
 	@ModelAttribute def command(@PathVariable("module") module:Module, @PathVariable("assignment") assignment: Assignment) =
 		new SubmissionReportCommand(module, assignment)
 
 	@RequestMapping
 	def get(command: SubmissionReportCommand): Mav = {
 		val report = command.apply()
-		
+
 		val submissionOnly = usersByWarwickIds(report.submissionOnly.toList)
 		val feedbackOnly = usersByWarwickIds(report.feedbackOnly.toList)
 		val hasNoAttachments = usersByWarwickIds(report.withoutAttachments.toList)

@@ -25,13 +25,13 @@ trait UserSettingsService {
 class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logging {
 
 	val json = Wire.auto[ObjectMapper]
-	
+
 	def getByUserId(userId: String) : Option[UserSettings] = {
 		session.newCriteria[UserSettings]
 			.add(is("userId", userId))
 			.uniqueResult
 	}
-	
+
 	def save(user: CurrentUser, newSettings: UserSettings) =  {
 		val existingSettings = getByUserId(user.apparentId)
 		val settingsToSave = existingSettings match {
@@ -41,5 +41,5 @@ class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logg
 		settingsToSave ++= newSettings
 		session.saveOrUpdate(settingsToSave)
 	}
-	
+
 }

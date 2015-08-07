@@ -24,26 +24,26 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 			// users added manually
 			group.addUserId("superhat")
 			group.addUserId("menace")
-			
+
 			session.saveOrUpdate(group)
 			session.flush()
 			session.clear()
-			
+
 			group = session.get(classOf[UserGroup], group.id).asInstanceOf[UserGroup]
-			
+
 			group.staticUserIds.size should be (2)
 			group.staticUserIds should (contain ("exoman") and contain ("eggdog"))
-			
+
 			group.includedUserIds.size should be (2)
 			group.includedUserIds should (contain ("superhat") and contain ("menace"))
-			
+
 			group.excludeUserId("eggdog") // poor eggdog.
 			group.includesUserId("whoareyou") should be {false}
 			group.includesUserId("exoman") should be {true}
 			group.includesUserId("eggdog") should be {false}
 			group.includesUserId("superhat") should be {true}
 			group.includesUserId("menace") should be {true}
-			
+
 			/* check that members works and is consistent.
 			 * At time of writing, staticIncludeUsers would get
 			 * added to includeUsers each time :|
@@ -52,29 +52,29 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 			group.members.size should be (3)
 			group.members.size should be (3)
 		}
-	} 
-	
+	}
+
 	@Test def withWebgroup() {
 		val userLookup = new MockUserLookup
-		
+
 		val group = UserGroup.ofUsercodes
 		group.sessionFactory = mockSessionFactory
 		group.userLookup = userLookup
-		
+
 		group.addUserId("cuscav")
 		group.addUserId("curef")
 		group.excludeUserId("cusmab") // we don't like Steve
 		group.staticUserIds = Seq("sb_systemtest")
 		group.baseWebgroup = "in-elab"
-			
+
 		val webgroup = new GroupImpl
 		webgroup.setUserCodes(List("cuscav", "cusmab", "cusebr").asJava)
-		
+
 		userLookup.groupService.groupMap += ("in-elab" -> webgroup)
-			
+
 		group.members should be (Seq("sb_systemtest", "cuscav", "curef", "cusebr"))
 	}
-	
+
 	@Test def copy() {
 		val group = UserGroup.ofUsercodes
 		group.sessionFactory = mockSessionFactory
@@ -83,13 +83,13 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		group.excludeUserId("cusmab") // we don't like Steve
 		group.staticUserIds = Seq("sb_systemtest")
 		group.baseWebgroup = "in-elab"
-			
+
 		val group2 = UserGroup.ofUsercodes
 		group2.sessionFactory = mockSessionFactory
 		group2.copyFrom(group)
-		
+
 		group.eq(group2) should be {false}
-		
+
 		group2.includedUserIds should be (group.includedUserIds)
 		group2.excludedUserIds should be (group.excludedUserIds)
 		group2.staticUserIds should be (group.staticUserIds)

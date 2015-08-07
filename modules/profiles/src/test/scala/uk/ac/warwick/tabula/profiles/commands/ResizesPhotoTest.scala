@@ -10,27 +10,27 @@ import org.springframework.core.io.ClassPathResource
 import java.io.File
 
 class ResizesPhotoTest extends TestBase {
-	
+
 	trait Context {
 		val directory = createTemporaryDirectory
 		val resizer = new CachingImageResizer(new JAIImageResizer, directory);
 		val command = new ResizesPhoto {}
 		command.imageResizer = resizer
-		
+
 		val member = new StudentMember
 		val photoAttachment = new FileAttachment
 		photoAttachment.file = new ClassPathResource("/dijkstra.jpg").getFile
 		photoAttachment.file.exists should be (true)
 		photoAttachment.name = "0123456.jpg"
 		member.photo = photoAttachment
-		
+
 		def fileList: Array[File] = {
 			val profilesDirectory = new File(directory, "profilephoto")
 			if (profilesDirectory.exists) profilesDirectory.listFiles()
 			else Array()
 		}
 	}
-	
+
 	@Test
 	def nullAttachment() {
 		new Context {
@@ -40,7 +40,7 @@ class ResizesPhotoTest extends TestBase {
 			renderable should be (DefaultPhoto)
 		}
 	}
-	
+
 	@Test
 	def thumbnail() {
 		new Context {
@@ -51,7 +51,7 @@ class ResizesPhotoTest extends TestBase {
 			files(0).getName should be ("0123456.jpg@170x0")
 		}
 	}
-	
+
 	@Test
 	def actual() {
 		new Context {
@@ -62,7 +62,7 @@ class ResizesPhotoTest extends TestBase {
 			files.length should be (0L)
 		}
 	}
-	
+
 	@Test
 	def unrecognisedSize() {
 		new Context {

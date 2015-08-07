@@ -26,7 +26,7 @@ object UserSettingsCommand {
 
 class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) extends CommandInternal[UserSettings] {
 	self: UserSettingsServiceComponent =>
-	
+
 	var alertsSubmission = settings.alertsSubmission
 	var weekNumberingSystem = settings.weekNumberingSystem
 	var bulkEmailSeparator = settings.bulkEmailSeparator
@@ -37,7 +37,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
 
 	lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(settings.notificationSettings("FinaliseFeedback"))
 	var finaliseFeedbackNotificationEnabled = finaliseFeedbackNotificationSettings.enabled.value
-		
+
 	override def applyInternal() = transactional() {
 		settings.alertsSubmission = alertsSubmission
 		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null

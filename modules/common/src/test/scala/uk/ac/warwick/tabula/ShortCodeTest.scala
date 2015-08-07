@@ -9,7 +9,7 @@ class ShortCodeTest extends TestBase {
 	@Test def randomShortCode {
 		ShortCode.random() should fullyMatch regex """[a-zA-Z0-9]{5}"""
 	}
-	
+
 	/**
 	 * Check that we can generate a bunch of unique codes with only
 	 * a few retries in case of collision.

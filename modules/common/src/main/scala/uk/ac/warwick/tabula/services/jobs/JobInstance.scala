@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
  */
 trait JobInstance {
 	type JsonMap = Map[String, Any]
-	
+
 	protected var propsMap: Map[String, Any]
 
 	def jobType: String
@@ -39,7 +39,7 @@ trait JobInstance {
 	var started: Boolean
 	var finished: Boolean
 	var succeeded: Boolean
-	
+
 	def json: JsonMap
 
 	def user: CurrentUser

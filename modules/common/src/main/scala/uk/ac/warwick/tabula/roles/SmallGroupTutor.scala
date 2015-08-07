@@ -20,9 +20,9 @@ case object SmallGroupEventTutorRoleDefinition extends UnassignableBuiltInRoleDe
 }
 
 case object SmallGroupTutorRoleDefinition extends UnassignableBuiltInRoleDefinition {
-	
+
 	override def description = "SmallGroupTutor"
-	
+
 	GrantsScopedPermission(
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,

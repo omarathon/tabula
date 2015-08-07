@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 import scala.reflect._
 
 object ReflectionHelper extends Logging {
-	
+
 	private def subtypesOf[A : ClassTag] = {
 		val scanner = new ClassPathScanningCandidateComponentProvider(false)
 		scanner.addIncludeFilter(new AssignableTypeFilter(classTag[A].runtimeClass))
@@ -33,17 +33,17 @@ object ReflectionHelper extends Logging {
 	}
 
 	lazy val allPermissionTargets = subtypesOf[PermissionsTarget].sortBy(_.getSimpleName)
-	
+
 	lazy val allPermissions = {
 		def sortFn(clazz1: Class[_ <: Permission], clazz2: Class[_ <: Permission]) = {
 			// Remove prefix and strip trailing $, then change $ to .
 			val shortName1 = Permissions.shortName(clazz1)
 			val shortName2 = Permissions.shortName(clazz2)
-			
+
 			// Sort by number of dots, then alphabetically
 			val dots1: Int = shortName1.split('.').length
 			val dots2: Int = shortName2.split('.').length
-			
+
 			if (dots1 != dots2) dots1 < dots2
 			else shortName1 < shortName2
 		}
@@ -58,7 +58,7 @@ object ReflectionHelper extends Logging {
 					case clzInner if clzInner == classOf[PermissionsSelector[StudentRelationshipType]] => PermissionsSelector.Any[StudentRelationshipType]
 					case clzInner => clzInner.newInstance().asInstanceOf[Object]
 				}
-				
+
 				if (params.length == 0) constructor.newInstance().asInstanceOf[Permission]
 				else constructor.newInstance(params: _*).asInstanceOf[Permission]
 			}
@@ -89,23 +89,23 @@ object ReflectionHelper extends Logging {
 				else clz.getSimpleName
 			}
 	}
-	
+
 	lazy val groupedPermissions = {
 		def groupFn(p: Permission) = {
-			val simpleName = Permissions.shortName(p.getClass) 
-			 
-			val parentName = 
+			val simpleName = Permissions.shortName(p.getClass)
+
+			val parentName =
 				if (simpleName.indexOf('.') == -1) ""
 				else simpleName.substring(0, simpleName.lastIndexOf('.'))
-			
+
 			parentName
 		}
-		
+
 		allPermissions
 			.groupBy(groupFn)
-			.map { case (key, value) => (key, value map { 
-				p => (p.getName, p.getName) 
-			})}		
+			.map { case (key, value) => (key, value map {
+				p => (p.getName, p.getName)
+			})}
 	}
-	
+
 }

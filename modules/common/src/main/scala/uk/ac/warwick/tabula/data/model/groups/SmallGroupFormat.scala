@@ -10,7 +10,7 @@ sealed abstract class SmallGroupFormat(val code: String, val description: String
 	// For Spring, the silly bum
 	def getCode = code
 	def getDescription = description
-	
+
 	override def toString = description
 }
 

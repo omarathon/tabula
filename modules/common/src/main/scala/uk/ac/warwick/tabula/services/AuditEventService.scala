@@ -49,10 +49,10 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
 
-	private val baseSelect = """select 
+	private val baseSelect = """select
 		eventdate,eventstage,eventtype,masquerade_user_id,real_user_id,data,eventid,id
 		from auditevent a"""
-		
+
 	private val DateIndex = 0
 	private val StageIndex = 1
 	private val TypeIndex = 2
@@ -73,10 +73,10 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val latestDateSql = """select max(a.eventdate) from auditevent a"""
 
 	// for getting events newer than a certain date, for indexing
-	private val indexListSql = baseSelect + """ 
+	private val indexListSql = baseSelect + """
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
-	
+
 	private val timestampColumnMapper = {
 		val mapper = new TimestampColumnDateTimeMapper
 		mapper.setDatabaseZone(DateTimeZone.forID("Europe/London"))

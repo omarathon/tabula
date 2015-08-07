@@ -35,7 +35,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 
 		val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
 	}
-	
+
 	@Test def itWorksForNewRole { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
@@ -44,7 +44,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		command.userLookup.registerUsers("cuscav", "cusebr")
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
-				
+
 		val grantedRole = command.applyInternal()
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedRole.users.size should be (2)
@@ -57,22 +57,22 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
-	
+
 	@Test def itWorksWithExisting { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.userLookup.registerUsers("cuscav", "cusebr")
-		
+
 		val existing = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
-				
+
 		val grantedRole = command.applyInternal()
 		(grantedRole.eq(existing)) should be (true)
-		
+
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedRole.users.size should be (3)
 		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
@@ -84,7 +84,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
-	
+
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
@@ -98,7 +98,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 
 		errors.hasErrors should be (false)
 	}}}
-	
+
 	@Test def noUsercodes { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 
@@ -113,13 +113,13 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def duplicateUsercode { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 		command.usercodes.add("cuscao")
-		
+
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 
@@ -134,13 +134,13 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("usercodes")
 		errors.getFieldError.getCode should be ("userId.duplicate")
 	}}}
-	
+
 	@Test def noPermission { withUser("cuscav", "0672089") { new Fixture {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.permissionsService.getGrantedRole(department, null) returns (None)
-		
+
 		val errors = new BindException(command, "command")
 		command.validate(errors)
 
@@ -149,7 +149,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
-	
+
 	@Test def cantGiveWhatYouDontHave { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")

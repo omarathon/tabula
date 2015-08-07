@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 import scala.xml.XML
 
 class TimetableFetchingServiceTest extends TestBase {
-	
+
 	@Test def parseXML() {
 		val locationFetchingService = new LocationFetchingService {
 			def locationFor(name: String) = NamedLocation(name)
@@ -37,7 +37,7 @@ class TimetableFetchingServiceTest extends TestBase {
 		events(1).comments should be (Some("Some comments"))
 		events(1).studentUniversityIds should be (Seq("1234567"))
 	}
-	
+
 	val TimetableEvents = """<?xml version="1.0" encoding="UTF-8"?>
 <Data>
    <Activities>

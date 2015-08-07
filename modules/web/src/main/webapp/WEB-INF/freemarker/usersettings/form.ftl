@@ -18,7 +18,7 @@
 	<div class="alert alert-success">Your preferred settings have been updated.</div>
 </#if>
 <@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
-	
+
 
 <#if isCourseworkModuleManager || isDepartmentalAdmin>
 	<@form.row>
@@ -39,7 +39,7 @@
 		</@form.field>
 	</@form.row>
 </#if>
-	
+
 	<@form.row>
 		<@form.label>Week numbering system</@form.label>
 		<@form.field>
@@ -66,7 +66,7 @@
 			<@f.errors path="weekNumberingSystem" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+
 	<@form.row>
 		<@form.label>Bulk email separator</@form.label>
 		<@form.field>
@@ -102,6 +102,6 @@
 	<input type="submit" value="Save" class="btn btn-primary">
 	<a class="btn" href="${url('/')}">Cancel</a>
 </div>
-	
+
 </@f.form>
 </#escape>

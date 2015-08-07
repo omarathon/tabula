@@ -15,23 +15,23 @@ import org.springframework.web.multipart.MultipartException
 
 // scalastyle:off magic.number
 class ExceptionResolverTest extends TestBase {
-	
-	val resolver = new ExceptionResolver {			
+
+	val resolver = new ExceptionResolver {
 		defaultView = "defaultErrorView"
 		exceptionHandler = new ExceptionHandler {
 			override def exception(context: ExceptionContext) {
 				// no special handling.
 			}
 		}
-		
+
 		viewMappings = Map(
 			classOf[ItemNotFoundException].getName -> "could-not-find",
 			classOf[FileUploadException].getName -> "upload-failed"
 		)
-		
+
 		override def loginUrl = "https://websignon.example.com/?target=whatever&etc"
 	}
-	
+
 	/**
 	 * When a PermissionDeniedException is thrown and the user is not
 	 * signed in, we should always redirect to sign in rather than present
@@ -47,7 +47,7 @@ class ExceptionResolverTest extends TestBase {
 			modelAndView.viewName should be ("redirect:"+resolver.loginUrl)
 		}
 	}
-	
+
 	/**
 	 * A PermissionDeniedException when logged in should be handled normally.
 	 * Usually we'd have an explicit mapping from PermissionDeniedException to
@@ -63,7 +63,7 @@ class ExceptionResolverTest extends TestBase {
 			modelAndView.viewName should be (resolver.defaultView)
 		}
 	}
-	
+
 	/**
 	 * TAB-567 - When handling multipart exceptions, wrap in a "HandledException" wrapper
 	 */
@@ -78,7 +78,7 @@ class ExceptionResolverTest extends TestBase {
 			case _ => fail("expected file upload exception")
 		}
 	}
-	
+
 	/**
 	 * When an exception mapping exists for an exception, use the
 	 * view name it maps to rather than defaultView.
@@ -90,34 +90,34 @@ class ExceptionResolverTest extends TestBase {
 			modelAndView.viewName should be ("could-not-find")
 		}
 	}
-	
+
 	@Test def callInterceptors {
 		var handled = 0
-		
+
 		resolver.userInterceptor = new CurrentUserInterceptor {
 			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 				handled += 7
 				true
 			}
 		}
-		
+
 		resolver.infoInterceptor = new RequestInfoInterceptor {
 			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
 				handled += 13
 				true
 			}
 		}
-		
+
 		withUser("cusebr") {
 			val request = new MockHttpServletRequest
 			val response = new MockHttpServletResponse
-			
+
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
 			val exception = new PermissionDeniedException(user, null, null, null)
 			val modelAndView = resolver.resolveException(request, response, handled, exception)
 			modelAndView.getViewName should be (resolver.defaultView)
-			
+
 			handled should be (20)
 		}
 	}

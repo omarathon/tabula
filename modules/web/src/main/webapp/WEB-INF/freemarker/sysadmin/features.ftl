@@ -10,8 +10,8 @@
 <h1>Feature flags</h1>
 
 <p>
-This controller uses ActiveMQ to broadcast changes to other instances. 
-When you set a property here, <strong>all</strong> properties will be kept in sync. 
+This controller uses ActiveMQ to broadcast changes to other instances.
+When you set a property here, <strong>all</strong> properties will be kept in sync.
 </p>
 
 <table class="feature-flags">
@@ -22,8 +22,8 @@ When you set a property here, <strong>all</strong> properties will be kept in sy
 <td>
 <form id="${feature.name}_form" action="<@url page="/sysadmin/features"/>" method="POST">
 <input type="hidden" name="name" value="${feature.name}">
-Set to 
-<input type="submit" name="value" value="false"> or 
+Set to
+<input type="submit" name="value" value="false"> or
 <input type="submit" name="value" value="true">
 </form>
 </td>

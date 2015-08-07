@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.permissions._
 
 class CleanupTemporaryFilesCommand extends Command[Unit] {
-	
+
 	PermissionCheck(Permissions.ReplicaSyncing)
 
 	var dao = Wire.auto[FileDao]

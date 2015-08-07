@@ -37,19 +37,19 @@ class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sco
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
-	
+
 	def applyInternal() = transactional() {
 		val granted = grantedPermission.getOrElse(GrantedPermission(scope, permission, overrideType))
-		
+
 		usercodes.asScala.foreach(granted.users.knownType.addUserId)
-		
+
 		permissionsService.saveOrUpdate(granted)
 
 		// For each usercode that we've added, clear the cache
 		usercodes.asScala.foreach { usercode =>
 			permissionsService.clearCachesForUser((usercode, classTag[A]))
 		}
-		
+
 		granted
 	}
 

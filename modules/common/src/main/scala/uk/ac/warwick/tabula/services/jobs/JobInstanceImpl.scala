@@ -92,7 +92,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
 		user = currentUserFinder.resolveCurrentUser(realUser, { (u, s) => apparentUser }, false)
 	}
-	
+
 	def toStringProps = Seq(
 		"id" -> id,
 		"status" -> status,

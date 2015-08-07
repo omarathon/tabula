@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.DegreeType._
 
 class DegreeTypeTest extends TestBase {
-  
+
 	@Test def convertToObject() {
 		val t = new DegreeTypeUserType
 		t.convertToObject("UG") should be (Undergraduate)
@@ -13,7 +13,7 @@ class DegreeTypeTest extends TestBase {
 		t.convertToObject("PGCE") should be (PGCE)
 		an [IllegalArgumentException] should be thrownBy { t.convertToObject("Q") }
 	}
-  
+
 	@Test def convertToValue() {
 		val t = new DegreeTypeUserType
 		t.convertToValue(Undergraduate) should be ("UG")

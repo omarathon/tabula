@@ -16,7 +16,7 @@
 			</@spring.bind>
 		</@form.labelled_row>
 	</#if>
-	
+
 	<#if newRecord || relationshipType.empty>
 		<@form.labelled_row "urlPart" "URL string">
 			<@f.input path="urlPart" cssClass="text" />
@@ -32,7 +32,7 @@
 			</@spring.bind>
 		</@form.labelled_row>
 	</#if>
-	
+
 	<@form.labelled_row "description" "Description">
 		<@f.input path="description" cssClass="text" />
 		<a class="use-popover" data-html="true"
@@ -40,7 +40,7 @@
 	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
-	
+
 	<@form.labelled_row "agentRole" "Agent Role">
 		<@f.input path="agentRole" cssClass="text" />
 		<a class="use-popover" data-html="true"
@@ -48,7 +48,7 @@
 	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
-	
+
 	<@form.labelled_row "studentRole" "Student Role">
 		<@f.input path="studentRole" cssClass="text" />
 		<a class="use-popover" data-html="true"
@@ -56,7 +56,7 @@
 	   	<i class="icon-question-sign fa fa-question-circle"></i>
 	  </a>
 	</@form.labelled_row>
-	
+
 	<@form.labelled_row "defaultSource" "Default source">
 		<label class="radio">
 			<@f.radiobutton path="defaultSource" value="local" />
@@ -75,7 +75,7 @@
 		  </a>
 		</label>
 	</@form.labelled_row>
-	
+
 	<@form.row defaultClass="">
 		<@form.field>
 			<@form.label checkbox=true>
@@ -85,7 +85,7 @@
 			<@f.errors path="defaultDisplay" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+
 	<@form.row defaultClass="">
 		<@form.field>
 			<@form.label checkbox=true>
@@ -99,7 +99,7 @@
 			<@f.errors path="expectedUG" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+
 	<@form.row defaultClass="">
 		<@form.field>
 			<@form.label checkbox=true>
@@ -113,7 +113,7 @@
 			<@f.errors path="expectedPGT" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+
 	<@form.row defaultClass="">
 		<@form.field>
 			<@form.label checkbox=true>
@@ -127,7 +127,7 @@
 			<@f.errors path="expectedPGR" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+
 	<@form.labelled_row "sortOrder" "Sort order">
 		<@f.input path="sortOrder" cssClass="text" />
 		<a class="use-popover" data-html="true"

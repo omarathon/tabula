@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.validators.WithinYears
 
 class FeedbackReportCommand (val department:Department, val user: CurrentUser) extends Command[JobInstance]
 			with Unaudited with SelfValidating {
-	
+
 	PermissionCheck(Permissions.Department.DownloadFeedbackReport, department)
 
 	@WithinYears(maxFuture = 3, maxPast = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)

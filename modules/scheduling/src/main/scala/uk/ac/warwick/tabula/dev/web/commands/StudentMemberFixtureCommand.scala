@@ -78,17 +78,17 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 					memberDao.delete
 				}
 			}
-	
+
 			transactional() {
 				newMember.attachStudentCourseDetails(scd)
 				memberDao.saveOrUpdate(newMember)
 			}
-	
+
 			transactional() {
 				newMember.mostSignificantCourse = scd
 				memberDao.saveOrUpdate(newMember)
 			}
-	
+
 			newMember
 	}
 }

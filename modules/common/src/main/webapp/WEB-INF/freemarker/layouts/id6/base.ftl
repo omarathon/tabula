@@ -85,7 +85,11 @@
 								<span id="subsite-character">&raquo;</span>
 							</#if>
 								<span id="current-site-header"><#compress>
-									<#assign homeUrl><@routes.home /></#assign>
+									<#if component.homeUrl??>
+										<#assign homeUrl=component.homeUrl />
+									<#else>
+										<#assign homeUrl><@routes.home /></#assign>
+									</#if>
 									<#if (info.requestedUri != homeUrl)!false>
 										<a href="${homeUrl}">${component.siteHeader?default('Tabula')}</a>
 									<#else>
@@ -139,7 +143,11 @@
 										<li class="section rendered-link">
 											<div class="link-content">
 												<div class="title rendered-link-content">
-													<#assign homeUrl><@routes.home /></#assign>
+													<#if component.homeUrl??>
+														<#assign homeUrl=component.homeUrl />
+													<#else>
+														<#assign homeUrl><@routes.home /></#assign>
+													</#if>
 													<#if (info.requestedUri != homeUrl)!false>
 														<a href="${homeUrl}">${component.title?default('Tabula')}</a>
 													<#else>
@@ -283,7 +291,7 @@
 			  var _gaq = _gaq || [];
 			  _gaq.push(['_setAccount', '${googleAnalyticsCode}']);
 			  _gaq.push(['_trackPageview']);
-			
+
 			  (function() {
 			    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 			    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';

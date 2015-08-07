@@ -18,7 +18,7 @@ case class TurnitinResponse(
 	lazy val userId = xml map { elem => (elem \\ "userid").text } filterNot emptyString
 	lazy val objectId = xml map { elem => (elem \\ "objectID").text } filterNot emptyString
 	lazy val sessionId = xml map { elem => (elem \\ "sessionid").text } filterNot emptyString
-	
+
 	/**
 	 * Convert an <object> list into a list of TurnitinSubmissionInfo items.
 	 *
@@ -62,7 +62,7 @@ object TurnitinResponse {
 		}
 		new TurnitinResponse(code, diagnostic = Some(string))
 	}
-	
+
 	def redirect(location: String) = {
 		new TurnitinResponse(0, redirectUrl = Some(location))
 	}
@@ -159,7 +159,7 @@ object TurnitinResponse {
 		215 -> "This primary account ID is not authorized to use this product",
 		216 -> "Student limit for this account has been reached. Cannot join student to this class.",
 		217 -> "The product for this account has expired. Please contact your sales agent to renew the product",
-		218 -> "Database Error inserting unique ID into the database", 
+		218 -> "Database Error inserting unique ID into the database",
 		219 -> "Unique user id in the database does not match submitted uid",
 		220 -> "More than one class exists with this title and unique ids must be used in this case",
 		221 -> "More than one assignment exists with this title and unique ids must be used in this case",
@@ -332,6 +332,6 @@ object TurnitinResponse {
 		9000 -> "Turnitin server unavailable",
 		9001 -> "Unexpected formatting in response from Turnitin"
 	)
-		
+
 
 }
