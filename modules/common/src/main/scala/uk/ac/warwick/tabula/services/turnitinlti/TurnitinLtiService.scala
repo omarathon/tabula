@@ -74,7 +74,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	/** Shared key as set up on the University of Warwick account's LTI settings */
 	@Value("${TurnitinLti.key}") var sharedSecretKey: String = null
 
-	// TODO only need the base url
 	@Value("${TurnitinLti.submitassignment.url}") var apiSubmitAssignment: String = _
 	@Value("${TurnitinLti.submitpaper.url}") var apiSubmitPaperEndpoint: String = _
 	@Value("${TurnitinLti.listendpoints.url}") var apiListEndpoints: String = _
@@ -146,8 +145,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				<message>Your file has been saved successfully.</message>
 			</response>
 	 */
-	def submitPaper(assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment,
-									userFirstName: String, userLastName: String): TurnitinLtiResponse = doRequest(
+	def submitPaper(
+		assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
+	 ): TurnitinLtiResponse = doRequest(
 
 		s"${apiSubmitPaperEndpoint}/${assignment.turnitinId}",
 		Map(
@@ -276,8 +276,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		"User-Agent" -> userAgent
 	)
 
-	def doRequestForLtiTesting (endpoint: String, secret: String, params: Map[String, String])
-														 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
+	def doRequestForLtiTesting(
+		endpoint: String, secret: String, params: Map[String, String]
+	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
 		val signedParams = getSignedParams(params, endpoint, Some(secret))
 
@@ -287,24 +288,25 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			http.x(transform(req))
 		} catch {
 			case e: IOException => {
-				logger.error("Exception contacting Turnitin", e)
+				logger.error("Exception contacting provider", e)
 				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
 			}
 			case e: SAXParseException => {
-				logger.error("Unexpected response from Turnitin", e)
+				logger.error("Unexpected response from provider", e)
 				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
 			}
 		}
 	}
 
-	def doRequest(endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None)
-							 (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
+	def doRequest(
+	endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
+	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
 		val signedParams = getSignedParams(params, endpoint, None)
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
 
-		logger.info("doRequest: " + signedParams)
+		logger.debug("doRequest: " + signedParams)
 		try {
 			if (expectedStatusCode.isDefined){
 				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {

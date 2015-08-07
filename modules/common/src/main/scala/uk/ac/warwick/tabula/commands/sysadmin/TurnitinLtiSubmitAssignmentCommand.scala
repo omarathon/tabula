@@ -9,36 +9,32 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti._
 
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 
 object TurnitinLtiSubmitAssignmentCommand {
 	def apply(user: CurrentUser) =
 		new TurnitinLtiSubmitAssignmentCommandInternal(user)
-				with TurnitinLtiSubmitAssignmentCommandPermissions
-				with ComposableCommand[TurnitinLtiResponse]
+			with TurnitinLtiSubmitAssignmentCommandPermissions
+			with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
 			with TurnitinLtiSubmitAssignmentCommandState
 			with TurnitinLtiSubmitAssignmentValidation
 			with AutowiringTurnitinLtiServiceComponent
-			with Logging
 }
 
 class TurnitinLtiSubmitAssignmentCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
 
-	self: TurnitinLtiSubmitAssignmentCommandState with TurnitinLtiServiceComponent with Logging =>
+	self: TurnitinLtiSubmitAssignmentCommandState with TurnitinLtiServiceComponent =>
 
 	override def applyInternal() = transactional() {
-
 		turnitinLtiService.submitAssignment(assignment, user)
-
 	}
 
 }
 
 trait TurnitinLtiSubmitAssignmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ManageEmergencyMessage)
+		p.PermissionCheck(Permissions.GodMode)
 	}
 }
 

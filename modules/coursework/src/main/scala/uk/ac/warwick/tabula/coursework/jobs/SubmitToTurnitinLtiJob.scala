@@ -128,8 +128,9 @@ class SubmitToTurnitinLtiJob extends Job
 		}
 
 		@tailrec
-		private def submitSinglePaper(attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment,
-														retries: Int): TurnitinLtiResponse = {
+		private def submitSinglePaper(
+	 		attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment,retries: Int
+		): TurnitinLtiResponse = {
 
 			def submit() = {
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
@@ -158,6 +159,7 @@ class SubmitToTurnitinLtiJob extends Job
 						val report = originalityReport.get
 						val response = turnitinLtiService.getSubmissionDetails(report.turnitinId, job.user)
 
+						// TODO retry if hasn't been checked by Turnitin yet
 						val result = response.submissionInfo
 						if (result.similarity.isDefined) report.similarity = Some(result.similarity.get.toInt)
 						if (result.publication_overlap.isDefined) report.publicationOverlap = Some(result.publication_overlap.get.toInt)

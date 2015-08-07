@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.turnitinlti._
 
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.validation.Errors
 import java.net.{MalformedURLException, URL}
@@ -23,27 +22,22 @@ object TurnitinLtiSubmitPaperCommand {
 			with TurnitinLtiSubmitPaperCommandState
 			with TurnitinLtiSubmitPaperValidation
 			with AutowiringTurnitinLtiServiceComponent
-			with Logging
 }
 
 class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
 
-	self: TurnitinLtiSubmitPaperCommandState with Logging with TurnitinLtiServiceComponent =>
+	self: TurnitinLtiSubmitPaperCommandState with TurnitinLtiServiceComponent =>
 
 	override def applyInternal() = transactional() {
-
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
-
-		// TODO fix!
 		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, attachment, user.universityId, "SYSADMIN")
-
 	}
 
 }
 
 trait TurnitinLtiSubmitPaperCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ManageEmergencyMessage)
+		p.PermissionCheck(Permissions.GodMode)
 	}
 }
 
@@ -69,7 +63,6 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 			}
 		}
 	}
-
 }
 
 trait TurnitinLtiSubmitPaperCommandState {

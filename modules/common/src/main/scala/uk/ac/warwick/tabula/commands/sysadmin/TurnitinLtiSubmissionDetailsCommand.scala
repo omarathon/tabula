@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.turnitinlti._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 
 object TurnitinLtiSubmissionDetailsCommand {
@@ -22,12 +21,11 @@ object TurnitinLtiSubmissionDetailsCommand {
 			with TurnitinLtiSubmissionDetailsCommandState
 			with TurnitinLtiSubmissionDetailsValidation
 			with AutowiringTurnitinLtiServiceComponent
-			with Logging
 }
 
-class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends  CommandInternal[TurnitinLtiResponse] {
+class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
 
-	self: TurnitinLtiSubmissionDetailsCommandState with TurnitinLtiServiceComponent with Logging =>
+	self: TurnitinLtiSubmissionDetailsCommandState with TurnitinLtiServiceComponent =>
 
 	override def applyInternal() = transactional() {
 		turnitinLtiService.getSubmissionDetails(turnitinSubmissionId, user)
@@ -37,7 +35,7 @@ class TurnitinLtiSubmissionDetailsCommandInternal(val user: CurrentUser) extends
 
 trait TurnitinLtiSubmissionDetailsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ManageEmergencyMessage)
+		p.PermissionCheck(Permissions.GodMode)
 	}
 }
 
