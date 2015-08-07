@@ -50,12 +50,14 @@ trait NotificationHandling extends Logging {
 					notification.actionCompleted(notificationResult.completedBy)
 				}
 
-				cmd.deferredMessages.append(
-					notificationService.updateWithDeferredIndex(
-						notificationResult.notifications.map(_.asInstanceOf[Notification[_, _]]),
-						notificationResult.completedBy
+				if (notificationResult.notifications.nonEmpty) {
+					cmd.deferredMessages.append(
+						notificationService.updateWithDeferredIndex(
+							notificationResult.notifications.map(_.asInstanceOf[Notification[_, _]]),
+							notificationResult.completedBy
+						)
 					)
-				)
+				}
 			case _ =>
 		}
 
