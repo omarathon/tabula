@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 
-class MarkerFeedbackTests extends PersistenceTestBase {
+class MarkerFeedbackTest extends PersistenceTestBase {
 
 	@Test def fields() {
 		val random = new Random
