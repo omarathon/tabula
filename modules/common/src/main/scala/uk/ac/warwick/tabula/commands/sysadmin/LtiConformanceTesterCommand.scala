@@ -37,7 +37,7 @@ class LtiConformanceTesterCommandInternal(val user: CurrentUser) extends Command
 
 trait LtiConformanceTesterCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ManageEmergencyMessage)
+		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 }
 

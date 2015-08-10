@@ -37,7 +37,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 
 trait TurnitinLtiSubmitPaperCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.GodMode)
+		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 }
 

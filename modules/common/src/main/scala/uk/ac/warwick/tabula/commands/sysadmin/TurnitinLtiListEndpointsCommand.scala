@@ -35,7 +35,7 @@ class TurnitinLtiListEndpointsCommandInternal(val user: CurrentUser) extends Com
 
 trait TurnitinLtiListEndpointsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.GodMode)
+		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 }
 

@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.commands.coursework.turnitinlti.TurnitinLtiViewRepor
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation
+import org.springframework.http.HttpStatus
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiResponse
 
 /**
  * Provides access to the Turnitin Document Viewer for a submission
@@ -31,6 +33,14 @@ class TurnitinLtiReportController extends CourseworkController {
 	}
 
 	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def goToReport(@Valid @ModelAttribute("turnitinLtiViewReportCommand") command: Appliable[Mav], errors: Errors): Mav = command.apply()
+	def goToReport(@Valid @ModelAttribute("turnitinLtiViewReportCommand") command: Appliable[TurnitinLtiResponse], errors: Errors): Mav = {
+		val response = command.apply()
+		if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.OK) {
+			Mav("admin/assignments/turnitinlti/report_error", "problem" -> s"unexpected-response-code")
+		}	else {
+				if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")
+				else Mav("admin/assignments/turnitinlti/report_error", "problem" -> "no-object")
+		}
+	}
 
 }

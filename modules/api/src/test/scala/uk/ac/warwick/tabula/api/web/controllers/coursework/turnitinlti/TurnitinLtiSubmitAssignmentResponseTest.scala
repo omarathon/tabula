@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.api.commands.coursework.turnitinlti.{TurnitinLtiSubmitAssignmentResponseRequestState, TurnitinLtiSubmitAssignmentResponseCommandState, TurnitinLtiSubmitAssignmentResponseValidation, TurnitinLtiSubmitAssignmentResponseCommandInternal}
 
 class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
 
@@ -11,8 +12,8 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
 		with TurnitinLtiSubmitAssignmentResponseValidation
 		with TurnitinLtiSubmitAssignmentResponseCommandState
 		with AssessmentServiceComponent {
-		val assessmentService = mock[AssessmentService]
-	}
+			val assessmentService = mock[AssessmentService]
+		}
 
 	trait Fixture {
 		val assignment = Fixtures.assignment("an assignment")

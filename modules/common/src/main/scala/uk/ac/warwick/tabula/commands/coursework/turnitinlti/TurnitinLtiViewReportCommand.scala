@@ -13,14 +13,12 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Module, FileAttachment, Assignment}
-import uk.ac.warwick.tabula.web.Mav
-import org.apache.http.HttpStatus
 
 object TurnitinLtiViewReportCommand {
 	def apply(module: Module, assignment: Assignment, attachment: FileAttachment, user: CurrentUser) =
 		new TurnitinLtiViewReportCommandInternal(module, assignment, attachment, user)
 			with TurnitinLtiViewReportCommandPermissions
-			with ComposableCommand[Mav]
+			with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
 			// TODO notifications
 			// with CompletesNotifications[Mav]
@@ -32,18 +30,12 @@ object TurnitinLtiViewReportCommand {
 
 class TurnitinLtiViewReportCommandInternal(
 		val module: Module, val assignment: Assignment, val attachment: FileAttachment, val user: CurrentUser)
-	extends CommandInternal[Mav]{
+	extends CommandInternal[TurnitinLtiResponse]{
 
 	self: TurnitinLtiViewReportCommandState with TurnitinLtiServiceComponent with Logging =>
 
 	override def applyInternal() = transactional() {
-		val response = turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
-		if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.SC_OK) {
-			Mav("admin/assignments/turnitinlti/report_error", "problem" -> s"unexpected-response-code")
-		}	else {
-				if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")
-				else Mav("admin/assignments/turnitinlti/report_error", "problem" -> "no-object")
-		}
+		turnitinLtiService.getOriginalityReportUrl(assignment, attachment, user)
 	}
 
 }

@@ -161,10 +161,10 @@ class SubmitToTurnitinLtiJob extends Job
 
 						// TODO retry if hasn't been checked by Turnitin yet
 						val result = response.submissionInfo
-						if (result.similarity.isDefined) report.similarity = Some(result.similarity.get.toInt)
-						if (result.publication_overlap.isDefined) report.publicationOverlap = Some(result.publication_overlap.get.toInt)
-						if (result.web_overlap.isDefined) report.webOverlap = Some(result.web_overlap.get.toInt)
-						if (result.student_overlap.isDefined) report.studentOverlap = Some(result.student_overlap.get.toInt)
+						report.similarity = result.similarity.map(_.toInt)
+						report.publicationOverlap = result.publication_overlap.map(_.toInt)
+						report.webOverlap = result.web_overlap.map(_.toInt)
+						report.studentOverlap = result.student_overlap.map(_.toInt)
 						attachment.originalityReport = report
 						attachment.originalityReport.reportReceived = true
 						transactional() {
