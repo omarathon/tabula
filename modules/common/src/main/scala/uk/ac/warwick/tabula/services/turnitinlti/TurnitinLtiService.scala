@@ -203,7 +203,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"${apiReportLaunch}aggghh/${attachment.originalityReport.turnitinId}", Map(
+		s"${apiReportLaunch}/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
