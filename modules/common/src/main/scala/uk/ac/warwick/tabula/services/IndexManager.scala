@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.Transactions._
  */
 trait IndexManager {
 	def indexNotificationRecipients(notifications: Seq[Notification[_,_]], user: User)
+	def createIndexMessage(notifications: Seq[Notification[_,_]], user: User): Object
 	def indexNotificationRecipients(message: IndexNotificationRecipientsMessage)
 }
 
@@ -33,8 +34,12 @@ class IndexManagerImpl extends IndexManager {
 	@Autowired var userLookup: UserLookupService = _
 
 	def indexNotificationRecipients(notifications: Seq[Notification[_,_]], user: User) {
+		queue.send(createIndexMessage(notifications, user))
+	}
+
+	def createIndexMessage(notifications: Seq[Notification[_,_]], user: User): Object = {
 		// Create a message that we can broadcast to the scheduling war
-		queue.send(new IndexNotificationRecipientsMessage(notifications, user))
+		new IndexNotificationRecipientsMessage(notifications, user)
 	}
 
 	def indexNotificationRecipients(message: IndexNotificationRecipientsMessage) = transactional(readOnly = true) {

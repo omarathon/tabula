@@ -253,7 +253,7 @@ trait EditSmallGroupEventDescription extends Describable[SmallGroupEvent] {
 }
 
 trait ModifySmallGroupEventScheduledNotifications
-	extends SchedulesNotifications[SmallGroupEvent, SmallGroupEventOccurrence] {
+	extends SchedulesNotifications[SmallGroupEvent, SmallGroupEventOccurrence] with GeneratesNotificationsForSmallGroupEventOccurrence {
 
 	self: SmallGroupServiceComponent =>
 
@@ -262,6 +262,13 @@ trait ModifySmallGroupEventScheduledNotifications
 		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
 
 	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+		generateNotifications(occurrence)
+	}
+}
+
+trait GeneratesNotificationsForSmallGroupEventOccurrence {
+
+	def generateNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
 		// Only generate notifications for sets that collect attendance and occurrences that are in valid weeks...
 		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
 			occurrence.dateTime.map(dt =>

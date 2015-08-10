@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.turnitin
 import uk.ac.warwick.tabula.TestBase
 
 
-class TurnitinTests extends TestBase {
+class TurnitinTest extends TestBase {
 
 	@Test
 	def documentTitle(): Unit = {

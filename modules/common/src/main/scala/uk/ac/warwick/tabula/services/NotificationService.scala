@@ -53,6 +53,12 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		indexManager.indexNotificationRecipients(notifications, user)
 	}
 
+	// Update the notifications and return the index message, but don't index now
+	def updateWithDeferredIndex(notifications: Seq[Notification[_,_]], user: User): Object = {
+		notifications.foreach(dao.update)
+		indexManager.createIndexMessage(notifications, user)
+	}
+
 	def stream(req: ActivityStreamRequest): PagingSearchResultItems[Activity[Any]] = {
 		val notifications = index.userStream(req)
 		val activities = notifications.items.flatMap(toActivity)

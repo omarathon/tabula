@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands
 
+import uk.ac.warwick.util.queue.Queue
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{UserGroup, Department, Module, Assignment}
@@ -41,6 +43,7 @@ object RequestAssignmentAccessCommandTest {
 		bean(){mock[Configuration]}
 		bean(){mock[Features]}
 		bean(){mock[TriggerService]}
+		bean("indexTopic"){mock[Queue]}
 	}
 }
 

@@ -5,12 +5,12 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module, ScheduledNotification}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, RequiresPermissionsChecking, PermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
@@ -22,6 +22,7 @@ object CopySmallGroupSetsCommand {
 			with CopySmallGroupSetsDescription
 			with CopySmallGroupSetsValidation
 			with AutowiringSmallGroupServiceComponent
+			with CopySmallGroupSetsScheduledNotifications
 			with PopulateCopySmallGroupSetsRequestDefaults {
 				override lazy val eventName = "CopySmallGroupSetsFromPrevious"
 			}
@@ -165,5 +166,19 @@ trait CopySmallGroupSetsPermissions extends RequiresPermissionsChecking with Per
 			p.PermissionCheck(Permissions.SmallGroups.Read, module)
 			p.PermissionCheck(Permissions.SmallGroups.Create, module)
 		}
+	}
+}
+
+trait CopySmallGroupSetsScheduledNotifications
+	extends SchedulesNotifications[Seq[SmallGroupSet], SmallGroupEventOccurrence] with GeneratesNotificationsForSmallGroupEventOccurrence {
+
+	self: SmallGroupServiceComponent =>
+
+	override def transformResult(sets: Seq[SmallGroupSet]): Seq[SmallGroupEventOccurrence] =
+		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
+		sets.flatMap(_.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences)))
+
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+		generateNotifications(occurrence)
 	}
 }
