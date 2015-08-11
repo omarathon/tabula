@@ -154,9 +154,10 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 			"custom_xmlresponse" -> "1",
-
 			// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
 			"roles" -> "Learner",
+			// I hoped this would be the callback Turnitin uses when a paper has been processed - apparently not
+			// "ext_outcomes_tool_placement_url" ->  s"$topLevelUrl/api/tunitin-outcomes",
 			"custom_submission_url" -> paperUrl,
 			"custom_submission_title" -> attachment.id,
 			"custom_submission_filename" -> attachment.name

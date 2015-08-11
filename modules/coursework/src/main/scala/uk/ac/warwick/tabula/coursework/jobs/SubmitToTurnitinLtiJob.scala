@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
 import scala.annotation.tailrec
+import uk.ac.warwick.tabula.CurrentUser
 
 object SubmitToTurnitinLtiJob {
 	val identifier = "turnitin-submit-lti"
@@ -129,7 +130,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 		@tailrec
 		private def submitSinglePaper(
-	 		attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment,retries: Int
+	 		attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment, retries: Int
 		): TurnitinLtiResponse = {
 
 			def submit() = {
@@ -145,6 +146,25 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
+
+		@tailrec
+		private def retrieveSinglePaperResults(
+			turnitinPaperId: String, currentUser: CurrentUser, retries: Int
+		): TurnitinLtiResponse = {
+
+			def getResults() = {
+				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				turnitinLtiService.getSubmissionDetails(turnitinPaperId, currentUser)
+			}
+
+			getResults() match {
+				case response if response.success => response
+				case response if retries == 0 => response
+				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
+			}
+
+		}
+
 		def retrieveResults(uploadsTotal: Int): (Seq[OriginalityReport]) = {
 			var resultsReceived = 0
 			var submissionResultsFailed = 0
@@ -157,20 +177,25 @@ class SubmitToTurnitinLtiJob extends Job
 
 					if (originalityReport.isDefined && !originalityReport.get.reportReceived) {
 						val report = originalityReport.get
-						val response = turnitinLtiService.getSubmissionDetails(report.turnitinId, job.user)
 
-						// TODO retry if hasn't been checked by Turnitin yet
-						val result = response.submissionInfo
-						report.similarity = result.similarity.map(_.toInt)
-						report.publicationOverlap = result.publication_overlap.map(_.toInt)
-						report.webOverlap = result.web_overlap.map(_.toInt)
-						report.studentOverlap = result.student_overlap.map(_.toInt)
-						attachment.originalityReport = report
-						attachment.originalityReport.reportReceived = true
-						transactional() {
-							originalityReportService.saveOriginalityReport(attachment)
+						val response = retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
+
+						if (response.success) {
+							val result = response.submissionInfo
+							report.similarity = result.similarity.map(_.toInt)
+							report.publicationOverlap = result.publication_overlap.map(_.toInt)
+							report.webOverlap = result.web_overlap.map(_.toInt)
+							report.studentOverlap = result.student_overlap.map(_.toInt)
+							attachment.originalityReport = report
+							attachment.originalityReport.reportReceived = true
+							transactional() {
+								originalityReportService.saveOriginalityReport(attachment)
+							}
+							originalityReports :+ report
+						} else {
+							logger.warn(s"Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
+							submissionResultsFailed += 1
 						}
-						originalityReports :+ report
 					} else {
 						logger.warn(s"Failed to find originality report for attachment $attachment.id")
 						submissionResultsFailed += 1

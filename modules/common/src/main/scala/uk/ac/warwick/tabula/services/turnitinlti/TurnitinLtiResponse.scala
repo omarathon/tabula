@@ -136,7 +136,18 @@ object TurnitinLtiResponse extends Logging {
 
 	def fromJson(json: String) = {
 		logger.info("Json response: " + json)
-		new TurnitinLtiResponse(true, json = Some(json))
+
+		val errorMessage: Option[String] = {
+			JSON.parseFull(json) match {
+				case Some(theJson: Map[String, String] @unchecked) =>
+					theJson.get("error") match {
+						case message: Option[String] => message
+						case _ => Some("")
+					}
+				case _ => throw new RuntimeException(s"Couldn't parse JSON\n $json")
+			}
+		}
+		new TurnitinLtiResponse(success = errorMessage.isEmpty, statusMessage = errorMessage, json = Some(json))
 	}
 
 	def fromHtml(success: Boolean, html: String) = {
