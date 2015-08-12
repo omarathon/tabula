@@ -74,13 +74,13 @@ class SubmitToTurnitinLtiJob extends Job
 			val failedUploads = submitPapers(assignment, uploadsTotal)
 
 			updateStatus("Getting similarity reports from Turnitin")
-			val originalityReports = retrieveResults(uploadsTotal)
+			val (originalityReports, noResults) = retrieveResults(uploadsTotal)
 
 			if (sendNotifications) {
 				debug("Sending an email to " + job.user.email)
 				val notification = Notification.init(new TurnitinJobSuccessNotification, job.user.apparentUser, originalityReports, assignment)
-				// TODO similarly with the ones with no reports
-				notification.failedUploads.value = failedUploads
+				// there shouldn't be dupes, but if there are, the first, failed upload, error message is more useful
+				notification.failedUploads.value = noResults ++ failedUploads
 				pushNotification(job, notification)
 			}
 			transactional() {
@@ -146,29 +146,10 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
-
-		@tailrec
-		private def retrieveSinglePaperResults(
-			turnitinPaperId: String, currentUser: CurrentUser, retries: Int
-		): TurnitinLtiResponse = {
-
-			def getResults() = {
-				Thread.sleep(WaitingRequestsToTurnitinSleep)
-				turnitinLtiService.getSubmissionDetails(turnitinPaperId, currentUser)
-			}
-
-			getResults() match {
-				case response if response.success => response
-				case response if retries == 0 => response
-				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
-			}
-
-		}
-
-		def retrieveResults(uploadsTotal: Int): (Seq[OriginalityReport]) = {
+		def retrieveResults(uploadsTotal: Int): (Seq[OriginalityReport], Map[String, String]) = {
 			var resultsReceived = 0
-			var submissionResultsFailed = 0
 			val originalityReports = Seq()
+			var failedResults = Map[String, String]()
 			assignment.submissions.asScala.foreach(submission => {
 				submission.allAttachments.foreach(attachment => {
 					val originalityReport = transactional(readOnly = true) {
@@ -194,19 +175,36 @@ class SubmitToTurnitinLtiJob extends Job
 							originalityReports :+ report
 						} else {
 							logger.warn(s"Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
-							submissionResultsFailed += 1
+							failedResults += (attachment.name -> response.statusMessage.getOrElse("failed to retrieve results"))
 						}
 					} else {
 						logger.warn(s"Failed to find originality report for attachment $attachment.id")
-						submissionResultsFailed += 1
+						failedResults += (attachment.name -> "failed to find Originality Report")
 					}
 					resultsReceived += 1
 				})
 
 				updateProgress(10 + (((resultsReceived * 40) / uploadsTotal) * 2)) // 50% to 90%
 			})
-			if (submissionResultsFailed > 0 ) logger.error("Did not receive all reports from Turnitin.")
-			originalityReports
+			if (failedResults.nonEmpty) logger.error("Did not receive all reports from Turnitin.")
+			(originalityReports, failedResults)
+		}
+
+		@tailrec
+		private def retrieveSinglePaperResults(
+			turnitinPaperId: String, currentUser: CurrentUser, retries: Int
+		): TurnitinLtiResponse = {
+
+			def getResults() = {
+				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				turnitinLtiService.getSubmissionDetails(turnitinPaperId, currentUser)
+			}
+
+			getResults() match {
+				case response if response.success => response
+				case response if retries == 0 => response
+				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
+			}
 		}
 
 		private def getToken(attachment: FileAttachment): FileAttachmentToken = {
