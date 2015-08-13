@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssessmentService}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.spring.Wire
-import org.springframework.mail.javamail.{MimeMessageHelper, MimeMailMessage}
+import org.springframework.mail.javamail.MimeMessageHelper
 import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.springframework.beans.factory.annotation.Value

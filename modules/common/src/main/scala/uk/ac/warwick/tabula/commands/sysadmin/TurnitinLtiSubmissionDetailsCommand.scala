@@ -15,8 +15,8 @@ import org.springframework.validation.Errors
 object TurnitinLtiSubmissionDetailsCommand {
 	def apply(user: CurrentUser) =
 		new TurnitinLtiSubmissionDetailsCommandInternal(user)
-				with TurnitinLtiSubmissionDetailsCommandPermissions
-				with ComposableCommand[TurnitinLtiResponse]
+			with TurnitinLtiSubmissionDetailsCommandPermissions
+			with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
 			with TurnitinLtiSubmissionDetailsCommandState
 			with TurnitinLtiSubmissionDetailsValidation

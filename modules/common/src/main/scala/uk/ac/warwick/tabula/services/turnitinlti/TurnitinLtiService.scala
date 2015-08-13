@@ -44,7 +44,7 @@ object TurnitinLtiService {
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
 	 */
-	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"${prefix}-${assignment.module.code}")
+	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"$prefix-${assignment.module.code}")
 
 	/**
 	 * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
@@ -97,11 +97,11 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		}
 	}
 
-	override def destroy {
+	override def destroy() {
 		http.shutdown()
 	}
 
-	override def afterPropertiesSet {}
+	override def afterPropertiesSet() {}
 
 	def submitAssignment(assignment: Assignment, user: CurrentUser): TurnitinLtiResponse = {
 		doRequest(
@@ -114,9 +114,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 				"custom_duedate" -> DateFormat.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
-				// TODO should we also add job id here, to update the progress?
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
-//				,"ext_outcomes_tool_placement_url" -> s"$topLevelUrl/api/tunitin-outcomes"
 			) ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>
 			// expect a 302
@@ -149,7 +147,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
 	 ): TurnitinLtiResponse = doRequest(
 
-		s"${apiSubmitPaperEndpoint}/${assignment.turnitinId}",
+		s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
 		Map(
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
@@ -167,18 +165,17 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		request =>
 			request >:+ {
 				(headers, request) =>
-					logger.info(headers.toString)
 					request <>  {
 						(node) => {
 							val response = TurnitinLtiResponse.fromXml(node)
 							if (response.success) {
 								val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 								if (originalityReport.isDefined) {
-									originalityReport.get.turnitinId = response.turnitinSubmissionId
+									originalityReport.get.turnitinId = response.turnitinSubmissionId()
 									originalityReport.get.reportReceived = false
 								} else {
 									val report = new OriginalityReport
-									report.turnitinId = response.turnitinSubmissionId
+									report.turnitinId = response.turnitinSubmissionId()
 									attachment.originalityReport = report
 									originalityReportService.saveOriginalityReport(attachment)
 								}
@@ -191,7 +188,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"${apiSubmissionDetails}/${turnitinSubmissionId}", Map()) {
+		s"$apiSubmissionDetails/$turnitinSubmissionId", Map()) {
 		request =>
 			request >:+ {
 				(headers, request) =>
@@ -204,7 +201,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"${apiReportLaunch}/${attachment.originalityReport.turnitinId}", Map(
+		s"$apiReportLaunch/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
@@ -231,7 +228,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(
-		s"${apiListEndpoints}/${turnitinAssignmentId}", Map()) {
+		s"$apiListEndpoints/$turnitinAssignmentId", Map()) {
 		request =>
 			request >:+ {
 				(headers, request) =>
@@ -288,14 +285,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		try {
 			http.x(transform(req))
 		} catch {
-			case e: IOException => {
-				logger.error("Exception contacting provider", e)
-				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
-			}
-			case e: SAXParseException => {
-				logger.error("Unexpected response from provider", e)
-				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
-			}
+				case e: IOException =>
+					logger.error("Exception contacting provider", e)
+					new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
+				case e: SAXParseException =>
+					logger.error("Unexpected response from provider", e)
+					new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
 		}
 	}
 
@@ -320,14 +315,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				}
 			} else http.x(transform(req))
 		} catch {
-			case e: IOException => {
-				logger.error("Exception contacting Turnitin", e)
-				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
-			}
-			case e: java.lang.Exception => {
-				logger.error("Some other exception", e)
-				new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
-			}
+				case e: IOException =>
+					logger.error("Exception contacting Turnitin", e)
+					new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
+				case e: java.lang.Exception =>
+					logger.error("Some other exception", e)
+					new TurnitinLtiResponse(false, statusMessage = Some(e.getMessage))
 		}
 	}
 
@@ -337,12 +330,10 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 		val oauthparams = new OAuthParameters()
 		oauthparams.setOAuthConsumerKey(turnitinAccountId)
-		oauthparams.setOAuthNonce(OAuthUtil.getNonce())
-		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp())
+		oauthparams.setOAuthNonce(OAuthUtil.getNonce)
+		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
 		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
 		oauthparams.setOAuthCallback("about:blank")
-
-//		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
 
 		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
 
@@ -363,10 +354,10 @@ trait AutowiringTurnitinLtiServiceComponent extends TurnitinLtiServiceComponent 
 	var turnitinLtiService = Wire[TurnitinLtiService]
 }
 
-case class ClassName(val value: String)
+case class ClassName(value: String)
 
-case class ClassId(val value: String)
+case class ClassId(value: String)
 
-case class AssignmentName(val value: String)
+case class AssignmentName(value: String)
 
-case class AssignmentId(val value: String)
+case class AssignmentId(value: String)

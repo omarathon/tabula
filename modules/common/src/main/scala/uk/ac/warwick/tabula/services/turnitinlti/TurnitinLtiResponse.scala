@@ -8,19 +8,18 @@ import scala.xml.Elem
  * Response from the Turnitin LTI API.
  */
 case class TurnitinLtiResponse(
-	val success: Boolean,
-	val statusMessage: Option[String] = None,
-	val diagnostic: Option[String] = None,
-	val redirectUrl: Option[String] = None,
-	val json: Option[String] = None,
-	val html: Option[String] = None,
-	val xml: Option[Elem] = None,
-	val responseCode: Option[Int] = None) extends Logging {
+	success: Boolean,
+	statusMessage: Option[String] = None,
+	diagnostic: Option[String] = None,
+	redirectUrl: Option[String] = None,
+	json: Option[String] = None,
+	html: Option[String] = None,
+	xml: Option[Elem] = None,
+	responseCode: Option[Int] = None) extends Logging {
 
 	def turnitinSubmissionId(): String = {
 		(xml.get \\ "lis_result_sourcedid").text
 	}
-
 
 	/**
 	 * Submission details is expected in the following format:
@@ -88,7 +87,7 @@ case class TurnitinLtiResponse(
 
 		val results = new SubmissionResults()
 
-			JSON.parseFull(json.get) match {
+		JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
 				theJson.get("outcome_originalityreport") match {
 					case Some(reports: Map[String, Any] @unchecked) =>
@@ -108,22 +107,20 @@ case class TurnitinLtiResponse(
 								}
 							case _ => Nil
 						}
-								reports.get("numeric") match {
-									case Some(numerics: Map[String, Double] @unchecked) =>
-										numerics.get("score") match {
-											case (score) =>
-												results.similarity = score
-										}
-									case _ => Nil
+						reports.get("numeric") match {
+							case Some(numerics: Map[String, Double] @unchecked) =>
+								numerics.get("score") match {
+									case (score) =>
+										results.similarity = score
 								}
-
 							case _ => Nil
 						}
 					case _ => Nil
+				}
+			case _ => Nil
 		}
 		results
 	}
-
 }
 
 case class SubmissionResults(var similarity:Option[Double] = None, var student_overlap: Option[Double] = None, var web_overlap: Option[Double] = None, var publication_overlap: Option[Double] = None)
@@ -135,8 +132,6 @@ object TurnitinLtiResponse extends Logging {
 	}
 
 	def fromJson(json: String) = {
-		logger.info("Json response: " + json)
-
 		val errorMessage: Option[String] = {
 			JSON.parseFull(json) match {
 				case Some(theJson: Map[String, String] @unchecked) =>

@@ -35,7 +35,7 @@ class TurnitinLtiReportController extends CourseworkController {
 	@annotation.RequestMapping(method=Array(GET, HEAD))
 	def goToReport(@Valid @ModelAttribute("turnitinLtiViewReportCommand") command: Appliable[TurnitinLtiResponse], errors: Errors): Mav = {
 		val response = command.apply()
-		if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.OK) {
+		if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.OK.value) {
 			Mav("admin/assignments/turnitinlti/report_error", "problem" -> s"unexpected-response-code")
 		}	else {
 				if (response.redirectUrl.isDefined) Mav(s"redirect:${response.redirectUrl.get}")

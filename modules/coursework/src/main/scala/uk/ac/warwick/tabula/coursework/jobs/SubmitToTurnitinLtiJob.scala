@@ -68,7 +68,7 @@ class SubmitToTurnitinLtiJob extends Job
 			awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
 
 			updateStatus("Submitting papers to Turnitin")
-			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType(_)) }
+			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType) }
 			val uploadsTotal = allAttachments.size
 
 			val failedUploads = submitPapers(assignment, uploadsTotal)
@@ -162,7 +162,7 @@ class SubmitToTurnitinLtiJob extends Job
 						val response = retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
 
 						if (response.success) {
-							val result = response.submissionInfo
+							val result = response.submissionInfo()
 							report.similarity = result.similarity.map(_.toInt)
 							report.publicationOverlap = result.publication_overlap.map(_.toInt)
 							report.webOverlap = result.web_overlap.map(_.toInt)
@@ -195,12 +195,12 @@ class SubmitToTurnitinLtiJob extends Job
 			turnitinPaperId: String, currentUser: CurrentUser, retries: Int
 		): TurnitinLtiResponse = {
 
-			def getResults() = {
+			def getResults = {
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
 				turnitinLtiService.getSubmissionDetails(turnitinPaperId, currentUser)
 			}
 
-			getResults() match {
+			getResults match {
 				case response if response.success => response
 				case response if retries == 0 => response
 				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
@@ -224,19 +224,18 @@ class SubmitToTurnitinLtiJob extends Job
 		@tailrec
 		private def awaitTurnitinId(assignment: Assignment, retries: Int): String = {
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
-			def hasTurnitinId() = {
+			def hasTurnitinId = {
 				Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
 				assignment.turnitinId.hasText
 			}
 
-			hasTurnitinId() match {
+			hasTurnitinId match {
 				case true => assignment.turnitinId
-				case false if retries == 0 => {
+				case false if retries == 0 =>
 					if (sendNotifications) {
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				}
 				case _ => awaitTurnitinId(assignment, retries - 1)
 			}
 		}

@@ -42,24 +42,26 @@ trait TurnitinLtiSubmitAssignmentResponseApi {
 	def command(@PathVariable assignment: Assignment): TurnitinLtiSubmitAssignmentResponseCommand =
 		TurnitinLtiSubmitAssignmentResponseCommand(assignment)
 
-@RequestMapping(method=Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-def inspectResponse(@RequestBody req: TurnitinLtiSubmitAssignmentResponseRequest,
-										@ModelAttribute("command") command: TurnitinLtiSubmitAssignmentResponseCommand,
-										@PathVariable assignment: Assignment,
-										errors: Errors) {
-			req.copyTo(command, errors)
-			command.validate(errors)
-			if (errors.hasErrors) {
-				Mav(new JSONErrorView(errors))
-			} else {
-				command.apply()
-				Mav(new JSONView(Map(
-					"success" -> true,
-					"assignment" -> assignment.id,
-					"turnitinAssignment" -> assignment.turnitinId
-				)))
-			}
+	@RequestMapping(method=Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+	def inspectResponse(
+		@RequestBody req: TurnitinLtiSubmitAssignmentResponseRequest,
+		@ModelAttribute("command") command: TurnitinLtiSubmitAssignmentResponseCommand,
+		@PathVariable assignment: Assignment,
+		errors: Errors
+	) = {
+		req.copyTo(command, errors)
+		command.validate(errors)
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			command.apply()
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"assignment" -> assignment.id,
+				"turnitinAssignment" -> assignment.turnitinId
+			)))
 		}
+	}
 }
 
 @JsonAutoDetect

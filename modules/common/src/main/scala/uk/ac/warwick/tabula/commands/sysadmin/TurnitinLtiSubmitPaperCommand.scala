@@ -56,10 +56,10 @@ trait TurnitinLtiSubmitPaperValidation extends SelfValidating {
 				if (!uri.getHost.equals("files.warwick.ac.uk") && (!uri.getHost.equals("tabula.warwick.ac.uk"))){
 					errors.rejectValue("paperUrl", "turnitin.paperurl.invalid")
 				}
-			} catch {
-				case e: MalformedURLException => {
+			}
+			catch {
+				case e: MalformedURLException =>
 					errors.rejectValue("paperUrl", "turnitin.paperurl.invalid")
-				}
 			}
 		}
 	}
