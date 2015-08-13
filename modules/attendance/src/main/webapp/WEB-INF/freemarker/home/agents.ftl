@@ -74,19 +74,6 @@
 <script type="text/javascript">
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
-
-		$('table.agents').tablesorter({
-			sortList: [[0,0]],
-			headers: { 4: { sorter: false }},
-			textExtraction: function(node) {
-				var $el = $(node);
-				if ($el.data('sortby')) {
-					return $el.data('sortby');
-				} else {
-					return $el.text().trim();
-				}
-			}
-		});
 	});
 </script>
 
