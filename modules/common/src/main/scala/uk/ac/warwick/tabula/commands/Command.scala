@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
@@ -17,6 +18,8 @@ import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, Main
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{DateFormats, AutowiringFeaturesComponent, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.queue.Queue
+import collection.mutable.ArrayBuffer
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -92,29 +95,35 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
 
 	var maintenanceMode = Wire[MaintenanceModeService]
+	val deferredMessages: ArrayBuffer[Object] = ArrayBuffer()
+	var messageQueue: Queue = Wire.named[Queue]("indexTopic")
 
 	final def apply(): A = {
-		if (EventHandling.enabled) {
-			if (readOnlyCheck(this)) {
-				recordEvent(this) {
-					transactional() {
-						handleTriggers(this) {
-							notify(this) {
-								benchmark() {
-									applyInternal()
+		val result = {
+			if (EventHandling.enabled) {
+				if (readOnlyCheck(this)) {
+					recordEvent(this) {
+						transactional() {
+							handleTriggers(this) {
+								notify(this) {
+									benchmark() {
+										applyInternal()
+									}
 								}
 							}
 						}
 					}
+				} else if (maintenanceMode.enabled) {
+					throw maintenanceMode.exception(this)
+				} else {
+					throw new CannotPerformWriteOperationException(this)
 				}
-			} else if (maintenanceMode.enabled) {
-				throw maintenanceMode.exception(this)
 			} else {
-				throw new CannotPerformWriteOperationException(this)
+				handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 			}
-		} else {
-			handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 		}
+		deferredMessages.foreach(messageQueue.send)
+		result
 	}
 
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }

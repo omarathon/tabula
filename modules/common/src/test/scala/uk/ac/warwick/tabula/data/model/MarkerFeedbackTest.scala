@@ -6,10 +6,9 @@ import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 
-class MarkerFeedbackTests extends PersistenceTestBase {
+class MarkerFeedbackTest extends PersistenceTestBase {
 
 	@Test def fields() {
-
 		val random = new Random
 		val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 
@@ -53,7 +52,7 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 		}
 
 		val (markerFeedback, markerFeedbackAttachment) = flushing(session) {
-			val mf = new MarkerFeedback(feedback)
+			val mf = Fixtures.markerFeedback(feedback)
 
 			val attachment = new FileAttachment
 			mf.addAttachment(attachment)

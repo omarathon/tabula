@@ -4,6 +4,7 @@ import javax.sql.DataSource
 
 import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.attendance.commands.agent.old.{AgentPointRecordCommandState, AgentPointRecordDescription, AgentPointRecordPermissions, AgentPointRecordValidation, AgentPointRecordCommand}
+import uk.ac.warwick.util.queue.Queue
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula._
@@ -324,6 +325,7 @@ object AgentPointRecordCommandTest {
 		bean() { smartMock[ScheduledNotificationService] }
 		bean() { smartMock[MaintenanceModeService] }
 		bean() { smartMock[TriggerService] }
+		bean("indexTopic"){mock[Queue]}
 		bean() {
 			val permissionsService = mock[PermissionsService]
 			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes
