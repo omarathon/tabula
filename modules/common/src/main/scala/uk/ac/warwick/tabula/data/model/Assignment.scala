@@ -120,6 +120,8 @@ class Assignment
 	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
 	var genericFeedback: String = ""
+	@Column(name="turnitin_id")
+	var turnitinId: String = ""
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")

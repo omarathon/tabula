@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.services.turnitin._
 import uk.ac.warwick.tabula.services.{AssessmentService, OriginalityReportService}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -51,8 +52,10 @@ class SubmitToTurnitinJob extends Job
 
 	var sendNotifications = true
 
-	def run(implicit job: JobInstance) {
-		new Runner(job).run()
+	def run(implicit job: JobInstance) = {
+		transactional() {
+			new Runner(job).run()
+		}
 	}
 
 	// Job is a shared service, so rather than pass objects between methods,

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FileDao
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{FileAttachmentToken, FileAttachment}
 import org.springframework.beans.factory.annotation.Autowired
 
 trait FileAttachmentServiceComponent {
@@ -16,6 +16,7 @@ trait AutowiringFileAttachmentServiceComponent extends FileAttachmentServiceComp
 
 trait FileAttachmentService {
 	def deleteAttachments(files: Seq[FileAttachment])
+	def saveOrUpdate(attachmentToken: FileAttachmentToken): Unit
 }
 
 
@@ -23,7 +24,7 @@ abstract class AbstractFileAttachmentService extends FileAttachmentService {
 	@Autowired var fileDao: FileDao = _
 
 	def deleteAttachments(files: Seq[FileAttachment]) = fileDao.deleteAttachments(files)
-
+	def saveOrUpdate(token: FileAttachmentToken): Unit = fileDao.saveOrUpdate(token)
 }
 
 @Service("fileAttachmentService")

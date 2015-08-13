@@ -575,6 +575,12 @@
 			<version>2.3.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.gdata</groupId>
+			<artifactId>core</artifactId>
+			<version>1.47.1</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{FileAttachmentToken, FileAttachment}
 import org.springframework.stereotype.Repository
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
@@ -142,6 +142,8 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	}
 
 	def deleteAttachments(files: Seq[FileAttachment]) = files.foreach(session.delete(_))
+
+	def saveOrUpdate(token: FileAttachmentToken): Unit = session.saveOrUpdate(token)
 
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.

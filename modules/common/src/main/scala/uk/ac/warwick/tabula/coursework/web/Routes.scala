@@ -139,6 +139,11 @@ object Routes {
 				def report(submission: Submission, attachment: FileAttachment) = assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(attachment.id))
 			}
 
+			object turnitinlti {
+				def fileByToken(submission: Submission, attachment: FileAttachment, token: FileAttachmentToken) =
+					s"/scheduling/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=${token.id}"
+			}
+
 			object extension {
 				def expandrow (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions?universityId=" + universityId
 
