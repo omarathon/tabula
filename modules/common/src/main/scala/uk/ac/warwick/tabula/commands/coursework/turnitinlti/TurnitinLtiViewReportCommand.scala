@@ -13,6 +13,9 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Module, FileAttachment, Assignment}
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.data.model.notifications.coursework.TurnitinJobSuccessNotification
+import uk.ac.warwick.tabula.services.{OriginalityReportServiceComponent, AutowiringOriginalityReportServiceComponent}
 
 object TurnitinLtiViewReportCommand {
 	def apply(module: Module, assignment: Assignment, attachment: FileAttachment, user: CurrentUser) =
@@ -20,11 +23,11 @@ object TurnitinLtiViewReportCommand {
 			with TurnitinLtiViewReportCommandPermissions
 			with ComposableCommand[TurnitinLtiResponse]
 			with ReadOnly with Unaudited
-			// TODO notifications
-			// with CompletesNotifications[Mav]
+			with TurnitinLtiViewReportNotificationCompletion
 			with TurnitinLtiViewReportCommandState
 			with TurnitinLtiViewReportValidation
 			with AutowiringTurnitinLtiServiceComponent
+			with AutowiringOriginalityReportServiceComponent
 			with Logging
 }
 
@@ -60,7 +63,26 @@ trait TurnitinLtiViewReportValidation extends SelfValidating {
 	}
 }
 
+trait TurnitinLtiViewReportNotificationCompletion extends CompletesNotifications[TurnitinLtiResponse] {
+	self: NotificationHandling with OriginalityReportServiceComponent with TurnitinLtiViewReportCommandState =>
+
+	def notificationsToComplete(commandResult: TurnitinLtiResponse): CompletesNotificationsResult = {
+		commandResult.success match {
+			case true =>
+				originalityReportService.getOriginalityReportByFileId(attachment.id).map(report =>
+					CompletesNotificationsResult(
+						notificationService.findActionRequiredNotificationsByEntityAndType[TurnitinJobSuccessNotification](report),
+						user.apparentUser
+					)
+				).getOrElse(EmptyCompletesNotificationsResult)
+			case false =>
+				EmptyCompletesNotificationsResult
+		}
+	}
+}
+
 trait TurnitinLtiViewReportCommandState {
+	val user: CurrentUser
 	def assignment: Assignment
 	def module: Module
 	def attachment: FileAttachment
