@@ -187,7 +187,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 							for (feedbackForSits <- feedbackForSitsService.getByFeedback(feedback)) {
 								session.delete(feedbackForSits)
 							}
-							session.delete(feedback)
 						}
 						assignment.feedbacks.clear()
 						session.delete(assignment)
