@@ -65,7 +65,9 @@ class SubmitToTurnitinLtiJob extends Job
 
 			submitAssignment(WaitingRequestsToTurnitinRetries)
 
-			awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
+			transactional(){
+				awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
+			}
 
 			updateStatus("Submitting papers to Turnitin")
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType) }
@@ -236,7 +238,7 @@ class SubmitToTurnitinLtiJob extends Job
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				case _ => awaitTurnitinId(assignment, retries - 1)
+				case _ => awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse(assignment), retries - 1)
 			}
 		}
 	}
