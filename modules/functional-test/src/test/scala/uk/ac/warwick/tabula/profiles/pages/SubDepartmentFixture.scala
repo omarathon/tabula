@@ -16,7 +16,8 @@ trait SubDepartmentFixture  extends BrowserTest with GivenWhenThen with Fixtures
 		And("Admin1 is a departmental admin in xxx")
 		And("Admin3 is a departmental admin in xxx-ug")
 		And("Admin4 is a departmental admin in xxx-ug1")
-		go to (Path("/scheduling/fixtures/setup")) // all set up in FixturesCommand
+		go to Path("/scheduling/fixtures/setup") // all set up in FixturesCommand
+		pageSource should include("Fixture setup successful")
 
 		And("student1 and student2 have a membership record with an undergraduate course")
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")

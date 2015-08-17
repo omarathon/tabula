@@ -197,6 +197,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				session.flush()
 
 				modules.asScala.foreach(invalidateAndDeletePermissions[Module])
+				session.flush()
+				assert(modules.asScala.forall(m => permissionsService.getAllGrantedRolesFor(m).isEmpty))
+
 				modules.asScala.foreach(session.delete)
 
 				dept.modules.clear()
@@ -227,6 +230,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from route where department_id not in (select id from department)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from assignment where module_id not in (select id from module)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Department' and SCOPE_ID not in (select id from department)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Module' and SCOPE_ID not in (select id from module)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from smallgroupset where module_id not in (select id from module)").list.size() == 0)
 			}
 		}

@@ -20,6 +20,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	before {
 		Given("The test department exists")
 		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		createPremarkedAssignment(TEST_MODULE_CODE)
 

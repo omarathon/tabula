@@ -13,6 +13,7 @@ class AttendanceDeptViewNoSetsTest  extends BrowserTest with FeaturesDriver with
 
 	before {
 		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")
 		createCourse(TEST_UNDERGRAD_COURSE_CODE,"Test UG Course")

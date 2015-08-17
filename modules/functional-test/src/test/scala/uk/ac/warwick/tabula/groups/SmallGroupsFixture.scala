@@ -9,12 +9,13 @@ import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
   before{
-    go to (Path("/scheduling/fixtures/setup"))
+    go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
   }
 
   def as[T](user: LoginDetails)(fn: =>T) = {
 		currentUser = user
-    signIn as(user) to (Path("/groups/"))
+    signIn as user to Path("/groups/")
     fn
   }
 
