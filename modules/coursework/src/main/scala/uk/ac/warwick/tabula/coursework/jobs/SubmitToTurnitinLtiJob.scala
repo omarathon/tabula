@@ -65,15 +65,17 @@ class SubmitToTurnitinLtiJob extends Job
 
 			submitAssignment(WaitingRequestsToTurnitinRetries)
 
-			transactional(){
-				awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
+			// Re-get this assignmnet from hibernate, to ensure we can retrieve the Turnitin id (set in a separate transaction).
+			// Otherwise we can get "Assignment LineItem not found" from Turnitin when submitting a paper
+			val assignmentWithTurnitinId = transactional(){
+				 awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
 			}
 
 			updateStatus("Submitting papers to Turnitin")
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType) }
 			val uploadsTotal = allAttachments.size
 
-			val failedUploads = submitPapers(assignment, uploadsTotal)
+			val failedUploads = submitPapers(assignmentWithTurnitinId, uploadsTotal)
 
 			updateStatus("Getting similarity reports from Turnitin")
 			val (originalityReports, noResults) = retrieveResults(uploadsTotal)
@@ -116,7 +118,7 @@ class SubmitToTurnitinLtiJob extends Job
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
 						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
-						val submitPaper = submitSinglePaper(attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
+						val submitPaper = submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
 							if (!submitPaper.success) {
 								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
 							}
@@ -132,7 +134,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 		@tailrec
 		private def submitSinglePaper(
-	 		attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment, retries: Int
+			assignment: Assignment, attachmentAccessUrl: String, submission: Submission, attachment: FileAttachment, retries: Int
 		): TurnitinLtiResponse = {
 
 			def submit() = {
@@ -144,7 +146,7 @@ class SubmitToTurnitinLtiJob extends Job
 			submit() match {
 				case response if response.success => response
 				case response if retries == 0 => response
-				case _ => submitSinglePaper(attachmentAccessUrl, submission, attachment, retries-1)
+				case _ => submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, retries-1)
 			}
 		}
 
@@ -224,7 +226,7 @@ class SubmitToTurnitinLtiJob extends Job
 		}
 
 		@tailrec
-		private def awaitTurnitinId(assignment: Assignment, retries: Int): String = {
+		private def awaitTurnitinId(assignment: Assignment, retries: Int): Assignment = {
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
 			def hasTurnitinId = {
 				Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
@@ -232,13 +234,16 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			hasTurnitinId match {
-				case true => assignment.turnitinId
+				case true => assignment
 				case false if retries == 0 =>
 					if (sendNotifications) {
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				case _ => awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse(assignment), retries - 1)
+				case _ => {
+					// Re-get this assignmnet from hibernate as the Turnitin ID has only just been set (in a separate transaction).
+					awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse (throw obsoleteJob), retries - 1)
+				}
 			}
 		}
 	}
