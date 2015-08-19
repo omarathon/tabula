@@ -117,7 +117,7 @@ class SubmitToTurnitinLtiJob extends Job
 					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
-						val attachmentAccessUrl = Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)
+						val attachmentAccessUrl = s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
 						val submitPaper = submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
 							if (!submitPaper.success) {
 								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
