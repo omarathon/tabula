@@ -46,7 +46,8 @@
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
 							<a class="long-running use-tooltip form-post"
-								 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
+								 data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
+								 href=""
 								 title="Download the submission files for the selected students as a ZIP file."
 								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download submission
 							</a>
