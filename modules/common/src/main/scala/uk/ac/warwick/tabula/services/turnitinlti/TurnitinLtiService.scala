@@ -168,18 +168,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 					request <>  {
 						(node) => {
 							val response = TurnitinLtiResponse.fromXml(node)
-							if (response.success) {
-								val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
-								if (originalityReport.isDefined) {
-									originalityReport.get.turnitinId = response.turnitinSubmissionId()
-									originalityReport.get.reportReceived = false
-								} else {
-									val report = new OriginalityReport
-									report.turnitinId = response.turnitinSubmissionId()
-									attachment.originalityReport = report
-									originalityReportService.saveOriginalityReport(attachment)
-								}
-							}	else logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
+
 							response
 						}
 					}

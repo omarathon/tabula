@@ -118,7 +118,9 @@ class SubmitToTurnitinLtiJob extends Job
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val token: FileAttachmentToken = getToken(attachment)
 						val attachmentAccessUrl = s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
-						val submitPaper = submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
+						val submitPaper = transactional(){
+							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
+						}
 							if (!submitPaper.success) {
 								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
 							}
@@ -144,8 +146,23 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			submit() match {
-				case response if response.success => response
-				case response if retries == 0 => response
+				case response if response.success => {
+						val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
+						if (originalityReport.isDefined) {
+							originalityReport.get.turnitinId = response.turnitinSubmissionId()
+							originalityReport.get.reportReceived = false
+						} else {
+							val report = new OriginalityReport
+							report.turnitinId = response.turnitinSubmissionId()
+							attachment.originalityReport = report
+							originalityReportService.saveOriginalityReport(attachment)
+						}
+					response
+				}
+				case response if retries == 0 => {
+					logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
+					response
+				}
 				case _ => submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, retries-1)
 			}
 		}
