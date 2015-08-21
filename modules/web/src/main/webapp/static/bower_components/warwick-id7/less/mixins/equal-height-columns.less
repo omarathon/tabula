@@ -1,0 +1,12 @@
+.equal-height-columns() {
+  display: flex;
+
+  > [class*='col-'] {
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      flex: auto;
+    }
+  }
+}
