@@ -1,17 +1,18 @@
 <#import "*/group_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "*/modal_macros.ftl" as modal />
 
-<div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<@modal.wrapper cssClass="modal-lg">
+<@modal.header>
 	<#if command.group??>
-		<h3>Students in ${command.group.name}</h3>
+		<h3 class="modal-title">Students in ${command.group.name}</h3>
 	<#else>
-		<h3>Students <#if unallocated!false>not </#if>in ${command.smallGroupSet.name}</h3>
+		<h3 class="modal-title">Students <#if unallocated!false>not </#if>in ${command.smallGroupSet.name}</h3>
 	</#if>
 
-</div>
+</@modal.header>
 
-<div class="modal-body">
+<@modal.body>
 
 	<#if command.group??>
 		<ul>
@@ -85,4 +86,5 @@
 
 	</#if>
 
-</div>
+</@modal.body>
+</@modal.wrapper>

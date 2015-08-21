@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
+import uk.ac.warwick.tabula.reports.web.Routes
 
 
 @Controller
@@ -17,7 +18,7 @@ class AllAttendanceReportController extends AbstractAttendanceReportController {
 
 	val pageRenderPath = "allattendance"
 	val filePrefix = "all-monitoring-point-attendance"
-
+	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.all(department, year)
 }
 
 @Controller
@@ -30,6 +31,7 @@ class UnrecordedAttendanceReportController extends AbstractAttendanceReportContr
 
 	val pageRenderPath = "unrecorded"
 	val filePrefix = "unrecorded-monitoring-points"
+	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.unrecorded(department, year)
 
 }
 
@@ -43,5 +45,6 @@ class MissedAttendanceReportController extends AbstractAttendanceReportControlle
 
 	val pageRenderPath = "missed"
 	val filePrefix = "missed-monitoring-points"
+	def urlGeneratorFactory(department: Department) = year => Routes.Attendance.missed(department, year)
 
 }

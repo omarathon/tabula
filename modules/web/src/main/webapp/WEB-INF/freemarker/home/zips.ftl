@@ -5,8 +5,8 @@
 <div class="alert alert-info">
 	<p>The ZIP file is currently being generated. You can download it below when it is ready.</p>
 
-	<div class="progress progress-striped active">
-		<div class="bar" style="width: 0;"></div>
+	<div class="progress active">
+		<div class="progress-bar progress-bar-striped" style="width: 0;"></div>
 	</div>
 
 	<p class="zip-progress">Initialising</p>
@@ -24,12 +24,11 @@
 		var updateProgress = function() {
 			$.get('<@routes.zipProgress jobId />', function(data){
 				if (data.succeeded) {
-					$('.progress .bar').width("100%");
+					$('.progress .progress-bar').width("100%").removeClass('active progress-bar-striped');
 					$('.zip-progress').empty();
 					$('.zip-complete').show();
-					$('.progress').removeClass('active progress-striped')
 				} else {
-					$('.progress .bar').width(data.progress + "%");
+					$('.progress .progress-bar').width(data.progress + "%");
 					if (data.status) {
 						$('.zip-progress').html(data.status);
 					}

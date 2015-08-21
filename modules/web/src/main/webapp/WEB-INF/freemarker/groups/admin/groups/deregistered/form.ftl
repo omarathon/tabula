@@ -1,9 +1,10 @@
 <#escape x as x?html>
 	<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
-	<h1>Deregistered students</h1>
-	<h4><span class="muted">for</span> ${smallGroupSet.name}</h4>
-
+	<div class="deptheader">
+		<h1>Deregistered students</h1>
+		<h4 class="with-related"><span class="muted">for</span> ${smallGroupSet.name}</h4>
+	</div>
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<p>Students who are allocated to groups may become deregistered from the set of small
@@ -14,7 +15,7 @@
 	<div class="fix-area">
 		<#assign submitUrl><@routes.groups.deregisteredStudents smallGroupSet /></#assign>
 		<@f.form method="post" action="${submitUrl}" commandName="command">
-			<table class="table table-bordered table-striped table-condensed table-hover table-checkable">
+			<table class="table table-striped table-condensed table-hover table-checkable">
 				<thead>
 					<tr>
 						<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
@@ -43,7 +44,7 @@
 
 			<div class="submit-buttons fix-footer">
 				<input type="submit" class="btn btn-primary" value="Remove deregistered students">
-				<a href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn">Cancel</a>
+				<a href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn btn-default">Cancel</a>
 			</div>
 		</@f.form>
 	</div>
@@ -57,10 +58,8 @@
 				var $table = $(this).closest('table');
 				var checkStatus = this.checked;
 				$table.find('td input:checkbox').prop('checked', checkStatus);
-			});
-
+			}).on('click', 'tr', function(e) {
 			<#-- make table rows clickable -->
-			$('.table-checkable').on('click', 'tr', function(e) {
 				if ($(e.target).is(':not(input:checkbox)') && $(e.target).closest('a').length == 0) {
 					e.preventDefault();
 					var $chk = $(this).find('input:checkbox');

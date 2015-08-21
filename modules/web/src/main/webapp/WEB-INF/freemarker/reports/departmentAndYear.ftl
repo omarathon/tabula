@@ -1,10 +1,11 @@
 <#escape x as x?html>
 
-<#macro deptheaderroutemacro dept>
-	<@routes.reports.departmentWithYear dept academicYear />
-</#macro>
-<#assign deptheaderroute = deptheaderroutemacro in routes.reports />
-<@fmt.deptheader "View reports for ${academicYear.toString}" "in" department routes.reports "deptheaderroute" />
+<#function route_function dept>
+	<#local result><@routes.reports.departmentWithYear dept academicYear /></#local>
+	<#return result />
+</#function>
+
+<@fmt.id7_deptheader title="View reports for ${academicYear.toString}" route_function=route_function preposition="in" />
 
 <#if (academicYear.startYear >= 2014)>
 	<h2>Monitoring points</h2>

@@ -6,14 +6,15 @@
 <#assign route_name><@fmt.route_name route /></#assign>
 
 <div id="route-permissions-page">
-	<div class="pull-right">
-		<div><a class="btn" href="<@routes.admin.permissions route />"><i class="icon-lock fa fa-lock"></i> Advanced</a></div>
-		<br>
-		<div class="pull-right"><a href="<@routes.admin.rolesDepartment route.department />"><strong>About roles</strong></a></div>
+	<div class="pull-right btn-toolbar">
+		<a class="btn btn-default" href="<@routes.admin.rolesDepartment route.department />">About roles</a>
+		<a class="btn btn-default" href="<@routes.admin.permissions route />">Advanced</a>
 	</div>
 
-	<h1 class="with-settings">Route permissions</h1>
-	<h5><span class="muted">for</span> <#noescape>${route_name}</#noescape></h5>
+	<div class="deptheader">
+		<h1 class="with-settings">Route permissions</h1>
+		<h5 class="with-related"><span class="muted">for</span> <#noescape>${route_name}</#noescape></h5>
+	</div>
 
 	<@pm.alerts "addCommand" route_name users role />
 

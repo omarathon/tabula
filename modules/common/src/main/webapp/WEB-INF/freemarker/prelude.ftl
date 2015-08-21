@@ -7,6 +7,7 @@
 	<#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
 	<#assign joda=JspTaglibs["/WEB-INF/tld/joda.tld"]>
 	<#import "forms.ftl" as form />
+	<#import "bs3-forms.ftl" as bs3form />
 	<#import "routes.ftl" as routes />
 	<#import "can_do.ftl" as can />
 	<#import "component.ftl" as component />

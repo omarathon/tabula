@@ -31,7 +31,8 @@ jQuery.fn.ajaxModalLink = function(options) {
 		    $modalElement = $($link.data('target')) || options.target,
 		    href = options.href || $link.attr('href'),
 		    $modalBody = $modalElement.find('.modal-body'),
-		    wholeContent = $modalBody.length === 0;
+		    wholeContent = $modalBody.length === 0,
+			$tabulaModalContainer = $('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3>Loading&hellip;</h3></div></div></div>');
 
 		var onLoad = function() {
 			// Allow recursive modal links, because that can only end well
@@ -41,7 +42,7 @@ jQuery.fn.ajaxModalLink = function(options) {
 		if (wholeContent) {
 			// HTML has no modal-body. bootstrap.js doesn't directly support this,
 			// so let's manually shove it in.
-			$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
+			$modalElement.append($tabulaModalContainer);
 			$modalElement.modal({ remote: null });
 			$modalElement.load(href, onLoad);
 		} else {
@@ -51,11 +52,11 @@ jQuery.fn.ajaxModalLink = function(options) {
 		}
 
 		// Forget about modal on hide, otherwise it'll only load once.
-		$modalElement.on('hidden', function() {
+		$modalElement.on('hidden hidden.bs.modal', function() {
 			if (wholeContent) {
 				// There was no modal-body when we first started, so revert back to
 				// this situation to allow the init code to work next time.
-				$modalElement.html("");
+				$tabulaModalContainer.remove();
 			}
 			$modalElement.removeData('modal');
 		});
@@ -65,7 +66,7 @@ jQuery.fn.ajaxModalLink = function(options) {
 
 	// some ajax links may be hidden to prevent them being clicked before this script is run - show them
 	this.show();
-}
+};
 
 $(function() {
 	$('a.ajax-modal').ajaxModalLink();

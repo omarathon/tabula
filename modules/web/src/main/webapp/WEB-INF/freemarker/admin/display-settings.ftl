@@ -1,159 +1,125 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
-	<@fmt.deptheader "Settings" "for" department routes.admin "displaysettings" "" />
+<#function route_function dept>
+	<#local result><@routes.admin.displaysettings dept /></#local>
+	<#return result />
+</#function>
+<@fmt.id7_deptheader "Settings" route_function "for" />
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.admin.displaysettings department /></#assign>
-	<@f.form method="post" class="form-horizontal department-settings-form" action=submitUrl commandName="displaySettingsCommand">
+	<@f.form method="post" class="department-settings-form" action=submitUrl commandName="displaySettingsCommand">
 		<input type="hidden" name="returnTo" value="${returnTo}">
-		<@form.row>
-			<@form.label>Week numbering system</@form.label>
-			<@form.field>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="weekNumberingSystem" value="term" />
-					Count weeks from 1-10 for each term (the first week of the Spring term is Term 2, week 1)
-				</@form.label>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="weekNumberingSystem" value="cumulative" />
-					Count term weeks cumulatively (the first week of the Spring term is Term 2, week 11)
-				</@form.label>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="weekNumberingSystem" value="academic" />
-					Use academic week numbers, including vacations (the first week of the Spring term is week 15)
-				</@form.label>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="weekNumberingSystem" value="none" />
-					Use no week numbers, displaying dates instead
-				</@form.label>
-				<@f.errors path="weekNumberingSystem" cssClass="error" />
-			</@form.field>
-		</@form.row>
+
+		<@bs3form.labelled_form_group labelText="Week numbering system">
+			<@bs3form.radio>
+				<@f.radiobutton path="weekNumberingSystem" value="term" />
+				Count weeks from 1-10 for each term (the first week of the Spring term is Term 2, week 1)
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="weekNumberingSystem" value="cumulative" />
+				Count term weeks cumulatively (the first week of the Spring term is Term 2, week 11)
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="weekNumberingSystem" value="academic" />
+				Use academic week numbers, including vacations (the first week of the Spring term is week 15)
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="weekNumberingSystem" value="none" />
+				Use no week numbers, displaying dates instead
+			</@bs3form.radio>
+			<@bs3form.errors path="weekNumberingSystem" />
+		</@bs3form.labelled_form_group>
 
 		<hr />
 
-		<fieldset id="assignment-options">
-			<h2>Assignment options</h2>
+		<h2>Assignment options</h2>
 
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="showStudentName" id="showStudentName" />
-						Show student name with submission
-					</@form.label>
-					<@f.errors path="showStudentName" cssClass="error" />
-					<div class="help-block">
-						If this option is enabled, all assignments in this department will display the student's name in place of their university ID.
-					</div>
-				</@form.field>
-			</@form.row>
+		<@bs3form.labelled_form_group>
+			<@bs3form.checkbox path="showStudentName">
+				<@f.checkbox path="showStudentName" id="showStudentName" />
+				Show student name with submission
+			</@bs3form.checkbox>
+			<div class="help-block">
+				If this option is enabled, all assignments in this department will display the student's name in place of their university ID.
+			</div>
+		</@bs3form.labelled_form_group>
 
-			<@form.row>
-				<@form.label>Assignment detail view</@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.radiobutton path="assignmentInfoView" value="default" />
-						Let Tabula choose the best view to display for submissions and feedback
-					</@form.label>
-					<@form.label checkbox=true>
-						<@f.radiobutton path="assignmentInfoView" value="table" />
-						Show the expanded table view of submissions and feedback first
-					</@form.label>
-					<@form.label checkbox=true>
-						<@f.radiobutton path="assignmentInfoView" value="summary" />
-						Show the summary view of submissions and feedback first
-					</@form.label>
-					<@f.errors path="assignmentInfoView" cssClass="error" />
-				</@form.field>
-			</@form.row>
+		<@bs3form.labelled_form_group labelText="Assignment detail view">
+			<@bs3form.radio>
+				<@f.radiobutton path="assignmentInfoView" value="default" />
+				Let Tabula choose the best view to display for submissions and feedback
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="assignmentInfoView" value="table" />
+				Show the expanded table view of submissions and feedback first
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="assignmentInfoView" value="summary" />
+				Show the summary view of submissions and feedback first
+			</@bs3form.radio>
+			<@bs3form.errors path="assignmentInfoView" />
+		</@bs3form.labelled_form_group>
 
-			<@form.row>
-				<@form.label>Validate feedback grades</@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.radiobutton path="assignmentGradeValidation" value="true" />
-						Validate grade
-						<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and replaced by a drop-down of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades will be calculated automatically when uploaded to SITS"/>
-					</@form.label>
-					<@form.label checkbox=true>
-						<@f.radiobutton path="assignmentGradeValidation" value="false" />
-						Free-form grades
-						<@fmt.help_popover id="assignmentGradeValidationFalse" content="Any text can be entered for the grade. Note that an invalid grade will prevent the feedback being uploaded to SITS (if and when this is requested)."/>
-					</@form.label>
-				</@form.field>
-			</@form.row>
+		<@bs3form.labelled_form_group labelText="Validate feedback grades">
+			<@bs3form.radio>
+				<@f.radiobutton path="assignmentGradeValidation" value="true" />
+				Validate grade
+				<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and replaced by a drop-down of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades will be calculated automatically when uploaded to SITS"/>
+			</@bs3form.radio>
+			<@bs3form.radio>
+				<@f.radiobutton path="assignmentGradeValidation" value="false" />
+				Free-form grades
+				<@fmt.help_popover id="assignmentGradeValidationFalse" content="Any text can be entered for the grade. Note that an invalid grade will prevent the feedback being uploaded to SITS (if and when this is requested)."/>
+			</@bs3form.radio>
+		</@bs3form.labelled_form_group>
 
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="plagiarismDetection" id="plagiarismDetection" />
-						Enable Turnitin plagiarism detection of assignment submissions
-					</@form.label>
-					<@f.errors path="plagiarismDetection" cssClass="error" />
-					<div class="help-block">
-						If you turn this option off, it won't be possible to submit any assignment submissions in this department to Turnitin.
-					</div>
-				</@form.field>
-			</@form.row>
-
-		</fieldset>
+		<@bs3form.checkbox path="plagiarismDetection">
+			<@f.checkbox path="plagiarismDetection" id="plagiarismDetection" />
+			Enable Turnitin plagiarism detection of assignment submissions
+			<div class="help-block">
+				If you turn this option off, it won't be possible to submit any assignment submissions in this department to Turnitin.
+			</div>
+		</@bs3form.checkbox>
 
 		<hr />
 
 		<fieldset id="turnitin-options">
 			<h2>Turnitin options</h2>
 			<p>The following filters will be applied to all Turnitin assignments generated by Tabula</p>
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="turnitinExcludeBibliography" id="turnitinExcludeBibliography" />
-						Exclude bibliographic materials
-					</@form.label>
-					<@f.errors path="turnitinExcludeBibliography" cssClass="error" />
-				</@form.field>
-			</@form.row>
+			<@bs3form.checkbox path="turnitinExcludeBibliography">
+				<@f.checkbox path="turnitinExcludeBibliography" id="turnitinExcludeBibliography" />
+				Exclude bibliographic materials
+			</@bs3form.checkbox>
 
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="turnitinExcludeQuotations" id="turnitinExcludeQuotations" />
-						Exclude quoted materials
-					</@form.label>
-					<@f.errors path="turnitinExcludeQuotations" cssClass="error" />
-				</@form.field>
-			</@form.row>
+			<@bs3form.checkbox path="turnitinExcludeQuotations">
+				<@f.checkbox path="turnitinExcludeQuotations" id="turnitinExcludeQuotations" />
+				Exclude quoted materials
+			</@bs3form.checkbox>
 
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="turnitinExcludeSmallMatches" id="turnitinExcludeSmallMatches" />
-						Exclude small matches
-					</@form.label>
-					<@f.errors path="turnitinExcludeSmallMatches" cssClass="error" />
-				</@form.field>
-			</@form.row>
+			<@bs3form.checkbox path="turnitinExcludeSmallMatches">
+				<@f.checkbox path="turnitinExcludeSmallMatches" id="turnitinExcludeSmallMatches" />
+				Exclude small matches
+			</@bs3form.checkbox>
 
-			<fieldset id="small-match-options" class="internal">
+			<fieldset id="small-match-options">
 				<#assign checkedMarkup><#if displaySettingsCommand.turnitinSmallMatchWordLimit!=0>checked="checked"</#if></#assign>
-				<@form.row>
-					<@form.label path="turnitinSmallMatchWordLimit"><input type="radio" name="disable-radio" ${checkedMarkup}/> Word limit</@form.label>
-					<@form.field>
-						<@f.errors path="turnitinSmallMatchWordLimit" cssClass="error" />
-						<@f.input path="turnitinSmallMatchWordLimit" cssClass="input-small" /> words
-					</@form.field>
-				</@form.row>
+				<@bs3form.radio>
+					<input type="radio" name="disable-radio" ${checkedMarkup}/> Word limit
+					<div class="input-group">
+						<@f.input path="turnitinSmallMatchWordLimit" cssClass="form-control" />
+						<span class="input-group-addon">words</span>
+					</div>
+					<@bs3form.errors path="turnitinSmallMatchWordLimit" />
+				</@bs3form.radio>
 				<#assign checkedMarkup><#if displaySettingsCommand.turnitinSmallMatchPercentageLimit!=0>checked="checked"</#if></#assign>
-				<@form.row>
-					<@form.label path="turnitinSmallMatchPercentageLimit"><input type="radio" name="disable-radio" ${checkedMarkup}/> Percentage limit</@form.label>
-					<@form.field>
-						<@f.errors path="turnitinSmallMatchPercentageLimit" cssClass="error" />
-						<@f.input path="turnitinSmallMatchPercentageLimit" cssClass="input-small" /> %
-					</@form.field>
-				</@form.row>
+				<@bs3form.radio>
+					<input type="radio" name="disable-radio" ${checkedMarkup}/> Percentage limit
+					<div class="input-group">
+						<@f.input path="turnitinSmallMatchPercentageLimit" cssClass="form-control" />
+						<span class="input-group-addon">%</span>
+					</div>
+					<@bs3form.errors path="turnitinSmallMatchPercentageLimit" />
+				</@bs3form.radio>
 			</fieldset>
 		</fieldset>
 
@@ -162,35 +128,25 @@
 		<fieldset id="small-groups-options">
 			<h2>Small group options</h2>
 			<#if features.smallGroupTeachingStudentSignUp>
-				<@form.row>
-					<@form.label>Default allocation method for small groups</@form.label>
-					<@form.field>
-						<@form.label checkbox=true>
-							<@f.radiobutton path="defaultGroupAllocationMethod" value="Manual" />
-							Manual Allocation
-						</@form.label>
-						<@form.label checkbox=true>
-							<@f.radiobutton path="defaultGroupAllocationMethod" value="StudentSignUp" />
-							Self Sign-up
-						</@form.label>
-						<@f.errors path="defaultGroupAllocationMethod" cssClass="error" />
-					</@form.field>
-				</@form.row>
+				<@bs3form.labelled_form_group path="defaultGroupAllocationMethod" labelText="Default allocation method for small groups">
+					<@bs3form.radio>
+						<@f.radiobutton path="defaultGroupAllocationMethod" value="Manual" />
+						Manual Allocation
+					</@bs3form.radio>
+					<@bs3form.radio>
+						<@f.radiobutton path="defaultGroupAllocationMethod" value="StudentSignUp" />
+						Self Sign-up
+					</@bs3form.radio>
+				</@bs3form.labelled_form_group>
 			</#if>
 
-			<@form.row>
-				<@form.label></@form.label>
-				<@form.field>
-					<@form.label checkbox=true>
-						<@f.checkbox path="autoGroupDeregistration" id="autoGroupDeregistration" />
-						Automatically deregister students from groups
-					</@form.label>
-					<@f.errors path="autoGroupDeregistration" cssClass="error" />
-					<div class="help-block">
-						Students will be removed from a group when they deregister from the associated module, or are manually removed from the set of groups.
-					</div>
-				</@form.field>
-			</@form.row>
+			<@bs3form.checkbox path="autoGroupDeregistration">
+				<@f.checkbox path="autoGroupDeregistration" id="autoGroupDeregistration" />
+				Automatically deregister students from groups
+				<div class="help-block">
+					Students will be removed from a group when they deregister from the associated module, or are manually removed from the set of groups.
+				</div>
+			</@bs3form.checkbox>
 
 		</fieldset>
 
@@ -200,35 +156,32 @@
 			<fieldset id="relationship-options">
 				<h2>Student relationship options</h2>
 
-				<@form.row>
-					<@form.label>Display</@form.label>
-					<@form.field>
-						<#list allRelationshipTypes as relationshipType>
-							<div class="studentRelationshipDisplayed">
-								<@form.label checkbox=true>
-									<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
-									${relationshipType.description}
-								</@form.label>
-								<div class="studentRelationshipExpected" style="margin-left: 32px;">
-									<div class="help-block">
-										<small>Show when empty to students of type</small>
-									</div>
-									<#list expectedCourseTypes as courseType>
-										<@form.label checkbox=true>
-											<@f.checkbox
-												path="studentRelationshipExpected[${relationshipType.urlPart}][${courseType.code}]"
-												id="studentRelationshipExpected_${relationshipType.urlPart}_${courseType.code}"
-												disabled=(!displaySettingsCommand.studentRelationshipDisplayed[relationshipType.id])
-											/>
-											${courseType.description}
-										</@form.label>
-									</#list>
+				<@bs3form.labelled_form_group labelText="Display">
+					<#list allRelationshipTypes as relationshipType>
+						<div class="studentRelationshipDisplayed">
+							<@bs3form.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]">
+								<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
+								${relationshipType.description}
+							</@bs3form.checkbox>
+							<div class="studentRelationshipExpected" style="margin-left: 32px;">
+								<div class="help-block">
+									<small>Show when empty to students of type</small>
 								</div>
+								<#list expectedCourseTypes as courseType>
+									<@bs3form.checkbox path="studentRelationshipExpected[${relationshipType.urlPart}][${courseType.code}]">
+										<@f.checkbox
+											path="studentRelationshipExpected[${relationshipType.urlPart}][${courseType.code}]"
+											id="studentRelationshipExpected_${relationshipType.urlPart}_${courseType.code}"
+											disabled=(!displaySettingsCommand.studentRelationshipDisplayed[relationshipType.id])
+										/>
+										${courseType.description}
+									</@bs3form.checkbox>
+								</#list>
 							</div>
-						</#list>
+						</div>
+					</#list>
 
-						<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
-					</@form.field>
+					<@bs3form.errors path="studentRelationshipDisplayed" />
 					<script>
 						jQuery(function($){
 							$('#relationship-options').find('input[name^=studentRelationshipDisplayed]').on('change', function(){
@@ -248,32 +201,26 @@
 
 						});
 					</script>
-				</@form.row>
+				</@bs3form.labelled_form_group>
 
-				<@form.row>
-					<@form.label></@form.label>
-					<@form.field>
-						<@form.label checkbox=true>
-							<@f.checkbox path="studentsCanScheduleMeetings" id="studentsCanScheduleMeetings" />
-							Students can schedule meetings
-						</@form.label>
-						<@f.errors path="studentsCanScheduleMeetings" cssClass="error" />
-						<div class="help-block">
-							If unchecked, students won't be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
-						</div>
-					</@form.field>
-				</@form.row>
+				<@bs3form.checkbox path="studentsCanScheduleMeetings">
+					<@f.checkbox path="studentsCanScheduleMeetings" id="studentsCanScheduleMeetings" />
+					Students can schedule meetings
+					<div class="help-block">
+						If unchecked, students won't be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
+					</div>
+				</@bs3form.checkbox>
 			</fieldset>
 		</#if>
 
-		<div class="submit-buttons fix-footer">
+		<div class="fix-footer">
 			<input type="submit" value="Save" class="btn btn-primary">
 			<#if (returnTo!"")?length gt 0>
 				<#assign cancelDestination=returnTo />
 			<#else>
 				<#assign cancelDestination><@routes.admin.departmenthome department=department /></#assign>
 			</#if>
-			<a class="btn" href="${cancelDestination}">Cancel</a>
+			<a class="btn btn-default" href="${cancelDestination}">Cancel</a>
 		</div>
 
 	</@f.form>

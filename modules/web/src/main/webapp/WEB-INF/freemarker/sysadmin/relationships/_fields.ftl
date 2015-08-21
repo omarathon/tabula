@@ -1,140 +1,82 @@
 <#escape x as x?html>
-<fieldset>
 
-	<#if newRecord>
-		<@form.labelled_row "id" "ID">
-			<@f.input path="id" cssClass="text" />
-			<a class="use-popover" data-html="true"
-		     data-content="A unique identifier. Set this to something descriptive, using alphanumeric chars, - and _ only, so it's easy to see in the database. e.g. 'personalTutor'">
-		   	<i class="icon-question-sign fa fa-question-circle"></i>
-		  </a>
-		</@form.labelled_row>
-	<#else>
-		<@form.labelled_row "id" "ID">
-			<@spring.bind path="id">
-				<span class="uneditable-value">${status.actualValue} <span class="hint">(can't be changed)<span></span>
-			</@spring.bind>
-		</@form.labelled_row>
-	</#if>
+<#if newRecord>
+	<#assign labelText>ID <@fmt.help_popover id="help-popover-startDate" content="A unique identifier. Set this to something descriptive, using alphanumeric chars, - and _ only, so it's easy to see in the database. e.g. 'personalTutor'" /></#assign>
+	<@bs3form.labelled_form_group path="id" labelText=labelText>
+		<@f.input path="id" cssClass="text form-control" />
+	</@bs3form.labelled_form_group>
+<#else>
+	<@bs3form.labelled_form_group path="id" labelText="ID">
+		<p class="form-control-static">${status.actualValue} <span class="hint">(can't be changed)<span></p>
+	</@bs3form.labelled_form_group>
+</#if>
 
-	<#if newRecord || relationshipType.empty>
-		<@form.labelled_row "urlPart" "URL string">
-			<@f.input path="urlPart" cssClass="text" />
-			<a class="use-popover" data-html="true"
-		     data-content="A string that can be used as part of the URL. e.g. 'tutor'">
-		   	<i class="icon-question-sign fa fa-question-circle"></i>
-		  </a>
-		</@form.labelled_row>
-	<#else>
-		<@form.labelled_row "urlPart" "URL string">
-			<@spring.bind path="urlPart">
-				<span class="uneditable-value">${status.actualValue} <span class="hint">(can't be changed)<span></span>
-			</@spring.bind>
-		</@form.labelled_row>
-	</#if>
+<#if newRecord || relationshipType.empty>
+	<#assign labelText>URL string <@fmt.help_popover id="help-popover-urlPart" content="A string that can be used as part of the URL. e.g. 'tutor'" /></#assign>
+	<@bs3form.labelled_form_group path="urlPart" labelText=labelText >
+		<@f.input path="urlPart" cssClass="text form-control" />
+	</@bs3form.labelled_form_group>
+<#else>
+	<@bs3form.labelled_form_group path="urlPart" labelText="URL string">
+		<p class="form-control-static">${status.actualValue} <span class="hint">(can't be changed)<span></p>
+	</@bs3form.labelled_form_group>
+</#if>
 
-	<@form.labelled_row "description" "Description">
-		<@f.input path="description" cssClass="text" />
-		<a class="use-popover" data-html="true"
-	     data-content="A descriptive name for this type of relationship. Capitalise accordingly; e.g. 'Personal Tutor'">
-	   	<i class="icon-question-sign fa fa-question-circle"></i>
-	  </a>
-	</@form.labelled_row>
+<#assign labelText>Description <@fmt.help_popover id="help-popover-description" content="A descriptive name for this type of relationship. Capitalise accordingly; e.g. 'Personal Tutor'" /></#assign>
+<@bs3form.labelled_form_group path="description" labelText=labelText >
+	<@f.input path="description" cssClass="text form-control" />
+</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "agentRole" "Agent Role">
-		<@f.input path="agentRole" cssClass="text" />
-		<a class="use-popover" data-html="true"
-	     data-content="How you'd refer to a single agent in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutor'">
-	   	<i class="icon-question-sign fa fa-question-circle"></i>
-	  </a>
-	</@form.labelled_row>
+<#assign labelText>Agent Role <@fmt.help_popover id="help-popover-startDate" content="How you'd refer to a single agent in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutor'" /></#assign>
+<@bs3form.labelled_form_group path="agentRole" labelText=labelText >
+	<@f.input path="agentRole" cssClass="text form-control" />
+</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "studentRole" "Student Role">
-		<@f.input path="studentRole" cssClass="text" />
-		<a class="use-popover" data-html="true"
-	     data-content="How you'd refer to a single student in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutee'">
-	   	<i class="icon-question-sign fa fa-question-circle"></i>
-	  </a>
-	</@form.labelled_row>
+<#assign labelText>Student Role <@fmt.help_popover id="help-popover-studentRole" content="How you'd refer to a single student in this relationship. Input as if used in the middle of a sentence; it will be capitalised accordingly. e.g. 'personal tutee'" /></#assign>
+<@bs3form.labelled_form_group path="studentRole" labelText=labelText >
+	<@f.input path="studentRole" cssClass="text form-control" />
+</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "defaultSource" "Default source">
-		<label class="radio">
-			<@f.radiobutton path="defaultSource" value="local" />
-			Tabula (Local)
-			<a class="use-popover" data-html="true"
-		     data-content="By default, information will be input directly into Tabula.">
-		   	<i class="icon-question-sign fa fa-question-circle"></i>
-		  </a>
-		</label>
-		<label class="radio">
-			<@f.radiobutton path="defaultSource" value="sits" />
-			SITS
-			<a class="use-popover" data-html="true"
-		     data-content="By default, information will be imported from SITS. Relies on code existing to know how to import this type.">
-		   	<i class="icon-question-sign fa fa-question-circle"></i>
-		  </a>
-		</label>
-	</@form.labelled_row>
+<@bs3form.labelled_form_group path="defaultSource" labelText="Default source">
+	<@bs3form.radio>
+		<@f.radiobutton path="defaultSource" value="local" />
+		Tabula (Local)
+		<@fmt.help_popover id="help-popover-defaultSource-local" content="By default, information will be input directly into Tabula." />
+	</@bs3form.radio>
 
-	<@form.row defaultClass="">
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="defaultDisplay" id="defaultDisplay" />
-					Display this relationship type by default for departments
-				</@form.label>
-			<@f.errors path="defaultDisplay" cssClass="error" />
-		</@form.field>
-	</@form.row>
+	<@bs3form.radio>
+		<@f.radiobutton path="defaultSource" value="sits" />
+		SITS
+		<@fmt.help_popover id="help-popover-defaultSource-sits" content="By default, information will be imported from SITS. Relies on code existing to know how to import this type." />
+	</@bs3form.radio>
+</@bs3form.labelled_form_group>
 
-	<@form.row defaultClass="">
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="expectedUG" id="expectedUG" />
-					Expect Undergraduates to always have a relationship of this type
-					<a class="use-popover" data-html="true"
-						 data-content="If enabled, on undergraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign fa fa-question-circle"></i>
-					</a>
-				</@form.label>
-			<@f.errors path="expectedUG" cssClass="error" />
-		</@form.field>
-	</@form.row>
+<@bs3form.checkbox path="defaultDisplay">
+	<@f.checkbox path="defaultDisplay" id="defaultDisplay" />
+	Display this relationship type by default for departments
+</@bs3form.checkbox>
 
-	<@form.row defaultClass="">
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="expectedPGT" id="expectedPGT" />
-					Expect Taught Postgraduates to always have a relationship of this type
-					<a class="use-popover" data-html="true"
-						 data-content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign fa fa-question-circle"></i>
-					</a>
-				</@form.label>
-			<@f.errors path="expectedPGT" cssClass="error" />
-		</@form.field>
-	</@form.row>
+<@bs3form.checkbox path="expectedUG">
+	<@f.checkbox path="expectedUG" id="expectedUG" />
+	Expect Undergraduates to always have a relationship of this type
+	<@fmt.help_popover id="help-popover-expectedUG" content="If enabled, on undergraduate student profiles that don't have this type of relationship the box will be empty rather than hidden" />
+</@bs3form.checkbox>
 
-	<@form.row defaultClass="">
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="expectedPGR" id="expectedPGR" />
-					Expect Research Postgraduates to always have a relationship of this type
-					<a class="use-popover" data-html="true"
-						 data-content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden">
-						<i class="icon-question-sign fa fa-question-circle"></i>
-					</a>
-				</@form.label>
-			<@f.errors path="expectedPGR" cssClass="error" />
-		</@form.field>
-	</@form.row>
+<@bs3form.checkbox path="expectedPGT">
+	<@f.checkbox path="expectedPGT" id="expectedPGT" />
+	Expect Taught Postgraduates to always have a relationship of this type
+	<@fmt.help_popover id="help-popover-expectedPGT" content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden" />
+</@bs3form.checkbox>
 
-	<@form.labelled_row "sortOrder" "Sort order">
-		<@f.input path="sortOrder" cssClass="text" />
-		<a class="use-popover" data-html="true"
-	     data-content="Sort order when viewing multiple relationships. Lower numbers appear first. Identical numbers are ordered alphabetically by ID.">
-	   	<i class="icon-question-sign fa fa-question-circle"></i>
-	  </a>
-	</@form.labelled_row>
+<@bs3form.checkbox path="expectedPGR">
+	<@f.checkbox path="expectedPGR" id="expectedPGR" />
+	Expect Research Postgraduates to always have a relationship of this type
+	<@fmt.help_popover id="help-popover-expectedPGR" content="If enabled, on taught postgraduate student profiles that don't have this type of relationship the box will be empty rather than hidden" />
+</@bs3form.checkbox>
 
-</fieldset>
+<#assign labelText>Sort order <@fmt.help_popover id="help-popover-sortOrder" content="Sort order when viewing multiple relationships. Lower numbers appear first. Identical numbers are ordered alphabetically by ID." /></#assign>
+<@bs3form.labelled_form_group path="sortOrder" labelText=labelText >
+	<@f.input path="sortOrder" cssClass="text form-control" />
+</@bs3form.labelled_form_group>
+
 </#escape>

@@ -30,7 +30,7 @@ object Routes {
 		def release(department: Department, year: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/groups/release/${year.startYear.toString}"
 		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))
 
-		def create(module: Module) = context + "/admin/module/%s/groups/new" format (encoded(module.code))
+		def create(module: Module) = context + "/admin/module/%s/groups/new" format encoded(module.code)
 		def create(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s" format (encoded(set.module.code), encoded(set.id))
 		def createAddStudents(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/students" format (encoded(set.module.code), encoded(set.id))
 		def createAddGroups(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/groups" format (encoded(set.module.code), encoded(set.id))
@@ -42,14 +42,15 @@ object Routes {
 		def editAddEvents(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/events" format (encoded(set.module.code), encoded(set.id))
 		def editAllocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/allocate" format (encoded(set.module.code), encoded(set.id))
 
-		def allocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
-
 		def copy(department: Department) = context + s"/admin/department/${encoded(department.code)}/groups/copy"
 		def copy(module: Module) = context + s"/admin/module/${encoded(module.code)}/groups/copy"
 
+		def departmentAttendance(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/attendance"
+		def moduleAttendance(module: Module, academicYear: AcademicYear) = context + s"/admin/module/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}/attendance"
+
 		object reusable {
-			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format (encoded(department.code))
-			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format (encoded(department.code))
+			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format encoded(department.code)
+			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format encoded(department.code)
 			def create(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s" format (encoded(set.department.code), encoded(set.id))
 			def createAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/students" format (encoded(set.department.code), encoded(set.id))
 			def createAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/groups" format (encoded(set.department.code), encoded(set.id))

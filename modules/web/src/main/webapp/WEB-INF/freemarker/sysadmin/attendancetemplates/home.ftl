@@ -5,8 +5,8 @@
 <#if templates?size == 0>
 	<div class="striped-section">
 		<div class="pull-right">
-			<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-success btn-medium pull-right">
-				<i class="icon-plus fa fa-plus"></i> Add a new template
+			<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-primary btn-medium pull-right">
+				Add a new template
 			</a>
 		</div>
 		<h2 class="section-title">Templates</h2>
@@ -21,19 +21,19 @@
 		<p style="color: #818285;"><em>Drag and drop to reorder templates.</em></p>
 		<div class="striped-section">
 			<div class="pull-right">
-				<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-success btn-medium pull-right">
-					<i class="icon-plus fa fa-plus"></i> Add a new template
+				<a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-primary btn-medium pull-right">
+					Add a new template
 				</a>
 			</div>
 			<h2 class="section-title">Templates</h2>
 			<div class="striped-section-contents">
 				<#assign templateCount = 0 />
 				<#list templates as template>
-					<div class="item-info row-fluid point" style="cursor: move;">
-						<div class="span12">
+					<div class="item-info row point" style="cursor: move;">
+						<div class="col-md-12">
 							<div class="pull-right">
-								<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/edit" />" class="btn btn-primary btn-small">Edit</a>
-								<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/delete" />" class="btn btn-danger btn-small">Delete</a>
+								<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/edit" />" class="btn btn-primary btn-sm">Edit</a>
+								<a href="<@url page="/sysadmin/attendancetemplates/${template.id}/delete" />" class="btn btn-danger btn-sm">Delete</a>
 							</div>
 							<input type="hidden" name="templates[${templateCount}]" value="${template.id}" />
 							<span class="count">${templateCount + 1}</span>. ${template.templateName} (${template.points?size} points)

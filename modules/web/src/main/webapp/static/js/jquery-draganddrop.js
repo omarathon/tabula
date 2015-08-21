@@ -362,7 +362,7 @@ Method calls (after initialising):
 
                 if (multidrag) msg = $element.closest('ul').find('.ui-selected').length + " " + itemName + "s";
                 return $('<div>')
-                    .addClass('label')
+                    .addClass('label label-default')
                     .addClass('multiple-items-drag-placeholder')
                     .html(msg);
             },

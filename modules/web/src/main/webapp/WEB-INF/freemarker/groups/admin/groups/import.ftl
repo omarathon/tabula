@@ -39,14 +39,14 @@
 <#macro groups_details timetabledEvent>
 	<div class="set-info striped-section collapsible">
 		<div class="clearfix">
-			<div class="section-title row-fluid">
-				<div class="span8 icon-container">
+			<div class="section-title row">
+				<div class="col-md-8 icon-container">
 					<span class="h6 colour-h6">${timetabledEvent.module.code?upper_case} ${timetabledEvent.eventType.displayName}s</span>
 				</div>
-				<div class="span2">
+				<div class="col-md-2">
 					<@fmt.p timetabledEvent.events?size "group" />
 				</div>
-				<div class="span2">
+				<div class="col-md-2">
 					<#local studentsCount = 0 />
 					<#list timetabledEvent.events as event>
 						<#local studentsCount = studentsCount + event.studentUniversityIds?size />
@@ -58,23 +58,23 @@
 
 			<div class="striped-section-contents">
 				<#list timetabledEvent.events as event>
-					<div class="item-info row-fluid">
-						<div class="span2">
+					<div class="item-info row">
+						<div class="col-md-2">
 							<h4 class="name">
 								Group ${event_index + 1}
 							</h4>
 						</div>
-						<div class="span2">
+						<div class="col-md-2">
 							<@fmt.p event.studentUniversityIds?size "student" />
 						</div>
 
-						<div class="span8">
+						<div class="col-md-8">
 							<#if event.startTime??><@fmt.time event.startTime /></#if> ${(event.day.name)!""}
 
 							<#local popoverContent><@eventDetails event /></#local>
 							<a class="use-popover"
 							   data-html="true"
-							   data-content="${popoverContent?html}"><i class="icon-question-sign"></i></a>
+							   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 						</div>
 					</div>
 				</#list>
@@ -86,16 +86,15 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
-	<#macro deptheaderroutemacro department>
-		<@routes.groups.import_groups_for_year department academicYear />
-	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes.groups />
-
-	<@fmt.deptheader "Import small groups from Syllabus+" "for" department routes.groups "deptheaderroute" "" />
+	<#function route_function dept>
+		<#local result><@routes.groups.import_groups_for_year dept academicYear /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader title="Import small groups from Syllabus+" route_function=route_function preposition="for"/>
 
 	<#assign post_url><@routes.groups.import_groups department /></#assign>
 	<div class="fix-area">
-		<@f.form method="post" id="import-form" action="${post_url}" commandName="command" cssClass="form-horizontal">
+		<@f.form method="post" id="import-form" action="${post_url}" commandName="command">
 			<input type="hidden" name="action" value="" />
 
 			<p>Below are all of the scheduled small groups defined for modules in this department in Syllabus+, the central timetabling system.</p>
@@ -105,19 +104,17 @@
 			   been unchecked, but you can check them if you want to import them again (note: they will be imported
 			   as a <strong>separate</strong> set of small groups to the ones already imported.</p>
 
-			<@form.labelled_row "academicYear" "Academic year">
-				<@f.select path="academicYear" id="academicYearSelect">
+			<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
+				<@f.select path="academicYear" id="academicYearSelect" cssClass="form-control">
 					<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 				</@f.select>
-			</@form.labelled_row>
+			</@bs3form.labelled_form_group>
 
-			<table class="table table-bordered table-striped" id="import-groups-table">
+			<table class="table table-striped" id="import-groups-table">
 				<tr>
 					<th>
-						<div class="check-all checkbox">
-							<label><span class="very-subtle"></span>
-								<input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select/unselect all">
-							</label>
+						<div class="check-all">
+							<input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select/unselect all">
 						</div>
 					</th>
 					<td></td>
@@ -133,11 +130,9 @@
 				</#list>
 			</table>
 
-			<div class="fix-footer submit-buttons">
-				<div class="pull-right">
-					<input id="submit-button" type="submit" value="Import groups" class="btn btn-primary" data-loading-text="Importing&hellip;" autocomplete="off">
-					<a class="btn" href="<@routes.groups.departmenthome department academicYear />">Cancel</a>
-				</div>
+			<div class="fix-footer">
+				<input id="submit-button" type="submit" value="Import groups" class="btn btn-primary" data-loading-text="Importing&hellip;" autocomplete="off">
+				<a class="btn btn-default" href="<@routes.groups.departmenthome department academicYear />">Cancel</a>
 			</div>
 		</@f.form>
 	</div>
@@ -152,6 +147,8 @@
 				$form.submit();
 			});
 
+			var batchTableMouseDown = false;
+
 			$('#import-groups-table').bigList({
 				onChange : function() {
 					this.closest("tr").toggleClass("selected", this.is(":checked"));
@@ -164,31 +161,25 @@
 				onNoneChecked : function() {
 					$('#submit-button').addClass('disabled');
 				}
+			}).on('mousedown', 'td.selectable', function(){
+				// cool selection mechanism...
+				batchTableMouseDown = true;
+				var $row = $(this).closest('tr');
+				$row.toggleClass('selected');
+				var checked = $row.hasClass('selected');
+				$row.find('.collection-checkbox').prop('checked', checked);
+				return false;
+			}).on('mouseenter', 'td.selectable', function(){
+				if (batchTableMouseDown) {
+					var $row = $(this).closest('tr');
+					$row.toggleClass('selected');
+					var checked = $row.hasClass('selected');
+					$row.find('.collection-checkbox').prop('checked', checked);
+				}
+			}).on('mousedown', 'a.name-edit-link, .striped-section, input[type="checkbox"]', function(e){
+				// prevent td.selected toggling when clicking
+				e.stopPropagation();
 			});
-
-			// cool selection mechanism...
-			var batchTableMouseDown = false;
-			$('#import-groups-table')
-					.on('mousedown', 'td.selectable', function(){
-						batchTableMouseDown = true;
-						var $row = $(this).closest('tr');
-						$row.toggleClass('selected');
-						var checked = $row.hasClass('selected');
-						$row.find('.collection-checkbox').attr('checked', checked);
-						return false;
-					})
-					.on('mouseenter', 'td.selectable', function(){
-						if (batchTableMouseDown) {
-							var $row = $(this).closest('tr');
-							$row.toggleClass('selected');
-							var checked = $row.hasClass('selected');
-							$row.find('.collection-checkbox').attr('checked', checked);
-						}
-					})
-					.on('mousedown', 'a.name-edit-link, .striped-section, input[type="checkbox"]', function(e){
-						// prevent td.selected toggling when clicking
-						e.stopPropagation();
-					});
 
 			$(document).mouseup(function(){
 				batchTableMouseDown = false;

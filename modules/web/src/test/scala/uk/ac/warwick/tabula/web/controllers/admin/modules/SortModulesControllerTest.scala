@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.admin.modules
 
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.admin.AdminBreadcrumbs
 import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, TestBase, Mockito}
 import uk.ac.warwick.tabula.commands.admin.modules.SortModulesCommandState
 import uk.ac.warwick.tabula.data.model.{Module, Department}
@@ -44,7 +45,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		val command = new CountingCommand(department)
 		val mav = controller.showForm(command)
 		mav.viewName should be ("admin/modules/arrange/form")
-		mav.toModel should be ('empty)
+		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(department))))
 
 		command.populateCount should be (1)
 		command.sortCount should be (1)
@@ -66,7 +67,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
 		val command = new CountingCommand(Fixtures.department("xx"))
 		val mav = controller.showForm(command)
 		mav.viewName should be ("admin/modules/arrange/form")
-		mav.toModel should be ('empty)
+		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(command.department))))
 
 		command.populateCount should be (1)
 		command.sortCount should be (1)
@@ -93,7 +94,7 @@ class SortModulesControllerTest extends TestBase with Mockito {
 
 		val mav = controller.submit(command, errors)
 		mav.viewName should be ("admin/modules/arrange/form")
-		mav.toModel should be ('empty)
+		mav.toModel should be (Map("breadcrumbs" -> Seq(AdminBreadcrumbs.Department(department))))
 
 		command.populateCount should be (0)
 		command.sortCount should be (1)

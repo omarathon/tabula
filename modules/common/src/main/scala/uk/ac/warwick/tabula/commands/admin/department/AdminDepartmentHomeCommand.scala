@@ -59,21 +59,19 @@ trait AdminDepartmentHomeCommandPermissions extends RequiresPermissionsChecking 
 		}
 
 		allDeptPermission match {
-			case Some(requiredPermission) => {
+			case Some(requiredPermission) =>
 				// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
 				p.PermissionCheck(requiredPermission, department)
-			}
-			case None => {
+			case None =>
 				// User has no dept-level permission, check modules and routes
-				if (!modulesWithPermission.isEmpty) {
+				if (modulesWithPermission.nonEmpty) {
 					p.PermissionCheckAll(Permissions.Module.Administer, modulesWithPermission)
-				} else if (!routesWithPermission.isEmpty) {
+				} else if (routesWithPermission.nonEmpty) {
 					p.PermissionCheckAll(Permissions.Route.Administer, routesWithPermission)
 				} else {
 					// The user doesn't have permissions. Just require it on the dept, we know it'll fail
 					p.PermissionCheck(Permissions.Module.Administer, department)
 				}
-			}
 		}
 	}
 }

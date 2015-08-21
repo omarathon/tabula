@@ -7,14 +7,14 @@
 
 <div class="permissions-page">
 	<div class="pull-right">
-		<div><a class="btn" href="<@routes.admin.permissions module />"><i class="icon-lock fa fa-lock"></i> Advanced</a></div>
-		<br>
-		<div class="pull-right"><a href="<@routes.admin.rolesDepartment module.department />"><strong>About roles</strong></a></div>
+		<a class="btn btn-default" href="<@routes.admin.rolesDepartment module.department />">About roles</a>
+		<a class="btn btn-default" href="<@routes.admin.permissions module />">Advanced</a>
 	</div>
 
-	<h1 class="with-settings">Module permissions</h1>
-	<h5><span class="muted">for</span> <#noescape>${module_name}</#noescape></h5>
-
+	<div class="deptheader">
+		<h1 class="with-settings">Module permissions</h1>
+		<h5 class="with-related"><span class="muted">for</span> <#noescape>${module_name}</#noescape></h5>
+	</div>
 	<@pm.alerts "addCommand" module_name users role />
 
 	<#assign scope=module />

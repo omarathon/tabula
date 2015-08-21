@@ -1,6 +1,5 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
-	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<h1>
 		${group.groupSet.module.code?upper_case}<span class="hide-smallscreen"> ${group.groupSet.nameWithoutModulePrefix}</span>, ${group.name}

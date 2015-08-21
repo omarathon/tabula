@@ -29,15 +29,15 @@ class HomeControllerTest extends TestBase with Mockito {
 		route3.adminDepartment = dept2
 
 		val controller = new AdminHomeController
-		controller.moduleService = mock[ModuleAndDepartmentService]
-		controller.routeService = mock[CourseAndRouteService]
+		controller.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		controller.courseAndRouteService = smartMock[CourseAndRouteService]
 	}
 
-	@Test def itWorks = withUser("cuscav") { new Fixture {
-		controller.moduleService.departmentsWithPermission(currentUser, Permissions.Module.Administer) returns (Set(dept1))
-		controller.moduleService.departmentsWithPermission(currentUser, Permissions.Route.Administer) returns (Set(dept1))
-		controller.moduleService.modulesWithPermission(currentUser, Permissions.Module.Administer) returns (Set(mod1, mod2, mod3))
-		controller.routeService.routesWithPermission(currentUser, Permissions.Route.Administer) returns (Set(route1, route2, route3))
+	@Test def itWorks() = withUser("cuscav") { new Fixture {
+		controller.moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Module.Administer) returns Set(dept1)
+		controller.moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.Route.Administer) returns Set(dept1)
+		controller.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.Module.Administer) returns Set(mod1, mod2, mod3)
+		controller.courseAndRouteService.routesWithPermission(currentUser, Permissions.Route.Administer) returns Set(route1, route2, route3)
 
 		val mav = controller.home(currentUser)
 		mav.viewName should be ("admin/home/view")

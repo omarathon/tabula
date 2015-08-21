@@ -33,13 +33,10 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro editset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/edit" /></#macro>
 <#macro deleteset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/delete" /></#macro>
 <#macro archiveset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
-<#macro allocateset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
 <#macro releaseset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
 <#macro enrolment set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/enrolment"/></#macro>
 <#macro openset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
-
-<#macro templatespreadsheet set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/allocate/template" /></#macro>
 
 <#macro createeditproperties set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}" /></#macro>
 <#macro createsetstudents set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/students" /></#macro>
@@ -51,11 +48,12 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro editsetgroups set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/groups" /></#macro>
 <#macro editsetevents set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events" /></#macro>
 <#macro editsetallocate set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/allocate" /></#macro>
+<#macro templatespreadsheet set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/allocate/template" /></#macro>
 
 <#macro createseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
 <#macro createseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
-<#macro editseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/new/${group.groupSet.id}/events/${group.id}/new" /></#macro>
-<#macro editseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
+<#macro editseteventsnewevent group><@_u page="/admin/module/${group.groupSet.module.code}/groups/edit/${group.groupSet.id}/events/${group.id}/new" /></#macro>
+<#macro editseteventseditevent event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/edit/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}" /></#macro>
 
 <#macro createseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events/defaults" /></#macro>
 <#macro editseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events/defaults" /></#macro>

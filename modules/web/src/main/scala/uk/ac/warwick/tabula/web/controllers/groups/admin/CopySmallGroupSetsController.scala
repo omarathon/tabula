@@ -7,26 +7,33 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
-import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.commands.groups.admin.{CopySmallGroupSetsCommand, CopySmallGroupSetsCommandState, CopySmallGroupSetsRequestState}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.{CopySmallGroupSetsRequestState, CopySmallGroupSetsCommandState, CopySmallGroupSetsCommand}
-import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
+import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 import scala.collection.JavaConverters._
 
-abstract class CopySmallGroupSetsController extends GroupsController {
+abstract class CopySmallGroupSetsController extends GroupsController
+	 {
 
 	validatesSelf[SelfValidating]
 
 	type CopySmallGroupSetsCommand =
 		Appliable[Seq[SmallGroupSet]] with PopulateOnForm with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState
 
-	private def formView(command: CopySmallGroupSetsCommand) = Mav("groups/admin/groups/copy").crumbsList(crumbsList(command))
-
 	def crumbsList(command: CopySmallGroupSetsCommand): Seq[BreadCrumb]
+
+	@ModelAttribute("academicYearChoices")
+	def academicYearChoices = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(3, 1)
+
+	private def formView(command: CopySmallGroupSetsCommand) =
+		Mav("groups/admin/groups/copy").crumbsList(crumbsList(command))
 
 	@RequestMapping
 	def refresh(@ModelAttribute("copySmallGroupSetsCommand") command: CopySmallGroupSetsCommand) = {
@@ -42,9 +49,6 @@ abstract class CopySmallGroupSetsController extends GroupsController {
 			Redirect(Routes.groups.admin(command.department, command.targetAcademicYear))
 		}
 	}
-
-	@ModelAttribute("academicYearChoices")
-	def academicYearChoices = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(3, 1)
 
 }
 
@@ -63,7 +67,22 @@ class CopyModuleSmallGroupSetsController extends CopySmallGroupSetsController {
 
 @Controller
 @RequestMapping(value = Array("/groups/admin/department/{department}/groups/copy"))
-class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsController {
+class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsController
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with GroupsDepartmentsAndModulesWithPermission {
+
+	override val departmentPermission: Permission = null
+
+	@ModelAttribute("departmentsWithPermission")
+	override def departmentsWithPermission: Seq[Department] = {
+		def withSubDepartments(d: Department) = (Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)).filter(_.routes.asScala.nonEmpty)
+
+		allDepartmentsForPermission(user, Permissions.Module.ManageSmallGroups)
+			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
+	}
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("copySmallGroupSetsCommand")
 	def command(@PathVariable department: Department): CopySmallGroupSetsCommand = {

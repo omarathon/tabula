@@ -52,7 +52,7 @@
 							<input type="hidden" name="_command" value="add">
 							<input type="hidden" name="roleDefinition" value="${roleDefinition}">
 							<input type="hidden" name="usercodes">
-							<button class="btn btn-mini" type="submit"><i class="icon-plus fa fa-plus"></i></button>
+							<button class="btn btn-default btn-mini" type="submit"><i class="icon-plus fa fa-plus"></i></button>
 						</form>
 					<#else>
 						<#local popoverText>
@@ -65,9 +65,7 @@
 							<p>on ${scope.toString}.</p>
 						</#local>
 
-						<button class="btn btn-mini use-tooltip disabled" type="button"
-										data-html="true"
-										data-title="${popoverText}"><i class="icon-plus fa fa-plus"></i></button>
+						<button class="btn btn-default btn-mini use-tooltip disabled" type="button" data-html="true" data-title="${popoverText}"><i class="icon-plus fa fa-plus"></i></button>
 					</#if>
 				</td>
 			</tr>

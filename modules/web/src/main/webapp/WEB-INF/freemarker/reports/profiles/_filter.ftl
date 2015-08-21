@@ -18,7 +18,7 @@
 			</div>
 		</#if>
 		<p><@fmt.p results?size "result" /></p>
-		<table class="table table-condensed table-bordered table-striped students">
+		<table class="table table-condensed table-striped students">
 			<thead>
 			<tr>
 				<th></th>

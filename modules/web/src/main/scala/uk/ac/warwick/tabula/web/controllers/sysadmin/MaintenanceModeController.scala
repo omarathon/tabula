@@ -59,8 +59,7 @@ class MaintenanceModeController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: MaintenanceModeCommand, errors: Errors) =
-		Mav("sysadmin/maintenance").crumbs(Breadcrumbs.Current("Sysadmin maintenance mode"))
-			.noLayoutIf(ajax)
+		Mav("sysadmin/maintenance").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid form: MaintenanceModeCommand, errors: Errors) = {

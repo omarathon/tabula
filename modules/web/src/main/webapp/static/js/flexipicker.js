@@ -12,7 +12,10 @@ var RichResultField = function (input) {
   this.$input = $(input);
   this.$uneditable = $('<span><span class=val></span>'+
              '<a href=# class="clear-field" title="Clear">&times;</a></span>');
-  this.$uneditable.attr('class', 'uneditable-input rich-result-field ' + this.$input.attr('class'));
+  this.$uneditable.attr({
+	  'class': 'uneditable-input rich-result-field ' + this.$input.attr('class'),
+	  'disabled': true
+  });
   this.$input.after(this.$uneditable);
   this.$uneditable.find('a').click(function () {
     self.edit();
@@ -24,29 +27,39 @@ var RichResultField = function (input) {
 /** Clear field, focus for typing */
 RichResultField.prototype.edit = function () {
   this.$input.val('').show().trigger('change').focus();
-  this.$uneditable.hide().find('.val').text('');
+  this.$uneditable.hide().find('.val').text('').attr('title', '');
 };
 
 /** Hide input field and show the rich `text` instead */
 RichResultField.prototype.storeText = function (text) {
   this.$input.hide();
-  this.$uneditable.show().find('.val').text(text);
+  this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /** Set value of input field, hide it and show the rich `text` instead */
 RichResultField.prototype.store = function (value, text) {
   this.$input.val(value).trigger('change').hide();
-  this.$uneditable.show().find('.val').text(text);
+  this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /**
  * Creates a Bootstrap Typeahead but with added functionality needed by FlexiPicker and ModulePicker
  */
 var TabulaTypeahead = function(options) {
-	var $typeahead = options.element.typeahead({
-		source: options.source,
-		item: options.item
-	}).data('typeahead');
+	// Twitter typeahead doesn't work for Tabula, so the replaced Bootstrap typeahead is aliased as bootstrap3Typeahead
+	if ($.fn.bootstrap3Typeahead) {
+		var mergedOptions = $.extend({}, $.fn.bootstrap3Typeahead.defaults, {
+			source: options.source,
+			item: options.item
+		});
+		var $typeahead = options.element.bootstrap3Typeahead(mergedOptions).data('typeahead');
+	} else {
+		// Implies ID6 so just use Bootstrap 2 typeahead
+		var $typeahead = options.element.typeahead({
+			source: options.source,
+			item: options.item
+		}).data('typeahead');
+	}
 
 	// Overridden lookup() method uses this to delay the AJAX call
 	$typeahead.delay = 100;
@@ -130,9 +143,9 @@ var FlexiPicker = function (options) {
 	this.richResultField = new RichResultField($element[0]);
 
 	this.iconMappings = {
-		user: 'user',
-		group: 'globe',
-		email: 'envelope'
+		user: 'icon-user fa fa-user',
+		group: 'icon-globe fa fa-globe',
+		email: 'icon-envelope fa fa-envelope'
 	};
 
 	var $typeahead = new TabulaTypeahead({
@@ -159,7 +172,7 @@ var FlexiPicker = function (options) {
 				i.attr('data-fullname', item.name);
 				i.find('span.title').html(that.highlighter(item.title));
 				i.find('span.type').html(item.type);
-				i.find('i').addClass('icon-' + self.iconMappings[item.type]);
+				i.find('i').addClass(self.iconMappings[item.type]);
 				var desc = i.find('.description');
 				if (desc && desc != '') {
 					  desc.html(item.description).show();
@@ -368,7 +381,7 @@ jQuery(function($){
 			$collection.append(
 				$('<button />')
 					.attr({'type':'button'})
-					.addClass('btn').addClass('btn-mini')
+					.addClass('btn').addClass('btn-mini btn-xs btn-default')
 					.html('<i class="icon-plus"></i> Add another')
 					.on('click', function() {
 						var input = $blankInput.clone();

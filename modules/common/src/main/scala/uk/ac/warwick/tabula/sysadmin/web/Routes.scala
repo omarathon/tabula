@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.sysadmin.web
 
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.web.RoutesUtils
 
@@ -13,8 +14,17 @@ object Routes {
 	import RoutesUtils._
 	private val context = "/sysadmin"
 
+	object Departments {
+		def home = context + "/departments"
+		def department(department: Department) = context + "/departments/%s" format encoded(department.code)
+	}
+
 	object AttendanceTemplates {
-		def list = context + "/attendancetemplates"
+		def home = context + "/attendancetemplates"
 		def edit(template: AttendanceMonitoringTemplate) = context + "/attendancetemplates/%s/edit" format encoded(template.id)
+	}
+
+	object Relationships {
+		def home = context + "/relationships"
 	}
 }

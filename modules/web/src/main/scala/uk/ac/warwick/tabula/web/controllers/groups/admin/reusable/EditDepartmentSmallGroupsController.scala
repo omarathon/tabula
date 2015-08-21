@@ -25,7 +25,7 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 		EditDepartmentSmallGroupsCommand(department, set)
 
 	protected def render(set: DepartmentSmallGroupSet) =
-		Mav(renderPath).crumbs(Breadcrumbs.Department(set.department))
+		Mav(renderPath).crumbs(Breadcrumbs.Department(set.department), Breadcrumbs.Reusable(set.department))
 
 	protected val renderPath: String
 

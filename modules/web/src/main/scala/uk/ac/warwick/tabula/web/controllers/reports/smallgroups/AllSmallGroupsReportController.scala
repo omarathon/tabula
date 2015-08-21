@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.reports.web.Routes
 
 
 @Controller
@@ -17,6 +18,7 @@ class AllSmallGroupsReportController extends AbstractSmallGroupsReportController
 
 	val pageRenderPath = "allsmallgroups"
 	val filePrefix = "all-small-group-attendance"
+	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.all(department, year)
 
 }
 
@@ -30,6 +32,7 @@ class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportCon
 
 	val pageRenderPath = "unrecorded"
 	val filePrefix = "unrecorded-small-group-attendance"
+	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.unrecorded(department, year)
 
 }
 
@@ -43,5 +46,6 @@ class MissedSmallGroupsReportController extends AbstractSmallGroupsReportControl
 
 	val pageRenderPath = "missed"
 	val filePrefix = "missed-small-group-attendance"
+	def urlGeneratorFactory(department: Department) = year => Routes.SmallGroups.missed(department, year)
 
 }

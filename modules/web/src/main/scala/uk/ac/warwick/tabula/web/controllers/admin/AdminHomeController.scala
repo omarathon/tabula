@@ -1,27 +1,38 @@
 package uk.ac.warwick.tabula.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services._
 
-@Controller class AdminHomeController extends AdminController {
+trait AdminDepartmentsModulesAndRoutes {
 
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var routeService = Wire[CourseAndRouteService]
+	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent =>
 
-	@RequestMapping(Array("/admin")) def home(user: CurrentUser) = {
+	case class Result(departments: Set[Department], modules: Set[Module], routes: Set[Route])
+
+	def ownedDepartmentsModulesAndRoutes(user: CurrentUser): Result = {
 		val ownedDepartments =
-			moduleService.departmentsWithPermission(user, Permissions.Module.Administer) ++
-			moduleService.departmentsWithPermission(user, Permissions.Route.Administer)
-		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.Administer)
-		val ownedRoutes = routeService.routesWithPermission(user, Permissions.Route.Administer)
+			moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.Administer) ++
+				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Route.Administer)
+		val ownedModules = moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer)
+		val ownedRoutes = courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer)
+		Result(ownedDepartments, ownedModules, ownedRoutes)
+	}
+}
 
+@Controller
+class AdminHomeController extends AdminController with AdminDepartmentsModulesAndRoutes
+	with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent {
+	
+	@RequestMapping(Array("/admin")) def home(user: CurrentUser) = {
+		val result = ownedDepartmentsModulesAndRoutes(user)
+		
 		Mav("admin/home/view",
-			"ownedDepartments" -> ownedDepartments,
-			"ownedModuleDepartments" -> ownedModules.map { _.adminDepartment },
-			"ownedRouteDepartments" -> ownedRoutes.map { _.adminDepartment })
+			"ownedDepartments" -> result.departments,
+			"ownedModuleDepartments" -> result.modules.map { _.adminDepartment },
+			"ownedRouteDepartments" -> result.routes.map { _.adminDepartment })
 	}
 
 }

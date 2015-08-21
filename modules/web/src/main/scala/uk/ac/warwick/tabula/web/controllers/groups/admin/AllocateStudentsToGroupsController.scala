@@ -59,12 +59,6 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/module/{module}/groups/{smallGroupSet}/allocate"))
-class AllocateStudentsToGroupsController extends AbstractAllocateStudentsToGroupsController {
-	override protected val renderPath = "groups/admin/groups/allocate"
-}
-
-@Controller
 @RequestMapping(value=Array("/groups/admin/module/{module}/groups/new/{smallGroupSet}/allocate"))
 class CreateSmallGroupSetAllocateController extends AbstractAllocateStudentsToGroupsController {
 	override protected val renderPath = "groups/admin/groups/newallocate"

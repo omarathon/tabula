@@ -35,18 +35,18 @@
 			</#if>
 
 
-			<div class="student-filter btn-group-group well well-small">
+			<div class="student-filter btn-group-group well well-small well-sm">
 				<button type="button" class="clear-all-filters btn btn-link">
-					<span class="icon-stack fa fa-stack">
-						<i class="icon-filter fa fa-filter"></i>
-						<i class="icon-ban-circle fa fa-ban icon-stack-base fa fa-stack-base"></i>
+					<span class="icon-stack fa-stack">
+						<i class="icon-filter fa fa-filter fa-stack-1x"></i>
+						<i class="icon-ban-circle fa fa-ban icon-stack-base fa-stack-2x"></i>
 					</span>
 				</button>
 
 				<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 					<@spring.bind path=path>
 						<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-							<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+							<a class="btn btn-default btn-mini btn-xs dropdown-toggle" data-toggle="dropdown">
 								<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 								<span class="caret"></span>
 							</a>
@@ -112,9 +112,9 @@
 				<#assign placeholder = "All routes" />
 				<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
 				<#assign routesCustomPicker>
-					<div class="route-search input-append">
-						<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
-						<span class="add-on"><i class="icon-search fa fa-search"></i></span>
+					<div class="route-search input-append input-group">
+						<input class="route-search-query route prevent-reload form-control" type="text" value="" placeholder="Search for a route" />
+						<span class="add-on input-group-addon"><i class="icon-search fa fa-search"></i></span>
 					</div>
 				</#assign>
 				<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=filterCommand.allRoutes validItems=filterCommand.visibleRoutes customPicker=routesCustomPicker; route, isValid>
@@ -147,9 +147,9 @@
 
 				<#assign placeholder = "All modules" />
 				<#assign modulesCustomPicker>
-					<div class="module-search input-append">
-						<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
-						<span class="add-on"><i class="icon-search fa fa-search"></i></span>
+					<div class="module-search input-append input-group">
+						<input class="module-search-query module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
+						<span class="add-on input-group-addon"><i class="icon-search fa fa-search"></i></span>
 					</div>
 				</#assign>
 				<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>

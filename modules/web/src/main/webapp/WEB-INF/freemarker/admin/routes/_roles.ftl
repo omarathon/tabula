@@ -2,8 +2,8 @@
 <#import "/WEB-INF/freemarker/formatters.ftl" as fmt />
 
 <#escape x as x?html>
-	<div class="row-fluid">
-		<div class="span6">
+	<div class="row">
+		<div class="col-md-6">
 			<#assign popover>
 				<p>A route manager can manage monitoring points for a route and record which students have attended or missed points.</p>
 			</#assign>
@@ -15,7 +15,7 @@
 			<@pm.roleTable perms_url "routemanager-table" scope "RouteManagerRoleDefinition" "route managers" />
 		</div>
 
-		<div class="span6">
+		<div class="col-md-6">
 			<#assign popover>
 				<p>A route assistant can record whether students have attended or missed a monitoring point, but can't change the monitoring point schemes.</p>
 			</#assign>
@@ -28,8 +28,8 @@
 		</div>
 	</div>
 
-	<div class="row-fluid">
-		<div class="span6">
+	<div class="row">
+		<div class="col-md-6">
 			<#assign popover>
 				<p>A route auditor can view which students have met or missed monitoring points.</p>
 			</#assign>

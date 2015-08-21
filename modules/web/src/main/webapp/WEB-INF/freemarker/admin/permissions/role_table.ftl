@@ -76,7 +76,7 @@
 
 	<div class="btn-toolbar dept-toolbar">
 		<form action="" class="dropdown show-hide-form">
-			<a class="btn" href="#" data-toggle="dropdown" data-target=".dropdown">
+			<a class="btn btn-default" href="#" data-toggle="dropdown" data-target=".show-hide-form">
 				Show/hide roles <b class="caret"></b>
 			</a>
 			<ul class="dropdown-menu">
@@ -90,12 +90,16 @@
 	</div>
 
 	<#if department??>
-		<@fmt.deptheader "Roles and capabilities" "for" department routes.admin "rolesDepartment" "with-settings" />
+		<#function route_function dept>
+			<#local result><@routes.admin.rolesDepartment dept /></#local>
+			<#return result />
+		</#function>
+		<@fmt.id7_deptheader "Roles and capabilities" route_function "for" />
 	<#else>
-		<h1>Roles and capabilities</h1>
+		<h1 class="with-settings">Roles and capabilities</h1>
 	</#if>
 
-	<table class="table table-striped table-bordered table-condensed roles-table">
+	<table class="table table-striped table-condensed roles-table">
 		<thead>
 			<th></th>
 			<#list (rolesTable?first)._2() as roles>

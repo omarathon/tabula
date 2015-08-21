@@ -82,6 +82,57 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</div>
 </#macro>
 
+<#--
+id7_deptheader macro creates a two line department-based heading for a page,
+automating a dropdown for any other departments the user has permission to view.
+
+title: Text to use in the <h1> element. Mandatory, unless preposition is empty, in which case, defaults to department name
+route_function: A function to generate the URL for each department. The function is passed a department as an arg
+preposition: Text to relate the title to the department name in the second line, eg. for, with, in
+-->
+<#macro id7_deptheader title route_function preposition="">
+	<#local two_line = preposition?has_content />
+	<div class="deptheader">
+		<h1 <#if !two_line>class="with-related"</#if>>${title}</h1>
+		<#if activeDepartment?has_content>
+			<#if two_line>
+				<h4 class="with-related">${preposition} ${department.name}</h4>
+			</#if>
+			<#if (departmentsWithPermission?has_content && departmentsWithPermission?size > 1)>
+				<a class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher">
+					<i class="fa fa-caret-down fa-lg"></i>
+				</a>
+				<#-- cross-app singleton introductory text -->
+				<#if showIntro("departmentsWithPermission", "anywhere")>
+					<#assign introText>
+						<p>To view other departments that you have permission to access, click the down arrow next to the department name.</p>
+					</#assign>
+					<a href="#"
+					   id="departmentsWithPermission-intro"
+					   class="use-introductory auto"
+					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
+					   data-title="Other departments"
+					   data-placement="bottom"
+					   data-html="true"
+					   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+				</#if>
+				<#-- the dropdown itself -->
+				<div class="dept-switcher dropdown">
+					<ul class="dropdown-menu">
+						<#list departmentsWithPermission as dept>
+							<#if dept.code != activeDepartment.code>
+								<li><a href="${route_function(dept)}">${dept.name}</a></li>
+							<#else>
+								<li class="disabled"><a>${dept.name}</a></li>
+							</#if>
+						</#list>
+					</ul>
+				</div>
+			</#if>
+		</#if>
+	</div>
+</#macro>
+
 <#macro module_name module withFormatting=true><#compress>
 	<#if withFormatting>
 		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
@@ -412,7 +463,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 
 	<#if emails?size gt 0>
-		<a class="btn <#if emails?size gt limit>use-tooltip disabled</#if>"
+		<a class="btn btn-default <#if emails?size gt limit>use-tooltip disabled</#if>"
 			<#if emails?size gt limit>
 		   		title="Emailing is disabled for groups of more than ${limit} students"
 			<#else>
@@ -463,7 +514,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 </#macro>
 
 <#macro help_popover id title="" content="" html=false>
-	<a class="use-popover"
+	<a class="help-popover use-popover"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"

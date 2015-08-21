@@ -28,7 +28,7 @@ Include by default as "form", e.g.
 	</@spring.bind>
 </#function>
 
-<#macro row path="" cssClass="" defaultClass="control-group">
+<#macro row path="" cssClass="" defaultClass="control-group form-group">
 
 	<#if cssClass="">
 		<#local baseClass=defaultClass/>
@@ -40,7 +40,7 @@ Include by default as "form", e.g.
 	<#else>
 		<@spring.bind path=path>
 			<#if status.error>
-				<#local baseClass=baseClass + " error" />
+				<#local baseClass=baseClass + " error has-error" />
 			</#if>
 			<div class="${baseClass}"><#nested/></div>
 		</@spring.bind>
@@ -53,14 +53,16 @@ Include by default as "form", e.g.
 	<#else>
 		<#local baseClass="controls " + cssClass />
 	</#if>
-	<div class="${baseClass}"><#nested/></div>
+	<div class="${baseClass}">
+		<#nested/>
+	</div>
 </#macro>
 
 <#macro label path="" for="" checkbox=false clazz="">
 <#if checkbox>
 	<#local clazz="${clazz} checkbox"?trim />
 <#else>
-	<#local clazz="${clazz} control-label"?trim />
+	<#local clazz="${clazz} control-label col-sm-2"?trim />
 </#if>
 <#if path!="">
   <@f.label path="${path}" for="${path}" cssClass="${clazz}" ><#nested/></@f.label>
@@ -84,14 +86,14 @@ Include by default as "form", e.g.
 	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
 </#compress></div></#macro>
 
-<#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
+<#macro errors path><@f.errors path=path cssClass="error help-inline help-block" /></#macro>
 
-<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="" helpPopover="">
+<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="" helpPopover="" helpPopoverAfter="">
 <@row path=path cssClass=cssClass>
 	<@_label path=path clazz=labelCss >
 		${label}
 		<#if helpPopover?has_content>
-			<@fmt.help_popover id="${path}" content="${helpPopover}" />
+			<@fmt.help_popover id="help-${path}" content="${helpPopover}" />
 		</#if>
 	</@_label>
 	<@field cssClass=fieldCssClass>
@@ -99,6 +101,11 @@ Include by default as "form", e.g.
 		<@errors path=path />
 		<#if help?has_content><div class="help-block">${help}</div></#if>
 	</@field>
+	<#if helpPopoverAfter?has_content>
+		<div class="col-md-1 control-label"><div class="pull-left">
+			<@fmt.help_popover id="help-after-${path}" content="${helpPopoverAfter}" />
+		</div></div>
+	</#if>
 </@row>
 </#macro>
 
@@ -206,8 +213,8 @@ To not bind:
 	<#-- List existing values -->
 		<#if value?? && value?size gt 0>
 			<#list value as id>
-				<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
-			--><input type="text" class="text flexi-picker ${cssClass}"
+				<div class="flexi-picker-container input-prepend input-group"><span class="input-group-addon add-on"><i class="icon-user fa fa-user"></i></span><#--
+			--><input type="text" class="text flexi-picker form-control ${cssClass}"
 					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
 					   data-members-only="${membersOnly}"
@@ -218,8 +225,8 @@ To not bind:
 		</#if>
 
 		<#if !value?has_content || (multiple && auto_multiple)>
-			<div class="flexi-picker-container input-prepend"><span class="add-on"><i class="icon-user fa fa-user"></i></span><#--
-		--><input   type="text" class="text flexi-picker ${cssClass}"
+			<div class="flexi-picker-container input-prepend input-group"><span class="input-group-addon add-on"><i class="icon-user fa fa-user"></i></span><#--
+		--><input   type="text" class="text flexi-picker form-control ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
 					data-members-only="${membersOnly}"

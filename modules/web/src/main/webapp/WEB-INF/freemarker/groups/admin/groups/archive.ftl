@@ -1,26 +1,40 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
+<@modal.wrapper>
 	<#assign submitAction><@routes.groups.archiveset smallGroupSet /></#assign>
-	<@f.form method="post" action="${submitAction}" commandName="archiveSmallGroupSetCommand" cssClass="form-vertical">
-		<#if smallGroupSet.archived>
+	<@f.form method="post" action="${submitAction}" commandName="archiveSmallGroupSetCommand" cssClass="double-submit-protection">
+		<@modal.header>
+			<#if smallGroupSet.archived>
+				<h3 class="modal-title">Unarchive these groups</h3>
+			<#else>
+				<h3 class="modal-title">Archive these groups</h3>
+			</#if>
+		</@modal.header>
 
-			<h3>Unarchive these groups</h3>
+		<@modal.body>
+			<#if smallGroupSet.archived>
+				<p>You should only unarchive groups that you've archived by mistake.
+					If you want to do anything new, you should create new groups.</p>
+			<#else>
+				<p>Archiving groups will hide them from most lists of things. Students
+					will still be able to access their group allocations from archived
+					groups.</p>
+			</#if>
+		</@modal.body>
 
-			<p>You should only unarchive groups that you've archived by mistake.
-			If you want to do anything new, you should create new groups.</p>
+		<@modal.footer>
+			<div class="submit-buttons">
+				<#if smallGroupSet.archived>
+					<input type="hidden" name="unarchive" value="true" />
+					<input class="btn btn-primary spinnable spinner-auto" type="submit" value="Unarchive" data-loading-text="Loading&hellip;">
+					<button class="btn btn-default" data-dismiss="modal">Cancel</button>
 
-			<input type="hidden" name="unarchive" value="true" />
-			<input class="btn" type="submit" value="Unarchive"> <a class="btn cancel-link" href="#">Cancel</a>
-
-		<#else>
-
-			<h3>Archive these groups</h3>
-
-			<p>Archiving groups will hide them from most lists of things. Students
-			will still be able to access their group allocations from archived
-			groups.</p>
-
-			<input class="btn" type="submit" value="Archive"> <a class="btn cancel-link" href="#">Cancel</a>
-
-		</#if>
+				<#else>
+					<input class="btn btn-primary spinnable spinner-auto" type="submit" value="Archive" data-loading-text="Loading&hellip;">
+					<button class="btn btn-default" data-dismiss="modal">Cancel</button>
+				</#if>
+			</div>
+		</@modal.footer>
 	</@f.form>
+</@modal.wrapper>
 </#escape>

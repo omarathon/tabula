@@ -101,7 +101,6 @@ class AuditLogController extends BaseSysadminController {
 			"page" -> results.pageNumber,
 			"startIndex" -> results.startIndex,
 			"endIndex" -> results.endIndex)
-			.crumbs(Breadcrumbs.Current("Sysadmin audit log"))
 	}
 
 }

@@ -10,7 +10,7 @@
 		<p>There was a scope mismatch between the permission requested and the settings for the helper.</p>
 
 		<#if permissionsHelperCommand.permission.scoped>
-			<p><span class="permission"><i class="icon-lock fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span> is a scoped permission and can only be resolved against a provided scope.</p>
+			<p><span class="permission"><i class="fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span> is a scoped permission and can only be resolved against a provided scope.</p>
 		</#if>
 	</div>
 </#if>
@@ -25,13 +25,13 @@
 			<#if permissionsHelperCommand.scope?? && permissionsHelperCommand.scopeType??>
 				<tr>
 					<th>Scope</th>
-					<td>${permissionsHelperCommand.scopeType.simpleName} - <span class="scope"><i class="icon-bookmark fa fa-bookmark"></i> ${permissionsHelperCommand.scope}</span></td>
+					<td>${permissionsHelperCommand.scopeType.simpleName} - <span class="scope"><i class="fa fa-bookmark"></i> ${permissionsHelperCommand.scope}</span></td>
 				</tr>
 			</#if>
 			<#if permissionsHelperCommand.permission??>
 				<tr>
 					<th>Permission</th>
-					<td><span class="permission"><i class="icon-lock fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span></td>
+					<td><span class="permission"><i class="fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span></td>
 				</tr>
 			</#if>
 		</tbody>
@@ -40,15 +40,15 @@
 				<tr>
 					<th>Result</th>
 					<td class="<#if results.canDo>text-success<#else>text-error</#if>">
-						<i class="icon-<#if results.canDo>ok<#else>remove</#if>"></i>
+						<i class="fa fa-<#if results.canDo>check<#else>times</#if>"></i>
 						${permissionsHelperCommand.user.fullName}
 						<strong><#if results.canDo>CAN<#else>CANNOT</#if></strong>
-						perform <span class="permission"><i class="icon-lock fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span>
+						perform <span class="permission"><i class="fa fa-lock"></i> ${permissionsHelperCommand.permission.name}</span>
 						<#if results.scopeMismatch && permissionsHelperCommand.permission.scoped>
 							<span class="label label-warning">No scope!</span>
 						</#if>
 						<#if permissionsHelperCommand.scope?? && permissionsHelperCommand.scopeType??>
-							on <span class="scope"><i class="icon-bookmark fa fa-bookmark"></i> ${permissionsHelperCommand.scope}</span> (${permissionsHelperCommand.scopeType.simpleName})
+							on <span class="scope"><i class="fa fa-bookmark"></i> ${permissionsHelperCommand.scope}</span> (${permissionsHelperCommand.scopeType.simpleName})
 						</#if>
 					</td>
 				</tr>

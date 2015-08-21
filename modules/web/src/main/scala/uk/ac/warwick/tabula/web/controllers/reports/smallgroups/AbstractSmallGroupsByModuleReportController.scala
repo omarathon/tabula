@@ -7,19 +7,31 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
-abstract class AbstractSmallGroupsByModuleReportController extends ReportsController {
+abstract class AbstractSmallGroupsByModuleReportController extends ReportsController
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
 
 	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 
 	val filePrefix: String
 
 	def page(cmd: Appliable[AllSmallGroupsReportCommandResult], department: Department, academicYear: AcademicYear): Mav
+
+	override val departmentPermission: Permission = Permissions.Department.Reports
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
@@ -58,7 +70,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 				student.getWarwickId -> moduleMap.map{case(module, count) =>
 					module.id -> count.toString
 				}
-			}.toMap,
+			},
 			"students" -> allStudents,
 			"modules" -> allModules
 		)))

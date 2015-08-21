@@ -11,7 +11,7 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/module/{module}/groups/{smallGroupSet}/allocate/template"))
+@RequestMapping(value=Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/allocate/template"))
 class AllocateStudentsTemplateController extends BaseController {
 
 	type AllocateStudentsToGroupsTemplateCommand = Appliable[ExcelView]

@@ -9,16 +9,6 @@ exports.zebraStripeGroups = function($module) {
 	$module.find('.group-info').filter(':visible:even').addClass('alt-row');
 };
 
-exports.wireModalButtons = function($container) {
-	$container.on('click', 'a[data-toggle=modal]', function(e){
-      e.preventDefault();
-      var $this = $(this);
-      var target = $this.attr('data-target');
-      var url = $this.attr('href');
-      $(target).load(url);
-  });
-};
-
 // take anything we've attached to "exports" and add it to the global "Groups"
 // we use extend() to add to any existing variable rather than clobber it
 window.Groups = jQuery.extend(window.Groups, exports);
@@ -51,11 +41,11 @@ $(function(){
 
         $('.striped-section.empty').toggle('fast', function() {
         	if($('.module-info.empty').is(":visible")) {
-        		hideButton.html('<i class="icon-eye-close"></i> Hide');
+        		hideButton.html('Hide');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
 
 			} else {
-        		hideButton.html('<i class="icon-eye-open"></i> Show');
+        		hideButton.html('Show');
         		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
         	}
         });
@@ -77,12 +67,20 @@ $(function(){
 
 // modals use ajax to retrieve their contents
 $(function() {
-	exports.wireModalButtons($('#container'));
+	$('body').on('click', 'a[data-toggle=modal]', function(e){
+		e.preventDefault();
+		var $this = $(this);
+		var $target = $($this.attr('data-target'));
+		var url = $this.attr('href');
+		$target.load(url, function(){
+			$target.find('form.double-submit-protection').tabulaSubmitOnce();
+		});
+	});
 
     $("#modal-container").on("click","input[type='submit']", function(e){
         e.preventDefault();
         var $this = $(this);
-        var $form = $this.closest("form");
+        var $form = $this.closest("form").trigger('tabula.ajaxSubmit');
         $form.removeClass('dirty');
         var updateTargetId = $this.data("update-target");
 
@@ -107,21 +105,21 @@ $(function() {
 		var updateCell = function($cell, value) {
 			var $icon = $cell.find('i');
 			if (value) {
-				$icon.addClass('icon-ok');
+				$icon.addClass('fa fa-check');
 				$cell.addClass('checked');
 			} else {
-				$icon.removeClass('icon-ok');
+				$icon.removeClass('fa fa-check');
 				$cell.removeClass('checked');
 			}
 		};
 
-		$table.find('input[type="checkbox"]').each(function() {
+		$table.find('tbody input[type="checkbox"]').each(function() {
 			var $checkbox = $(this);
 			var $cell = $checkbox.closest('td');
 
 			$checkbox.hide();
 
-			var $icon = $('<i />').addClass('icon-fixed-width');
+			var $icon = $('<i />').addClass('fa fa-fw');
 			$checkbox.after($icon);
 
 			updateCell($cell, $checkbox.is(':checked'));
@@ -152,7 +150,7 @@ $(function() {
 			});
 		});
 
-		$table.closest('.control-group').find('.show-vacations').each(function() {
+		$table.find('.show-vacations').each(function() {
 			var $checkbox = $(this);
 
 			if ($table.find('tr.vacation td.checked').length) {
@@ -262,7 +260,7 @@ $(function() {
 							.append(
 							$('<button />').attr('type', 'button')
 								.addClass('btn btn-link')
-								.html('<i class="icon-ban-circle"></i> Clear selected items')
+								.html('Clear selected items')
 								.on('click', function(e) {
 									$list.find('input:checked').each(function() {
 										var $checkbox = $(this);

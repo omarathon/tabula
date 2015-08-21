@@ -1,18 +1,17 @@
 <#escape x as x?html>
-	<#macro deptheaderroutemacro department>
-		<@routes.groups.import_groups_for_year department academicYear />
-	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes.groups />
-
-	<@fmt.deptheader "Import small groups from Syllabus+" "for" department routes.groups "deptheaderroute" "" />
+	<#function route_function dept>
+		<#local result><@routes.groups.import_groups_for_year dept academicYear /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader title="Import small groups from Syllabus+" route_function=route_function preposition="for"/>
 
 	<#assign post_url><@routes.groups.import_groups department /></#assign>
-	<@f.form method="post" id="import-form" action="${post_url}" commandName="command" cssClass="form-horizontal">
+	<@f.form method="post" id="import-form" action="${post_url}" commandName="command">
 		<input type="hidden" name="action" value="populate" />
 		<@f.hidden path="academicYear" />
 	</@f.form>
 
-	<div class="muted">Loading, please wait&hellip;</div>
+	<div class="very-subtle">Loading, please wait&hellip;</div>
 
 	<script type="text/javascript">
 		jQuery(function($) {

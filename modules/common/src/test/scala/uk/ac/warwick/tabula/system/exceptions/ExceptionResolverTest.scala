@@ -38,7 +38,7 @@ class ExceptionResolverTest extends TestBase {
 	 * a permission denied page.
 	 */
 	@Test
-	def permDeniedNotLoggedIn {
+	def permDeniedNotLoggedIn() {
 		withUser(null) {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
@@ -54,7 +54,7 @@ class ExceptionResolverTest extends TestBase {
 	 * a special view but in this test it'll fall back to the default error view.
 	 */
 	@Test
-	def permDeniedLoggedIn {
+	def permDeniedLoggedIn() {
 		withUser("cusebr") {
 			val requestInfo = RequestInfo.fromThread.get
 			val user = requestInfo.user
@@ -67,14 +67,13 @@ class ExceptionResolverTest extends TestBase {
 	/**
 	 * TAB-567 - When handling multipart exceptions, wrap in a "HandledException" wrapper
 	 */
-	@Test def multipartException = withUser("cuscav") {
+	@Test def multipartException() = withUser("cuscav") {
 		val requestInfo = RequestInfo.fromThread.get
-		val user = requestInfo.user
 		val exception = new MultipartException("Could not parse multipart servlet request")
 		val modelAndView = resolver.doResolve(exception, None)
 		modelAndView.viewName should be ("upload-failed")
 		modelAndView.toModel("exception") match {
-			case ex: FileUploadException if ex.getCause == exception => ex.isInstanceOf[HandledException] should be (true)
+			case ex: FileUploadException if ex.getCause == exception => ex.isInstanceOf[HandledException] should be {true}
 			case _ => fail("expected file upload exception")
 		}
 	}
@@ -84,14 +83,14 @@ class ExceptionResolverTest extends TestBase {
 	 * view name it maps to rather than defaultView.
 	 */
 	@Test
-	def viewMapping {
+	def viewMapping() {
 		withUser("cusebr") {
 			val modelAndView = resolver.doResolve(new ItemNotFoundException(), None)
 			modelAndView.viewName should be ("could-not-find")
 		}
 	}
 
-	@Test def callInterceptors {
+	@Test def callInterceptors() {
 		var handled = 0
 
 		resolver.userInterceptor = new CurrentUserInterceptor {

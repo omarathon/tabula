@@ -11,18 +11,19 @@
 	</definition>
 	-->
 
-	<!-- Standard ID7 layout.
+	<!-- Standard ID7 layout. -->
 	<definition name="base" template="/WEB-INF/freemarker/layouts/id7/base.ftl">
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
-	-->
 
-	<!-- Switchable layout. -->
+
+	<!-- Switchable layout.
 	<definition name="base" template="/WEB-INF/freemarker/layouts/base-id-switch.ftl">
 		<put-attribute name="head" value="/WEB-INF/freemarker/blank.ftl"/>
 		<put-attribute name="body" value="/WEB-INF/freemarker/blank.ftl"/>
 	</definition>
+	-->
 
 
 	<!-- Bare layout - used for AJAX responses -->

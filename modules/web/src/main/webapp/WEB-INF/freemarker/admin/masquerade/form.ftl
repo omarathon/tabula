@@ -1,7 +1,7 @@
 <h1>Masquerade as a different user</h1>
 
-<div class="row-fluid">
-	<div class="span<#if (activeSpringProfiles!"") == "sandbox">6<#else>12</#if>">
+<div class="row">
+	<div class="col-md-<#if (activeSpringProfiles!"") == "sandbox">6<#else>12</#if>">
 		<#if !user.sysadmin && user.masquerader>
 			<p>You are not a system admin but are in a group of people able to masquerade freely as another user.</p>
 		</#if>
@@ -9,22 +9,18 @@
 		<p>Masquerading allows you to see the site exactly as another user would see it. If you do any audited
 			actions, both your masquerade identity and your true identity will be stored.</p>
 
-		<#if actionMessage?default('') = "removed">
+		<#if actionMessage!'' = "removed">
 			<p>You are no longer masquerading.</p>
 		</#if>
 
-		<@f.form method="post" action="${url('/admin/masquerade')}" commandName="masqueradeCommand" cssClass="form-vertical">
+		<@f.form method="post" action="${url('/admin/masquerade')}" commandName="masqueradeCommand" cssClass="form-inline">
 			<input type="hidden" name="returnTo" value="${returnTo!""}" />
-			<fieldset>
-				<@f.errors cssClass="error form-errors" />
-				<@form.row>
-					<@form.field>
-						<@form.flexipicker name="usercode" placeholder="Type a name or usercode" cssClass="input-append" />
-						<button type="submit" class="btn" style="margin-top: -10px"><i class="icon-eye-open fa fa-eye"></i> Mask</button>
-						<@f.errors path="usercode" cssClass="error" />
-					</@form.field>
-				</@form.row>
-			</fieldset>
+			<@f.errors cssClass="error form-errors" />
+			<@bs3form.form_group>
+				<@form.flexipicker name="usercode" placeholder="Type a name or usercode" />
+			</@bs3form.form_group>
+			<button type="submit" class="btn btn-default">Mask</button>
+			<@bs3form.errors path="usercode" />
 		</@f.form>
 
 		<#if user.masquerading>
@@ -34,19 +30,20 @@
 			<@f.form method="post" action="${url('/admin/masquerade')}">
 				<input type="hidden" name="returnTo" value="${returnTo!""}" />
 				<input type="hidden" name="action" value="remove" />
-				<button type="submit" class="btn"><i class="icon-eye-close fa fa-eye-slash"></i> Unmask</button>
+				<button type="submit" class="btn btn-default">Unmask</button>
 			</@f.form>
 
 		</#if>
 
 		<#if (returnTo!"")?length gt 0>
-			<p><a href="${returnTo}" class="btn"><i class="icon-reply fa fa-reply"></i> Return to previous page</a></p>
+			<br />
+			<p><a href="${returnTo}" class="btn btn-default">Return to previous page</a></p>
 		</#if>
 	</div>
 	<#if (activeSpringProfiles!"") == "sandbox" && masqueradeDepartments?size gt 0>
-		<div class="span6">
+		<div class="col-md-6">
 			<div class="alert alert-block">
-				<h3><i class="icon-sun fa fa-sun-o"></i> Sandbox data</h3>
+				<h3><i class="fa fa-sun-o"></i> Sandbox data</h3>
 
 				<p>The following users are available for masquerading in the Sandbox system:</p>
 
@@ -84,13 +81,14 @@
 					var $li = $(this);
 					var userId = $li.data('userid');
 
-					var $button = $('<button class="btn btn-mini" type="button"><i class="icon-eye-open fa fa-eye"></i> Mask</button>');
+					var $button = $('<button class="btn btn-xs" type="button">Mask</button>');
 					$button.on('click', function(e) {
 						e.preventDefault();
 						e.stopPropagation();
 
-						$('#masqueradeCommand input[type="text"]').val(userId);
-						$('#masqueradeCommand').submit();
+						var command = $('#masqueradeCommand');
+						command.find('input[type="text"]').val(userId);
+						command.submit();
 
 						return false;
 					});

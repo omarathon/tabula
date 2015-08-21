@@ -45,7 +45,6 @@ class SysadminController extends BaseSysadminController {
 
 	@RequestMapping
 	def home = Mav("sysadmin/home")
-		.crumbs(Breadcrumbs.Current("Sysadmin"))
 		.addObjects(
 			"maintenanceModeService" -> maintenanceService,
 			"emergencyMessageService" -> emergencyMessageService

@@ -1,107 +1,81 @@
 <#escape x as x?html>
-<style type="text/css">
-	.tabula-page #main-content p.radio-aligned {
-		margin-left: 20px;
-		padding-top: 5px;
-	}
-
-	.tabula-page #main-content label.checkbox.radio-aligned input[type="checkbox"] {
-		margin-left: 0;
-		margin-right: 6px;
-		vertical-align: text-bottom;
-	}
-</style>
-
-<h1 class="with-settings">User settings for ${user.firstName}</h1>
+<h1>User settings for ${user.firstName}</h1>
 
 <#if success!false>
 	<div class="alert alert-success">Your preferred settings have been updated.</div>
 </#if>
-<@f.form method="post" class="form-horizontal" action="${url('/settings')}" commandName="userSettingsCommand">
+<@f.form method="post" action="${url('/settings')}" commandName="userSettingsCommand">
 
-
-<#if isCourseworkModuleManager || isDepartmentalAdmin>
-	<@form.row>
-		<@form.label>Submission email alerts</@form.label>
-		<@form.field>
-			<@form.label checkbox=true>
+	<#if isCourseworkModuleManager || isDepartmentalAdmin>
+		<@bs3form.labelled_form_group path="alertsSubmission" labelText="Submission email alerts">
+			<@bs3form.radio>
 				<@f.radiobutton path="alertsSubmission" value="allSubmissions" />
 				All submissions
-			</@form.label>
-			<@form.label checkbox=true>
+			</@bs3form.radio>
+			<@bs3form.radio>
 				<@f.radiobutton path="alertsSubmission" value="lateSubmissions" />
 				Noteworthy submissions (late, late within extension, suspected plagiarism)
-			</@form.label>
-			<@form.label checkbox=true>
+			</@bs3form.radio>
+			<@bs3form.radio>
 				<@f.radiobutton path="alertsSubmission" value="none" />
 				No alerts
-			</@form.label>
-		</@form.field>
-	</@form.row>
-</#if>
+			</@bs3form.radio>
+		</@bs3form.labelled_form_group>
+	</#if>
 
-	<@form.row>
-		<@form.label>Week numbering system</@form.label>
-		<@form.field>
-			<@form.label checkbox=true>
+	<@bs3form.labelled_form_group path="weekNumberingSystem" labelText="Week numbering system">
+		<@bs3form.radio>
 				<@f.radiobutton path="weekNumberingSystem" value="" />
 				Use the department's choice of week numbering system
-			</@form.label>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="weekNumberingSystem" value="term" />
-				Count weeks from 1-10 for each term (the first week of the Spring term is Term 2, week 1)
-			</@form.label>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="weekNumberingSystem" value="cumulative" />
-				Count term weeks cumulatively (the first week of the Spring term is Term 2, week 11)
-			</@form.label>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="weekNumberingSystem" value="academic" />
-				Use academic week numbers, including vacations (the first week of the Spring term is week 15)
-			</@form.label>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="weekNumberingSystem" value="none" />
-				Use no week numbers, displaying dates instead
-			</@form.label>
-			<@f.errors path="weekNumberingSystem" cssClass="error" />
-		</@form.field>
-	</@form.row>
+		</@bs3form.radio>
+		<@bs3form.radio>
+			<@f.radiobutton path="weekNumberingSystem" value="term" />
+			Count weeks from 1-10 for each term (the first week of the Spring term is Term 2, week 1)
+		</@bs3form.radio>
+		<@bs3form.radio>
+			<@f.radiobutton path="weekNumberingSystem" value="cumulative" />
+			Count term weeks cumulatively (the first week of the Spring term is Term 2, week 11)
+		</@bs3form.radio>
+		<@bs3form.radio>
+			<@f.radiobutton path="weekNumberingSystem" value="academic" />
+			Use academic week numbers, including vacations (the first week of the Spring term is week 15)
+		</@bs3form.radio>
+		<@bs3form.radio>
+			<@f.radiobutton path="weekNumberingSystem" value="none" />
+			Use no week numbers, displaying dates instead
+		</@bs3form.radio>
+	</@bs3form.labelled_form_group>
 
-	<@form.row>
-		<@form.label>Bulk email separator</@form.label>
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="bulkEmailSeparator" value=";" />
-				Semi-colon (Microsoft Outlook)
-			</@form.label>
-			<@form.label checkbox=true>
-				<@f.radiobutton path="bulkEmailSeparator" value="," />
-				Comma (Thunderbird, Gmail, Apple Mail)
-			</@form.label>
-		</@form.field>
-	</@form.row>
+	<@bs3form.labelled_form_group path="bulkEmailSeparator" labelText="Bulk email separator">
+		<@bs3form.radio>
+			<@f.radiobutton path="bulkEmailSeparator" value=";" />
+			Semi-colon (Microsoft Outlook)
+		</@bs3form.radio>
+		<@bs3form.radio>
+			<@f.radiobutton path="bulkEmailSeparator" value="," />
+			Comma (Thunderbird, Gmail, Apple Mail)
+		</@bs3form.radio>
+	</@bs3form.labelled_form_group>
 
-	<@form.row>
-		<@form.label>Notifications</@form.label>
-		<@form.field>
-			<p class="radio-aligned">Send me notifications about:</p>
+	<@bs3form.labelled_form_group labelText="Notifications">
+		<p>Send me notifications about:</p>
 
-			<@form.label checkbox=true clazz="radio-aligned">
-				<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
-				Small group attendance
-			</@form.label>
+		<@bs3form.checkbox>
+			<@f.checkbox path="smallGroupEventAttendanceReminderEnabled" />
+			Small group attendance
+		</@bs3form.checkbox>
 
-			<@form.label checkbox=true clazz="radio-aligned">
-				<@f.checkbox path="finaliseFeedbackNotificationEnabled" />
-				Coursework submissions which have been marked
-			</@form.label>
-		</@form.field>
-	</@form.row>
+		<@bs3form.checkbox>
+			<@f.checkbox path="finaliseFeedbackNotificationEnabled" />
+			Coursework submissions which have been marked
+		</@bs3form.checkbox>
 
-<div class="submit-buttons">
-	<input type="submit" value="Save" class="btn btn-primary">
-	<a class="btn" href="${url('/')}">Cancel</a>
-</div>
+	</@bs3form.labelled_form_group>
 
+	<@bs3form.labelled_form_group>
+		<input type="submit" value="Save" class="btn btn-primary">
+		<a class="btn btn-default" href="${url('/')}">Cancel</a>
+	</@bs3form.labelled_form_group>
+	
 </@f.form>
 </#escape>

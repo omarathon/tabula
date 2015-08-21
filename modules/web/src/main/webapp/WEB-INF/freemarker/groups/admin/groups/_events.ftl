@@ -10,8 +10,8 @@
 		<#list groups as group>
 			<@spring.nestedPath path="groups[${group.id}]">
 				<div class="item-info">
-					<div class="row-fluid">
-						<div class="span10 groupDetail">
+					<div class="row">
+						<div class="col-md-10 groupDetail">
 							<h3 class="name inline-block">
 								${group.name!""}
 								<#if ((group.students.size)!0) gt 0>
@@ -23,18 +23,18 @@
 								</#if>
 							</h3>
 						</div>
-						<div class="span2">
+						<div class="col-md-2">
 							<#if is_edit>
 								<#assign addEventUrl><@routes.groups.editseteventsnewevent group /></#assign>
 							<#else>
 								<#assign addEventUrl><@routes.groups.createseteventsnewevent group /></#assign>
 							</#if>
-							<a class="btn pull-right" href="${addEventUrl}">Add event</a>
+							<a class="btn btn-default pull-right" href="${addEventUrl}">Add event</a>
 						</div>
 					</div>
 
-					<div class="row-fluid">
-						<div class="span12">
+					<div class="row">
+						<div class="col-md-12">
 							<ul class="events unstyled">
 								<#list mapGet(command.groups, group).events as event>
 									<@spring.nestedPath path="events[${event_index}]">
@@ -45,9 +45,7 @@
 											<@form.errors path="delete" />
 
 											<#assign popoverContent><@components.eventDetails event.event /></#assign>
-											<a class="use-popover"
-											   data-html="true"
-											   data-content="${popoverContent}"><i class="icon-question-sign"></i></a>
+											<@fmt.help_popover id="events[${event_index}]" content="${popoverContent}" html=true />
 
 											<div class="buttons pull-right">
 												<#if is_edit>
@@ -56,20 +54,22 @@
 													<#assign editEventUrl><@routes.groups.createseteventseditevent event.event /></#assign>
 												</#if>
 
-												<a class="btn btn-mini btn-info" href="${editEventUrl}">Edit</a>
+												<a class="btn btn-xs btn-primary" href="${editEventUrl}">Edit</a>
 
 												<#if event.hasRecordedAttendance>
-													<button type="button" class="btn btn-danger btn-mini disabled use-tooltip" title="This event can't be deleted as there is attendance recorded against it">
-														<i class="icon-remove"></i>
-													</button>
+													<div class="use-tooltip" data-container="body" style="display: inline-block;" title="This event can't be deleted as there is attendance recorded against it">
+														<button type="button" class="btn btn-danger btn-xs disabled use-tooltip">
+															<i class="fa fa-times"></i>
+														</button>
+													</div>
 												<#else>
-													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
-														<i class="icon-remove"></i>
+													<button type="button" class="btn btn-danger btn-xs" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+														<i class="fa fa-times"></i>
 													</button>
 												</#if>
 
-												<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
-													<i class="icon-undo"></i>
+												<button type="button" class="btn btn-primary btn-xs" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
+													<i class="fa fa-undo"></i>
 												</button>
 
 											</div>
