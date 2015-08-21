@@ -11,7 +11,9 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.springframework.validation.Errors
 import java.net.{MalformedURLException, URL}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.data.model.{OriginalityReport, FileAttachment, Assignment}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 
 object TurnitinLtiSubmitPaperCommand {
 	def apply(user: CurrentUser) =
@@ -22,15 +24,31 @@ object TurnitinLtiSubmitPaperCommand {
 			with TurnitinLtiSubmitPaperCommandState
 			with TurnitinLtiSubmitPaperValidation
 			with AutowiringTurnitinLtiServiceComponent
+			with AutowiringOriginalityReportServiceComponent
+			with Logging
 }
 
-class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
+class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] with Logging {
 
-	self: TurnitinLtiSubmitPaperCommandState with TurnitinLtiServiceComponent =>
+	self: TurnitinLtiSubmitPaperCommandState with TurnitinLtiServiceComponent with OriginalityReportServiceComponent =>
 
 	override def applyInternal() = transactional() {
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
-		turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, attachment, user.universityId, "SYSADMIN")
+		val response = turnitinLtiService.submitPaper(assignment, paperUrl, userEmail, attachment, user.universityId, "SYSADMIN")
+
+		if (response.success) {
+			val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
+			if (originalityReport.isDefined) {
+				originalityReport.get.turnitinId = response.turnitinSubmissionId()
+				originalityReport.get.reportReceived = false
+			} else {
+				val report = new OriginalityReport
+				report.turnitinId = response.turnitinSubmissionId()
+				attachment.originalityReport = report
+				originalityReportService.saveOriginalityReport(attachment)
+			}
+		} else logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
+		response
 	}
 
 }

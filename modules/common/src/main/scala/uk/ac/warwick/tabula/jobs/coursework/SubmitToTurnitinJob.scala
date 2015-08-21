@@ -221,6 +221,7 @@ class SubmitToTurnitinJob extends Job
 								r.webOverlap = report.webOverlap
 								r.publicationOverlap = report.publicationOverlap
 								r.studentOverlap = report.studentPaperOverlap
+								r.reportReceived = true
 								r
 							}
 							attachment.originalityReport = r
