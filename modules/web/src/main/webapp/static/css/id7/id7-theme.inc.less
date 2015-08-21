@@ -1,0 +1,29 @@
+.apply-brand(#333333);
+.apply-site-imagery('../../images/id7');
+.link-colour(#3C5E7F);
+
+.tabula-apply-navbar-brand(@colour, @text-colour) {
+	@border-colour: multiply(@colour, darken(white, 20%));
+	@contrast-colour: @text-colour;
+	@active-colour: screen(@colour, lighten(black, 30%));
+
+	.apply-navbar-brand(@colour,
+		@contrast-colour,
+		@contrast-colour,
+		@contrast-colour,
+		@border-colour,
+		@active-colour,
+		@contrast-colour,
+		@border-colour
+	);
+}
+
+.id7-navigation .navbar-primary {
+	.tabula-apply-navbar-brand(#239B92, #ffffff);
+}
+
+.id7-navigation .navbar-secondary {
+	.tabula-apply-navbar-brand(#90C0BD, #222222);
+}
+
+.apply-footer-brand(#6B695D);
