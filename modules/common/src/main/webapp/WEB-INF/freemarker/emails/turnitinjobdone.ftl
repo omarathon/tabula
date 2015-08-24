@@ -3,5 +3,7 @@ You recently asked to have the submissions for the assignment ${assignmentTitle}
 <#if failureCount gt 0>
 <@fmt.p number=failureCount singular="submission"/> could not be checked:
 
-<#list failedUploads?keys as key>${key} --  ${failedUploads[key]}</#list>
+<#list failedUploads?keys as key>
+${key} --  ${failedUploads[key]}
+</#list>
 </#if>

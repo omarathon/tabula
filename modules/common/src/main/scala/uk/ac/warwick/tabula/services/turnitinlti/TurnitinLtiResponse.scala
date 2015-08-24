@@ -110,8 +110,11 @@ case class TurnitinLtiResponse(
 						reports.get("numeric") match {
 							case Some(numerics: Map[String, Double] @unchecked) =>
 								numerics.get("score") match {
-									case (score) =>
-										results.similarity = score
+									case (Some(score)) => {
+										results.overlap = Some(score)
+										results.similarity = calculateSimilarityScore(score)
+									}
+									case _ => Nil
 								}
 							case _ => Nil
 						}
@@ -121,9 +124,27 @@ case class TurnitinLtiResponse(
 		}
 		results
 	}
+
+	private def calculateSimilarityScore(overlap: Double): Option[Int] = {
+		overlap match {
+			case overlap if overlap > 74 => Some(4)
+			case overlap if overlap > 49 => Some(3)
+			case overlap if overlap > 24 => Some(2)
+			case overlap if overlap > 0  => Some(1)
+			case overlap if overlap == 0 => Some(0)
+		}
+	}
+
 }
 
-case class SubmissionResults(var similarity:Option[Double] = None, var student_overlap: Option[Double] = None, var web_overlap: Option[Double] = None, var publication_overlap: Option[Double] = None)
+case class SubmissionResults(
+	var similarity:Option[Int] = None,
+	var overlap:Option[Double] = None,
+	var student_overlap: Option[Double] = None,
+	var web_overlap: Option[Double] = None,
+	var publication_overlap: Option[Double] = None
+)
+
 
 object TurnitinLtiResponse extends Logging {
 
