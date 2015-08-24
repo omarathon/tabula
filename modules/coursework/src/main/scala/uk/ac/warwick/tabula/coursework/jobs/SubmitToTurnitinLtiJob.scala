@@ -184,7 +184,8 @@ class SubmitToTurnitinLtiJob extends Job
 
 						if (response.success) {
 							val result = response.submissionInfo()
-							report.similarity = result.similarity.map(_.toInt)
+							report.similarity = result.similarity
+							report.overlap = result.overlap.map(_.toInt)
 							report.publicationOverlap = result.publication_overlap.map(_.toInt)
 							report.webOverlap = result.web_overlap.map(_.toInt)
 							report.studentOverlap = result.student_overlap.map(_.toInt)
