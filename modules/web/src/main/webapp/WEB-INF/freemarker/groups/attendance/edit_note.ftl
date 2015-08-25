@@ -1,6 +1,5 @@
 <#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
-
 	<#if success??>
 		<#assign isAdd = !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content && !command.attendanceNote.absenceType?has_content />
 		<div
@@ -10,126 +9,117 @@
 		></div>
 	</#if>
 
-	<#assign heading>
-		<#if command.isNew()>
-			<h2>Create attendance note for ${student.fullName}</h2>
-		<#else>
-			<h2>Edit attendance note for ${student.fullName}</h2>
+	<@modal.wrapper cssClass="modal-lg" enabled=(isModal && !isIframe)>
+
+		<#if !isIframe>
+			<@modal.header enabled=isModal!false>
+				<#if command.isNew()>
+					<h2 class="modal-title">Create attendance note for ${student.fullName}</h2>
+				<#else>
+					<h2 class="modal-title">Edit attendance note for ${student.fullName}</h2>
+				</#if>
+			</@modal.header>
 		</#if>
-	</#assign>
 
-	<#if isModal!false>
-		<@modal.header>
-			<#noescape>${heading}</#noescape>
-		</@modal.header>
-	<#elseif isIframe>
-		<div id="container">
-	<#else>
-		<#noescape>${heading}</#noescape>
-	</#if>
 
-	<#if isModal!false>
-		<@modal.body />
+		<@modal.body enabled=isModal />
 
-		<@modal.footer>
-			<form class="double-submit-protection">
-				<span class="submit-buttons">
-					<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
-						Save
-					</button>
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-				</span>
-			</form>
-		</@modal.footer>
-	<#else>
+		<#if isModal!false>
+			<@modal.footer>
+				<form class="double-submit-protection">
+					<span class="submit-buttons">
+						<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
+							Save
+						</button>
+						<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+					</span>
+				</form>
+			</@modal.footer>
 
-		<p>
-			<#if command.customState??>
-				${command.customState.description}:
-			<#elseif command.attendance??>
-				${command.attendance.state.description}:
-			<#else>
-				Not recorded:
-			</#if>
-			${command.occurrence.event.group.groupSet.name},
-			${command.occurrence.event.group.name},
-			${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
-			Week ${command.occurrence.week}
+		<#else>
 
-			<#if command.customState?? && command.attendance?? && command.customState.dbValue != command.attendance.state.dbValue>
-				<small class="subtle help-block">
-					This attendance has not yet been saved.
-				</small>
-			</#if>
-		</p>
+			<p>
+				<#if command.customState??>
+					${command.customState.description}:
+				<#elseif command.attendance??>
+					${command.attendance.state.description}:
+				<#else>
+					Not recorded:
+				</#if>
+				${command.occurrence.event.group.groupSet.name},
+				${command.occurrence.event.group.name},
+				${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
+				Week ${command.occurrence.week}
 
-		<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
-
-			<@form.labelled_row "absenceType" "Absence type">
-				<@f.select path="absenceType">
-					<option value="" style="display: none;">Please select one&hellip;</option>
-					<#list allAbsenceTypes as type>
-						<@f.option value="${type.dbValue}" label="${type.description}" />
-					</#list>
-				</@f.select>
-			</@form.labelled_row>
-
-			<@form.labelled_row "note" "Note">
-				<@f.textarea path="note" cssClass="input-block-level" rows="5" cssStyle="height: 150px;" />
-			</@form.labelled_row>
-
-			<#if command.attachedFile?has_content>
-				<@form.labelled_row "attachedFile" "Attached file">
-					<i class="icon-file-alt"></i>
-					<@fmt.download_link
-						filePath="/profiles/note/${command.student.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
-						mimeType=command.attachedFile.mimeType
-						title="Download file ${command.attachedFile.name}"
-						text="Download ${command.attachedFile.name}"
-					/>
-					&nbsp;
-					<@f.hidden path="attachedFile" value="${command.attachedFile.id}" />
-					<i class="icon-remove-sign remove-attachment"></i>
-
+				<#if command.customState?? && command.attendance?? && command.customState.dbValue != command.attendance.state.dbValue>
 					<small class="subtle help-block">
-						This is the file attached to this attendance note.
-						Click the remove link next to a document to delete it.
+						This attendance has not yet been saved.
 					</small>
+				</#if>
+			</p>
 
-				</@form.labelled_row>
+			<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
 
-				<script>
-					jQuery(function($){
-						$(".remove-attachment").on("click", function(e){
-							$(this).closest('form').find('.attendance-file').show();
-							$(this).closest(".control-group").remove()
-							return false;
+				<@bs3form.labelled_form_group "absenceType" "Absence type">
+					<@f.select path="absenceType" cssClass="form-control">
+						<option value="" style="display: none;">Please select one&hellip;</option>
+						<#list allAbsenceTypes as type>
+							<@f.option value="${type.dbValue}" label="${type.description}" />
+						</#list>
+					</@f.select>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group "note" "Note">
+					<@f.textarea path="note" cssClass="form-control" rows="5" cssStyle="height: 150px;" />
+				</@bs3form.labelled_form_group>
+
+				<#if command.attachedFile?has_content>
+					<@bs3form.labelled_form_group "attachedFile" "Attached file">
+						<@fmt.download_link
+							filePath="/profiles/note/${command.student.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
+							mimeType=command.attachedFile.mimeType
+							title="Download file ${command.attachedFile.name}"
+							text="Download ${command.attachedFile.name}"
+						/>
+						&nbsp;
+						<@f.hidden path="attachedFile" value="${command.attachedFile.id}" />
+						<i class="fa fa-times-circle remove-attachment"></i>
+
+						<small class="very-subtle help-block">
+							This is the file attached to this attendance note.
+							Click the remove link next to a document to delete it.
+						</small>
+
+					</@bs3form.labelled_form_group>
+
+					<script>
+						jQuery(function($){
+							$(".remove-attachment").on("click", function(e){
+								$(this).closest('form').find('.attendance-file').show();
+								$(this).closest(".control-group").remove();
+								return false;
+							});
 						});
-					});
-				</script>
-			</#if>
+					</script>
+				</#if>
 
-			<div class="attendance-file" <#if command.attachedFile?has_content>style="display:none;"</#if>>
-				<@form.filewidget basename="file" types=[] multiple=false />
-			</div>
-
-			<#if !isIframe>
-
-				<div class="form-actions">
-					<div class="pull-right">
-						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-						<a class="btn" href="${returnTo}">Cancel</a>
-					</div>
+				<div class="attendance-file" <#if command.attachedFile?has_content>style="display:none;"</#if>>
+					<@bs3form.filewidget basename="file" types=[] multiple=false />
 				</div>
 
-			</#if>
+				<#if !isIframe>
 
-		</@f.form>
+					<div class="form-actions">
+						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
+						<a class="btn btn-default" href="${returnTo}">Cancel</a>
+					</div>
 
-	</#if>
+				</#if>
 
-	<#if isIframe>
-		</div> <#--container -->
-	</#if>
+			</@f.form>
+
+		</#if>
+
+	</@modal.wrapper>
 
 </#escape>

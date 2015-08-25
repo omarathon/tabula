@@ -91,5 +91,87 @@ Macros for customised form elements, containers and more complex pickers.
 	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
 </#compress></#macro>
 
+<#macro filewidget types basename multiple=true max=10 labelText="File">
+<#-- <#local command=.vars[Request[commandVarName]] /> -->
+	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
+	<@labelled_form_group basename labelText>
+		<@errors path="${basename}" />
+		<@errors path="${basename}.upload" />
+		<@errors path="${basename}.attached" />
+		<@spring.bind path="${basename}">
+			<#local f=status.actualValue />
+			<div id="${elementId}">
+				<#if f.exists>
+					<#list f.attached as attached>
+						<#local uploadedId=attached.id />
+						<div class="hidden-attachment" id="attachment-${uploadedId}">
+							<input type="hidden" name="${basename}.attached" value="${uploadedId}">
+						${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>
+						</div>
+						<div id="upload-${uploadedId}" style="display:none">
+
+						</div>
+					</#list>
+				</#if>
+
+				<#if multiple>
+					<input type="file" id="${basename}.upload" name="${basename}.upload" multiple>
+					<noscript>
+						<#list (2..max) as i>
+							<br><input type="file" name="${basename}.upload">
+						</#list>
+					</noscript>
+				<#else>
+					<input type="file" id="${basename}.upload" name="${basename}.upload" >
+				</#if>
+			</div>
+
+			<small class="very-subtle help-block">
+				<#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+				<#if types?size &gt; 0>
+					File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
+				</#if>
+				<#if multiple && max!=1>
+					<span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
+				</#if>
+			</small>
+
+			<script><!--
+
+			jQuery(function($){
+				var $container = $('#${elementId}'),
+						$file = $container.find('input[type=file]'),
+						$addButton;
+				if (Supports.multipleFiles) {
+					// nothing, already works
+				} else {
+					// Add button which generates more file inputs
+					$addButton = $('<a>').addClass('btn btn-mini').append($('<i class="fa fa-plus"></i>').attr('title','Add another attachment'));
+					$addButton.click(function(){
+						$addButton
+								.before($('<br/>'))
+								.before($('<input type="file">').attr('name',"${basename}.upload"));
+						if ($container.find('input[type=file]').length >= ${max}) {
+							$addButton.hide(); // you've got enough file input thingies now.
+						}
+					});
+					$file.after($addButton);
+				}
+
+				$container.find('.hidden-attachment a').click(function(ev){
+					ev.preventDefault();
+					$(this).parent('.hidden-attachment').remove();
+					if ($addButton && $container.find('input[type=file],input[type=hidden]').length < ${max}) {
+						$addButton.show();
+					}
+					return false;
+				});
+			});
+
+			//--></script>
+		</@spring.bind>
+	</@labelled_form_group>
+</#macro>
+
 </#escape>
 </#compress>

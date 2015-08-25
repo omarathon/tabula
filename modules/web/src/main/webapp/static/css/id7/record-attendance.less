@@ -1,29 +1,8 @@
 @import "../css3";
 @import "../../bower_components/warwick-id7/less/variables.less";
+@import "colours.less";
 
 .recordCheckpointForm {
-	.check-all {
-		padding:2px 0.5em 2px;
-		border-left: 1px solid #ddd;
-		border-right: 1px solid #ddd;
-		border-top: 1px solid #ddd;
-
-		.span12 {
-			padding:3px 0 3px 0;
-		}
-
-		div.span9 {
-			padding: 15px 0;
-
-			span {
-				margin-right: 10px
-			}
-		}
-		div.span3 {
-			padding-top: 9px;
-		}
-	}
-
 	.submit-buttons {
 		width:100%;
 
@@ -31,19 +10,16 @@
 			padding-right:2.5em;
 		}
 	}
-}
 
-.recordCheckpointForm {
-	.check-all {
-		width: auto;
+	.row .bg {
+		padding-top: 10px;
+		padding-bottom: 10px;
 	}
-	.item-info {
-		margin: 0;
-		width: auto;
+	.row:nth-of-type(even) .bg {
+		background-color: @zebra-pale;
 	}
-	.striped-section .item-info {
-		margin-left: -0.5em;
-		margin-right: -0.5em;
+	.check-all .bg {
+		background-color: @zebra-dark;
 	}
 }
 
@@ -61,7 +37,7 @@
 	}
 
 	// in these cases the gradient won't cover the background, so we override
-	&:hover, &:focus, &:active, &.active {
+	&:hover, &:focus, &:active, &.active, &.active:hover, &.active:focus {
 		color: @textColour !important;
 		background-color: @activeColour;
 		*background-color: darken(@activeColour, 5%);
@@ -88,8 +64,8 @@
 	.active-colour(@brand-danger);
 }
 .btn-authorised {
-	color: @brand-info !important;
-	.active-colour(@brand-info);
+	color: @brand-primary !important;
+	.active-colour(@brand-primary);
 }
 
 .checkAllMessage {

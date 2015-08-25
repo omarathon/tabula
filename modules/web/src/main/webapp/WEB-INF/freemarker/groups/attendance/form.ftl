@@ -17,83 +17,85 @@
 
 <div class="recordCheckpointForm">
 	<div style="display:none;" class="forCloning">
-		<div class="btn-group" data-toggle="buttons-radio">
-			<button type="button" class="btn" data-state="">
-				<i class="icon-minus icon-fixed-width" title="Set to 'Not recorded'"></i>
+		<div class="btn-group" data-toggle="radio-buttons">
+			<button type="button" class="btn btn-default" data-state="">
+				<i class="fa fa-fw fa-minus" title="Set to 'Not recorded'"></i>
 			</button>
-			<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="unauthorised">
-				<i class="icon-remove icon-fixed-width" title="Set to 'Missed (unauthorised)'"></i>
+			<button type="button" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="unauthorised">
+				<i class="fa fa-fw fa-times" title="Set to 'Missed (unauthorised)'"></i>
 			</button>
-			<button type="button" class="btn btn-authorised" data-state="authorised">
-				<i class="icon-remove-circle icon-fixed-width" title="Set to 'Missed (authorised)'"></i>
+			<button type="button" class="btn btn-default btn-authorised" data-state="authorised">
+				<i class="fa fa-fw fa-times-circle-o" title="Set to 'Missed (authorised)'"></i>
 			</button>
-			<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="attended">
-				<i class="icon-ok icon-fixed-width" title="Set to 'Attended'"></i>
+			<button type="button" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="attended">
+				<i class="fa fa-fw fa-check" title="Set to 'Attended'"></i>
 			</button>
 		</div>
 	</div>
 
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 	<div class="fix-area">
-		<h1>Record attendance</h1>
-		<h4><span class="muted">for</span>
-			${command.event.group.groupSet.module.code?upper_case}<span class="hide-smallscreen"> ${command.event.group.groupSet.nameWithoutModulePrefix}</span>,
-			${command.event.group.name}</h4>
+		<div class="deptheader">
+			<h1>Record attendance</h1>
+			<h4 class="with-related"><span class="muted">for</span>
+				${command.event.group.groupSet.module.code?upper_case} ${command.event.group.groupSet.nameWithoutModulePrefix},
+				${command.event.group.name}</h4>
+		</div>
 
-		<div id="print-modal" class="modal hide fade">
-			<@modal.header>
-				<h3>Print register</h3>
-			</@modal.header>
-			<form method="get" action="<@routes.groups.registerPdf command.event />" style="margin-bottom: 0;" class="form-horizontal">
-				<input type="hidden" name="week" value="${command.week?c}" />
-				<@modal.body>
-					<p>Generate a PDF of this register so that it can be printed.</p>
+		<div id="print-modal" class="modal fade">
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title">Print register</h3>
+				</@modal.header>
+				<form method="get" action="<@routes.groups.registerPdf command.event />" style="margin-bottom: 0;">
+					<input type="hidden" name="week" value="${command.week?c}" />
+					<@modal.body>
+						<p>Generate a PDF of this register so that it can be printed.</p>
 
-					<@form.labelled_row "" "">
-						<@form.label checkbox=true>
+						<@bs3form.checkbox>
 							<input type="hidden" name="_showPhotos" value="" />
 							<input type="checkbox" name="showPhotos" value="true" checked />
 							Show student photos
-						</@form.label>
-					</@form.labelled_row>
+						</@bs3form.checkbox>
 
-					<@form.labelled_row "" "Name display">
-						<@form.label checkbox=true>
-							<input type="radio" name="displayName" value="name" checked />
-							Show student name only
-						</@form.label>
-						<@form.label checkbox=true>
-							<input type="radio" name="displayName" value="id" />
-							Show University ID only
-						</@form.label>
-						<@form.label checkbox=true>
-							<input type="radio" name="displayName" value="both" />
-							Show both name and University ID
-						</@form.label>
-					</@form.labelled_row>
+						<@bs3form.labelled_form_group "" "Name display">
+							<@bs3form.radio>
+								<input type="radio" name="displayName" value="name" checked />
+								Show student name only
+							</@bs3form.radio>
+							<@bs3form.radio>
+								<input type="radio" name="displayName" value="id" />
+								Show University ID only
+							</@bs3form.radio>
+							<@bs3form.radio>
+								<input type="radio" name="displayName" value="both" />
+								Show both name and University ID
+							</@bs3form.radio>
+						</@bs3form.labelled_form_group>
 
-					<@form.labelled_row "" "Fill area">
-						<@form.label checkbox=true>
-							<input type="radio" name="displayCheck" value="checkbox" checked />
-							Include checkbox
-						</@form.label>
-						<@form.label checkbox=true>
-							<input type="radio" name="displayCheck" value="line" />
-							Include signature line
-						</@form.label>
-					</@form.labelled_row>
-				</@modal.body>
-				<@modal.footer>
-					<button type="submit" class="btn btn-primary"><i class="icon-download"></i> Save as PDF for printing</button>
-					<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-				</@modal.footer>
-			</form>
+						<@bs3form.labelled_form_group "" "Fill area">
+							<@bs3form.radio>
+								<input type="radio" name="displayCheck" value="checkbox" checked />
+								Include checkbox
+							</@bs3form.radio>
+							<@bs3form.radio>
+								<input type="radio" name="displayCheck" value="line" />
+								Include signature line
+							</@bs3form.radio>
+						</@bs3form.labelled_form_group>
+					</@modal.body>
+					<@modal.footer>
+						<button type="submit" class="btn btn-primary">Save as PDF for printing</button>
+						<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+					</@modal.footer>
+				</form>
+			</@modal.wrapper>
 		</div>
-		<div class="pull-right" style="margin-top: -10px;">
-			<button type="button" class="btn" data-toggle="modal" data-target="#print-modal"><i class="icon-print"></i> Print</button>
+		<div class="pull-right">
+			<button type="button" class="btn btn-default" data-toggle="modal" data-target="#print-modal">Print</button>
 		</div>
 
-		<h6 style="margin: -8px 0 12px;">
+		<h6>
 			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
 			<#if command.event.tutors.users?has_content>
 				<br /><@fmt.p number=command.event.tutors.users?size singular="Tutor" shownumber=false/>: <#list command.event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
@@ -102,10 +104,10 @@
 
 
 		<div class="fix-header">
-			<div class="row-fluid record-attendance-form-header check-all">
-				<div class="span12">
+			<div class="row check-all">
+				<div class="col-md-12"><div class="bg clearfix"><div class="col-md-12">
 					<span class="studentsLoadingMessage">
-						<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+						<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 					</span>
 					<script type="text/javascript">
 						jQuery(function($){
@@ -115,12 +117,14 @@
 					<div class="pull-left">
 						<div class="form-inline">
 							<label for="additionalStudentQuery">Add student:</label>
-							<span class="profile-search input-append" data-target="<@routes.groups.students_json command.event.group.groupSet />?excludeEvent=${command.event.id}&excludeWeek=${command.week}" data-form="<@routes.groups.addAdditionalStudent command.event command.week />" data-modal="#addAdditional-modal">
+							<span class="profile-search input-group" data-target="<@routes.groups.students_json command.event.group.groupSet />?excludeEvent=${command.event.id}&excludeWeek=${command.week}" data-form="<@routes.groups.addAdditionalStudent command.event command.week />" data-modal="#addAdditional-modal">
 								<input type="hidden" name="additionalStudent" />
-								<input class="input-xlarge" type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for a student to add&hellip;" />
-								<button class="btn" type="button" style="margin-top: 0px;">
-									<i class="icon-search"></i>
-								</button>
+								<input style="width: 300px;" class="form-control" type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for a student to add&hellip;" />
+								<span class="input-group-btn">
+									<button class="btn btn-default" type="button">
+										<i class="fa fa-search"></i>
+									</button>
+								</span>
 							</span>
 
 							<#assign helpText>
@@ -140,40 +144,40 @@
 					<div class="pull-right" style="display: none;">
 						<span class="checkAllMessage">
 							Record all attendance
-						<#assign popoverContent>
-							<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
-								<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
-								<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
-								<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
-						</#assign>
+							<#assign popoverContent>
+								<p><i class="fa fa-minus fa-fw"></i> Not recorded</p>
+									<p><i class="fa fa-times fa-fw unauthorised"></i> Missed (unauthorised)</p>
+									<p><i class="fa fa fa-times-circle-o fa-fw authorised"></i> Missed (authorised)</p>
+									<p><i class="fa fa-check fa-fw attended"></i> Attended</p>
+							</#assign>
 							<a class="use-popover"
 							   data-title="Key"
 							   data-placement="bottom"
 							   data-container="body"
 							   data-content='${popoverContent}'
 							   data-html="true">
-								<i class="icon-question-sign"></i>
+								<i class="fa fa-question-circle"></i>
 							</a>
-						</span>
+							</span>
 						<div class="btn-group">
-							<button type="button" class="btn">
-								<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
+							<button type="button" class="btn btn-default">
+								<i class="fa fa-minus fa-fw" title="Set all to 'Not recorded'"></i>
 							</button>
-							<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
-								<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
+							<button type="button" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+								<i class="fa fa-times fa-fw" title="Set all to 'Missed (unauthorised)'"></i>
 							</button>
-							<button type="button" class="btn btn-authorised">
-								<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
+							<button type="button" class="btn btn-default btn-authorised">
+								<i class="fa fa fa-times-circle-o fa-fw" title="Set all to 'Missed (authorised)'"></i>
 							</button>
-							<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
-								<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
+							<button type="button" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+								<i class="fa fa-check fa-fw" title="Set all to 'Attended'"></i>
 							</button>
 						</div>
 						<#if features.attendanceMonitoringNote>
-							<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+							<a style="visibility: hidden" class="btn btn-default"><i class="fa fa-pencil-square-o"></i></a>
 						</#if>
 					</div>
-				</div>
+				</div></div></div>
 			</div>
 		</div>
 
@@ -182,9 +186,9 @@
 		</#if>
 
 		<#macro studentRow student added_manually linked_info={}>
-			<div class="row-fluid item-info">
-				<div class="span12" id="student-${student.universityId}">
-					<div class="span8">
+			<div class="row" id="student-${student.universityId}">
+				<div class="col-md-12"><div class="bg clearfix">
+					<div class="col-md-8">
 						<@fmt.member_photo student "tinythumbnail" true />
 						${student.fullName}
 						<@pl.profile_link student.universityId />
@@ -218,7 +222,7 @@
 							</#list>
 						</#if>
 					</div>
-					<div class="span4">
+					<div class="col-md-4">
 						<div class="pull-right">
 							<#local hasState = mapGet(command.studentsState, student.universityId)?? />
 							<#if hasState>
@@ -243,33 +247,33 @@
 									<#if note.hasContent>
 										<a
 											id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-											class="btn use-tooltip attendance-note edit"
+											class="btn btn-default use-tooltip attendance-note edit"
 											title="Edit attendance note"
 											data-container="body"
 											href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 										>
-											<i class="icon-edit attendance-note-icon"></i>
+											<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 										</a>
 									<#else>
 										<a
 											id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-											class="btn use-tooltip attendance-note"
+											class="btn btn-default use-tooltip attendance-note"
 											title="Add attendance note"
 											data-container="body"
 											href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 										>
-											<i class="icon-edit attendance-note-icon"></i>
+											<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 										</a>
 									</#if>
 								<#else>
 									<a
 										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
-										class="btn use-tooltip attendance-note"
+										class="btn btn-default use-tooltip attendance-note"
 										title="Add attendance note"
 										data-container="body"
 										href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 									>
-										<i class="icon-edit attendance-note-icon"></i>
+										<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 									</a>
 								</#if>
 							</#if>
@@ -280,7 +284,8 @@
 						<#list status.errorMessages as err>${err}</#list>
 						<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
 					</@spring.bind>
-				</div>
+				</div></div>
+
 				<script type="text/javascript">
 					AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}');
 					AttendanceRecording.wireButtons('#student-${student.universityId}');
@@ -288,7 +293,7 @@
 			</div>
 		</#macro>
 
-		<div class="striped-section-contents attendees">
+		<div class="attendees">
 			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
 				<script type="text/javascript">
 					AttendanceRecording.bindButtonGroupHandler(true);
@@ -316,7 +321,7 @@
 					<div class="fix-footer submit-buttons">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-							<a class="btn" href="${returnTo}">Cancel</a>
+							<a class="btn btn-default" href="${returnTo}">Cancel</a>
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
 							Saving this attendance will set monitoring points for

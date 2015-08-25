@@ -299,7 +299,7 @@ $(function(){
 					var $spinner = $('<div />').addClass('spinner-container').addClass('pull-right').attr('style', 'position: relative; top: 15px; left: 15px;');
 					$search.before($spinner);
 
-					$(this).typeahead({
+					$(this).bootstrap3Typeahead({
 						source: function(query, process) {
 							if (xhr != null) {
 								xhr.abort();
