@@ -5,28 +5,61 @@
 	<@form.row>
 		<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
 
-		<p>
-			<#if is_edit>
-				<#assign default_properties_url><@routes.groups.editseteventdefaults smallGroupSet /></#assign>
-			<#else>
-				<#assign default_properties_url><@routes.groups.createseteventdefaults smallGroupSet /></#assign>
-			</#if>
+		<div class="clearfix">
+			<div class="pull-left">
+				<#if is_edit>
+					<#assign default_properties_url><@routes.groups.editseteventdefaults smallGroupSet /></#assign>
+				<#else>
+					<#assign default_properties_url><@routes.groups.createseteventdefaults smallGroupSet /></#assign>
+				</#if>
 
-			<a class="btn" href="${default_properties_url}">Default properties</a>
+				<a class="btn" href="${default_properties_url}">Default properties</a>
 
-			<#assign helpText>
-				<p>You can set default properties for events created for all groups, such as tutor, location or which weeks
-				   the events are running, and then edit these for individual groups if necessary.</p>
-			</#assign>
-			<a href="#"
-			   class="use-introductory<#if showIntro("sgt-default-event-properties", "anywhere")> auto</#if>"
-			   data-title="Default properties for events"
-			   data-trigger="click"
-			   data-placement="bottom"
-			   data-html="true"
-			   data-hash="${introHash("sgt-default-event-properties", "anywhere")}"
-			   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
-		</p>
+				<#assign helpText>
+					<p>You can set default properties for events created for all groups, such as tutor, location or which weeks
+					   the events are running, and then edit these for individual groups if necessary.</p>
+				</#assign>
+				<a href="#"
+				   class="use-introductory<#if showIntro("sgt-default-event-properties", "anywhere")> auto</#if>"
+				   data-title="Default properties for events"
+				   data-trigger="click"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-hash="${introHash("sgt-default-event-properties", "anywhere")}"
+				   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+			</div>
+
+			<div class="pull-right">
+				<#if syllabusPlusEventCount gt 0>
+					<#if is_edit>
+						<#assign import_external_url><@routes.groups.editimportfromexternal smallGroupSet /></#assign>
+					<#else>
+						<#assign import_external_url><@routes.groups.createimportfromexternal smallGroupSet /></#assign>
+					</#if>
+
+					<a class="btn" href="${import_external_url}">
+						Import events from Syllabus+
+					</a>
+
+					<#assign helpText>
+						<p>You can create or update events by using scheduled small groups defined for
+							<@fmt.module_name module false /> in Syllabus+, the central timetabling system.</p>
+					</#assign>
+					<a href="#"
+					   class="use-introductory<#if showIntro("sgt-import-events-splus", "anywhere")> auto</#if>"
+					   data-title="Import events from Syllabus+"
+					   data-trigger="click"
+					   data-placement="bottom"
+					   data-html="true"
+					   data-hash="${introHash("sgt-import-events-splus", "anywhere")}"
+					   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
+				<#else>
+					<a class="btn disabled use-tooltip" title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
+						Import events from Syllabus+
+					</a>
+				</#if>
+			</div>
+		</div>
 	</@form.row>
 
 	<div class="striped-section no-title">
