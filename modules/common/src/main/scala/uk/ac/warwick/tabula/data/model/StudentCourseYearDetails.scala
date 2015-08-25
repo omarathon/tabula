@@ -90,7 +90,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		try {
 			val academicYearStartDate = termService.getTermFromAcademicWeek(1, academicYear).getStartDate
 			val academicYearEndDate = termService.getTermFromAcademicWeek(1, academicYear.next).getStartDate.minusDays(1)
-			val sixMonthsInDays = 6 * 30
+			val twoMonthsInDays = 2 * 30
 
 			studentCourseDetails.allRelationshipsOfType(relationshipType)
 				.filter(r => r.endDate == null || r.startDate.isBefore(r.endDate))
@@ -100,7 +100,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 					relationship.isCurrent
 				} else {
 					// Otherwise return the relationship if it lasted for at least 6 months in this academic year
-					val relationshipEndDate = if (relationship.endDate == null) DateTime.now else relationship.endDate
+					val relationshipEndDate = if (relationship.endDate == null) academicYearEndDate else relationship.endDate
 					if (relationshipEndDate.isBefore(academicYearStartDate) || relationship.startDate.isAfter(academicYearEndDate)) {
 						false
 					} else {
@@ -114,7 +114,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 								academicYearEndDate
 							else
 								relationshipEndDate
-						new Duration(inYearStartDate, inYearEndDate).getStandardDays > sixMonthsInDays
+						new Duration(inYearStartDate, inYearEndDate).getStandardDays > twoMonthsInDays
 					}
 				}
 			})
