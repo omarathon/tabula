@@ -275,7 +275,7 @@ first page of the form to setup a bunch of assignments from SITS.
 		</div>
 		<div class="modal-body">
 		<#-- this form is never submitted, it is just here for styling -->
-			<form class="form-horizontal dateTimePair">
+			<form class="form-horizontal dateTimePair dirty-check-ignore">
 				<@spring.nestedPath path=commandName>
 					<@form.row>
 						<@form.label>Open date</@form.label>
@@ -337,6 +337,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 		// Disable the heads up when we submit the form through the proper means
 		jQuery('form').on('submit', function() {
+			jQuery('form.di').set
 			jQuery(window).off('beforeunload.backattack');
 		});
 	</script>
