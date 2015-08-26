@@ -8,6 +8,26 @@
 	<h1 class="with-settings">Edit event</h1>
 	<h4><span class="muted">for</span> ${smallGroup.name}</h4>
 
+	<div class="clearfix">
+		<div class="pull-right">
+			<#if syllabusPlusEventCount gt 0>
+				<#if is_edit_set>
+					<#assign import_external_url><@routes.groups.editseteventsediteventimport smallGroupEvent /></#assign>
+				<#else>
+					<#assign import_external_url><@routes.groups.createseteventsediteventimport smallGroupEvent /></#assign>
+				</#if>
+
+				<a class="btn" href="${import_external_url}">
+					Update from Syllabus+
+				</a>
+			<#else>
+				<a class="btn disabled use-tooltip" title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
+					Import events from Syllabus+
+				</a>
+			</#if>
+		</div>
+	</div>
+
 	<@f.form method="post" action="" commandName="editSmallGroupEventCommand" cssClass="form-horizontal">
 		<@f.errors cssClass="error form-errors" />
 

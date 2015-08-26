@@ -16,7 +16,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.util.Success
 
-class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with Mockito {
+class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with Mockito {
 
 	@Before def tidyUpContext {
 		// TODO it would be better to find where this context is actually coming from
@@ -31,22 +31,14 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 		with SmallGroupServiceComponent
 		with UserLookupComponent {
 
-		val timetableFetchingService = ImportSmallGroupEventsFromExternalSystemCommandTest.this.timetableFetchingService
-		val smallGroupService = ImportSmallGroupEventsFromExternalSystemCommandTest.this.smallGroupService
-		val userLookup = ImportSmallGroupEventsFromExternalSystemCommandTest.this.userLookup
+		val timetableFetchingService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.timetableFetchingService
+		val smallGroupService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.smallGroupService
+		val userLookup = UpdateSmallGroupEventFromExternalSystemCommandTest.this.userLookup
 
 	}
 
-	private trait CommandTestSupport extends SmallGroupEventGenerator {
-		self: MockServices with ImportSmallGroupEventsFromExternalSystemCommandState =>
-
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
-			val event = new SmallGroupEvent(group)
-			updateEvent(module, set, group, event, weeks, day, startTime, endTime, location, tutorUsercodes)
-
-			group.addEvent(event)
-			event
-		}
+	private trait CommandTestSupport extends SmallGroupEventUpdater {
+		self: MockServices with UpdateSmallGroupEventFromExternalSystemCommandState =>
 
 		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
 			event.weekRanges = weeks
@@ -63,16 +55,15 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 	private trait Fixture {
 		val module = Fixtures.module("in101")
 		val set = Fixtures.smallGroupSet("IN101 Seminars")
-		val group1 = Fixtures.smallGroup("Group 1")
-		val group2 = Fixtures.smallGroup("Group 2")
+		val group = Fixtures.smallGroup("Group 1")
+		val event = Fixtures.smallGroupEvent("Event 1")
 	}
 
 	private trait CommandFixture extends Fixture {
 		val command =
-			new ImportSmallGroupEventsFromExternalSystemCommandInternal(module, set)
+			new UpdateSmallGroupEventFromExternalSystemCommandInternal(module, set, group, event)
 				with CommandTestSupport
 				with MockServices
-				with LookupEventsFromModuleTimetable
 	}
 
 	private trait FixtureWithSingleSeminarForYear extends Fixture with MockServices {
@@ -141,40 +132,30 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 	}
 
 	@Test def init { new FixtureWithSingleSeminarForYear with CommandFixture {
-		command.eventsToImport.size() should be (2)
-		command.eventsToImport.get(0).timetableEvent should be (tEventSeminar2)
-		command.eventsToImport.get(1).timetableEvent should be (tEventSeminar1)
+		command.timetableEvents should be (Seq(tEventSeminar2, tEventSeminar1))
 	}}
 
 	@Test def apply { new FixtureWithSingleSeminarForYear with CommandFixture {
-		command.eventsToImport.get(0).group = group1
-		command.eventsToImport.get(1).group = group2
+		command.index = 0
 
 		val sets = command.applyInternal()
 
-		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
+		verify(command.smallGroupService, times(1)).saveOrUpdate(event)
 
-		val group1event = group1.events.head
-		group1event.weekRanges should be (Seq(WeekRange(6, 10)))
-		group1event.day should be (DayOfWeek.Thursday)
-		group1event.startTime should be (new LocalTime(12, 0))
-		group1event.endTime should be (new LocalTime(13, 0))
-		group1event.location should be (NamedLocation("CS1.04"))
-		group1event.tutors.knownType.includedUserIds should be (Seq("abcdef"))
-
-		val group2event = group2.events.head
-		group2event.weekRanges should be (Seq(WeekRange(6, 10)))
-		group2event.day should be (DayOfWeek.Friday)
-		group2event.startTime should be (new LocalTime(12, 0))
-		group2event.endTime should be (new LocalTime(13, 0))
-		group2event.location should be (NamedLocation("CS1.04"))
-		group2event.tutors.knownType.includedUserIds should be (Seq("abcdef"))
+		event.weekRanges should be (Seq(WeekRange(6, 10)))
+		event.day should be (DayOfWeek.Thursday)
+		event.startTime should be (new LocalTime(12, 0))
+		event.endTime should be (new LocalTime(13, 0))
+		event.location should be (NamedLocation("CS1.04"))
+		event.tutors.knownType.includedUserIds should be (Seq("abcdef"))
 	}}
 
 	private trait PermissionsFixture extends Fixture {
-		val command = new ImportSmallGroupEventsFromExternalSystemPermissions with ImportSmallGroupEventsFromExternalSystemCommandState {
+		val command = new UpdateSmallGroupEventFromExternalSystemPermissions with UpdateSmallGroupEventFromExternalSystemCommandState with UpdateSmallGroupEventFromExternalSystemRequestState with MockServices {
 			val module = PermissionsFixture.this.module
 			val set = PermissionsFixture.this.set
+			val group = PermissionsFixture.this.group
+			val event = PermissionsFixture.this.event
 		}
 	}
 
@@ -182,10 +163,16 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 		module.groupSets.add(set)
 		set.module = module
 
+		set.groups.add(group)
+		group.groupSet = set
+
+		group.addEvent(event)
+		event.group = group
+
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
-		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
+		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, event)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def notLinked { new PermissionsFixture {
@@ -196,24 +183,36 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 	}}
 
 	@Test def description {
-		val command = new ImportSmallGroupEventsFromExternalSystemDescription with ImportSmallGroupEventsFromExternalSystemCommandState {
+		val command = new UpdateSmallGroupEventFromExternalSystemDescription with UpdateSmallGroupEventFromExternalSystemCommandState with UpdateSmallGroupEventFromExternalSystemRequestState with MockServices {
 			override val eventName: String = "test"
 			val module = Fixtures.module("in101")
 			val set = Fixtures.smallGroupSet("IN101 Seminars")
+			val group = Fixtures.smallGroup("Group 1")
+			val event = Fixtures.smallGroupEvent("Event 1")
 
 			module.id = "moduleId"
 			set.id = "setId"
+			group.id = "groupId"
+			event.id = "eventId"
 
 			module.groupSets.add(set)
 			set.module = module
+
+			set.groups.add(group)
+			group.groupSet = set
+
+			group.addEvent(event)
+			event.group = group
 		}
 
 		val d = new DescriptionImpl
 		command.describe(d)
 
 		d.allProperties should be (Map(
+			"module" -> "moduleId",
 			"smallGroupSet" -> "setId",
-			"module" -> "moduleId"
+			"smallGroup" -> "groupId",
+			"smallGroupEvent" -> "eventId"
 		))
 	}
 

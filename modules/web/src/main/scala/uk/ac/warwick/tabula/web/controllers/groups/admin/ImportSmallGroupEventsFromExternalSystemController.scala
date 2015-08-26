@@ -5,17 +5,17 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupEventsFromExternalSystemCommand
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import scala.collection.JavaConverters._
 
 abstract class AbstractImportSmallGroupEventsFromExternalSystemController extends SmallGroupEventsController with AutowiringTermServiceComponent {
 
-	type ImportSmallGroupEventsFromExternalSystemCommand = Appliable[SmallGroupSet]
+	type ImportSmallGroupEventsFromExternalSystemCommand = Appliable[Seq[SmallGroupEvent]] with PopulateOnForm
 
 	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ImportSmallGroupEventsFromExternalSystemCommand =
 		ImportSmallGroupEventsFromExternalSystemCommand(module, set)
@@ -34,7 +34,10 @@ abstract class AbstractImportSmallGroupEventsFromExternalSystemController extend
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: ImportSmallGroupEventsFromExternalSystemCommand
-	) = render(set)
+	) = {
+		cmd.populate()
+		render(set)
+	}
 
 	protected def submit(cmd: ImportSmallGroupEventsFromExternalSystemCommand, errors: Errors, set: SmallGroupSet, route: String) = {
 		if (errors.hasErrors) {

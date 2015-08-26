@@ -38,16 +38,15 @@
 					</#if>
 
 					<a class="btn" href="${import_external_url}">
-						Import events from Syllabus+
+						Create events from Syllabus+
 					</a>
 
 					<#assign helpText>
-						<p>You can create or update events by using scheduled small groups defined for
-							<@fmt.module_name module false /> in Syllabus+, the central timetabling system.</p>
+						<p>Create small group events using data from the central timetabling system Syllabus+.</p>
 					</#assign>
 					<a href="#"
 					   class="use-introductory<#if showIntro("sgt-import-events-splus", "anywhere")> auto</#if>"
-					   data-title="Import events from Syllabus+"
+					   data-title="Create events from Syllabus+"
 					   data-trigger="click"
 					   data-placement="bottom"
 					   data-html="true"
