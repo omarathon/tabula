@@ -104,6 +104,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 			"isSchemes" -> searchResult.schemes.nonEmpty,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"findResult" -> findCommand.apply(),
+			"monthNames" -> monthNames(searchAcademicYear),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Manage.Home,
@@ -143,6 +144,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 				"isSchemes" -> searchResult.schemes.nonEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
 				"errors" -> errors,
+				"monthNames" -> monthNames(searchAcademicYear),
 				"returnTo" -> getReturnTo("")
 			).crumbs(
 				Breadcrumbs.Manage.Home,

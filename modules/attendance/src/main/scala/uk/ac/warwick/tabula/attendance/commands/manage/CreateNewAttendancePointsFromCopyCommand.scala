@@ -38,7 +38,7 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
-		val points = getPoints(findPointsResult, schemes, pointStyle)
+		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
 
 		afterUpdate(schemes)
@@ -53,16 +53,16 @@ trait CreateNewAttendancePointsFromCopyValidation extends SelfValidating with Ge
 	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
-		val points = getPoints(findPointsResult, schemes, pointStyle, addToScheme = false)
+		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = false)
 		points.foreach(point => {
-			validateSchemePointStyles(errors, pointStyle, schemes.toSeq)
+			validateSchemePointStyles(errors, pointStyle, schemes)
 
 			pointStyle match {
 				case AttendanceMonitoringPointStyle.Date =>
-					validateCanPointBeEditedByDate(errors, point.startDate, schemes.map{_.members.members}.flatten, academicYear, "")
+					validateCanPointBeEditedByDate(errors, point.startDate, schemes.flatMap(_.members.members), academicYear, "")
 					validateDuplicateForDate(errors, point.name, point.startDate, point.endDate, schemes, global = true)
 				case AttendanceMonitoringPointStyle.Week =>
-					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.map{_.members.members}.flatten, academicYear, "")
+					validateCanPointBeEditedByWeek(errors, point.startWeek, schemes.flatMap(_.members.members), academicYear, "")
 					validateDuplicateForWeek(errors, point.name, point.startWeek, point.endWeek, schemes, global = true)
 			}
 		})
@@ -78,12 +78,13 @@ trait GetsPointsToCreate {
 		findPointsResult: FindPointsResult,
 		schemes: Seq[AttendanceMonitoringScheme],
 		pointStyle: AttendanceMonitoringPointStyle,
+		academicYear: AcademicYear,
 		addToScheme: Boolean = true
 	): Seq[AttendanceMonitoringPoint] = {
 		val oldPoints = findPointsResult.termGroupedOldPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val weekPoints = findPointsResult.termGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val datePoints = findPointsResult.monthGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
-		if (oldPoints.size > 0) {
+		if (oldPoints.nonEmpty) {
 			// Old points to new points
 			schemes.flatMap { scheme =>
 				oldPoints.map { oldPoint =>
@@ -119,6 +120,10 @@ trait GetsPointsToCreate {
 					}
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
+					// Fix new points year
+					val academicYearDifference = academicYear.startYear - datePoint.scheme.academicYear.startYear
+					newPoint.startDate = newPoint.startDate.withYear(newPoint.startDate.getYear + academicYearDifference)
+					newPoint.endDate = newPoint.endDate.withYear(newPoint.endDate.getYear + academicYearDifference)
 					newPoint
 				}
 			}
@@ -140,8 +145,8 @@ trait GetsPointsToCreate {
 		}
 		oldPoint.pointType match {
 			case MonitoringPointType.Meeting =>
-				newPoint.meetingRelationships = oldPoint.meetingRelationships.toSeq
-				newPoint.meetingFormats = oldPoint.meetingFormats.toSeq
+				newPoint.meetingRelationships = oldPoint.meetingRelationships
+				newPoint.meetingFormats = oldPoint.meetingFormats
 				newPoint.meetingQuantity = oldPoint.meetingQuantity
 			case MonitoringPointType.SmallGroup =>
 				newPoint.smallGroupEventQuantity = oldPoint.smallGroupEventQuantity
