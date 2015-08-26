@@ -21,7 +21,9 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 
 <@hiddenorfalse path="collectSubmissions" />
 <@hiddenorfalse path="collectMarks" />
-<@hiddenorfalse path="queueFeedbackForSits" />
+<#if !(ignoreQueueFeedbackForSits!false)>
+	<@hiddenorfalse path="queueFeedbackForSits" />
+</#if>
 <@hiddenorfalse path="displayPlagiarismNotice" />
 <@hiddenorfalse path="restrictSubmissions" />
 <@hiddenorfalse path="allowLateSubmissions" />
