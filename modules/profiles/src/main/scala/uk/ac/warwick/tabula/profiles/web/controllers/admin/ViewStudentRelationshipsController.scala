@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember, Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.profiles.commands.{ViewRelatedStudentsCommand, MissingStudentRelationshipCommand, ViewStudentRelationshipsCommand}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.{Department, StudentCourseDetails, StudentRelationshipType}
+import uk.ac.warwick.tabula.profiles.commands.{MissingStudentRelationshipCommand, ViewRelatedStudentsCommand, ViewStudentRelationshipsCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller
 @RequestMapping(value = Array("/department/{department}/{relationshipType}"))
@@ -30,6 +28,8 @@ class ViewStudentRelationshipsController extends ProfilesController {
 			"agentRelationships" -> agentGraph.studentMap,
 			"studentCount" -> agentGraph.studentCount,
 			"missingCount" -> agentGraph.missingCount,
+			"courseMap" -> agentGraph.courseMap,
+			"yearOfStudyMap" -> agentGraph.yearOfStudyMap,
 			"department" -> department
 		)
 	}
