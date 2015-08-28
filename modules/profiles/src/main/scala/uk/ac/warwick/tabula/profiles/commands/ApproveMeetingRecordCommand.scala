@@ -43,6 +43,7 @@ class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: Current
 		if (approved) {
 			approvals.foreach(approval => {
 				approval.state = Approved
+				user.profile.foreach(approval.approvedBy = _)
 				approval.lastUpdatedDate = DateTime.now
 				meetingRecordDao.saveOrUpdate(approval)
 			})
