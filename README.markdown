@@ -86,6 +86,8 @@ Properties passed into the app. You can get one of these off of tabula-test and 
 ### `lib/tabula-sso-config.xml`
 
 The usual SSO config guff. You will need to get this configuration added to Web Sign-on for SSO to work.
+Ensure it includes a `<trustedapps />` section or you _will_ see NPEs from one of the bouncycastle crypto libraries.
+Also, ensure that the cluster datasource matches the sample - older configs may not match, which will cause _datasource not found_ exceptions.
 
 ### ActiveMQ
 
@@ -155,8 +157,9 @@ use `rewrites.inc` for full Tabula development.
 
 You need an HTTPS vhost for SSO so if you're only going to set up one vhost,
 it should be the HTTPS one. The include files reference a map to get the port to use,
-so you may need to define yours with two lines such as
+so you may need to define yours with three lines such as
 
+    RewriteMap api txt:/etc/apache2/tabulaport.txt
     RewriteMap proxy txt:/etc/apache2/tabulaport.txt
     RewriteMap scheduler txt:/etc/apache2/tabulaport.txt
 
@@ -164,8 +167,19 @@ The above line should point to a file containing this line (assuming default Tom
 
     port 8080
 
+### Local properties
+
 Copy `local-example.properties` as `local.properties` and edit the properties in there
 to match your system. `local.properties` will be ignored by Git.
+
+### Troubleshooting updates
+
+If updating from an older version of Tabula, remember to apply recent database migrations from `config/scripts/schema`.
+If you get `IllegalStateException` from Lucene, it means one of your indexes is out of date. Find its location
+(look in `tabula.properties` for `base.data.dir` and look inside the `index` directory within. Delete the relevant index
+(eg. `rm -fr BASE_DATA_DIR/index/notifications`), and rebuild it from /sysadmin within the app.
+
+### Deployment
 
 Run `mvn -Pdeploy` to build the app and copy an exploded WAR to the
 location you specified in your properties file.
