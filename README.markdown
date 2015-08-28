@@ -175,8 +175,8 @@ to match your system. `local.properties` will be ignored by Git.
 ### Troubleshooting updates
 
 If updating from an older version of Tabula, remember to apply recent database migrations from `config/scripts/schema`.
-If you get `IllegalStateException` from Lucene, it means one of your indexes is out of date. Find its location
-(look in `tabula.properties` for `base.data.dir` and look inside the `index` directory within. Delete the relevant index
+If you get an `IllegalStateException` from Lucene, it means one of your indexes is out of date. Find its location
+(look in `tabula.properties` for `base.data.dir` and look inside the `index` directory within). Delete the relevant index
 (eg. `rm -fr BASE_DATA_DIR/index/notifications`), and rebuild it from /sysadmin within the app.
 
 ### Deployment
