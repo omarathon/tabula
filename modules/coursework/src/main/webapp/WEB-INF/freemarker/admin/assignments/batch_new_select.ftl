@@ -337,7 +337,6 @@ first page of the form to setup a bunch of assignments from SITS.
 
 		// Disable the heads up when we submit the form through the proper means
 		jQuery('form').on('submit', function() {
-			jQuery('form.di').set
 			jQuery(window).off('beforeunload.backattack');
 		});
 	</script>
