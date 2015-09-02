@@ -22,7 +22,7 @@
 		<div class="alert alert-warning">
 			<p>
 				<strong>Note: </strong> Any submissions to the assignments listed below that have already been released will not be re-released,
-				so the new marker will not notified that they need to mark submission. You should contact the new marker yourself.
+				so the new marker will not be notified that they need to mark the submissions. You should contact the new marker yourself.
 			</p>
 			<p>
 				<label class="checkbox"><@f.checkbox path="confirm" /> I understand that I need to contact the new marker to inform them that they may need to mark submissions.</label>
