@@ -14,7 +14,7 @@ Adding or editing a new marking workflow
 <#escape x as x?html>
 <#compress>
 
-<h1>Define marking workflow</h1>
+<h1 class="with-settings">Define marking workflow</h1>
 <#assign commandName="command" />
 
 <@f.form method="post" action="${form_url}" commandName=commandName cssClass="form-horizontal">
