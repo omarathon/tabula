@@ -120,6 +120,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					}
 					scd.clearModuleRegistrations()
 				}
+				session.flush()
 
 				// Checkpoints must be deleted before the associated student
 				for (route <- routes) {
@@ -146,10 +147,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (total <- attendanceMonitoringDao.getAllCheckpointTotals(dept)) {
 					session.delete(total)
 				}
+				session.flush()
+				assert(attendanceMonitoringDao.listAllSchemes(dept).isEmpty)
 
 				for (set <- smallGroupService.getAllSmallGroupSets(dept)) {
 					session.delete(set)
 				}
+				session.flush()
+				assert(smallGroupService.getAllSmallGroupSets(dept).isEmpty)
 
 			  for (student <- scds.map{ _.student}.distinct) {
 					//should cascade delete SCDs too
@@ -183,10 +188,17 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 								session.delete(feedbackForSits)
 							}
 						}
+						assignment.feedbacks.clear()
+						session.delete(assignment)
 					}
+					module.assignments.clear()
 				}
+				session.flush()
 
 				modules.asScala.foreach(invalidateAndDeletePermissions[Module])
+				session.flush()
+				assert(modules.asScala.forall(m => permissionsService.getAllGrantedRolesFor(m).isEmpty))
+
 				modules.asScala.foreach(session.delete)
 
 				dept.modules.clear()
@@ -213,10 +225,17 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 				session.flush()
 				assert(moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).isEmpty)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from module where department_id not in (select id from department)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from route where department_id not in (select id from department)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from assignment where module_id not in (select id from module)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Department' and SCOPE_ID not in (select id from department)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Module' and SCOPE_ID not in (select id from module)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from smallgroupset where module_id not in (select id from module)").list.size() == 0)
 			}
 		}
 
 		session.flush()
+		session.clear()
 
 		def recursivelyGetChildren(department:Department): Set[Department] = {
 			val descendents = department.children.asScala flatMap { recursivelyGetChildren }
@@ -271,21 +290,21 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			session.save(newModuleFrom(Fixtures.TestModule4, subDepartment))
 		}
 
-	    // create a small group on the first module in the list
-	    transactional() {
-	      val firstModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule1.code).get
-	      val groupSet = new SmallGroupSet()
-	      groupSet.name = "Test Lab"
-	      groupSet.format = SmallGroupFormat.Lab
-	      groupSet.module = firstModule
-		  groupSet.allocationMethod= SmallGroupAllocationMethod.Manual
-	      val group  = new SmallGroup
-	      group.name ="Test Lab Group 1"
-	      groupSet.groups = JArrayList(group)
-	      session.save(groupSet)
-	    }
+		// create a small group on the first module in the list
+		transactional() {
+			val firstModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule1.code).get
+			val groupSet = new SmallGroupSet()
+			groupSet.name = "Test Lab"
+			groupSet.format = SmallGroupFormat.Lab
+			groupSet.module = firstModule
+			groupSet.allocationMethod= SmallGroupAllocationMethod.Manual
+			val group  = new SmallGroup
+			group.name ="Test Lab Group 1"
+			groupSet.groups = JArrayList(group)
+			session.save(groupSet)
+		}
 
-		  // and another, with AllocationMethod = "StudentSignUp", on the second
+		// and another, with AllocationMethod = "StudentSignUp", on the second
 		transactional() {
 			val secondModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule2.code).get
 			val groupSet = new SmallGroupSet()

@@ -13,6 +13,7 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 
 	before {
 		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")
 		createRoute(TEST_PG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "PG Route")

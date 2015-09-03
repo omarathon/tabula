@@ -88,8 +88,8 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		newPoint.pointType = pointType
 		pointType match {
 			case AttendanceMonitoringPointType.Meeting =>
-				newPoint.meetingRelationships = meetingRelationships.toSeq
-				newPoint.meetingFormats = meetingFormats.toSeq
+				newPoint.meetingRelationships = meetingRelationships
+				newPoint.meetingFormats = meetingFormats
 				newPoint.meetingQuantity = meetingQuantity
 			case AttendanceMonitoringPointType.SmallGroup =>
 				newPoint.smallGroupEventQuantity = smallGroupEventQuantity

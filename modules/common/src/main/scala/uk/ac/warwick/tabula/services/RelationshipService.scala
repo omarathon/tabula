@@ -72,6 +72,8 @@ trait RelationshipService {
 	def getStudentAssociationEntityData(department: Department, relationshipType: StudentRelationshipType, additionalEntityIds: Seq[String]): Seq[StudentAssociationEntityData]
 	def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def applyStudentRelationships(relationshipType: StudentRelationshipType, agentId: String, studentIDs: Seq[String]): Seq[StudentRelationship]
+	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course]
+	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int]
 }
 
 abstract class AbstractRelationshipService extends RelationshipService with Logging with TaskBenchmarking {
@@ -361,6 +363,14 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		}
 		relationships.foreach(saveOrUpdate)
 		relationships
+	}
+
+	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course] = {
+		relationshipDao.coursesForStudentCourseDetails(scds)
+	}
+
+	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
+		relationshipDao.latestYearsOfStudyForStudentCourseDetails(scds)
 	}
 }
 

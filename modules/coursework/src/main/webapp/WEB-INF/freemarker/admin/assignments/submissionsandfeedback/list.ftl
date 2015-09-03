@@ -233,7 +233,7 @@
 									<#if submission??>
 										<#list submission.allAttachments as attachment>
 											<!-- Checking originality report for ${attachment.name} ... -->
-											<#if attachment.originalityReport??>
+											<#if attachment.originalityReportReceived>
 												<@components.originalityReport attachment />
 											</#if>
 										</#list>

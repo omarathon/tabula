@@ -126,8 +126,12 @@ $(function(){
 			$('.form-post', $outerContainer).click(function(event){
 				event.preventDefault();
 				if(!$(this).hasClass("disabled")) {
+					var action = this.href;
+					if ($(this).data('href')) {
+						action = $(this).data('href')
+					}
 
-					var $form = $('<form></form>').attr({method: 'POST', action: this.href}).hide();
+					var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
 					var doFormSubmit = false;
 
 					if ($container.data('checked') != 'none') {

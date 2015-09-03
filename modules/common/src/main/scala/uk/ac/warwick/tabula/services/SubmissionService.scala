@@ -84,7 +84,7 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
 
 	def saveOriginalityReport(attachment: FileAttachment) {
 		attachment.originalityReport.attachment = attachment
-		session.save(attachment.originalityReport)
+		session.saveOrUpdate(attachment.originalityReport)
 	}
 
 	def getOriginalityReportByFileId(fileId: String): Option[OriginalityReport] = {
@@ -93,4 +93,12 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
 			.add(is("attachment.id", fileId))
 			.seq.headOption
 	}
+}
+
+trait OriginalityReportServiceComponent {
+	def originalityReportService: OriginalityReportService
+}
+
+trait AutowiringOriginalityReportServiceComponent extends OriginalityReportServiceComponent {
+	var originalityReportService = Wire[OriginalityReportService]
 }

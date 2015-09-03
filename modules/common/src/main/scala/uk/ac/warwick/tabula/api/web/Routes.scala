@@ -19,4 +19,9 @@ object Routes {
 		def apply(assignment: Assignment) =
 			context + "/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
 	}
+
+	object turnitin {
+		def submitAssignmentCallback(assignment: Assignment) =
+			context + "/turnitin/turnitin-submit-assignment-response/assignment/%s" format (encoded(assignment.id))
+	}
 }

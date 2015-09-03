@@ -54,7 +54,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def doAssignments() {
 		val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
-		val modules = moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCode).distinct)
+		val modules = moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
 			.groupBy(_.code).mapValues(_.head)
 		for (assignments <- assessmentComponents.grouped(ImportGroupSize)) {
 			transactional() {

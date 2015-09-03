@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
 import javax.persistence._
-import javax.persistence.CascadeType._
 import org.joda.time.DateTime
+import javax.persistence.Column
 
 @Entity
 class OriginalityReport extends GeneratedId with ToEntityReference {
@@ -17,6 +17,12 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 	def completed = similarity map { _ > -1 } getOrElse false
 
 	var createdDate: DateTime = DateTime.now
+
+	@Column(name = "TURNITIN_ID")
+	var turnitinId: String = _
+
+	@Column(name = "REPORT_RECEIVED")
+	var reportReceived: Boolean = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	var similarity: Option[Int] = None

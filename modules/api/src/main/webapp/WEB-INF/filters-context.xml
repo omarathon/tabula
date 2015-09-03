@@ -13,6 +13,7 @@
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
 			<excluded-url-pattern>/error/*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/turnitin/*</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 

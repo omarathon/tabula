@@ -33,9 +33,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Module.Create,
 		// We don't give Read here, god up for that
 		Module.Update,
-		Module.Delete,
-
-		Department.ArrangeRoutesAndModules
+		Module.Delete
 	)
 
 }

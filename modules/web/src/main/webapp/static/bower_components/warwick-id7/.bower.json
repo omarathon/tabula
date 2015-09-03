@@ -1,0 +1,61 @@
+{
+  "name": "warwick-id7",
+  "description": "CSS, JavaScript and sample HTML in order to use the corporate identity on your site",
+  "version": "1.1.9",
+  "homepage": "http://id7.warwick.ac.uk",
+  "main": [
+    "less/id7.less",
+    "dist/css/id7.css",
+    "dist/css/id7-default-theme.css",
+    "dist/js/id7-bundle.js",
+    "dist/fonts/fontawesome-webfont.eot",
+    "dist/fonts/fontawesome-webfont.svg",
+    "dist/fonts/fontawesome-webfont.ttf",
+    "dist/fonts/fontawesome-webfont.woff",
+    "dist/fonts/fontawesome-webfont.woff2",
+    "dist/images/masthead-logo-bleed-sm.svg",
+    "dist/images/masthead-logo-bleed-sm.png",
+    "dist/images/masthead-logo-bleed-xs.svg",
+    "dist/images/masthead-logo-bleed-xs.png",
+    "dist/templates/base.html"
+  ],
+  "ignore": [
+    "/.*",
+    "_config.yml",
+    "CNAME",
+    "composer.json",
+    "docs",
+    "js/tests",
+    "test-infra",
+    "bin",
+    ".jscsrc",
+    ".jshintrc",
+    "deploy.sh",
+    "blank.jst",
+    "Gemfile",
+    "Gemfile.lock",
+    "Gruntfile.js",
+    "id7.iml",
+    "package.json"
+  ],
+  "//": {
+    "All dependencies are intentionally removed here because they're packaged for inclusion by bower anyway": "",
+    "jquery": ">= 1.11.3",
+    "bootstrap": ">= 3.3.4",
+    "typeahead.js": ">= 0.11.1",
+    "lodash": ">= 3.10.0",
+    "html5shiv": ">= 3.7.2",
+    "modernizr": ">= 2.8.3",
+    "jquery-doublescroll": ">= 0.4"
+  },
+  "_release": "1.1.9",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.9",
+    "commit": "c37f3dd11528753bcdfbcf97ddf84973566b9b80"
+  },
+  "_source": "git://github.com/universityofwarwick/id7.git",
+  "_target": "~1.1.9",
+  "_originalSource": "warwick-id7",
+  "_direct": true
+}

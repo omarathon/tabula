@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, AssessmentService}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.spring.Wire
-import org.springframework.mail.javamail.{MimeMessageHelper, MimeMailMessage}
+import org.springframework.mail.javamail.MimeMessageHelper
 import javax.annotation.Resource
 import uk.ac.warwick.util.mail.WarwickMailSender
 import org.springframework.beans.factory.annotation.Value
@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream
 import org.springframework.core.io.ByteArrayResource
 import freemarker.template.Configuration
 import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
+import uk.ac.warwick.tabula.data.Transactions._
 
 object FeedbackReportJob {
 	val identifier = "feedback-report"
@@ -54,8 +55,10 @@ class FeedbackReportJob extends Job with Logging with FreemarkerRendering {
 
 	var sendEmails = true
 
-	def run(implicit job: JobInstance) {
-		new Runner(job).run()
+	def run(implicit job: JobInstance) = {
+		transactional() {
+			new Runner(job).run()
+		}
 	}
 
 

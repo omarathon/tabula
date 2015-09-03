@@ -12,6 +12,7 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 
 	before {
 		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		createStaffMember(P.Marker1.usercode, deptCode = "xxx")
 		createStaffMember(P.Marker2.usercode, deptCode = "xxx")

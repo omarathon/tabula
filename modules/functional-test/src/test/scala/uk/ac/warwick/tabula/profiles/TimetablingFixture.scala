@@ -18,7 +18,8 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 	before{
 		Given("The test department exists")
-		go to (Path("/scheduling/fixtures/setup"))
+		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		And("the personal timetables feature is enabled")
 		enableFeature("personalTimetables")

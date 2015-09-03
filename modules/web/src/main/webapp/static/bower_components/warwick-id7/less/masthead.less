@@ -1,0 +1,299 @@
+.id7-masthead {
+  .container-fluid((@grid-gutter-width * 2));
+
+  .id7-masthead-contents {
+    .make-row();
+  }
+
+  .id7-logo-column {
+    .make-sm-column(8);
+
+    float: left;
+    width: @id7-masthead-logo-width-xs;
+
+    @media (min-width: @grid-float-breakpoint) {
+      margin-bottom: 2px;
+    }
+  }
+
+  .id7-search-column {
+    .make-sm-column(4);
+
+    float: right;
+    margin-left: (-@id7-masthead-logo-width-xs);
+    max-width: 50%;
+    padding-left: 0;
+
+    @media (min-width: @screen-sm-min) {
+      padding-left: @grid-gutter-width;
+      margin-left: 0;
+    }
+
+    @media (max-width: @screen-sm-max) {
+      .id7-search-box-container .input-lg {
+        // Also make the placeholder text smaller on sm
+
+        &::-moz-placeholder { // Firefox
+          font-size: 11.5px;
+          line-height: 24px;
+        }
+        &:-ms-input-placeholder { // Internet Explorer 10+
+          font-size: 11.5px;
+          line-height: 24px;
+        }
+        &::-webkit-input-placeholder {  // Safari and Chrome
+          font-size: 11.5px;
+          line-height: 24px;
+        }
+      }
+    }
+  }
+
+  .id7-logo-row {
+    .make-row();
+    height: @id7-masthead-logo-height-xs;
+  }
+
+  .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-xs.svg", "@{id7-image-root-dir}/masthead-logo-bleed-xs.png");
+  background-size: 1680px 300px;
+
+  @media (min-width: @grid-float-breakpoint) {
+    .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-sm.svg", "@{id7-image-root-dir}/masthead-logo-bleed-sm.png");
+    background-size: @container-lg 300px;
+
+    .id7-logo-row {
+      height: @id7-masthead-logo-height-sm;
+
+      > .id7-logo {
+        width: @id7-masthead-logo-width-sm;
+        float: left;
+      }
+    }
+  }
+
+  .id7-logo a {
+    display: block;
+    height: @id7-masthead-logo-height-xs;
+    width: 100%;
+    text-align: center;
+
+    @media (min-width: @grid-float-breakpoint) {
+      height: @id7-masthead-logo-height-sm;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      .opacity(0);
+    }
+  }
+
+  .id7-header-text {
+    .header-colour(@text-color);
+    .link-colour(@text-color);
+    .link-decoration(underline);
+
+    @media (min-width: @grid-float-breakpoint) {
+      .link-decoration(none);
+    }
+
+    padding: 0 (@grid-gutter-width / 2);
+    position: relative;
+
+    h1 {
+      font-size: @id7-header-h1-font-size-xs;
+
+      @media (min-width: @grid-float-breakpoint) {
+        font-size: @id7-header-h1-font-size-sm;
+      }
+
+      line-height: @id7-header-h1-height;
+      margin: 0;
+      padding: @id7-header-h1-padding-vertical 0;
+
+      &.affix {
+        top: 0;
+        margin: 0 (-@grid-gutter-width);
+        padding: @id7-header-h1-padding-vertical @grid-gutter-width;
+        width: 100%;
+        z-index: 10;
+        background-color: white;
+
+        @media (min-width: @screen-sm-min) {
+          width: @container-sm;
+        }
+
+        @media (min-width: @screen-md-min) {
+          width: @container-md;
+        }
+
+        @media (min-width: @screen-lg-min) {
+          width: @container-lg;
+        }
+
+        &.headroom {
+          transition: transform 200ms linear;
+        }
+        &.headroom--pinned {
+          transform: translateY(0%);
+        }
+        &.headroom--unpinned {
+          transform: translateY(-100%);
+        }
+      }
+
+      @media (max-width: (@grid-float-breakpoint - 1)) {
+        .text-overflow();
+      }
+    }
+
+    .id7-parent-site-link {
+      color: @gray-light;
+
+      &::after {
+        .fa();
+        content: @fa-var-play;
+        position: relative;
+
+        font-size: 10px;
+        top: -2px;
+        margin-left: 5px;
+
+        @media (min-width: @grid-float-breakpoint) {
+          font-size: 12px;
+          top: -4px;
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+
+  .id7-logo-row nav {
+    display: none;
+
+    @media (min-width: @grid-float-breakpoint) {
+      display: block;
+    }
+
+    margin-left: @id7-masthead-logo-width-sm;
+
+    .opacity(0);
+    .transition(opacity 0.15s linear);
+    .small();
+
+    @line-height-small-computed: floor((@font-size-small * @line-height-small)); // ~17px
+    margin-top: ((@id7-masthead-logo-height-sm * 5/6) - (@line-height-small-computed / 2));
+
+    ul {
+      .horizontal-utility-links();
+    }
+
+    .link-colour(@gray-dark);
+  }
+
+  .id7-logo-row:hover nav { .opacity(1); }
+
+  .id7-search {
+    .id7-search-box-container {
+      margin-top: @id7-masthead-search-offset-xs;
+
+      @media (min-width: @grid-float-breakpoint) {
+        margin-top: (@id7-masthead-search-offset-sm + (@line-height-computed / 2));
+      }
+
+      position: relative;
+
+      .input-lg {
+        padding-right: (@padding-large-horizontal + @id7-masthead-search-button-width);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .fa {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+
+      color: @gray-light;
+      cursor: pointer;
+      .transition(color .15s linear);
+    }
+
+    .twitter-typeahead:hover + .fa, .fa:hover {
+      color: black;
+    }
+
+    .id7-search-box {
+      border-radius: 0;
+    }
+
+    .twitter-typeahead {
+      width: 100%;
+    }
+
+    .tt-menu {
+      margin-top: -1px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      .box-shadow(0 5px 10px rgba(0,0,0,.2));
+
+      left: auto !important;
+      right: 0px !important;
+      min-width: 100%;
+      width: (320px - (@grid-gutter-width * 2));
+
+      @media (min-width: @screen-md-min) {
+        left: 0px !important;
+        right: auto !important;
+        width: 100%;
+      }
+    }
+
+    .tt-suggestion {
+      padding: 8px 20px;
+      line-height: 18px;
+    }
+
+    .tt-suggestion + .tt-suggestion {
+      border-top: 1px solid #ccc;
+    }
+
+    .tt-suggestion .go-path {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .tt-suggestion .go-description {
+      margin: 0;
+    }
+
+    .twitter-typeahead .tt-suggestion.tt-cursor {
+      cursor: pointer;
+    }
+  }
+}
+
+// Unbranded sites don't get the logo in the masthead
+.id7-non-branded {
+  .id7-masthead {
+    background: white !important;
+
+    @media (min-width: @screen-xs-max) {
+      height: auto;
+    }
+  }
+
+  .id7-logo-column,
+  .id7-utility-masthead::after {
+    content: none;
+    display: none;
+  }
+
+  .id7-search-box-container {
+    margin-top: (@line-height-computed / 2) !important;
+  }
+}

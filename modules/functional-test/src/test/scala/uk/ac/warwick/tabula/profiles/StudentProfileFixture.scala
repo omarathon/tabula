@@ -13,7 +13,8 @@ trait StudentProfileFixture extends FixturesDriver with GivenWhenThen {
 
 	before{
 		Given("The test department exists")
-		go to (Path("/scheduling/fixtures/setup"))
+		go to Path("/scheduling/fixtures/setup")
+		pageSource should include("Fixture setup successful")
 
 		And("student1 has a membership record")
 		createRoute(TEST_ROUTE_CODE, TEST_DEPARTMENT_CODE, "Test Route")

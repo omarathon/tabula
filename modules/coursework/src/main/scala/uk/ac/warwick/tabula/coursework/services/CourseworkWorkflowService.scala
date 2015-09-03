@@ -130,7 +130,7 @@ object CourseworkWorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.suspectPlagiarised", health = Danger, completed = true)
-			case Some(item) if item.submission.allAttachments.exists(_.originalityReport != null) =>
+			case Some(item) if item.submission.allAttachments.exists(_.originalityReportReceived) =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.checked", health = Good, completed = true)
 			case Some(_) => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")
 			case _ => StageProgress(CheckForPlagiarism, started = false, messageCode = "workflow.CheckForPlagiarism.notChecked")

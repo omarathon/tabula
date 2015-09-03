@@ -686,7 +686,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Option(submission))) should be {false}
 
 		val a = new FileAttachment
-		a.originalityReport = new OriginalityReport
+		val originalityReport =new OriginalityReport
+		originalityReport.reportReceived = true
+		a.originalityReport = originalityReport
 		submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
 
 		submission.hasOriginalityReport.booleanValue() should be {true}
@@ -784,7 +786,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(params)(student(submission=Option(submission))) should be {false}
 
 		val a = new FileAttachment
+
 		a.originalityReport = new OriginalityReport
+		a.originalityReport.reportReceived = true
 		a.originalityReport.overlap = Option(30)
 		submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
 
@@ -834,7 +838,10 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 		// Checked for plagiarism, no longer fits
 		val a = new FileAttachment
-		a.originalityReport = new OriginalityReport
+		val originalityReport =new OriginalityReport
+		originalityReport.reportReceived = true
+		a.originalityReport = originalityReport
+
 		submission.values.add(SavedFormValue.withAttachments(submission, "Turnitin", Seq(a).toSet))
 
 		submission.hasOriginalityReport.booleanValue() should be {true}

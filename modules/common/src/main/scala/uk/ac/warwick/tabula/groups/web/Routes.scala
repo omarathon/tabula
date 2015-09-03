@@ -36,11 +36,13 @@ object Routes {
 		def createAddGroups(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/groups" format (encoded(set.module.code), encoded(set.id))
 		def createAddEvents(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/events" format (encoded(set.module.code), encoded(set.id))
 		def createAllocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s/allocate" format (encoded(set.module.code), encoded(set.id))
+		def createEditEvent(event: SmallGroupEvent) = context + "/admin/module/%s/groups/new/%s/events/%s/edit/%s" format (encoded(event.group.groupSet.module.code), encoded(event.group.groupSet.id), encoded(event.group.id), encoded(event.id))
 		def edit(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s" format (encoded(set.module.code), encoded(set.id))
 		def editAddStudents(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/students" format (encoded(set.module.code), encoded(set.id))
 		def editAddGroups(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/groups" format (encoded(set.module.code), encoded(set.id))
 		def editAddEvents(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/events" format (encoded(set.module.code), encoded(set.id))
 		def editAllocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/edit/%s/allocate" format (encoded(set.module.code), encoded(set.id))
+		def editEditEvent(event: SmallGroupEvent) = context + "/admin/module/%s/groups/edit/%s/events/%s/edit/%s" format (encoded(event.group.groupSet.module.code), encoded(event.group.groupSet.id), encoded(event.group.id), encoded(event.id))
 
 		def allocate(set: SmallGroupSet) = context + "/admin/module/%s/groups/%s/allocate" format (encoded(set.module.code), encoded(set.id))
 
