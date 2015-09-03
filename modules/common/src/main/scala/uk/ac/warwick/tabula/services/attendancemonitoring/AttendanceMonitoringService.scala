@@ -219,15 +219,22 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	}
 
 	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
-		val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear)).map(_.beginDate)
+		val validCourses = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear))
+		val beginDates = validCourses.map(_.beginDate)
+		val endDates = validCourses.map(c => Option(c.endDate))
 		if (beginDates.nonEmpty) {
-			// do not remove; import needed for sorting
-			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			val beginDate = beginDates.min
+			val endDate = {
+				if (endDates.exists(_.isEmpty)) {
+					None
+				} else {
+					Option(endDates.flatten.max)
+				}
+			}
 			val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
 			schemes.flatMap(_.points.asScala).filter(p =>
-				p.applies(beginDate)
+				p.applies(beginDate, endDate)
 			)
 		} else {
 			Seq()
@@ -237,7 +244,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		val schemes = findSchemesForStudent(studentData.universityId, studentData.userId, Option(department), academicYear)
 		schemes.flatMap(_.points.asScala).filter(p =>
-			p.applies(studentData.scdBeginDate)
+			p.applies(studentData.scdBeginDate, studentData.scdEndDate)
 		)
 	}
 
