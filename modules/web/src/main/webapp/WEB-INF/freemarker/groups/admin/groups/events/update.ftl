@@ -54,6 +54,7 @@ ${(event.day.name)!""}
 
 	<@f.form method="post" action="" commandName="command" cssClass="form-horizontal">
 		<@f.errors cssClass="error form-errors" />
+		<@f.errors path="index" cssClass="error form-errors" />
 
 		<table class="table table-bordered table-striped">
 			<thead>
