@@ -13,6 +13,7 @@ import uk.ac.warwick.util.files.imageresize.FileExposingImageResizer
 import uk.ac.warwick.util.files.imageresize.ImageResizer.FileType
 import uk.ac.warwick.util.files.impl.AbstractFileReference
 
+@deprecated("TAB-3706", "115")
 trait ResizesPhoto {
 	var imageResizer = Wire[FileExposingImageResizer]
 
@@ -48,6 +49,7 @@ trait ResizesPhoto {
 }
 
 /** Hacky adapter around RenderableFile to implement enough of FileReference for the resizer to accept */
+@deprecated("TAB-3706", "115")
 class RenderableFileReference(ref: RenderableFile, prefix: String) extends AbstractFileReference {
 	override def getData = new FileData {
 		override def delete(): Boolean = ???
@@ -72,11 +74,13 @@ class RenderableFileReference(ref: RenderableFile, prefix: String) extends Abstr
 	override def unlink() { ??? }
 }
 
+@deprecated("TAB-3706", "115")
 trait PhotoCachePolicy { self: RenderableFile =>
 	// Let browsers cache photos for a couple of hours
 	override def cachePolicy = CachePolicy(expires = Some(Hours.TWO))
 }
 
+@deprecated("TAB-3706", "115")
 class ResizedPhoto(f: File) extends RenderableFile with PhotoCachePolicy {
 	override def contentType = "image/jpeg"
 	override def inputStream = new FileInputStream(f)
@@ -85,10 +89,12 @@ class ResizedPhoto(f: File) extends RenderableFile with PhotoCachePolicy {
 	override def file = Some(f)
 }
 
+@deprecated("TAB-3706", "115")
 class Photo(attachment: FileAttachment) extends RenderableAttachment(attachment: FileAttachment) with PhotoCachePolicy {
 	override def contentType = "image/jpeg"
 }
 
+@deprecated("TAB-3706", "115")
 object DefaultPhoto extends RenderableFile {
 	private def read() = {
 		val is = getClass.getResourceAsStream("/no-photo.jpg")

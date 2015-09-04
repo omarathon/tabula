@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
@@ -28,9 +29,8 @@ class PhotoController extends ProfilesController {
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)
-							(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		// specify callback so that audit logging happens around file serving
-		command.apply { (renderable) => fileServer.stream(renderable) }
+							(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+		command.apply()
 	}
 
 }
@@ -63,9 +63,8 @@ class StudentRelationshipPhotoController extends ProfilesController {
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)
-							(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		// specify callback so that audit logging happens around file serving
-		command.apply { (renderable) => fileServer.stream(renderable) }
+							(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+		command.apply()
 	}
 
 }

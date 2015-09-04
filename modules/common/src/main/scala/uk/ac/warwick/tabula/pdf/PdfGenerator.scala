@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.pdf
 import com.itextpdf.text.Image
 import org.apache.commons.io.IOUtils
 import org.w3c.dom.Element
-import org.xhtmlrenderer.extend.{ReplacedElement, UserAgentCallback, ReplacedElementFactory}
+import org.xhtmlrenderer.extend.{UserAgentCallback, ReplacedElementFactory}
 import org.xhtmlrenderer.layout.LayoutContext
 import org.xhtmlrenderer.render.BlockBox
 import org.xhtmlrenderer.simple.extend.FormSubmissionListener
