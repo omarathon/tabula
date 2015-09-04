@@ -8,14 +8,13 @@ import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import scala.xml.Elem
 
-
 object TurnitinLtiConformanceOutcomesServiceCommand {
 	def apply(assignment: Assignment) =
 		new TurnitinLtiConformanceOutcomesServiceCommandInternal(assignment)
 			with ComposableCommand[TurnitinLtiConformanceOutcomesServiceCommandResponse]
 			with TurnitinLtiConformanceOutcomesServiceValidation
 			with AutowiringAssessmentServiceComponent
-			with Unaudited with ReadOnly with Logging with PubliclyVisiblePermissions
+			with Unaudited with Logging with PubliclyVisiblePermissions
 			with TurnitinLtiConformanceOutcomesServiceCommandState
 		}
 
@@ -38,6 +37,9 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 
 	}
 
+	/*
+		A deleteResultRequest callback will remove a turnitin id for an assignment
+	 */
 	private def applyDeleteResultRequest(incomingXml: Elem): TurnitinLtiConformanceOutcomesServiceCommandResponse = {
 		val sourcedId = (incomingXml \\ "sourcedId").text
 
@@ -46,6 +48,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 		val imsx_codeMajor = {
 			if ((incomingXml \\ "deleteResultRequest").text.nonEmpty) {
 				assignment.turnitinId = ""
+				assessmentService.save(assignment)
 				"success"
 			}
 			else "unsupported"
@@ -77,6 +80,9 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 		TurnitinLtiConformanceOutcomesServiceCommandResponse(xmlresponsestring)
 	}
 
+	/*
+	A readResultRequest callback will return the current turnitin id for an assignment
+ */
 	private def applyReadResultRequest(incomingXml: Elem): TurnitinLtiConformanceOutcomesServiceCommandResponse = {
 		val sourcedId = (incomingXml \\ "sourcedId").text
 
@@ -126,6 +132,9 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 		TurnitinLtiConformanceOutcomesServiceCommandResponse(xmlresponsestring)
 	}
 
+	/*
+	A replaceResultRequest callback will update a turnitin id for an assignment
+ */
 	private def applyReplaceResultRequest(incomingXml: Elem): TurnitinLtiConformanceOutcomesServiceCommandResponse = {
 		val sourcedId = (incomingXml \\ "sourcedId").text
 
@@ -140,6 +149,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 				score.toDouble match {
 					case s if 0<=s && s<= 1 => {
 						assignment.turnitinId = score
+						assessmentService.save(assignment)
 						("success", score)
 					}
 					case s if 0>s || s>1  => ("failure", -1)

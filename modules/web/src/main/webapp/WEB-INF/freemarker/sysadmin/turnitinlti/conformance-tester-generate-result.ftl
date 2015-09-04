@@ -9,7 +9,8 @@
 		<div class="control-group">
 			<div class="controls">
 				<label class="control-label" for="${key}">${key}</label>
-				<input type="text" value="${response[key]}" class="text" name="${key}" id="${key}" /></div>
+				<input type="text" value="${response[key]}" class="text" name="${key}" id="${key}" />
+			</div>
 		</div>
 		</#if>
 	</#list>
