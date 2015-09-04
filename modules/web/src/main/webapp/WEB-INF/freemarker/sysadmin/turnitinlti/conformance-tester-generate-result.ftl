@@ -6,11 +6,14 @@
 
 	<#list response?keys as key>
 		<#if response[key]?has_content>
-			<div class="control-group"><label class="control-label" for="$key}">
-				<div class="controls"><input type="text" value="${response[key]}" class="text" name="${key}" id="${key}" />
-			</div>
+		<div class="control-group">
+			<div class="controls">
+				<label class="control-label" for="${key}">${key}</label>
+				<input type="text" value="${response[key]}" class="text" name="${key}" id="${key}" /></div>
+		</div>
 		</#if>
 	</#list>
+
 	<@f.errors cssClass="error form-errors" />
 
 	<div class="submit-buttons">

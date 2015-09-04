@@ -27,8 +27,6 @@ import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.DateTime
 import scala.util.{Failure, Success, Try}
 
-//import scala.language.postfixOps
-
 object TurnitinLtiService {
 
 	val AssignmentPrefix = "Assignment-"
@@ -131,7 +129,6 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 							}
 						}
 				}
-
 		}
 	}
 
@@ -267,7 +264,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			endpoint, Some(secret), key
 		)
 
-		logger.info("doRequest: " + signedParams)
+		logger.debug("doRequest: " + signedParams)
 
 		signedParams
 
@@ -312,7 +309,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 		val signedParams = getSignedParamsWithKey(params, endpoint, Some(secret), key)
 
-		logger.info("doRequest: " + signedParams)
+		logger.debug("doRequest: " + signedParams)
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
 

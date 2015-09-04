@@ -27,8 +27,6 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 
 	def applyInternal(): TurnitinLtiConformanceOutcomesServiceCommandResponse = {
 
-		logger.info("body: " + body)
-
 		val incomingXml = scala.xml.XML.loadString(body)
 
 		val replaceResultRequest = (incomingXml \\ "replaceResultRequest").text

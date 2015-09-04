@@ -28,6 +28,7 @@ trait TurnitinLtiConformanceOutcomesServiceApi {
 	def command(@PathVariable assignment: Assignment) =
 		TurnitinLtiConformanceOutcomesServiceCommand(assignment)
 
+	// Could configure an xml transformer instead, if we ever needed to do this for real, rather than getting the whole RequestBody and parsing it ourselves.
 	@RequestMapping(method=Array(POST))
 	def inspectResponse(
 		@RequestBody body: String,
