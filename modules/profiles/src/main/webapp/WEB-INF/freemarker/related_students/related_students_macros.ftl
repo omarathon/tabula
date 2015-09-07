@@ -41,7 +41,8 @@
     (function($) {
         $(function() {
             $(".related_students").tablesorter({
-                sortList: [[2,0], [4,0], [5,0]]
+                sortList: [[2,0], [4,0], [5,0]],
+				sortForce: [[2,0]]
             });
 
             $(".related_student").on("mouseover", function(e) {
