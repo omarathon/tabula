@@ -56,8 +56,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 
 		val messageIdentifier = (incomingXml \\ "imsx_messageIdentifier").text
 
-		val xmlresponsestring = s"""
-			<?xml version="1.0" encoding="utf-8"?>
+		val xmlresponsestring = s"""<?xml version="1.0" encoding="utf-8"?>
 			<imsx_POXEnvelopeResponse xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
 				<imsx_POXHeader>
 					<imsx_POXResponseHeaderInfo>
@@ -100,8 +99,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 		val messageIdentifier = (incomingXml \\ "imsx_messageIdentifier").text
 		val version = (incomingXml \\ "imsx_version").text
 
-		val xmlresponsestring = s"""
-			<?xml version="1.0" encoding="utf-8"?>
+		val xmlresponsestring = s"""<?xml version="1.0" encoding="utf-8"?>
 			<imsx_POXEnvelopeResponse xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
 				<imsx_POXHeader>
 					<imsx_POXResponseHeaderInfo>
@@ -158,8 +156,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 				case e: NumberFormatException => ("failure", -1)
 			}
 
-		val xmlresponsestring = s"""
-			<?xml version="1.0" encoding="utf-8"?>
+		val xmlresponsestring = s"""<?xml version="1.0" encoding="utf-8"?>
 			<imsx_POXEnvelopeResponse xmlns = "http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
 				<imsx_POXHeader>
 					<imsx_POXResponseHeaderInfo>
