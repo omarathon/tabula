@@ -19,7 +19,7 @@
 		<p>
 			Feedback for <strong><@fmt.p markerFeedback?size "submission" /></strong> will be listed as approved.
 			By approving this feedback you agree that it is ready to be published to students. If you feel that further
-			modifications should be made to any feedback before it is published then reject the feedback instead.
+			modifications should be made to any feedback before it is published then request changes to the feedback instead.
 		</p>
 
 		<p>

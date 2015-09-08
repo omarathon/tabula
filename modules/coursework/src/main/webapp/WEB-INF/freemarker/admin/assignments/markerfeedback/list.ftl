@@ -64,11 +64,11 @@
 										<span class="label label-warning">Ready for marking</span>
 									</#if>
 								<#elseif thisFeedback.state.toString == "InProgress">
-									<span class="label label-info">In Progress</span>
+									<span class="label label-info">In progress</span>
 								<#elseif thisFeedback.state.toString == "MarkingCompleted">
 									<span class="label label-success">Marking completed</span>
 								<#elseif thisFeedback.state.toString == "Rejected">
-									<span class="label label-important">Rejected</span>
+									<span class="label label-important">Changes requested</span>
 								</#if>
 							</#if>
 						</dt>
@@ -130,7 +130,7 @@
 			   data-container="body"
 			   href="<@routes.markingUncompleted assignment marker previousRoleName />"
 			   id="marking-uncomplete-button">
-				<i class="icon-arrow-left"></i> Reject and return to ${previousRoleName}
+				<i class="icon-arrow-left"></i> Request changes from ${previousRoleName}
 			</a>
 		</#if>
 

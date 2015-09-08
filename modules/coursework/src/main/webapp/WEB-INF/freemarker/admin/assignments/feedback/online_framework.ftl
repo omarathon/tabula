@@ -42,7 +42,7 @@
 			<#elseif graph.hasUncompletedFeedback>
 				<div class="label label-warning marked">Marked</div>
 			<#elseif graph.hasRejectedFeedback>
-				<div class="label label-important">Rejected</div>
+				<div class="label label-important">Changes requested</div>
 			</#if>
 			</dt>
 			<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">

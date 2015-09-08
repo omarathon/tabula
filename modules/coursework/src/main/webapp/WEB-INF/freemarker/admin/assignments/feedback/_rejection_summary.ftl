@@ -1,11 +1,11 @@
 <#assign secondMarkerFeedback = parentFeedback.secondMarkerFeedback />
 <div class="well alert alert-danger">
 	<h3 style="color: inherit;">
-		This feedback was rejected by the moderator at <@fmt.date secondMarkerFeedback.uploadedDate />
+		The moderator requested changes to this feedabck at <@fmt.date secondMarkerFeedback.uploadedDate />
 	</h3>
 </div>
 <div class="well">
-	<h4>Rejection Summary</h4>
+	<h4>Summary of requested changes</h4>
 	<div class="${secondMarkerFeedback.feedbackPosition.toString} feedback-summary">
 		<div class="feedback-details">
 		<#if secondMarkerFeedback.mark?has_content || secondMarkerFeedback.grade?has_content>
