@@ -149,9 +149,13 @@ class SubmitToTurnitinLtiJob extends Job
 				case response if response.success =>
 						val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 						if (originalityReport.isDefined) {
-							originalityReport.get.turnitinId = response.turnitinSubmissionId()
-							originalityReport.get.reportReceived = false
+							logger.info("There is an existing originality report")
+							transactional() {
+								originalityReport.get.turnitinId = response.turnitinSubmissionId()
+								originalityReport.get.reportReceived = false
+							}
 						} else {
+							logger.info("No existing originality report; creating one")
 							transactional() {
 								val report = new OriginalityReport
 								report.turnitinId = response.turnitinSubmissionId()
