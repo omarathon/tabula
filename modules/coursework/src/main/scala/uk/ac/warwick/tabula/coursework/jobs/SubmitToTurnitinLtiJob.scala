@@ -197,6 +197,7 @@ class SubmitToTurnitinLtiJob extends Job
 								attachment.originalityReport = report
 								attachment.originalityReport.reportReceived = true
 								originalityReportService.saveOriginalityReport(attachment)
+								logger.info(s"Saving Originality Report with similarity ${result.similarity.getOrElse(None)}")
 							}
 							originalityReports :+ report
 						} else {
