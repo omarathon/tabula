@@ -146,23 +146,23 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			submit() match {
-				case response if response.success => {
+				case response if response.success =>
 						val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 						if (originalityReport.isDefined) {
 							originalityReport.get.turnitinId = response.turnitinSubmissionId()
 							originalityReport.get.reportReceived = false
 						} else {
-							val report = new OriginalityReport
-							report.turnitinId = response.turnitinSubmissionId()
-							attachment.originalityReport = report
-							originalityReportService.saveOriginalityReport(attachment)
+							transactional() {
+								val report = new OriginalityReport
+								report.turnitinId = response.turnitinSubmissionId()
+								attachment.originalityReport = report
+								originalityReportService.saveOriginalityReport(attachment)
+							}
 						}
 					response
-				}
-				case response if retries == 0 => {
+				case response if retries == 0 =>
 					logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
 					response
-				}
 				case _ => submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, retries-1)
 			}
 		}
@@ -184,14 +184,14 @@ class SubmitToTurnitinLtiJob extends Job
 
 						if (response.success) {
 							val result = response.submissionInfo()
-							report.similarity = result.similarity
-							report.overlap = result.overlap.map(_.toInt)
-							report.publicationOverlap = result.publication_overlap.map(_.toInt)
-							report.webOverlap = result.web_overlap.map(_.toInt)
-							report.studentOverlap = result.student_overlap.map(_.toInt)
-							attachment.originalityReport = report
-							attachment.originalityReport.reportReceived = true
 							transactional() {
+								report.similarity = result.similarity
+								report.overlap = result.overlap.map(_.toInt)
+								report.publicationOverlap = result.publication_overlap.map(_.toInt)
+								report.webOverlap = result.web_overlap.map(_.toInt)
+								report.studentOverlap = result.student_overlap.map(_.toInt)
+								attachment.originalityReport = report
+								attachment.originalityReport.reportReceived = true
 								originalityReportService.saveOriginalityReport(attachment)
 							}
 							originalityReports :+ report
@@ -200,7 +200,7 @@ class SubmitToTurnitinLtiJob extends Job
 							failedResults += (attachment.name -> response.statusMessage.getOrElse("failed to retrieve results"))
 						}
 					} else {
-						logger.warn(s"Failed to find originality report for attachment $attachment.id")
+						logger.warn(s"Failed to find originality report for attachment ${attachment.id}")
 						failedResults += (attachment.name -> "failed to find Originality Report")
 					}
 					resultsReceived += 1
@@ -258,10 +258,9 @@ class SubmitToTurnitinLtiJob extends Job
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				case _ => {
-					// Re-get this assignmnet from hibernate as the Turnitin ID has only just been set (in a separate transaction).
+				case _ =>
+					// Re-get this assignment from hibernate as the Turnitin ID has only just been set (in a separate transaction).
 					awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse (throw obsoleteJob), retries - 1)
-				}
 			}
 		}
 	}
