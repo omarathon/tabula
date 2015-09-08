@@ -374,6 +374,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
 		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
 		oauthparams.setOAuthCallback("about:blank")
+		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
 
 		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
 
