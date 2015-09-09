@@ -38,7 +38,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 	// Turnitin have requested that submissions should be sent at a rate of no more than 1 per second
 	val WaitingRequestsToTurnitinSleep = 2000
-	val WaitingRequestsToTurnitinRetries = 5
+	val WaitingRequestsToTurnitinRetries = 15
 
 
 	val WaitingRequestsFromTurnitinCallbackSleep = 2000
