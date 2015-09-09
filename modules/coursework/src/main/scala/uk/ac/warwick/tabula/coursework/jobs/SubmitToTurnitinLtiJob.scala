@@ -184,10 +184,12 @@ class SubmitToTurnitinLtiJob extends Job
 					if (originalityReport.isDefined && !originalityReport.get.reportReceived) {
 						val report = originalityReport.get
 
-						val response = retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
+						val response = transactional(readOnly = true) {
+							retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
+						}
 
-						if (response.success) {
-							val result = response.submissionInfo()
+						if (response.success && response.submissionInfo.similarity.isDefined) {
+							val result = response.submissionInfo
 							transactional() {
 								report.similarity = result.similarity
 								report.overlap = result.overlap.map(_.toInt)
@@ -228,7 +230,7 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			getResults match {
-				case response if response.success => response
+				case response if response.success && response.submissionInfo.similarity.isDefined => response
 				case response if retries == 0 => response
 				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
 			}
