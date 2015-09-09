@@ -8,6 +8,6 @@
 
 <p><a class="btn" href="<@url page="/sysadmin/turnitinlti/listendpoints" />">List endpoints for an assignment</a></p>
 
-<p><a class="btn" href="<@url page="/sysadmin/turnitinlti/conformancetester" />">Conformance tester</a></p>
+<p><a class="btn" href="<@url page="/sysadmin/turnitinlti/conformancetester-generate" />">Conformance tester</a></p>
 
 

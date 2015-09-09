@@ -12,7 +12,7 @@ import org.apache.http.protocol.HttpContext
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport, Assignment}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import com.google.api.client.auth.oauth.OAuthHmacSigner
@@ -229,50 +229,101 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def ltiConformanceTest(endpoint: String, secret: String, user: CurrentUser) = {
-				doRequestForLtiTesting(
-			endpoint,
-				secret,
-				Map(
-					"custom_debug" -> "true",
-					"resource_link_id" -> "1234567"
-				)){
-					request =>
-						request >:+ {
-							(headers, request) =>
-								request >- {
-									(html) => {
-										TurnitinLtiResponse.fromHtml(html.contains("message request is valid"), html)
-									}
-								}
-						}
-				}
+	def ltiConformanceTestParams(
+		endpoint: String,
+		secret: String,
+		key: String,
+		givenName: String,
+		familyName: String,
+		email: String,
+		role: String,
+		mentee: String,
+		customParams: String,
+		tool_consumer_info_version: String,
+		assignment: Assignment,
+		user: CurrentUser ) = {
+
+		val signedParams = getSignedParamsWithKey(
+			Map(
+				"lis_result_sourcedid" -> assignment.id,
+				"lis_outcome_service_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-lti-outcomes/assignment/${assignment.id}",
+				"resource_link_id" -> assignment.id,
+				"roles" -> role,
+				"role_scope_mentor" -> mentee,
+				"context_title" -> assignment.module.name,
+				"context_id" -> assignment.module.code,
+				"context_label" -> "A label for this context",
+				"resource_link_title" -> assignment.name,
+				"resource_link_description" -> "A description for this resource link",
+				"tool_consumer_info_version" -> tool_consumer_info_version,
+
+				// custom - custom params should be prefixed with _custom
+				"custom_debug" -> "true"
+
+			)  ++ userParams(email, givenName, familyName) ++ customParamsForTesting(customParams, email) filter(p => p._2.nonEmpty),
+			endpoint, Some(secret), key
+		)
+
+		logger.debug("doRequest: " + signedParams)
+
+		signedParams
+
 	}
+
+	def customParamsForTesting(customParams: String, email: String): Map[String, String] = {
+		/**
+		 * The LTI 1 specification forces all characters in key names to lower case and
+		 * maps anything that is not a number or letter to an underscore.
+		 * In LTI 2 it is best practice to send the parameter under both names, if different.
+		 */
+
+		val paramsList = customParams.split("\n").toList
+
+		val map =	paramsList.map (
+				p => (s"custom_${p.substring(0, p.indexOf("=")).replaceAll("[^a-zA-Z0-9]", "_").toLowerCase}"
+					-> p.substring(p.indexOf("=")+1).replace("$User.id", email).replace("$User.username", email).replace("$ToolConsumerProfile.url", topLevelUrl)
+					.filter(_ >= ' '))) // strip out carriage returns etc.
+				.toMap
+		map
+}
 
 	def userParams(email: String, firstName: String, lastName: String): Map[String, String] = {
 		Map(
+			// according to the spec, need lis_person_name_full or both lis_person_name_family and lis_person_name_given.
 			"user_id" -> email,
 			"lis_person_contact_email_primary" -> email,
-			"lis_person_contact_name_given" -> firstName,
-			"lis_person_contact_name_family" -> lastName)
+			"lis_person_name_given" -> firstName,
+			"lis_person_name_family" -> lastName)
 	}
 
 	def commonParameters = Map(
 		"lti_message_type" -> "basic-lti-launch-request",
 		"lti_version" -> "LTI-1p0",
-		"User-Agent" -> userAgent
+		"launch_presentation_locale" -> "en-GB",
+		"tool_consumer_info_product_family_code" -> "Tabula"
 	)
 
 	def doRequestForLtiTesting(
-		endpoint: String, secret: String, params: Map[String, String]
+		endpoint: String, secret: String, key: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
 	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
-		val signedParams = getSignedParams(params, endpoint, Some(secret))
+		val signedParams = getSignedParamsWithKey(params, endpoint, Some(secret), key)
+
+		logger.debug("doRequest: " + signedParams)
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
 
 		try {
-			http.x(transform(req))
+			if (expectedStatusCode.isDefined){
+				Try(http.when(_==expectedStatusCode.get)(transform(req))) match {
+					case Success(response) => response
+					case Failure(StatusCode(code, contents)) =>
+						logger.warn(s"Not expected http status code")
+						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"), responseCode = Some(code))
+					case _ =>
+						new TurnitinLtiResponse(false, statusMessage = Some("Unexpected HTTP status code"))
+				}
+			} else http.x(transform(req))
 		} catch {
 				case e: IOException =>
 					logger.error("Exception contacting provider", e)
@@ -319,6 +370,28 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 		val oauthparams = new OAuthParameters()
 		oauthparams.setOAuthConsumerKey(turnitinAccountId)
+		oauthparams.setOAuthNonce(OAuthUtil.getNonce)
+		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
+		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
+		oauthparams.setOAuthCallback("about:blank")
+		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
+
+		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
+
+		val signatureBaseString = OAuthUtil.getSignatureBaseString(endpoint, "POST", allParams.asJava)
+		val signature = hmacSigner.computeSignature(signatureBaseString)
+
+		oauthparams.addCustomBaseParameter("oauth_signature", signature)
+		val allParamsIncludingSignature = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
+		allParamsIncludingSignature
+	}
+
+	def getSignedParamsWithKey(params: Map[String, String], endpoint: String, optionalSecret: Option[String], key: String): Map[String, String] = {
+		val hmacSigner = new OAuthHmacSigner()
+		hmacSigner.clientSharedSecret = optionalSecret.getOrElse(sharedSecretKey)
+
+		val oauthparams = new OAuthParameters()
+		oauthparams.setOAuthConsumerKey(key)
 		oauthparams.setOAuthNonce(OAuthUtil.getNonce)
 		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
 		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")

@@ -734,6 +734,8 @@
                             if (!e[config.sortMultiSortKey]) {
                                 // flush the sort list
                                 config.sortList = [];
+								// add column to sort list
+								config.sortList.push([i, this.order]);
                                 if (config.sortForce != null) {
                                     var a = config.sortForce;
                                     for (var j = 0; j < a.length; j++) {
@@ -742,8 +744,6 @@
                                         }
                                     }
                                 }
-                                // add column to sort list
-                                config.sortList.push([i, this.order]);
                                 // multi column sorting
                             } else {
                                 // the user has clicked on an all

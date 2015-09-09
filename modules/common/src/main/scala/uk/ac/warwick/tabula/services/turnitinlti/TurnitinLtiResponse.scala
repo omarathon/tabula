@@ -89,6 +89,7 @@ case class TurnitinLtiResponse(
 
 		JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
+				logger.info(s"results: \n $theJson")
 				theJson.get("outcome_originalityreport") match {
 					case Some(reports: Map[String, Any] @unchecked) =>
 						reports.get("breakdown") match {

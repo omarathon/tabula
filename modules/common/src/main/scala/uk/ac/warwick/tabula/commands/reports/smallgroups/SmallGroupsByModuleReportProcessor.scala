@@ -49,6 +49,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 				null,
 				null,
 				null,
+				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))

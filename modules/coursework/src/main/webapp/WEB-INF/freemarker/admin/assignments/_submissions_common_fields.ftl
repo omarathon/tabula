@@ -213,7 +213,12 @@ so that they can be passed around between requests.
 						<@f.errors path="wordCountConventions" cssClass="error" />
 						<@f.textarea path="wordCountConventions" id="wordCountConventions" rows="3" cssClass="span6" />
 						<div class="help-block">
-							Tell students if there are specific things which should be included or excluded from the word count.
+							<div class="enabled">
+								Tell students if there are specific things which should be included or excluded from the word count.
+							</div>
+							<div class="disabled">
+								This will only be displayed if a minimum and/or maximum word count is entered.
+							</div>
 						</div>
 					</@form.field>
 				</@form.row>
@@ -232,7 +237,7 @@ jQuery(function($) {
 		}  else {
 			$('details.submissions').details('close');
 		}
-	}
+	};
 
 	<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
 	$('input[name=collectSubmissions]').on('change click keypress',function(e) {
@@ -241,6 +246,25 @@ jQuery(function($) {
 	});
 
 	updateSubmissionsDetails();
+
+	var updateWordCountConventions = function() {
+		if ($('input[name=wordCountMin]').val().length === 0 && $('input[name=wordCountMax]').val().length === 0) {
+			$('textarea[name=wordCountConventions]').prop('disabled', true).closest('div')
+				.find('.help-block .disabled').show()
+				.end().find('.help-block .enabled').hide();
+		} else {
+			$('textarea[name=wordCountConventions]').prop('disabled', false).closest('div')
+				.find('.help-block .enabled').show()
+				.end().find('.help-block .disabled').hide();
+		}
+	};
+
+	$('input[name=wordCountMin], input[name=wordCountMax]').on('change',function(e) {
+		e.stopPropagation();
+		updateWordCountConventions();
+	});
+
+	updateWordCountConventions();
 
 	<#-- if summary supported, disable defaults for this summary when a contained label element is clicked -->
 	$("summary").on("click", "label", function(e){
