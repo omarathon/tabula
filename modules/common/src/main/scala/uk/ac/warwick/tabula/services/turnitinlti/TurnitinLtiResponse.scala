@@ -155,6 +155,7 @@ object TurnitinLtiResponse extends Logging {
 
 	def fromJson(json: String) = {
 		val errorMessage: Option[String] = {
+			logger.info(s"json: $json")
 			JSON.parseFull(json) match {
 				case Some(theJson: Map[String, String] @unchecked) =>
 					theJson.get("error") match {
