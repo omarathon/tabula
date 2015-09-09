@@ -13,33 +13,12 @@ class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def memberWithNoPhoto() {
+	def memberPhoto() {
 		val member = new StudentMember()
-		member.photo = null
-		val command = new ViewProfilePhotoCommand(member)
-		val renderable = command.applyInternal()
-
-		renderable should be (DefaultPhoto)
-	}
-
-	@Test
-	def photoWithNoStream() {
-		val member = new StudentMember()
-		//member.photo = mock[FileAttachment] // photo.dataStream should return null
-		// can't use a mock because verifying mocked GeneratedIds doesn't work properly
-		val p = new FileAttachment(){
-			var dataStreamCallCount = 0
-			override def dataStream = {
-				dataStreamCallCount += 1
-				null
-			}
-		}
-		member.photo =p
-		val command = new ViewProfilePhotoCommand(member)
-		val renderable = command.applyInternal()
-
-		renderable should be (DefaultPhoto)
-		p.dataStreamCallCount should be(1)
+		member.universityId = "1170836"
+		val command = new ViewProfilePhotoCommand(member) {}
+		val mav = command.applyInternal()
+		mav.viewName should be ("redirect:https://$%7Bphotos.host%7D/$%7Bphotos.applicationId%7D/photo/a4ad3c80fd4bb5681b53c29f702abe8c/1170836")
 	}
 
 }
