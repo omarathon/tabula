@@ -144,7 +144,7 @@
 
 	<@fmt.deptheader "" "" department routes.groups "deptheaderroute" "with-settings" />
 
-	<#if !hasGroups>
+	<#if !hasGroups && !isFiltered>
 		<p class="alert alert-info empty-hint"><i class="icon-lightbulb"></i> There are no small groups set up for ${adminCommand.academicYear.label} in ${department.name}.</p>
 	</#if>
 
@@ -193,7 +193,7 @@
 		})(jQuery);
 	</script>
 
-	<#if hasGroups>
+	<#if hasGroups || isFiltered>
 		<#-- Filtering -->
 		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">

@@ -32,6 +32,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 		val hasModules = info.modulesWithPermission.nonEmpty
 		val hasGroups = info.setsWithPermission.nonEmpty
 		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
+		val isFiltered = !(cmd.moduleFilters.isEmpty && cmd.statusFilters.isEmpty && cmd.allocationMethodFilters.isEmpty && cmd.termFilters.isEmpty)
 
 		val model = Map(
 			"viewedAcademicYear" -> cmd.academicYear,
@@ -48,7 +49,8 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
 			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
 			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
-			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService)
+			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService),
+			"isFiltered" -> isFiltered
 		)
 
 		Mav(view, model)
