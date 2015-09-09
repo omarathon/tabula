@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 
 class PdfGeneratorTest extends TestBase{
 
-	val pdfGenerator: PdfGenerator = (new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent {
+	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent {
 		def textRenderer:TextRenderer = new TextRenderer {
 			def renderTemplate(templateId: String, model: Any): String = {
 				templateId match {
@@ -14,10 +14,10 @@ class PdfGeneratorTest extends TestBase{
 				}
 			}
 		}
-	}).pdfGenerator
+	}.pdfGenerator
 
 	@Test
-	def canRenderXHTML(){
+	def renderXHTML(){
 		val baos = new ByteArrayOutputStream()
 		pdfGenerator.renderTemplate("minimal",Map(),baos)
 		val of = new FileOutputStream(new File("/tmp/test.pdf"))
@@ -25,7 +25,7 @@ class PdfGeneratorTest extends TestBase{
 		of.write(pdfBytes)
 		of.close()
 		val pdf = new String(pdfBytes)
-		pdf should not be(null)
+		pdf should not be null
 		pdf should include("%PDF-1.4")
 	}
 
