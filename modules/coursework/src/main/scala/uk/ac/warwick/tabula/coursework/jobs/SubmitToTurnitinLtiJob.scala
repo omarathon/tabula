@@ -102,7 +102,7 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 			submit() match {
 				case response if response.success => response
-				case response if retries == 0 => throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + Some(response.statusMessage))
+				case response if retries == 0 => throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + response.statusMessage.getOrElse("Error unknown"))
 				case _ => submitAssignment(retries -1)
 			}
 		}
