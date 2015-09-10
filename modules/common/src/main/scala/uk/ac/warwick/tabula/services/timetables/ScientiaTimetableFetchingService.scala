@@ -11,7 +11,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 import scala.util.{Failure, Success, Try}
@@ -90,12 +91,12 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	// the timetable response doesn't include its year, so we pass that in separately.
 	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			val events = parseXml(node, year, locationFetchingService)
+			val events = parseXml(node, year, locationFetchingService, moduleAndDepartmentService)
 
 			if (excludeSmallGroupEventsInTabula)
 				events.filterNot { event =>
 					event.eventType == TimetableEventType.Seminar &&
-					hasSmallGroups(event.context, year)
+					hasSmallGroups(event.parent.shortName, year)
 				}
 			else events
 		}
@@ -103,7 +104,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	private def hasSmallGroups(moduleCode: Option[String], year: AcademicYear) =
 		moduleCode.flatMap(moduleAndDepartmentService.getModuleByCode).fold(false) { module =>
-			smallGroupService.getSmallGroupSets(module, year).filterNot { _.archived }.nonEmpty
+			!smallGroupService.getSmallGroupSets(module, year).forall(_.archived)
 		}
 
 	def getTimetableForStudent(universityId: String) = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
@@ -117,8 +118,8 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			val (ss: Seq[Success[Seq[T]]] @unchecked, fs: Seq[Failure[Seq[T]]] @unchecked) =
 				xs.partition(_.isSuccess)
 
-			if (fs.isEmpty) Success(ss.map { _.get }.flatten)
-			else Failure[Seq[T]](fs(0).exception) // Only keep the first failure
+			if (fs.isEmpty) Success(ss.flatMap(_.get))
+			else Failure[Seq[T]](fs.head.exception) // Only keep the first failure
 		}
 
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
@@ -163,7 +164,14 @@ object ScientiaHttpTimetableFetchingService {
 		}
 	}
 
-	def parseXml(xml: Elem, year: AcademicYear, locationFetchingService: LocationFetchingService): Seq[TimetableEvent] =
+	def parseXml(
+		xml: Elem,
+		year: AcademicYear,
+		locationFetchingService: LocationFetchingService,
+		moduleAndDepartmentService: ModuleAndDepartmentService
+	): Seq[TimetableEvent] = {
+		val moduleCodes = (xml \\ "module").map(_.text.toLowerCase).distinct
+		val moduleMap = moduleAndDepartmentService.getModulesByCodes(moduleCodes).groupBy(_.code).mapValues(_.head)
 		xml \\ "Activity" map { activity =>
 			val name = (activity \\ "name").text
 
@@ -175,11 +183,11 @@ object ScientiaHttpTimetableFetchingService {
 					// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
 					// we're generally better off without this.
 					val removeBuildingNames = "^[^_]*_".r
-					Some(locationFetchingService.locationFor(removeBuildingNames.replaceFirstIn(text,"")))
+					Some(locationFetchingService.locationFor(removeBuildingNames.replaceFirstIn(text, "")))
 				case _ => None
 			}
 
-			val context = Option((activity \\ "module").text)
+			val parent = Parent.Module(moduleMap.get((activity \\ "module").text.toLowerCase))
 
 			val dayOfWeek = DayOfWeek.apply((activity \\ "day").text.toInt + 1)
 
@@ -190,8 +198,10 @@ object ScientiaHttpTimetableFetchingService {
 						startTime.toString,
 						endTime.toString,
 						dayOfWeek.toString,
-						location.fold("") { _.name },
-						context.getOrElse("")
+						location.fold("") {
+							_.name
+						},
+						parent.shortName.getOrElse("")
 					).mkString
 				)
 
@@ -206,12 +216,18 @@ object ScientiaHttpTimetableFetchingService {
 				startTime = startTime,
 				endTime = endTime,
 				location = location,
-				comments = Option((activity \\ "comments").text).flatMap { _.maybeText },
-				context = context,
-				staffUniversityIds = (activity \\ "staffmember") map { _.text },
-				studentUniversityIds = (activity \\ "student") map { _.text },
+				comments = Option((activity \\ "comments").text).flatMap {
+					_.maybeText
+				},
+				parent = parent,
+				staffUniversityIds = (activity \\ "staffmember") map {
+					_.text
+				},
+				studentUniversityIds = (activity \\ "student") map {
+					_.text
+				},
 				year = year
 			)
 		}
-
+	}
 }

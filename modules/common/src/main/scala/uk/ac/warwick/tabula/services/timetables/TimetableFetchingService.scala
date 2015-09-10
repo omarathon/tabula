@@ -80,7 +80,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 
 	def mergeDuplicates(events: Seq[TimetableEvent]): Seq[TimetableEvent] = {
 		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module, it is the same
-		events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges, event.eventType, event.context) }
+		events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges, event.eventType, event.parent.shortName) }
 			.mapValues {
 				case event :: Nil => event
 				case events => {
@@ -96,7 +96,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						event.startTime,
 						event.endTime,
 						events.flatMap { _.location }.headOption,
-						event.context,
+						event.parent,
 						events.flatMap { _.comments }.headOption,
 						events.flatMap { _.staffUniversityIds }.distinct,
 						events.flatMap { _.studentUniversityIds }.distinct,

@@ -4,6 +4,7 @@ import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, RelationshipService, RelationshipServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
@@ -12,9 +13,9 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	student.universityId = "university ID"
 
 	val user = mock[CurrentUser]
-	user.profile returns (Some(student))
+	user.profile returns Some(student)
 
-	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, None, Nil)
+	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, Parent.Empty(), None, Nil)
 
 	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
 	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student))
@@ -37,7 +38,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
 	source.relationshipService.listAllStudentRelationshipsWithMember(student) returns Nil
-	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns (true)
+	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns true
 	source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 
 	@Test

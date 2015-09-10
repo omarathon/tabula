@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.data.model.{StaffMember, Member, AbstractMeetingRecord, RuntimeMember, StudentMember}
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, RelationshipServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
+import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, RelationshipServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 trait ScheduledMeetingEventSource {
 	def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[EventOccurrence]
@@ -34,10 +34,9 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 			val meetings = meetingRecordService.listAll(relationships, currentUser.profile)
 			meetings.flatMap { meeting => meeting.toEventOccurrence(context).map {
 				case occurrence if canReadMeeting(meeting) => occurrence
-				case occurrence => {
+				case occurrence =>
 					// No permission to read meeting details, just show as busy
 					EventOccurrence.busy(occurrence)
-				}
 			}
 		}}
 

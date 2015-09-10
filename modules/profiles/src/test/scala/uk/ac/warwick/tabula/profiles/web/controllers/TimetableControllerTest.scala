@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import org.joda.time.DateTime
 import org.springframework.mock.web.{MockHttpServletResponse, MockHttpServletRequest}
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
@@ -22,16 +23,16 @@ class TimetableControllerTest extends TestBase with Mockito {
 			i<- 1 until 21
 		  j = i%3}
 		yield {
-			FullCalendarEvent(s"Test event $i", "", allDay = false, 0L,0L,"","","","","","","","","","","",s"module$j","")
+			FullCalendarEvent(s"Test event $i", "", allDay = false, 0L,0L,"","","","","","","","","","","","Module",s"module$j",s"Module $j","")
 		}
 
 		// Add a Busy event at the end
-		val coloured = new TimetableController().colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","", "", ""))
+		val coloured = new TimetableController().colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","","Empty", "", "", ""))
 
 		// every event should have a colour
 		coloured.find(_.backgroundColor=="") should not be 'defined
 
-		// there should be 3 colours in use
+		// there should be 4 colours in use
 		coloured.map(_.backgroundColor).distinct.size should be(4)
 
 		coloured.last.backgroundColor should be ("#bbb")
