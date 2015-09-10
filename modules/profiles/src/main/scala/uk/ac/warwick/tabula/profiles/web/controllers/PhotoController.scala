@@ -25,7 +25,7 @@ class PhotoController extends ProfilesController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = new ViewProfilePhotoCommand(member)
+	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)

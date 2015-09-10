@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.profiles.{PhotosWarwickMemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication}
+import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, PhotosWarwickMemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -10,8 +10,14 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.web.Mav
 
-class ViewProfilePhotoCommand(val member: Member)
-	extends Command[Mav] with ReadOnly with Unaudited with ServesPhotosFromExternalApplication with PhotosWarwickMemberPhotoUrlGeneratorComponent {
+object ViewProfilePhotoCommand {
+	def apply(member: Member) = new ViewProfilePhotoCommand(member) with PhotosWarwickMemberPhotoUrlGeneratorComponent
+}
+
+abstract class ViewProfilePhotoCommand(val member: Member)
+	extends Command[Mav] with ReadOnly with Unaudited with ServesPhotosFromExternalApplication {
+
+	this: MemberPhotoUrlGeneratorComponent =>
 
 	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
 
@@ -20,7 +26,6 @@ class ViewProfilePhotoCommand(val member: Member)
 	}
 
 	override def describe(d: Description) = d.member(member)
-
 }
 
 class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship)

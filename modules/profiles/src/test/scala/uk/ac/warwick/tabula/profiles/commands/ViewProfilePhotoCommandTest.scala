@@ -1,24 +1,30 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.profiles.DefaultPhoto
+import uk.ac.warwick.tabula.commands.profiles._
 import uk.ac.warwick.tabula.{Mockito, ItemNotFoundException, TestBase}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember, Member}
 import scala.language.reflectiveCalls
 
 class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 
+	val testConfig = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
+
 	@Test(expected=classOf[ItemNotFoundException])
 	def memberDoesNotExist() {
-		new ViewProfilePhotoCommand(null: Member)
+		ViewProfilePhotoCommand(null: Member)
 	}
 
 	@Test
 	def memberPhoto() {
 		val member = new StudentMember()
 		member.universityId = "1170836"
-		val command = new ViewProfilePhotoCommand(member) {}
+		val command = new ViewProfilePhotoCommand(member) with MemberPhotoUrlGeneratorComponent {
+			val photoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
+				def photosWarwickConfiguration = testConfig
+			}
+		}
 		val mav = command.applyInternal()
-		mav.viewName should be ("redirect:https://$%7Bphotos.host%7D/$%7Bphotos.applicationId%7D/photo/a4ad3c80fd4bb5681b53c29f702abe8c/1170836")
+		mav.viewName should be ("redirect:https://photos.warwick.ac.uk/tabula/photo/71e36c13ab75fc9f422b1b404245b1a3/1170836")
 	}
 
 }
