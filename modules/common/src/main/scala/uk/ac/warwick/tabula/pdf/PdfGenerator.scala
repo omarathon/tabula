@@ -8,7 +8,7 @@ import org.xhtmlrenderer.extend.{UserAgentCallback, ReplacedElementFactory}
 import org.xhtmlrenderer.layout.LayoutContext
 import org.xhtmlrenderer.render.BlockBox
 import org.xhtmlrenderer.simple.extend.FormSubmissionListener
-import uk.ac.warwick.tabula.commands.profiles.{ServesPhotosFromExternalApplication, PhotosWarwickMemberPhotoUrlGeneratorComponent}
+import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication, PhotosWarwickMemberPhotoUrlGeneratorComponent}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.views.TextRendererComponent
 import org.xhtmlrenderer.pdf.{ITextImageElement, ITextFSImage, ITextRenderer}
@@ -24,17 +24,23 @@ trait PDFGeneratorComponent {
 }
 
 trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
-	self: TextRendererComponent =>
+	self: TextRendererComponent with MemberPhotoUrlGeneratorComponent =>
 
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
 	def pdfGenerator: PdfGenerator = new PdfGeneratorImpl()
+	val parentUrlGenerator = photoUrlGenerator
 
 	class PdfGeneratorImpl extends PdfGenerator {
+
 		def renderTemplate(templateId: String, model: Any, out:OutputStream) = {
 			val xthml = textRenderer.renderTemplate(templateId, model)
 			val renderer = new ITextRenderer
-			renderer.getSharedContext.setReplacedElementFactory(new ProfileImageReplacedElementFactory(renderer.getSharedContext.getReplacedElementFactory))
+			val elementFactory = new ProfileImageReplacedElementFactory(renderer.getSharedContext.getReplacedElementFactory)
+				with MemberPhotoUrlGeneratorComponent {
+				def photoUrlGenerator = parentUrlGenerator
+			}
+			renderer.getSharedContext.setReplacedElementFactory(elementFactory)
 			renderer.setDocumentFromString(xthml.replace("&#8194;", " "), topLevelUrl)
 			renderer.layout()
 			renderer.createPDF(out)
@@ -44,7 +50,9 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 }
 
 class ProfileImageReplacedElementFactory(delegate: ReplacedElementFactory) extends ReplacedElementFactory
-	with ServesPhotosFromExternalApplication with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringProfileServiceComponent {
+	with ServesPhotosFromExternalApplication with AutowiringProfileServiceComponent {
+
+	this: MemberPhotoUrlGeneratorComponent =>
 
 	size = THUMBNAIL_SIZE // TODO consider allowing different sizes
 

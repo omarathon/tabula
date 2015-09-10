@@ -2,11 +2,19 @@ package uk.ac.warwick.tabula.pdf
 
 import uk.ac.warwick.tabula.TestBase
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
+import uk.ac.warwick.tabula.commands.profiles.{PhotosWarwickConfig, PhotosWarwickConfigComponent, PhotosWarwickMemberPhotoUrlGenerator, MemberPhotoUrlGeneratorComponent}
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 
 class PdfGeneratorTest extends TestBase{
 
-	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent {
+
+	trait MockMemberPhotoUrlGeneratorComponent extends MemberPhotoUrlGeneratorComponent {
+		val photoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
+			def photosWarwickConfiguration = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
+		}
+	}
+
+	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent {
 		def textRenderer:TextRenderer = new TextRenderer {
 			def renderTemplate(templateId: String, model: Any): String = {
 				templateId match {
