@@ -37,24 +37,18 @@ object TimetableEvent {
 		val shortName: Option[String]
 		val fullName: Option[String]
 	}
-	case class EmptyParent(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
-	case class ModuleParent(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
-	case class RelationshipParent(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	case class Empty(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	case class Module(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	case class Relationship(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
 	object Parent {
-		object Empty {
-			def apply() = {
-				EmptyParent(None, None)
-			}
+		def apply() = {
+			Empty(None, None)
 		}
-		object Module {
-			def apply(module: Option[model.Module]) = {
-				ModuleParent(module.map(_.code.toUpperCase), module.map(_.name))
-			}
+		def apply(module: Option[model.Module]) = {
+			Module(module.map(_.code.toUpperCase), module.map(_.name))
 		}
-		object Relationship {
-			def apply(relationship: StudentRelationshipType) = {
-				RelationshipParent(Option(relationship.description), Option(relationship.description))
-			}
+		def apply(relationship: StudentRelationshipType) = {
+			Relationship(Option(relationship.description), Option(relationship.description))
 		}
 	}
 
@@ -73,7 +67,7 @@ object TimetableEvent {
 			startTime = sge.startTime,
 			endTime = sge.endTime,
 			location = Option(sge.location),
-			parent = Parent.Module(Option(sge.group.groupSet.module)),
+			parent = TimetableEvent.Parent(Option(sge.group.groupSet.module)),
 			comments = None,
 			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
 			studentUniversityIds = sge.group.students.knownType.members,
@@ -169,7 +163,7 @@ object EventOccurrence {
 			occurrence.start,
 			occurrence.end,
 			None,
-			Parent.Empty(),
+			TimetableEvent.Parent(),
 			None,
 			Nil
 		)

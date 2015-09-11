@@ -187,7 +187,7 @@ object ScientiaHttpTimetableFetchingService {
 				case _ => None
 			}
 
-			val parent = Parent.Module(moduleMap.get((activity \\ "module").text.toLowerCase))
+			val parent = TimetableEvent.Parent(moduleMap.get((activity \\ "module").text.toLowerCase))
 
 			val dayOfWeek = DayOfWeek.apply((activity \\ "day").text.toInt + 1)
 

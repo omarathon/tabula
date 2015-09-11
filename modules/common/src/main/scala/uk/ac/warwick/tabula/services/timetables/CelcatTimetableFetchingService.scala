@@ -186,7 +186,7 @@ object CelcatHttpTimetableFetchingService {
 				endTime = end.toLocalTime,
 				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(locationFetchingService.locationFor),
 				comments = None,
-				parent = Parent.Module(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
+				parent = TimetableEvent.Parent(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
 				staffUniversityIds = staffIds,
 				studentUniversityIds = Nil,
 				year = year

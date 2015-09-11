@@ -101,7 +101,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			start = meetingDate.toLocalDateTime,
 			end = meetingDate.plusHours(1).toLocalDateTime,
 			location = if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }.map(NamedLocation),
-			parent = Parent.Relationship(relationship.relationshipType),
+			parent = TimetableEvent.Parent(relationship.relationshipType),
 			comments = None,
 			staffUniversityIds = context match {
 				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.universityId }.toSeq

@@ -37,7 +37,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
 			location=Some(NamedLocation("L5")),
-			parent=Parent.Module(Some(module)),
+			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Nil,

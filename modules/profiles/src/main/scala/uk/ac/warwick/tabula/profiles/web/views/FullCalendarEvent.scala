@@ -6,8 +6,7 @@ import uk.ac.warwick.tabula.data.model.MapLocation
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{Hour12OptionalMins, IncludeDays}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.timetables.TimetableEvent.{EmptyParent, ModuleParent, RelationshipParent}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 /**
  * serialises to the JSON which FullCalendar likes.
@@ -77,9 +76,9 @@ object FullCalendarEvent {
 			shorterTitle = source.parent.shortName.map { _ + " " }.getOrElse("") + source.eventType.displayName,
 			tutorNames = userLookup.getUsersByWarwickUniIds(source.staffUniversityIds).values.map(_.getFullName).mkString(", "),
 		  parentType = source.parent match {
-				case EmptyParent(_,_) => "Empty"
-				case ModuleParent(_,_) => "Module"
-				case RelationshipParent(_,_) => "Relationship"
+				case TimetableEvent.Empty(_,_) => "Empty"
+				case TimetableEvent.Module(_,_) => "Module"
+				case TimetableEvent.Relationship(_,_) => "Relationship"
 			},
 			parentShortName = source.parent.shortName.getOrElse(""),
 			parentFullName = source.parent.fullName.getOrElse(""),

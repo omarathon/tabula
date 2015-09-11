@@ -17,7 +17,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 	private trait Fixture {
 		val module = Fixtures.module("cs118")
 		val studentId = "studentId"
-		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,Parent.Module(None),None,Nil,Nil, AcademicYear(2013)))
+		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
 		val delegate = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns Success(studentEvents)
@@ -47,7 +47,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// deliberately use the student ID to look up some staff events. The cache key should be the ID + the type of
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
-		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,Parent.Module(None),None,Nil,Nil, AcademicYear(2013)))
+		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
 		delegate.getTimetableForStaff(studentId) returns Success(staffEvents)
 
 		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
@@ -83,7 +83,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				new LocalTime(16, 0),
 				new LocalTime(17, 0),
 				Some(NamedLocation("event 1 location")),
-				Parent.Module(Some(module)),
+				TimetableEvent.Parent(Some(module)),
 				Some("Comments!"),
 				Seq("0672089", "0672088"),
 				Seq("1234567"),
@@ -100,7 +100,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				new LocalTime(10, 0),
 				new LocalTime(14, 0),
 				None,
-				Parent.Module(None),
+				TimetableEvent.Parent(None),
 				None,
 				Nil,
 				Nil,
