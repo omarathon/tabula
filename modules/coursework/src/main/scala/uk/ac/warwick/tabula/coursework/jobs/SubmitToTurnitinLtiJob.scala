@@ -38,11 +38,11 @@ class SubmitToTurnitinLtiJob extends Job
 
 	// Turnitin have requested that submissions should be sent at a rate of no more than 1 per second
 	val WaitingRequestsToTurnitinSleep = 2000
-	val WaitingRequestsToTurnitinRetries = 15
+	val WaitingRequestsToTurnitinRetries = 30
 
 
 	val WaitingRequestsFromTurnitinCallbackSleep = 2000
-	val WaitingRequestsFromTurnitinCallbacksRetries = 10
+	val WaitingRequestsFromTurnitinCallbacksRetries = 20
 
 	var sendNotifications = true
 
@@ -154,16 +154,14 @@ class SubmitToTurnitinLtiJob extends Job
 				case response if response.success =>
 						val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 						if (originalityReport.isDefined) {
-							logger.info("There is an existing originality report")
 							transactional() {
-								originalityReport.get.turnitinId = response.turnitinSubmissionId()
+								originalityReport.get.turnitinId = response.turnitinSubmissionId
 								originalityReport.get.reportReceived = false
 							}
 						} else {
-							logger.info("No existing originality report; creating one")
 							transactional() {
 								val report = new OriginalityReport
-								report.turnitinId = response.turnitinSubmissionId()
+								report.turnitinId = response.turnitinSubmissionId
 								attachment.originalityReport = report
 								originalityReportService.saveOriginalityReport(attachment)
 							}

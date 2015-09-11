@@ -89,7 +89,6 @@ case class TurnitinLtiResponse(
 
 		JSON.parseFull(json.get) match {
 			case Some(theJson: Map[String, Any] @unchecked) =>
-				logger.info(s"results: \n $theJson")
 				theJson.get("outcome_originalityreport") match {
 					case Some(reports: Map[String, Any] @unchecked) =>
 						reports.get("breakdown") match {
@@ -160,7 +159,6 @@ object TurnitinLtiResponse extends Logging {
 
 	def fromJson(json: String) = {
 		val errorMessage: Option[String] = {
-			logger.info(s"json: $json")
 			JSON.parseFull(json) match {
 				case Some(theJson: Map[String, String] @unchecked) =>
 					theJson.get("error") match {
