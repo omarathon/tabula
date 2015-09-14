@@ -135,7 +135,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val command = new ImportStaffMemberCommand(mac, new AnonymousUser)
 
 		command.memberDao = memberDao
-		command.fileDao = fileDao
 
 		val member = command.apply()
 		member.title should be ("Mr")
@@ -146,9 +145,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		member.firstName should be ("Mathew")
 		member.lastName should be ("Mannion")
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-
-		verify(fileDao, times(1)).savePermanent(any[FileAttachment])
-		verify(fileDao, times(0)).saveTemporary(any[FileAttachment])
 
 		verify(memberDao, times(1)).saveOrUpdate(any[Member])
 	}

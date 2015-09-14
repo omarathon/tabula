@@ -7,23 +7,17 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberProperties
 import java.sql.ResultSet
-import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.Gender
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.sql.Date
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import org.springframework.beans.BeanWrapper
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.Closeables._
-import java.io.InputStream
-import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.commands.Unaudited
-import java.io.ByteArrayInputStream
 import uk.ac.warwick.userlookup.User
 import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
@@ -40,7 +34,6 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var memberDao = Wire[MemberDao]
-	var fileDao = Wire[FileDao]
 	var userLookup = Wire[UserLookupService]
 
 	// A couple of intermediate properties that will be transformed later
