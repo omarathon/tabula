@@ -7,23 +7,17 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberProperties
 import java.sql.ResultSet
-import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.Gender
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.sql.Date
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import org.springframework.beans.BeanWrapper
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.Closeables._
-import java.io.InputStream
-import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.commands.Unaudited
-import java.io.ByteArrayInputStream
 import uk.ac.warwick.userlookup.User
 import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
@@ -40,11 +34,9 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var memberDao = Wire[MemberDao]
-	var fileDao = Wire[FileDao]
 	var userLookup = Wire[UserLookupService]
 
 	// A couple of intermediate properties that will be transformed later
-	var photoOption: () => Option[Array[Byte]] = _
 	var homeDepartmentCode: String = _
 
 	var membershipLastUpdated: DateTime = _
@@ -77,7 +69,6 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
 
 		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }).orNull)
-		this.photoOption = mac.photo
 
 		this.jobTitle = member.position
 		this.phoneNumber = member.phoneNumber
@@ -90,78 +81,11 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")).orNull)
 	}
 
-	private def copyPhoto(property: String, photoOption: Option[Array[Byte]], memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case null => null
-			case value: FileAttachment => value
-		}
-
-		val blobEmpty = !photoOption.isDefined || photoOption.get.length == 0
-
-		logger.debug("Property " + property + ": " + oldValue + " -> " + photoOption)
-
-		if (oldValue == null && blobEmpty) false
-		else if (oldValue == null) {
-			// From no photo to having a photo
-			memberBean.setPropertyValue(property, toPhoto(photoOption.get))
-			true
-		} else if (blobEmpty) {
-			// User had a photo but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else {
-			def shaHash(is: InputStream) =
-				if (is == null) null
-				else closeThis(is) { is => DigestUtils.shaHex(is) }
-
-			// Need to check whether the existing photo matches the new photo
-			if (shaHash(oldValue.dataStream) == shaHash(new ByteArrayInputStream(photoOption.get))) false
-			else {
-				memberBean.setPropertyValue(property, toPhoto(photoOption.get))
-				true
-			}
-		}
-	}
-
 	private val basicMemberProperties = Set(
 		// userType is included for new records, but hibernate does not in fact update it for existing records
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
 		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
 	)
-
-	private def copyPhotoIfModified(property: String, photoOption: () => Option[Array[Byte]], memberBean: BeanWrapper): Boolean = {
-		val memberLastUpdated = memberBean.getPropertyValue("lastUpdatedDate").asInstanceOf[DateTime]
-		val existingPhoto = memberBean.getPropertyValue("_photo").asInstanceOf[FileAttachment]
-
-		/*
-		 * We copy the photo if:
-		 * - The student currently has no photo; or
-		 * - There is no last updated date for the Member; or
-		 * - There is no last updated date from Membership; or
-		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
-		 */
-		val fetchPhoto = if (memberBean.getPropertyValue("photoOptOut").asInstanceOf[Boolean]) {
-			logger.info(s"Not fetching photo for $universityId as they have opted out")
-			false
-		} else if (existingPhoto == null || !existingPhoto.hasData) {
-			logger.info(s"Fetching photo for $universityId as we have no existing photo stored")
-			true
-		} else if (memberLastUpdated == null) {
-			logger.info(s"Fetching photo for $universityId as we have no last updated date stored")
-			true
-		} else if (membershipLastUpdated == null) {
-			logger.info(s"Fetching photo for $universityId as membership returned no last updated date")
-			true
-		} else if (memberLastUpdated.isBefore(membershipLastUpdated)) {
-			logger.info(s"Fetching photo for $universityId as our member last updated $memberLastUpdated is before membership last updated $membershipLastUpdated")
-			true
-		} else false
-
-		if (fetchPhoto) {
-			copyPhoto("photo", photoOption(), memberBean)
-			true // always ping the last updated date
-		} else false
-	}
 
 	private def setTimetableHashIfMissing(memberBean: BeanWrapper): Boolean = {
 		val existingHash = memberBean.getPropertyValue("timetableHash").asInstanceOf[String]
@@ -176,26 +100,14 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-		copyPhotoIfModified("photo", photoOption, memberBean) |
 		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
 		setTimetableHashIfMissing(memberBean)
-
-	private def toPhoto(bytes: Array[Byte]) = {
-		val photo = new FileAttachment
-		photo.name = universityId + ".jpg"
-		photo.uploadedData = new ByteArrayInputStream(bytes)
-		photo.uploadedDataLength = bytes.length
-		fileDao.savePermanent(photo)
-		photo
-	}
-
-	override def photoOptOut = false
 
 }
 
 object ImportMemberHelpers {
 
-	implicit def opt[A](value: A) = Option(value)
+	implicit def opt[A](value: A): Option[A] = Option(value)
 
 	/** Return the first Option that has a value, else None. */
 	def oneOf[A](options: Option[A]*) = options.flatten.headOption

@@ -56,7 +56,6 @@ abstract class ImportMemberFromMembershipCommand
 		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
 
 		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }).orNull)
-		this.photoOption = mac.photo
 
 		this.jobTitle = member.position
 		this.phoneNumber = member.phoneNumber
