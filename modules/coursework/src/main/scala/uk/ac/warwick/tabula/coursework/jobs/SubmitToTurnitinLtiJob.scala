@@ -250,14 +250,6 @@ class SubmitToTurnitinLtiJob extends Job
 				s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
 			}
 		}
-		
-		private def getToken(attachment: FileAttachment): FileAttachmentToken = {
-			transactional() {
-				val token = attachment.generateToken()
-				fileAttachmentService.saveOrUpdate(token)
-				token
-			}
-		}
 
 		private def sendFailureNotification(job: JobInstance, assignment: Assignment) {
 			debug("Sending an email to " + job.user.email)
