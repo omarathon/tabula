@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups
 
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
@@ -79,7 +80,7 @@ class DownloadRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val week:
 				"displayName" -> displayName,
 				"displayCheck" -> displayCheck
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	}
 }
 

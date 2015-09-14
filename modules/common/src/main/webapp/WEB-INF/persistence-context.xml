@@ -80,24 +80,6 @@
 
 		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />
 
-		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper">
-			<property name="membershipInterface">
-				<bean class="org.springframework.remoting.rmi.RmiProxyFactoryBean" autowire-candidate="false">
-					<property name="serviceUrl" value="${membership.rmi.serviceUrl}" />
-					<property name="serviceInterface" value="uk.ac.warwick.membership.MemberInterface" />
-					<property name="lookupStubOnStartup" value="false" />
-					<property name="refreshStubOnConnectFailure" value="true" />
-				</bean>
-			</property>
-			<property name="auth">
-				<bean class="uk.ac.warwick.membership.Auth" autowire-candidate="false">
-					<property name="serviceName" value="${membership.rmi.auth.serviceName}" />
-					<property name="userName" value="${membership.rmi.auth.username}" />
-					<property name="password" value="${membership.rmi.auth.password}" />
-				</bean>
-			</property>
-		</bean>
-
 	</beans>
 
 	<beans profile="dev,sandbox,production">
@@ -154,8 +136,6 @@
 			<prop key="hibernate.hbm2ddl.auto">create</prop>
 			<!-- <prop key="hibernate.show_sql">true</prop>  -->
 		</util:properties>
-
-		<bean id="memberInterface" class="uk.ac.warwick.membership.MembershipInterfaceWrapper" />
 
 	</beans>
 
