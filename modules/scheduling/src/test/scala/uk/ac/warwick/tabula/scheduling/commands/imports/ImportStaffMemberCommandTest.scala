@@ -13,8 +13,6 @@ import uk.ac.warwick.userlookup.AnonymousUser
 class ImportStaffMemberCommandTest extends TestBase with Mockito {
 
 	trait Environment {
-		val blobBytes = Array[Byte](1,2,3,4,5)
-
 		val mm = MembershipMember(
 			universityId 			= "0672089",
 			email					= "M.Mannion@warwick.ac.uk",
@@ -27,7 +25,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			userType				= Staff
 		)
 
-		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val mac = MembershipInformation(mm)
 	}
 
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
@@ -52,7 +50,6 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should not be null
 
@@ -88,7 +85,6 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 			member.timetableHash should be (existingTimetableHash)
 

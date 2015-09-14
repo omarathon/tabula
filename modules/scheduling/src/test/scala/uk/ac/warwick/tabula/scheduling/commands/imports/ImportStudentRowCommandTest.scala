@@ -165,8 +165,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	with MemberSetup {
 		val rs: ResultSet
 
-		val blobBytes = Array[Byte](1,2,3,4,5)
-		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val mac = MembershipInformation(mm)
 
 		// only return a known disability for code Q
 		val disabilityQ = new Disability("Q", "Test disability")
@@ -314,7 +313,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 			member match {
@@ -399,7 +397,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 			member match {

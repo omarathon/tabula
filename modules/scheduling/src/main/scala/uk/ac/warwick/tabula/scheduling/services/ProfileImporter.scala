@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 
 import javax.sql.DataSource
-import uk.ac.warwick.membership.{MembershipInterfaceException, MembershipInterfaceWrapper}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, MemberUserType}
@@ -23,11 +22,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory}
+import uk.ac.warwick.tabula.scheduling.helpers.ImportCommandFactory
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 
-case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
+case class MembershipInformation(member: MembershipMember)
 
 trait ProfileImporter {
 	import ProfileImporter._
@@ -48,7 +47,6 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	var membership = Wire[DataSource]("membershipDataSource")
-	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
@@ -91,23 +89,9 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}.toSeq
 	}
 
-	def photoFor(universityId: String): () => Option[Array[Byte]] = {
-		def photo() = try {
-			logger.info(s"Fetching photo for $universityId")
-			Option(membershipInterface.getPhotoById(universityId))
-		} catch {
-			case e: MembershipInterfaceException => {
-				logger.info(s"MembershipInterfaceException fetching photo for ${universityId}: ${e.getMessage}")
-				None
-			}
-		}
-
-		photo
-	}
-
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
 		membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
-			MembershipInformation(member, photoFor(member.universityId))
+			MembershipInformation(member)
 		}
 
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
@@ -115,8 +99,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
 					MembershipInformation(
-						mem.head,
-						photoFor(universityId)
+						mem.head
 					)
 				)
 		}
@@ -248,7 +231,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					gender,
 					null,
 					userType
-				), () => None
+				)
 			)
 		}.toSeq
 
@@ -293,7 +276,7 @@ class SandboxProfileImporter extends ProfileImporter {
 						gender,
 						null,
 						userType
-					), () => None
+					)
 				)
 			}
 		}.toSeq
@@ -319,7 +302,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					member.gender,
 					member.homeEmail,
 					member.userType
-				), () => None
+				)
 			)
 		}
 

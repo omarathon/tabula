@@ -44,7 +44,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			userType				= Staff
 		)
 
-		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val mac = MembershipInformation(mm)
 	}
 
 	// SITS names come uppercased - check that we reformat various names correctly.
@@ -59,7 +59,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					usercode = "cuscav",
 					preferredForenames = name.toUpperCase,
 					userType = Staff
-				), () => None)
+				))
 
 				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
 				member.firstName should be (name)
@@ -80,7 +80,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					usercode = "cuscav",
 					preferredSurname = name.toUpperCase,
 					userType = Staff
-				), () => None)
+				))
 
 				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
 				member.lastName should be (name)
@@ -113,8 +113,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Test def importStaff() {
-		val blobBytes = Array[Byte](1,2,3,4,5)
-
 		val mac = MembershipInformation(MembershipMember(
 			universityId 			= "0672089",
 			email					= "M.Mannion@warwick.ac.uk",
@@ -125,7 +123,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			usercode				= "cuscav",
 			gender					= Male,
 			userType				= Staff
-		), () => Some(blobBytes))
+		))
 
 		val importer = new ProfileImporterImpl
 
@@ -147,7 +145,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		member.gender should be (Male)
 		member.firstName should be ("Mathew")
 		member.lastName should be ("Mannion")
-		member.photo should not be null
 		member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 		verify(fileDao, times(1)).savePermanent(any[FileAttachment])

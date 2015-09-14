@@ -248,29 +248,24 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 			attachment
 		}
 
-		val (member, memberAttachment) = flushing(session){
+		val member = flushing(session){
 			val member = new StudentMember
 			member.universityId = "01234567"
 			member.userId = "steve"
 
-			val attachment = new FileAttachment
-			member.photo = attachment
-
 			session.save(member)
-			(member, attachment)
+			member
 		}
 
 		// Ensure everything's been persisted
 		orphanAttachment.id should not be {null}
 		member.id should not be {null}
-		memberAttachment.id should not be {null}
 
 		// Can fetch everything from db
 		flushing(session){
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			// Can't do an exact equality check because of Hibernate polymorphism
 			session.get(classOf[Member], member.id).asInstanceOf[Member].universityId should be (member.universityId)
-			session.get(classOf[FileAttachment], memberAttachment.id).asInstanceOf[FileAttachment].id should be (memberAttachment.id)
 		}
 
 		flushing(session){session.delete(member) }
@@ -279,7 +274,6 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 		flushing(session){
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Member], member.id) should be {null}
-			session.get(classOf[FileAttachment], memberAttachment.id) should be {null}
 		}
 	}
 
