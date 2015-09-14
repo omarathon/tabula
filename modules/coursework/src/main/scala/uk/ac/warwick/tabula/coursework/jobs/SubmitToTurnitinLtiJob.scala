@@ -121,8 +121,7 @@ class SubmitToTurnitinLtiJob extends Job
 				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
 					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
-						val token: FileAttachmentToken = getToken(attachment)
-						val attachmentAccessUrl = s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
+						val attachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
 						val submitPaper = transactional(){
 							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
 						}
@@ -172,7 +171,10 @@ class SubmitToTurnitinLtiJob extends Job
 				case response if retries == 0 =>
 					logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
 					response
-				case _ => submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, retries-1)
+				case _ => {
+					val newAttachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
+					submitSinglePaper(assignment, newAttachmentAccessUrl, submission, attachment, retries - 1)
+				}
 			}
 		}
 
@@ -241,6 +243,14 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
+		private def getAttachmentAccessUrl(submission: Submission, attachment: FileAttachment): String = {
+			transactional() {
+				val token = attachment.generateToken()
+				fileAttachmentService.saveOrUpdate(token)
+				s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
+			}
+		}
+		
 		private def getToken(attachment: FileAttachment): FileAttachmentToken = {
 			transactional() {
 				val token = attachment.generateToken()
