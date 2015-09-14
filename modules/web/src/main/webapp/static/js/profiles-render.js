@@ -451,6 +451,10 @@
 				},
 				eventAfterRender: function(event, element, view){
 					var content = "<table class='event-info'>";
+					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
+						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
+					}
+
 					if (event.fullTitle && event.fullTitle.length > 0) {
 						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 					}

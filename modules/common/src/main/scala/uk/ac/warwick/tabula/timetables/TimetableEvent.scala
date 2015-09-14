@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.timetables
 
 import org.joda.time.{LocalTime, LocalDateTime}
-import uk.ac.warwick.tabula.data.model.Location
+import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Location}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 
 case class TimetableEvent(
 	uid: String,
@@ -16,7 +18,7 @@ case class TimetableEvent(
 	startTime: LocalTime,
 	endTime: LocalTime,
 	location: Option[Location],
-	context: Option[String],
+	parent: TimetableEvent.Parent,
 	comments: Option[String],
 	staffUniversityIds: Seq[String],
 	studentUniversityIds: Seq[String],
@@ -25,10 +27,29 @@ case class TimetableEvent(
 
 object TimetableEvent {
 
-	sealed abstract trait Context
+	sealed trait Context
 	object Context {
 		case object Student extends Context
 		case object Staff extends Context
+	}
+
+	sealed trait Parent {
+		val shortName: Option[String]
+		val fullName: Option[String]
+	}
+	case class Empty(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	case class Module(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	case class Relationship(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+	object Parent {
+		def apply() = {
+			Empty(None, None)
+		}
+		def apply(module: Option[model.Module]) = {
+			Module(module.map(_.code.toUpperCase), module.map(_.name))
+		}
+		def apply(relationship: StudentRelationshipType) = {
+			Relationship(Option(relationship.description), Option(relationship.description))
+		}
 	}
 
 	def apply(sge: SmallGroupEvent) = eventForSmallGroupEventInWeeks(sge, sge.weekRanges)
@@ -46,7 +67,7 @@ object TimetableEvent {
 			startTime = sge.startTime,
 			endTime = sge.endTime,
 			location = Option(sge.location),
-			context = Some(sge.group.groupSet.module.code.toUpperCase),
+			parent = TimetableEvent.Parent(Option(sge.group.groupSet.module)),
 			comments = None,
 			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
 			studentUniversityIds = sge.group.students.knownType.members,
@@ -110,7 +131,7 @@ case class EventOccurrence(
 	start: LocalDateTime,
 	end: LocalDateTime,
 	location: Option[Location],
-	context: Option[String],
+	parent: TimetableEvent.Parent,
 	comments: Option[String],
 	staffUniversityIds: Seq[String]
 )
@@ -126,7 +147,7 @@ object EventOccurrence {
 			start,
 			end,
 			timetableEvent.location,
-			timetableEvent.context,
+			timetableEvent.parent,
 			timetableEvent.comments,
 			timetableEvent.staffUniversityIds
 		)
@@ -142,7 +163,7 @@ object EventOccurrence {
 			occurrence.start,
 			occurrence.end,
 			None,
-			None,
+			TimetableEvent.Parent(),
 			None,
 			Nil
 		)

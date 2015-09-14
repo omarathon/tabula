@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
@@ -18,7 +19,7 @@ import scala.util.Success
 
 class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with Mockito {
 
-	@Before def tidyUpContext {
+	@Before def tidyUpContext() {
 		// TODO it would be better to find where this context is actually coming from
 		SpringConfigurer.applicationContext = null
 	}
@@ -89,7 +90,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Seminar,
 			location=Some(NamedLocation("CS1.04")),
-			context=Some("IN101"),
+			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Seq("0000001", "0000002", "0000003"),
@@ -106,7 +107,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 			day=DayOfWeek.Thursday,
 			eventType=TimetableEventType.Seminar,
 			location=Some(NamedLocation("CS1.04")),
-			context=Some("IN101"),
+			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Seq("0000004", "0000005", "0000006"),
@@ -126,7 +127,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 				day=DayOfWeek.Friday,
 				eventType=TimetableEventType.Lecture,
 				location=Some(NamedLocation("L5")),
-				context=Some("IN101"),
+				parent=TimetableEvent.Parent(Some(module)),
 				comments=None,
 				staffUniversityIds=Seq("1170047"),
 				studentUniversityIds=Nil,
@@ -140,13 +141,13 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 		userLookup.registerUserObjects(tutor)
 	}
 
-	@Test def init { new FixtureWithSingleSeminarForYear with CommandFixture {
+	@Test def init() { new FixtureWithSingleSeminarForYear with CommandFixture {
 		command.eventsToImport.size() should be (2)
 		command.eventsToImport.get(0).timetableEvent should be (tEventSeminar2)
 		command.eventsToImport.get(1).timetableEvent should be (tEventSeminar1)
 	}}
 
-	@Test def apply { new FixtureWithSingleSeminarForYear with CommandFixture {
+	@Test def apply() { new FixtureWithSingleSeminarForYear with CommandFixture {
 		command.eventsToImport.get(0).group = group1
 		command.eventsToImport.get(1).group = group2
 
@@ -178,7 +179,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 		}
 	}
 
-	@Test def permissions { new PermissionsFixture {
+	@Test def permissions() { new PermissionsFixture {
 		module.groupSets.add(set)
 		set.module = module
 
@@ -188,14 +189,15 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def notLinked { new PermissionsFixture {
+	@Test(expected = classOf[ItemNotFoundException])
+	def notLinked() { new PermissionsFixture {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		fail("Expected exception")
 	}}
 
-	@Test def description {
+	@Test def description() {
 		val command = new ImportSmallGroupEventsFromExternalSystemDescription with ImportSmallGroupEventsFromExternalSystemCommandState {
 			override val eventName: String = "test"
 			val module = Fixtures.module("in101")

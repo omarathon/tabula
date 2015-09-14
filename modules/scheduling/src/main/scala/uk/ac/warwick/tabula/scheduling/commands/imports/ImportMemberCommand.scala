@@ -22,13 +22,12 @@ import uk.ac.warwick.userlookup.User
 import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import language.implicitConversions
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.services.UserLookupService
 import java.util.UUID
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
-	with MemberProperties with Unaudited with PropertyCopying {
+with MemberProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -49,26 +48,37 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		val member = mac.member
 		this.membershipLastUpdated = member.modified
 
-		this.universityId = oneOf(member.universityId, optString("university_id")).get
+		this.universityId = oneOf(Option(member.universityId), optString("university_id")).get
 
 		// TAB-2014
-		this.userId = oneOf(member.usercode, ssoUser.getUserId.maybeText, optString("user_code")).get
+		this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, optString("user_code")).get
 
 		this.userType = member.userType
 
-		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
+		this.title = oneOf(Option(member.title), optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse ""
+
+		def regexExceptionHandled(fieldNameToDisplay: String, fallbackField: String)(f: => String): String = {
+			try {	f	} catch {
+				case iae: IllegalArgumentException =>
+					// Regex match error
+					logger.error(s"Failed to match $fieldNameToDisplay for ${ssoUser.getUserId}")
+					fallbackField
+			}
+		}
 		this.firstName = oneOf(
 			optString("preferred_forename"),
-			member.preferredForenames,
-			ssoUser.getFirstName
-		) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
-		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
-		this.lastName = oneOf(optString("family_name"), member.preferredSurname, ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
+			Option(member.preferredForenames),
+			Option(ssoUser.getFirstName)
+		).map(s => regexExceptionHandled("firstName", ssoUser.getFirstName){ formatForename(s, ssoUser.getFirstName) }).getOrElse("")
+		this.fullFirstName = oneOf(optString("forenames"), Option(ssoUser.getFirstName))
+			.map(s => regexExceptionHandled("firstName", ssoUser.getFirstName){ formatForename(s, ssoUser.getFirstName) }).getOrElse("")
+		this.lastName = oneOf(optString("family_name"), Option(member.preferredSurname), Option(ssoUser.getLastName))
+			.map(s => regexExceptionHandled("lastName", ssoUser.getLastName){ formatSurname(s, ssoUser.getLastName) }).getOrElse("")
 
-		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail).orNull)
-		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
+		this.email = oneOf(Option(member.email), optString("email_address"), Option(ssoUser.getEmail)).orNull
+		this.homeEmail = oneOf(Option(member.alternativeEmailAddress), optString("alternative_email_address")).orNull
 
-		this.gender = (oneOf(member.gender, optString("gender") map { Gender.fromCode(_) }).orNull)
+		this.gender = oneOf(Option(member.gender), optString("gender") map Gender.fromCode).orNull
 
 		this.jobTitle = member.position
 		this.phoneNumber = member.phoneNumber
@@ -77,8 +87,8 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.groupName = member.targetGroup
 		this.inactivationDate = member.endDate
 
-		this.homeDepartmentCode = (oneOf(member.departmentCode, optString("home_department_code"), ssoUser.getDepartmentCode).orNull)
-		this.dateOfBirth = (oneOf(member.dateOfBirth, optLocalDate("date_of_birth")).orNull)
+		this.homeDepartmentCode = oneOf(Option(member.departmentCode), optString("home_department_code"), Option(ssoUser.getDepartmentCode)).orNull
+		this.dateOfBirth = oneOf(Option(member.dateOfBirth), optLocalDate("date_of_birth")).orNull
 	}
 
 	private val basicMemberProperties = Set(
@@ -165,7 +175,7 @@ object ImportMemberHelpers {
 			suggested
 		} else {
 			CapitaliseForenamePattern.replaceAllIn(name, { m: Regex.Match =>
-				m.group(1).toUpperCase() + m.group(2).toLowerCase() + m.group(3)
+				m.group(1).toUpperCase + m.group(2).toLowerCase + m.group(3)
 			}).trim()
 		}
 	}
@@ -189,28 +199,28 @@ object ImportMemberHelpers {
 			 */
 
 			CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
-				val wholeWord = m.group(WholeWordGroup).toUpperCase()
-				val first = m.group(FirstLetterGroup).toUpperCase()
-				val remainder = m.group(RemainingLettersGroup).toLowerCase()
+				val wholeWord = m.group(WholeWordGroup).toUpperCase
+				val first = m.group(FirstLetterGroup).toUpperCase
+				val remainder = m.group(RemainingLettersGroup).toLowerCase
 				val separator = m.group(SeparatorGroup)
 
 				if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
 					// Capitalise the first letter of the remainder
 					first +
 						remainder.substring(0, 1) +
-						remainder.substring(1, 2).toUpperCase() +
+						remainder.substring(1, 2).toUpperCase +
 						remainder.substring(2) +
 						separator
 				} else if (wholeWord.startsWith("MAC") && wholeWord.length() > 3) {
 					// Capitalise the first letter of the remainder
 					first +
 						remainder.substring(0, 2) +
-						remainder.substring(2, 3).toUpperCase() +
+						remainder.substring(2, 3).toUpperCase +
 						remainder.substring(3) +
 						separator
 				} else if (wholeWord.equals("VON") || wholeWord.equals("D") || wholeWord.equals("DE") || wholeWord.equals("DI")) {
 					// Special case - lowercase the first word
-					first.toLowerCase() + remainder + separator
+					first.toLowerCase + remainder + separator
 				} else {
 					first + remainder + separator
 				}

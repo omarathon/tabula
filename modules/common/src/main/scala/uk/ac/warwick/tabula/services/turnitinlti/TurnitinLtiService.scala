@@ -18,7 +18,7 @@ import uk.ac.warwick.spring.Wire
 import com.google.api.client.auth.oauth.OAuthHmacSigner
 import com.google.gdata.client.authn.oauth.{OAuthUtil, OAuthParameters}
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
 import org.xml.sax.SAXParseException
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import org.apache.commons.io.FilenameUtils._
@@ -86,7 +86,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val userAgent = "Tabula, Coursework submission app, University of Warwick, coursework@warwick.ac.uk"
 
-	val DateFormat = ISODateTimeFormat.dateTimeNoMillis()
+	val isoFormatter = DateFormats.IsoDateTime
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
@@ -113,7 +113,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
-				"custom_duedate" -> DateFormat.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
+				"custom_duedate" -> isoFormatter.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
 			) ++ userParams(user.email, user.firstName, user.lastName)) {
 			request =>

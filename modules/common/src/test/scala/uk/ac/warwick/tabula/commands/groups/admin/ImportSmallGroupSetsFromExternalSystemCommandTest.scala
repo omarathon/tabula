@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
@@ -19,7 +20,7 @@ import scala.util.Success
 
 class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mockito {
 
-	@Before def tidyUpContext {
+	@Before def tidyUpContext() {
 		// TODO it would be better to find where this context is actually coming from
 		SpringConfigurer.applicationContext = null
 	}
@@ -85,7 +86,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 
 		command.academicYear = AcademicYear(2012)
 
-		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (true)
+		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns true
 
 		val tEventModule1Seminar1 = TimetableEvent(
 			uid="uuid1",
@@ -98,7 +99,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Seminar,
 			location=Some(NamedLocation("CS1.04")),
-			context=Some("IN101"),
+			parent=TimetableEvent.Parent(Some(module1)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Seq("0000001", "0000002", "0000003"),
@@ -115,7 +116,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			day=DayOfWeek.Thursday,
 			eventType=TimetableEventType.Seminar,
 			location=Some(NamedLocation("CS1.04")),
-			context=Some("IN101"),
+			parent=TimetableEvent.Parent(Some(module1)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Seq("0000004", "0000005", "0000006"),
@@ -135,7 +136,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				day=DayOfWeek.Friday,
 				eventType=TimetableEventType.Lecture,
 				location=Some(NamedLocation("L5")),
-				context=Some("IN101"),
+				parent=TimetableEvent.Parent(Some(module1)),
 				comments=None,
 				staffUniversityIds=Seq("1170047"),
 				studentUniversityIds=Nil,
@@ -154,7 +155,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				day=DayOfWeek.Thursday,
 				eventType=TimetableEventType.Seminar,
 				location=Some(NamedLocation("CS1.04")),
-				context=Some("IN102"),
+				parent=TimetableEvent.Parent(Some(module2)),
 				comments=None,
 				staffUniversityIds=Seq("1170047"),
 				studentUniversityIds=Seq("0000004", "0000005", "0000006"),
@@ -168,15 +169,15 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 		command.userLookup.registerUserObjects(tutor)
 	}
 
-	@Test def init { new CommandFixture with FixtureWithSingleSeminarForYear {
-		command.canManageDepartment should be (true)
+	@Test def init() { new CommandFixture with FixtureWithSingleSeminarForYear {
+		command.canManageDepartment should be {true}
 		command.modules should be (Seq(module1, module2))
 		command.timetabledEvents should be (Seq(
 			new TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar2, tEventModule1Seminar1))
 		))
 	}}
 
-	@Test def apply { new CommandFixture with FixtureWithSingleSeminarForYear {
+	@Test def apply() {	new CommandFixture with FixtureWithSingleSeminarForYear {
 		val sets = command.applyInternal()
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(any[SmallGroupSet])
@@ -233,45 +234,45 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 	private trait DepartmentalAdministratorPermissions {
 		self: PermissionsFixture =>
 
-		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (true)
+		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns true
 	}
 
 	private trait ModuleManagerPermissions {
 		self: PermissionsFixture =>
 
-		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (false)
-		command.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (Set(module1, module2))
+		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns false
+		command.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns Set(module1, module2)
 	}
 
 	private trait NoPermissions {
 		self: PermissionsFixture =>
 
-		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (false)
-		command.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns (Set.empty)
+		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns false
+		command.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns Set.empty
 	}
 
-	@Test def deptAdminPermissions { new PermissionsFixture with DepartmentalAdministratorPermissions {
+	@Test def deptAdminPermissions() { new PermissionsFixture with DepartmentalAdministratorPermissions {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
-	@Test def noPermissions { new PermissionsFixture with DepartmentalAdministratorPermissions {
+	@Test def noPermissions() { new PermissionsFixture with DepartmentalAdministratorPermissions {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.ImportFromExternalSystem, department)
 	}}
 
-	@Test def moduleManagerPermissions { new PermissionsFixture with ModuleManagerPermissions {
+	@Test def moduleManagerPermissions() { new PermissionsFixture with ModuleManagerPermissions {
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.SmallGroups.ImportFromExternalSystem, Seq(module1, module2))
 	}}
 
-	@Test def description {
+	@Test def description() {
 		val command = new ImportSmallGroupSetsFromExternalSystemDescription with ImportSmallGroupSetsFromExternalSystemCommandState {
 			override val eventName: String = "test"
 			val department = Fixtures.department("in")

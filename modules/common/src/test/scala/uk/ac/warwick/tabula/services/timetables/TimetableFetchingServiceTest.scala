@@ -1,23 +1,32 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalTime
+import org.mockito.Matchers
 import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{AcademicYear, TestBase}
+import uk.ac.warwick.tabula.{Mockito, Fixtures, AcademicYear, TestBase}
 
 import scala.xml.XML
 
-class TimetableFetchingServiceTest extends TestBase {
+class TimetableFetchingServiceTest extends TestBase with Mockito {
+
+	val module = Fixtures.module("cs132")
 
 	@Test def parseXML() {
 		val locationFetchingService = new LocationFetchingService {
 			def locationFor(name: String) = NamedLocation(name)
 		}
+		val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		mockModuleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
+			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
+		}
 
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService)
+		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService, mockModuleAndDepartmentService)
 		events.size should be (10)
-		events(0) should be (TimetableEvent(
+		events.head should be (TimetableEvent(
 			uid="945ff0ef192ccb9d328be90c9268873a",
 			name="CS132L",
 			title="",
@@ -28,7 +37,7 @@ class TimetableFetchingServiceTest extends TestBase {
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
 			location=Some(NamedLocation("L5")),
-			context=Some("CS132"),
+			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
 			staffUniversityIds=Seq("1170047"),
 			studentUniversityIds=Nil,

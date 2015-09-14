@@ -39,11 +39,11 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 		if (response.success) {
 			val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 			if (originalityReport.isDefined) {
-				originalityReport.get.turnitinId = response.turnitinSubmissionId()
+				originalityReport.get.turnitinId = response.turnitinSubmissionId
 				originalityReport.get.reportReceived = false
 			} else {
 				val report = new OriginalityReport
-				report.turnitinId = response.turnitinSubmissionId()
+				report.turnitinId = response.turnitinSubmissionId
 				attachment.originalityReport = report
 				originalityReportService.saveOriginalityReport(attachment)
 			}
