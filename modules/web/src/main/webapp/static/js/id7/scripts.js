@@ -1063,28 +1063,6 @@
 		$('.tabula-dnd').dragAndDrop();
 		$('.tabula-filtered-list').filteredList();
 
-		// TAB-1236 Ensure modals fit in the viewport
-		$('.modal').on('shown.bs.modal', function(e){
-			if (this == e.target) {
-				var $this = $(this)
-					, modalBodyHeight = $this.find('.modal-body').height()
-					, modalHeight = $this.find('.modal-content').height()
-					, viewportHeight = $(window).height()
-					;
-				if (viewportHeight === 0 || modalHeight === 0 || modalBodyHeight === 0) {
-					// can't work out the relative heights so give up
-					return false;
-				}
-
-				// modal is positioned at 10% top, so add that in
-				var modalNotBodyHeight = modalHeight - modalBodyHeight
-					, viewportMaxHeight = (viewportHeight / 1.1) - modalNotBodyHeight
-					;
-
-				$this.find('.modal-body').css('max-height', viewportMaxHeight);
-			}
-		});
-
 		if (window != window.top) {
 			// this is an iframe
 			(function(){

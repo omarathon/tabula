@@ -2,6 +2,12 @@
 @import "colours.less";
 @import "../css3.less";
 
+h1, h2, h3, h4, h5, h6 {
+	a.help-popover {
+		font-size: @main-font-size;
+	}
+}
+
 h2 + h3, h2 + h4, h2 + h5, h2 + h6,
 h3 + h4, h3 + h5, h3 + h6,
 h4 + h5, h4 + h6,
@@ -317,22 +323,19 @@ summary {
 
 	div.spinner-container {
 		position: absolute;
-		top: 15px;
-		left: 15px;
-		margin-left: 220px;
+		top: 16px;
+		right: 60px;
 	}
 }
 
 @flexi-picker-vertical-align: middle;
-@flexi-picker-width: 200px;
 
 input.flexi-picker {
 	vertical-align: @flexi-picker-vertical-align;
-	width: @flexi-picker-width + 25 !important;
 }
 
 .flexi-picker-result {
-	min-width:219px;
+	min-width: 219px;
 
 	span.type {
 		font-size: 75%;
@@ -367,7 +370,6 @@ input.flexi-picker {
 		overflow: hidden;
 		padding-right: 13px;
 		white-space: nowrap;
-		width: @flexi-picker-width;
 	}
 
 	a.clear-field {
@@ -408,13 +410,13 @@ input.flexi-picker {
 	}
 
 	.priority-complete .headline {
-		i { color: @tabulaGreen; }
+		i { color: @brand-success; }
 		.title { text-decoration: line-through; }
 	}
-	.priority-trivial .headline i { color: @tabulaBlue; }
-	.priority-info .headline i { color: @tabulaBlue; }
-	.priority-warning .headline i { color: @tabulaOrangeLight; }
-	.priority-critical .headline i { color: @tabulaRed; }
+	.priority-trivial .headline i { color: @brand-primary; }
+	.priority-info .headline i { color: @brand-primary; }
+	.priority-warning .headline i { color: @brand-warning; }
+	.priority-critical .headline i { color: @brand-danger; }
 
 	.timestamp {
 		color: #666;
@@ -494,11 +496,11 @@ input.flexi-picker {
 table.tablesorter {
 	> thead > tr {
 		th {
-			background-color: lighten(@tabulaGrayLightTint, 5%);
+			background-color: white;
 			padding-right: 20px;
 
 			&.header {
-				background: url(/static/images/tablesorter/bg.gif) no-repeat center right;
+				background: white url(/static/images/tablesorter/bg.gif) no-repeat center right;
 				.cursor-pointer();
 			}
 
@@ -510,79 +512,8 @@ table.tablesorter {
 				background-image: url(/static/images/tablesorter/desc.gif);
 			}
 
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaGrayLightTint;
-			}
-
 			&.no-sort {
 				padding-right: 0;
-			}
-		}
-	}
-
-	&.tabula-green, &.tabula-greenLight {
-		> thead > tr > th {
-			background-color: lighten(@tabulaGreenLightTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaGreenLightTint;
-			}
-		}
-	}
-
-	&.tabula-purple, &.tabula-pink {
-		> thead > tr > th {
-			background-color: lighten(@tabulaPurpleTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaPurpleTint;
-			}
-		}
-	}
-
-	&.tabula-blueDark, &.tabula-blue, &.tabula-blueLight {
-		> thead > tr > th {
-			background-color: lighten(@tabulaBlueTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaBlueTint;
-			}
-		}
-	}
-
-	&.tabula-orangeLight, &.tabula-red {
-		> thead > tr > th {
-			background-color: lighten(@tabulaRedTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaRedTint;
-			}
-		}
-	}
-
-	&.tabula-darkRed {
-		> thead > tr > th {
-			background-color: lighten(@tabulaRedDarkTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaRedDarkTint;
-			}
-		}
-	}
-
-	&.tabula-greenDark, &.tabula-turquoise {
-		> thead > tr > th {
-			background-color: lighten(@tabulaTurquoiseTint, 5%);
-
-			&.headerSortDown,
-			&.headerSortUp {
-				background-color: @tabulaTurquoiseTint;
 			}
 		}
 	}
@@ -693,6 +624,10 @@ table.tablesorter {
 
 }
 
+.dept-settings {
+	margin-bottom: 16px;
+}
+
 .dept-toolbar {
 	display: inline-block;
 	float:right
@@ -736,6 +671,19 @@ h2 {
 	}
 }
 
+.permission-list {
+	border: 1px solid #ddd;
+	padding: 16px;
+	.col-md-12 .col-md-12 {
+		margin-top: 8px;
+		&.user {
+			padding-bottom: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+	}
+	margin-bottom: 16px;
+}
+
 .permission-group {
 	.box-style;
 	padding: 0.5em;
@@ -744,9 +692,9 @@ h2 {
 		color: #666;
 	}
 
-	table.permission-list {
+	.permission-list {
 		margin: 1em 0 0.3em 1em;
-		tr.anon-user {
+		.anon-user {
 			color: #666;
 		}
 
@@ -867,4 +815,18 @@ ul.profile-user-list {
 
 .photo.size-thumbnail {
 	.tabula-photo(186px, 8px);
+}
+
+.datetimepicker table tr td.active {
+	&:active,
+	&:hover:active,
+	&.disabled:active,
+	&.disabled:hover:active,
+	&.active,
+	&:hover.active,
+	&.disabled.active,
+	&.disabled:hover.active {
+		background: @btn-primary-bg none;
+		border-color: @btn-primary-border;
+	}
 }

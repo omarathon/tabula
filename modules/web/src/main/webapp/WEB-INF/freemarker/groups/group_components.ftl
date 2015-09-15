@@ -586,14 +586,14 @@
 
 				<div class="${moduleItem.canManageGroups?string('col-md-8','col-md-10')}">
 				<#if allocated?? && allocated.id == groupSet.id>
-					<div class="alert alert-success">
-						<a class="close" data-dismiss="alert">&times;</a>
+					<div class="alert alert-info">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
 						<p>Changes saved.</p>
 					</div>
 				</#if>
 				<#if notificationSentMessage??>
-					<div class="alert alert-success">
-						<a class="close" data-dismiss="alert">&times;</a>
+					<div class="alert alert-info">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
 						<p>${notificationSentMessage}</p>
 					</div>
 				</#if>

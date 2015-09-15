@@ -5,7 +5,7 @@
 	<#local result><@routes.reports.unrecordedAttendance dept academicYear /></#local>
 	<#return result />
 </#function>
-<@fmt.id7_deptheader title="Unrecorded monitoring points for ${academicYear.toString}" route_function=route_function />
+<@fmt.id7_deptheader title="Unrecorded monitoring points for ${department.name}" route_function=route_function />
 
 <#assign reportUrl><@routes.reports.unrecordedAttendance department academicYear /></#assign>
 <@reports_macros.reportLoader reportUrl>

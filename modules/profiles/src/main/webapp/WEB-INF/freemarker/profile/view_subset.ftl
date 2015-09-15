@@ -134,9 +134,6 @@
 					</#if>
 				</tbody>
 			</table>
-			<div class="alert alert-info">
-				Further details for this user are not available in Tabula.
-			</div>
 		</@modal.body>
 	</@modal.wrapper>
 </#if>

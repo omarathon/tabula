@@ -17,9 +17,12 @@
 			<input type="hidden" name="returnTo" value="${returnTo!""}" />
 			<@f.errors cssClass="error form-errors" />
 			<@bs3form.form_group>
-				<@form.flexipicker name="usercode" placeholder="Type a name or usercode" />
+				<@bs3form.flexipicker name="usercode" placeholder="Type a name or usercode">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="submit">Mask</button>
+					</span>
+				</@bs3form.flexipicker>
 			</@bs3form.form_group>
-			<button type="submit" class="btn btn-default">Mask</button>
 			<@bs3form.errors path="usercode" />
 		</@f.form>
 

@@ -27,7 +27,7 @@
 				<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}">
 					<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 					<input type="hidden" name="action" value="remove" />
-					<button class="btn btn-xs btn-info"><i class="icon-eye-close fa fa-eye-slash"></i> Disable God mode</button>
+					<button class="btn btn-xs btn-info">Disable God mode</button>
 				</@f.form>
 			</div>
 		</#if>

@@ -9,7 +9,7 @@
 
 
 <#if updatedOccurrence??>
-<div class="alert alert-success">
+<div class="alert alert-info">
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
     Attendance at
 		${updatedOccurrence.event.group.groupSet.name},

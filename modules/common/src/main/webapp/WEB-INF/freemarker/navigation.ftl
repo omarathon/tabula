@@ -1,21 +1,21 @@
 <#if isCollapsed>
 	<ul class="nav navbar-nav">
-		<li class="courses-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
-
-		<#if features.exams && canViewExams>
-			<li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Management</a></li>
-		</#if>
-
-		<#if features.smallGroupTeaching>
-			<li class="groups-active"><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></li>
-		</#if>
-
 		<#if user.staff>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">Profiles</a></li>
 		<#elseif user.student>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">My Student Profile</a></li>
 		<#elseif canViewProfiles>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">Profiles</a></li>
+		</#if>
+
+		<#if features.smallGroupTeaching>
+			<li class="groups-active"><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></li>
+		</#if>
+
+		<li class="courses-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
+
+		<#if features.exams && canViewExams>
+			<li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Management</a></li>
 		</#if>
 
 		<#if features.attendanceMonitoring>
@@ -26,29 +26,28 @@
 			</#if>
 		</#if>
 
-		<#if canAdmin>
-			<li class="admin-active"><a href="<@url page="/" context="/admin" />">Administration and Permissions</a></li>
-		</#if>
-
 		<#if features.reports && canDeptAdmin>
 			<li class="reports-active"><a href="<@url page="/" context="/reports" />">Reports</a></li>
+		</#if>
+
+		<#if canAdmin>
+			<li class="admin-active"><a href="<@url page="/" context="/admin" />">Administration and Permissions</a></li>
 		</#if>
 
 	</ul>
 <#else>
 	<ul id="home-list">
-		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2>
-			<#if user.staff>
-				<span class="hint">Create assignments, give feedback and add marks</span>
-			<#else>
-				<span class="hint">Submit coursework, view feedback and see your marks</span>
-			</#if>
-		</li>
-
-		<#if features.exams && canViewExams>
-			<li>
-				<h2><a href="<@url page="/" context="/exams" />">Exam Management</a></h2>
-				<span class="hint">Manage exam marks</span>
+		<#if user.staff>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
+				<span class="hint">View staff and student information and edit personal tutors</span>
+			</li>
+		<#elseif user.student>
+			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
+				<span class="hint">View your student information</span>
+			</li>
+		<#elseif canViewProfiles>
+			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
+				<span class="hint">View staff and student information</span>
 			</li>
 		</#if>
 
@@ -62,17 +61,18 @@
 			</li>
 		</#if>
 
-		<#if user.staff>
-			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
-				<span class="hint">View staff and student information and edit personal tutors</span>
-			</li>
-		<#elseif user.student>
-			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
-				<span class="hint">View your student information</span>
-			</li>
-		<#elseif canViewProfiles>
-			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
-				<span class="hint">View staff and student information</span>
+		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2>
+			<#if user.staff>
+				<span class="hint">Create assignments, give feedback and add marks</span>
+			<#else>
+				<span class="hint">Submit coursework, view feedback and see your marks</span>
+			</#if>
+		</li>
+
+		<#if features.exams && canViewExams>
+			<li>
+				<h2><a href="<@url page="/" context="/exams" />">Exam Management</a></h2>
+				<span class="hint">Manage exam marks</span>
 			</li>
 		</#if>
 
@@ -90,17 +90,17 @@
 			</#if>
 		</#if>
 
-		<#if canAdmin>
-			<li>
-				<h2><a href="<@url page="/" context="/admin" />">Administration and Permissions</a></h2>
-				<span class="hint">Manage department, module and route settings and permissions</span>
-			</li>
-		</#if>
-
 		<#if features.reports && canDeptAdmin>
 			<li>
 				<h2><a href="<@url page="/" context="/reports" />">Reports</a></h2>
 				<span class="hint">View reports for various aspects of Tabula</span>
+			</li>
+		</#if>
+
+		<#if canAdmin>
+			<li>
+				<h2><a href="<@url page="/" context="/admin" />">Administration and Permissions</a></h2>
+				<span class="hint">Manage department, module and route settings and permissions</span>
 			</li>
 		</#if>
 

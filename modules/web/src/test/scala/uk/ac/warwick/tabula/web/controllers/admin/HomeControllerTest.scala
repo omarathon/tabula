@@ -39,7 +39,7 @@ class HomeControllerTest extends TestBase with Mockito {
 		controller.moduleAndDepartmentService.modulesWithPermission(currentUser, Permissions.Module.Administer) returns Set(mod1, mod2, mod3)
 		controller.courseAndRouteService.routesWithPermission(currentUser, Permissions.Route.Administer) returns Set(route1, route2, route3)
 
-		val mav = controller.home(currentUser)
+		val mav = controller.home(None)
 		mav.viewName should be ("admin/home/view")
 		mav.toModel should be (Map(
 			"ownedDepartments" -> Set(dept1),

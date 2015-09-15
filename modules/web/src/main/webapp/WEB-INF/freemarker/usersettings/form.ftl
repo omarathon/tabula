@@ -2,7 +2,7 @@
 <h1>User settings for ${user.firstName}</h1>
 
 <#if success!false>
-	<div class="alert alert-success">Your preferred settings have been updated.</div>
+	<div class="alert alert-info">Your preferred settings have been updated.</div>
 </#if>
 <@f.form method="post" action="${url('/settings')}" commandName="userSettingsCommand">
 

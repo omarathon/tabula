@@ -6,7 +6,7 @@
 	<#return result />
 </#function>
 
-<@fmt.id7_deptheader title="All attendance for ${academicYear.toString}" route_function=route_function />
+<@fmt.id7_deptheader title="All attendance for ${department.name}" route_function=route_function />
 
 <#assign reportUrl><@routes.reports.allAttendance department academicYear /></#assign>
 <@reports_macros.reportLoader reportUrl>

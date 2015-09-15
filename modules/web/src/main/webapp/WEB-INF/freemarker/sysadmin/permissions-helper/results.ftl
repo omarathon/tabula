@@ -3,7 +3,7 @@
 <h1>Permissions helper - results</h1>
 
 <#if results.scopeMismatch>
-	<div class="alert <#if permissionsHelperCommand.permission.scoped>alert-block<#else>alert-error</#if>">
+	<div class="alert <#if permissionsHelperCommand.permission.scoped>alert-block<#else>alert-danger</#if>">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		<h4>Warning!</h4>
 

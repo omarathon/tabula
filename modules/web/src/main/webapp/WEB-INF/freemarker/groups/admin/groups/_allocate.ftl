@@ -58,7 +58,7 @@
 
 				<@spring.hasBindErrors name="command">
 					<#if errors.hasErrors()>
-						<div class="alert alert-error">
+						<div class="alert alert-danger">
 							<h3>Some problems need fixing</h3>
 							<#if errors.hasGlobalErrors()>
 								<#list errors.globalErrors as e>

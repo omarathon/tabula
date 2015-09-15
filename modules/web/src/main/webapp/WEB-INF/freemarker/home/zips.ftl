@@ -12,7 +12,7 @@
 	<p class="zip-progress">Initialising</p>
 </div>
 
-<div class="zip-complete alert alert-success" style="display: none;">
+<div class="zip-complete alert alert-info" style="display: none;">
 	<h3>ZIP file generated successfully</h3>
 	<p><a href="<@routes.zipComplete jobId />" class="btn"><i class="icon-download fa fa-arrow-circle-o-down"></i> Download ZIP file</a></p>
 </div>

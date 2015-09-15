@@ -1,8 +1,8 @@
 <#assign department=command.department />
 
 <#if saved??>
-	<div class="alert alert-success">
-		<a class="close" data-dismiss="alert">&times;</a>
+	<div class="alert alert-info">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		<p>Changes saved.</p>
 	</div>
 </#if>
@@ -22,7 +22,7 @@
 
 <@spring.hasBindErrors name="${commandName}">
 	<#if errors.hasErrors()>
-	<div class="alert alert-error">
+	<div class="alert alert-danger">
 		<h3>Some problems need fixing</h3>
 		<#if errors.hasGlobalErrors()>
 			<#list errors.globalErrors as e>

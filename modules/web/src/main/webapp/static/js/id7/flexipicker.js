@@ -8,45 +8,53 @@
  * Requires Bootstrap.
  */
 var RichResultField = function (input) {
-  var self = this;
-  this.$input = $(input);
-  this.$uneditable = $('<span><span class=val></span>'+
-             '<a href=# class="clear-field" title="Clear">&times;</a></span>');
-  this.$uneditable.attr('class', 'uneditable-input rich-result-field ' + this.$input.attr('class'));
-  this.$input.after(this.$uneditable);
-  this.$uneditable.find('a').click(function () {
-    self.edit();
-    return false;
-  });
-  this.$uneditable.hide();
+	var self = this;
+	this.$input = $(input);
+	this.$uneditable = $('<span><span class=val></span>'+
+		'<a href=# class="clear-field" title="Clear">&times;</a></span>');
+	this.$uneditable.attr({
+		'class': 'uneditable-input rich-result-field ' + this.$input.attr('class'),
+		'disabled': true
+	});
+	this.$input.after(this.$uneditable);
+	// Attempt to match the original widths; defined width needed for text-overflow to work
+	this.$input.css('width', this.$input.css('width'));
+	this.$uneditable.css('width', this.$input.css('width'));
+	this.$uneditable.find('a').click(function () {
+		self.edit();
+		return false;
+	});
+	this.$uneditable.hide();
 };
 
 /** Clear field, focus for typing */
 RichResultField.prototype.edit = function () {
   this.$input.val('').show().trigger('change').focus();
-  this.$uneditable.hide().find('.val').text('');
+  this.$uneditable.hide().find('.val').text('').attr('title', '');
 };
 
 /** Hide input field and show the rich `text` instead */
 RichResultField.prototype.storeText = function (text) {
   this.$input.hide();
-  this.$uneditable.show().find('.val').text(text);
+  this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /** Set value of input field, hide it and show the rich `text` instead */
 RichResultField.prototype.store = function (value, text) {
   this.$input.val(value).trigger('change').hide();
-  this.$uneditable.show().find('.val').text(text);
+  this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /**
  * Creates a Bootstrap Typeahead but with added functionality needed by FlexiPicker and ModulePicker
  */
 var TabulaTypeahead = function(options) {
-	var $typeahead = options.element.typeahead({
+	// Twitter typeahead doesn't work for Tabula, so the replaced Bootstrap typeahead is aliased as bootstrap3Typeahead
+	var mergedOptions = $.extend({}, $.fn.bootstrap3Typeahead.defaults, {
 		source: options.source,
 		item: options.item
-	}).data('typeahead');
+	});
+	var $typeahead = options.element.bootstrap3Typeahead(mergedOptions).data('typeahead');
 
 	// Overridden lookup() method uses this to delay the AJAX call
 	$typeahead.delay = 100;
@@ -130,9 +138,9 @@ var FlexiPicker = function (options) {
 	this.richResultField = new RichResultField($element[0]);
 
 	this.iconMappings = {
-		user: 'user',
-		group: 'globe',
-		email: 'envelope'
+		user: 'fa fa-user',
+		group: 'fa fa-globe',
+		email: 'fa fa-envelope'
 	};
 
 	var $typeahead = new TabulaTypeahead({
@@ -150,7 +158,10 @@ var FlexiPicker = function (options) {
 	// Renders each result item with icon and description.
 	$typeahead.render = function (items) {
 		var that = this;
-
+		var withIcons = $(items).filter(function(i, item) {
+			return item != undefined && item.type != undefined;
+		});
+		var useIcons = withIcons.filter(function(i, item) { return item.type != withIcons.get(0).type; }).length > 0;
 		items = $(items).map(function (i, item) {
 			if (item != undefined) {
 				i = $(that.options.item);
@@ -159,7 +170,9 @@ var FlexiPicker = function (options) {
 				i.attr('data-fullname', item.name);
 				i.find('span.title').html(that.highlighter(item.title));
 				i.find('span.type').html(item.type);
-				i.find('i').addClass('icon-' + self.iconMappings[item.type]);
+				if (useIcons) {
+					i.find('i').addClass(self.iconMappings[item.type]);
+				}
 				var desc = i.find('.description');
 				if (desc && desc != '') {
 					  desc.html(item.description).show();

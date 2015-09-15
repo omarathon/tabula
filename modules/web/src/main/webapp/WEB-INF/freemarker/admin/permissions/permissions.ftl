@@ -2,6 +2,12 @@
 
 <#import "*/permissions_macros.ftl" as pm />
 <#assign perms_url = info.requestedUri />
+<#assign display_name = target.humanReadableId />
+<#if target.urlCategory == 'assignment'>
+	<#assign display_name>${target.name} (${target.module.code?upper_case})</#assign>
+<#elseif target.urlCategory == 'smallgroupevent'>
+	<#assign display_name>${target.group.name} <@fmt.time target.startTime /> ${target.day.name}</#assign>
+</#if>
 
 <div class="permissions-page">
 	<#-- Permissions parents -->
@@ -52,15 +58,12 @@
 
 	<div class="deptheader">
 		<h1 class="with-settings">Permissions</h1>
-		<h5 class="with-related">
-			<span class="muted">on</span>
-			${target.humanReadableId}
-		</h5>
+		<h5 class="with-related">on ${display_name}</h5>
 	</div>
 
 	<#-- Alerts -->
 
-	<@pm.alerts "addCommand" target.humanReadableId users role />
+	<@pm.alerts "addCommand" display_name users role />
 
 	<div class="existing-roles">
 		<h2>Granted roles</h2>
@@ -80,13 +83,8 @@
 						</#compress></#assign>
 
 						<div class="col-md-6">
-							<h3 class="permissionTitle">${roleDefinition.description}</h3>
 							<#assign roleDescription><@pm.debugRole role=mapGet(existingRoleDefinitions, roleDefinition) showScopes=false /></#assign>
-							<a class="use-popover colour-h3"
-							   id="popover-${roleDefinition.name}"
-							   data-html="true"
-							   data-original-title="${roleDefinition.description}"
-							   data-content="${roleDescription}"><i class="fa fa-question-circle"></i></a>
+							<h3 class="permissionTitle">${roleDefinition.description} <@fmt.help_popover id="${roleDefinition.name}" title="${roleDefinition.description}" content="${roleDescription}" html=true /></h3>
 
 							<@pm.roleTable perms_url "${roleDefinition.name}-table" target roleDefinitionName roleDefinition.description />
 						</div>
@@ -94,7 +92,7 @@
 				</div>
 			</#list>
 		<#else>
-			<p>There are no granted roles applied against ${target.humanReadableId}.</p>
+			<p>There are no granted roles applied against ${display_name}.</p>
 		</#if>
 	</div>
 
@@ -117,13 +115,8 @@
 						</#compress></#assign>
 
 						<div class="col-md-6">
-							<h3 class="permissionTitle">${roleDefinition.description}</h3>
 							<#assign roleDescription><@pm.debugRole role=mapGet(grantableRoleDefinitions, roleDefinition) showScopes=false /></#assign>
-							<a class="use-popover colour-h3"
-							   id="popover-${roleDefinition.name}"
-							   data-html="true"
-							   data-original-title="${roleDefinition.description}"
-							   data-content="${roleDescription}"><i class="fa fa-question-circle"></i></a>
+							<h3 class="permissionTitle">${roleDefinition.description} <@fmt.help_popover id="${roleDefinition.name}" title="${roleDefinition.description}" content="${roleDescription}" html=true /></h3>
 
 							<@pm.roleTable perms_url "${roleDefinition.name}-table" target roleDefinitionName roleDefinition.description />
 						</div>
@@ -131,7 +124,7 @@
 				</div>
 			</#list>
 		<#else>
-			<p>You do not have permission to grant any roles against ${target.humanReadableId}.</p>
+			<p>You do not have permission to grant any roles against ${display_name}.</p>
 		</#if>
 	</div>
 
@@ -162,7 +155,7 @@
 							<#list grantedPermission.users.users as u>
 								<tr>
 									<td class="user">
-										${u.fullName} <span class="muted">${u.userId}</span>
+										${u.fullName} <span class="very-subtle">${u.userId}</span>
 									</td>
 									<td><abbr title="${grantedPermission.permission.description}" class="initialism">${permissionName}</abbr></td>
 									<td>
@@ -179,7 +172,7 @@
 												<input type="hidden" name="permission" value="${permissionName}">
 												<input type="hidden" name="overrideType" value="<#if grantedPermission.overrideType>true<#else>false</#if>">
 												<input type="hidden" name="usercodes" value="${u.userId}">
-												<a class="btn btn-danger btn-xs removeUser"><i class="fa fa-inverse fa-times"></i></a>
+												<button class="btn btn-danger btn-xs removeUser"><i class="fa fa-inverse fa-times"></i></button>
 											</form>
 										<#else>
 											<#assign popoverText>
@@ -204,7 +197,7 @@
 				</tbody>
 			</table>
 		<#else>
-			<p>There are no granted or revoked permissions applied against ${target.humanReadableId}.</p>
+			<p>There are no granted or revoked permissions applied against ${display_name}.</p>
 		</#if>
 	</div>
 
@@ -218,7 +211,7 @@
 			<input type="hidden" name="_command" value="addSingle">
 
 			<@bs3form.labelled_form_group path="usercodes" labelText="User ID">
-				<@form.flexipicker path="usercodes" placeholder="Type name or usercode" />
+				<@bs3form.flexipicker path="usercodes" placeholder="Type name or usercode" />
 			</@bs3form.labelled_form_group>
 
 			<@bs3form.labelled_form_group path="permission" labelText="Permission">
@@ -246,7 +239,5 @@
 		</@f.form>
 	</div>
 </div>
-
-<@pm.script />
 
 </#escape></#compress>

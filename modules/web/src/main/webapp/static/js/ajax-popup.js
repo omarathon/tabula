@@ -56,7 +56,7 @@ jQuery.fn.ajaxModalLink = function(options) {
 			if (wholeContent) {
 				// There was no modal-body when we first started, so revert back to
 				// this situation to allow the init code to work next time.
-				$tabulaModalContainer.remove();
+				$modalElement.find('.modal-dialog').remove();
 			}
 			$modalElement.removeData('modal');
 		});

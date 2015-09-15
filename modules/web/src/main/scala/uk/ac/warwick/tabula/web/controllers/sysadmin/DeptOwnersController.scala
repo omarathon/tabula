@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 @Controller
-@RequestMapping(Array("/sysadmin/departments/"))
+@RequestMapping(Array("/sysadmin/departments"))
 class SysadminDeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping

@@ -27,7 +27,7 @@
 
 				<#if modules?has_content || departmentRoutes?has_content || !department.children?has_content>
 					<li><a href="<@routes.admin.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-						Display settings
+						Department settings
 					</a></li>
 					<li><a href="<@routes.admin.notificationsettings department />?returnTo=${(info.requestedUri!"")?url}">
 						Notification settings

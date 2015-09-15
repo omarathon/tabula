@@ -4,17 +4,15 @@
 
 <#if jobId??>
 
-	<div class="alert alert-info">
-		<h2>Report generating progress</h2>
+	<h2>Report generating progress</h2>
 
-		<div class="progress">
-			<div class="progress-bar progress-bar-striped active" style="width: 0;"></div>
-		</div>
-
-		<p class="report-progress">Starting report</p>
+	<div class="progress">
+		<div class="progress-bar progress-bar-striped active" style="width: 0;"></div>
 	</div>
 
-	<div class="report-complete alert alert-success" style="display: none;">
+	<p class="report-progress">Starting report</p>
+
+	<div class="report-complete alert alert-info" style="display: none;">
 		<h3>Report generation status</h3>
 		<p><@fmt.p command.students?size "report" /> generated successfully</p>
 		<p>
@@ -46,7 +44,7 @@
 	</script>
 
 <#else>
-	<div class="alert alert-error">
+	<div class="alert alert-danger">
 		<@f.errors path="command.students" cssClass="error" />
 	</div>
 </#if>

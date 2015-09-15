@@ -1,6 +1,6 @@
 <#if !results?has_content && (command.hasBeenFiltered || command.searchSingle || command.searchMulti)>
 	<#if command.noPermissionIds?has_content>
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			You do not have permission to view the following students: <#list command.noPermissionIds as universityId>${universityId}<#if universityId_has_next>, </#if></#list>
 		</div>
 	<#else>
@@ -13,7 +13,7 @@
 		</div>
 		<#if command.noPermissionIds?has_content>
 			<div class="clearfix"></div>
-			<div class="alert alert-error">
+			<div class="alert alert-danger">
 				You do not have permission to view the following students: <#list command.noPermissionIds as universityId>${universityId}<#if universityId_has_next>, </#if></#list>
 			</div>
 		</#if>

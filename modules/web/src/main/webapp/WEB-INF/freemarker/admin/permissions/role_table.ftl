@@ -75,7 +75,7 @@
 	</#function>
 
 	<div class="btn-toolbar dept-toolbar">
-		<form action="" class="dropdown show-hide-form">
+		<form action="" class="dropdown show-hide-form clearfix">
 			<a class="btn btn-default" href="#" data-toggle="dropdown" data-target=".show-hide-form">
 				Show/hide roles <b class="caret"></b>
 			</a>

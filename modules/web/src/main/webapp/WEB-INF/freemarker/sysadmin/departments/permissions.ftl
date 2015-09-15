@@ -4,8 +4,10 @@
 <#assign deptperms_url><@url page="/sysadmin/departments/${department.code}/permissions" /></#assign>
 
 <div class="permissions-page">
-	<h1>Departmental permissions</h1>
-	<h5><span class="muted">for</span> ${department.name}</h5>
+	<div class="deptheader">
+		<h1>Departmental permissions</h1>
+		<h5 class="with-related">for ${department.name}</h5>
+	</div>
 
 	<@pm.alerts "addCommand" department.name users role />
 
@@ -17,9 +19,7 @@
 				<p>Note also that departmental admins for sub-departments get <b>no</b> automatic rights over the parent department.</p>
 			</#assign>
 
-			<h3 class="permissionTitle">Departmental admins</h3> <a class="use-popover colour-h3" id="popover-deptadmins" data-html="true"
-			   data-original-title="Departmental admins"
-			   data-content="${popover}"><i class="fa fa-question-circle"></i></a>
+			<h3 class="permissionTitle">Departmental admins <@fmt.help_popover id="deptadmins" title="Departmental admins" content="${popover}" html=true /></h3>
 
 			<@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
 		</div>
@@ -30,16 +30,12 @@
 				   This includes assigning the role of Senior Tutor/Supervisor. User Access Managers can assign Departmental Administrators as well as nominate other User Access Managers.</p>
 			</#assign>
 
-			<h3 class="permissionTitle">Departmental User Access Manager</h3> <a class="use-popover colour-h3" id="popover-uam" data-html="true"
-			   data-original-title="Departmental User Access Manager"
-			   data-content="${popover}"><i class="fa fa-question-circle"></i></a>
+			<h3 class="permissionTitle">Departmental User Access Manager <@fmt.help_popover id="uam" title="Departmental admins" content="${popover}" html=true /></h3>
 
 			<@pm.roleTable deptperms_url "deptuam-table" department "UserAccessMgrRoleDefinition" "user access managers" />
 		</div>
 
 	</div>
 </div>
-
-<@pm.script />
 
 </#escape></#compress>

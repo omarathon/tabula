@@ -67,12 +67,5 @@
 </ul>
 
 <div id="profile-modal" class="modal fade profile-subset"></div>
-<script type="text/javascript">
-	jQuery(function($) {
-		$('.use-popover').on('shown.bs.popover', function() {
-			$('a.ajax-modal').ajaxModalLink();
-		});
-	});
-</script>
 
 </#escape></#compress>

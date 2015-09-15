@@ -21,6 +21,4 @@
 	<#include "_roles.ftl" />
 </div>
 
-<@pm.script />
-
 </#escape></#compress>

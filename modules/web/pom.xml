@@ -352,7 +352,7 @@
 								<include>js/jquery-scrolltofixed.js</include>
 								<include>js/jquery-radiocontrolled.js</include>
 								<include>js/userpicker.js</include>
-								<include>js/flexipicker.js</include>
+								<include>js/id7/flexipicker.js</include>
 								<include>js/ajax-popup.js</include>
 								<include>js/browser-info.js</include>
 								<include>js/id7/app-comments.js</include>

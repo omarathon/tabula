@@ -24,7 +24,7 @@
 		</div>
 	</div>
 
-	<div class="complete alert alert-success" style="display: none;">
+	<div class="complete alert alert-info" style="display: none; margin-top: 16px;">
 		<p>Report complete</p>
 		<div class="btn-toolbar">
 			<a href="#" class="show-data btn btn-default" data-loading-text="Building table, please wait&hellip;">Show</a>
@@ -35,7 +35,7 @@
 		</div>
 	</div>
 
-	<div class="alert alert-error" style="display: none;">
+	<div class="alert alert-danger" style="display: none;">
 		<p>There was a problem generating the report. If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a>.</p>
 	</div>
 
@@ -344,7 +344,9 @@
 			window.ReportBuilder.buildFooter = function() {
 				var container = $('<tr/>');
 				container.append(
-					$('<th/>').prop('colspan', 3).css('text-align', 'right').html('Tutor/s')
+					$('<th/>').prop('colspan', 2)
+				).append(
+					$('<th/>').html('Tutor/s')
 				);
 				$.each(window.ReportBuilder.reportData.events, function(i, event){
 					container.append(

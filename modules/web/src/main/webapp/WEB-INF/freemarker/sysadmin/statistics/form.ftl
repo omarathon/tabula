@@ -1,6 +1,6 @@
 <h1>Internal statistics</h1>
 
-<div class="alert alert-warning">
+<div class="alert alert-danger">
 	<h3>Slow operations</h3>
 	<p>
 	Some of these operations (such as Hibernate statistics collection) are bad for performance and shouldn't
@@ -24,7 +24,7 @@
 
 <button id="clear-hib-stats" class="btn btn default">Clear stats</button>
 
-<div class="alert alert-warning" id="hib-response"></div>
+<div class="alert alert-danger" id="hib-response"></div>
 
 </div>
 
@@ -46,7 +46,7 @@
 
 	<button id="clear-memcached" class="btn btn-default">Flush the cache (expires all items)</button>
 
-	<div class="alert alert-warning" id="memcached-response"></div>
+	<div class="alert alert-danger" id="memcached-response"></div>
 </div>
 
 <script>

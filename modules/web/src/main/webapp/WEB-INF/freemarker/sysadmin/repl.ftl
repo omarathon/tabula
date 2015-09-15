@@ -22,7 +22,7 @@
 			</code></pre>
 		</#if>
 		<#if response.exception??>
-			<div class="alert alert-warning">
+			<div class="alert alert-danger">
 				<h3>${response.exception.class.simpleName}</h3>
 				${response.exception.message!''}
 				<pre>

@@ -6,7 +6,7 @@
 	</div>
 
 	<#if saved!false>
-		<div class="alert alert-success">
+		<div class="alert alert-info">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			Events saved for ${smallGroupSet.name}.
 		</div>

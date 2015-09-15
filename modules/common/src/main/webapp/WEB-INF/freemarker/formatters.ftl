@@ -518,6 +518,7 @@ preposition: Text to relate the title to the department name in the second line,
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
 	   data-content="${content}"
+	   data-container="body"
 	   <#if html>data-html="true"</#if>
 	>
 		<i class="icon-question-sign fa fa-question-circle"></i>

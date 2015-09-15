@@ -211,7 +211,7 @@
 		</p>
 
 		<#if (addUsersResult.missingUsers?size > 0)>
-			<div class="alert alert-warning">
+			<div class="alert alert-danger">
 				The following students could not be added as they were not found:
 				<ul>
 					<#list addUsersResult.missingUsers as user>

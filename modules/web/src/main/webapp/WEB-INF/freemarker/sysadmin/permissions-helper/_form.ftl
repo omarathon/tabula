@@ -1,7 +1,7 @@
 <@f.form action="${url('/sysadmin/permissions-helper')}" commandName="permissionsHelperCommand">
 
 	<@bs3form.labelled_form_group path="user" labelText="User ID">
-		<@form.flexipicker path="user" placeholder="Type name or usercode" />
+		<@bs3form.flexipicker path="user" placeholder="Type name or usercode" />
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group path="scopeType" labelText="Permission scope type">
