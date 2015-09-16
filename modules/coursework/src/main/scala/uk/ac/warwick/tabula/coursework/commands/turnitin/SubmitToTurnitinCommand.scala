@@ -31,6 +31,9 @@ class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, va
 
 	def describe(d: Description) = d.assignment(assignment)
 
-	def incompatibleFiles = assignment.submissions.asScala.flatMap{ _.allAttachments }.filterNot(Turnitin.validFileType)
-
+	def incompatibleFiles = {
+		val allAttachments = assignment.submissions.asScala.flatMap{ _.allAttachments }
+		allAttachments.filterNot(Turnitin.validFileType) ++ allAttachments.filterNot(Turnitin.validFileSize)
+	} 
+	
 }
