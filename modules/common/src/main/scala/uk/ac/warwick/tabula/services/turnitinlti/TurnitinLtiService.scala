@@ -36,10 +36,16 @@ object TurnitinLtiService {
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
-
+	val maxFileSize = 20 * 1000 * 1000;  // 20M
+	
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
 
+	def validFileSize(file: FileAttachment): Boolean =
+		file.actualDataLength < maxFileSize
+	
+	def validFile(file: FileAttachment): Boolean = validFileType(file) && validFileSize(file)
+	
 	/**
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
