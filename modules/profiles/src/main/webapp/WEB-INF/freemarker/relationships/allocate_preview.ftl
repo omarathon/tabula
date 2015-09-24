@@ -32,7 +32,7 @@
 		</div>
 		<div class="submit-buttons">
 			<button type="submit" class="btn btn-primary" name="continue" value="true">Continue</button>
-			<a href="https://jeff.warwick.ac.uk/profiles/" class="btn">Cancel</a>
+			<a href="/profiles/" class="btn">Cancel</a>
 		</div>
 	</@f.form>
 
@@ -111,7 +111,7 @@
 		<div class="submit-buttons">
 			<input type="hidden" name="confirm" value="true">
 			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Confirm</button>
-			<a href="https://jeff.warwick.ac.uk/profiles/" class="btn">Cancel</a>
+			<a href="/profiles/" class="btn">Cancel</a>
 		</div>
 	</@f.form>
 
