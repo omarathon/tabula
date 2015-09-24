@@ -25,9 +25,11 @@
 		   data-hash="${introHash("sgt-import-events-splus", "anywhere")}"
 		   data-content="${helpText}"><i class="fa fa-fw fa-question-circle"></i></a>
 	<#else>
-		<a class="btn btn-default disabled use-tooltip" title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
-			Import events from Syllabus+
-		</a>
+		<div class="use-tooltip" title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
+			<a class="btn btn-default disabled">
+				Import events from Syllabus+
+			</a>
+		</div>
 	</#if>
 </div>
 

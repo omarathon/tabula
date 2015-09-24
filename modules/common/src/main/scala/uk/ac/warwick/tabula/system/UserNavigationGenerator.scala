@@ -39,10 +39,10 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 			// Avoid doing too much work by just returning the first one of these that's true
 			user.loggedIn && (
 				moduleService.departmentsWithPermission(user, Permissions.Module.Administer).nonEmpty ||
-					moduleService.departmentsWithPermission(user, Permissions.Route.Administer).nonEmpty ||
-					moduleService.modulesWithPermission(user, Permissions.Module.Administer).nonEmpty ||
-					routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
-				)
+				moduleService.departmentsWithPermission(user, Permissions.Route.Administer).nonEmpty ||
+				moduleService.modulesWithPermission(user, Permissions.Module.Administer).nonEmpty ||
+				routeService.routesWithPermission(user, Permissions.Route.Administer).nonEmpty
+			)
 
 		val canViewProfiles =
 			user.isStaff ||
