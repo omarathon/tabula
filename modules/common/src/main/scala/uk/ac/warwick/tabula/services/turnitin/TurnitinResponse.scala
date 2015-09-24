@@ -268,7 +268,7 @@ object TurnitinResponse {
 		1004 -> "Paper author’s first name missing or incorrect length in URL",
 		1005 -> "Paper author’s last name missing or incorrect length in URL",
 		1006 -> "Paper title missing",
-		1007 -> "The file you have uploaded is too big (TurnItIn site has a note that file size may not exceed 10.48576Mb)",
+		1007 -> "The file you have uploaded is too big (File size may not exceed 20 MB)",
 		1008 -> "No file uploaded! Please make sure that you have attached the file that you wish to submit before sending the request",
 		1009 -> "Invalid file type! Valid file types are MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format. Please make sure the format of your file is one of the valid file types.",
 		1010 -> "You must submit more than 100 characters of non-whitespace",

@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalTime
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.model.{NamedLocation, Module}
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
@@ -44,9 +43,9 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
 	@Test
 	def translatesFromSmallGroupEventToTimetableEvent(){
-		mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns (Seq(group))
-		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns (Nil)
-		mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns (Nil)
+		mockSmallGroupService.findSmallGroupsByStudent(any[User]) returns Seq(group)
+		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns Nil
+		mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns Nil
 	  val events = eventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student)
 		events.size should be (1)
 		val tte:TimetableEvent = events.head
@@ -55,7 +54,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		tte.endTime should be(event.endTime)
 		tte.eventType should be(TimetableEventType.Practical)
 		tte.location should be(Some(NamedLocation("location")))
-		tte.context should be(Some("MODCODE"))
+		tte.parent.shortName should be(Some("MODCODE"))
 		tte.name should be("groupset name")
 		tte.startTime should be (event.startTime)
 	}

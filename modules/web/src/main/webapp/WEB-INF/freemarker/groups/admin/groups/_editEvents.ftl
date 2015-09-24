@@ -1,6 +1,36 @@
 <#escape x as x?html>
 <input type="hidden" name="action" value="submit" id="action-submit">
 
+<div class="pull-right">
+	<#if syllabusPlusEventCount gt 0>
+		<#if is_edit>
+			<#assign import_external_url><@routes.groups.editimportfromexternal smallGroupSet /></#assign>
+		<#else>
+			<#assign import_external_url><@routes.groups.createimportfromexternal smallGroupSet /></#assign>
+		</#if>
+
+		<a class="btn btn-default" href="${import_external_url}">
+			Create events from Syllabus+
+		</a>
+
+		<#assign helpText>
+			<p>Create small group events using data from the central timetabling system Syllabus+.</p>
+		</#assign>
+		<a href="#"
+		   class="use-introductory<#if showIntro("sgt-import-events-splus", "anywhere")> auto</#if>"
+		   data-title="Create events from Syllabus+"
+		   data-trigger="click"
+		   data-placement="bottom"
+		   data-html="true"
+		   data-hash="${introHash("sgt-import-events-splus", "anywhere")}"
+		   data-content="${helpText}"><i class="fa fa-fw fa-question-circle"></i></a>
+	<#else>
+		<a class="btn btn-default disabled use-tooltip" title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
+			Import events from Syllabus+
+		</a>
+	</#if>
+</div>
+
 <@bs3form.form_group>
 	<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name}<#if smallGroupSet.linked> (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name})</#if>.</p>
 

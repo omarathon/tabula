@@ -52,6 +52,7 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 						s.universityId,
 						s.userId,
 						null,
+						null,
 						scd.map(_.route.code).getOrElse(""),
 						scd.map(_.route.name).getOrElse("")
 					)

@@ -74,5 +74,4 @@ class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: Resu
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "alumni")
 
 	override def phoneNumberPermissions: Seq[Permission] = Nil
-	override def photoOptOut = false
 }

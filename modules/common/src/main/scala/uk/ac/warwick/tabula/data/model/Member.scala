@@ -31,16 +31,11 @@ import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
-import Member.Settings
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
 	final val FreshOnlyFilter = "freshMemberOnly"
-
-	object Settings {
-		val PhotoOptOut = "photoOptOut"
-	}
 }
 
 /**
@@ -156,9 +151,6 @@ abstract class Member
 	override def postLoad {
 		ensureSettings
 	}
-
-	def photoOptOut = getBooleanSetting(Settings.PhotoOptOut, default = false)
-	def photoOptOut_=(optOut: Boolean) { settings += (Settings.PhotoOptOut -> optOut) }
 
 	def asSsoUser = {
 		val u = new User
@@ -506,13 +498,6 @@ trait MemberProperties extends StringId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	var gender: Gender = _
 
-	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
-	@JoinColumn(name = "PHOTO_ID")
-	var _photo: FileAttachment = _
-
-	def photo = if (photoOptOut) null else _photo
-	def photo_=(attachment: FileAttachment) { _photo = attachment }
-
 	var inUseFlag: String = _
 
 	var inactivationDate: LocalDate = _
@@ -544,7 +529,6 @@ trait MemberProperties extends StringId {
 	var deceased: Boolean = _
 
 	def phoneNumberPermissions: Seq[Permission]
-	def photoOptOut: Boolean
 
 }
 

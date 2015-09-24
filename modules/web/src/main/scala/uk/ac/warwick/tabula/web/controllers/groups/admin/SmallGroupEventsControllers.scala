@@ -7,12 +7,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.commands.groups.admin.{ModifySmallGroupEventCommandState, ModifySmallGroupEventCommand}
+import uk.ac.warwick.tabula.commands.groups.admin.{UpdateSmallGroupEventFromExternalSystemCommand, ModifySmallGroupEventCommandState, ModifySmallGroupEventCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
+import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
 import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.util.termdates.Term
@@ -24,7 +25,7 @@ trait SmallGroupEventsController extends GroupsController {
 
 	@ModelAttribute("allDays") def allDays = DayOfWeek.members
 
-	case class NamedTerm(val name: String, val term: Term, val weekRange: WeekRange)
+	case class NamedTerm(name: String, term: Term, weekRange: WeekRange)
 
 	@ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet) = {
 		val year = Option(set.academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
@@ -99,7 +100,9 @@ class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEve
 
 }
 
-abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent {
+abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent
+	with AutowiringScientiaConfigurationComponent with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
+	with SyllabusPlusEventCountForModule {
 
 	type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
@@ -139,6 +142,8 @@ class CreateSmallGroupSetEditEventController extends AbstractEditSmallGroupEvent
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		submit(cmd, errors, Routes.admin.createAddEvents(set))
 
+	@ModelAttribute("is_edit_set") def isEditingSmallGroupSet = false
+
 }
 
 @RequestMapping(Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/events/{smallGroup}/edit/{smallGroupEvent}"))
@@ -151,4 +156,65 @@ class EditSmallGroupSetEditEventController extends AbstractEditSmallGroupEventCo
 	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		submit(cmd, errors, Routes.admin.editAddEvents(set))
 
+	@ModelAttribute("is_edit_set") def isEditingSmallGroupSet = true
+
+}
+
+abstract class AbstractUpdateSmallGroupEventFromExternalSystemController extends GroupsController {
+
+	validatesSelf[SelfValidating]
+
+	type UpdateSmallGroupEventFromExternalSystemCommand = Appliable[SmallGroupEvent] with SelfValidating
+
+	@ModelAttribute("command") def cmd(
+		@PathVariable("module") module: Module,
+		@PathVariable("smallGroupSet") set: SmallGroupSet,
+		@PathVariable("smallGroup") group: SmallGroup,
+		@PathVariable("smallGroupEvent") event: SmallGroupEvent
+	): UpdateSmallGroupEventFromExternalSystemCommand =
+		UpdateSmallGroupEventFromExternalSystemCommand(module, set, group, event)
+
+	protected def render(event: SmallGroupEvent) = {
+		val set = event.group.groupSet
+
+		Mav("groups/admin/groups/events/update", "cancelUrl" -> postSaveRoute(event))
+			.crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+	}
+
+	protected def postSaveRoute(event: SmallGroupEvent): String
+
+	@RequestMapping
+	def form(
+		@PathVariable("smallGroupEvent") event: SmallGroupEvent,
+		@ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand
+	) = render(event)
+
+	protected def submit(cmd: UpdateSmallGroupEventFromExternalSystemCommand, errors: Errors, event: SmallGroupEvent, route: String) = {
+		if (errors.hasErrors) {
+			render(event)
+		} else {
+			cmd.apply()
+			RedirectForce(route)
+		}
+	}
+
+	@RequestMapping(method = Array(POST))
+	def save(
+		@Valid @ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand,
+		errors: Errors,
+		@PathVariable("smallGroupEvent") event: SmallGroupEvent
+	) = submit(cmd, errors, event, postSaveRoute(event))
+
+}
+
+@RequestMapping(Array("/groups/admin/module/{module}/groups/new/{smallGroupSet}/events/{smallGroup}/edit/{smallGroupEvent}/import"))
+@Controller
+class CreateSmallGroupSetUpdateEventFromExternalSystemController extends AbstractUpdateSmallGroupEventFromExternalSystemController {
+	override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.createEditEvent(event)
+}
+
+@RequestMapping(Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/events/{smallGroup}/edit/{smallGroupEvent}/import"))
+@Controller
+class EditSmallGroupSetUpdateEventFromExternalSystemController extends AbstractUpdateSmallGroupEventFromExternalSystemController {
+	override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.editEditEvent(event)
 }

@@ -31,6 +31,10 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
 
 	var comments: String = _
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="approved_by")
+	var approvedBy: Member = _
+
 	override def toEntityReference: EntityReference[MeetingRecordApproval] = new MeetingRecordApprovalEntityReference().put(this)
 
 	override def permissionsParents: Stream[PermissionsTarget] = Stream(meetingRecord)

@@ -88,8 +88,8 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		newPoint.pointType = pointType
 		pointType match {
 			case AttendanceMonitoringPointType.Meeting =>
-				newPoint.meetingRelationships = meetingRelationships.toSeq
-				newPoint.meetingFormats = meetingFormats.toSeq
+				newPoint.meetingRelationships = meetingRelationships
+				newPoint.meetingFormats = meetingFormats
 				newPoint.meetingQuantity = meetingQuantity
 			case AttendanceMonitoringPointType.SmallGroup =>
 				newPoint.smallGroupEventQuantity = smallGroupEventQuantity
@@ -106,19 +106,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 		newPoint
 	}
 
-	def applies(student: StudentMember): Boolean = {
-		val beginDates = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == scheme.academicYear)).map(_.beginDate)
-		if (beginDates.nonEmpty) {
-			// do not remove; import needed for sorting
-			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-			applies(beginDates.min)
-		} else {
-			false
-		}
-	}
-
-	def applies(beginDate: LocalDate): Boolean = endDate.isAfter(beginDate)
+	def applies(beginDate: LocalDate, finishDate: Option[LocalDate]): Boolean = endDate.isAfter(beginDate) && (finishDate.isEmpty || startDate.isBefore(finishDate.get))
 }
 
 trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehaviour {

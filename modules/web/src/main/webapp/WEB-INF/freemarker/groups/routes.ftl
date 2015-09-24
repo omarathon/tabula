@@ -58,6 +58,12 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro createseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events/defaults" /></#macro>
 <#macro editseteventdefaults set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events/defaults" /></#macro>
 
+<#macro createimportfromexternal set><@_u page="/admin/module/${set.module.code}/groups/new/${set.id}/events/import" /></#macro>
+<#macro editimportfromexternal set><@_u page="/admin/module/${set.module.code}/groups/edit/${set.id}/events/import" /></#macro>
+
+<#macro createseteventsediteventimport event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}/import" /></#macro>
+<#macro editseteventsediteventimport event><@_u page="/admin/module/${event.group.groupSet.module.code}/groups/new/${event.group.groupSet.id}/events/${event.group.id}/edit/${event.id}/import" /></#macro>
+
 <#macro register event><@_u page="/event/${event.id}/register" /></#macro>
 <#macro registerForWeek event week><@_u page="/event/${event.id}/register?week=${week?c}" /></#macro>
 <#macro registerPdf event><@_u page="/event/${event.id}/register.pdf" /></#macro>

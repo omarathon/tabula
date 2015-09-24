@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.jobs
 
 
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -38,11 +39,11 @@ class SubmitToTurnitinLtiJob extends Job
 
 	// Turnitin have requested that submissions should be sent at a rate of no more than 1 per second
 	val WaitingRequestsToTurnitinSleep = 2000
-	val WaitingRequestsToTurnitinRetries = 5
+	val WaitingRequestsToTurnitinRetries = 30
 
 
 	val WaitingRequestsFromTurnitinCallbackSleep = 2000
-	val WaitingRequestsFromTurnitinCallbacksRetries = 10
+	val WaitingRequestsFromTurnitinCallbacksRetries = 20
 
 	var sendNotifications = true
 
@@ -72,7 +73,7 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			updateStatus("Submitting papers to Turnitin")
-			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType) }
+			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFile) }
 			val uploadsTotal = allAttachments.size
 
 			val failedUploads = submitPapers(assignmentWithTurnitinId, uploadsTotal)
@@ -102,7 +103,12 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 			submit() match {
 				case response if response.success => response
-				case response if retries == 0 => throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + Some(response.statusMessage))
+				case response if retries == 0 => {
+					if (sendNotifications) {
+						sendFailureNotification(job, assignment)
+					}
+					throw new FailedJobException("Failed to submit assignment '" + assignment.name + "' - " + response.statusMessage.getOrElse("Error unknown"))
+				}
 				case _ => submitAssignment(retries -1)
 			}
 		}
@@ -113,11 +119,10 @@ class SubmitToTurnitinLtiJob extends Job
 			var uploadsDone: Int = 0
 
 			assignment.submissions.asScala.foreach(submission => {
-				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
+				for (attachment <- submission.allAttachments if (TurnitinLtiService.validFile(attachment))) {
 					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
-						val token: FileAttachmentToken = getToken(attachment)
-						val attachmentAccessUrl = s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
+						val attachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
 						val submitPaper = transactional(){
 							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
 						}
@@ -146,24 +151,29 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			submit() match {
-				case response if response.success => {
+				case response if response.success =>
 						val originalityReport = originalityReportService.getOriginalityReportByFileId(attachment.id)
 						if (originalityReport.isDefined) {
-							originalityReport.get.turnitinId = response.turnitinSubmissionId()
-							originalityReport.get.reportReceived = false
+							transactional() {
+								originalityReport.get.turnitinId = response.turnitinSubmissionId
+								originalityReport.get.reportReceived = false
+							}
 						} else {
-							val report = new OriginalityReport
-							report.turnitinId = response.turnitinSubmissionId()
-							attachment.originalityReport = report
-							originalityReportService.saveOriginalityReport(attachment)
+							transactional() {
+								val report = new OriginalityReport
+								report.turnitinId = response.turnitinSubmissionId
+								attachment.originalityReport = report
+								originalityReportService.saveOriginalityReport(attachment)
+							}
 						}
 					response
-				}
-				case response if retries == 0 => {
+				case response if retries == 0 =>
 					logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
 					response
+				case _ => {
+					val newAttachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
+					submitSinglePaper(assignment, newAttachmentAccessUrl, submission, attachment, retries - 1)
 				}
-				case _ => submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, retries-1)
 			}
 		}
 
@@ -172,7 +182,7 @@ class SubmitToTurnitinLtiJob extends Job
 			val originalityReports = Seq()
 			var failedResults = Map[String, String]()
 			assignment.submissions.asScala.foreach(submission => {
-				submission.allAttachments.foreach(attachment => {
+				submission.allAttachments.filter(TurnitinLtiService.validFile).foreach(attachment => {
 					val originalityReport = transactional(readOnly = true) {
 						originalityReportService.getOriginalityReportByFileId(attachment.id)
 					}
@@ -180,26 +190,30 @@ class SubmitToTurnitinLtiJob extends Job
 					if (originalityReport.isDefined && !originalityReport.get.reportReceived) {
 						val report = originalityReport.get
 
-						val response = retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
+						val response = transactional(readOnly = true) {
+							retrieveSinglePaperResults(report.turnitinId, job.user, WaitingRequestsToTurnitinRetries)
+						}
 
-						if (response.success) {
-							val result = response.submissionInfo()
-							report.similarity = result.similarity.map(_.toInt)
-							report.publicationOverlap = result.publication_overlap.map(_.toInt)
-							report.webOverlap = result.web_overlap.map(_.toInt)
-							report.studentOverlap = result.student_overlap.map(_.toInt)
-							attachment.originalityReport = report
-							attachment.originalityReport.reportReceived = true
+						if (response.success && response.submissionInfo.similarity.isDefined) {
+							val result = response.submissionInfo
 							transactional() {
+								report.similarity = result.similarity
+								report.overlap = result.overlap.map(_.toInt)
+								report.publicationOverlap = result.publication_overlap.map(_.toInt)
+								report.webOverlap = result.web_overlap.map(_.toInt)
+								report.studentOverlap = result.student_overlap.map(_.toInt)
+								attachment.originalityReport = report
+								attachment.originalityReport.reportReceived = true
 								originalityReportService.saveOriginalityReport(attachment)
+								logger.info(s"Saving Originality Report with similarity ${result.similarity.getOrElse(None)}")
 							}
 							originalityReports :+ report
 						} else {
 							logger.warn(s"Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
 							failedResults += (attachment.name -> response.statusMessage.getOrElse("failed to retrieve results"))
 						}
-					} else {
-						logger.warn(s"Failed to find originality report for attachment $attachment.id")
+					} else if(!originalityReport.isDefined) {
+						logger.warn(s"Failed to find originality report for attachment ${attachment.id}")
 						failedResults += (attachment.name -> "failed to find Originality Report")
 					}
 					resultsReceived += 1
@@ -222,17 +236,17 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			getResults match {
-				case response if response.success => response
+				case response if response.success && response.submissionInfo.similarity.isDefined => response
 				case response if retries == 0 => response
 				case _ => retrieveSinglePaperResults(turnitinPaperId, currentUser, retries-1)
 			}
 		}
 
-		private def getToken(attachment: FileAttachment): FileAttachmentToken = {
-			transactional() {
+		private def getAttachmentAccessUrl(submission: Submission, attachment: FileAttachment): String = {
+			transactional(readOnly = false, propagation = REQUIRES_NEW) {
 				val token = attachment.generateToken()
 				fileAttachmentService.saveOrUpdate(token)
-				token
+				s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"
 			}
 		}
 
@@ -257,10 +271,9 @@ class SubmitToTurnitinLtiJob extends Job
 						sendFailureNotification(job, assignment)
 					}
 					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				case _ => {
-					// Re-get this assignmnet from hibernate as the Turnitin ID has only just been set (in a separate transaction).
+				case _ =>
+					// Re-get this assignment from hibernate as the Turnitin ID has only just been set (in a separate transaction).
 					awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse (throw obsoleteJob), retries - 1)
-				}
 			}
 		}
 	}

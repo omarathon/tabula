@@ -2,18 +2,21 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.immutable.TreeMap
-import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 // wrapper class for relationship data - just for less crufty method signature
-case class RelationshipGraph(studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]], studentCount: Int, missingCount: Int)
+case class RelationshipGraph(
+	studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]],
+	studentCount: Int,
+	missingCount: Int,
+	courseMap: Map[StudentCourseDetails, Course],
+	yearOfStudyMap: Map[StudentCourseDetails, Int]
+)
 case class SortableAgentIdentifier(agentId:String, lastName:Option[String]){
 	 val sortkey = lastName.getOrElse("") + agentId
 	 override def toString() = sortkey
@@ -62,12 +65,22 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		val studentIdsInDepartment = unsortedAgentRelationshipsByStudentDept.map(_.studentId).distinct
 		val studentsOutsideDepartmentCount =
 			unsortedAgentRelationshipsByStaffDept.map(_.studentId).distinct
-				.filterNot(id=>studentIdsInDepartment.exists(_ == id)).size
+				.filterNot(id=>studentIdsInDepartment.contains(id)).size
+
+		val courseMap: Map[StudentCourseDetails, Course] = benchmarkTask("courseDetails") {
+			relationshipService.coursesForStudentCourseDetails(sortedAgentRelationships.values.flatten.map(_.studentCourseDetails).toSeq)
+		}
+
+		val yearOfStudyMap: Map[StudentCourseDetails, Int] = benchmarkTask("yearsOfStudy") {
+			relationshipService.latestYearsOfStudyForStudentCourseDetails(sortedAgentRelationships.values.flatten.map(_.studentCourseDetails).toSeq)
+		}
 
 		RelationshipGraph(
 			sortedAgentRelationships,
 			studentsInDepartmentCount + studentsOutsideDepartmentCount,
-			departmentStudentsWithoutAgentCount
+			departmentStudentsWithoutAgentCount,
+			courseMap,
+			yearOfStudyMap
 		)
 	}
 }

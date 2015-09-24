@@ -89,9 +89,9 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	trait StudentDatasFixture extends Fixture {
 		val thisStudentDatas =
 			Seq(
-				AttendanceMonitoringStudentData(student1.firstName, student1.lastName, student1.universityId, "", new LocalDate, null, null),
-				AttendanceMonitoringStudentData(student2.firstName, student2.lastName, student2.universityId, "", new LocalDate, null, null),
-				AttendanceMonitoringStudentData(student3.firstName, student3.lastName, student3.universityId, "", new LocalDate, null, null)
+				AttendanceMonitoringStudentData(student1.firstName, student1.lastName, student1.universityId, "", new LocalDate, None, null, null),
+				AttendanceMonitoringStudentData(student2.firstName, student2.lastName, student2.universityId, "", new LocalDate, None, null, null),
+				AttendanceMonitoringStudentData(student3.firstName, student3.lastName, student3.universityId, "", new LocalDate, None, null, null)
 			)
 	}
 

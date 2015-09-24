@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiResponse
+import uk.ac.warwick.tabula.web.controllers.sysadmin.LtiConformanceTesterGenerateController.LtiConformanceTesterPopulateFormCommand
+import uk.ac.warwick.tabula.commands.sysadmin.LtiConformanceTesterPopulateFormCommand
 
 @Controller
 @RequestMapping(Array("/sysadmin/turnitinlti"))
@@ -111,26 +113,31 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 
 }
 
+object LtiConformanceTesterGenerateController {
+	type LtiConformanceTesterPopulateFormCommand = Appliable[Map[String, String]]
+	with LtiConformanceTesterPopulateFormCommandState
+}
+
 @Controller
-@RequestMapping(value = Array("/sysadmin/turnitinlti/conformancetester"))
-class LtiConformanceTesterController extends BaseSysadminController {
+@RequestMapping(value = Array("/sysadmin/turnitinlti/conformancetester-generate"))
+class LtiConformanceTesterGenerateController extends BaseSysadminController {
 
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("ltiConformanceTesterCommand")
-	def ltiConformanceTesterCommand(user: CurrentUser) = LtiConformanceTesterCommand(user)
+	@ModelAttribute("ltiConformanceTesterPopulateFormCommand")
+	def ltiConformanceTesterPopulateFormCommand(user: CurrentUser) = LtiConformanceTesterPopulateFormCommand(user)
 
 	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/conformance-tester")
+	def form() = Mav("sysadmin/turnitinlti/conformance-tester-generate")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("ltiConformanceTesterCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("ltiConformanceTesterPopulateFormCommand") cmd: LtiConformanceTesterPopulateFormCommand, errors: Errors) =
 		if (errors.hasErrors){
 			form()
 		} else {
-
-			val response: TurnitinLtiResponse = cmd.apply()
-			Mav("sysadmin/turnitinlti/conformancetester-result",
-				"response" -> response)
+			val response = cmd.apply()
+			Mav("sysadmin/turnitinlti/conformance-tester-generate-result",
+				"response" -> response,
+				"endpoint" -> cmd.endpoint)
 		}
 }

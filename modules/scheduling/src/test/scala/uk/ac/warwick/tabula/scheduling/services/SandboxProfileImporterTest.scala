@@ -19,7 +19,6 @@ class SandboxProfileImporterTest extends TestBase with ImportCommandFactorySetup
 		macs.size should be (310)
 
 		val mac = macs(0)
-		mac.photo() should be ('empty)
 
 		val member = mac.member
 		member.universityId should be ("4300001")

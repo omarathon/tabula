@@ -106,65 +106,71 @@
 
 <#macro meetingState meeting studentCourseDetails>
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewerUser)>
-	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="alert alert-info">
-		This meeting record needs to be approved by <#list meeting.pendingApprovers as approver>${approver.fullName}<#if approver_has_next>, </#if></#list>.
-	</div>
+		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<div class="alert alert-info">
+			This meeting record needs to be approved by <#list meeting.pendingApprovers as approver>${approver.fullName}<#if approver_has_next>, </#if></#list>.
+		</div>
 	<#elseif meeting.pendingApprovalBy(viewerUser)>
-	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="pending-action alert alert-warning">
-		This record needs your approval. Please review, then approve or return it with comments.
-		<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
-			<br />
-			Approving this meeting record will mark a monitoring point as attended.
-		</#if>
-	</div>
-	<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
-	<form method="post" class="approval" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
-		<@form.row>
-			<@form.field>
-				<label class="radio inline">
-					<input type="radio" name="approved" value="true">
-					Approve
-				</label>
-				<label class="radio inline">
-					<input class="reject" type="radio" name="approved" value="false">
-					Return with comments
-				</label>
-			</@form.field>
-		</@form.row>
-		<div class="rejection-comment" style="display:none">
+		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<div class="pending-action alert alert-warning">
+			This record needs your approval. Please review, then approve or return it with comments.
+			<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
+				<br />
+				Approving this meeting record will mark a monitoring point as attended.
+			</#if>
+		</div>
+		<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
+		<form method="post" class="approval" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
 			<@form.row>
 				<@form.field>
-					<textarea class="big-textarea" name="rejectionComments"></textarea>
+					<label class="radio inline">
+						<input type="radio" name="approved" value="true">
+						Approve
+					</label>
+					<label class="radio inline">
+						<input class="reject" type="radio" name="approved" value="false">
+						Return with comments
+					</label>
 				</@form.field>
 			</@form.row>
-		</div>
-		<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
-	</form>
-	<#elseif meeting.rejectedBy(viewerMember)>
-	<small class="muted">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="alert alert-error">
-		<div class="rejection">
-			<p>You sent this record back to the other party, who will review the record and submit it for approval again.</p>
-		</div>
-	</div>
-	<#elseif meeting.pendingRevisionBy(viewerUser)>
-	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-	<div class="pending-action alert alert-warning">
-		<#list meeting.rejectedApprovals as rejectedApproval>
-			<div class="rejection">
-				<p>This record has been returned with comments by ${rejectedApproval.approver.fullName} because:</p>
-				<blockquote class="reason">${rejectedApproval.comments}</blockquote>
-				<p>Please edit the record and submit it for approval again.</p>
+			<div class="rejection-comment" style="display:none">
+				<@form.row>
+					<@form.field>
+						<textarea class="big-textarea" name="rejectionComments"></textarea>
+					</@form.field>
+				</@form.row>
 			</div>
-		</#list>
-	</div>
-	<div class="submit-buttons">
-		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting/>">Edit</a>
-	</div>
+			<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
+		</form>
+	<#elseif meeting.rejectedBy(viewerMember)>
+		<small class="muted">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<div class="alert alert-error">
+			<div class="rejection">
+				<p>You sent this record back to the other party, who will review the record and submit it for approval again.</p>
+			</div>
+		</div>
+	<#elseif meeting.pendingRevisionBy(viewerUser)>
+		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<div class="pending-action alert alert-warning">
+			<#list meeting.rejectedApprovals as rejectedApproval>
+				<div class="rejection">
+					<p>This record has been returned with comments by ${rejectedApproval.approver.fullName} because:</p>
+					<blockquote class="reason">${rejectedApproval.comments}</blockquote>
+					<p>Please edit the record and submit it for approval again.</p>
+				</div>
+			</#list>
+		</div>
+		<div class="submit-buttons">
+			<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting/>">Edit</a>
+		</div>
 	<#else>
-	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+		<small class="muted">
+			${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}.
+			Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate />.
+			<#if meeting.approved && (meeting.approvedBy?has_content || meeting.approvedDate?has_content)>
+				Approved<#if meeting.approvedBy?has_content> by ${meeting.approvedBy.fullName},</#if><#if meeting.approvedDate?has_content> <@fmt.date meeting.approvedDate /></#if>
+			</#if>
+		</small>
 	</#if>
 </#macro>
 

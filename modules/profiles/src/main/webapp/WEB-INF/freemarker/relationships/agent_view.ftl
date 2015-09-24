@@ -7,12 +7,12 @@
 	<div class="pull-right">
 		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
 			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
-				<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
+				<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s
 			</a>
 		</#if>
 	</div>
 
-	<h1>${relationshipType.description}s for ${department.name}</h1>
+	<h1 class="with-settings">${relationshipType.description}s for ${department.name}</h1>
 
 	<#if studentCount gt 0>
 		<#if agentRelationships?has_content>
@@ -63,12 +63,8 @@
 													<td><h6>${studentCourseDetails.student.lastName}</h6></td>
 													<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
 													<td>${studentCourseDetails.student.groupName!""}</td>
-													<td>
-														${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
-													</td>
-													<td>
-														${(studentCourseDetails.course.name)!""}
-													</td>
+													<td>${(mapGet(yearOfStudyMap, studentCourseDetails))!""}</td>
+													<td>${(mapGet(courseMap, studentCourseDetails).name)!""}</td>
 												</tr>
 											</#list>
 										</tbody>

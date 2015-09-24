@@ -50,47 +50,54 @@
 
 		<#if !student_table_script_included??>
 			<script type="text/javascript">
-			    (function($) {
-			        $(function() {
-			        	<#if totalResults lte filterStudentsCommand.studentsPerPage>
-			            $(".students").tablesorter({
-			            	headers: { 0: { sorter: false } },
-			              sortList: [[2,0], [1,0]]
-			            });
-			          <#else>
-			          	// CUSTOM TABLE SORTING
-			          	$(".students").addClass('tablesorter')
-			          		.find('th:not(:first-child)').addClass('header')
-			          		.on('click', function(e) {
-			          			var $th = $(this);
+				(function($) {
+					$(function() {
+						<#if totalResults lte filterStudentsCommand.studentsPerPage>
+							$(".students").tablesorter({
+								headers: { 0: { sorter: false } },
+								sortList: [[2,0], [1,0]]
+							});
+						<#else>
+							// CUSTOM TABLE SORTING
+							$(".students").addClass('tablesorter')
+								.find('th:not(:first-child)').addClass('header')
+								.on('click', function(e) {
+									var $th = $(this);
 
-			          			if ($th.hasClass('headerSortDown')) {
-			          				$('#sortOrder').val('desc(' + $th.data('field') + ')');
-			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-			          				$th.addClass('headerSortUp');
-			          			} else {
-			          				$('#sortOrder').val('asc(' + $th.data('field') + ')');
-			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-			          				$th.addClass('headerSortDown');
-			          			}
+									if ($th.hasClass('headerSortDown')) {
+										$('#sortOrder').val('desc(' + $th.data('field') + ')');
+										$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+										$th.addClass('headerSortUp');
+									} else {
+										$('#sortOrder').val('asc(' + $th.data('field') + ')');
+										$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+										$th.addClass('headerSortDown');
+									}
 
-			          			if (typeof(window.doRequest) === 'function') {
-												window.doRequest($('#filterStudentsCommand'), true);
-											} else {
-												$('#filterStudentsCommand').submit();
-											}
-			          		});
-			          </#if>
+									if (typeof(window.doRequest) === 'function') {
+										window.doRequest($('#filterStudentsCommand'), true);
+									} else {
+										$('#filterStudentsCommand').submit();
+									}
+								});
+						</#if>
 
-			            $(".student").on("mouseover", function(e) {
-			                $(this).find("td").addClass("hover");
-			            }).on("mouseout", function(e) {
-                      $(this).find("td").removeClass("hover");
-                  }).on("click", function(e) {
-                      if (! $(e.target).is("a") && ! $(e.target).is("img")) window.location = $(this).find("a.profile-link")[0].href;
-                  });
-			        });
-			    })(jQuery);
+						$(".student").on("mouseover", function(e) {
+							$(this).find("td").addClass("hover");
+						}).on("mouseout", function(e) {
+							$(this).find("td").removeClass("hover");
+						}).on("click", function(e) {
+							if (! $(e.target).is("a") && ! $(e.target).is("img")) {
+								window.location = $(this).find("a.profile-link")[0].href;
+							}
+						});
+
+						$('.use-popover').tabulaPopover({
+							trigger: 'click',
+							container: '#container'
+						});
+					});
+				})(jQuery);
 			</script>
 			<#assign student_table_script_included=true />
 		</#if>
