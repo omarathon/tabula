@@ -114,7 +114,11 @@
 						${(user.navigation.collapsed)!""}
 					</#if>
 				</#assign>
-				${navigation?replace("${component.name!''}-active", "${component.name!''}-active active")}
+				<#if breadcrumbs?has_content>
+					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active next-secondary")}
+				<#else>
+					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active")}
+				</#if>
 			</nav>
 			<#if breadcrumbs?has_content>
 				<nav class="navbar navbar-secondary" role="navigation">

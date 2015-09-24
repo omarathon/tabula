@@ -35,14 +35,16 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 					if (searchSingle) profileService.getAllMembersWithUserId(singleSearch)
 					else profileService.getAllMembersWithUniversityIds(multiSearchEntries)
 				}
-				val (students, noPermission) = members.flatMap {
+				val students = members.flatMap {
 					case student: StudentMember => Some(student)
 					case _ => None
-				}.partition(s => securityService.can(user, Permissions.Department.Reports, s))
+				}
+				val (validStudents, noPermission) = students.partition(s => securityService.can(user, Permissions.Department.Reports, s))
 
+				notFoundIds = multiSearchEntries.diff(students.map(_.universityId))
 				noPermissionIds = noPermission.map(_.universityId)
 
-				students.map(s => {
+				validStudents.map(s => {
 					val scd = Option(s.mostSignificantCourse)
 					AttendanceMonitoringStudentData(
 						s.firstName,
@@ -88,6 +90,7 @@ trait ProfileExportCommandState extends FiltersStudents {
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 
 	var noPermissionIds: Seq[String] = Seq()
+	var notFoundIds: Seq[String] = Seq()
 	// Bind variables
 
 	var page = 1

@@ -7,8 +7,8 @@
 	</div>
 	<div class="col-md-6">
 		<h2>Search for multiple Student IDs</h2>
-		<textarea class="form-control" name="multiSearch" rows="5" style="width:300px;" placeholder="Add one ID number per line">${command.multiSearch!}</textarea>
-		<button class="btn btn-default" type="submit" name="searchMulti" value="true" style="vertical-align: bottom"><i class="fa fa-search"></i></button>
+		<textarea class="form-control" name="multiSearch" rows="5" placeholder="Add one ID number per line" style="width: 100%;">${command.multiSearch!}</textarea>
+		<button class="btn btn-default" type="submit" name="searchMulti" value="true" style="vertical-align: bottom">Add</button>
 	</div>
 </div>
 <hr />

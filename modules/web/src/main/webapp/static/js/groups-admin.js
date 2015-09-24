@@ -103,13 +103,15 @@ $(function() {
 		var $table = $(this);
 
 		var updateCell = function($cell, value) {
-			var $icon = $cell.find('i');
+			var $icon = $cell.find('i'), groupRunningText = 'Group running on ';
 			if (value) {
 				$icon.addClass('fa fa-check');
-				$cell.addClass('checked');
+				$cell.addClass('checked')
+					.attr('data-original-title', groupRunningText + $cell.attr('data-original-title'));
 			} else {
 				$icon.removeClass('fa fa-check');
-				$cell.removeClass('checked');
+				$cell.removeClass('checked')
+					.attr('data-original-title', $cell.attr('data-original-title').replace(groupRunningText, ''));
 			}
 		};
 

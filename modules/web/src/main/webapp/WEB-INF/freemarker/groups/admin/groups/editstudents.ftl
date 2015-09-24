@@ -2,7 +2,7 @@
 <#import "*/group_components.ftl" as components />
 	<div class="deptheader">
 		<h1>Edit small groups</h1>
-		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
+		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /> <#if smallGroupSet??>(${smallGroupSet.academicYear.toString})</#if></h4>
 	</div>
 
 	<#if saved!false>

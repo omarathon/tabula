@@ -78,10 +78,10 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		<#local membersGroup=status.actualValue />
 	</@spring.bind>
 
-	<#local includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up fa fa-hand-o-up"></i></span><span class="hide">Added</span></#local>
-	<#local pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove fa fa-times"></i></span><span class="hide">Pending deletion</span></#local>
-	<#local excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle fa fa-ban"></i></span><span class="hide">Removed</span></#local>
-	<#local sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt fa fa-list-alt"></i></span><span class="hide">SITS</span></#local>
+	<#local includeText><span class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
+	<#local pendingDeletionText><span class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
+	<#local excludeText><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
+	<#local sitsText><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
 
 	<#local membershipInfo = command.membershipInfo />
 	<#local hasMembers = membershipInfo.totalCount gt 0 />
@@ -123,6 +123,19 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				<a class="btn btn-primary restore-users disabled">Restore</a>
 			</div>
 
+			<#if showIntro("membership-buttons-disabled", "anywhere")>
+				<#assign introText>
+					<p>Checkbox entries must be selected to activate options.</p>
+				</#assign>
+				<a href="#"
+				   id="membership-buttons-disabled-intro"
+				   class="use-introductory auto"
+				   data-hash="${introHash("tier4-filtering", "anywhere")}"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
+			</#if>
+
 		</#if>
 
 		<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb fa fa-lightbulb-o"></i> Javascript is required for editing</small></span>
@@ -135,7 +148,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				<thead>
 					<tr>
 						<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
-						<th class="sortable" style="width: 50px;">Source</th>
+						<th class="sortable" style="width: 1px;">Source</th>
 						<th class="sortable">First name</th>
 						<th class="sortable">Last name</th>
 						<th class="sortable">ID</th>
@@ -166,14 +179,14 @@ Generates the bulk of the picker HTML, inside a fieldset element
 									<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 								</#if>
 							</td>
-							<td class="source">
+							<td class="source" style="white-space: nowrap;">
 								<#noescape>
 									<#if item.itemTypeString='include'>
-										${includeIcon}
+										${includeText}
 									<#elseif item.itemTypeString='exclude'>
-										${excludeIcon}
+										${excludeText}
 									<#else>
-										${sitsIcon}
+										${sitsText}
 									</#if>
 								</#noescape>
 							</td>
@@ -535,9 +548,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(untypedId));
 				if ($tr.is('.item-type-sits')) {
-					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+					$tr.find('.source').html('<#noescape>${excludeText}</#noescape>');
 				} else {
-					$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
+					$tr.find('.source').html('<#noescape>${pendingDeletionText}</#noescape>');
 				}
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
@@ -558,7 +571,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				// update both hidden fields and table
 				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ untypedId + ']').remove();
 				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(untypedId));
-				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
+				$tr.find('.source').html('<#noescape>${includeText}</#noescape>');
 
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');

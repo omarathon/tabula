@@ -1327,7 +1327,7 @@
 	<#local label>
 		Running in these weeks
 		<#local helpText>
-			<p>Select the weeks that this small group event will run in by clicking on each week. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
+			<p>Select the weeks that this small group event will run in by clicking on each week, the week will turn to a tick to indicate that the group is active on that date. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
 		</#local>
 		<a href="#"
 		   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
