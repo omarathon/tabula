@@ -5,7 +5,7 @@
 <#else>
 	<#assign moderationFeedback = firstMarkerFeedback.feedback.secondMarkerFeedback />
 	<div class="well alert alert-danger">
-		<h3 style="color: inherit;">You rejected this feedback at <@fmt.date completedDate /></h3>
+		<h3 style="color: inherit;">You requested changes to this feedback at <@fmt.date completedDate /></h3>
 	</div>
     <div class="well">
 		<h4>Moderation Summary</h4>

@@ -153,7 +153,6 @@ object FlexiPickerController {
 			}
 
 			users.sortBy(_.getFullName)
-			users
 		}
 
 		private def isValidUser(user: User) =

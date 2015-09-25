@@ -547,7 +547,7 @@ $(function() {
 
 				if(rejected) {
 					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
-					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
+					$statusContainer.append($('<div class="label label-important">Changes requested</div>'));
 					$actionContainer.html('No action required.');
 				}
 				else if(markingCompleted) {
@@ -559,7 +559,7 @@ $(function() {
 				else if(nextMarkerAction != undefined && !$statusContainer.find('.marked').length) {
 					$statusContainer.find('.label-warning').remove(); // remove existing label before adding another
 					if(!$row.hasClass("in-progress")) {
-						$statusContainer.append($('<span class="label label-info">In Progress</span>'));
+						$statusContainer.append($('<span class="label label-info">In progress</span>'));
 						$row.addClass("in-progress");
 					}
 					$actionContainer.html(nextMarkerAction);

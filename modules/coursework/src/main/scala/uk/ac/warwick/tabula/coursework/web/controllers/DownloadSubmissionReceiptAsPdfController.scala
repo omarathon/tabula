@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -34,7 +35,7 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	}
 
 }
@@ -63,7 +64,7 @@ class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkContr
 			Map(
 				"submission" -> command.apply()
 			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	}
 
 }

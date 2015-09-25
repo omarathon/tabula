@@ -7,7 +7,7 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.{MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
@@ -165,8 +165,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	with MemberSetup {
 		val rs: ResultSet
 
-		val blobBytes = Array[Byte](1,2,3,4,5)
-		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val mac = MembershipInformation(mm)
 
 		// only return a known disability for code Q
 		val disabilityQ = new Disability("Q", "Test disability")
@@ -178,7 +177,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, importCommandFactory) with ComponentMixins
 		rowCommand.memberDao = memberDao
-		rowCommand.fileDao = smartMock[FileDao]
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 		rowCommand.profileService = profileService
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
@@ -314,7 +312,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 			member match {
@@ -343,8 +340,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
-			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
 			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
@@ -399,7 +394,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			member.gender should be (Male)
 			member.firstName should be ("Mathew")
 			member.lastName should be ("Mannion")
-			member.photo should not be null
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 			member match {
@@ -423,8 +417,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
-			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
 			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}
@@ -446,8 +438,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be {true}
 			}
 
-			verify(rowCommand.fileDao, times(1)).savePermanent(any[FileAttachment])
-			verify(rowCommand.fileDao, times(0)).saveTemporary(any[FileAttachment])
 			verify(memberDao, times(1)).saveOrUpdate(any[Member])
 		}
 	}

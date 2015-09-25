@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.reports.profiles
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import org.joda.time.format.DateTimeFormat
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent, FileDao}
+import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, MonitoringPoint, MonitoringPointType}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, FileAttachment, StudentMember}
@@ -28,6 +28,7 @@ object ProfileExportSingleCommand {
 		new ProfileExportSingleCommandInternal(student, academicYear, user)
 			with AutowiredTextRendererComponent
 			with FreemarkerXHTMLPDFGeneratorComponent
+			with PhotosWarwickMemberPhotoUrlGeneratorComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.scheduling.web.controllers.turnitin
 
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.web.bind.annotation._
@@ -27,6 +28,6 @@ class DownloadFileByTokenController extends BaseController with Logging {
 	}
 
 	@RequestMapping(method = Array(GET))
-	def serve(@Valid @ModelAttribute("command") command: Appliable[RenderableFile]) =
+	def serve(@Valid @ModelAttribute("command") command: Appliable[RenderableFile], errors: Errors) =
 		Mav(new RenderableFileView(command.apply()))
 }

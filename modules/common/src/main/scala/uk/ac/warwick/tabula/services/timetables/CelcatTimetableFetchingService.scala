@@ -15,21 +15,22 @@ import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AcademicYear}
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
-import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
+import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingService._
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
-
-import CelcatHttpTimetableFetchingService._
 
 sealed abstract class FilenameGenerationStrategy
 object FilenameGenerationStrategy {
@@ -92,7 +93,8 @@ object CelcatHttpTimetableFetchingService {
 	val cacheName = "CelcatTimetables"
 
 	def apply(celcatConfiguration: CelcatConfiguration): StudentTimetableFetchingService with StaffTimetableFetchingService = {
-		val delegate = new CelcatHttpTimetableFetchingService(celcatConfiguration) with AutowiringUserLookupComponent with AutowiringTermServiceComponent with AutowiringCacheStrategyComponent with WAI2GoHttpLocationFetchingServiceComponent with AutowiringWAI2GoConfigurationComponent
+		val delegate = new CelcatHttpTimetableFetchingService(celcatConfiguration) with AutowiringUserLookupComponent with AutowiringTermServiceComponent
+			with AutowiringCacheStrategyComponent with WAI2GoHttpLocationFetchingServiceComponent with AutowiringWAI2GoConfigurationComponent with AutowiringModuleAndDepartmentServiceComponent
 
 		if (celcatConfiguration.cacheEnabled) {
 			new CachedStaffAndStudentTimetableFetchingService(delegate, cacheName)
@@ -101,7 +103,19 @@ object CelcatHttpTimetableFetchingService {
 		}
 	}
 
-	def parseVEvent(event: VEvent, allStaff: Map[UniversityId, CelcatStaffInfo], config: CelcatDepartmentConfiguration, termService: TermService, locationFetchingService: LocationFetchingService): Option[TimetableEvent] = {
+	private def parseModuleCode(event: VEvent): Option[String] = {
+		val summary = Option(event.getSummary).fold("") { _.getValue }
+		summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase }
+	}
+
+	def parseVEvent(
+		event: VEvent,
+		allStaff: Map[UniversityId, CelcatStaffInfo],
+		config: CelcatDepartmentConfiguration,
+		termService: TermService,
+		locationFetchingService: LocationFetchingService,
+		moduleMap: Map[String, Module]
+	): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
@@ -146,8 +160,6 @@ object CelcatHttpTimetableFetchingService {
 
 			val weekRange = WeekRange(startWeek, endWeek)
 
-			val moduleCode = summary.maybeText.collect { case r"([A-Za-z]{2}[0-9][0-9A-Za-z]{2})${m}.*" => m.toUpperCase() }
-
 			val staffIds: Seq[UniversityId] =
 				if (allStaff.nonEmpty)
 					summary.maybeText
@@ -174,7 +186,7 @@ object CelcatHttpTimetableFetchingService {
 				endTime = end.toLocalTime,
 				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(locationFetchingService.locationFor),
 				comments = None,
-				context = moduleCode,
+				parent = TimetableEvent.Parent(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
 				staffUniversityIds = staffIds,
 				studentUniversityIds = Nil,
 				year = year
@@ -195,7 +207,7 @@ object CelcatHttpTimetableFetchingService {
 }
 
 class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging with DisposableBean {
-	self: UserLookupComponent with TermServiceComponent with LocationFetchingServiceComponent with CacheStrategyComponent =>
+	self: UserLookupComponent with TermServiceComponent with LocationFetchingServiceComponent with CacheStrategyComponent with ModuleAndDepartmentServiceComponent =>
 
 	lazy val configs = celcatConfiguration.departmentConfiguration
 
@@ -308,15 +320,24 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
-		logger.info(s"Requesting timetable data from $req")
-		val result = Try(http.when(_==200)(req >:+ handler(config)))
+		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
+		val result = try {
+			Success(http.when(_==200)(req >:+ handler(config)))
+		}	catch {
+			case StatusCode(404, _) =>
+				// Special case a 404, just return no events
+				logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
+				Success(Nil)
+			case e: Throwable =>
+				Failure(e)
+		}
 
 		// Extra logging
 		result match {
 			case Success(ev) =>
 				if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
 			case Failure(e) =>
-				logger.warn(s"Request for $req failed: ${e.getMessage}")
+				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 		}
 
 		result
@@ -326,7 +347,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// If we run an identical event in separate weeks, combine the weeks for them
 		val groupedEvents = events.groupBy { event =>
 			(event.name, event.title, event.description, event.eventType, event.day, event.startTime, event.endTime,
-				event.location, event.context, event.staffUniversityIds, event.studentUniversityIds, event.year)
+				event.location, event.parent.shortName, event.staffUniversityIds, event.studentUniversityIds, event.year)
 		}.values.toSeq
 
 		groupedEvents.map { eventSeq => eventSeq.size match {
@@ -347,7 +368,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.startTime,
 					event.endTime,
 					event.location,
-					event.context,
+					event.parent,
 					event.comments,
 					event.staffUniversityIds,
 					event.studentUniversityIds,
@@ -365,8 +386,12 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 		val allStaff = staffInfo(config)
 
-		cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }.flatMap { event =>
-			parseVEvent(event, allStaff, config, termService, locationFetchingService)
+		val vEvents = cal.getComponents(Component.VEVENT).asScala.collect { case event: VEvent => event }
+		val moduleMap = moduleAndDepartmentService.getModulesByCodes(
+			vEvents.flatMap(e => parseModuleCode(e).map(_.toLowerCase)).distinct
+		).groupBy(_.code).mapValues(_.head)
+		vEvents.flatMap { event =>
+			parseVEvent(event, allStaff, config, termService, locationFetchingService, moduleMap)
 		}
 	}
 }

@@ -11,7 +11,7 @@ import org.hibernate.annotations.DiscriminatorOptions
 abstract class MarkerMap extends GeneratedId {
 
 	@Column(name="marker_uni_id")
-	var marker_id: String = _
+	var marker_id: String = _ // In spite of the column name, this is actually the usercode
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "markermap_id")

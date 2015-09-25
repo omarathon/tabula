@@ -60,6 +60,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 				null,
 				null,
 				null,
+				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))

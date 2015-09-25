@@ -484,44 +484,52 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 	}
 
 	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course] = {
-		val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
-		val queryString =
-		"""
-			select studentCourseDetails.scjCode, course
-	 		from StudentCourseDetails studentCourseDetails, Course course
-			where studentCourseDetails.course = course
-	 		and (
-		""" + scjCodes.map{
-			case (ids, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
-		}.mkString(" or ")	+ ")"
-		val query = session.newQuery[Array[java.lang.Object]](queryString)
-		scjCodes.foreach {
-			case (ids, index) =>
-				query.setParameterList("scjCodes" + index.toString, ids)
-		}
-		query.seq.distinct.map{ objArray =>
-			scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Course]
-		}.toMap
-	}
-
-	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
-		val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
-		val queryString =
+		if (scds.isEmpty) {
+			Map()
+		} else {
+			val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+			val queryString =
 			"""
-			select studentCourseDetails.scjCode, studentCourseYearDetails.yearOfStudy
-	 		from StudentCourseDetails studentCourseDetails, StudentCourseYearDetails studentCourseYearDetails
-			where studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
-	 		and (
+				select studentCourseDetails.scjCode, course
+				from StudentCourseDetails studentCourseDetails, Course course
+				where studentCourseDetails.course = course
+				and (
 			""" + scjCodes.map{
 				case (ids, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
 			}.mkString(" or ")	+ ")"
-		val query = session.newQuery[Array[java.lang.Object]](queryString)
-		scjCodes.foreach {
-			case (ids, index) =>
-				query.setParameterList("scjCodes" + index.toString, ids)
+			val query = session.newQuery[Array[java.lang.Object]](queryString)
+			scjCodes.foreach {
+				case (ids, index) =>
+					query.setParameterList("scjCodes" + index.toString, ids)
+			}
+			query.seq.distinct.map{ objArray =>
+				scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Course]
+			}.toMap
 		}
-		query.seq.distinct.map{ objArray =>
-			scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Int]
-		}.toMap
+	}
+
+	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
+		if (scds.isEmpty) {
+			Map()
+		} else {
+			val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+			val queryString =
+				"""
+				select studentCourseDetails.scjCode, studentCourseYearDetails.yearOfStudy
+				from StudentCourseDetails studentCourseDetails, StudentCourseYearDetails studentCourseYearDetails
+				where studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
+				and (
+				""" + scjCodes.map{
+					case (ids, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
+				}.mkString(" or ")	+ ")"
+			val query = session.newQuery[Array[java.lang.Object]](queryString)
+			scjCodes.foreach {
+				case (ids, index) =>
+					query.setParameterList("scjCodes" + index.toString, ids)
+			}
+			query.seq.distinct.map{ objArray =>
+				scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Int]
+			}.toMap
+		}
 	}
 }

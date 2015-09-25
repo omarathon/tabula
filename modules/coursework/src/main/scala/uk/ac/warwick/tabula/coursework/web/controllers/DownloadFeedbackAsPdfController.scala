@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.web.bind.annotation.PathVariable
+import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.services.FeedbackService
@@ -44,7 +45,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 			"feedback.pdf",
 			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",
 			Map("feedback" -> command.apply(), "user"-> student.asSsoUser)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	}
 
 }
