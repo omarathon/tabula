@@ -57,7 +57,7 @@
 						sorter: function(items) { return items; }, // use 'as-returned' sort
 						highlighter: function(item) {
 							var member = item.split("|");
-							return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
+							return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail size-tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
 						},
 
 						updater: function(item) {
@@ -451,6 +451,10 @@
 				},
 				eventAfterRender: function(event, element, view){
 					var content = "<table class='event-info'>";
+					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
+						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
+					}
+
 					if (event.fullTitle && event.fullTitle.length > 0) {
 						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 					}

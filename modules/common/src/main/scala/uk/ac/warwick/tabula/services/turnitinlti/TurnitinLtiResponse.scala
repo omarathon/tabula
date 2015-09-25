@@ -94,25 +94,30 @@ case class TurnitinLtiResponse(
 						reports.get("breakdown") match {
 							case Some(breakdowns: Map[String, Double] @unchecked) =>
 								breakdowns.get("publications_score") match {
-									case (publicationsScore) =>
+									case publicationsScore if publicationsScore.get != null => {
 										results.publication_overlap = publicationsScore
+									}
+									case _ => Nil
 								}
 								breakdowns.get("internet_score") match {
-									case (internetScore) =>
+									case internetScore if internetScore.get != null => {
 										results.web_overlap = internetScore
+									}
+									case _ => Nil
 								}
 								breakdowns.get("submitted_works_score") match {
-									case (submittedWorksScore) =>
+									case submittedWorksScore if submittedWorksScore.get != null =>
 										results.student_overlap = submittedWorksScore
+									case _ => Nil
 								}
 							case _ => Nil
 						}
 						reports.get("numeric") match {
 							case Some(numerics: Map[String, Double] @unchecked) =>
 								numerics.get("score") match {
-									case (Some(score)) => {
-										results.overlap = Some(score)
-										results.similarity = calculateSimilarityScore(score)
+									case score if score.get != null => {
+										results.overlap = score
+										results.similarity = calculateSimilarityScore(score.get)
 									}
 									case _ => Nil
 								}

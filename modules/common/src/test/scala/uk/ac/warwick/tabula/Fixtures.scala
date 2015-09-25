@@ -429,4 +429,22 @@ object Fixtures extends Mockito {
 		d
 	}
 
+	def firstMarkerMap(assignment: Assignment, marker_id: String, students: Seq[String] = Seq()) = {
+		val fmm = new FirstMarkersMap
+		fmm.assignment = assignment
+		fmm.marker_id = marker_id
+		fmm.students = UserGroup.ofUsercodes
+		students.foreach(fmm.students.knownType.addUserId)
+		fmm
+	}
+
+	def secondMarkerMap(assignment: Assignment, marker_id: String, students: Seq[String] = Seq()) = {
+		val smm = new SecondMarkersMap
+		smm.assignment = assignment
+		smm.marker_id = marker_id
+		smm.students = UserGroup.ofUsercodes
+		students.foreach(smm.students.knownType.addUserId)
+		smm
+	}
+
 }

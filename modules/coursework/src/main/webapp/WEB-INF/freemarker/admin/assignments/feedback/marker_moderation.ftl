@@ -30,7 +30,7 @@
 					</label>
 					<label class="radio inline">
 						<@f.radiobutton cssClass="reject" path="approved" value="false" />
-						Reject
+						Request changes
 					</label>
 				</@form.field>
 			</@form.row>
@@ -40,7 +40,7 @@
 				<@form.labelled_row "rejectionComments" "Comments">
 					<@f.textarea path="rejectionComments" cssClass="big-textarea" />
 					<div class="help-block">
-						Please add any comments about your rejection here.
+						Please add any comments about the changes here.
 					</div>
 				</@form.labelled_row>
 
@@ -75,7 +75,7 @@
 								<br />
 								The first marker, ${firstMarkerFeedback.markerUser.fullName}
 								(<i class="icon-envelope-alt"></i> <a href="mailto:${firstMarkerFeedback.markerUser.email}">${firstMarkerFeedback.markerUser.email}</a>),
-								will be notified of the rejection.
+								will be notified of the requested changes.
 							</span>
 						</div>
 					</div>

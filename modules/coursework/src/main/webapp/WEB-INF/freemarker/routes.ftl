@@ -110,6 +110,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markingworkflowlist department><@_u page="/admin/department/${department.code}/markingworkflows" /></#macro>
 <#macro markingworkflowadd department><@markingworkflowlist department />/add</#macro>
 <#macro markingworkflowedit scheme><@markingworkflowlist scheme.department />/edit/${scheme.id}</#macro>
+<#macro markingworkflowreplace scheme><@markingworkflowlist scheme.department />/edit/${scheme.id}/replace</#macro>
 <#macro markingworkflowdelete scheme><@markingworkflowlist scheme.department />/delete/${scheme.id}</#macro>
 
 <#macro feedbackreport department><@_u page="/admin/department/${department.code}/reports/feedback" /></#macro>

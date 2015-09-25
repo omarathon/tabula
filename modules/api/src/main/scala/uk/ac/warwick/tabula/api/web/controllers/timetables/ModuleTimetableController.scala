@@ -61,7 +61,8 @@ trait GetModuleTimetableApi {
 						case Some(l) => Map("name" -> l.name)
 						case _ => null
 					}),
-					"context" -> event.context.orNull,
+					"context" -> event.parent.shortName,
+					"parent" -> event.parent,
 					"comments" -> event.comments.orNull,
 					"staffUniversityIds" -> event.staffUniversityIds,
 					"year" -> event.year.toString

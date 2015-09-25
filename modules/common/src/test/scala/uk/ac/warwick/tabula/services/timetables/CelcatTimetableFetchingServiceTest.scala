@@ -8,15 +8,19 @@ import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.io.IOUtils
 import org.apache.http.auth.AuthScope
 import org.joda.time.LocalTime
+import org.mockito.Matchers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.services.{TermServiceComponent, TermServiceImpl, UserLookupComponent}
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
-class CelcatTimetableFetchingServiceTest extends TestBase {
+class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
+
+	val module = Fixtures.module("es186")
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		val departmentConfiguration =	Map(
@@ -26,12 +30,16 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent {
+	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent {
 		val userLookup = new MockUserLookup
 		val termService = new TermServiceImpl
 		val cacheStrategy = CacheStrategy.InMemoryOnly
 		val locationFetchingService = new LocationFetchingService {
 			def locationFor(name: String) = NamedLocation(name)
+		}
+		val moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+		moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
+			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
 		}
 	}
 
@@ -59,7 +67,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		LOCATION:R021
 		END:VEVENT
 		 */
-		combined(0) should be (TimetableEvent(
+		combined.head should be (TimetableEvent(
 			"CT-1313406-6447-2013-09-30-R021@eng.warwick.ac.uk",
 			"ES186 - AMP/DAH/DJB/MVC/NGS",
 			"",
@@ -70,7 +78,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			new LocalTime(11, 15),
 			new LocalTime(13, 0),
 			Some(NamedLocation("R021")),
-			Some("ES186"),
+			TimetableEvent.Parent(Some(module)),
 			None,
 			Nil,
 			Nil,
@@ -104,7 +112,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 			new LocalTime(10, 0),
 			new LocalTime(11, 0),
 			Some(NamedLocation("P521")),
-			Some("ES186"),
+			TimetableEvent.Parent(Some(module)),
 			None,
 			Nil,
 			Nil,
@@ -128,21 +136,21 @@ class CelcatTimetableFetchingServiceTest extends TestBase {
 		val builder = new CalendarBuilder
 		val cal = builder.build(IOUtils.toInputStream(
 			"""
-BEGIN:VCALENDAR
-BEGIN:VEVENT
-DTSTAMP:20140914T220100Z
-SEQUENCE:0
-TRANSP:OPAQUE
-LAST-MODIFIED:20140914T220100Z
-DTSTART;TZID=Europe/London:20141001T090500
-DTEND;TZID=Europe/London:20141001T185500
-SUMMARY:Unavailable - Clark, Andrew
-UID:CT-Clark-Andrew-20244-2014-10-01-@chem.warwick.ac.uk
-DESCRIPTION:
-CATEGORIES:
-RRULE:FREQ=WEEKLY;COUNT=52;BYDAY=WE
-END:VEVENT
-END:VCALENDAR
+				|BEGIN:VCALENDAR
+				|BEGIN:VEVENT
+				|DTSTAMP:20140914T220100Z
+				|SEQUENCE:0
+				|TRANSP:OPAQUE
+				|LAST-MODIFIED:20140914T220100Z
+				|DTSTART;TZID=Europe/London:20141001T090500
+				|DTEND;TZID=Europe/London:20141001T185500
+				|SUMMARY:Unavailable - Clark, Andrew
+				|UID:CT-Clark-Andrew-20244-2014-10-01-@chem.warwick.ac.uk
+				|DESCRIPTION:
+				|CATEGORIES:
+				|RRULE:FREQ=WEEKLY;COUNT=52;BYDAY=WE
+				|END:VEVENT
+				|END:VCALENDAR
 			""".stripMargin.trim()))
 
 		val parsed =
@@ -151,7 +159,8 @@ END:VCALENDAR
 				Map(),
 				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
 				service.termService,
-				service.locationFetchingService
+				service.locationFetchingService,
+				Map(module.code -> module)
 			)
 
 		parsed should be ('defined)
@@ -166,7 +175,7 @@ END:VCALENDAR
 			new LocalTime(9, 5),
 			new LocalTime(18, 55),
 			None,
-			None,
+			TimetableEvent.Parent(None),
 			None,
 			Nil,
 			Nil,

@@ -94,7 +94,12 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 			file.attachmentTypes = fileAttachmentTypes
 		}
 
-		if (wordCountMax != null) {
+		if (wordCountMin == null && wordCountMax == null) {
+			findWordCountField(assignment).foreach{ wordCountField =>
+				wordCountField.max = null
+				wordCountField.min = null
+			}
+		} else {
 			val wordCount = findWordCountField(assignment).getOrElse{
 				val newField = new WordCountField()
 				newField.name = Assignment.defaultWordCountName

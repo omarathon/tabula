@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, Projections, Restrictions}
+import org.hibernate.criterion.{ProjectionList, Order, Projections, Restrictions}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -531,7 +531,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 				students.filter(student =>
 					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
 				).filter(student =>
-					point.applies(student.scdBeginDate)
+					point.applies(student.scdBeginDate, student.scdEndDate)
 				)
 			}).distinct
 		}
@@ -574,6 +574,7 @@ case class AttendanceMonitoringStudentData(
 	universityId: String,
 	userId: String,
 	scdBeginDate: LocalDate,
+	scdEndDate: Option[LocalDate],
 	routeCode: String,
 	routeName: String
 ) {
@@ -586,34 +587,66 @@ trait AttendanceMonitoringStudentDataFetcher {
 	import org.hibernate.criterion.Projections._
 
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
-		val projections =
-			Projections.projectionList()
-				.add(max("firstName"))
-				.add(max("lastName"))
-				.add(groupProperty("universityId"))
-				.add(max("userId"))
-				.add(min("studentCourseDetails.beginDate"))
-				.add(max("route.code"))
-				.add(max("route.name"))
-
-		session.newCriteria[StudentMember]
-			.createAlias("studentCourseDetails","studentCourseDetails")
-			.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
-			.createAlias("studentCourseDetails.route","route")
-			.add(isNull("studentCourseDetails.missingFromImportSince"))
-			.add(is("studentCourseYearDetails.academicYear", academicYear))
-			.add(safeIn("universityId", universityIds))
-			.project[Array[java.lang.Object]](projections).seq.map {
-				case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
-					AttendanceMonitoringStudentData(
-						firstName,
-						lastName,
-						universityId,
-						userId,
-						scdBeginDate,
-						routeCode,
-						routeName
-					)
+		def setupProjection(withEndDate: Boolean = false): ProjectionList = {
+			val projections =
+				Projections.projectionList()
+					.add(max("firstName"))
+					.add(max("lastName"))
+					.add(groupProperty("universityId"))
+					.add(max("userId"))
+					.add(min("studentCourseDetails.beginDate"))
+					.add(max("route.code"))
+					.add(max("route.name"))
+			if (withEndDate) {
+				projections.add(max("studentCourseDetails.endDate"))
 			}
+			projections
+		}
+		def setupCriteria(projection: ProjectionList, withEndDate: Boolean = false, nullEndDateData: Seq[AttendanceMonitoringStudentData] = Seq()) = {
+			val criteria = session.newCriteria[StudentMember]
+				.createAlias("studentCourseDetails","studentCourseDetails")
+				.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
+				.createAlias("studentCourseDetails.route","route")
+				.add(isNull("studentCourseDetails.missingFromImportSince"))
+				.add(is("studentCourseYearDetails.academicYear", academicYear))
+				.add(safeIn("universityId", universityIds))
+			if (withEndDate) {
+				criteria.add(isNotNull("studentCourseDetails.endDate"))
+					.add(not(safeIn("universityId", nullEndDateData.map(_.universityId))))
+			} else {
+				criteria.add(isNull("studentCourseDetails.endDate"))
+			}
+			criteria.project[Array[java.lang.Object]](projection)
+		}
+		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
+		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).seq.map {
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
+				AttendanceMonitoringStudentData(
+					firstName,
+					lastName,
+					universityId,
+					userId,
+					scdBeginDate,
+					None,
+					routeCode,
+					routeName
+				)
+		}
+		// Then get the not-nulls, which won't include any student already in the nulls
+		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true, nullEndDateData).seq.map {
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, scdEndDate: LocalDate) =>
+				AttendanceMonitoringStudentData(
+					firstName,
+					lastName,
+					universityId,
+					userId,
+					scdBeginDate,
+					Option(scdEndDate),
+					routeCode,
+					routeName
+				)
+		}
+		// Then combine the two
+		nullEndDateData ++ hasEndDateData
 	}
 }

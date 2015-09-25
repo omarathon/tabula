@@ -77,10 +77,18 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 			roleGrantedUsers ++ explicitlyGrantedUsers
 		}
 
-		val allAdmins = usersWithPermission(assignment) ++ usersWithPermission(module) ++ usersWithPermission(module.adminDepartment)
-		allAdmins.toSeq
+		val adminsWithPermission = (usersWithPermission(assignment) ++ usersWithPermission(module) ++ usersWithPermission(module.adminDepartment)).toSeq
 			.filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
-			.filter(canEmailUser)
+
+		// Contact the current marker, if there is one, and the submission has already been released
+		val feedback = assignment.findFeedback(submission.universityId)
+		val currentMarker = if (assignment.hasWorkflow && feedback.isDefined && feedback.exists(_.isPlaceholder)) {
+			feedback.get.getCurrentWorkflowFeedback.map(mf => Seq(mf.getMarkerUser)).getOrElse(Seq())
+		} else {
+			Seq()
+		}
+
+		(adminsWithPermission ++ currentMarker).filter(canEmailUser)
 	}
 
 }

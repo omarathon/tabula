@@ -51,6 +51,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 				null,
 				null,
 				null,
+				null,
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))

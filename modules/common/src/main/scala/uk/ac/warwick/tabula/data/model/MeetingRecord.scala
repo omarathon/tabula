@@ -4,6 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 
 import org.hibernate.annotations.BatchSize
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
@@ -77,6 +78,11 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 	// people who have had a draft version rejected
 	def pendingRevisionBy(user: CurrentUser) = isRejected && user.universityId == creator.universityId
+
+	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.state == Approved).map(_.lastUpdatedDate).sorted.headOption
+
+	def approvedBy: Option[Member] = approvals.asScala.filter(_.state == Approved).flatMap(a => Option(a.approvedBy)).headOption
 
 	// End of workflow definitions
 }
