@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.jobs
 
 
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -72,7 +73,7 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 
 			updateStatus("Submitting papers to Turnitin")
-			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFileType) }
+			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFile) }
 			val uploadsTotal = allAttachments.size
 
 			val failedUploads = submitPapers(assignmentWithTurnitinId, uploadsTotal)
@@ -118,7 +119,7 @@ class SubmitToTurnitinLtiJob extends Job
 			var uploadsDone: Int = 0
 
 			assignment.submissions.asScala.foreach(submission => {
-				for (attachment <- submission.allAttachments if TurnitinLtiService.validFileType(attachment)) {
+				for (attachment <- submission.allAttachments if (TurnitinLtiService.validFile(attachment))) {
 					// Don't need to resubmit the same papers again.
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val attachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
@@ -181,7 +182,7 @@ class SubmitToTurnitinLtiJob extends Job
 			val originalityReports = Seq()
 			var failedResults = Map[String, String]()
 			assignment.submissions.asScala.foreach(submission => {
-				submission.allAttachments.foreach(attachment => {
+				submission.allAttachments.filter(TurnitinLtiService.validFile).foreach(attachment => {
 					val originalityReport = transactional(readOnly = true) {
 						originalityReportService.getOriginalityReportByFileId(attachment.id)
 					}
@@ -211,7 +212,7 @@ class SubmitToTurnitinLtiJob extends Job
 							logger.warn(s"Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
 							failedResults += (attachment.name -> response.statusMessage.getOrElse("failed to retrieve results"))
 						}
-					} else {
+					} else if(!originalityReport.isDefined) {
 						logger.warn(s"Failed to find originality report for attachment ${attachment.id}")
 						failedResults += (attachment.name -> "failed to find Originality Report")
 					}
@@ -242,7 +243,7 @@ class SubmitToTurnitinLtiJob extends Job
 		}
 
 		private def getAttachmentAccessUrl(submission: Submission, attachment: FileAttachment): String = {
-			transactional() {
+			transactional(readOnly = false, propagation = REQUIRES_NEW) {
 				val token = attachment.generateToken()
 				fileAttachmentService.saveOrUpdate(token)
 				s"$topLevelUrl${Routes.admin.assignment.turnitinlti.fileByToken(submission, attachment, token)}"

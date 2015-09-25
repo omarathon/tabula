@@ -199,9 +199,9 @@ class SandboxProfileImporter extends ProfileImporter {
 	}
 
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
-		val dept = SandboxData.Departments(department.code)
-
-		studentsForDepartment(dept) ++ staffForDepartment(dept)
+		SandboxData.Departments.get(department.code).map(dept =>
+			studentsForDepartment(dept) ++ staffForDepartment(dept)
+		).getOrElse(Seq())
 	}
 
 	def staffForDepartment(department: SandboxData.Department) =

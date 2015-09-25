@@ -320,15 +320,24 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
-		logger.info(s"Requesting timetable data from $req")
-		val result = Try(http.when(_==200)(req >:+ handler(config)))
+		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
+		val result = try {
+			Success(http.when(_==200)(req >:+ handler(config)))
+		}	catch {
+			case StatusCode(404, _) =>
+				// Special case a 404, just return no events
+				logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
+				Success(Nil)
+			case e: Throwable =>
+				Failure(e)
+		}
 
 		// Extra logging
 		result match {
 			case Success(ev) =>
 				if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
 			case Failure(e) =>
-				logger.warn(s"Request for $req failed: ${e.getMessage}")
+				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 		}
 
 		result
