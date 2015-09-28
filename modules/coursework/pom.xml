@@ -101,7 +101,7 @@
 
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
-			<artifactId>warwickutils_spring4-csv</artifactId>
+			<artifactId>warwickutils-csv</artifactId>
 			<version>${warwickutils.version}</version>
 		</dependency>
 	</dependencies>
