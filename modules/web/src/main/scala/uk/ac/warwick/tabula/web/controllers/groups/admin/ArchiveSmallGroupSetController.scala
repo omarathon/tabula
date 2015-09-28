@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, Mo
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.groups.admin.ArchiveSmallGroupSetCommand
+import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @RequestMapping(Array("/groups/admin/module/{module}/groups/{set}/archive"))
@@ -23,7 +24,10 @@ class ArchiveSmallGroupSetController extends GroupsController {
 	@RequestMapping(method = Array(POST))
 	def submit(cmd: ArchiveSmallGroupSetCommand) = {
 		cmd.apply()
-		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+		if (ajax)
+			Mav("ajax_success").noLayout()
+		else
+			Redirect(Routes.home)
 	}
 
 }

@@ -5,23 +5,36 @@ import java.io.StringWriter
 import freemarker.template.{Configuration, DefaultObjectWrapper}
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.helpers.IntervalFormatter
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.helpers.IntervalFormatter
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
-import uk.ac.warwick.tabula.JavaImports._
 
 
-abstract class AbstractAttendanceReportController extends ReportsController {
+abstract class AbstractAttendanceReportController extends ReportsController
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+
+	override val departmentPermission: Permission = Permissions.Department.Reports
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	def command(department: Department, academicYear: AcademicYear): Appliable[AllAttendanceReportCommandResult]
 
 	val pageRenderPath: String
 	val filePrefix: String
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String
 
 	@ModelAttribute("processor")
 	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -33,11 +46,9 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		Mav(s"reports/attendancemonitoring/$pageRenderPath").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.Attendance.Home(department, academicYear)
-		)
+		Mav(s"reports/attendancemonitoring/$pageRenderPath")
+			.crumbs(ReportsBreadcrumbs.Attendance.Home(department, academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(urlGeneratorFactory(department)): _*)
 	}
 
 	@RequestMapping(method = Array(POST))

@@ -1,48 +1,55 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
+<#import "*/modal_macros.ftl" as modal />
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<!-- Include any favicons here -->
-	<meta name="theme-color" content="#5b3069">
-	<!-- Use the brand colour of the site -->
-
-	<title>Your page title</title>
-
-	<!-- Lato web font -->
-	<link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
-		  rel="stylesheet" type="text/css">
-
-	<!-- ID7 -->
-	<@stylesheet "/static/css/id7.css" />
-	<@stylesheet "/static/css/id7-fixes.css" />
-
-	<!-- Default styling. You will probably want to replace with your own site.css -->
-	<@stylesheet "/static/css/id7-theme.css" />
-
-	<@script "/static/js/id7/id7-bundle.js" />
-
-	<!-- HTML5 shim for IE8 support of HTML5 elements -->
-
-	<!--[if lt IE 9]>
-	<@script "/static/js/id7/vendor/html5shiv-3.7.2.min.js" />
-	<![endif]-->
+	<#include "_head.ftl" />
 </head>
-<body>
+<body class="tabula-page ${component.bodyClass?default('component-page')} ${bodyClasses?default('')}">
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">
 	<a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
 	<header class="id7-page-header">
+
+		<!--[if IE]>
+		<div id="ie8-notice">
+			Your web browser is unsupported, please upgrade.
+			<a href="http://warwick.ac.uk/tabula/faqs/browser-support" class="btn btn-mini btn-primary">
+				More information
+			</a>
+		</div>
+		<![endif]-->
+
+		<#if (user.god)!false>
+			<div id="god-notice" class="sysadmin-only-content">
+				God mode enabled.
+				<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}">
+					<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
+					<input type="hidden" name="action" value="remove" />
+					<button class="btn btn-xs btn-info">Disable God mode</button>
+				</@f.form>
+			</div>
+		</#if>
+		<#if (info.hasEmergencyMessage)!false>
+			<div id="emergency-message" class="sysadmin-only-content">${info.emergencyMessage}</div>
+		</#if>
+		<#if (user.masquerading)!false>
+			<div id="masquerade-notice" class="sysadmin-only-content">
+				Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
+			</div>
+		</#if>
+		<#if isProxying!false && proxyingAs??>
+			<div id="proxy-notice" class="sysadmin-only-content">
+				Proxying as <strong>${proxyingAs.fullName}</strong>.
+			</div>
+		</#if>
+
 		<div class="id7-utility-masthead">
 			<nav class="id7-utility-bar">
 				<ul>
 					<#if IS_SSO_PROTECTED!true>
 						<#if user?? && user.loggedIn>
-							<li><a href="/settings">Settings</a></li>
 							<li><a href="http://warwick.ac.uk/tabula/manual/" target="_blank">Manual</a></li>
 							<li><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
 							<li>
@@ -80,27 +87,17 @@
 								</nav>
 							</div>
 						</div>
-						<div class="id7-search-column">
-							<div class="id7-search">
-								<form action="http://search.warwick.ac.uk/website" role="search">
-									<input type="hidden" name="source" value="http://warwick.ac.uk/"> <!-- Replace with the current page URL -->
-									<div class="form-group">
-										<label class="sr-only" for="id7-search-box">Search</label>
-										<div class="id7-search-box-container">
-											<input type="search" class="form-control input-lg" id="id7-search-box" name="q" placeholder="Search Warwick" data-suggest="go">
-											<i class="fa fa-search fa-2x"></i>
-										</div>
-									</div>
-								</form>
-							</div>
-						</div>
 					</div>
 
 					<div class="id7-header-text clearfix">
 						<h1>
-							<!-- Parent site link often excluded -->
-							<span class="id7-parent-site-link"><a href="#">Parent site name</a></span>
-							<span class="id7-current-site-link"><a href="#">Current site name</a></span>
+							<div class="pull-right btn-toolbar" style="margin-bottom: -12px;">
+							<#if user?? && user.loggedIn>
+								<a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
+							</#if>
+								<a class="btn btn-brand btn-sm" id="app-feedback-link" href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Problems, questions?</a>
+							</div>
+							<span class="id7-current-site-link"><a href="/">Tabula</a></span>
 						</h1>
 					</div>
 				</div>
@@ -109,7 +106,41 @@
 
 		<!-- Docs master nav -->
 		<div class="id7-navigation">
-			<!-- Include the navigation component here if used -->
+			<nav class="navbar navbar-primary hidden-xs" role="navigation">
+				<#assign navigation>
+					<#if userNavigation?has_content>
+						${(userNavigation.collapsed)!""}
+					<#else>
+						${(user.navigation.collapsed)!""}
+					</#if>
+				</#assign>
+				<#if breadcrumbs?has_content>
+					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active next-secondary")}
+				<#else>
+					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active")}
+				</#if>
+			</nav>
+			<#if breadcrumbs?has_content>
+				<nav class="navbar navbar-secondary" role="navigation">
+					<ul class="nav navbar-nav">
+						<li class="nav-breadcrumb"><a href="/${component.name}">${component.title}</a></li>
+						<#list breadcrumbs as crumb>
+							<#if crumb.linked!false>
+								<li class="nav-breadcrumb"><a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
+							</#if>
+						</#list>
+					</ul>
+				</nav>
+			</#if>
+			<#if secondBreadcrumbs?has_content>
+				<nav class="navbar navbar-tertiary" role="navigation">
+					<ul class="nav navbar-nav">
+						<#list secondBreadcrumbs as crumb>
+							<li <#if activeAcademicYear?has_content && activeAcademicYear.label == crumb.title>class="active"</#if>><a href="<@url page=crumb.url!"" />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
+						</#list>
+					</ul>
+				</nav>
+			</#if>
 		</div>
 	</header>
 
@@ -120,10 +151,6 @@
 				<svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" version="1.1" width="1130" height="40" viewBox="0, 0, 1130, 41">
 					<path d="m 0,0.5 1030.48, 0 22.8,40 16.96,-31.4 16.96,31.4 22.8,-40 20,0" class="divider" stroke="#383838" fill="none" />
 				</svg>
-			</div>
-
-			<div class="id7-page-title">
-				<h1>Your page title</h1>
 			</div>
 		</header>
 
@@ -141,8 +168,6 @@
 			  </svg>
 			  </div>
 			-->
-
-			Your site footer content
 		</div>
 		<div class="id7-app-footer">
 			<!-- Only include the id7-logo-bleed for footer class="id7-footer-coloured" -->
@@ -150,7 +175,6 @@
 
 			<div class="id7-footer-utility">
 				<ul>
-					<li>Powered by <a href="http://warwick.ac.uk/sitebuilder">App name</a></li>
 					<li><a href="http://warwick.ac.uk/copyright">© MMXV</a></li>
 					<li><a href="http://warwick.ac.uk/terms">Terms</a></li>
 					<li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
@@ -159,6 +183,45 @@
 				</ul>
 			</div>
 		</div>
+
+		<div class="modal fade" id="app-comment-modal">
+			<@modal.wrapper>
+				<@modal.body></@modal.body>
+			</@modal.wrapper>
+		</div>
+
+		<#if user?? && user.sysadmin>
+			<div id="sysadmin-link">
+				<div class="btn-group">
+					<a id="sysadmin-button" class="btn btn-default dropdown-toggle dropup" data-toggle="dropdown" href="<@url page="/sysadmin/" context="/" />"><i class="icon-cog fa fa-cog icon-white fa fa-white"></i> System <span class="caret"></span></a>
+					<ul class="dropdown-menu pull-right">
+						<#if user.sysadmin>
+							<li><a href="<@url page="/sysadmin/" context="/" />">Sysadmin home</a></li>
+						</#if>
+						<#if user.sysadmin>
+							<li><a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin" />">Masquerade</a></li>
+						</#if>
+						<#if user.sysadmin>
+							<li><a href="#" id="hide-sysadmin-only-content">Hide sysadmin content</a></li>
+						</#if>
+					</ul>
+				</div>
+			</div>
+			<script type="text/javascript">
+				jQuery('#hide-sysadmin-only-content').on('click', function(){
+					jQuery('#sysadmin-link').fadeOut('slow');
+					jQuery('.sysadmin-only-content').hide('slow');
+					return false;
+				});
+			</script>
+		<#elseif user?? && user.masquerader>
+			<div id="sysadmin-link">
+				<a id="sysadmin-button" class="btn btn-inverse" href="<@url page="/masquerade" context="/admin" />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-user fa fa-user icon-white fa fa-white"></i> Masquerade</a>
+			</div>
+		</#if>
+
+		<div style="clear:both;"></div>
+		<div class="cog"></div>
 	</footer>
 </div>
 <div class="id7-right-border"></div>

@@ -3,7 +3,7 @@
 	<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 	<#if smallGroupSet.linked>
-		<div class="alert alert-block">
+		<div class="alert alert-danger">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			<h4>Allocation linked to ${smallGroupSet.linkedDepartmentSmallGroupSet.name}</h4>
 
@@ -16,7 +16,7 @@
 
 	<#macro student_item student bindpath="">
 		<#local profile = membersById[student.warwickId]!{} />
-		<li class="student well well-small"
+		<li class="student well well-sm"
 			data-f-gender="${(profile.gender.dbValue)!}"
 			data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
 			data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
@@ -34,10 +34,10 @@
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#if (command.isStudentSignup())>
-		<div class="alert">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+		<div class="alert alert-info">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div>
 	</#if>
 	<noscript>
-		<div class="alert">This page requires Javascript.</div>
+		<div class="alert alert-info">This page requires Javascript.</div>
 	</noscript>
 
 	<div class="tabbable">
@@ -58,7 +58,7 @@
 
 				<@spring.hasBindErrors name="command">
 					<#if errors.hasErrors()>
-						<div class="alert alert-error">
+						<div class="alert alert-danger">
 							<h3>Some problems need fixing</h3>
 							<#if errors.hasGlobalErrors()>
 								<#list errors.globalErrors as e>
@@ -76,7 +76,7 @@
 				</@spring.hasBindErrors>
 
 				<div class="fix-area">
-					<@f.form method="post" action="${submitUrl}" commandName="command" class="form-horizontal allocateStudentsToGroupsCommand dirty-check">
+					<@f.form method="post" action="${submitUrl}" commandName="command" class="allocateStudentsToGroupsCommand dirty-check">
 						<div class="tabula-dnd"
 							 data-item-name="student"
 							 data-text-selector=".name h6"
@@ -85,44 +85,42 @@
 							 data-scroll="true"
 							 data-remove-tooltip="Remove this student from this group">
 							<div class="fix-header pad-when-fixed">
-								<div class="btn-toolbar">
-									<a class="random btn btn-mini" data-toggle="randomise" data-disabled-on="empty-list"
-									   href="#" >
-										<i class="icon-random"></i> Randomly allocate
+								<p class="btn-toolbar">
+									<a class="random btn btn-xs btn-default" data-toggle="randomise" data-disabled-on="empty-list" href="#">
+										Randomly allocate
 									</a>
-									<a class="return-items btn btn-mini" data-toggle="return" data-disabled-on="no-allocation"
-									   href="#" >
-										<i class="icon-arrow-left"></i> Remove all
+									<a class="return-items btn btn-xs btn-default" data-toggle="return" data-disabled-on="no-allocation" href="#">
+										Remove all
 									</a>
-								</div>
-								<div class="row-fluid hide-smallscreen">
-									<div class="span5">
+								</p>
+								<div class="row">
+									<div class="col-md-5">
 										<h3>Students</h3>
 									</div>
-									<div class="span2"></div>
-									<div class="span5">
+									<div class="col-md-2"></div>
+									<div class="col-md-5">
 										<h3>Groups</h3>
 									</div>
 								</div>
 							</div><!-- end persist header -->
 
-							<div class="row-fluid fix-on-scroll-container">
-								<div class="span5">
+							<div class="row fix-on-scroll-container">
+								<div class="col-md-5">
 									<div id="studentslist"
 										 class="students tabula-filtered-list"
 										 data-item-selector=".student-list li">
-										<div class="well ">
+										<div class="well">
 											<h4>Not allocated to a group</h4>
 											<#if features.smallGroupAllocationFiltering>
 												<div class="filter" id="filter-by-gender-controls">
-													<select data-filter-attr="fGender">
+													<select data-filter-attr="fGender" class="form-control">
 														<option data-filter-value="*">Any Gender</option>
 														<option data-filter-value="M">Male</option>
 														<option data-filter-value="F">Female</option>
 													</select>
 												</div>
 												<div class="filter" id="filter-by-year-controls">
-													<select data-filter-attr="fYear">
+													<select data-filter-attr="fYear" class="form-control">
 														<option data-filter-value="*">Any Year of study</option>
 														<#list command.allMembersYears as year>
 															<option data-filter-value="${year}">Year ${year}</option>
@@ -130,7 +128,7 @@
 													</select>
 												</div>
 												<div class="filter" id="filter-by-route-controls">
-													<select data-filter-attr="fRoute">
+													<select data-filter-attr="fRoute" class="form-control">
 														<option data-filter-value="*">Any Route</option>
 														<#list command.allMembersRoutes as route>
 															<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
@@ -141,10 +139,10 @@
 											<div class="student-list drag-target">
 												<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 													<@spring.bind path="unallocated">
-												<#list status.actualValue as student>
-														<@student_item student "${status.expression}[${student_index}]" />
-													</#list>
-											</@spring.bind>
+														<#list status.actualValue as student>
+															<@student_item student "${status.expression}[${student_index}]" />
+														</#list>
+													</@spring.bind>
 												</ul>
 											</div>
 										</div>
@@ -153,21 +151,20 @@
 										<p>
 											There <@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
 											<@fmt.p command.unallocatedPermWithdrawnCount "unallocated student" /> who
-											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is" plural="are" shownumber=false />
+											<@fmt.p number=command.unallocatedPermWithdrawnCount singular="is " plural="are " shownumber=false />
 											permanently withdrawn and so cannot be allocated. You can
 											<a target="_blank" href="<@routes.groups.editsetstudents command.set />">edit the students in the group set</a>
 											to remove them.
 										</p>
 									</#if>
 								</div>
-								<div class="span2">
+								<div class="col-md-2">
 								<#-- I, for one, welcome our new jumbo icon overlords -->
-									<div class="direction-icon fix-on-scroll hide-smallscreen">
-										<i class="icon-arrow-right"></i>
+									<div class="direction-icon fix-on-scroll">
+										<i class="fa fa-arrow-right"></i>
 									</div>
 								</div>
-								<div class="span5">
-									<h3 class="smallscreen-only">Groups</h3>
+								<div class="col-md-5">
 									<div id="groupslist" class="groups fix-on-scroll">
 										<#list command.sortedGroups as group>
 											<#assign existingStudents = mappingById[group.id]![] />
@@ -185,21 +182,21 @@
 													</#assign>
 
 													<h4 class="name">
-													${group.name}
+														${group.name}
 													</h4>
 
 													<div>
 														<#assign count = existingStudents?size />
 														<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-														<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".group-${group.id}" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-edit"></i></a>
+														<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".group-${group.id}" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="fa fa-pencil-square-o"></i></a>
 													</div>
 												</div>
 
 												<ul class="drag-list hide" data-bindpath="mapping[${group.id}]">
 													<#list existingStudents as student>
-												<@student_item student "mapping[${group.id}][${student_index}]" />
-											</#list>
+														<@student_item student "mapping[${group.id}][${student_index}]" />
+													</#list>
 												</ul>
 											</div>
 										</#list>
@@ -209,9 +206,9 @@
 							</div>
 						</div>
 
-						<div class="submit-buttons fix-footer">
+						<div class="fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn dirty-check-ignore">Cancel</a>
+							<a class="btn btn-default" href="<@routes.groups.depthome module=smallGroupSet.module academicYear=smallGroupSet.academicYear/>" class="btn btn-default dirty-check-ignore">Cancel</a>
 						</div>
 					</@f.form>
 				</div>
@@ -229,13 +226,18 @@
 						<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for ${smallGroupSet.name}. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
 							You can select additional students to be in ${smallGroupSet.name} by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
 						<li><strong>Save</strong> your updated spreadsheet.</li>
-						<li><@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" ><input type="file" name="file.upload"  /> </@form.labelled_row></li>
+						<li>
+							<@bs3form.labelled_form_group path="file.upload" labelText="Choose your updated spreadsheet">
+								<input type="file" name="file.upload" />
+							</@bs3form.labelled_form_group>
+						</li>
 					</ol>
 
 					<input name="isfile" value="true" type="hidden"/>
 
-					<div class="submit-buttons">
-						<button class="btn btn-primary btn-large"><i class="icon-upload icon-white"></i> Upload</button>
+
+					<div>
+						<button class="btn btn-primary btn-lg">Upload</button>
 					</div>
 				</@f.form>
 

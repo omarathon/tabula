@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.services.jobs
 import uk.ac.warwick.tabula.{CurrentUser, JsonObjectMapperFactory, MockUserLookup, Mockito, TestBase}
-import uk.ac.warwick.tabula.system.CurrentUserInterceptor
+import uk.ac.warwick.tabula.system.{UserNavigation, UserNavigationGenerator, CurrentUserInterceptor}
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.userlookup.User
 
 class JobInstanceTest extends TestBase with Mockito {
 
@@ -15,11 +16,15 @@ class JobInstanceTest extends TestBase with Mockito {
 	currentUserFinder.userLookup = userLookup
 	currentUserFinder.roleService = roleService
 	currentUserFinder.profileService = smartMock[ProfileService]
+
 	currentUserFinder.departmentService = smartMock[ModuleAndDepartmentService]
+	currentUserFinder.departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns Set()
 
-	currentUserFinder.departmentService.departmentsWithPermission(any[CurrentUser], any[Permission]) returns (Set())
+	currentUserFinder.userNavigationGenerator = new UserNavigationGenerator {
+		override def apply(user: User, forceUpdate: Boolean): UserNavigation = UserNavigation("", "")
+	}
 
-	@Test def onLoad {
+	@Test def onLoad() {
 		val instance = new JobInstanceImpl
 		instance.jsonMapper = jsonMapper
 		instance.userLookup = userLookup
@@ -34,8 +39,8 @@ class JobInstanceTest extends TestBase with Mockito {
 
 		instance.user should be (null)
 		instance.json should be ('empty)
-		instance.updatedDate should not be (null)
-
+		instance.updatedDate should not be null
+		
 		val oldUpdatedDate = instance.updatedDate
 		instance.postLoad
 
@@ -45,7 +50,7 @@ class JobInstanceTest extends TestBase with Mockito {
 		instance.json("steve") should be ("yes")
 	}
 
-	@Test def strings {
+	@Test def strings() {
 		val instance = new JobInstanceImpl
 		instance.jsonMapper = jsonMapper
 

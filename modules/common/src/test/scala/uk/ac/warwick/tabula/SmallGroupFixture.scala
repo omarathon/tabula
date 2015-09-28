@@ -60,7 +60,7 @@ trait SmallGroupFixture extends Mockito {
 	recipient.setUserId("recipient")
 	when(userLookup.getUserByUserId(recipient.getUserId)).thenReturn(recipient)
 
-  val department = new Department
+  val department = Fixtures.department("in")
 
   val (group1,groupSet1) = createGroupSet("A Groupset 1","small group 1",SmallGroupFormat.Lab, "la101")
 	val (group2,groupSet2) = createGroupSet("A Groupset 2","small group 2",SmallGroupFormat.Seminar, "la102")

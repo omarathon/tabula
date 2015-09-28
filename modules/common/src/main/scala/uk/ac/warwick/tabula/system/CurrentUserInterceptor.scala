@@ -1,28 +1,26 @@
 package uk.ac.warwick.tabula.system
 
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.NoCurrentUser
-import uk.ac.warwick.tabula.helpers.FoundUser
-import uk.ac.warwick.tabula.roles.Sysadmin
-import uk.ac.warwick.tabula.services.permissions.RoleService
-import uk.ac.warwick.tabula.web.Cookies._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.tabula.roles.Masquerader
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.FoundUser
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.{Masquerader, Sysadmin}
+import uk.ac.warwick.tabula.services.permissions.RoleService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
+import uk.ac.warwick.tabula.web.Cookies._
+import uk.ac.warwick.userlookup.{User, UserLookupInterface}
 
 class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	var roleService = Wire[RoleService]
 	var userLookup = Wire[UserLookupInterface]
 	var profileService = Wire[ProfileService]
 	var departmentService = Wire[ModuleAndDepartmentService]
+	var userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
 
 	type MasqueradeUserCheck = (User, Boolean) => User
 
@@ -32,7 +30,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		val masquerader =
 			sysadmin ||
 			roleService.hasRole(new CurrentUser(user, user), Masquerader()) ||
-			!departmentService.departmentsWithPermission(new CurrentUser(user, user), Permissions.Masquerade).isEmpty
+			departmentService.departmentsWithPermission(new CurrentUser(user, user), Permissions.Masquerade).nonEmpty
 		val canMasquerade =  sysadmin || masquerader
 		val apparentUser = masqueradeUser(user, canMasquerade)
 
@@ -42,7 +40,9 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 			profile = profileService.getMemberByUser(user = apparentUser, disableFilter = true, eagerLoad = true),
 			sysadmin = sysadmin,
 			masquerader = masquerader,
-			god = god)
+			god = god,
+			navigation = userNavigationGenerator(apparentUser)
+		)
 	}
 
 	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
@@ -55,14 +55,14 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	private def godCookieExists(request: HttpServletRequest): Boolean =
-		request.getCookies().getBoolean(CurrentUser.godModeCookie, false)
+		request.getCookies.getBoolean(CurrentUser.godModeCookie, default = false)
 
 	// masquerade support
 	private def apparentUser(request: HttpServletRequest)(realUser: User, canMasquerade: Boolean): User =
 		if (canMasquerade) {
 			request.getCookies.getString(CurrentUser.masqueradeCookie) match {
 				case Some(userid) => userLookup.getUserByUserId(userid) match {
-					case user: User if user.isFoundUser() => user
+					case user: User if user.isFoundUser => user
 					case _ => realUser
 				}
 				case None => realUser

@@ -16,15 +16,27 @@ object Routes {
 	object Attendance {
 		def home(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/attendance" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def all(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/attendance/all" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def missed(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/attendance/unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def unrecorded(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/attendance/missed" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 
 	object SmallGroups {
 		def home(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def all(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/all" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def unrecorded(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups/unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def unrecordedByModule(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/unrecorded/bymodule" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def missed(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups/missed" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def missedByModule(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/missed/bymodule" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 
 	object Profiles {

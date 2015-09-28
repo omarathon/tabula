@@ -45,11 +45,13 @@ class ListStudentRelationshipTypesController extends StudentRelationshipTypeCont
 @RequestMapping(value = Array("/sysadmin/relationships/add"))
 class AddStudentRelationshipTypeController extends StudentRelationshipTypeController {
 	@ModelAttribute("addStudentRelationshipTypeCommand")
-		def addStudentRelationshipTypeCommand = AddStudentRelationshipTypeCommand()
-
+		def addStudentRelationshipTypeCommand() = AddStudentRelationshipTypeCommand()
+		
 	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/relationships/add")
-
+	def form() = Mav("sysadmin/relationships/add").crumbs(
+		SysadminBreadcrumbs.Relationships.Home
+	)
+		
 	@annotation.RequestMapping(method=Array(POST))
 	def add(@Valid @ModelAttribute("addStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){
@@ -68,8 +70,10 @@ class EditStudentRelationshipTypeController extends StudentRelationshipTypeContr
 			EditStudentRelationshipTypeCommand(relationshipType)
 
 	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/relationships/edit")
-
+	def form() = Mav("sysadmin/relationships/edit").crumbs(
+		SysadminBreadcrumbs.Relationships.Home
+	)
+		
 	@annotation.RequestMapping(method=Array(POST))
 	def edit(@Valid @ModelAttribute("editStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){
@@ -88,8 +92,10 @@ class DeleteStudentRelationshipTypeController extends StudentRelationshipTypeCon
 			DeleteStudentRelationshipTypeCommand(relationshipType)
 
 	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/relationships/delete")
-
+	def form() = Mav("sysadmin/relationships/delete").crumbs(
+		SysadminBreadcrumbs.Relationships.Home
+	)
+		
 	@annotation.RequestMapping(method=Array(POST))
 	def delete(@Valid @ModelAttribute("deleteStudentRelationshipTypeCommand") cmd: Appliable[StudentRelationshipType], errors: Errors) =
 		if (errors.hasErrors){

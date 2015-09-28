@@ -5,34 +5,37 @@
 <#assign commandName="editDepartmentCommand" />
 <#assign command=editDepartmentCommand />
 <#assign submitUrl><@routes.admin.editdepartment department /></#assign>
-<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="form-horizontal double-submit-protection">
-<@f.errors cssClass="error form-errors" />
+<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="double-submit-protection">
+
+	<@f.errors cssClass="error form-errors" />
+
 	<#if department.hasParent>
-		<@form.labelled_row "code" "Department code">
-			<@f.input path="code" cssClass="text" />
-		</@form.labelled_row>
+		<@bs3form.labelled_form_group path="code" labelText="Department code">
+			<@f.input path="code" cssClass="form-control" />
+		</@bs3form.labelled_form_group>
 	</#if>
 
-	<@form.labelled_row "fullName" "Department full name">
-		<@f.input path="fullName" cssClass="text" />
-	</@form.labelled_row>
+	<@bs3form.labelled_form_group path="fullName" labelText="Department full name">
+		<@f.input path="fullName" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "shortName" "Department short name">
-		<@f.input path="shortName" cssClass="text" />
-	</@form.labelled_row>
+	<@bs3form.labelled_form_group path="shortName" labelText="Department short name">
+		<@f.input path="shortName" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
 	<#if department.hasParent>
-		<@form.labelled_row "filterRule" "Filter rule">
-			<@f.select path="filterRule" id="filterRule">
+		<@bs3form.labelled_form_group path="filterRule" labelText="Filter rule">
+			<@f.select path="filterRule" id="filterRule" cssClass="form-control">
 				<@f.options items=allFilterRules itemLabel="name" itemValue="name" />
 			</@f.select>
-		</@form.labelled_row>
+		</@bs3form.labelled_form_group>
 	</#if>
 
-	<div class="submit-buttons form-actions">
+	<@bs3form.form_group>
 		<input type="submit" value="Edit" class="btn btn-primary">
-		<a class="btn" href="<@routes.admin.home />">Cancel</a>
-	</div>
+		<a class="btn btn-default" href="<@routes.admin.home />">Cancel</a>
+	</@bs3form.form_group>
+
 </@f.form>
 
 </#compress>

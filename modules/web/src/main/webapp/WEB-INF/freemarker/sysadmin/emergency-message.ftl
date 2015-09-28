@@ -1,15 +1,17 @@
 <h1>Emergency message</h1>
 
-<@f.form action="?" cssClass="form-horizontal" commandName="emergencyMessageCommand">
+<@f.form action="?" commandName="emergencyMessageCommand">
 
-	<@form.labelled_row "enable" "Enabled?">
-		<@f.checkbox path="enable" />
-	</@form.labelled_row>
+	<@bs3form.checkbox path="enable">
+		<@f.checkbox path="enable" /> Enabled
+	</@bs3form.checkbox>
 
-	<@form.labelled_row "message" "Custom message">
-		<@f.textarea path="message" />
-	</@form.labelled_row>
+	<@bs3form.labelled_form_group path="message" labelText="Custom message">
+		<@f.textarea path="message" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-	<input class="btn btn-danger" type="submit" value="Update" />
-
+	<@bs3form.form_group>
+		<input class="btn btn-danger" type="submit" value="Update" />
+	</@bs3form.form_group>
+	
 </@f.form>

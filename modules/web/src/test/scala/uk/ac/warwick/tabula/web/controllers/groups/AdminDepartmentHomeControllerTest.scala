@@ -16,64 +16,65 @@ import scala.collection.immutable.ListMap
 
 class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 
-  def createController = {
-    val controller = new GroupsAdminDepartmentController()
-    controller.securityService = mock[SecurityService]
-		controller.termService = mock[TermService]
-    when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn{true}
+	def createController = {
+		val controller = new GroupsAdminDepartmentController()
+		controller.securityService = smartMock[SecurityService]
+		controller.termService = smartMock[TermService]
+		controller.features = emptyFeatures
+		when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn{true}
 		when(controller.termService.getAcademicWeeksForYear(any[BaseDateTime])).thenReturn(Nil)
-    controller
-  }
+		controller
+	}
 
-  @Test
-  def reportsWhenNotAllGroupsetsAreReleased(){new SmallGroupFixture {
-    withUser("test") {
-      groupSet1.releasedToStudents = true
-      groupSet1.releasedToTutors = false
+	@Test
+	def reportsWhenNotAllGroupsetsAreReleased(){new SmallGroupFixture {
+		withUser("test") {
+			groupSet1.releasedToStudents = true
+			groupSet1.releasedToTutors = false
 
-      val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
+			val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
 				val department = Fixtures.department("in")
 				def user = NoCurrentUser()
 				def academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
-				def apply = {
-					AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
+				def apply() = {
+					AdminSmallGroupsHomeInformation(canAdminDepartment = false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
 				}
 			}
 
-      val mav = createController.adminDepartment(cmd, department, currentUser)
-      mav.map.get("hasUnreleasedGroupsets") match{
-        case Some(v: Boolean) => v should be {true}
-        case _ => fail()
-      }
-    }}
-  }
+			val mav = createController.adminDepartment(cmd, department, currentUser)
+			mav.map.get("hasUnreleasedGroupsets") match{
+				case Some(v: Boolean) => v should be {true}
+				case _ => fail()
+			}
+		}}
+	}
 
-  @Test
-  def reportsWhenAllGroupsetsAreReleased(){new SmallGroupFixture {
-    withUser("test"){
+	@Test
+	def reportsWhenAllGroupsetsAreReleased(){new SmallGroupFixture {
+		withUser("test"){
 
-      groupSet1.releasedToStudents = true
-      groupSet1.releasedToTutors = true
+			groupSet1.releasedToStudents = true
+			groupSet1.releasedToTutors = true
 
-      val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
+			val cmd = new Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState {
 				val department = Fixtures.department("in")
 				def user = NoCurrentUser()
 				def academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
-				def apply = {
-					AdminSmallGroupsHomeInformation(false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
+				def apply() = {
+					AdminSmallGroupsHomeInformation(canAdminDepartment = false, Seq(groupSet1.module), Seq(ViewSetWithProgress(groupSet1, Nil, GroupsViewModel.Tutor, null, None, ListMap())), Nil)
 				}
 			}
 
-      val mav = createController.adminDepartment(cmd, department, currentUser)
-      mav.map.get("hasUnreleasedGroupsets") match {
-        case Some(v: Boolean) => v should be {false}
-        case _ => fail()
-      }
+			val mav = createController.adminDepartment(cmd, department, currentUser)
+			mav.map.get("hasUnreleasedGroupsets") match {
+				case Some(v: Boolean) => v should be {false}
+				case _ => fail()
+			}
 
-    }}
+		}}
 
-  }
+	}
 
 }

@@ -18,7 +18,6 @@ class TurnitinLtiAdminController extends BaseSysadminController {
 
 	@RequestMapping
 	def home = Mav("sysadmin/turnitinlti/home")
-		.crumbs(Breadcrumbs.Current("Sysadmin"))
 
 }
 

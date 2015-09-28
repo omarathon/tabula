@@ -38,7 +38,6 @@ class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
 			Return(null)
 		}
 		Mav("sysadmin/repl", "query" -> query, "response" -> response)
-			.crumbs(Breadcrumbs.Current(s"Sysadmin REPL"))
 	}
 
 	/**
@@ -46,13 +45,13 @@ class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
 	 * as top-level items in your SpEL query.
 	 */
 	case class RootObject(
-		val session: Session,
-		val beanFactory: BeanFactory = beanFactory,
+		session: Session,
+		beanFactory: BeanFactory = beanFactory,
 		// expose Assignments as a map of ids
-		val assignments: MapAccessor[Assignment] = MapAccessor { id =>
+		assignments: MapAccessor[Assignment] = MapAccessor { id =>
 			assignmentService.getAssignmentById(id).orNull
 		},
-		val departmentCodes: MapAccessor[Department] = MapAccessor { code =>
+		departmentCodes: MapAccessor[Department] = MapAccessor { code =>
 			moduleAndDepartmentService.getDepartmentByCode(code).orNull
 		})
 }
@@ -89,7 +88,7 @@ object MapAccessor {
 	}
 }
 
-case class Return(val value: Any, val exception: Exception = null) {
+case class Return(value: Any, exception: Exception = null) {
 	lazy val stringValue = value.toString
 	lazy val isNone = value match {
 		case None => true
@@ -99,7 +98,7 @@ case class Return(val value: Any, val exception: Exception = null) {
 		val stringer = new StringWriter
 		val writer = new PrintWriter(stringer)
 		exception.printStackTrace(writer)
-		writer.close
+		writer.close()
 		stringer.toString
 	}
 	lazy val valueType = {

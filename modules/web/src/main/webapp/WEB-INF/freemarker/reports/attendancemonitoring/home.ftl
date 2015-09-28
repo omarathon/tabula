@@ -9,7 +9,7 @@
 		<li><h3><a href="<@routes.reports.missedAttendance department academicYear />">Missed monitoring points</a></h3></li>
 	</ul>
 <#else>
-	<div class="alert alert-warning">
+	<div class="alert alert-danger">
 		Monitoring point reports are not available for 13/14
 	</div>
 </#if>

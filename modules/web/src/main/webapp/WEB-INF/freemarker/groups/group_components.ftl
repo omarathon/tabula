@@ -3,6 +3,8 @@
 <#-- Common template parts for use in other small groups templates. -->
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 
 <#function module_anchor module>
 	<#return "module-${module.code}" />
@@ -14,7 +16,7 @@
 
 <#macro event_schedule_info event>
 <#if event.unscheduled>
-	<span class="badge badge-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
+	<span class="badge progress-bar-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
 <#else>
 	<#-- Weeks, day/time, location -->
 	<#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
@@ -27,11 +29,11 @@
 </#macro>
 
 <#-- Output a dropdown menu only if there is anything in it. -->
-<#macro dropdown_menu text icon button_size="btn-medium">
+<#macro dropdown_menu text button_size="btn-medium">
 	<#-- Capture the content between the macro tags into a string -->
 	<#local content><#nested /></#local>
 	<#if content?trim?has_content>
-	<a class="btn ${button_size} dropdown-toggle" data-toggle="dropdown"><i class="icon-${icon}"></i> ${text} <span class="caret"></span></a>
+	<a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown">${text} <span class="caret"></span></a>
 	<ul class="dropdown-menu pull-right">
 	${content}
 	</ul>
@@ -52,7 +54,6 @@
 </#macro>
 
 <#macro single_set setItem expand_by_default=true>
-	<#local spring=JspTaglibs["/WEB-INF/tld/spring.tld"] /> <#-- FIXME lame -->
 	<#local set = setItem.set />
 	<#local has_groups = setItem.groups?size gt 0 />
 
@@ -64,39 +65,39 @@
 			</#if>
 			 data-name="${set_anchor(set)}">
 			<div class="clearfix">
-				<div class="section-title row-fluid">
-					<div class="span4 icon-container">
+				<div class="section-title row">
+					<div class="col-md-4 icon-container">
 						<span class="h6 colour-h6"><@fmt.groupset_name set /></span>
 					</div>
 
-					<div class="span1">
+					<div class="col-md-1">
 						<#if setItem.isStudentSignUp()>
 							<#if setItem.set.openForSignups>
-								<span class="use-tooltip" title="These groups are open for self sign-up"><i class="icon-unlock-alt"></i></span>
+								<span class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
 							<#else>
-								<span class="use-tooltip" title="These groups are closed for self sign-up"><i class="icon-lock"></i></span>
+								<span class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i></span>
 							</#if>
 						<#elseif setItem.isLinked()>
-							<span class="use-tooltip" title="These group allocations may be linked to other modules"><i class="icon-link"></i></span>
+							<span class="use-tooltip" title="These group allocations may be linked to other modules"><i class="fa fa-link"></i></span>
 						<#else>
-							<span class="use-tooltip" title="These groups are manually allocated"><i class="icon-random"></i></span>
+							<span class="use-tooltip" title="These groups are manually allocated"><i class="fa fa-random"></i></span>
 						</#if>
 
 						<#if set.archived>
-							<span class="use-tooltip" title="These groups have been archived"><i class="icon-folder-close"></i></span>
+							<span class="use-tooltip" title="These groups have been archived"><i class="fa fa-folder"></i></span>
 						</#if>
 					</div>
 
 					<#if !set.archived>
-						<div class="span2 progress-container">
+						<div class="col-md-2">
 							<#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
 
-							<dl class="progress progress-${setItem.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
-								<dt class="bar" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
+							<dl class="progress use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
+								<dt class="progress-bar progress-bar-${setItem.progress.t}" style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
 							</dl>
 						</div>
 
-						<div class="span4 next-action">
+						<div class="col-md-3 next-action">
 							<#if setItem.nextStage??>
 								<#local nextStageUrl="" />
 								<#local nextStageModal="" />
@@ -135,191 +136,186 @@
 							<#if notInMembershipCount gt 0>
 								<#local tooltip><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</#local>
 
-								<a href="<@routes.groups.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="icon-warning-sign warning"></i></a>
+								<a href="<@routes.groups.deregisteredStudents set />" class="use-tooltip warning" style="display: inline;" title="${tooltip}"><i class="fa fa-exclamation-triangle warning"></i></a>
 							</#if>
 						</div>
 					<#else>
-						<div class="span6"></div>
+						<div class="col-md-5"></div>
 					</#if>
 
-					<div class="span1">
-						<div class="btn-group pull-right">
-							<@dropdown_menu "Actions" "cog" "btn-mini">
-								<li class="dropdown-submenu pull-left">
-									<#local edit_url><@routes.groups.editset set /></#local>
-									<@fmt.permission_button
+					<div class="col-md-2">
+						<div class="pull-right">
+							<span>
+								<@dropdown_menu "Edit" "btn-xs">
+									<li>
+										<#local edit_url><@routes.groups.editsetproperties set /></#local>
+										<@fmt.permission_button
+										permission='SmallGroups.Update'
+										scope=set
+										action_descr='edit small group properties'
+										href=edit_url
+										>
+											Properties
+										</@fmt.permission_button>
+									</li>
+
+									<li>
+										<#local edit_url><@routes.groups.editsetgroups set /></#local>
+										<@fmt.permission_button
 										permission='SmallGroups.Update'
 										scope=set
 										action_descr='edit small groups'
 										href=edit_url
-									>
-										<i class="icon-wrench icon-fixed-width"></i> Edit
-									</@fmt.permission_button>
-
-									<ul class="dropdown-menu">
-										<li>
-											<#local edit_url><@routes.groups.editsetproperties set /></#local>
-											<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=set
-												action_descr='edit small group properties'
-												href=edit_url
-											>
-												Properties
-											</@fmt.permission_button>
-										</li>
-
-										<li>
-											<#local edit_url><@routes.groups.editsetgroups set /></#local>
-											<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=set
-												action_descr='edit small groups'
-												href=edit_url
-											>
-												Groups
-											</@fmt.permission_button>
-										</li>
-
-										<li>
-											<#local edit_url><@routes.groups.editsetstudents set /></#local>
-											<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=set
-												action_descr='edit small group students'
-												href=edit_url
-											>
-												Students
-											</@fmt.permission_button>
-										</li>
-
-										<li>
-											<#local edit_url><@routes.groups.editsetevents set /></#local>
-											<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=set
-												action_descr='edit small group events'
-												href=edit_url
-											>
-												Events
-											</@fmt.permission_button>
-										</li>
-
-										<li>
-											<#local allocateset_url><@routes.groups.editsetallocate set /></#local>
-											<@fmt.permission_button
-												permission='SmallGroups.Allocate'
-												scope=set
-												action_descr='allocate students'
-												href=allocateset_url
-											>
-												Allocation
-											</@fmt.permission_button>
-										</li>
-									</ul>
-								</li>
-
-								<li class="divider"></li>
-
-								<#if features.smallGroupTeachingStudentSignUp>
-									<#if set.openForSignups>
-										<li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-										(''," class='disabled use-tooltip' title='Not a self-signup group' ")
-										}>
-											<#local closeset_url><@routes.groups.closeset set /></#local>
-											<@fmt.permission_button
-											permission='SmallGroups.Update'
-											scope=set
-											classes='close-group-link'
-											action_descr='close small group'
-											href=closeset_url
-											data_attr='data-toggle=modal data-target=#modal-container'>
-												<i class="icon-lock icon-fixed-width"></i> Close
-											</@fmt.permission_button>
-										</li>
-									<#else>
-										<li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-										(''," class='disabled use-tooltip' title='Not a self-signup group' ")
-										}>
-											<#local openset_url><@routes.groups.openset set /></#local>
-											<@fmt.permission_button
-											permission='SmallGroups.Update'
-											scope=set
-											classes='open-group-link'
-											action_descr='open small group'
-											href=openset_url
-											data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-												<i class="icon-unlock-alt icon-fixed-width"></i> Open
-											</@fmt.permission_button>
-										</li>
-									</#if>
-								</#if>
-
-								<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
-									<#local notifyset_url><@routes.groups.releaseset set /></#local>
-									<@fmt.permission_button
-									permission='SmallGroups.Update'
-									scope=set
-									action_descr='publish groups to students and staff'
-									href=notifyset_url
-									classes='notify-group-link'
-									data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-										<i class="icon-envelope-alt icon-fixed-width"></i> Publish
-									</@fmt.permission_button>
-								</li>
-
-								<li class="divider"></li>
-
-								<li>
-									<#if set.archived>
-										<#local archive_caption>Unarchive</#local>
-									<#else>
-										<#local archive_caption>Archive</#local>
-									</#if>
-
-									<#local archive_url><@routes.groups.archiveset set /></#local>
-
-									<@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url
-									tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'>
-										<i class="icon-folder-close icon-fixed-width"></i> ${archive_caption}
-									</@fmt.permission_button>
-									</a>
-								</li>
-
-								<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups that have been published to students or tutors"</#if>>
-									<#local delete_url><@routes.groups.deleteset set /></#local>
-									<@fmt.permission_button
-										permission='SmallGroups.Delete'
-										scope=set
-										action_descr='delete small groups'
-										href=delete_url>
-										<i class="icon-remove icon-fixed-width"></i> Delete
-									</@fmt.permission_button>
-								</li>
-
-								<li class="divider"></li>
-
-								<#if set.collectAttendance>
-									<#local set_attendance_url><@routes.groups.setAttendance set /></#local>
-									<li>
-										<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=set action_descr='view attendance' href=set_attendance_url
-										tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-											<i class="icon-group icon-fixed-width"></i> View attendance
+										>
+											Groups
 										</@fmt.permission_button>
 									</li>
-								</#if>
 
-								<li>
-									<#local permissions_url><@routes.groups.permissions set /></#local>
-									<@fmt.permission_button
-									permission='RolesAndPermissions.Create'
-									scope=set
-									action_descr='modify permissions'
-									href=permissions_url>
-										<i class="icon-user icon-fixed-width"></i> Edit permissions
-									</@fmt.permission_button>
-								</li>
-							</@dropdown_menu>
+									<li>
+										<#local edit_url><@routes.groups.editsetstudents set /></#local>
+										<@fmt.permission_button
+										permission='SmallGroups.Update'
+										scope=set
+										action_descr='edit small group students'
+										href=edit_url
+										>
+											Students
+										</@fmt.permission_button>
+									</li>
+
+									<li>
+										<#local edit_url><@routes.groups.editsetevents set /></#local>
+										<@fmt.permission_button
+										permission='SmallGroups.Update'
+										scope=set
+										action_descr='edit small group events'
+										href=edit_url
+										>
+											Events
+										</@fmt.permission_button>
+									</li>
+
+									<li>
+										<#local allocateset_url><@routes.groups.editsetallocate set /></#local>
+										<@fmt.permission_button
+										permission='SmallGroups.Allocate'
+										scope=set
+										action_descr='allocate students'
+										href=allocateset_url
+										>
+											Allocation
+										</@fmt.permission_button>
+									</li>
+								</@dropdown_menu>
+							</span>
+							<span>
+								<@dropdown_menu "Actions" "btn-xs">
+									<#if features.smallGroupTeachingStudentSignUp>
+										<#if set.openForSignups>
+											<li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
+											(''," class='disabled use-tooltip' title='Not a self-signup group' ")
+											}>
+												<#local closeset_url><@routes.groups.closeset set /></#local>
+												<@fmt.permission_button
+												permission='SmallGroups.Update'
+												scope=set
+												classes='close-group-link'
+												action_descr='close small group'
+												href=closeset_url
+												data_attr='data-toggle=modal data-target=#modal-container'
+												>
+													Close
+												</@fmt.permission_button>
+											</li>
+										<#else>
+											<li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
+											(''," class='disabled use-tooltip' title='Not a self-signup group' ")
+											}>
+												<#local openset_url><@routes.groups.openset set /></#local>
+												<@fmt.permission_button
+												permission='SmallGroups.Update'
+												scope=set
+												classes='open-group-link'
+												action_descr='open small group'
+												href=openset_url
+												data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+												>
+													Open
+												</@fmt.permission_button>
+											</li>
+										</#if>
+									</#if>
+
+									<li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+										<#local notifyset_url><@routes.groups.releaseset set /></#local>
+										<@fmt.permission_button
+										permission='SmallGroups.Update'
+										scope=set
+										action_descr='publish groups to students and staff'
+										href=notifyset_url
+										classes='notify-group-link'
+										data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+										>
+											Publish
+										</@fmt.permission_button>
+									</li>
+
+									<li class="divider"></li>
+
+									<li>
+										<#if set.archived>
+											<#local archive_caption>Unarchive</#local>
+										<#else>
+											<#local archive_caption>Archive</#local>
+										</#if>
+
+										<#local archive_url><@routes.groups.archiveset set /></#local>
+
+										<@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr='${archive_caption}'?lower_case classes='archive-group-link' href=archive_url
+										tooltip='Archive small group' data_attr='data-toggle=modal data-target=#modal-container'>
+											${archive_caption}
+										</@fmt.permission_button>
+										</a>
+									</li>
+
+									<li<#if set.releasedToStudents || set.releasedToTutors> class="disabled use-tooltip" data-container="body" title="Can't delete small groups that have been published to students or tutors"</#if>>
+										<#local delete_url><@routes.groups.deleteset set /></#local>
+										<@fmt.permission_button
+											permission='SmallGroups.Delete'
+											scope=set
+											action_descr='delete small groups'
+											href=delete_url
+										>
+											Delete
+										</@fmt.permission_button>
+									</li>
+
+									<li class="divider"></li>
+
+									<#if set.collectAttendance>
+										<#local set_attendance_url><@routes.groups.setAttendance set /></#local>
+										<li>
+											<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=set action_descr='view attendance' href=set_attendance_url
+											tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'
+											>
+												View attendance
+											</@fmt.permission_button>
+										</li>
+									</#if>
+
+									<li>
+										<#local permissions_url><@routes.groups.permissions set /></#local>
+										<@fmt.permission_button
+											permission='RolesAndPermissions.Create'
+											scope=set
+											action_descr='modify permissions'
+											href=permissions_url
+										>
+											Edit permissions
+										</@fmt.permission_button>
+									</li>
+								</@dropdown_menu>
+							</span>
 						</div>
 					</div>
 				</div>
@@ -340,22 +336,22 @@
 	<#local can_update_groups = can.do('SmallGroups.Update', set) />
 
 	<#-- Overall info -->
-	<div class="row-fluid">
-		<div class="span2">
+	<div class="row">
+		<div class="col-md-2">
 			<#if can_update_groups>
 				<a href="<@routes.groups.editsetgroups set />"><@fmt.p setItem.groups?size "group" /></a>
 			<#else>
 				<@fmt.p setItem.groups?size "group" />
 			</#if>
 		</div>
-		<div class="span2">
+		<div class="col-md-2">
 			<#if can_update_groups>
 				<a href="<@routes.groups.editsetstudents set />"><@fmt.p set.allStudentsCount "student" /></a>
 			<#else>
 				<a href="<@routes.groups.studentsinsetlist set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p set.allStudentsCount "student" /></a>
 			</#if>
 		</div>
-		<div class="span8">
+		<div class="col-md-8">
 			<#local unallocatedSize = set.unallocatedStudentsCount />
 			<#local notInMembershipCount = set.studentsNotInMembershipCount />
 
@@ -370,7 +366,7 @@
 
 			<#if notInMembershipCount gt 0 && can_update_groups>
 				<a href="<@routes.groups.deregisteredStudents set />"><@fmt.p notInMembershipCount "student has" "students have" /> deregistered</a>
-				<i class="icon-warning-sign warning"></i>
+				<i class="fa fa-exclamation-triangle warning"></i>
 			</#if>
 		</div>
 	</div>
@@ -379,13 +375,13 @@
 		<#list setItem.groups as group>
 			<#local showAttendanceButton = features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance />
 
-		<div class="item-info row-fluid group-${group.id}" >
-			<div class="span2">
+		<div class="item-info row group-${group.id}" >
+			<div class="col-md-2">
 				<h4 class="name">
 				${group.name!""}
 				</h4>
 			</div>
-			<div class="span2">
+			<div class="col-md-2">
 				<#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers && ((group.students.size)!0) gt 0>
 					<a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 						<@fmt.p (group.students.size)!0 "student" "students" />
@@ -395,7 +391,7 @@
 				</#if>
 			</div>
 
-			<div class="${showAttendanceButton?string("span6", "span8")}">
+			<div class="${showAttendanceButton?string("col-md-6", "col-md-8")}">
 				<ul class="unstyled margin-fix">
 					<#list group.events as event>
 						<li class="clearfix">
@@ -404,15 +400,15 @@
 							<#local popoverContent><@eventDetails event /></#local>
 							<a class="use-popover"
 							   data-html="true"
-							   data-content="${popoverContent?html}"><i class="icon-question-sign"></i></a>
+							   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 						</li>
 					</#list>
 				</ul>
 			</div>
 
 			<#if showAttendanceButton>
-				<div class="span2">
-					<a href="<@routes.groups.groupAttendance group />" class="btn btn-primary btn-mini pull-right">
+				<div class="col-md-2">
+					<a href="<@routes.groups.groupAttendance group />" class="btn btn-primary btn-xs pull-right">
 						Attendance
 					</a>
 				</div>
@@ -439,9 +435,7 @@
 		jQuery(document.body).on('loaded.collapsible', '.module-info', function() {
 			var $module = jQuery(this);
 			Groups.zebraStripeGroups($module);
-			Groups.wireModalButtons($module);
 			$module.mapPopups();
-			AjaxPopup.wireAjaxPopupLinks($module);
 			$module.find('.use-tooltip').tooltip();
 			$module.find('.use-popover').tabulaPopover({
 				trigger: 'click',
@@ -490,7 +484,7 @@
 			<@dropdown_menu "Manage" "wrench">
 				<#if moduleItem.canManageGroups>
 					<li><a href="<@routes.groups.moduleperms module />">
-						<i class="icon-user icon-fixed-width"></i> Edit module permissions
+						Edit module permissions
 					</a></li>
 					<li>
 						<#local create_url><@routes.groups.createset module /></#local>
@@ -498,8 +492,9 @@
 							permission='SmallGroups.Create'
 							scope=module
 							action_descr='add small groups'
-							href=create_url>
-							<i class="icon-group icon-fixed-width"></i> Add small groups</a>
+							href=create_url
+						>
+							Add small groups
 						</@fmt.permission_button>
 					</li>
 				</#if>
@@ -508,17 +503,17 @@
 					<#local module_attendance_url><@routes.groups.moduleAttendance module /></#local>
 					<li>
 						<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=module action_descr='view attendance' href=module_attendance_url
-							tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-							<i class="icon-group icon-fixed-width"></i> Attendance
+							tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'
+						>
+							Attendance
 						</@fmt.permission_button>
 					</li>
 				</#if>
 
 				<#if moduleItem.canManageGroups && has_archived_groups>
 					<li><a class="show-archived-small-groups" href="#">
-						<i class="icon-eye-open icon-fixed-width"></i> Show archived small groups
-					</a>
-					</li>
+						Show archived small groups
+					</a></li>
 				</#if>
 			</@dropdown_menu>
 		</div>
@@ -529,10 +524,10 @@
 			<div class="striped-section-contents">
 				<#if expand_by_default>
 					<@groupsets_info moduleItem />
-	      </#if>
-      </div>
-    </#if>
-  </div>
+	      		</#if>
+      		</div>
+    	</#if>
+	</div>
 </div> <!-- module-info striped-section-->
 </span>
 </#macro>
@@ -546,275 +541,282 @@
 </#macro>
 
 <#macro single_groupset setItem moduleItem>
-			<#local groupSet=setItem.set />
-			<#if !groupSet.deleted>
-				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}" >
-				<#if setItem.viewerMustSignUp>
-				  <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.groups.signup_to_group setItem.set />">
-				</#if>
-					<div class="span2">
-						<h3 class="name">
-							<small>
-							${groupSet.name}
-								<#if groupSet.archived>
-									(Archived)
-								</#if>
-							</small>
-							<#if setItem.viewerIsStudent >
-								<#if !setItem.isStudentSignUp()
-									 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
-									 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
-								>
-									<span class="use-tooltip" title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
-								<#else>
-									<span class="use-tooltip" title="This group is open for self sign-up"><i class="icon-unlock-alt"></i></span>
-								</#if>
+	<#local groupSet=setItem.set />
+	<#if !groupSet.deleted>
+		<div class="item-info row<#if groupSet.archived> archived</#if> groupset-${groupSet.id}" >
+		<#if setItem.viewerMustSignUp>
+		  <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.groups.signup_to_group setItem.set />">
+		</#if>
+			<div class="col-md-2">
+				<h3 class="name">
+					<small>
+					${groupSet.name}
+						<#if groupSet.archived>
+							(Archived)
+						</#if>
+					</small>
+					<#if setItem.viewerIsStudent >
+						<#if !setItem.isStudentSignUp()
+							 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
+							 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
+						>
+							<span class="use-tooltip" title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
+						<#else>
+							<span class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+						</#if>
+					<#else>
+						<#if setItem.isStudentSignUp()>
+							<#if setItem.set.openForSignups>
+								<span class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
 							<#else>
-								<#if setItem.isStudentSignUp()>
-									<#if setItem.set.openForSignups>
-										<span class="use-tooltip" title="This group is open for self sign-up"><i class="icon-unlock-alt"></i></span>
+								<span class="use-tooltip" title="This group is closed for self sign-up"><i class="fa fa-lock"></i></span>
+							</#if>
+						<#elseif setItem.isLinked()>
+							<span class="use-tooltip" title="Allocations for this group are linked and reused"><i class="fa fa-link"></i></span>
+						<#else>
+							<span class="use-tooltip" title="This is a manually allocated group"><i class="fa fa-random"></i></span>
+						</#if>
+					</#if>
+				</h3>
+
+				<span class="format">
+				${groupSet.format.description}
+				</span>
+			</div>
+
+				<div class="${moduleItem.canManageGroups?string('col-md-8','col-md-10')}">
+				<#if allocated?? && allocated.id == groupSet.id>
+					<div class="alert alert-info">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<p>Changes saved.</p>
+					</div>
+				</#if>
+				<#if notificationSentMessage??>
+					<div class="alert alert-info">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<p>${notificationSentMessage}</p>
+					</div>
+				</#if>
+
+				<#list setItem.groups as group>
+					<div class="row group">
+						<div class="col-md-12">
+							<#if setItem.viewerMustSignUp>
+								<div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
+									<input type="radio"
+										name="group"
+										value="${group.id}"
+										${group.full?string(' disabled ','')}
+										class="radio inline group-selection-radio"/>
+								</div>
+								<div style="margin-left: 20px;">
+							<#else>
+								<div>
+							</#if>
+								<h4 class="name">
+									${group.name!""}
+									<#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers >
+										<a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
+											<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+										</a>
 									<#else>
-										<span class="use-tooltip" title="This group is closed for self sign-up"><i class="icon-lock"></i></span>
+										<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 									</#if>
-								<#elseif setItem.isLinked()>
-									<span class="use-tooltip" title="Allocations for this group are linked and reused"><i class="icon-link"></i></span>
+								</h4>
+
+								<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
+									<div class="pull-right">
+										<a href="<@routes.groups.groupAttendance group />" class="btn btn-primary btn-small">
+											Attendance
+										</a>
+									</div>
+								</#if>
+
+								<#if setItem.viewerIsStudent
+										&& setItem.isStudentSignUp()
+										&& setItem.set.allowSelfGroupSwitching
+										&& setItem.set.openForSignups >
+									<#if !setItem.viewerMustSignUp >
+										<form id="leave-${setItem.set.id}" method="post" action="<@routes.groups.leave_group setItem.set />" >
+											<input type="hidden" name="group" value="${group.id}" />
+											<input type="submit"
+												   class="btn btn-primary pull-right use-tooltip"
+												   title='Leave this group. You will need to sign up for a different group.'
+												   value="Leave"/>
+										 </form>
+									</#if>
+								</#if>
+
+
+								<ul class="unstyled margin-fix">
+									<#list group.events as event>
+										<li class="clearfix">
+											<#-- Tutor, weeks, day/time, location -->
+											<div class="eventWeeks">
+												<#if setItem.canViewTutors && event.tutors?? && (!(isSelf!false) || event.tutors.size > 1) >
+													<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
+														<#if (event.tutors.size < 1)>[no tutor]</#if>
+													<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
+													</h6>
+												</#if>
+												<@event_schedule_info event />
+											</div>
+										</li>
+									</#list>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</#list>
+				<#if setItem.viewerMustSignUp>
+					<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
+					</form>
+				</#if>
+				<#-- Only show warnings to users that can do somthing about them -->
+				<#if moduleItem.canManageGroups>
+					<#local unallocatedSize = groupSet.unallocatedStudentsCount />
+					<#if unallocatedSize gt 0>
+						<div class="alert">
+							<a href="<@routes.groups.unallocatedstudentslist setItem.set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group</a>
+						</div>
+					</#if>
+
+					<#if groupSet.hasAllocated >
+						 <#-- not released at all -->
+						  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+						<p class="alert">
+							These groups have not been published
+						</p>
+						 <#-- only released to tutors-->
+						 <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
+						  <p class="alert">
+							   These groups have been published to tutors, but not students
+						   </p>
+						  <#-- only released to students-->
+						  <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+							  <p class="alert">
+								  These groups have been published to students, but not tutors
+							  </p>
+						 </#if>
+					</#if>
+				</#if>
+			</div>
+
+			<#if moduleItem.canManageGroups>
+			<div class="col-md-2">
+				<div class="btn-toolbar pull-right">
+					<div class="btn-group">
+
+						<@dropdown_menu "Actions" "cog">
+							<li>
+								<#local edit_url><@routes.groups.editset groupSet /></#local>
+								<@fmt.permission_button
+									permission='SmallGroups.Update'
+									scope=groupSet
+									action_descr='edit small group properties'
+									href=edit_url
+								>
+									Edit properties
+								</@fmt.permission_button>
+							</li>
+							<#if features.smallGroupTeachingStudentSignUp>
+								<#if groupSet.openForSignups>
+									<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+									(''," class='disabled use-tooltip' title='Not a self-signup group' ")
+									}>
+										<#local closeset_url><@routes.groups.closeset groupSet /></#local>
+										<@fmt.permission_button
+											permission='SmallGroups.Update'
+											scope=groupSet
+											classes='close-group-link'
+											action_descr='close small group'
+											href=closeset_url
+											data_attr='data-toggle=modal data-target=#modal-container'
+										>
+											Close
+										</@fmt.permission_button>
+									</li>
 								<#else>
-									<span class="use-tooltip" title="This is a manually allocated group"><i class="icon-random"></i></span>
+									<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+									(''," class='disabled use-tooltip' title='Not a self-signup group' ")
+									}>
+										<#local openset_url><@routes.groups.openset groupSet /></#local>
+										<@fmt.permission_button
+											permission='SmallGroups.Update'
+											scope=groupSet
+											classes='open-group-link'
+											action_descr='open small group'
+											href=openset_url
+											data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+										>
+											Open
+										</@fmt.permission_button>
+									</li>
 								</#if>
 							</#if>
-						</h3>
+							<li>
+								<#local allocateset_url><@routes.groups.allocateset groupSet /></#local>
+								<@fmt.permission_button
+									permission='SmallGroups.Allocate'
+									scope=groupSet
+									action_descr='allocate students'
+									href=allocateset_url
+								>
+									Allocate students
+								</@fmt.permission_button>
+							</li>
+							<li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+								<#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
+								<@fmt.permission_button
+									permission='SmallGroups.Update'
+									scope=groupSet
+									action_descr='publish groups to students and staff'
+									href=notifyset_url
+									classes='notify-group-link'
+									data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+								>
+									Publish
+								</@fmt.permission_button>
+							</li>
 
-						<span class="format">
-						${groupSet.format.description}
-						</span>
+							<#if groupSet.collectAttendance>
+								<#local set_attendance_url><@routes.groups.setAttendance groupSet /></#local>
+								<li>
+									<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=groupSet action_descr='view attendance' href=set_attendance_url
+									tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'
+									>
+										Attendance
+									</@fmt.permission_button>
+								</li>
+							</#if>
+
+
+							<li>
+								<#if groupSet.archived>
+									<#local archive_caption>Unarchive groups</#local>
+								<#else>
+									<#local archive_caption>Archive groups</#local>
+								</#if>
+
+								<#local archive_url><@routes.groups.archiveset groupSet /></#local>
+
+								<@fmt.permission_button permission='SmallGroups.Archive' scope=groupSet action_descr='${archive_caption}'?lower_case classes='archive-group-link' href=archive_url
+									tooltip='Archive small group' data_attr='data-toggle=modal data-target=#modal-container'
+								>
+									${archive_caption}
+								</@fmt.permission_button>
+								</a></li>
+						</@dropdown_menu>
 					</div>
+				</div>
+			</div>
+			</#if>
 
-						<div class="${moduleItem.canManageGroups?string('span8','span10')}">
-						<#if allocated?? && allocated.id == groupSet.id>
-							<div class="alert alert-success">
-								<a class="close" data-dismiss="alert">&times;</a>
-								<p>Changes saved.</p>
-							</div>
-						</#if>
-						<#if notificationSentMessage??>
-							<div class="alert alert-success">
-								<a class="close" data-dismiss="alert">&times;</a>
-								<p>${notificationSentMessage}</p>
-							</div>
-						</#if>
-
-						<#list setItem.groups as group>
-							<div class="row-fluid group">
-								<div class="span12">
-									<#if setItem.viewerMustSignUp>
-										<div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
-											<input type="radio"
-												name="group"
-												value="${group.id}"
-												${group.full?string(' disabled ','')}
-												class="radio inline group-selection-radio"/>
-										</div>
-										<div style="margin-left: 20px;">
-									<#else>
-										<div>
-									</#if>
-										<h4 class="name">
-											${group.name!""}
-											<#if can.do('SmallGroups.ReadMembership', group) && setItem.canViewMembers >
-												<a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
-													<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
-												</a>
-											<#else>
-												<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
-											</#if>
-										</h4>
-
-										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
-											<div class="pull-right">
-												<a href="<@routes.groups.groupAttendance group />" class="btn btn-primary btn-small">
-													Attendance
-												</a>
-											</div>
-										</#if>
-
-										<#if setItem.viewerIsStudent
-												&& setItem.isStudentSignUp()
-												&& setItem.set.allowSelfGroupSwitching
-												&& setItem.set.openForSignups >
-											<#if !setItem.viewerMustSignUp >
-												<form id="leave-${setItem.set.id}" method="post" action="<@routes.groups.leave_group setItem.set />" >
-													<input type="hidden" name="group" value="${group.id}" />
-													<input type="submit"
-														   class="btn btn-primary pull-right use-tooltip"
-														   title='Leave this group. You will need to sign up for a different group.'
-														   value="Leave"/>
-												 </form>
-											</#if>
-										</#if>
-
-
-										<ul class="unstyled margin-fix">
-											<#list group.events as event>
-												<li class="clearfix">
-													<#-- Tutor, weeks, day/time, location -->
-													<div class="eventWeeks">
-														<#if setItem.canViewTutors && event.tutors?? && (!(isSelf!false) || event.tutors.size > 1) >
-															<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
-																<#if (event.tutors.size < 1)>[no tutor]</#if>
-															<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
-															</h6>
-														</#if>
-														<@event_schedule_info event />
-													</div>
-												</li>
-											</#list>
-										</ul>
-									</div>
-								</div>
-							</div>
-						</#list>
-						<#if setItem.viewerMustSignUp>
-							<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
-							</form>
-                        </#if>
-						<#-- Only show warnings to users that can do somthing about them -->
-						<#if moduleItem.canManageGroups>
-							<#local unallocatedSize = groupSet.unallocatedStudentsCount />
-							<#if unallocatedSize gt 0>
-								<div class="alert">
-									<i class="icon-info-sign"></i>  <a href="<@routes.groups.unallocatedstudentslist setItem.set />" class="ajax-modal" data-target="#students-list-modal"><@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group</a>
-								</div>
-							</#if>
-
-							<#if groupSet.hasAllocated >
-								 <#-- not released at all -->
-								  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-								<p class="alert">
-									<i class="icon-info-sign"></i> These groups have not been published
-								</p>
-								 <#-- only released to tutors-->
-								 <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
-								  <p class="alert">
-									   <i class="icon-info-sign"></i> These groups have been published to tutors, but not students
-								   </p>
-								  <#-- only released to students-->
-								  <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-									  <p class="alert">
-										  <i class="icon-info-sign"></i> These groups have been published to students, but not tutors
-									  </p>
-								 </#if>
-							</#if>
-						</#if>
-                    </div>
-
-                    <#if moduleItem.canManageGroups>
-                    <div class="span2">
-                        <div class="btn-toolbar pull-right">
-                            <div class="btn-group">
-
-								<@dropdown_menu "Actions" "cog">
-									<li>
-										<#local edit_url><@routes.groups.editset groupSet /></#local>
-										<@fmt.permission_button
-										permission='SmallGroups.Update'
-										scope=groupSet
-										action_descr='edit small group properties'
-										href=edit_url>
-											<i class="icon-wrench icon-fixed-width"></i> Edit properties
-										</@fmt.permission_button>
-									</li>
-									<#if features.smallGroupTeachingStudentSignUp>
-										<#if groupSet.openForSignups>
-											<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-											(''," class='disabled use-tooltip' title='Not a self-signup group' ")
-											}>
-												<#local closeset_url><@routes.groups.closeset groupSet /></#local>
-												<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=groupSet
-												classes='close-group-link'
-												action_descr='close small group'
-												href=closeset_url
-												data_attr='data-toggle=modal data-target=#modal-container'>
-													<i class="icon-lock icon-fixed-width"></i> Close
-												</@fmt.permission_button>
-											</li>
-										<#else>
-											<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-											(''," class='disabled use-tooltip' title='Not a self-signup group' ")
-											}>
-												<#local openset_url><@routes.groups.openset groupSet /></#local>
-												<@fmt.permission_button
-												permission='SmallGroups.Update'
-												scope=groupSet
-												classes='open-group-link'
-												action_descr='open small group'
-												href=openset_url
-												data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-													<i class="icon-unlock-alt icon-fixed-width"></i> Open
-												</@fmt.permission_button>
-											</li>
-										</#if>
-									</#if>
-									<li>
-										<#local allocateset_url><@routes.groups.allocateset groupSet /></#local>
-										<@fmt.permission_button
-										permission='SmallGroups.Allocate'
-										scope=groupSet
-										action_descr='allocate students'
-										href=allocateset_url>
-											<i class="icon-random icon-fixed-width"></i> Allocate students
-										</@fmt.permission_button>
-									</li>
-									<li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
-										<#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
-										<@fmt.permission_button
-										permission='SmallGroups.Update'
-										scope=groupSet
-										action_descr='publish groups to students and staff'
-										href=notifyset_url
-										classes='notify-group-link'
-										data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
-											<i class="icon-envelope-alt icon-fixed-width"></i> Publish
-										</@fmt.permission_button>
-									</li>
-
-									<#if groupSet.collectAttendance>
-										<#local set_attendance_url><@routes.groups.setAttendance groupSet /></#local>
-										<li>
-											<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=groupSet action_descr='view attendance' href=set_attendance_url
-											tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-												<i class="icon-group icon-fixed-width"></i> Attendance
-											</@fmt.permission_button>
-										</li>
-									</#if>
-
-
-									<li>
-										<#if groupSet.archived>
-											<#local archive_caption>Unarchive groups</#local>
-										<#else>
-											<#local archive_caption>Archive groups</#local>
-										</#if>
-
-										<#local archive_url><@routes.groups.archiveset groupSet /></#local>
-
-										<@fmt.permission_button permission='SmallGroups.Archive' scope=groupSet action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url
-										tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'>
-											<i class="icon-folder-close icon-fixed-width"></i> ${archive_caption}
-										</@fmt.permission_button>
-										</a></li>
-								</@dropdown_menu>
-                            </div>
-                        </div>
-                    </div>
-                    </#if>
-
-					<#if setItem.viewerMustSignUp>
-					</form>
-                    </#if>
-                </div>
-            </#if>
+			<#if setItem.viewerMustSignUp>
+			</form>
+			</#if>
+		</div>
+	</#if>
 </#macro>
 
 <#macro instanceFormat instance academicYear department><#compress>
@@ -841,23 +843,23 @@
 			<#local title><@instanceFormat instance academicYear department /></#local>
 
 			<#if state.name == 'Attended'>
-				<#local class = "icon-ok attended" />
+				<#local class = "fa-check attended" />
 				<#local title = "${student.fullName} attended: " + title />
 			<#elseif state.name == 'MissedAuthorised'>
-				<#local class = "icon-remove-circle authorised" />
+				<#local class = "fa-times-circle-o authorised" />
 				<#local title = "${student.fullName} did not attend (authorised absence): " + title />
 			<#elseif state.name == 'MissedUnauthorised'>
-				<#local class = "icon-remove unauthorised" />
+				<#local class = "fa-times unauthorised" />
 				<#local title = "${student.fullName} did not attend (unauthorised): " + title />
 				<#local missedCount = missedCount + 1 />
 			<#elseif state.name == 'Late'>
-				<#local class = "icon-warning-sign late" />
+				<#local class = "fa-exclamation-triangle late" />
 				<#local title = "No data: " + title />
 			<#elseif state.name == 'NotExpected'>
 				<#local class = "" />
 				<#local title = "No longer in group" />
 			<#else>
-				<#local class = "icon-minus" />
+				<#local class = "fa-minus" />
 			</#if>
 
 			<#local titles = [title] />
@@ -885,11 +887,11 @@
 			</#local>
 
 			<td>
-				<i class="use-popover icon-fixed-width ${class}" data-content="${renderedTitle}" data-html="true"></i>
+				<i class="use-popover fa fa-fw ${class}" data-content="${renderedTitle}" data-html="true"></i>
 			</td>
 		</#list>
 		<td>
-			<span class="badge badge-<#if (missedCount > 2)>important<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
+			<span class="badge progress-bar-<#if (missedCount > 2)>danger<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
 		</td>
 	</tr>
 </#macro>
@@ -900,7 +902,7 @@
 	<#local department = module.department />
 	<#local academicYear = set.academicYear />
 
-	<table id="group_attendance_${group.id}" class="table table-striped table-bordered table-condensed attendance-table">
+	<table id="group_attendance_${group.id}" class="table table-striped table-condensed attendance-table">
 		<thead>
 			<tr>
 				<#if !singleStudent?has_content><th class="sortable nowrap">Student</th></#if>
@@ -916,7 +918,7 @@
 						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 							<#if can.do("SmallGroupEvents.ViewRegister", event)>
 								<div class="eventRegister">
-									<a class="btn btn-mini use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>">
+									<a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>">
 										Record
 									</a>
 								</div>
@@ -986,11 +988,11 @@
 							<#local attendanceInfo = mapGet(groups, group) />
 
 							<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance attendanceInfo.notes />
-			      </div>
-		      </div>
-	      </#list>
-	    </div>
-	  </div>
+						</div>
+					</div>
+				</#list>
+			</div>
+		</div>
 	</div> <!-- attendance-info striped-section-->
 </#macro>
 
@@ -1011,8 +1013,8 @@
 	<#list sets?keys as set>
 		<#local groups = mapGet(sets, set) />
 
-		<div class="item-info row-fluid clearfix">
-			<div class="span2">
+		<div class="item-info row clearfix">
+			<div class="col-md-2">
 				<h3 class="name">
 					<small>
 					${set.name}
@@ -1027,7 +1029,7 @@
 				</span>
 			</div>
 
-			<div class="span10">
+			<div class="col-md-10">
 				<#list groups?keys as group>
 					<h4 class="name">
 						${group.name}
@@ -1106,7 +1108,7 @@
 
 	<#if (membershipItems?size > 0)>
 
-		<table class="manage-student-table table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-darkRed tablesorter sb-no-wrapper-table-popout">
+		<table class="manage-student-table table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tablesorter sb-no-wrapper-table-popout">
 			<thead>
 			<tr>
 				<th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
@@ -1117,7 +1119,7 @@
 				<#if checkboxName?has_content>
 					<th style="width: 65px; padding-right: 5px;" <#if checkAll>class="for-check-all"</#if>>
 						<#if showRemoveButton>
-							<input class="btn btn-warning btn-small use-tooltip"
+							<input class="btn btn-danger btn-sm use-tooltip"
 							  <#if findCommandResult.membershipItems?size == 0>disabled</#if>
 							  type="submit"
 							  name="${ManageDepartmentSmallGroupsMappingParameters.manuallyExclude}"
@@ -1127,13 +1129,13 @@
 							/>
 						</#if>
 						<#if (showResetButton && (editMembershipCommandResult.includedStudentIds?size > 0 || editMembershipCommandResult.excludedStudentIds?size > 0))>
-							<input class="btn btn-warning btn-small use-tooltip"
-								   type="submit"
-								   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
-								   name="${ManageDepartmentSmallGroupsMappingParameters.resetMembership}"
-								   value="Reset"
-								   data-container="body"
-								   title="Restore the manually removed and remove the manually added students selected"
+							<input class="btn btn-danger btn-sm use-tooltip"
+							   type="submit"
+							   style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
+							   name="${ManageDepartmentSmallGroupsMappingParameters.resetMembership}"
+							   value="Reset"
+							   data-container="body"
+							   title="Restore the manually removed and remove the manually added students selected"
 							/>
 						</#if>
 					</th>
@@ -1145,11 +1147,11 @@
 					<tr class="${item.itemTypeString}">
 						<td>
 							<#if item.itemTypeString == "static">
-								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span>
+								<span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="fa fa-list-alt"></i></span>
 							<#elseif item.itemTypeString == "exclude">
-								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span>
+								<span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="fa fa-ban"></i></span>
 							<#else>
-								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span>
+								<span class="use-tooltip" title="Added manually" data-placement="right"><i class="fa fa-hand-o-up"></i></span>
 							</#if>
 						</td>
 						<td>${item.firstName}</td>
@@ -1322,65 +1324,52 @@
 </#macro>
 
 <#macro week_selector path allTerms smallGroupSet>
-	<#-- TODO hmm this is suck -->
-	<#local f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-
-	<@form.row path=path>
-		<@form.label>
-			Running in these weeks
-			<@form.label checkbox=true clazz="pull-right">
-				<input type="checkbox" class="show-vacations" value="true">
-				Show vacations
-			</@form.label>
-		</@form.label>
-
-		<@form.field>
-			<table class="table table-striped table-bordered week-selector">
-				<thead>
-					<tr>
-						<#local colspan=0 />
-						<#list allTerms as namedTerm>
-							<#if (namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) gt colspan>
-								<#local colspan=(namedTerm.weekRange.maxWeek - namedTerm.weekRange.minWeek) />
-							</#if>
-						</#list>
-						<th colspan="${colspan + 2}" style="text-align: center;">
-							Weeks
-							<#local helpText>
-								<p>Select the weeks that this small group event will run in by clicking on each week. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
-							</#local>
-							<a href="#"
-							   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
-							   data-title="Selecting weeks for a small group event"
-							   data-trigger="click"
-							   data-placement="bottom"
-							   data-html="true"
-							   data-hash="${introHash("sgt-week-selector", "anywhere")}"
-							   data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<#list allTerms as namedTerm>
-						<#local is_vacation = !(namedTerm.term.termType?has_content) />
-						<tr<#if is_vacation> class="vacation"</#if>>
-							<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
-							<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
-								<td
-									class="use-tooltip"
-									title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
-									data-html="true"
-									data-container="body">
-									<@f.checkbox path=path value="${weekNumber}" />
-									<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
-								</td>
-							</#list>
-						</tr>
+	<#local label>
+		Running in these weeks
+		<#local helpText>
+			<p>Select the weeks that this small group event will run in by clicking on each week, the week will turn to a tick to indicate that the group is active on that date. Click on the name of the term or vacation to select all weeks in that term or vacation.</p>
+		</#local>
+		<a href="#"
+		   class="use-introductory<#if showIntro("sgt-week-selector", "anywhere")> auto</#if>"
+		   data-title="Selecting weeks for a small group event"
+		   data-trigger="click"
+		   data-placement="bottom"
+		   data-html="true"
+		   data-hash="${introHash("sgt-week-selector", "anywhere")}"
+		   data-content="${helpText}"><i class="fa fa-question-circle fa-fw"></i></a>
+	</#local>
+	<@bs3form.labelled_form_group path=path labelText="${label}">
+		<table class="table table-striped week-selector">
+			<thead>
+				<tr>
+					<td>
+						<@bs3form.checkbox>
+							<input type="checkbox" class="show-vacations" value="true">
+							Show vacations
+						</@bs3form.checkbox>
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				<#list allTerms as namedTerm>
+					<#local is_vacation = !(namedTerm.term.termType?has_content) />
+				<tr<#if is_vacation> class="vacation"</#if>>
+					<th>${namedTerm.name}<#if !is_vacation> term</#if></th>
+					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
+						<td
+								class="use-tooltip"
+								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
+								data-html="true"
+								data-container="body">
+							<@f.checkbox path=path value="${weekNumber}" />
+							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
+						</td>
 					</#list>
-				</tbody>
-			</table>
-		</@form.field>
-	</@form.row>
+				</tr>
+				</#list>
+			</tbody>
+		</table>
+	</@bs3form.labelled_form_group>
 </#macro>
 
 <#macro eventShortDetails event>

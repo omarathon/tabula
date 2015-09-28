@@ -368,7 +368,7 @@ jQuery(function($){
 			$collection.append(
 				$('<button />')
 					.attr({'type':'button'})
-					.addClass('btn').addClass('btn-mini')
+					.addClass('btn').addClass('btn-mini btn-xs btn-default')
 					.html('<i class="icon-plus"></i> Add another')
 					.on('click', function() {
 						var input = $blankInput.clone();

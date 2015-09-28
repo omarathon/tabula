@@ -12,9 +12,9 @@
 
 <p><strong>Sub-departments:</strong></p>
 <ul>
-<#list department.children as child>
-	<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a> (${child.modules?size} modules)</li>
-</#list>
+	<#list department.children as child>
+		<li><a href='<@url page="/sysadmin/departments/${child.code}/" />'>${child.name}</a> (${child.modules?size} modules)</li>
+	</#list>
 </ul>
 </#if>
 

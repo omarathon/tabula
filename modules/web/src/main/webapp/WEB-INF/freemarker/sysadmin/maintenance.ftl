@@ -1,19 +1,21 @@
 <h1>Maintenance mode</h1>
 
-<@f.form action="?" cssClass="form-horizontal" commandName="maintenanceModeCommand">
+<@f.form action="?" commandName="maintenanceModeCommand">
 
-	<@form.labelled_row "enable" "Enabled?">
-		<@f.checkbox path="enable" />
-	</@form.labelled_row>
+	<@bs3form.checkbox path="enable">
+		<@f.checkbox path="enable" id="enable"/> Enabled?
+	</@bs3form.checkbox>
+	
+	<@bs3form.labelled_form_group path="until" labelText="ETA">
+		<@f.input path="until" cssClass="date-time-picker form-control" placeholder="Click to pick a date" />
+	</@bs3form.labelled_form_group>
+	
+	<@bs3form.labelled_form_group path="message" labelText="Custom message">
+		<@f.textarea path="message" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "until" "ETA">
-		<@f.input path="until" cssClass="date-time-picker" placeholder="Click to pick a date" />
-	</@form.labelled_row>
-
-	<@form.labelled_row "message" "Custom message">
-		<@f.textarea path="message" />
-	</@form.labelled_row>
-
-	<input class="btn btn-danger" type="submit" value="Update" />
-
+	<@bs3form.form_group>
+		<input class="btn btn-danger" type="submit" value="Update" />
+	</@bs3form.form_group>
+	
 </@f.form>

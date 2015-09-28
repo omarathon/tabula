@@ -49,9 +49,11 @@ class ListCustomRolesController extends CustomRoleControllerMethods {
 
 	@RequestMapping
 	def list(@ModelAttribute("command") command: ListCustomRolesCommand) = {
-		crumbed(Mav("admin/department/customroles/list",
+		Mav("admin/department/customroles/list",
 			"customRoles" -> command.apply()
-		), command.department)
+		).crumbs(
+			Breadcrumbs.Department(command.department)
+		)
 	}
 }
 
@@ -60,15 +62,19 @@ class AddCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
 	type AddCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with AddCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = AddCustomRoleDefinitionCommand(department)
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department) = AddCustomRoleDefinitionCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("admin/department/customroles/add")
+	def form(@PathVariable department: Department) =
+		Mav("admin/department/customroles/add").crumbs(
+			Breadcrumbs.Department(department)
+		)
 
 	@RequestMapping(method=Array(POST))
 	def save(@Valid @ModelAttribute("command") command: AddCustomRoleDefinitionCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-			form()
+			form(command.department)
 		} else {
 			command.apply()
 			Redirect(Routes.admin.department.customRoles(command.department))
@@ -81,16 +87,20 @@ class EditCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
 	type EditCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with EditCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	@ModelAttribute("command")
+	def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
 		EditCustomRoleDefinitionCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("admin/department/customroles/edit")
+	def form(@PathVariable department: Department) =
+		Mav("admin/department/customroles/edit").crumbs(
+			Breadcrumbs.Department(department)
+		)
 
 	@RequestMapping(method=Array(POST))
 	def save(@Valid @ModelAttribute("command") command: EditCustomRoleDefinitionCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-			form()
+			form(command.department)
 		} else {
 			command.apply()
 			Redirect(Routes.admin.department.customRoles(command.customRoleDefinition.department))
@@ -171,9 +181,11 @@ class ListCustomRoleDefinitionOverridesController extends CustomRoleOverridesCon
 
 	@RequestMapping
 	def list(@ModelAttribute("command") command: ListCustomRoleOverridesCommand) = {
-		crumbed(Mav("admin/department/customroles/overrides",
+		Mav("admin/department/customroles/overrides",
 			"roleInfo" -> command.apply()
-		), command.department)
+		).crumbs(
+			Breadcrumbs.Department(command.department)
+		)
 	}
 }
 
@@ -182,16 +194,20 @@ class AddCustomRoleOverrideController extends CustomRoleOverridesControllerMetho
 
 	type AddCustomRoleOverrideCommand = Appliable[RoleOverride] with AddCustomRoleOverrideCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
 		AddCustomRoleOverrideCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("admin/department/customroles/addOverride")
+	def form(@PathVariable department: Department) =
+		Mav("admin/department/customroles/addOverride").crumbs(
+			Breadcrumbs.Department(department)
+		)
 
 	@RequestMapping(method=Array(POST))
 	def save(@Valid @ModelAttribute("command") command: AddCustomRoleOverrideCommand, errors: Errors) = {
 		if (errors.hasErrors) {
-			form()
+			form(command.department)
 		} else {
 			command.apply()
 			Redirect(Routes.admin.department.customRoles.overrides(command.customRoleDefinition))

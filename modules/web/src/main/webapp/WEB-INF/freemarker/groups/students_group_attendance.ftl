@@ -12,7 +12,7 @@
 			<div class="span12">
 				<h4>${term.termTypeAsString}</h4>
 				<div class="row-fluid term">
-					<table id="group_attendance_${term.termTypeAsString}" class="table table-striped table-bordered table-condensed attendance-table">
+					<table id="group_attendance_${term.termTypeAsString}" class="table table-striped table-condensed attendance-table">
 						<thead>
 							<tr>
 								<th class="sortable nowrap">

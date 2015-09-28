@@ -3,33 +3,36 @@
 <h1>Create a template</h1>
 
 <#assign action><@url page="/sysadmin/attendancetemplates/add"/></#assign>
-<@f.form id="newScheme" method="POST" commandName="command" class="form-horizontal" action="${action}">
+<@f.form id="newScheme" method="POST" commandName="command" action="${action}">
 
-	<@form.labelled_row "name" "Name">
-		<@f.input path="name" />
-	</@form.labelled_row>
+	<@bs3form.labelled_form_group path="name" labelText="Name">
+		<@f.input path="name" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-	<@form.labelled_row "pointStyle" "Date format">
-		<@form.label clazz="radio" checkbox=true>
+	<@bs3form.labelled_form_group path="pointStyle" labelText="Date format">
+		<@bs3form.radio>
 			<@f.radiobutton path="pointStyle" value="week" />
 			term weeks
 			<@fmt.help_popover id="pointStyle-week" content="Create points which cover term weeks e.g. Personal tutor meeting weeks 2-3" />
-		</@form.label>
-		<@form.label clazz="radio" checkbox=true>
+		</@bs3form.radio>
+		<@bs3form.radio>
 			<@f.radiobutton path="pointStyle" value="date" />
 			calendar dates
 			<@fmt.help_popover id="pointStyle-date" content="Create points which use calendar dates e.g. Supervision 1st-31st October" />
-		</@form.label>
-		<span class="hint">Select the date format to use for points on this scheme</span>
-	</@form.labelled_row>
+		</@bs3form.radio>
+		<span class="help-block">Select the date format to use for points on this scheme</span>
+	</@bs3form.labelled_form_group>
 
-	<input
-		type="submit"
-		class="btn btn-primary"
-		name="create"
-		value="Save"
-		data-container="body"
-	/>
-	<a class="btn" href="<@url page="/sysadmin/attendancetemplates" />">Cancel</a>
+	<@bs3form.form_group>
+		<input
+			type="submit"
+			class="btn btn-primary"
+			name="create"
+			value="Save"
+			data-container="body"
+		/>
+		<a class="btn btn-default" href="<@url page="/sysadmin/attendancetemplates" />">Cancel</a>
+	</@bs3form.form_group>
+
 </@f.form>
 </#escape>

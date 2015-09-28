@@ -39,16 +39,16 @@ ${(event.day.name)!""}
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
+<div class="deptheader">
 <h1>Update event from Syllabus+</h1>
-<h4><span class="muted">for</span>
-	${smallGroup.name},
-	<@components.eventShortDetails smallGroupEvent />
+	<h4 class="with-related"><span class="muted">for</span>
+		${smallGroup.name},
+		<@components.eventShortDetails smallGroupEvent />
 
-	<#noescape><#assign popoverContent><@components.eventDetails smallGroupEvent /></#assign>
-	<a class="use-popover"
-	   data-html="true"
-	   data-content="${popoverContent?html}"><i class="icon-question-sign" style="font-size: 0.85em;"></i></a></#noescape>
-</h4>
+		<#assign popoverContent><@components.eventDetails smallGroupEvent /></#assign>
+		<@fmt.help_popover id="event-details" html=true content=popoverContent />
+	</h4>
+</div>
 
 <p>Here are all the small group events for <@fmt.module_name module false /> in the central timetabling system Syllabus+.</p>
 
@@ -85,7 +85,7 @@ ${(event.day.name)!""}
 					name="create"
 					value="Save"
 					/>
-			<a class="btn" href="${cancelUrl}">Cancel</a>
+			<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 		</div>
 	</@f.form>
 </#escape>
