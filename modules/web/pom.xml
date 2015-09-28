@@ -476,7 +476,7 @@
 				<dependencies>
 					<dependency>
 						<groupId>uk.ac.warwick.util</groupId>
-						<artifactId>warwickutils_spring4-ant</artifactId>
+						<artifactId>warwickutils-ant</artifactId>
 						<version>${warwickutils.version}</version>
 					</dependency>
 					<dependency>
