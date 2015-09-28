@@ -8,15 +8,15 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 	def withRoleInElement[T](permittedUser: String, parentElement:String, fixtureAdmins:Seq[String])(fn: => T) =
 		as(P.Sysadmin) { withGodModeEnabled {
 
-			def usercodes = findAll(cssSelector(s"$parentElement .user .muted")).toList.map(_.underlying.getText.trim)
+			def usercodes = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)
 
-			def normalAdmins = {
+			def normalAdmins() = {
 				fixtureAdmins.foreach(usercode=>usercodes should contain (usercode))
 			}
 
-			def onlyNormalAdmins = {
+			def onlyNormalAdmins() = {
 				usercodes.size should be (fixtureAdmins.size)
-				normalAdmins
+				normalAdmins()
 			}
 
 			When("I go the department listing")
@@ -40,7 +40,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				currentUrl should include("/permissions")
 
 			And("I should see only the two default admin users")
-				onlyNormalAdmins
+				onlyNormalAdmins()
 
 			When("I enter a usercode in the picker")
 				click on cssSelector(s"$parentElement .pickedUser")
@@ -71,7 +71,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 
 			Then("I should see the old and new entries")
 				usercodes.size should be (fixtureAdmins.size + 1)
-				normalAdmins
+				normalAdmins()
 				usercodes should contain (permittedUser)
 
 			When("I remove the new entry")
@@ -80,7 +80,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				removable.get.underlying.submit()
 
 			Then("There should only be the normal admins left")
-				onlyNormalAdmins
+				onlyNormalAdmins()
 
 			fn
 		}}

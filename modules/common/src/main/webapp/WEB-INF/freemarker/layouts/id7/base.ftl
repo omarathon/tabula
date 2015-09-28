@@ -53,11 +53,11 @@
 							<li><a href="http://warwick.ac.uk/tabula/manual/" target="_blank">Manual</a></li>
 							<li><a href="http://warwick.ac.uk/tabula/whatsnew/" target="_blank">What's new?</a></li>
 							<li>
-								<a href="<@sso.logoutlink target="${component.rootUrl!rootUrl}" />" data-toggle="id7:account-popover" data-loginlink="<@sso.loginlink />" data-name="${user.fullName}">Sign out</a>
+								<a class="sso-link sign-out" href="<@sso.logoutlink target="${component.rootUrl!rootUrl}" />" data-toggle="id7:account-popover" data-loginlink="<@sso.loginlink />" data-name="${user.fullName}">Sign out</a>
 							</li>
 						<#else>
 							<li>
-								<a href="<@sso.loginlink />">Sign in</a>
+								<a class="sso-link sign-in" href="<@sso.loginlink />">Sign in</a>
 							</li>
 						</#if>
 					</#if>

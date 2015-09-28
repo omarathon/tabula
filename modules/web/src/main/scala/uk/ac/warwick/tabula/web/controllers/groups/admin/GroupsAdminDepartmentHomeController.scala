@@ -29,7 +29,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 
 	@ModelAttribute("departmentsWithPermission")
 	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = (Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)).filter(_.routes.asScala.nonEmpty)
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
 
 		allDepartmentsForPermission(user, Permissions.Module.ManageSmallGroups)
 			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct

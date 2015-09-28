@@ -8,7 +8,7 @@ import org.scalatest.GivenWhenThen
 // test isn't expecting. HTMLUnit ignores them.
 class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
-	private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .user .muted")).toList.map(_.underlying.getText.trim)
+	private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)
 
 	private def noNewUsersListed(parentElement: String, expectedCount: Int) {
 		usercodes(parentElement).size should be (expectedCount)
@@ -18,13 +18,15 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
 		val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 		// then delve further to get the usercodes included
-		val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
+		val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".row .very-subtle")))
 		filteredUsercodes.foreach(_.size should be(0))
 	}
 
 	private def gotoPermissionsScreen(parentElement: String, preExistingCount: Int) {
 		When("I go the admin page")
-		click on linkText("Go to the Test Services admin page")
+		if (!currentUrl.contains("/department/xxx")) {
+			click on linkText("Go to the Test Services admin page")
+		}
 
 		Then("I should be able to click on the Manage button")
 		val toolbar = findAll(className("dept-toolbar")).next().underlying
@@ -112,7 +114,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			gotoPermissionsScreen(parentElement, preExistingCount)
 
 			Then("The button should be disabled")
-			find(cssSelector(s"$parentElement .actions button")).get.underlying.getAttribute("class").indexOf("disabled") should not be (-1)
+			find(cssSelector(s"$parentElement button")).get.underlying.getAttribute("class").indexOf("disabled") should not be (-1)
 
 			fn
 		}

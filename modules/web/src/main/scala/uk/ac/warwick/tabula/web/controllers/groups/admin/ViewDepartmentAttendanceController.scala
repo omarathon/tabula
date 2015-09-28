@@ -26,7 +26,7 @@ abstract class AbstractViewDepartmentAttendanceController extends GroupsControll
 
 	@ModelAttribute("departmentsWithPermission")
 	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = (Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)).filter(_.routes.asScala.nonEmpty)
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
 
 		allDepartmentsForPermission(user, Permissions.SmallGroupEvents.ViewRegister)
 			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct

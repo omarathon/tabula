@@ -38,7 +38,7 @@
 
 <#macro roleTable permsUrl cssClass scope roleDefinition roleNamePlural>
 	<@manageRole scope=scope roleName=roleDefinition>
-		<div class="permission-list">
+		<div class="permission-list ${cssClass}">
 			<div class="row">
 				<div class="col-md-12">
 					<form action="${permsUrl}" method="post" class="add-permissions">
