@@ -77,13 +77,22 @@
 					</a>
 					<ul class="dropdown-menu">
 						<#if features.turnitin>
-							<li>
-								<#assign checkplagiarism_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
-								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
+							<#if features.turnitinSubmissions>
+								<li>
+									<#assign checkplagiarism_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
+									<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
+										<i class="icon-book icon-fixed-width"></i> Check for plagiarism
+									</@fmt.permission_button>
+								</li>
+							<#else>
+							<li class="disabled">
+								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism - temporarily disabled' tooltip='Check for plagiarism - temporarily disabled'>
 									<i class="icon-book icon-fixed-width"></i> Check for plagiarism
 								</@fmt.permission_button>
 							</li>
+							</#if>
 						</#if>
+
 						<li class="must-have-selected">
 							<#assign markplagiarised_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
 							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>

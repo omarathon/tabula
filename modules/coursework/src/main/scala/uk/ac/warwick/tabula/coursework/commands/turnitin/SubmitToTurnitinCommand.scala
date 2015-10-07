@@ -11,13 +11,15 @@ import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.coursework.jobs.SubmitToTurnitinLtiJob
+import org.springframework.validation.Errors
 
 /**
  * Creates a job that submits the assignment to Turnitin.
  *
  * Returns the job instance ID for status tracking.
  */
-class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance] {
+class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance]
+	with SelfValidating {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
@@ -34,6 +36,10 @@ class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, va
 	def incompatibleFiles = {
 		val allAttachments = assignment.submissions.asScala.flatMap{ _.allAttachments }
 		allAttachments.filterNot(a => Turnitin.validFileType(a) && Turnitin.validFileSize(a))
-	} 
+	}
+
+	override def validate(errors: Errors) {
+		if (!features.turnitinSubmissions) errors.reject("turnitin.submissions.disabled")
+	}
 	
 }

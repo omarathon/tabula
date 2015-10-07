@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
 import scala.annotation.tailrec
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 
 object SubmitToTurnitinLtiJob {
 	val identifier = "turnitin-submit-lti"
@@ -31,7 +31,8 @@ class SubmitToTurnitinLtiJob extends Job
 	with NotifyingJob[Seq[OriginalityReport]]
   with Logging with FreemarkerRendering
 	with AutowiringAssessmentServiceComponent with AutowiringTurnitinLtiServiceComponent
-	with AutowiringFileAttachmentServiceComponent with AutowiringOriginalityReportServiceComponent {
+	with AutowiringFileAttachmentServiceComponent with AutowiringOriginalityReportServiceComponent
+	with AutowiringFeaturesComponent {
 
 	val identifier = SubmitToTurnitinLtiJob.identifier
 
@@ -48,7 +49,9 @@ class SubmitToTurnitinLtiJob extends Job
 	var sendNotifications = true
 
 	def run(implicit job: JobInstance) {
+		if (features.turnitinSubmissions) {
 			new Runner(job).run()
+		}
 	}
 
 	class Runner(job: JobInstance) {
