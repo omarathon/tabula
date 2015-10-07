@@ -86,7 +86,7 @@
 								</li>
 							<#else>
 							<li class="disabled">
-								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism - temporarily disabled' href=checkplagiarism_url tooltip='Check for plagiarism - temporarily disabled'>
+								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism - temporarily disabled' tooltip='Check for plagiarism - temporarily disabled'>
 									<i class="icon-book icon-fixed-width"></i> Check for plagiarism
 								</@fmt.permission_button>
 							</li>
