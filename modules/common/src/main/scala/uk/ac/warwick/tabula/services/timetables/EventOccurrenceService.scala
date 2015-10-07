@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.timetables
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.{Cn, Value}
 import net.fortuna.ical4j.model.property._
-import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -75,7 +74,10 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		if (eventOccurrence.start.toDateTime.isEqual(end)) {
 			end = end.plusMinutes(1)
 		}
-		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name).safeSubstring(0, 255))
+
+		val parent = for (sn <- eventOccurrence.parent.shortName; fn <- eventOccurrence.parent.fullName) yield s"$sn $fn "
+		val summary = eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name)
+		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), (parent.getOrElse("") + summary).safeSubstring(0, 255))
 		event.getStartDate.getParameters.add(Value.DATE_TIME)
 		event.getEndDate.getParameters.add(Value.DATE_TIME)
 

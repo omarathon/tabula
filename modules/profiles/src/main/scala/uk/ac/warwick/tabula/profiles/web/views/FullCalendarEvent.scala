@@ -57,7 +57,7 @@ object FullCalendarEvent {
 		val endTimeSeconds = rollToHour(source.end.toDateTime).getMillis / 1000
 
 		val title: String =
-			Seq(source.parent.shortName, Some(source.eventType.displayName), source.location.map { l => s"(${l.name})" })
+			Seq(source.parent.shortName, source.parent.fullName, Some(source.eventType.displayName), source.location.map { l => s"(${l.name})" })
 				.flatten
 				.mkString(" ")
 
