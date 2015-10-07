@@ -75,9 +75,13 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			end = end.plusMinutes(1)
 		}
 
-		val parent = for (sn <- eventOccurrence.parent.shortName; fn <- eventOccurrence.parent.fullName) yield s"$sn $fn "
+		val moduleSummary = for (
+			module <- Option(eventOccurrence.parent).collect({case m: TimetableEvent.Module => m});
+			sn <- module.shortName;
+			fn <- module.fullName
+		) yield s"$sn $fn "
 		val summary = eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name)
-		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), (parent.getOrElse("") + summary).safeSubstring(0, 255))
+		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), (moduleSummary.getOrElse("") + summary).safeSubstring(0, 255))
 		event.getStartDate.getParameters.add(Value.DATE_TIME)
 		event.getEndDate.getParameters.add(Value.DATE_TIME)
 
