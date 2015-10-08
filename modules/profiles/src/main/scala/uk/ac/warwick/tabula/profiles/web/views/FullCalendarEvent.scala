@@ -57,11 +57,11 @@ object FullCalendarEvent {
 		val endTimeSeconds = rollToHour(source.end.toDateTime).getMillis / 1000
 
 		val parentTitle = source.parent match {
-			case m: TimetableEvent.Module => Seq(m.shortName, m.fullName).flatten
-			case o: TimetableEvent => o.shortName.toSeq
+			case m: TimetableEvent.Module => for (sn <- m.shortName; fn <- m.fullName) yield s"$sn $fn"
+			case o: TimetableEvent.Parent => o.shortName
 		}
 
-		val title: String =
+		val title =
 			Seq(parentTitle, Some(source.eventType.displayName), source.location.map { l => s"(${l.name})" })
 				.flatten
 				.mkString(" ")
