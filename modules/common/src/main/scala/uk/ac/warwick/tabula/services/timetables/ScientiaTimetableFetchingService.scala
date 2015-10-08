@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{url, thread, Http}
+import dispatch.classic.{Http, thread, url}
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.params.HttpConnectionParams
 import org.joda.time.{DateTimeConstants, LocalTime}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
-import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{ClockComponent, Logging}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
 
 import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
@@ -37,9 +37,9 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
 		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.guessSITSAcademicYearByDate(clock.now))
 		lazy val prevAcademicYear: Option[AcademicYear] = {
-			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < NOVEMBER
+			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
 			val month = clock.now.getMonthOfYear
-			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.NOVEMBER)
+			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
 				currentAcademicYear.map { _ - 1 }
 			else
 				None
@@ -79,6 +79,8 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}

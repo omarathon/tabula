@@ -1,41 +1,40 @@
 package uk.ac.warwick.tabula.services
 
 import java.io._
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{url, thread, Http}
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import dispatch.classic.{Http, thread, url}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.params.HttpConnectionParams
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
 import org.apache.lucene.index._
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
+import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import org.apache.lucene.search._
 import org.apache.lucene.store.{Directory, FSDirectory}
 import org.apache.lucene.util.BytesRef
 import org.bouncycastle.util.encoders.Base64
-import org.joda.time.DateTime
-import org.joda.time.Duration
+import org.joda.time.{DateTime, Duration}
+import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.beans.factory.annotation._
-import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.sso.client.SSOConfiguration
-import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, SSOConfigTrustedApplicationsManager}
-import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.sso.client.trusted.{SSOConfigTrustedApplicationsManager, TrustedApplicationUtils}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.helpers._
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import org.springframework.beans.factory.DisposableBean
-import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import language.implicitConversions
-import scala.util.parsing.json.JSON
+import uk.ac.warwick.tabula.{Features, HttpClientDefaults}
+
 import scala.collection.JavaConverters._
+import scala.language.implicitConversions
+import scala.util.parsing.json.JSON
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -562,6 +561,8 @@ trait HttpSearching {
 
 	lazy val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
