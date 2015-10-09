@@ -12,6 +12,7 @@ import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.http.auth.AuthScope
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.params.HttpConnectionParams
 import org.joda.time.{DateTime, DateTimeZone}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
@@ -23,9 +24,8 @@ import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingService._
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, HttpClientDefaults}
 import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
@@ -213,6 +213,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(Some(celcatConfiguration.authScope, celcatConfiguration.credentials)), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
