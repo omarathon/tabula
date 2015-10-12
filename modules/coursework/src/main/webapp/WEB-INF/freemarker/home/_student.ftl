@@ -3,7 +3,7 @@
 <#assign has_assignments = enrolledAssignments?has_content />
 <#assign has_historical_items = historicAssignments?has_content />
 
-<#if (user.staff && (has_assignments || has_historical_items)) || !user.staff>
+<#if has_assignments || has_historical_items || user.student || user.PGR>
 	<div class="header-with-tooltip" id="your-assignments">
 		<#if ajax><h4><#else><h2 class="section"></#if>
 		<#if isSelf>My<#else>${student.firstName}'s</#if> assignments
@@ -93,7 +93,7 @@
 			</#list>
 		</div>
 	</div>
-<#elseif !user.staff>
+<#elseif user.student || user.PGR>
 	<div class="alert alert-block alert-info">
 		<#if !ajax><h3>Pending</h3></#if>
 		There are no pending assignments to show <#if isSelf>you </#if>in Tabula right now
@@ -186,7 +186,7 @@
 			</#list>
 		</div>
 	</div>
-<#elseif !user.staff>
+<#elseif user.student || user.PGR>
 	<div class="alert alert-block alert-info">
 		<#if !ajax><h3>Past</h3></#if>
 		There are no past assignments to show <#if isSelf>you </#if>in Tabula right now
