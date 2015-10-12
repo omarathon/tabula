@@ -277,7 +277,7 @@ class Department extends GeneratedId
 		}
 	}
 
-	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) = {
+	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition): Option[CustomRoleDefinition] = {
 		def matches(customRoleDefinition: CustomRoleDefinition) = {
 			roleDefinition match {
 				case roleDefinition: SelectorBuiltInRoleDefinition[_] =>
@@ -291,9 +291,11 @@ class Department extends GeneratedId
 			}
 		}
 
-		customRoleDefinitions.asScala
-			.filter { _.replacesBaseDefinition }
-			.find { matches }
+		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find { matches } match {
+			case Some(role) => Option(role)
+			case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
+			case _ => None
+		}
 	}
 
 	def permissionsParents = Option(parent).toStream

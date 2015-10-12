@@ -74,8 +74,8 @@ trait CustomRolesForAdminDepartments {
 	// departments to check for custom roles
 	private def studentsAdminDepartments(student: StudentMember): Seq[Department] = {
 		student.mostSignificantCourseDetails.map(scd => {
-			Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).toSeq ++
-			Option(scd.route).flatMap { r => Option(r.adminDepartment)}.toSeq
+			Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).map(_.subDepartmentsContaining(student)).toSeq.flatten ++
+			Option(scd.route).flatMap(r => Option(r.adminDepartment)).map(_.subDepartmentsContaining(student)).toSeq.flatten
 		}).getOrElse(Nil)
 	}
 
