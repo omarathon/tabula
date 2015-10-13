@@ -25,12 +25,13 @@ object DownloadMarkersFeedbackForPositionCommand {
 		with AutowiringZipServiceComponent
 }
 
-class DownloadMarkersFeedbackForPositionCommand(val module: Module,
-																								val assignment: Assignment,
-																								val marker:User,
-																								val submitter: CurrentUser,
-																								val position: FeedbackPosition)
-	extends CommandInternal[RenderableZip] with HasCallback[RenderableZip] with CanProxy {
+class DownloadMarkersFeedbackForPositionCommand(
+	val module: Module,
+	val assignment: Assignment,
+	val marker:User,
+	val submitter: CurrentUser,
+	val position: FeedbackPosition
+) extends CommandInternal[RenderableZip] with CanProxy {
 
 	self: ZipServiceComponent =>
 
@@ -44,7 +45,6 @@ class DownloadMarkersFeedbackForPositionCommand(val module: Module,
 		}).filter(_.state == MarkingState.MarkingCompleted)
 		val zip = zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks)
 		val renderable = new RenderableZip(zip)
-		if (callback != null) callback(renderable)
 		renderable
 	}
 }

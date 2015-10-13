@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, MarkerFeedback}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver._
 import uk.ac.warwick.tabula.services.{FeedbackService, ZipService}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions._
+
+import scala.collection.JavaConverters._
 
 
 class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: Assignment, val markerFeedbackId: String)
@@ -26,7 +27,6 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 		var zipService = Wire.auto[ZipService]
 
 		private var fileFound: Boolean = _
-		var callback: (RenderableFile) => Unit = _
 
 		/**
 		 * If filename is unset, it returns a renderable Zip of all files.
@@ -36,15 +36,14 @@ class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: As
 		def applyInternal() = {
 			val result: Option[RenderableFile] =
 				filename match {
-					case filename: String if filename.hasText =>
-						markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
+					case name: String if name.hasText =>
+						markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_){
+							override val filename = s"${markerFeedback.feedback.universityId}-${Option(name).getOrElse(module.code)}"
+						})
 					case _ => Some(zipped(markerFeedback))
 				}
 
 			fileFound = result.isDefined
-			if (callback != null) {
-				result.map { callback }
-			}
 			result
 		}
 

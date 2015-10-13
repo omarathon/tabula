@@ -37,16 +37,9 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 
 	private var fileFound: Boolean = _
 
-	var callback: (RenderableFile) => Unit = _
-
 	def applyInternal() = {
-		val thing = feedback.attachments
 		val attachment = Option(new RenderableAttachment(feedback.attachments.get(0)))
-
 		fileFound = attachment.isDefined
-		if (callback != null) {
-			attachment.map { callback(_) }
-		}
 		attachment
 	}
 
