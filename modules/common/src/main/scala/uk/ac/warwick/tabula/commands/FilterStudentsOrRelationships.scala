@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands
 
+import org.hibernate.NullPrecedence
 import org.hibernate.criterion.DetachedCriteria
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.ScalaRestriction._
@@ -25,8 +26,8 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 	protected def buildOrders(): Seq[ScalaOrder] =
 		(sortOrder.asScala ++ defaultOrder).map { underlying =>
 			underlying.getPropertyName match {
-				case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying, getAliasPaths(aliasPath) : _*)
-				case _ => ScalaOrder(underlying)
+				case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying.nulls(NullPrecedence.LAST), getAliasPaths(aliasPath) : _*)
+				case _ => ScalaOrder(underlying.nulls(NullPrecedence.LAST))
 			}
 		}
 
