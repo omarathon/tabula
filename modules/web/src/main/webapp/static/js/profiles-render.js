@@ -353,12 +353,16 @@
 				setTimeout(function() {
 					if (!complete) $container.fadeTo('fast', 0.3);
 				}, 300);
+				var startToSend = new Date(start.getTime());
+				startToSend.setDate(startToSend.getDate() - 1);
+				var endToSend = new Date(end.getTime());
+				endToSend.setDate(endToSend.getDate() + 1);
 				$.ajax({url:'/profiles/timetable/api',
 					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
 					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
 					data:{
-						'from':start.getTime()/1000,
-						'to':end.getTime()/1000,
+						'from':startToSend.getTime()/1000,
+						'to':endToSend.getTime()/1000,
 						'whoFor':studentId
 					},
 					success:function(data){
