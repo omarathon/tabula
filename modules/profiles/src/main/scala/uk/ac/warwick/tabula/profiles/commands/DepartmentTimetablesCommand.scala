@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.commands
 import org.joda.time.{DateTime, Interval, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactory
+import uk.ac.warwick.tabula.commands.timetables.{ViewStaffPersonalTimetableCommandFactory, ViewStudentPersonalTimetableCommandFactory, ViewModuleTimetableCommandFactory}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._

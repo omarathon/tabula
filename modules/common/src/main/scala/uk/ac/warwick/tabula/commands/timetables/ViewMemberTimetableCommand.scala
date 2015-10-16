@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.timetables
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member, Module}
-import uk.ac.warwick.tabula.helpers.{Logging, SystemClockComponent}
+import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -15,7 +15,7 @@ import scala.util.Try
 object ViewMemberTimetableCommand extends Logging {
 	type TimetableCommand = Appliable[Try[Seq[TimetableEvent]]] with ViewMemberTimetableRequest with SelfValidating
 
-	def apply(member: Member, currentUser: CurrentUser) = member match {
+	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
 			new ViewStudentTimetableCommandInternal(student, currentUser)
 				with ComposableCommand[Try[Seq[TimetableEvent]]]

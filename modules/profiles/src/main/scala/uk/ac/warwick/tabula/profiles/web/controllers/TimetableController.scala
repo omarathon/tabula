@@ -7,9 +7,9 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.timetables.{ViewMemberEventsCommand, ViewMemberEventsRequest}
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Tap._
-import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services.timetables._
@@ -23,20 +23,12 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.util.Try
 
 abstract class AbstractTimetableController extends ProfilesController {
-	self: ProfileServiceComponent
-		with StudentTimetableEventSourceComponent
-		with StaffTimetableEventSourceComponent
-		with ScheduledMeetingEventSourceComponent =>
+	self: ProfileServiceComponent =>
 
-	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState
+	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
 
-	protected def commandForMember(whoFor: Member): TimetableCommand = whoFor match {
-		case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-		case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-		case _ =>
-			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${whoFor.universityId}, ${whoFor.userType})")
-			throw new ItemNotFoundException
-	}
+	protected def commandForMember(whoFor: Member): TimetableCommand =
+		ViewMemberEventsCommand(whoFor, user)
 
 	protected def commandForTimetableHash(timetableHash: String): TimetableCommand = {
 		// Use a mocked up CurrentUser, as the actual current user is probably not logged in
@@ -51,8 +43,8 @@ abstract class AbstractTimetableController extends ProfilesController {
 			)
 
 		profileService.getMemberByTimetableHash(timetableHash).map {
-			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser(student))
-			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser(staff))
+			case student: StudentMember => ViewMemberEventsCommand.public(student, currentUser(student))
+			case staff: StaffMember => ViewMemberEventsCommand.public(staff, currentUser(staff))
 		}.getOrElse(throw new ItemNotFoundException)
 	}
 
@@ -62,10 +54,7 @@ abstract class AbstractTimetableController extends ProfilesController {
 @RequestMapping(value = Array("/timetable/api"))
 class TimetableController extends AbstractTimetableController
 	with AutowiringUserLookupComponent
-	with AutowiringProfileServiceComponent
-	with AutowiringStudentTimetableEventSourceComponent
-	with AutowiringStaffTimetableEventSourceComponent
-	with AutowiringScheduledMeetingEventSourceComponent {
+	with AutowiringProfileServiceComponent {
 
 	@ModelAttribute("command")
 	def command(@RequestParam(value="whoFor") whoFor: Member) = commandForMember(whoFor)
@@ -119,10 +108,7 @@ class ViewMyTimetableController extends ProfilesController {
 @RequestMapping(value = Array("/timetable/{member}"))
 class TimetableForMemberController extends AbstractTimetableController
 	with AutowiringUserLookupComponent
-	with AutowiringProfileServiceComponent
-	with AutowiringStudentTimetableEventSourceComponent
-	with AutowiringStaffTimetableEventSourceComponent
-	with AutowiringScheduledMeetingEventSourceComponent {
+	with AutowiringProfileServiceComponent {
 
 	@RequestMapping
 	def viewTimetable(
@@ -144,9 +130,6 @@ class TimetableForMemberController extends AbstractTimetableController
 abstract class AbstractTimetableICalController
 	extends AbstractTimetableController
 		with AutowiringProfileServiceComponent
-		with AutowiringStudentTimetableEventSourceComponent
-		with AutowiringStaffTimetableEventSourceComponent
-		with AutowiringScheduledMeetingEventSourceComponent
 		with AutowiringTermBasedEventOccurrenceServiceComponent
 		with AutowiringTermServiceComponent {
 

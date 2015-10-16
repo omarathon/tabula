@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.joda.time.DateTime
 import org.springframework.mock.web.{MockHttpServletResponse, MockHttpServletRequest}
+import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsRequest
 import uk.ac.warwick.tabula.services.TermService
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.profiles.commands.PersonalTimetableCommandState
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.util.termdates.Term.TermType
@@ -48,9 +47,9 @@ class TimetableControllerTest extends TestBase with Mockito {
 		termService.getTermFromAcademicWeek(1, academicYear) returns autumnTerm
 		termService.getTermFromAcademicWeek(1, academicYear + 1) returns autumnTerm
 		val controller = new TimetableICalController
-		val command = new Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState {
+		val command = new Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest {
 			override def apply(): Try[Seq[EventOccurrence]] = Success(Seq())
-			override def member: Member = Fixtures.staff("1234")
+			override val member: Member = Fixtures.staff("1234")
 		}
 		command.start = DateTime.now.toLocalDate
 		command.end = DateTime.now.toLocalDate
