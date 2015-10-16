@@ -5,6 +5,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, RequestFailedException}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.TimetableEventToJsonConverter
@@ -27,6 +28,7 @@ object MemberTimetableController {
 class MemberTimetableController extends ApiController
 	with GetMemberTimetableApi
 	with TimetableEventToJsonConverter
+with AutowiringProfileServiceComponent
 
 trait GetMemberTimetableApi {
 	self: ApiController with TimetableEventToJsonConverter =>

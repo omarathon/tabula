@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.api.web.helpers.EventOccurrenceToJsonConverter
 import uk.ac.warwick.tabula.commands.timetables.{ViewModuleEventsCommand, ViewModuleEventsRequest}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 
 import ModuleEventsController._
@@ -27,6 +28,7 @@ object ModuleEventsController {
 class ModuleEventsController extends ApiController
 	with GetModuleEventsApi
 	with EventOccurrenceToJsonConverter
+	with AutowiringProfileServiceComponent
 
 trait GetModuleEventsApi {
 	self: ApiController with EventOccurrenceToJsonConverter =>
@@ -47,7 +49,10 @@ trait GetModuleEventsApi {
 				"status" -> "ok",
 				"events" -> events.map(jsonEventOccurrenceObject)
 			)))
-			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
+			case Failure(t) => {
+				logger.error("Couldn't generate timetable events", t)
+				throw new RequestFailedException("The timetabling service could not be reached", t)
+			}
 		}
 	}
 }

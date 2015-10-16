@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.api.web.helpers.TimetableEventToJsonConverter
 import uk.ac.warwick.tabula.commands.timetables.{ViewModuleTimetableCommand, ViewModuleTimetableRequest}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import ModuleTimetableController._
@@ -27,6 +28,7 @@ object ModuleTimetableController {
 class ModuleTimetableController extends ApiController
 	with GetModuleTimetableApi
 	with TimetableEventToJsonConverter
+with AutowiringProfileServiceComponent
 
 trait GetModuleTimetableApi {
 	self: ApiController with TimetableEventToJsonConverter =>
