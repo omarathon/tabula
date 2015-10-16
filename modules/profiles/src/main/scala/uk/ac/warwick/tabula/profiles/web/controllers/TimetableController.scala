@@ -8,51 +8,27 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
-import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.JavaImports._
 
-abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
+import scala.util.Try
 
-	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
+abstract class AbstractTimetableController extends ProfilesController {
+	self: ProfileServiceComponent
+		with StudentTimetableEventSourceComponent
+		with StaffTimetableEventSourceComponent
+		with ScheduledMeetingEventSourceComponent =>
 
-	// re-use the event source, so it can cache lookups between requests
-	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).studentTimetableEventSource
-
-	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).staffTimetableEventSource
-
-	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
-		with AutowiringRelationshipServiceComponent
-		with AutowiringMeetingRecordServiceComponent
-		with AutowiringSecurityServiceComponent
-		).scheduledMeetingEventSource
+	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState
 
 	protected def commandForMember(whoFor: Member): TimetableCommand = whoFor match {
 		case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
@@ -84,7 +60,12 @@ abstract class AbstractTimetableController extends ProfilesController with Autow
 
 @Controller
 @RequestMapping(value = Array("/timetable/api"))
-class TimetableController extends AbstractTimetableController with AutowiringUserLookupComponent {
+class TimetableController extends AbstractTimetableController
+	with AutowiringUserLookupComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringStudentTimetableEventSourceComponent
+	with AutowiringStaffTimetableEventSourceComponent
+	with AutowiringScheduledMeetingEventSourceComponent {
 
 	@ModelAttribute("command")
 	def command(@RequestParam(value="whoFor") whoFor: Member) = commandForMember(whoFor)
@@ -102,7 +83,7 @@ class TimetableController extends AbstractTimetableController with AutowiringUse
 		val end = new DateTime(to * 1000).toLocalDate
 		command.start = start
 		command.end = end
-		val timetableEvents = command.apply()
+		val timetableEvents = command.apply().get
 		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
 		Mav(new JSONView(colourEvents(calendarEvents)))
 	}
@@ -136,7 +117,12 @@ class ViewMyTimetableController extends ProfilesController {
 
 @Controller
 @RequestMapping(value = Array("/timetable/{member}"))
-class TimetableForMemberController extends AbstractTimetableController with AutowiringUserLookupComponent {
+class TimetableForMemberController extends AbstractTimetableController
+	with AutowiringUserLookupComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringStudentTimetableEventSourceComponent
+	with AutowiringStaffTimetableEventSourceComponent
+	with AutowiringScheduledMeetingEventSourceComponent {
 
 	@RequestMapping
 	def viewTimetable(
@@ -157,6 +143,10 @@ class TimetableForMemberController extends AbstractTimetableController with Auto
 
 abstract class AbstractTimetableICalController
 	extends AbstractTimetableController
+		with AutowiringProfileServiceComponent
+		with AutowiringStudentTimetableEventSourceComponent
+		with AutowiringStaffTimetableEventSourceComponent
+		with AutowiringScheduledMeetingEventSourceComponent
 		with AutowiringTermBasedEventOccurrenceServiceComponent
 		with AutowiringTermServiceComponent {
 
@@ -183,7 +173,7 @@ abstract class AbstractTimetableICalController
 		command.start = start
 		command.end = end
 
-		val timetableEvents = command.apply()
+		val timetableEvents = command.apply().get
 
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)

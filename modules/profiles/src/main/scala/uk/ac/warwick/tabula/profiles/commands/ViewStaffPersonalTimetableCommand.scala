@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurre
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
+import scala.util.Try
+
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
@@ -43,23 +45,24 @@ class ViewStaffPersonalTimetableCommandImpl (
 	scheduledMeetingEventSource: ScheduledMeetingEventSource,
 	val staff: StaffMember,
 	val currentUser: CurrentUser
-) extends CommandInternal[Seq[EventOccurrence]] with ViewStaffPersonalTimetableCommandState {
+) extends CommandInternal[Try[Seq[EventOccurrence]]] with ViewStaffPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
 		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 
-	def applyInternal(): Seq[EventOccurrence] = {
+	def applyInternal(): Try[Seq[EventOccurrence]] = {
 		val timetableEvents = staffTimetableEventSource.eventsFor(staff, currentUser, TimetableEvent.Context.Staff)
-		val occurrences =
-			timetableEvents.flatMap(eventsToOccurrences) ++
-				scheduledMeetingEventSource.occurrencesFor(staff, currentUser, TimetableEvent.Context.Staff)
+		val timetableOccurrences = timetableEvents.map { _.flatMap(eventsToOccurrences) }
+
+		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(staff, currentUser, TimetableEvent.Context.Staff)
+
+		val occurrences = Try(Seq(timetableOccurrences, meetingOccurrences).flatMap(_.get))
 
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		occurrences.sortBy(_.start)
+		occurrences.map { _.sortBy(_.start) }
 	}
-
 
 }
 
@@ -80,7 +83,7 @@ object ViewStaffPersonalTimetableCommand {
 		staff: StaffMember,
 		currentUser: CurrentUser
 	) = new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
-			with ComposableCommand[Seq[EventOccurrence]]
+			with ComposableCommand[Try[Seq[EventOccurrence]]]
 			with ViewStaffTimetablePermissions
 			with ReadOnly with Unaudited
 			with AutowiringTermBasedEventOccurrenceServiceComponent
@@ -97,9 +100,9 @@ object PublicStaffPersonalTimetableCommand {
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		staff: StaffMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+	): Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState =
 		new ViewStaffPersonalTimetableCommandImpl(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser)
-			with Command[Seq[EventOccurrence]]
+			with Command[Try[Seq[EventOccurrence]]]
 			with Public
 			with ReadOnly with Unaudited
 			with AutowiringTermBasedEventOccurrenceServiceComponent
@@ -110,7 +113,7 @@ object PublicStaffPersonalTimetableCommand {
 }
 
 trait ViewStaffPersonalTimetableCommandFactory {
-	def apply(staffMember: StaffMember): ComposableCommand[Seq[EventOccurrence]]
+	def apply(staffMember: StaffMember): ComposableCommand[Try[Seq[EventOccurrence]]]
 }
 class ViewStaffPersonalTimetableCommandFactoryImpl(
 	staffTimetableEventSource: StaffTimetableEventSource,

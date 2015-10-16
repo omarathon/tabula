@@ -14,6 +14,8 @@ import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 import uk.ac.warwick.tabula.JavaImports._
 
+import scala.util.{Try, Success}
+
 class TimetableControllerTest extends TestBase with Mockito {
 
 	@Test
@@ -46,8 +48,8 @@ class TimetableControllerTest extends TestBase with Mockito {
 		termService.getTermFromAcademicWeek(1, academicYear) returns autumnTerm
 		termService.getTermFromAcademicWeek(1, academicYear + 1) returns autumnTerm
 		val controller = new TimetableICalController
-		val command = new Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState {
-			override def apply(): Seq[EventOccurrence] = Seq()
+		val command = new Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState {
+			override def apply(): Try[Seq[EventOccurrence]] = Success(Seq())
 			override def member: Member = Fixtures.staff("1234")
 		}
 		command.start = DateTime.now.toLocalDate

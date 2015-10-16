@@ -6,9 +6,10 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, EventOccurrenceServiceComponent, _}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
+
+import scala.util.Success
 
 class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
@@ -33,8 +34,8 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	}
 	command.start=  new LocalDate
 	command.end = command.start.plusDays(2)
-	studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns timetableEvents
-	scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns meetingOccurrences
+	studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Success(timetableEvents)
+	scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Success(meetingOccurrences)
 	command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 
 	@Test

@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Public, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
+import scala.util.Try
+
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
@@ -49,21 +51,23 @@ class ViewStudentPersonalTimetableCommandImpl(
 	scheduledMeetingEventSource: ScheduledMeetingEventSource,
 	val student: StudentMember,
 	val currentUser: CurrentUser
-) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+) extends CommandInternal[Try[Seq[EventOccurrence]]] with ViewStudentPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
 		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 
-	def applyInternal(): Seq[EventOccurrence] = {
+	def applyInternal(): Try[Seq[EventOccurrence]] = {
 		val timetableEvents = studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student)
-		val occurrences =
-			timetableEvents.flatMap(eventsToOccurrences) ++
-			scheduledMeetingEventSource.occurrencesFor(student, currentUser, TimetableEvent.Context.Student)
+		val timetableOccurrences = timetableEvents.map { _.flatMap(eventsToOccurrences) }
+
+		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(student, currentUser, TimetableEvent.Context.Student)
+
+		val occurrences = Try(Seq(timetableOccurrences, meetingOccurrences).flatMap(_.get))
 
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		occurrences.sortBy(_.start)
+		occurrences.map { _.sortBy(_.start) }
 	}
 }
 
@@ -76,18 +80,17 @@ trait ViewStudentTimetablePermissions extends RequiresPermissionsChecking{
 
 object ViewStudentPersonalTimetableCommand {
 
-
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
 	def apply(
-		studentTimetableEventSource:StudentTimetableEventSource,
+		studentTimetableEventSource: StudentTimetableEventSource,
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		student: StudentMember,
 		currentUser: CurrentUser
 	) =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
-			with ComposableCommand[Seq[EventOccurrence]]
+			with ComposableCommand[Try[Seq[EventOccurrence]]]
 			with ViewStudentTimetablePermissions
 			with ReadOnly with Unaudited
 			with AutowiringTermBasedEventOccurrenceServiceComponent
@@ -100,13 +103,13 @@ object ViewStudentPersonalTimetableCommand {
 object PublicStudentPersonalTimetableCommand {
 
 	def apply(
-		studentTimetableEventSource:StudentTimetableEventSource,
+		studentTimetableEventSource: StudentTimetableEventSource,
 		scheduledMeetingEventSource: ScheduledMeetingEventSource,
 		student: StudentMember,
 		currentUser: CurrentUser
-	): Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState =
+	): Appliable[Try[Seq[EventOccurrence]]] with PersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
-			with Command[Seq[EventOccurrence]]
+			with Command[Try[Seq[EventOccurrence]]]
 			with Public
 			with ReadOnly with Unaudited
 			with AutowiringTermBasedEventOccurrenceServiceComponent
@@ -117,7 +120,7 @@ object PublicStudentPersonalTimetableCommand {
 }
 
 trait ViewStudentPersonalTimetableCommandFactory {
-	def apply(student: StudentMember): ComposableCommand[Seq[EventOccurrence]]
+	def apply(student: StudentMember): ComposableCommand[Try[Seq[EventOccurrence]]]
 }
 class ViewStudentPersonalTimetableCommandFactoryImpl(
 	studentTimetableEventSource: StudentTimetableEventSource,

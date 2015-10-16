@@ -79,7 +79,7 @@ class DepartmentTimetablesCommandInternal(
 		val studentEvents = studentCommands.flatMap{case(student, cmd) =>
 			try {
 				permittedByChecks(securityService, user, cmd)
-				Some(cmd.apply())
+				cmd.apply().toOption
 			} catch {
 				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
 					errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
@@ -94,7 +94,7 @@ class DepartmentTimetablesCommandInternal(
 		val staffEvents = staffCommands.flatMap{case(staffMember, cmd) =>
 			try {
 				permittedByChecks(securityService, user, cmd)
-				Some(cmd.apply())
+				cmd.apply().toOption
 			} catch {
 				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
 					errors.append(s"You do not have permission to view the timetable of ${staffMember.fullName.getOrElse("")} (${staffMember.universityId})")
