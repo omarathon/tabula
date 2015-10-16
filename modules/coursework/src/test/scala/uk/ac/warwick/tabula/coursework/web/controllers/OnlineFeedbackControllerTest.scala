@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackFormCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{OnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackFormCommand}
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackController, OnlineFeedbackFormController}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
 import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, Mockito, TestBase}

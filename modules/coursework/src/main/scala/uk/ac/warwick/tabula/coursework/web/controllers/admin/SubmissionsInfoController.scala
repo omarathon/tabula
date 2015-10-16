@@ -7,8 +7,8 @@ import org.joda.time.{DateTime, ReadableInstant}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.views.CSVView

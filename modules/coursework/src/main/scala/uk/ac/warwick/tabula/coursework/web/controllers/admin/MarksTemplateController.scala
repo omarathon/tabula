@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.feedback.MarksTemplateCommand._
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
+import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}

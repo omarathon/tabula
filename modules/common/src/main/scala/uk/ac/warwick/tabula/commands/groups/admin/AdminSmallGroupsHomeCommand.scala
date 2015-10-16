@@ -58,8 +58,8 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 	self: AdminSmallGroupsHomePermissionsRestrictedState with SmallGroupServiceComponent with SecurityServiceComponent with SmallGroupSetWorkflowServiceComponent =>
 
 	def applyInternal() = benchmarkTask("Build small groups admin home info") {
-		val modules =
-			if (canManageDepartment) department.modules.asScala
+		val modules: Set[Module] =
+			if (canManageDepartment) department.modules.asScala.toSet
 			else modulesWithPermission
 
 		val sets = benchmarkTask("Fetch, filter and sort sets") {
@@ -120,7 +120,7 @@ trait AdminSmallGroupsHomeCommandPermissions extends RequiresPermissionsChecking
 			val managedModules = modulesWithPermission.toList
 
 			// This is implied by the above, but it's nice to check anyway. Avoid exception if there are no managed modules
-			if (!managedModules.isEmpty) p.PermissionCheckAll(RequiredPermission, managedModules)
+			if (managedModules.nonEmpty) p.PermissionCheckAll(RequiredPermission, managedModules)
 			else p.PermissionCheck(RequiredPermission, department)
 		}
 	}

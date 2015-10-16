@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController

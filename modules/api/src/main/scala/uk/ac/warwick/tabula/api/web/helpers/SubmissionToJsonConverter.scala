@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.api.web.helpers
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.web.Routes
 
 import scala.util.Try

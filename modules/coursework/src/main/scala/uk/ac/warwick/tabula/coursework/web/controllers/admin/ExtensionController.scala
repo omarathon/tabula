@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Assignment, Module}
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
+import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}

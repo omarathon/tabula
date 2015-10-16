@@ -9,8 +9,8 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.scheduling.services" />
 
 	<!-- We need to get jobs from other components. -->
-	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.services" />
-	<context:component-scan base-package="uk.ac.warwick.tabula.coursework.jobs" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.services.coursework" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.jobs.coursework" />
 
 	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.services" />
 

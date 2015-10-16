@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadAttachmentCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletResponse

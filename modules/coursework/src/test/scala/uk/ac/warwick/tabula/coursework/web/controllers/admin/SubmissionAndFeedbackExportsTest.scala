@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.data.model._
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand.SubmissionListItem
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
