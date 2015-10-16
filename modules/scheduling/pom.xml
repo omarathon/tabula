@@ -149,11 +149,6 @@
 
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>courses</artifactId>
-			<classifier>jar</classifier>
-		</dependency>
-		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>profiles</artifactId>
 			<classifier>jar</classifier>
 		</dependency>
@@ -161,13 +156,6 @@
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>web</artifactId>
 			<classifier>jar</classifier>
-		</dependency>
-		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>courses</artifactId>
-			<version>${project.version}</version><!--$NO-MVN-MAN-VER$-->
-			<type>war</type>
-			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
