@@ -197,8 +197,12 @@
 						$container.fadeTo('fast', 0.3);
 					}
 				}, 300);
-				$('#from').val(start.getTime()/1000);
-				$('#to').val(end.getTime()/1000);
+				var startToSend = new Date(start.getTime());
+				startToSend.setDate(startToSend.getDate() - 1);
+				var endToSend = new Date(end.getTime());
+				endToSend.setDate(endToSend.getDate() + 1);
+				$('#from').val(startToSend.getTime()/1000);
+				$('#to').val(endToSend.getTime()/1000);
 				$.ajax({
 					url:'${submitUrl}',
 					type: 'POST',

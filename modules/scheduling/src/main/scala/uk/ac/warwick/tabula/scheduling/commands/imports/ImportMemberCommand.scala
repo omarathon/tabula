@@ -26,6 +26,8 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.services.UserLookupService
 import java.util.UUID
 
+import scala.language.implicitConversions
+
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 with MemberProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._

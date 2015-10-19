@@ -9,25 +9,36 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
+import scala.util.Try
+
 trait SmallGroupEventTimetableEventSourceComponent{
 	val studentGroupEventSource: StudentTimetableEventSource
 	val staffGroupEventSource: StaffTimetableEventSource
 }
+
 trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTimetableEventSourceComponent {
 	self: SmallGroupServiceComponent with UserLookupComponent with SecurityServiceComponent =>
 
-	val studentGroupEventSource: StudentTimetableEventSource = new SmallGroupEventTimetableEventSourceImpl
-	val staffGroupEventSource: StaffTimetableEventSource = new SmallGroupEventTimetableEventSourceImpl
+	val studentGroupEventSource: StudentTimetableEventSource = new StudentSmallGroupEventTimetableEventSource
+	val staffGroupEventSource: StaffTimetableEventSource = new StaffSmallGroupEventTimetableEventSource
 
-	class SmallGroupEventTimetableEventSourceImpl extends StudentTimetableEventSource with StaffTimetableEventSource {
+	class StudentSmallGroupEventTimetableEventSource extends StudentTimetableEventSource with SmallGroupEventTimetableEventSource {
 
-		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] =
-			eventsFor(userLookup.getUserByUserId(student.userId), currentUser)
+		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Try[Seq[TimetableEvent]] =
+			Try(eventsFor(userLookup.getUserByUserId(student.userId), currentUser))
 
-		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Seq[TimetableEvent] =
-			eventsFor(userLookup.getUserByUserId(staff.userId), currentUser)
+	}
 
-		private def eventsFor(user: User, currentUser: CurrentUser) = {
+	class StaffSmallGroupEventTimetableEventSource extends StaffTimetableEventSource with SmallGroupEventTimetableEventSource {
+
+		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Try[Seq[TimetableEvent]] =
+			Try(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser))
+
+	}
+
+	trait SmallGroupEventTimetableEventSource {
+
+		protected def eventsFor(user: User, currentUser: CurrentUser) = {
 			/* Include SGT teaching responsibilities for students (mainly PGR) and students for staff (e.g. Chemistry) */
 			val allEvents = studentEvents(user, currentUser) ++ tutorEvents(user, currentUser)
 			val autoTimetableEvents = allEvents map smallGroupEventToTimetableEvent
