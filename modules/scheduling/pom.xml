@@ -122,14 +122,6 @@
 								<include>WEB-INF/**/*</include>
 							</includes>
 						</overlay>
-						<overlay>
-							<groupId>uk.ac.warwick.tabula</groupId>
-							<artifactId>courses</artifactId>
-							<type>war</type>
-							<includes>
-								<include>WEB-INF/freemarker/emails/*</include>
-							</includes>
-						</overlay>
 					</overlays>
 				</configuration>
 			</plugin>
