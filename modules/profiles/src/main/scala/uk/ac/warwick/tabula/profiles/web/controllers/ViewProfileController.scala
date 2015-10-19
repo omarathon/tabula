@@ -41,11 +41,11 @@ abstract class ViewProfileController extends ProfilesController {
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
 	def viewProfileForCourse(
-		studentCourseDetails: Option[StudentCourseDetails],
-		studentCourseYearDetails: Option[StudentCourseYearDetails],
-		openMeetingId: String,
-		agentId: String,
-		profiledStudentMember: StudentMember): Mav = {
+														studentCourseDetails: Option[StudentCourseDetails],
+														studentCourseYearDetails: Option[StudentCourseYearDetails],
+														openMeetingId: String,
+														agentId: String,
+														profiledStudentMember: StudentMember): Mav = {
 		val isSelf = profiledStudentMember.universityId == user.universityId
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
@@ -54,7 +54,7 @@ abstract class ViewProfileController extends ProfilesController {
 			if (currentMember.isStudent)
 				relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember])
 					.map(_.agentRole).distinct.toList
-			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
+			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map(_.studentRole + "s").distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
 			case Nil => ""
@@ -100,6 +100,8 @@ abstract class ViewProfileController extends ProfilesController {
 			relationshipService.listAllStudentRelationshipTypesWithMember(currentMember)
 
 		val smallGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+			.filter { group => group.groupSet.releasedToTutors }
+
 
 		val marking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
 
