@@ -14,6 +14,10 @@
 			background-color: #eee !important;
 			text-decoration: line-through;
 		}
+		
+		#container .control-group.flush {
+			margin-bottom:6px;
+		}
 
 		.help-inline.hidden { display: none !important; }
 	</style>
@@ -31,34 +35,17 @@
 			</#if>
 		</@form.row>
 	<#else>
-		<@form.labelled_row "defaultMaxGroupSizeEnabled", "Group size">
-			<@form.label checkbox=true>
-				<@f.radiobutton path="defaultMaxGroupSizeEnabled" id="unlimitedDefaultGroupSize" value="false" />
-				Unlimited
-			</@form.label>
-
-			<@form.label checkbox=true>
-				<@f.radiobutton path="defaultMaxGroupSizeEnabled" id="limitedDefaultGroupSize" value="true" selector=".max-group-size-options" />
-				Maximum
-				<span class="max-group-size-options">
-					<@f.input path="defaultMaxGroupSize" type="number" min="0" cssClass="input-mini" />
-				</span>
-				students per group
-				<a class="use-popover" data-html="true"
-				   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
-					<i class="icon-question-sign"></i>
-				</a>
-			</@form.label>
-
-			<@f.errors path="defaultMaxGroupSize" cssClass="error" />
-		</@form.labelled_row>
-
-		<@form.row>
+		<@f.hidden path="defaultMaxGroupSizeEnabled" id="limitedDefaultGroupSize" value="true" />
+	
+		<@form.row cssClass="flush">
 			<@form.field>
 				<#-- Well this sucks -->
 				<span class="uneditable-input hidden">&nbsp;</span>
 				&nbsp;
-				Max
+				Set group numbers
+			<a class="use-popover tabulaPopover-init" data-html="true" data-content="This is the  maximum size for any new groups you create.  You can adjust the maximum size of individual groups" data-original-title="" title="">
+				<i class="icon-question-sign"></i>
+			</a>
 			</@form.field>
 		</@form.row>
 
@@ -83,7 +70,7 @@
 					<@f.input path="name" id="${index}-name" cssClass="text" />
 					&nbsp;
 					<span class="max-group-size-options">
-						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" type="number" min="0" cssClass="text input-mini" />
+						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" placeholder="Unlimited" type="number" min="0" cssClass="text input-small" />
 					</span>
 					<#if !no_remove_button>
 						&nbsp;
@@ -132,22 +119,7 @@
 		</@form.row>
 
 		<script type="text/javascript">
-			jQuery(function($) {
-				var setMaxSizeOptions = function() {
-					if ($("#defaultMaxGroupSizeEnabled:checked").val()){
-						$('#defaultMaxGroupSize').removeAttr('disabled');
-						$(".groupSizeUnlimited").hide();
-						$(".groupSizeLimited").show();
-					} else {
-						$('#defaultMaxGroupSize').attr('disabled', 'disabled');
-						$(".groupSizeUnlimited").show();
-						$(".groupSizeLimited").hide();
-					}
-				}
-
-				setMaxSizeOptions();
-
-				$('#defaultMaxGroupSizeEnabled').change(setMaxSizeOptions);
+			jQuery(function($) {				
 
 				$('button[data-toggle="add"]').each(function() {
 					var $button = $(this);
@@ -225,10 +197,7 @@
 					});
 					$button.closest('form.dirty-check').trigger('rescan.areYouSure');
 				});
-
-				// Set up radios to enable/disable max students per group field
-				$("input:radio[name='defaultMaxGroupSizeEnabled']").radioControlled();
-
+				
 				// Stop 'Enter' from submitting the form
 				$('input[name$=".name"]').closest('form')
 						.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')

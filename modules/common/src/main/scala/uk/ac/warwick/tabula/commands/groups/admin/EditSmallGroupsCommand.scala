@@ -33,7 +33,7 @@ object EditSmallGroupsCommand {
 		def set: SmallGroupSet
 
 		var name: String = _
-		var maxGroupSize: Int = _
+		var maxGroupSize: JInteger = _
 	}
 
 	class NewGroupProperties(val module: Module, val set: SmallGroupSet) extends GroupProperties {
@@ -42,9 +42,7 @@ object EditSmallGroupsCommand {
 
 	class ExistingGroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends GroupProperties {
 		name = group.name
-		maxGroupSize = group.maxGroupSize.getOrElse {
-			if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
-		}
+		maxGroupSize = group.maxGroupSize
 
 		var delete: Boolean = false
 	}
@@ -56,7 +54,7 @@ trait EditSmallGroupsCommandState {
 
 	var existingGroups: JMap[String, ExistingGroupProperties] = JHashMap()
 	var newGroups: JList[NewGroupProperties] = LazyLists.createWithFactory { () => new NewGroupProperties(module, set) }
-	var defaultMaxGroupSizeEnabled: Boolean = false
+	var defaultMaxGroupSizeEnabled: Boolean = true
 	var defaultMaxGroupSize: Int = SmallGroup.DefaultGroupSize
 }
 
