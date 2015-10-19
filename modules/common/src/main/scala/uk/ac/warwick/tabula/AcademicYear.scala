@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula
 
 import scala.language.implicitConversions
-import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, DateTime}
 import org.joda.time.DateTimeConstants._
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.{TermNotFoundException, Term}
@@ -55,7 +55,7 @@ case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Conve
 	 *  *Restrictions apply. Always read the small print. We are confident
 	 *   that November 1st is always in term 1 of the year
 	 */
-	def dateInTermOne =	new DateMidnight(startYear, DateTimeConstants.NOVEMBER, 1)
+	def dateInTermOne =	new LocalDate(startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear
@@ -66,7 +66,7 @@ case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Conve
 	}
 
 	def isSITSInFlux(date: DateTime): Boolean = {
-		val juneThisYear = new DateMidnight(this.endYear, DateTimeConstants.JUNE, 1)
+		val juneThisYear = new LocalDate(this.endYear, DateTimeConstants.JUNE, 1).toDateTimeAtStartOfDay
 		juneThisYear.isBefore(date)
 	}
 

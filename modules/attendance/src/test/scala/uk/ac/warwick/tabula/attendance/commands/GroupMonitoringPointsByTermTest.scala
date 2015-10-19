@@ -4,8 +4,7 @@ import uk.ac.warwick.tabula.attendance.commands.old.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model.Route
-import org.joda.time.{Interval, DateTimeConstants, DateMidnight}
+import org.joda.time.{LocalDate, Interval, DateTimeConstants}
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.tabula.services.Vacation
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -26,15 +25,15 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		monitoringPoint2.validFromWeek = 15
 		val monitoringPoints = List(monitoringPoint1, monitoringPoint2)
 
-		val week5StartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
-		val week5EndDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 8)
-		val week15StartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 1)
-		val week15EndDate = new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 8)
+		val week5StartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+		val week5EndDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
+		val week15StartDate = new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 1).toDateTimeAtStartOfDay
+		val week15EndDate = new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 8).toDateTimeAtStartOfDay
 
 		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
 		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
 		val weeksForYear = Seq(week5pair, week15pair)
-		termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+		termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)	returns weeksForYear
 
 		val autumnTerm = mock[Term]
 		autumnTerm.getTermTypeAsString returns "Autumn"
@@ -84,14 +83,14 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		duplicatePoint.pointSet = pointSet1
 		val monitoringPoints = List(commonPoint1, commonPoint2, differentCaseButCommonPoint, sameNameButDifferentWeekPoint, duplicatePoint)
 
-		val week1StartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
-		val week1EndDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 8)
-		val week2StartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 15)
-		val week2EndDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 22)
+		val week1StartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+		val week1EndDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
+		val week2StartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 15).toDateTimeAtStartOfDay
+		val week2EndDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 22).toDateTimeAtStartOfDay
 		val week1pair = (new Integer(1), new Interval(week1StartDate, week2EndDate))
 		val week2pair = (new Integer(2), new Interval(week2StartDate, week2EndDate))
 		val weeksForYear = Seq(week1pair, week2pair)
-		termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+		termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)	returns weeksForYear
 		val autumnTerm = mock[Term]
 		autumnTerm.getTermTypeAsString returns "Autumn"
 		termService.getTermFromDateIncludingVacations(week1StartDate.withDayOfWeek(DayOfWeek.Thursday.getAsInt)) returns autumnTerm
