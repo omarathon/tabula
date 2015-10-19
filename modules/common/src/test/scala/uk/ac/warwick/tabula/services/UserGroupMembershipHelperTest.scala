@@ -13,7 +13,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
     "cusebr" -> List("unrelated-but-cool-group")
   )
 
-  trait FakeLookups { self: UserGroupMembershipHelper[_] =>
+  trait FakeLookups { self: UserGroupMembershipHelperLookup =>
     override def getUser(usercode: String) = user
     override def getWebgroups(usercode: String) = fakeGroups.getOrElse(usercode, Nil)
   }
