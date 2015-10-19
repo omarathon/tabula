@@ -46,6 +46,8 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 		user.setWarwickId("0123456")
 
 		val eventHelper = new UserGroupMembershipHelper[SmallGroupEvent]("_tutors") with FakeLookups
+		eventHelper.sessionFactory = sessionFactory
+
 		val events = eventHelper.findBy(user)
 		events should have size (2)
 		events should contain (event1)
@@ -54,4 +56,5 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 		// cached
 		eventHelper.findBy(user)
 	}
+
 }
