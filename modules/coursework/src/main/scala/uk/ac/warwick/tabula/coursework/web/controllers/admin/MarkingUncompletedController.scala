@@ -10,7 +10,7 @@ import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, MarkingUncompletedState, MarkingUncompletedCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedState, MarkingUncompletedCommand}
 import uk.ac.warwick.userlookup.User
 
 @Controller

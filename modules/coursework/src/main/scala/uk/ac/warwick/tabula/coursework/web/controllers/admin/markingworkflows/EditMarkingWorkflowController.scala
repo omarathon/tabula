@@ -4,7 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.EditMarkingWorkflowCommand
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.EditMarkingWorkflowCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.exams.web.{Routes => ExamRoutes}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.MarkingWorkflowCommandState
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.MarkingWorkflowCommandState
 import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller

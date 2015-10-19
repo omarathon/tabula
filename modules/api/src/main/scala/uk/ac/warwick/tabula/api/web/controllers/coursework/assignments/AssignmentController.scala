@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats, WorkflowStageHealth}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{DeleteAssignmentCommand, EditAssignmentCommand, SubmissionAndFeedbackCommand}
-import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilters, CourseworkFilter}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{DeleteAssignmentCommand, EditAssignmentCommand, SubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilters, CourseworkFilter}
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}

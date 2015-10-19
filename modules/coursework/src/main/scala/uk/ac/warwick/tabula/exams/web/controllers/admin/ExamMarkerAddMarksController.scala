@@ -6,16 +6,16 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.PostExtractValidation
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.commands.coursework.assignments.PostExtractValidation
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.exams.commands.ExamMarkerAddMarksCommand
+import uk.ac.warwick.tabula.commands.exams.ExamMarkerAddMarksCommand
 
 @Controller
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks"))

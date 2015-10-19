@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.coursework.commands.assignments.AssignMarkersCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.AssignMarkersCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.web.{Routes => ExamRoutes}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}

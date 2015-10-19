@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
+import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.validation.Valid
 import uk.ac.warwick.tabula.permissions._

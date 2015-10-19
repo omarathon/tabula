@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction._
@@ -17,6 +18,7 @@ import scala.language.implicitConversions
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
+@DirtiesContext
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting
 
@@ -27,8 +29,10 @@ trait FieldAccessByReflection{
 		def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
 	}
 }
+
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
+@DirtiesContext
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 

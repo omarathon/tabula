@@ -4,8 +4,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.UploadFeedbackToSitsCommand
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.UploadFeedbackToSitsCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController

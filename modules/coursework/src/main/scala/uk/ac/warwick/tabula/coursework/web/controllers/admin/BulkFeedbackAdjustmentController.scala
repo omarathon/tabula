@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Mark, Assignment, Module}
-import uk.ac.warwick.tabula.exams.commands.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import javax.validation.Valid
 import org.springframework.validation.Errors

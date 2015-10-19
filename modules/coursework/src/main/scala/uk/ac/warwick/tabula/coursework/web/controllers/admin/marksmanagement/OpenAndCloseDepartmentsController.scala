@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.marksmanagement.OpenAndCloseDepartmentsCommand
+import uk.ac.warwick.tabula.commands.coursework.marksmanagement.OpenAndCloseDepartmentsCommand
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable}
 import uk.ac.warwick.tabula.data.model.DegreeType
 

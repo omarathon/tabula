@@ -41,7 +41,7 @@ trait TimetableEventToJsonConverter {
 					"email" -> m.email,
 					"title" -> m.title,
 					"fullFirstName" -> m.fullFirstName,
-					"userType" -> m.userType,
+					"userType" -> m.userType.description,
 					"jobTitle" -> m.jobTitle
 				)
 			}.getOrElse(Map())
