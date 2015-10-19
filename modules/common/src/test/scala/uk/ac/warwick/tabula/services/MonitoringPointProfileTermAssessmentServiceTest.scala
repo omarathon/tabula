@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
-import org.joda.time.{Interval, DateTimeConstants, DateMidnight, DateTime}
+import org.joda.time.{LocalDate, Interval, DateTimeConstants, DateTime}
 
 class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mockito {
 
@@ -57,15 +57,15 @@ class MonitoringPointProfileTermAssessmentServiceTest extends TestBase with Mock
 
 		mockAssignmentService.getAssignmentById(assignment.id) returns Option(assignment)
 
-		val week5StartDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1)
-		val week5EndDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 8)
-		val week15StartDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 1)
-		val week15EndDate = new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 8)
+		val week5StartDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+		val week5EndDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
+		val week15StartDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 1).toDateTimeAtStartOfDay
+		val week15EndDate = new LocalDate(currentAcademicYear.startYear, DateTimeConstants.DECEMBER, 8).toDateTimeAtStartOfDay
 
 		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
 		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
 		val weeksForYear = Seq(week5pair, week15pair)
-		mockTermService.getAcademicWeeksForYear(new DateMidnight(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+		mockTermService.getAcademicWeeksForYear(new LocalDate(currentAcademicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)	returns weeksForYear
 
 	}
 
