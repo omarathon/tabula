@@ -160,7 +160,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
 				service.termService,
 				service.locationFetchingService,
-				Map(module.code -> module)
+				Map(module.code -> module),
+				service.userLookup
 			)
 
 		parsed should be ('defined)

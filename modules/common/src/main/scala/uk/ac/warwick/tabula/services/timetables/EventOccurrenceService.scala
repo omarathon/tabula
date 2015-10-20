@@ -29,10 +29,24 @@ trait EventOccurrenceService {
 }
 
 abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
-
 	self: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
+		def buildEventOccurrence(start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
+			EventOccurrence(
+				uid,
+				event.name,
+				event.title,
+				event.description,
+				event.eventType,
+				start,
+				end,
+				event.location,
+				event.parent,
+				event.comments,
+				event.staff
+			)
+		}
 
 		def eventDateToLocalDate(week: WeekRange.Week, localTime: LocalTime): LocalDateTime = {
 			weekToDateConverter.toLocalDatetime(week, event.day, localTime, event.year).
@@ -51,8 +65,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			weeks
 				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
 				.map { week =>
-					EventOccurrence(
-						event,
+					buildEventOccurrence(
 						eventDateToLocalDate(week, event.startTime),
 						eventDateToLocalDate(week, event.endTime),
 						s"$week-${event.uid}" // TODO rather than UID swapping here, this should be a recurring event
@@ -96,17 +109,14 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		event.getProperties.add(Method.PUBLISH)
 		event.getProperties.add(Transp.OPAQUE)
 
-		eventOccurrence.staffUniversityIds.headOption.flatMap {
-			universityId =>
-			profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
-				staffMember =>
-					val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
-					organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("Unknown")))
-					event.getProperties.add(organiser)
-			}
-		}.getOrElse {
-			val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
-			event.getProperties.add(organiser)
+		eventOccurrence.staff.headOption match {
+			case Some(user) =>
+				val organiser: Organizer = new Organizer(s"MAILTO:${user.getEmail}")
+				organiser.getParameters.add(new Cn(user.getFullName))
+				event.getProperties.add(organiser)
+			case _ =>
+				val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
+				event.getProperties.add(organiser)
 		}
 
 		event

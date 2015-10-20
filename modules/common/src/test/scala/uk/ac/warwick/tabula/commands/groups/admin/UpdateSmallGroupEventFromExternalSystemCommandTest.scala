@@ -70,6 +70,38 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 	private trait FixtureWithSingleSeminarForYear extends Fixture with MockServices {
 		set.academicYear = AcademicYear(2012)
 
+		val tutor = new User("abcdef")
+		tutor.setFoundUser(true)
+		tutor.setWarwickId("1170047")
+
+		userLookup.registerUserObjects(tutor)
+
+		val student1 = new User("student1")
+		student1.setFoundUser(true)
+		student1.setWarwickId("0000001")
+
+		val student2 = new User("student2")
+		student2.setFoundUser(true)
+		student2.setWarwickId("0000002")
+
+		val student3 = new User("student3")
+		student3.setFoundUser(true)
+		student3.setWarwickId("0000003")
+
+		val student4 = new User("student4")
+		student4.setFoundUser(true)
+		student4.setWarwickId("0000004")
+
+		val student5 = new User("student5")
+		student5.setFoundUser(true)
+		student5.setWarwickId("0000005")
+
+		val student6 = new User("student6")
+		student6.setFoundUser(true)
+		student6.setWarwickId("0000006")
+
+		userLookup.registerUserObjects(student1, student2, student3, student4, student5, student6)
+
 		val tEventSeminar1 = TimetableEvent(
 			uid="uuid1",
 			name="IN101S",
@@ -83,8 +115,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			location=Some(NamedLocation("CS1.04")),
 			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
-			staffUniversityIds=Seq("1170047"),
-			studentUniversityIds=Seq("0000001", "0000002", "0000003"),
+			staff=Seq(tutor),
+			students=Seq(student1, student2, student3),
 			year = AcademicYear(2012)
 		)
 		val tEventSeminar2 = TimetableEvent(
@@ -100,8 +132,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			location=Some(NamedLocation("CS1.04")),
 			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
-			staffUniversityIds=Seq("1170047"),
-			studentUniversityIds=Seq("0000004", "0000005", "0000006"),
+			staff=Seq(tutor),
+			students=Seq(student4, student5, student6),
 			year = AcademicYear(2012)
 		)
 
@@ -120,16 +152,11 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 				location=Some(NamedLocation("L5")),
 				parent=TimetableEvent.Parent(Some(module)),
 				comments=None,
-				staffUniversityIds=Seq("1170047"),
-				studentUniversityIds=Nil,
+				staff=Seq(tutor),
+				students=Nil,
 				year = AcademicYear(2012)
 			)
 		))
-
-		val tutor = new User("abcdef")
-		tutor.setFoundUser(true)
-		tutor.setWarwickId("1170047")
-		userLookup.registerUserObjects(tutor)
 	}
 
 	@Test def init() { new FixtureWithSingleSeminarForYear with CommandFixture {
