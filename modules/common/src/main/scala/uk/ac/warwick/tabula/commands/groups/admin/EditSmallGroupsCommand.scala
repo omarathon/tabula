@@ -62,19 +62,12 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = {
-		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
-		if (defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize = defaultMaxGroupSize
-
 		// Manage existing groups
 		existingGroups.asScala.values.filterNot { _.delete }.foreach { props =>
 			val group = props.group
 			group.name = props.name
-
-			if (defaultMaxGroupSizeEnabled) {
-				group.maxGroupSize = props.maxGroupSize
-			} else {
-				group.removeMaxGroupSize()
-			}
+			group.maxGroupSize = props.maxGroupSize
+			
 		}
 
 		existingGroups.asScala.values.filter { _.delete }.foreach { props =>
@@ -94,14 +87,9 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 		newGroups.asScala.foreach { props =>
 			val group = new SmallGroup(set)
 			set.groups.add(group)
-
 			group.name = props.name
-
-			if (defaultMaxGroupSizeEnabled) {
-				group.maxGroupSize = props.maxGroupSize
-			} else {
-				group.removeMaxGroupSize()
-			}
+			group.maxGroupSize = props.maxGroupSize
+	
 		}
 
 		smallGroupService.saveOrUpdate(set)
@@ -119,9 +107,6 @@ trait PopulateEditSmallGroupsCommand {
 		set.groups.asScala.sorted.foreach { group =>
 			existingGroups.put(group.id, new ExistingGroupProperties(module, set, group))
 		}
-
-		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
-		defaultMaxGroupSize = set.defaultMaxGroupSize
 	}
 }
 
