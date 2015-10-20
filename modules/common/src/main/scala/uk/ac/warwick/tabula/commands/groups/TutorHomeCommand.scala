@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SecurityService, SmallGroupService}
+import uk.ac.warwick.tabula.services.{SmallGroupService}
 import uk.ac.warwick.tabula.system.permissions.Public
 
 trait TutorHomeCommand extends Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]]
@@ -24,7 +23,6 @@ class TutorHomeCommandImpl(user: CurrentUser)
 	with Public {
 
 	var smallGroupService = Wire[SmallGroupService]
-	var securityService = Wire[SecurityService]
 
 	def applyInternal() =
 		smallGroupService.findReleasedSmallGroupsByTutor(user)
