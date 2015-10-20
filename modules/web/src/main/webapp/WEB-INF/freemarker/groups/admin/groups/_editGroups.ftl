@@ -43,7 +43,7 @@
 				<span class="uneditable-input hidden">&nbsp;</span>
 				&nbsp;
 				Set group numbers
-			<a class="use-popover tabulaPopover-init" data-html="true" data-content="This is the  maximum size for any new groups you create.  You can adjust the maximum size of individual groups" data-original-title="" title="">
+			<a class="use-popover tabulaPopover-init" data-html="true" data-content="Leave the max group size field empty for no limit" data-original-title="" title="">
 				<i class="icon-question-sign"></i>
 			</a>
 			</@form.field>
@@ -119,7 +119,7 @@
 		</@form.row>
 
 		<script type="text/javascript">
-			jQuery(function($) {				
+			jQuery(function($) {
 
 				$('button[data-toggle="add"]').each(function() {
 					var $button = $(this);
