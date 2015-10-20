@@ -114,7 +114,8 @@ object CelcatHttpTimetableFetchingService {
 		config: CelcatDepartmentConfiguration,
 		termService: TermService,
 		locationFetchingService: LocationFetchingService,
-		moduleMap: Map[String, Module]
+		moduleMap: Map[String, Module],
+		userLookup: UserLookupService
 	): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
@@ -126,8 +127,8 @@ object CelcatHttpTimetableFetchingService {
 		val eventType = categories match {
 			case singleCategory :: Nil => TimetableEventType(singleCategory)
 
-			case categories if categories.exists { c => TimetableEventType(c).core } =>
-				categories.find { c => TimetableEventType(c).core }.map { c => TimetableEventType(c) }.get
+			case cats if cats.exists { c => TimetableEventType(c).core } =>
+				cats.find { c => TimetableEventType(c).core }.map { c => TimetableEventType(c) }.get
 
 			case _ =>	summary.split(" - ", 2) match {
 				case Array(t, staffInfo) => TimetableEventType(t)
@@ -174,6 +175,8 @@ object CelcatHttpTimetableFetchingService {
 					}.getOrElse(Nil)
 				else Nil
 
+			val staff = userLookup.getUsersByWarwickUniIds(staffIds).values.filter { case FoundUser(u) => true }.toSeq
+
 			Some(TimetableEvent(
 				uid = event.getUid.getValue,
 				name = summary,
@@ -187,8 +190,8 @@ object CelcatHttpTimetableFetchingService {
 				location = Option(event.getLocation).flatMap { _.getValue.maybeText }.map(locationFetchingService.locationFor),
 				comments = None,
 				parent = TimetableEvent.Parent(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
-				staffUniversityIds = staffIds,
-				studentUniversityIds = Nil,
+				staff = staff,
+				students = Nil,
 				year = year
 			))
 		}
@@ -219,7 +222,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}
 	}
 
-	override def destroy {
+	override def destroy() {
 		http.shutdown()
 	}
 
@@ -349,7 +352,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// If we run an identical event in separate weeks, combine the weeks for them
 		val groupedEvents = events.groupBy { event =>
 			(event.name, event.title, event.description, event.eventType, event.day, event.startTime, event.endTime,
-				event.location, event.parent.shortName, event.staffUniversityIds, event.studentUniversityIds, event.year)
+				event.location, event.parent.shortName, event.staff, event.students, event.year)
 		}.values.toSeq
 
 		groupedEvents.map { eventSeq => eventSeq.size match {
@@ -372,8 +375,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.location,
 					event.parent,
 					event.comments,
-					event.staffUniversityIds,
-					event.studentUniversityIds,
+					event.staff,
+					event.students,
 					event.year
 				)
 		}}.toList
@@ -393,7 +396,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			vEvents.flatMap(e => parseModuleCode(e).map(_.toLowerCase)).distinct
 		).groupBy(_.code).mapValues(_.head)
 		vEvents.flatMap { event =>
-			parseVEvent(event, allStaff, config, termService, locationFetchingService, moduleMap)
+			parseVEvent(event, allStaff, config, termService, locationFetchingService, moduleMap, userLookup)
 		}
 	}
 }

@@ -51,10 +51,9 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	var profileService = Wire[ProfileService]
 
 	override def getUserByUserId(id: String) = super.getUserByUserId(id) match {
-		case anon: AnonymousUser => {
+		case anon: AnonymousUser =>
 			anon.setUserId(id)
 			anon
-		}
 		case user => filterApplicantUsers(user)
 	}
 
@@ -62,10 +61,22 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 		getUserByWarwickUniId(id, true)
 
 	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) =
-		UserByWarwickIdCache.get(id)
+		try {
+			id.maybeText.map(UserByWarwickIdCache.get).getOrElse(new AnonymousUser)
+		} catch {
+			case e: CacheEntryUpdateException =>
+				logger.error("Error fetching user by warwick ID", e)
+				new AnonymousUser
+		}
 
 	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
-		UserByWarwickIdCache.get(ids.asJava).asScala.toMap
+		try {
+			UserByWarwickIdCache.get(ids.filter(_.hasText).asJava).asScala.toMap
+		} catch {
+			case e: CacheEntryUpdateException =>
+				logger.error("Error fetching users by warwick ID", e)
+				Map()
+		}
 
 	private def getUserByWarwickUniIdFromUserLookup(id: UniversityId) = {
 		/*
@@ -76,8 +87,8 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 		findUsersWithFilter(filter.asJava, true)
 			.asScala
 			.map { user => getUserByUserId(user.getUserId) }
-			.sortBy(user => (user.isLoginDisabled, !user.getEmail.hasText))
 			.filter { user => user.getExtraProperty("urn:websignon:usertype") != "Applicant" }
+			.sortBy(user => (user.isLoginDisabled, !user.getEmail.hasText))
 			.headOption
 			.getOrElse {
 				logger.debug("No user found that matches Warwick Uni Id:" + id)
