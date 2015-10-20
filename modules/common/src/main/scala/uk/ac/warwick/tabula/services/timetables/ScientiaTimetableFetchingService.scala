@@ -225,10 +225,10 @@ object ScientiaHttpTimetableFetchingService {
 				parent = parent,
 				staff = userLookup.getUsersByWarwickUniIds((activity \\ "staffmember") map {
 					_.text
-				}).values.filter { case FoundUser(u) => true }.toSeq,
+				}).values.collect { case FoundUser(u) => u }.toSeq,
 				students = userLookup.getUsersByWarwickUniIds((activity \\ "student") map {
 					_.text
-				}).values.filter { case FoundUser(u) => true }.toSeq,
+				}).values.collect { case FoundUser(u) => u }.toSeq,
 				year = year
 			)
 		}

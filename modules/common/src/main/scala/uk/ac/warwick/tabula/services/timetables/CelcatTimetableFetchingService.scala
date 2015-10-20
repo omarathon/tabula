@@ -175,7 +175,7 @@ object CelcatHttpTimetableFetchingService {
 					}.getOrElse(Nil)
 				else Nil
 
-			val staff = userLookup.getUsersByWarwickUniIds(staffIds).values.filter { case FoundUser(u) => true }.toSeq
+			val staff = userLookup.getUsersByWarwickUniIds(staffIds).values.collect { case FoundUser(u) => u }.toSeq
 
 			Some(TimetableEvent(
 				uid = event.getUid.getValue,
