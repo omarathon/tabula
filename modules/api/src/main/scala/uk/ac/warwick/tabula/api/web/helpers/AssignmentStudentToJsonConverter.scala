@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
 

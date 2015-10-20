@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
-import uk.ac.warwick.tabula.coursework.commands.assignments.SharedAssignmentPropertiesForm
+import uk.ac.warwick.tabula.commands.coursework.assignments.SharedAssignmentPropertiesForm
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Valid

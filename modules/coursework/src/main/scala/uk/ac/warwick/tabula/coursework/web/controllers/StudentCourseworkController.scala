@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.assignments.{StudentCourseworkGadgetCommand, StudentCourseworkFullScreenCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkGadgetCommand, StudentCourseworkFullScreenCommand}
 
 abstract class StudentCourseworkController extends CourseworkController {
 	def getMav(member: Member, info: StudentAssignments) =

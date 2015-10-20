@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, Re
 import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.departments.FeedbackReportCommand
+import uk.ac.warwick.tabula.commands.coursework.departments.FeedbackReportCommand
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}

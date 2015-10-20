@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.csv.CSVLineWriter
 import scala.collection.immutable.ListMap

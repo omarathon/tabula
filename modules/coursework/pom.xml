@@ -98,11 +98,5 @@
 			<type>zip</type>
 			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>uk.ac.warwick.util</groupId>
-			<artifactId>warwickutils_spring4-csv</artifactId>
-			<version>${warwickutils.version}</version>
-		</dependency>
 	</dependencies>
 </project>

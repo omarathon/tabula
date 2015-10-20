@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.api.web.helpers
 import uk.ac.warwick.tabula.data.model.MapLocation
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait TimetableEventToJsonConverter {
 	self: ProfileServiceComponent =>
@@ -28,23 +29,15 @@ trait TimetableEventToJsonConverter {
 		"context" -> event.parent.shortName,
 		"parent" -> event.parent,
 		"comments" -> event.comments.orNull,
-		"staffUniversityIds" -> event.staffUniversityIds,
-		"staff" -> event.staffUniversityIds.map { universityId =>
-			val member = profileService.getMemberByUniversityIdStaleOrFresh(universityId)
-
+		"staffUniversityIds" -> event.staff.map { _.getWarwickId }.filter { _.hasText },
+		"staff" -> event.staff.map { user =>
 			Map(
-				"universityId" -> universityId
-			) ++ member.map { m =>
-				Map(
-					"firstName" -> m.firstName,
-					"lastName" -> m.lastName,
-					"email" -> m.email,
-					"title" -> m.title,
-					"fullFirstName" -> m.fullFirstName,
-					"userType" -> m.userType,
-					"jobTitle" -> m.jobTitle
-				)
-			}.getOrElse(Map())
+				"universityId" -> user.getWarwickId,
+				"firstName" -> user.getFirstName,
+				"lastName" -> user.getLastName,
+				"email" -> user.getEmail,
+				"userType" -> user.getUserType
+			)
 		},
 		"year" -> event.year.toString
 	)

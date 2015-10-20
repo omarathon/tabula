@@ -29,13 +29,36 @@ No marking workflows have been created yet. Click <strong>Create</strong> below 
 <tbody>
 <#list markingWorkflowInfo as info>
 <#assign markingWorkflow = info.markingWorkflow />
-<#assign canDelete = (info.assignmentCount == 0) />
+<#assign usedInAssignments = (info.assignmentCount > 0) />
+<#assign usedInExams = (info.examCount > 0) />
+
+<#if usedInAssignments>
+	<#assign formattedAssignmentCount><@fmt.p info.assignmentCount "assignment" "assignments" /></#assign>
+</#if>
+<#if usedInExams>
+	<#assign formattedExamCount><@fmt.p info.examCount "exam" /></#assign>
+</#if>
+
 <tr>
 	<td>${markingWorkflow.name}</td>
 	<td>${markingWorkflow.markingMethod.description}</td>
 	<td>
 		<a class="btn btn-mini" href="<@routes.markingworkflowedit markingWorkflow />"><i class="icon-edit"></i> Modify</a>
-		<a class="btn btn-mini btn-danger<#if !canDelete> use-tooltip disabled</#if>" href="<@routes.markingworkflowdelete markingWorkflow />" data-toggle="modal" data-target="#marking-workflow-modal"<#if !canDelete> title="You can't delete this marking workflow as it is in use by <@fmt.p info.assignmentCount "assignment" "assignments" />."</#if>><i class="icon-remove icon-white"></i> Delete</a>
+		<a class="btn btn-mini btn-danger<#if usedInAssignments || usedInExams> use-tooltip disabled</#if>"
+		   href="<@routes.markingworkflowdelete markingWorkflow />"
+		   data-toggle="modal" data-target="#marking-workflow-modal"
+			<#if usedInAssignments || usedInExams> title="You can't delete this marking workflow as it is in use by
+				<#if usedInAssignments>
+					${formattedAssignmentCount}
+					<#if usedInExams>
+					and
+					</#if>
+				</#if>
+				<#if usedInExams>
+					${formattedExamCount}
+				</#if>
+				"
+			</#if>><i class="icon-remove icon-white"></i> Delete</a>
 	</td>
 </tr>
 </#list>

@@ -5,18 +5,11 @@
 		-
 		<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
 	</div>
-	<#if event.staffUniversityIds?size gt 0>
-		Tutor<#if event.staffUniversityIds?size gt 1>s</#if>:
-		<@userlookup ids=event.staffUniversityIds lookupByUniversityId=true>
-			<#list returned_users?keys?sort as id> <#compress> <#-- intentional space -->
-				<#local returned_user=returned_users[id] />
-				<#if returned_user.foundUser>
-					${returned_user.fullName}<#if id_has_next>,</#if>
-				<#else>
-					${id}<#if id_has_next>,</#if>
-				</#if>
-			</#compress></#list>
-		</@userlookup>
+	<#if event.staff?size gt 0>
+		Tutor<#if event.staff?size gt 1>s</#if>:
+		<#list event.staff as user>
+			${user.fullName}<#if user_has_next>,</#if>
+		</#list>
 	</#if>
 	<#if ((event.location.name)!"")?has_content>
 		<div class="location">

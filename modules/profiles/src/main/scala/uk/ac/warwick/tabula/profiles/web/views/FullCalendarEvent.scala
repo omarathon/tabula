@@ -79,7 +79,7 @@ object FullCalendarEvent {
 			locationId = source.location.collect { case l: MapLocation => l }.fold("") { _.locationId },
 			description = source.description,
 			shorterTitle = source.parent.shortName.map { _ + " " }.getOrElse("") + source.eventType.displayName,
-			tutorNames = userLookup.getUsersByWarwickUniIds(source.staffUniversityIds).values.map(_.getFullName).mkString(", "),
+			tutorNames = source.staff.map(_.getFullName).mkString(", "),
 		  parentType = source.parent match {
 				case TimetableEvent.Empty(_,_) => "Empty"
 				case TimetableEvent.Module(_,_) => "Module"

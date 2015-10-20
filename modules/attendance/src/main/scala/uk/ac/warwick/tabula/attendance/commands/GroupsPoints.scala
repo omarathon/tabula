@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import java.text.DateFormatSymbols
-import org.joda.time.{DateTimeConstants, DateMidnight}
+import org.joda.time.{LocalDate, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.spring.Wire
@@ -83,7 +83,7 @@ trait GroupsPoints {
 	}
 
 	def groupOldByTerm(points: Seq[MonitoringPoint], academicYear: AcademicYear): Map[String, Seq[GroupedOldPoint]] = {
-		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val approxStartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
 

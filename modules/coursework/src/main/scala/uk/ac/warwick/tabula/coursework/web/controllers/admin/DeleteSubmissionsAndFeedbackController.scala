@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionsAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.DeleteSubmissionsAndFeedbackCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._

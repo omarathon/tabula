@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.jobs
 
+import org.junit.Ignore
 import uk.ac.warwick.tabula._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.jobs._
@@ -18,6 +19,8 @@ class JobContextTest extends AppContextTestBase {
 				jsi.json = Map("How" -> "Json")
 				jsi.succeeded = true
 				session.save(jsi)
+				session.flush()
+				session.clear()
 				jsi.id
 			}
 
@@ -27,7 +30,8 @@ class JobContextTest extends AppContextTestBase {
 		}
 
 	@Transactional
-//	@Test
+	@Ignore
+	@Test
 	def load() {
 		val id = jobService.add(None, TestingJob("anything really")).id
 		jobService.getInstance(id) map { instance =>
