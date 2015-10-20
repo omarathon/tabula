@@ -49,27 +49,15 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		val command = new EditSmallGroupsCommandInternal(module, set) with CommandTestSupport with PopulateEditSmallGroupsCommand with EditSmallGroupsCommandRemoveTrailingEmptyGroups
 		command.populate()
 	}
-
-	@Test def usesDefaultMaxGroupSizeIfEnabled { new CommandFixture {
-		set.defaultMaxGroupSize = 8
-		set.defaultMaxGroupSizeEnabled = true
-
-		command.populate()
-
-		command.defaultMaxGroupSizeEnabled should be (true)
-		command.defaultMaxGroupSize should be (8)
-	}}
-
+	
 	@Test def populate { new CommandFixture {
 		set.groups.add(Fixtures.smallGroup("Group A").tap { _.id = "groupAId" })
 		set.groups.add(Fixtures.smallGroup("Group B").tap { _.id = "groupBId" })
-		set.defaultMaxGroupSize = 8
-		set.defaultMaxGroupSizeEnabled = true
 
 		command.populate()
 
 		command.existingGroups.values().asScala.map { _.name }.toSet should be (Set("Group A", "Group B"))
-		command.existingGroups.values().asScala.map { _.maxGroupSize }.toSet should be (Set(8, 8))
+		command.existingGroups.values().asScala.map { _.maxGroupSize }.toSet should be (Set(null, null))
 	}}
 
 	@Test def create { new CommandFixture {
@@ -78,16 +66,34 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		command.newGroups.get(0).maxGroupSize = 15
 		command.newGroups.get(1).name = "Group B"
 		command.newGroups.get(1).maxGroupSize = 15
-		command.defaultMaxGroupSizeEnabled = true
 
 		val groups = command.applyInternal()
 		set.groups.asScala should be (groups)
 
 		groups(0).name should be ("Group A")
-		groups(0).maxGroupSize should be (Some(15))
+		groups(0).maxGroupSize should be (15)
 
 		groups(1).name should be ("Group B")
-		groups(1).maxGroupSize should be (Some(15))
+		groups(1).maxGroupSize should be (15)
+
+		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
+	}}
+
+	@Test def createUnlimitedGroup { new CommandFixture {
+		command.populate()
+		command.newGroups.get(0).name = "Group A"
+		command.newGroups.get(0).maxGroupSize = 15
+		command.newGroups.get(1).name = "Group B"
+		command.newGroups.get(1).maxGroupSize = null
+
+		val groups = command.applyInternal()
+		set.groups.asScala should be (groups)
+
+		groups(0).name should be ("Group A")
+		groups(0).maxGroupSize should be (15)
+
+		groups(1).name should be ("Group B")
+		groups(1).maxGroupSize should be (null)
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
