@@ -41,11 +41,12 @@ abstract class ViewProfileController extends ProfilesController {
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
 	def viewProfileForCourse(
-														studentCourseDetails: Option[StudentCourseDetails],
-														studentCourseYearDetails: Option[StudentCourseYearDetails],
-														openMeetingId: String,
-														agentId: String,
-														profiledStudentMember: StudentMember): Mav = {
+		studentCourseDetails: Option[StudentCourseDetails],
+		studentCourseYearDetails: Option[StudentCourseYearDetails],
+		openMeetingId: String,
+		agentId: String,
+		profiledStudentMember: StudentMember
+		): Mav = {
 		val isSelf = profiledStudentMember.universityId == user.universityId
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
@@ -99,8 +100,7 @@ abstract class ViewProfileController extends ProfilesController {
 		val relationshipTypes: Seq[StudentRelationshipType] =
 			relationshipService.listAllStudentRelationshipTypesWithMember(currentMember)
 
-		val smallGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
-			.filter { group => group.groupSet.releasedToTutors }
+		val smallGroups = smallGroupService.findReleasedSmallGroupsByTutor(user)
 
 
 		val marking = assignmentService.getAssignmentWhereMarker(user.apparentUser)

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.{AssessmentMembershipDao, AssessmentMembershipD
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.Appliable
@@ -69,6 +70,8 @@ trait SmallGroupService {
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
+
+	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -77,6 +80,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with SmallGroupMembershipHelpers
 		with UserLookupComponent
 		with UserGroupDaoComponent
+	  with SecurityServiceComponent
 		with Logging =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
@@ -253,6 +257,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 		smallGroupDao.delete(occurrence)
 	}
+
+	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup] = 	findSmallGroupsByTutor(user.apparentUser)
+		.filter { group =>
+			// The set is visible to tutors; OR
+			(group.groupSet.releasedToTutors ||
+			// I have permission to view the membership of the set anyway
+			securityService.can(user, Permissions.SmallGroups.ReadMembership, group))
+	}
 }
 
 trait SmallGroupMembershipHelpers {
@@ -288,4 +300,5 @@ class SmallGroupServiceImpl
 	  with AutowiringUserLookupComponent
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
+	  with AutowiringSecurityServiceComponent
 		with Logging

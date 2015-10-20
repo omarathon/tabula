@@ -27,17 +27,7 @@ class TutorHomeCommandImpl(user: CurrentUser)
 	var securityService = Wire[SecurityService]
 
 	def applyInternal() =
-		smallGroupService.findSmallGroupsByTutor(user.apparentUser)
-			.filter { group =>
-				!group.groupSet.deleted &&
-				(
-					// The set is visible to tutors; OR
-					group.groupSet.releasedToTutors ||
-
-					// I have permission to view the membership of the set anyway
-					securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
-				)
-			}
+		smallGroupService.findReleasedSmallGroupsByTutor(user)
 			.groupBy { group => group.groupSet }
 			.groupBy { case (set, groups) => set.module }
 
