@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 
-	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 	val isSitsInFlux = DateTime.now.getMonthOfYear >= DateTimeConstants.JUNE && DateTime.now.getMonthOfYear < DateTimeConstants.OCTOBER
 
 	"A Member of staff" should "be able to edit students on a scheme" in {
