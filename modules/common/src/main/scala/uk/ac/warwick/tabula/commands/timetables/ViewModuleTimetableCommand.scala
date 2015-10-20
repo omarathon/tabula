@@ -33,7 +33,6 @@ object ViewModuleTimetableCommand {
 			with ViewModuleTimetableValidation
 			with Unaudited with ReadOnly
 			with ModuleTimetableFetchingServiceComponent {
-			// Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
 			val timetableFetchingService = service
 		}
 }

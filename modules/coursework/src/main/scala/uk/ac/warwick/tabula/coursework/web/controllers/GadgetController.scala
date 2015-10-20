@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand
+
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
-import javax.servlet.http.HttpServletRequest
-import java.util.Collections
 
 @Controller
 class GadgetController extends CourseworkController {

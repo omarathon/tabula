@@ -4,7 +4,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.TestBase
 import org.junit.Ignore
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Assignment

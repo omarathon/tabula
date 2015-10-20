@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddMarkerFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.AddMarkerFeedbackCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.coursework.commands.feedback.DownloadFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.DownloadFeedbackCommand
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException

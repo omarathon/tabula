@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.old
 
-import org.joda.time.{DateMidnight, DateTimeConstants}
+import org.joda.time.{LocalDate, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.attendance.{CommonMonitoringPointProperties, MonitoringPoint}
@@ -18,7 +18,7 @@ case class GroupedMonitoringPoint(
 
 trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 	def groupByTerm[A <: CommonMonitoringPointProperties](monitoringPoints: Seq[A], academicYear: AcademicYear): Map[String, Seq[A]] = {
-		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val approxStartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
 

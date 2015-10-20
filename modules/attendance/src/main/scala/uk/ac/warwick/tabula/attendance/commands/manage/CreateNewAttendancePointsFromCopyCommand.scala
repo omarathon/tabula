@@ -100,6 +100,7 @@ trait GetsPointsToCreate {
 		} else if (pointStyle == AttendanceMonitoringPointStyle.Week) {
 			// Week points
 			schemes.flatMap { scheme =>
+				val weeksForYear = termService.getAcademicWeeksForYear(scheme.academicYear.dateInTermOne).toMap
 				weekPoints.map { weekPoint =>
 					val newPoint = addToScheme match {
 						case true => weekPoint.cloneTo(Option(scheme))
@@ -107,6 +108,9 @@ trait GetsPointsToCreate {
 					}
 					newPoint.createdDate = DateTime.now
 					newPoint.updatedDate = DateTime.now
+					// Fix new points date
+					newPoint.startDate = weeksForYear(weekPoint.startWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
+					newPoint.endDate = weeksForYear(weekPoint.endWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
 					newPoint
 				}
 			}

@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, TermService, TermServiceComponent, WeekToDateConverter, WeekToDateConverterComponent}
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.{TermFactory, TermImpl}
 
@@ -38,10 +37,11 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	val intervalOutsideOccurrence = new Interval(1,2)
 
-	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent {
+	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent with UserLookupComponent {
 		val weekToDateConverter = mock[WeekToDateConverter]
 		var termService = mock[TermService]
 		val profileService = mock[ProfileService]
+		val userLookup = new MockUserLookup
 	}
 
 	val termFactory = mock[TermFactory]

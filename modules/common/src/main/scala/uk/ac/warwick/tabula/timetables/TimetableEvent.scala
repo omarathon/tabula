@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Location}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
+import uk.ac.warwick.userlookup.User
 
 case class TimetableEvent(
 	uid: String,
@@ -20,8 +20,8 @@ case class TimetableEvent(
 	location: Option[Location],
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
-	staffUniversityIds: Seq[String],
-	studentUniversityIds: Seq[String],
+	staff: Seq[User],
+	students: Seq[User],
 	year: AcademicYear
 )
 
@@ -69,8 +69,8 @@ object TimetableEvent {
 			location = Option(sge.location),
 			parent = TimetableEvent.Parent(Option(sge.group.groupSet.module)),
 			comments = None,
-			staffUniversityIds = sge.tutors.users.map { _.getWarwickId },
-			studentUniversityIds = sge.group.students.knownType.members,
+			staff = sge.tutors.users,
+			students = sge.group.students.users,
 			year = sge.group.groupSet.academicYear
 		)
 
@@ -121,7 +121,6 @@ object TimetableEventType {
 	}
 }
 
-
 case class EventOccurrence(
 	uid: String,
 	name: String,
@@ -133,26 +132,10 @@ case class EventOccurrence(
 	location: Option[Location],
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
-	staffUniversityIds: Seq[String]
+	staff: Seq[User]
 )
 
 object EventOccurrence {
-	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
-		EventOccurrence(
-			uid,
-			timetableEvent.name,
-			timetableEvent.title,
-			timetableEvent.description,
-			timetableEvent.eventType,
-			start,
-			end,
-			timetableEvent.location,
-			timetableEvent.parent,
-			timetableEvent.comments,
-			timetableEvent.staffUniversityIds
-		)
-	}
-
 	def busy(occurrence: EventOccurrence): EventOccurrence = {
 		EventOccurrence(
 			occurrence.uid,

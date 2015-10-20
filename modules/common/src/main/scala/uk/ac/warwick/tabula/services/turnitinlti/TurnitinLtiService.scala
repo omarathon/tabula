@@ -2,29 +2,30 @@ package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
 
+import com.google.api.client.auth.oauth.OAuthHmacSigner
+import com.google.gdata.client.authn.oauth.{OAuthParameters, OAuthUtil}
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.{HttpStatus, HttpRequest, HttpResponse}
+import org.apache.commons.io.FilenameUtils._
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
+import org.apache.http.params.HttpConnectionParams
 import org.apache.http.protocol.HttpContext
-import org.springframework.beans.factory.{DisposableBean, InitializingBean}
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
-import com.google.api.client.auth.oauth.OAuthHmacSigner
-import com.google.gdata.client.authn.oauth.{OAuthUtil, OAuthParameters}
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
-import org.xml.sax.SAXParseException
-import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
-import org.apache.commons.io.FilenameUtils._
-import uk.ac.warwick.tabula.api.web.Routes
-import org.joda.time.format.ISODateTimeFormat
+import org.apache.http.{HttpRequest, HttpResponse, HttpStatus}
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.{DisposableBean, InitializingBean}
+import org.springframework.stereotype.Service
+import org.xml.sax.SAXParseException
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.api.web.Routes
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats, HttpClientDefaults}
+
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object TurnitinLtiService {
@@ -60,11 +61,11 @@ object TurnitinLtiService {
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(s"${module.code.toUpperCase}-${module.name}")
+		ClassName(s"${module.code.toUpperCase} - ${module.name}")
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(s"${assignment.name}(${assignment.academicYear.toString})")
+		AssignmentName(s"${assignment.name} (${assignment.academicYear.toString})")
 	}
 }
 
@@ -96,6 +97,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})

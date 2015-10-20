@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommandState, GenerateGradesFromMarkCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommandState, GenerateGradesFromMarkCommand}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Exam, GradeBoundary, Assignment, Module}
 import uk.ac.warwick.tabula.JavaImports._

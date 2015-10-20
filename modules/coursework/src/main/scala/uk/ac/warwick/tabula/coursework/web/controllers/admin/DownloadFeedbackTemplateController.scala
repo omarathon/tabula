@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.coursework.commands.departments.DownloadFeedbackTemplateCommand
+import uk.ac.warwick.tabula.commands.coursework.departments.DownloadFeedbackTemplateCommand
 import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.web.bind.annotation.PathVariable

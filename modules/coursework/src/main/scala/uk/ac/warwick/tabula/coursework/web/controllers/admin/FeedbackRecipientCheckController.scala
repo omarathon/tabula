@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackRecipientCheckCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackRecipientCheckCommand
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.PathVariable

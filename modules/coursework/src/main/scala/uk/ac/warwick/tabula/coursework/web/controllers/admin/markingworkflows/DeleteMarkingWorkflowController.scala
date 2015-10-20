@@ -2,28 +2,33 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.markingworkflows
 
 import javax.validation.Valid
 
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.DeleteMarkingWorkflowCommand
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.{DeleteMarkingWorkflowCommandState, DeleteMarkingWorkflowCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.coursework.web.controllers.admin.markingworkflows.DeleteMarkingWorkflowController.DeleteMarkingWorkflowCommand
+
+object DeleteMarkingWorkflowController {
+	type DeleteMarkingWorkflowCommand = Appliable[Unit]
+		with SelfValidating with DeleteMarkingWorkflowCommandState
+}
 
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/markingworkflows/delete/{markingworkflow}"))
 class DeleteMarkingWorkflowController extends CourseworkController {
 
-	// tell @Valid annotation how to validate
-	validatesSelf[DeleteMarkingWorkflowCommand]
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("department") department: Department, @PathVariable("markingworkflow") markingWorkflow: MarkingWorkflow) =
-		new DeleteMarkingWorkflowCommand(department, markingWorkflow)
+	def cmd(@PathVariable("department") department: Department, @PathVariable("markingworkflow") markingWorkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
+		DeleteMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
@@ -47,11 +52,11 @@ class DeleteMarkingWorkflowController extends CourseworkController {
 class ExamsDeleteMarkingWorkflowController extends ExamsController {
 
 	// tell @Valid annotation how to validate
-	validatesSelf[DeleteMarkingWorkflowCommand]
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("department") department: Department, @PathVariable("markingworkflow") markingWorkflow: MarkingWorkflow) =
-		new DeleteMarkingWorkflowCommand(department, markingWorkflow)
+	def cmd(@PathVariable("department") department: Department, @PathVariable("markingworkflow") markingWorkflow: MarkingWorkflow):DeleteMarkingWorkflowCommand =
+		DeleteMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.{FoundUser, SystemClockComponent}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
@@ -64,9 +64,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
 			.map { e => (e.timetableEvent, Option(e.group)) }
 			.filter { case (_, group) => group.nonEmpty }
 			.map { case (e, group) =>
-				val tutorUsercodes = e.staffUniversityIds.flatMap { id =>
-					Option(userLookup.getUserByWarwickUniId(id)).collect { case FoundUser(u) => u.getUserId }
-				}
+				val tutorUsercodes = e.staff.map { _.getUserId }
 
 				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
 			}

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.coursework.commands.feedback.RateFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.RateFeedbackCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping

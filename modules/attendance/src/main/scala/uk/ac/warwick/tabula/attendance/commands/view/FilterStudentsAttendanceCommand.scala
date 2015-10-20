@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.attendance.commands.view
 
-import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
+import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.sql.JoinType
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.old.AutowiringSecurityServicePermissionsAwareRoutes
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -86,8 +87,6 @@ trait FilterStudentsAttendancePermissions extends RequiresPermissionsChecking wi
 }
 
 trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
-	def department: Department
-	def academicYear: AcademicYear
 
 	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
@@ -108,6 +107,9 @@ trait FilterStudentsAttendanceCommandState extends AttendanceFilterExtras {
 }
 
 trait AttendanceFilterExtras extends FiltersStudents {
+
+	def department: Department
+	def academicYear: AcademicYear
 
 	final val UNAUTHORISED = "Missed (unauthorised)"
 	final val AUTHORISED = "Missed (authorised)"
@@ -136,14 +138,20 @@ trait AttendanceFilterExtras extends FiltersStudents {
 	override def getAliasPaths(table: String) = {
 		(FiltersStudents.AliasPaths ++ Map(
 			"attendanceCheckpointTotals" -> Seq(
-				"attendanceCheckpointTotals" -> AliasAndJoinType("attendanceCheckpointTotals")
+				"attendanceCheckpointTotals" -> AliasAndJoinType(
+					"attendanceCheckpointTotals",
+					JoinType.LEFT_OUTER_JOIN,
+					Option(Restrictions.conjunction(
+						Restrictions.eq("attendanceCheckpointTotals.department", department),
+						Restrictions.eq("attendanceCheckpointTotals.academicYear", academicYear)
+					))
+				)
 			)
 		))(table)
 	}
 
 	override def buildRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
 		super.buildRestrictions(year) ++ Seq(
-			attendanceCheckpointTotalsRestriction,
 			unrecordedAttendanceRestriction,
 			authorisedAttendanceRestriction,
 			unauthorisedAttendanceRestriction,
@@ -151,17 +159,6 @@ trait AttendanceFilterExtras extends FiltersStudents {
 			unauthorisedAttendance6Restriction
 		).flatten
 	}
-
-	def attendanceCheckpointTotalsRestriction: Option[ScalaRestriction] =
-		// Only apply if required (otherwise only students with a checkpoint total are returned)
-		Seq(unrecordedAttendanceRestriction, authorisedAttendanceRestriction, unauthorisedAttendanceRestriction).flatten.isEmpty match {
-			case true => None
-			case false =>  ScalaRestriction.is(
-				"attendanceCheckpointTotals.department",
-				department,
-				getAliasPaths("attendanceCheckpointTotals"): _*
-			)
-		}
 
 	def unrecordedAttendanceRestriction: Option[ScalaRestriction] = otherCriteria.contains(UNRECORDED) match {
 		case false => None

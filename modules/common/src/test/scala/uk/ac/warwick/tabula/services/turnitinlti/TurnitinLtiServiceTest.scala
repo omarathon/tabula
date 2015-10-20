@@ -35,11 +35,11 @@ class TurnitinLtiServiceTest extends TestBase {
 	}}
 
 	@Test def generatedClassName() { new Fixture {
-		TurnitinLtiService.classNameFor(assignment).value should be("AB101-First year module")
+		TurnitinLtiService.classNameFor(assignment).value should be("AB101 - First year module")
 	}}
 
 	@Test def generatedAssignmentName() { new Fixture {
-		TurnitinLtiService.assignmentNameFor(assignment).value should be("1500 word assignment(14/15)")
+		TurnitinLtiService.assignmentNameFor(assignment).value should be("1500 word assignment (14/15)")
 	}}
 
 }

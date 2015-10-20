@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.ReplaceMarkerInMarkingWorkflowCommand
+import uk.ac.warwick.tabula.commands.coursework.markingworkflows.ReplaceMarkerInMarkingWorkflowCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{MarkingWorkflow, Department}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
