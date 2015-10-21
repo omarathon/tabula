@@ -13,6 +13,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
   val TEST_ROUTE_CODE="xx123"
 	val TEST_DEPARTMENT_CODE="xxx"
 	val TEST_COURSE_CODE="Ux123"
+	val TEST_MODULE_NAME="Timetabling Module"
 
 	var testGroupSetId:String=_
 
@@ -30,7 +31,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 		createStudentMember(P.Student1.usercode,routeCode=TEST_ROUTE_CODE, courseCode=TEST_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE)
 
 		And("a module exists with a related SmallGroupSet")
-		createModule(TEST_DEPARTMENT_CODE, TEST_MODULE_CODE, "Timetabling Module")
+		createModule(TEST_DEPARTMENT_CODE, TEST_MODULE_CODE, TEST_MODULE_NAME)
 		testGroupSetId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 
 		And("marker1 has a membership record")
