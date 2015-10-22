@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance
 
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
 
 class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDriver {
 
@@ -10,6 +10,8 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 	val TEST_PG_ROUTE_CODE="xx234"
 	val TEST_UNDERGRAD_COURSE_CODE="Ux123"
 	val TEST_POSTGRAD_COURSE_CODE="Px123"
+
+	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
 	before {
 		go to Path("/scheduling/fixtures/setup")
@@ -23,12 +25,12 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 			academicYear = "2013")
 		createStudentMember(P.Student2.usercode,routeCode=TEST_PG_ROUTE_CODE, courseCode=TEST_POSTGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1)
 		createStudentMember(P.Student3.usercode,routeCode=TEST_UG_ROUTE_CODE, courseCode=TEST_UNDERGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1,
-			academicYear = "2014")
+			academicYear = thisAcademicYearString)
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
 		createMonitoringPointSet(TEST_UG_ROUTE_CODE, 3, "2013", Option(1))
 
 		// new AM
-		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 3, "2014", P.Student3.warwickId)
+		createAttendanceMonitoringScheme(TEST_DEPARTMENT_CODE, 3, thisAcademicYearString, P.Student3.warwickId)
 
 	}
 

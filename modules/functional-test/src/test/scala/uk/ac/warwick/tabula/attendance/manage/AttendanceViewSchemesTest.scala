@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.attendance.manage
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceViewSchemesTest extends AttendanceFixture with GivenWhenThen {
 
-	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
 	"A Member of staff" should "see the schemes for their department" in {
 		Given("I am logged in as Admin1")

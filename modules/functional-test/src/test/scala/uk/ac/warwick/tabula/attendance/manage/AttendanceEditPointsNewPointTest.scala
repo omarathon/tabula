@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceEditPointsNewPointTest extends AttendanceFixture with GivenWhenThen {
 
-	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 	val newPointName = "New point"
 
 	"A Member of staff" should "be able to add a new point to a scheme" in {

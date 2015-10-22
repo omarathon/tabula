@@ -10,8 +10,8 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 		 Given("I am logged in as Admin1")
 		 signIn as P.Admin1 to Path("/")
 
-		 When("I go to /attendance/view/xxx/2014/points")
-		 go to Path("/attendance/view/xxx/2014/points")
+		 When(s"I go to /attendance/view/xxx/$thisAcademicYearString/points")
+		 go to Path(s"/attendance/view/xxx/$thisAcademicYearString/points")
 
 		 Then("I see the page, but no points")
 
