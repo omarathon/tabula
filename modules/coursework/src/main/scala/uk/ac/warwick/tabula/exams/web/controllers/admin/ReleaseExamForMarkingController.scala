@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
-import uk.ac.warwick.tabula.exams.commands.ReleaseExamForMarkingCommand
+import uk.ac.warwick.tabula.commands.exams.ReleaseExamForMarkingCommand
 
 @Controller
 @RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/release-for-marking"))

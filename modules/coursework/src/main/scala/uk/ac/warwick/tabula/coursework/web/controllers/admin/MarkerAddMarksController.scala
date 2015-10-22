@@ -7,9 +7,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, MarkerAddMarksCommand, PostExtractValidation}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkerAddMarksCommand, PostExtractValidation}
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._

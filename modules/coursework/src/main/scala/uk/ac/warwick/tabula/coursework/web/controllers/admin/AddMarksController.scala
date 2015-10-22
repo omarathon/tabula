@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.coursework.commands.assignments.{PostExtractValidation, AdminAddMarksCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{PostExtractValidation, AdminAddMarksCommand}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
+import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.services.AssessmentMembershipService

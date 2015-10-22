@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 
 	val schemeName = "The Scheme of things"
-	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
 	"A Member of staff" should "be able to create monitoring point schemes" in {
 		Given("I am logged in as Admin1")
@@ -70,7 +69,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		click on linkText("Add points")
 
 		Then("I am redirected to the add points page")
-		eventually(currentUrl should include("/attendance/manage/xxx/2014/addpoints"))
+		eventually(currentUrl should include(s"/attendance/manage/xxx/$thisAcademicYearString/addpoints"))
 		pageSource should include(schemeName)
 
 	}

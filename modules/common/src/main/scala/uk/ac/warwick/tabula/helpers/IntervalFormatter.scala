@@ -73,7 +73,7 @@ class ConfigurableIntervalFormatter(val timeFormat: TimeFormats, val dateFormat:
 
 
 	def format(start: DateTime, end: DateTime) = {
-		if (start.toDateMidnight == end.toDateMidnight) {
+		if (start.toLocalDate == end.toLocalDate) {
 			// don't print the date twice if they're the same
 			val timeBit = timeFormat.formatTimes(new Interval(start, end)) match {
 				case None => ""

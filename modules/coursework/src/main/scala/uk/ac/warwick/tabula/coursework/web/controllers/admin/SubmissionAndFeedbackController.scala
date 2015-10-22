@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.views.CSVView
 import uk.ac.warwick.tabula.web.views.ExcelView
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.coursework.helpers.{CourseworkFilter, CourseworkFilters}
+import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.Features
 import javax.validation.Valid

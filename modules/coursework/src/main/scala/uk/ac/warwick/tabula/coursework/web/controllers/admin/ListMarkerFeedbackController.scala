@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, ListMarkerFeedbackCommand, MarkerFeedbackStage}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, ListMarkerFeedbackCommand, MarkerFeedbackStage}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}

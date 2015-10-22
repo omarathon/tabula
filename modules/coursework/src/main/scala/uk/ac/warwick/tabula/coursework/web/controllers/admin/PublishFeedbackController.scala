@@ -3,7 +3,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.coursework.commands.feedback.{GenerateGradesFromMarkCommand, PublishFeedbackCommandState, PublishFeedbackCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, PublishFeedbackCommandState, PublishFeedbackCommand}
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute

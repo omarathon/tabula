@@ -134,15 +134,13 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 				events.zipWithIndex.foreach { case (e, i) =>
 					val group = new SmallGroup(set)
 					group.name = s"Group ${i + 1}"
-					group.students.knownType.includedUserIds = e.studentUniversityIds
+					e.students.foreach(group.students.add)
 
 					smallGroupService.saveOrUpdate(group)
 
 					set.groups.add(group)
 
-					val tutorUsercodes = e.staffUniversityIds.flatMap { id =>
-						Option(userLookup.getUserByWarwickUniId(id)).collect { case FoundUser(u) => u }.map { _.getUserId }
-					}
+					val tutorUsercodes = e.staff.map { _.getUserId }
 
 					createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
 				}

@@ -61,11 +61,11 @@ object TurnitinLtiService {
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(s"${module.code.toUpperCase}-${module.name}")
+		ClassName(s"${module.code.toUpperCase} - ${module.name}")
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(s"${assignment.name}(${assignment.academicYear.toString})")
+		AssignmentName(s"${assignment.name} (${assignment.academicYear.toString})")
 	}
 }
 

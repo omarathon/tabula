@@ -103,9 +103,9 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			location = if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }.map(NamedLocation),
 			parent = TimetableEvent.Parent(relationship.relationshipType),
 			comments = None,
-			staffUniversityIds = context match {
-				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.universityId }.toSeq
-				case TimetableEvent.Context.Student => relationship.agentMember.map { _.universityId }.toSeq
+			staff = context match {
+				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.asSsoUser }.toSeq
+				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
 			}
 		))
 	}

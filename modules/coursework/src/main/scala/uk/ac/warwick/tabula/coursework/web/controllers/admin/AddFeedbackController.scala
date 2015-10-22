@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.AddFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.AddFeedbackCommand
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.assignments.CopyAssignmentsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 
 @Controller

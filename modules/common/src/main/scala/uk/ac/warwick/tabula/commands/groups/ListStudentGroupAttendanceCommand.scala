@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups
 
-import org.joda.time.{LocalDateTime, DateMidnight, DateTime, DateTimeConstants}
+import org.joda.time.{LocalDate, LocalDateTime, DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
@@ -119,7 +119,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 	def groupByTerm(
 		instances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])]
 	): SortedMap[Term, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
-		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val approxStartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
 

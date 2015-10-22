@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.timetables
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.{Cn, Value}
 import net.fortuna.ical4j.model.property._
-import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time._
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -30,10 +29,24 @@ trait EventOccurrenceService {
 }
 
 abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
-
 	self: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
+		def buildEventOccurrence(start: LocalDateTime, end: LocalDateTime, uid: String): EventOccurrence = {
+			EventOccurrence(
+				uid,
+				event.name,
+				event.title,
+				event.description,
+				event.eventType,
+				start,
+				end,
+				event.location,
+				event.parent,
+				event.comments,
+				event.staff
+			)
+		}
 
 		def eventDateToLocalDate(week: WeekRange.Week, localTime: LocalTime): LocalDateTime = {
 			weekToDateConverter.toLocalDatetime(week, event.day, localTime, event.year).
@@ -52,8 +65,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 			weeks
 				.filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year))
 				.map { week =>
-					EventOccurrence(
-						event,
+					buildEventOccurrence(
 						eventDateToLocalDate(week, event.startTime),
 						eventDateToLocalDate(week, event.endTime),
 						s"$week-${event.uid}" // TODO rather than UID swapping here, this should be a recurring event
@@ -75,7 +87,14 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		if (eventOccurrence.start.toDateTime.isEqual(end)) {
 			end = end.plusMinutes(1)
 		}
-		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name).safeSubstring(0, 255))
+
+		val moduleSummary = for (
+			module <- Option(eventOccurrence.parent).collect({case m: TimetableEvent.Module => m});
+			sn <- module.shortName;
+			fn <- module.fullName
+		) yield s"$sn $fn "
+		val summary = eventOccurrence.title.maybeText.getOrElse(eventOccurrence.name)
+		val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), (moduleSummary.getOrElse("") + summary).safeSubstring(0, 255))
 		event.getStartDate.getParameters.add(Value.DATE_TIME)
 		event.getEndDate.getParameters.add(Value.DATE_TIME)
 
@@ -90,17 +109,14 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 		event.getProperties.add(Method.PUBLISH)
 		event.getProperties.add(Transp.OPAQUE)
 
-		eventOccurrence.staffUniversityIds.headOption.flatMap {
-			universityId =>
-			profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
-				staffMember =>
-					val organiser: Organizer = new Organizer(s"MAILTO:${staffMember.email}")
-					organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("Unknown")))
-					event.getProperties.add(organiser)
-			}
-		}.getOrElse {
-			val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
-			event.getProperties.add(organiser)
+		eventOccurrence.staff.headOption match {
+			case Some(user) =>
+				val organiser: Organizer = new Organizer(s"MAILTO:${user.getEmail}")
+				organiser.getParameters.add(new Cn(user.getFullName))
+				event.getProperties.add(organiser)
+			case _ =>
+				val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
+				event.getProperties.add(organiser)
 		}
 
 		event

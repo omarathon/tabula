@@ -8,9 +8,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
-import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmitAssignmentCommand
+import uk.ac.warwick.tabula.commands.coursework.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
