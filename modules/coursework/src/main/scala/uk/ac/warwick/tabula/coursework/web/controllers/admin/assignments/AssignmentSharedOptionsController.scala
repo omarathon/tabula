@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
+import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
@@ -9,6 +10,8 @@ import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Valid
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 /**
  * When setting up a batch of assignments using AddAssignmentsController, we need
@@ -18,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
  */
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/shared-options"))
-class AssignmentSharedOptionsController extends CourseworkController {
+class AssignmentSharedOptionsController extends CourseworkController with AutowiringFeaturesComponent {
 
 	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
@@ -35,7 +38,9 @@ class AssignmentSharedOptionsController extends CourseworkController {
 	def mav(form: SharedAssignmentPropertiesForm, @PathVariable("department") department: Department) = {
 		Mav("admin/assignments/shared_options",
 			"department" -> department,
-			"maxWordCount" -> Assignment.MaximumWordCount).noLayout()
+			"maxWordCount" -> Assignment.MaximumWordCount,
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSize else Turnitin.maxFileSize)
+		).noLayout()
 	}
 
 	@ModelAttribute

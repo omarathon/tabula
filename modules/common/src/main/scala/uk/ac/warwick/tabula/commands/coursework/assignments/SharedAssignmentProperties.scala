@@ -57,6 +57,9 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 
 	var fileAttachmentTypes: JList[String] = JArrayList()
 
+	@Min(0)
+	var individualFileSizeLimit: JLong = _
+
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added
 	 * to all Assignments. When the forms become customisable this will be replaced with
@@ -92,6 +95,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		for (file <- findFileField(assignment)) {
 			file.attachmentLimit = fileAttachmentLimit
 			file.attachmentTypes = fileAttachmentTypes
+			file.individualFileSizeLimit = individualFileSizeLimit
 		}
 
 		if (wordCountMin == null && wordCountMax == null) {
@@ -133,6 +137,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
 			fileAttachmentTypes = file.attachmentTypes
+			individualFileSizeLimit = file.individualFileSizeLimit
 		}
 
 		for (wordCount <- findWordCountField(assignment)) {
@@ -149,7 +154,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		val markerField = findMarkerSelectField(assignment)
 		if (markingWorkflow != null && markingWorkflow.studentsChooseMarker){
 			// we now need a marker field for this assignment. create one
-			if (!markerField.isDefined) {
+			if (markerField.isEmpty) {
 				val markerSelect = new MarkerSelectField()
 				markerSelect.name = Assignment.defaultMarkerSelectorName
 				assignment.addFields(markerSelect)

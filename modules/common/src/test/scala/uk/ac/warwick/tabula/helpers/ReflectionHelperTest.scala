@@ -12,21 +12,21 @@ import java.io.InputStreamReader
 
 class ReflectionHelperTest extends TestBase with ReflectionsSetup {
 
-	@Test def allPermissionsTargets = {
-		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be (true)
+	@Test def allPermissionsTargets() = {
+		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be {true}
 	}
 
-	@Test def notifications = {
+	@Test def notifications() = {
 		val map = ReflectionHelper.allNotifications
-		map.contains("SubmissionDueGeneral") should be (true)
+		map.contains("SubmissionDueGeneral") should be {true}
 	}
 
-	@Test def allPermissions = {
-		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be (true)
+	@Test def allPermissions() = {
+		ReflectionHelper.allPermissions.contains(Permissions.Module.ManageAssignments) should be {true}
 	}
 
-	@Test def groupedPermissions = {
-		ReflectionHelper.groupedPermissions("Module").contains(("Module.Create", "Module.Create")) should be (true)
+	@Test def groupedPermissions() = {
+		ReflectionHelper.groupedPermissions("Module").contains(("Module.Create", "Module.Create")) should be {true}
 	}
 
 }

@@ -239,7 +239,7 @@ To not bind:
 	basename - bind path to the UploadedFile.
 	multiple - whether it should be possible to upload more than one file.
 -->
-<#macro filewidget types basename multiple=true max=10 labelText="File" >
+<#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="">
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@row path=basename>
@@ -280,6 +280,9 @@ To not bind:
 		<#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
 		<#if types?size &gt; 0>
 			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
+		</#if>
+		<#if maxFileSize?has_content>
+			Maximum file size per file (in bytes): ${maxFileSize}
 		</#if>
 		<#if multiple && max!=1>
 			<span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>

@@ -288,6 +288,17 @@ class FileField extends AssignmentFormField {
 	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: Seq[String])
 
+	// When the JSON is deserialized the number will be a JInteger if it will fit (otherwise a JLong)
+	// Attempt to get the JLong first and if it is null (because it reverts to the default when the types don't match) check if it's really a JInteger
+	def individualFileSizeLimit: JLong = getProperty[JLong]("individualFileSizeLimit", null) match {
+		case notNull: JLong => notNull
+		case _ => getProperty[JInteger]("individualFileSizeLimit", null) match {
+			case notNull: JInteger => JLong(Option(notNull.longValue()))
+			case _ => null
+		}
+	}
+	def individualFileSizeLimit_=(limit: JLong) = setProperty("individualFileSizeLimit", limit)
+
 	// This is after onBind is called, so any multipart files have been persisted as attachments
 	override def validate(value: FormValue, errors: Errors) {
 
@@ -307,9 +318,15 @@ class FileField extends AssignmentFormField {
 					val attachmentStrings = attachmentTypes.map(s => "." + s)
 					val fileNames = v.file.fileNames map (_.toLowerCase)
 					val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
-					if (invalidFiles.size > 0) {
+					if (invalidFiles.nonEmpty) {
 						if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+					}
+				} else if (Option(individualFileSizeLimit).nonEmpty){
+					val invalidFiles = v.file.individualFileSizes.filter(_._2 > individualFileSizeLimit)
+					if (invalidFiles.nonEmpty) {
+						if (invalidFiles.size == 1) errors.rejectValue("file", "file.toobig.one", Array(invalidFiles.map(_._1).mkString("")), "")
+						else errors.rejectValue("file", "file.toobig", Array(invalidFiles.map(_._1).mkString(", ")), "")
 					}
 				}
 		}
@@ -322,6 +339,7 @@ class FileField extends AssignmentFormField {
 		newField.context = this.context
 		newField.attachmentLimit = this.attachmentLimit
 		newField.attachmentTypes = this.attachmentTypes
+		newField.individualFileSizeLimit = this.individualFileSizeLimit
 		newField
 	}
 }

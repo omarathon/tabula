@@ -37,7 +37,7 @@ object TurnitinLtiService {
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
-	val maxFileSize = 20 * 1000 * 1000;  // 20M
+	val maxFileSize = 20 * 1000 * 1000  // 20M
 	
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
@@ -57,7 +57,7 @@ object TurnitinLtiService {
 	 * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same assignment.
 	 */
-	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"${AssignmentPrefix}${assignment.id}")
+	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module

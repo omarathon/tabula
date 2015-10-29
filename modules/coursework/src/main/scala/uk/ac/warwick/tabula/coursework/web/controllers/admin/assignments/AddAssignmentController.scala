@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
 import javax.validation.Valid
+import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+
 import scala.collection.JavaConverters._
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,7 +18,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{Features, AcademicYear}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UpstreamGroup
 import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
@@ -25,6 +28,7 @@ import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
 class AddAssignmentController extends CourseworkController {
 
 	@Autowired var assignmentService: AssessmentService = _
+	@Autowired var features: Features = _
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
@@ -83,8 +87,9 @@ class AddAssignmentController extends CourseworkController {
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,
 			"collectSubmissions" -> form.collectSubmissions,
-			"maxWordCount" -> Assignment.MaximumWordCount)
-			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+			"maxWordCount" -> Assignment.MaximumWordCount,
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSize else Turnitin.maxFileSize)
+		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@InitBinder
