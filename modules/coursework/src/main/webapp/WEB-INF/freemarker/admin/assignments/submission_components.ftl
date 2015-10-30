@@ -14,10 +14,10 @@
 			Publications: ${r.publicationOverlap}%
 		</p>
 		<p>
-			<#if !r.turnitinId?has_content>
+			<#if r.turnitinId?has_content>
+				<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-lti-report/${attachment.id}'/>">View full report</a>
+			<#else>
 				<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report - available via Tabula until end of August 2016</a>
-			<#elseif features.turnitinLTI && r.turnitinId?has_content><a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-lti-report/${attachment.id}'/>">View full report</a>
-			<#else>This report is no longer available in Tabula. If you need access to the full report please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a>
 			</#if>
 		</p>
 	</div>
