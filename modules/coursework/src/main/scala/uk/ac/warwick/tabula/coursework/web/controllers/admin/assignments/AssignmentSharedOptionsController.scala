@@ -39,7 +39,7 @@ class AssignmentSharedOptionsController extends CourseworkController with Autowi
 		Mav("admin/assignments/shared_options",
 			"department" -> department,
 			"maxWordCount" -> Assignment.MaximumWordCount,
-			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSize else Turnitin.maxFileSize)
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
 		).noLayout()
 	}
 

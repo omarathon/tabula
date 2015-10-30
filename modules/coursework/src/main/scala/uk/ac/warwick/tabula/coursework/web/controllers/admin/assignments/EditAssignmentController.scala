@@ -47,7 +47,7 @@ class EditAssignmentController extends CourseworkController with AutowiringFeatu
 			"assessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount,
 			"openDetails" -> openDetails,
-			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSize else Turnitin.maxFileSize)
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
 		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 

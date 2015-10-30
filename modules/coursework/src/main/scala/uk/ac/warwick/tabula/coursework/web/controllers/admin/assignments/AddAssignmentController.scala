@@ -88,7 +88,7 @@ class AddAssignmentController extends CourseworkController {
 			"assessmentGroups" -> form.assessmentGroups,
 			"collectSubmissions" -> form.collectSubmissions,
 			"maxWordCount" -> Assignment.MaximumWordCount,
-			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSize else Turnitin.maxFileSize)
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
 		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 

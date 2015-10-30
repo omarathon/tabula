@@ -105,7 +105,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 	@BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
 	@BeanProperty var fileAttachmentLimit: JInteger = null
 	@BeanProperty var fileAttachmentTypes: JList[String] = null
-	@BeanProperty var individualFileSizeLimit: JLong = null
+	@BeanProperty var individualFileSizeLimit: JInteger = null
 	@BeanProperty var minWordCount: JInteger = null
 	@BeanProperty var maxWordCount: JInteger = null
 	@BeanProperty var wordCountConventions: String = null

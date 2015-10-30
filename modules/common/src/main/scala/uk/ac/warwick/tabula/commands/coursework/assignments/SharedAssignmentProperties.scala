@@ -58,7 +58,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 	var fileAttachmentTypes: JList[String] = JArrayList()
 
 	@Min(0)
-	var individualFileSizeLimit: JLong = _
+	var individualFileSizeLimit: JInteger = _
 
 	/**
 	 * This isn't actually a property on Assignment, it's one of the default fields added

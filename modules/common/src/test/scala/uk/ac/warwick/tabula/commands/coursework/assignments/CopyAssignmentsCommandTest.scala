@@ -175,7 +175,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findCommentField(assignment).get.value = extremeHeronRant
 			findFileField(assignment).get.attachmentLimit = 9999
 			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
-			findFileField(assignment).get.individualFileSizeLimit = Integer.MAX_VALUE.toLong * 10
+			findFileField(assignment).get.individualFileSizeLimit = 100
 			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 			val newAssignment = command.applyInternal().get(0)
@@ -183,7 +183,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findCommentField(newAssignment).get.value should be (extremeHeronRant)
 			findFileField(newAssignment).get.attachmentLimit should be (9999)
 			findFileField(newAssignment).get.attachmentTypes should be (Seq(".hateherons"))
-			findFileField(newAssignment).get.individualFileSizeLimit should be (Integer.MAX_VALUE.toLong * 10)
+			findFileField(newAssignment).get.individualFileSizeLimit should be (100)
 			findWordCountField(newAssignment).get.max should be(5000)
 			findWordCountField(newAssignment).get.min should be(4500)
 			findWordCountField(newAssignment).get.conventions should be(heronRant)

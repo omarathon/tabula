@@ -181,7 +181,7 @@ so that they can be passed around between requests.
 						<@f.errors path="individualFileSizeLimit" cssClass="error" />
 						<@f.input path="individualFileSizeLimit" cssClass="input-small" />
 						<div class="help-block">
-							Enter the maximum file size (in bytes) for a single uploaded file. If you wish to submit the file(s) to Turnitin each file can be no larger than ${turnitinFileSizeLimit}
+							Enter the maximum file size (in Megabytes) for a single uploaded file. If you wish to submit the file(s) to Turnitin each file can be no larger than ${turnitinFileSizeLimit}MB
 						</div>
 					</@form.field>
 				</@form.row>

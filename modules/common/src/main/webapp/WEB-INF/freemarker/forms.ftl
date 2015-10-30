@@ -282,7 +282,7 @@ To not bind:
 			File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
 		</#if>
 		<#if maxFileSize?has_content>
-			Maximum file size per file (in bytes): ${maxFileSize}
+			Maximum file size per file: ${maxFileSize}MB
 		</#if>
 		<#if multiple && max!=1>
 			<span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>

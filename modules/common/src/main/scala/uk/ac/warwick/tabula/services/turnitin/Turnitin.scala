@@ -26,7 +26,8 @@ object Turnitin {
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
-	val maxFileSize = 20 * 1000 * 1000;  // 20MB
+	val maxFileSizeInMegabytes = 20
+	val maxFileSize = maxFileSizeInMegabytes * 1000 * 1000;  // 20MB
 	
 	def validFileType(file: FileAttachment): Boolean =
 		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
