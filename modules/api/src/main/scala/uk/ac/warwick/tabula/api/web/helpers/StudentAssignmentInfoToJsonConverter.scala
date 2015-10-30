@@ -37,7 +37,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 			"late" -> (!info("isExtended").asInstanceOf[Boolean] && info("closed").asInstanceOf[Boolean]),
 
 			"module" -> Map(
-				"code" -> assignment.module.code.toUpperCase(),
+				"code" -> assignment.module.code.toUpperCase,
 				"name" -> assignment.module.name
 			),
 
@@ -55,6 +55,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 					"allowsExtensions" -> assignment.allowExtensions,
 					"fileAttachmentLimit" -> assignment.attachmentLimit,
 					"fileAttachmentTypes" -> assignment.fileExtensions,
+					"individualFileSizeLimit" -> assignment.attachmentField.map { _.individualFileSizeLimit }.orNull,
 					"submissionFormText" -> assignment.commentField.map { _.value }.getOrElse(""),
 					"wordCountMin" -> assignment.wordCountField.map { _.min }.orNull,
 					"wordCountMax" -> assignment.wordCountField.map { _.max }.orNull,
