@@ -10,15 +10,15 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{DateFormats, AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, ViewViewableCommand}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentCommand, ModifyAssignmentCommand}
+import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
@@ -105,6 +105,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 	@BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
 	@BeanProperty var fileAttachmentLimit: JInteger = null
 	@BeanProperty var fileAttachmentTypes: JList[String] = null
+	@BeanProperty var individualFileSizeLimit: JInteger = null
 	@BeanProperty var minWordCount: JInteger = null
 	@BeanProperty var maxWordCount: JInteger = null
 	@BeanProperty var wordCountConventions: String = null
@@ -120,6 +121,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(upstreamGroups).foreach { state.upstreamGroups = _ }
 		Option(fileAttachmentLimit).foreach { state.fileAttachmentLimit = _ }
 		Option(fileAttachmentTypes).foreach { state.fileAttachmentTypes = _ }
+		Option(individualFileSizeLimit).foreach { state.individualFileSizeLimit = _ }
 		Option(minWordCount).foreach { state.wordCountMin = _ }
 		Option(maxWordCount).foreach { state.wordCountMax = _ }
 		Option(wordCountConventions).foreach { state.wordCountConventions = _ }

@@ -175,6 +175,17 @@ so that they can be passed around between requests.
 					</@form.field>
 				</@form.row>
 
+				<@form.row>
+					<@form.label path="individualFileSizeLimit">Max file size per file</@form.label>
+					<@form.field>
+						<@f.errors path="individualFileSizeLimit" cssClass="error" />
+						<@f.input path="individualFileSizeLimit" cssClass="input-small" />
+						<div class="help-block">
+							Enter the maximum file size (in Megabytes) for a single uploaded file. If you wish to submit the file(s) to Turnitin each file can be no larger than ${turnitinFileSizeLimit}MB
+						</div>
+					</@form.field>
+				</@form.row>
+
 				<@form.row path="comment">
 				  <@form.label for="assignmentComment">Text to show on submission form</@form.label>
 					<@form.field>
