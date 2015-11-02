@@ -13,7 +13,6 @@
 					if (title != '' && title != undefined) {
 						pane.find('.title').html(title);
 						window.GlobalScripts.initCollapsible();
-						$('#module-registration-pane').show();
 					}
 				}
 			});

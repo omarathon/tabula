@@ -38,6 +38,7 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@f.hidden path="wordCountConventions" />
 <@f.hidden path="fileAttachmentLimit" />
 <@f.hidden path="fileAttachmentTypes" />
+<@f.hidden path="individualFileSizeLimit" />
 <@f.hidden path="comment" />
 <@f.hidden path="feedbackTemplate" />
 <@f.hidden path="markingWorkflow" />

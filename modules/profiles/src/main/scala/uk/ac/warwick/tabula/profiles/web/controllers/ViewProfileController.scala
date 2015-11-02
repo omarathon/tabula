@@ -45,7 +45,8 @@ abstract class ViewProfileController extends ProfilesController {
 		studentCourseYearDetails: Option[StudentCourseYearDetails],
 		openMeetingId: String,
 		agentId: String,
-		profiledStudentMember: StudentMember): Mav = {
+		profiledStudentMember: StudentMember
+		): Mav = {
 		val isSelf = profiledStudentMember.universityId == user.universityId
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
@@ -54,7 +55,7 @@ abstract class ViewProfileController extends ProfilesController {
 			if (currentMember.isStudent)
 				relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember])
 					.map(_.agentRole).distinct.toList
-			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
+			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map(_.studentRole + "s").distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
 			case Nil => ""
@@ -99,7 +100,8 @@ abstract class ViewProfileController extends ProfilesController {
 		val relationshipTypes: Seq[StudentRelationshipType] =
 			relationshipService.listAllStudentRelationshipTypesWithMember(currentMember)
 
-		val smallGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+		val smallGroups = smallGroupService.findReleasedSmallGroupsByTutor(user)
+
 
 		val marking = assignmentService.getAssignmentWhereMarker(user.apparentUser)
 

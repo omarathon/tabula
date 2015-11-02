@@ -53,6 +53,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with UserLookupComponent
 			with UserGroupDaoComponent
 			with SmallGroupDaoComponent
+		  with SecurityServiceComponent
 			with Logging {
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
@@ -65,7 +66,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				smallGroupDao.findByModuleAndYear(module2, new AcademicYear(2013)) returns Seq[SmallGroup]()
 
 				val userGroupDao: UserGroupDao = smartMock[UserGroupDao]
-
+			  val securityService: SecurityService = smartMock[SecurityService]
 				def userLookup = mockUserLookup
 		}
 	}

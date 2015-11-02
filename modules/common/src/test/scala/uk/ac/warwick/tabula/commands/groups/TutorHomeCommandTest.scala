@@ -21,9 +21,8 @@ class TutorHomeCommandTest extends TestBase with Mockito {
 			val command = new TutorHomeCommandImpl(currentUser)
 
 			command.smallGroupService = mock[SmallGroupService]
-			command.securityService = mock[SecurityService]
 
-			command.smallGroupService.findSmallGroupsByTutor(currentUser.apparentUser) returns (groups)
+			command.smallGroupService.findReleasedSmallGroupsByTutor(currentUser) returns (groups)
 
 			val result = command.applyInternal()
 			result should be (Map(module -> Map(set->groups)))

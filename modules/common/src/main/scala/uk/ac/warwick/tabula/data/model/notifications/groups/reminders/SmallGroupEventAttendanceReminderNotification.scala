@@ -70,7 +70,7 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def allRecipients: Seq[User] = {
 		val attendanceIds = item.entity.attendance.asScala.map(_.universityId)
-		if (!event.group.groupSet.collectAttendance || event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+		if (!event.group.groupSet.collectAttendance || event.group.groupSet.archived || event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
 			Seq()
 		} else {
 			var users: Seq[User] = Seq()

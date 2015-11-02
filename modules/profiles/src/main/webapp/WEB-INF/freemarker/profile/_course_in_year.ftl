@@ -81,12 +81,12 @@
 			</#list>
 
 			<#if features.courseworkInStudentProfile>
-				<li id="coursework-pane" style="display:none;" data-title="Coursework">
+				<li id="coursework-pane" data-title="Coursework">
 					<#include "_coursework.ftl" />
 				</li>
 			</#if>
 
-			<li id="sg-pane" style="display:none;" data-title="Groups">
+			<li id="sg-pane" data-title="Groups">
 				<#include "_small_groups.ftl" />
 			</li>
 
@@ -97,7 +97,7 @@
 			</#if>
 
 			<#if features.attendanceMonitoring>
-				<li id="attendance-pane" style="display:none;" data-title="Attendance">
+				<li id="attendance-pane" data-title="Attendance">
 					<#include "_attendance.ftl" />
 				</li>
 			</#if>
