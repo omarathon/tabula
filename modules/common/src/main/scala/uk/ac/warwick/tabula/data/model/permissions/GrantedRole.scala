@@ -220,7 +220,9 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 
 	def scopeDepartment = scope match {
 		case student: StudentMember =>
-			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.orElse(Option(student.homeDepartment))
+			student.mostSignificantCourseDetails.flatMap {
+				_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption
+			}.orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
 		case _ => Option(scope.homeDepartment)
 	}
 }

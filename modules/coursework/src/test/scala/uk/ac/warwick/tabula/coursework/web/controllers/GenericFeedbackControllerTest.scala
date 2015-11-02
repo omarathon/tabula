@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenericFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.GenericFeedbackController
 import org.springframework.validation.Errors
 

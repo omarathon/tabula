@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import org.hibernate.NullPrecedence
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
@@ -79,7 +80,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
-			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
+			anArgThat(seqToStringMatches(Seq(ScalaOrder(Order.asc("lastName").nulls(NullPrecedence.LAST)), ScalaOrder(Order.asc("firstName").nulls(NullPrecedence.LAST))))),
 			isEq(50),
 			isEq(0)
 		)
@@ -144,7 +145,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
-			anArgThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))),
+			anArgThat(seqToStringMatches(Seq(ScalaOrder(Order.asc("lastName").nulls(NullPrecedence.LAST)), ScalaOrder(Order.asc("firstName").nulls(NullPrecedence.LAST))))),
 			isEq(10),
 			isEq(20)
 		)
@@ -162,12 +163,12 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		val expectedOrders = Seq(
 			ScalaOrder(
-				Order.desc("studentCourseYearDetails.yearOfStudy"),
+				Order.desc("studentCourseYearDetails.yearOfStudy").nulls(NullPrecedence.LAST),
 				"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
 				"mostSignificantCourse.studentCourseYearDetails" -> AliasAndJoinType("studentCourseYearDetails")
 			),
-			ScalaOrder.asc("lastName"),
-			ScalaOrder.asc("firstName")
+			ScalaOrder(Order.asc("lastName").nulls(NullPrecedence.LAST)),
+			ScalaOrder(Order.asc("firstName").nulls(NullPrecedence.LAST))
 		)
 
 		verify(command.profileService, times(1)).findStudentsByRestrictions(

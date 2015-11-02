@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
-import uk.ac.warwick.tabula.exams.commands.{ViewExamCommandResult, ViewExamCommand}
+import uk.ac.warwick.tabula.commands.exams.{ViewExamCommandResult, ViewExamCommand}
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 
 @Controller

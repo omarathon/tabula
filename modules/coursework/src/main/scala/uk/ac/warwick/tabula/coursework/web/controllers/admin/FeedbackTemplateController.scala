@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
-import uk.ac.warwick.tabula.coursework.commands.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
+import uk.ac.warwick.tabula.commands.coursework.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes

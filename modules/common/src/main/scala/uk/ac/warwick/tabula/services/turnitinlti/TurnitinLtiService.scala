@@ -2,29 +2,30 @@ package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
 
+import com.google.api.client.auth.oauth.OAuthHmacSigner
+import com.google.gdata.client.authn.oauth.{OAuthParameters, OAuthUtil}
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.{HttpStatus, HttpRequest, HttpResponse}
+import org.apache.commons.io.FilenameUtils._
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
+import org.apache.http.params.HttpConnectionParams
 import org.apache.http.protocol.HttpContext
-import org.springframework.beans.factory.{DisposableBean, InitializingBean}
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
-import com.google.api.client.auth.oauth.OAuthHmacSigner
-import com.google.gdata.client.authn.oauth.{OAuthUtil, OAuthParameters}
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
-import org.xml.sax.SAXParseException
-import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
-import org.apache.commons.io.FilenameUtils._
-import uk.ac.warwick.tabula.api.web.Routes
-import org.joda.time.format.ISODateTimeFormat
+import org.apache.http.{HttpRequest, HttpResponse, HttpStatus}
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.{DisposableBean, InitializingBean}
+import org.springframework.stereotype.Service
+import org.xml.sax.SAXParseException
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.api.web.Routes
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats, HttpClientDefaults}
+
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object TurnitinLtiService {
@@ -36,7 +37,8 @@ object TurnitinLtiService {
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
-	val maxFileSize = 20 * 1000 * 1000;  // 20M
+	val maxFileSizeInMegabytes = 20
+	val maxFileSize = maxFileSizeInMegabytes * 1000 * 1000  // 20M
 	
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
@@ -56,15 +58,15 @@ object TurnitinLtiService {
 	 * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same assignment.
 	 */
-	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"${AssignmentPrefix}${assignment.id}")
+	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(s"${module.code.toUpperCase}-${module.name}")
+		ClassName(s"${module.code.toUpperCase} - ${module.name}")
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(s"${assignment.name}(${assignment.academicYear.toString})")
+		AssignmentName(s"${assignment.name} (${assignment.academicYear.toString})")
 	}
 }
 
@@ -96,6 +98,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})

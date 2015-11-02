@@ -66,8 +66,8 @@ object DateBuilder {
 	}
 
 	def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean) = {
-		val today = DateTime.now.toDateMidnight
-		val thatDay = new DateMidnight(date.getMillis, date.getChronology)
+		val today = LocalDate.now.toDateTimeAtStartOfDay
+		val thatDay = new LocalDate(date.getMillis, date.getChronology).toDateTimeAtStartOfDay
 
 		lazy val absoluteDate = (dayAndDateFormat print date) +
 			"<sup>" + ordinal(date.getDayOfMonth) + "</sup>" +

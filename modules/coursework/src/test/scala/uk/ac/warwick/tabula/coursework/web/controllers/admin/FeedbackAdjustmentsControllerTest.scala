@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.feedback.FeedbackAdjustmentCommandState
+import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackAdjustmentCommandState
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}

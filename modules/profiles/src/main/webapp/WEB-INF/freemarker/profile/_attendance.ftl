@@ -35,7 +35,6 @@
 					var pane = $('#attendance-pane');
 					if ($('#attendance .small-groups').find('.seminar-attendance-profile').length > 0) {
 						$('#attendance .small-groups').show();
-						pane.show();
 						window.GlobalScripts.initCollapsible();
 						$('.use-tooltip').tooltip();
 						$('.use-popover').tabulaPopover({

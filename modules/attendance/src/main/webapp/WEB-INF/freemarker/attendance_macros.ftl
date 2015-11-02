@@ -572,7 +572,7 @@
 					<tbody>
 						<#list filterResult.results as result>
 							<tr class="student">
-								<#if visiblePeriods?size == 0>
+								<#if visiblePeriods?size == 0 || !result.groupedPointCheckpointPairs?has_content>
 									<td colspan="${visiblePeriods?size}"><span class="muted"><em>No monitoring points found</em></span></td>
 								<#else>
 									<@listCheckpointIcons department visiblePeriods monthNames result />
@@ -601,7 +601,13 @@
 						<#list filterResult.results as result>
 						<tr class="student">
 							<#if result.groupedPointCheckpointPairs?keys?size == 0>
-								<td colspan="3">&nbsp;</td>
+								<td class="unrecorded">
+									<span class="badge badge-success">0</span>
+								</td>
+								<td class="missed">
+									<span class="badge badge-success">0</span>
+								</td>
+								<td>&nbsp;</td>
 							<#else>
 								<#nested result />
 							</#if>

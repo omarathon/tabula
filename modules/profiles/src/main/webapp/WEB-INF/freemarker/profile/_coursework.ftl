@@ -8,7 +8,6 @@
 					if (title != '' && title != undefined) {
 						pane.find('.title').html(title);
 						window.GlobalScripts.initCollapsible();
-						$('#coursework-pane').show();
 					}
 				});
 			});
@@ -20,7 +19,7 @@
 			var pane = jQuery('#coursework-pane');
 			var title = pane.find('h4').first().html();
 			if (title != '' && title != undefined) {
-				pane.find('.title').html(title).show();
+				pane.find('.title').html(title);
 			}
 		</script>
 	</#if>

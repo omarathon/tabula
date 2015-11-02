@@ -151,22 +151,22 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
-			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
+		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
+			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
 		)
 
 		val term = mock[Term]
-		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
-		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
+		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
 		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 
 		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
@@ -219,22 +219,22 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
-			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
+		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
+			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
 		)
 
 		val term = mock[Term]
-		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
-		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
+		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
 		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 
 		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
@@ -287,22 +287,22 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		command.weekToDateConverter.toLocalDatetime(4, DayOfWeek.Monday, new LocalTime(12, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 20, 12, 0))
 		command.weekToDateConverter.toLocalDatetime(7, DayOfWeek.Monday, new LocalTime(16, 0), set.academicYear) returns Some(new LocalDateTime(2014, DateTimeConstants.OCTOBER, 29, 16, 0))
 
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
-			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
-			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
-			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
-			JInteger(Some(4)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTime.minusSeconds(1)),
-			JInteger(Some(5)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTime.minusSeconds(1)),
-			JInteger(Some(6)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTime.minusSeconds(1)),
-			JInteger(Some(7)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTime.minusSeconds(1)),
-			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
-			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
-			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
+		command.termService.getAcademicWeeksForYear(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay) returns Seq(
+			JInteger(Some(1)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(2)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(3)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(4)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 22).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 28).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(5)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 29).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 4).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(6)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 5).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 11).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(7)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 12).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 18).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(8)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(9)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)),
+			JInteger(Some(10)) -> new Interval(new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTimeAtStartOfDay.toDateTime, new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1))
 		)
 
 		val term = mock[Term]
-		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
-		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		term.getStartDate returns new LocalDate(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTimeAtStartOfDay.toDateTime
+		term.getEndDate returns new LocalDate(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTimeAtStartOfDay.toDateTime.minusSeconds(1)
 		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 
 		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1

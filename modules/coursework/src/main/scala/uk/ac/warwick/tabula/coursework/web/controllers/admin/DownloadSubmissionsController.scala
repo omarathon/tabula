@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, RenderableZip}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
@@ -11,11 +11,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.{Submission, Module, Assignment}
-import uk.ac.warwick.tabula.coursework.commands.assignments.AdminGetSingleSubmissionCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.AdminGetSingleSubmissionCommand
 import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadAttachmentCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadMarkersSubmissionsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}

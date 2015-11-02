@@ -62,9 +62,11 @@ object ListMarkingWorkflowController {
 			val validWorkflows = if (isExam) department.markingWorkflows.filter(_.validForExams) else department.markingWorkflows
 			validWorkflows.map { markingWorkflow =>
 				val assignments = dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
+				val exams = dao.getExamsUsingMarkingWorkflow(markingWorkflow)
 				Map(
 					"markingWorkflow" -> markingWorkflow,
-					"assignmentCount" -> assignments.size)
+					"assignmentCount" -> assignments.size,
+					"examCount" -> exams.size)
 			}
 		}
 	}

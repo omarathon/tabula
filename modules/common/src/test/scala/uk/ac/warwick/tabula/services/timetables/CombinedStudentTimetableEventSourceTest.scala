@@ -31,11 +31,11 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	}
 
 	source.timetableFetchingService.getTimetableForStudent(student.universityId) returns Success(timetableEvents)
-	source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns groupEvents
+	source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns Success(groupEvents)
 
 	@Test
 	def callsBothServicesAndAggregatesTheResult(){
-		source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) should be (timetableEvents ++ groupEvents)
+		source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) should be (Success(timetableEvents ++ groupEvents))
 	}
 
 

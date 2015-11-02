@@ -12,7 +12,6 @@
 					pane.find('.title').html(title);
 					$('a.ajax-modal', '#small-groups').ajaxModalLink();
 				}
-				pane.show();
 			});
 		});
 	</script>

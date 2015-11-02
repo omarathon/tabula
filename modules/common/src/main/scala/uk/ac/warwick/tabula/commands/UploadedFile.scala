@@ -70,6 +70,10 @@ class UploadedFile extends BindListener {
 
 	def isUploaded = hasUploads
 
+	def individualFileSizes: Seq[(String, Long)] =
+		upload.asScala.map(u => (u.getOriginalFilename, u.getSize)) ++
+			attached.asScala.map(a => (a.getName, a.length.getOrElse(0L)))
+
 	/**
 	 * Performs persistence of uploads such as converting MultipartFiles
 	 * into FileAttachments saves to the database. When first saved, these

@@ -83,26 +83,25 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 		events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges, event.eventType, event.parent.shortName) }
 			.mapValues {
 				case event :: Nil => event
-				case events => {
-					val event = events.head
+				case groupedEvents =>
+					val event = groupedEvents.head
 					TimetableEvent(
 						event.uid,
-						events.flatMap { _.name.maybeText }.headOption.getOrElse(""),
-						events.flatMap { _.title.maybeText }.headOption.getOrElse(""),
-						events.flatMap { _.description.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.name.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.title.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.description.maybeText }.headOption.getOrElse(""),
 						event.eventType,
 						event.weekRanges,
 						event.day,
 						event.startTime,
 						event.endTime,
-						events.flatMap { _.location }.headOption,
+						groupedEvents.flatMap { _.location }.headOption,
 						event.parent,
-						events.flatMap { _.comments }.headOption,
-						events.flatMap { _.staffUniversityIds }.distinct,
-						events.flatMap { _.studentUniversityIds }.distinct,
+						groupedEvents.flatMap { _.comments }.headOption,
+						groupedEvents.flatMap { _.staff }.distinct,
+						groupedEvents.flatMap { _.students }.distinct,
 						event.year
 					)
-				}
 			}
 			.values.toSeq
 	}

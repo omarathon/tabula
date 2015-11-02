@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UserAware, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{CanProxy, NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._

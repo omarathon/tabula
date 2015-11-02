@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
-import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, Interval, DateTime}
 import uk.ac.warwick.util.termdates.{TermImpl, Term}
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.{ScheduledNotification, StudentRelationshipType, Department}
@@ -38,15 +38,15 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		val academicYear2015 = AcademicYear(2015)
 		val department = new Department
 
-		val week5StartDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1)
-		val week5EndDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8)
-		val week15StartDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.DECEMBER, 1)
-		val week15EndDate = new DateMidnight(academicYear2015.startYear, DateTimeConstants.DECEMBER, 8)
+		val week5StartDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+		val week5EndDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
+		val week15StartDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 1).toDateTimeAtStartOfDay
+		val week15EndDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.DECEMBER, 8).toDateTimeAtStartOfDay
 
 		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
 		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
 		val weeksForYear = Seq(week5pair, week15pair)
-		thisTermService.getAcademicWeeksForYear(new DateMidnight(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
+		thisTermService.getAcademicWeeksForYear(new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)	returns weeksForYear
 
 		val scheme = new AttendanceMonitoringScheme
 		scheme.academicYear = academicYear2015

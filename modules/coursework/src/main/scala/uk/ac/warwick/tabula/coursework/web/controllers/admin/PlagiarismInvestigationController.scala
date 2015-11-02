@@ -10,7 +10,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.assignments.{PlagiarismInvestigationCommandValidation, PlagiarismInvestigationCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestigationCommandValidation, PlagiarismInvestigationCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller

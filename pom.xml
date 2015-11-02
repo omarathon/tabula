@@ -547,7 +547,7 @@
 					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
-						<jvmArg>-Xmx2048m</jvmArg>
+						<jvmArg>-Xmx4096m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
