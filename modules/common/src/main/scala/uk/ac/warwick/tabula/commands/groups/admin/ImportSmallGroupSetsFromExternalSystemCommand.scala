@@ -142,7 +142,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 
 					val tutorUsercodes = e.staff.map { _.getUserId }
 
-					createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+					createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 				}
 
 				smallGroupService.saveOrUpdate(set)
@@ -169,11 +169,11 @@ trait CommandSmallGroupSetGenerator extends SmallGroupSetGenerator {
 }
 
 trait SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]): SmallGroupEvent
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent
 }
 
 trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 		val command = ModifySmallGroupEventCommand.create(module, set, group)
 		command.weekRanges = weeks
 		command.day = day
@@ -187,6 +187,7 @@ trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
 				command.locationId = locationId
 		}
 
+		command.title = title
 		command.tutors.addAll(tutorUsercodes.asJavaCollection)
 
 		command.apply()
