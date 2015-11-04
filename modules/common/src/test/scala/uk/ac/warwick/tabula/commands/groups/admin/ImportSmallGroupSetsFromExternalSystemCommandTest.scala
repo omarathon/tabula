@@ -50,8 +50,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			set
 		}
 
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 			val event = new SmallGroupEvent(group)
+			event.title = title
 			event.weekRanges = weeks
 			event.day = day
 			event.startTime = startTime

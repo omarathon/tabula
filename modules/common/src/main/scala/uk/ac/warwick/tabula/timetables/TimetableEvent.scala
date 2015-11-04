@@ -58,7 +58,7 @@ object TimetableEvent {
 	private def eventForSmallGroupEventInWeeks(sge: SmallGroupEvent, weekRanges: Seq[WeekRange]): TimetableEvent =
 		TimetableEvent(
 			uid = sge.id,
-			name = sge.group.groupSet.name,
+			name = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			title = Option(sge.title).getOrElse(""),
 			description = s"${sge.group.groupSet.name}: ${sge.group.name}",
 			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),

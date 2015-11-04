@@ -65,7 +65,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandInternal(val module: Module,
 
 		val tutorUsercodes = e.staff.map { _.getUserId }
 
-		updateEvent(module, set, group, event, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+		updateEvent(module, set, group, event, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 
 		smallGroupService.saveOrUpdate(event)
 		smallGroupService.getOrCreateSmallGroupEventOccurrences(event)
@@ -105,11 +105,11 @@ trait UpdateSmallGroupEventFromExternalSystemDescription extends Describable[Sma
 }
 
 trait SmallGroupEventUpdater {
-	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]): SmallGroupEvent
+	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent
 }
 
 trait CommandSmallGroupEventUpdater extends SmallGroupEventUpdater {
-	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 		val command = ModifySmallGroupEventCommand.edit(module, set, group, event)
 		command.weekRanges = weeks
 		command.day = day
@@ -122,6 +122,8 @@ trait CommandSmallGroupEventUpdater extends SmallGroupEventUpdater {
 				command.location = name
 				command.locationId = locationId
 		}
+
+		command.title = title
 
 		// Remove existing tutors if we're overwriting. This means that if we update the tutor in Tabula and there isn't
 		// one in S+, we don't overwrite it. If there is one in S+ and then it's overwritten to have no tutor any more,

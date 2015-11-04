@@ -41,7 +41,8 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 	private trait CommandTestSupport extends SmallGroupEventUpdater {
 		self: MockServices with UpdateSmallGroupEventFromExternalSystemCommandState =>
 
-		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+			event.title = title
 			event.weekRanges = weeks
 			event.day = day
 			event.startTime = startTime
