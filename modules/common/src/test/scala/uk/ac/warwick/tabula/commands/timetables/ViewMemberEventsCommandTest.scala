@@ -41,8 +41,8 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 		val command = new ViewStudentEventsCommandInternal(testStudent, user) with CommandTestSupport
 
-		command.start =  new LocalDate
-		command.end = command.start.plusDays(2)
+		command.from =  new LocalDate
+		command.to = command.start.plusDays(2)
 		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Success(timetableEvents)
 		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Success(meetingOccurrences)
 		command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences

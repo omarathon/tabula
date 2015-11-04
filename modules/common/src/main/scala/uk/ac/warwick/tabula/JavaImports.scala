@@ -13,7 +13,7 @@ import java.math.MathContext
  *
  * You can either import:
  * {{{
- * import uk.ac.warwick.coures.JavaImports._
+ * import uk.ac.warwick.tabula.JavaImports._
  * }}}
  * or you can add the JavaImports trait to your class:
  * {{{
