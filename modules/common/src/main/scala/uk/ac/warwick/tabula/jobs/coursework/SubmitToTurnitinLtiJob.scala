@@ -71,9 +71,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 			// Re-get this assignmnet from hibernate, to ensure we can retrieve the Turnitin id (set in a separate transaction).
 			// Otherwise we can get "Assignment LineItem not found" from Turnitin when submitting a paper
-			val assignmentWithTurnitinId = transactional(){
-				 awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
-			}
+			val assignmentWithTurnitinId = awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
 
 			updateStatus("Submitting papers to Turnitin")
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFile) }
@@ -263,21 +261,29 @@ class SubmitToTurnitinLtiJob extends Job
 		private def awaitTurnitinId(assignment: Assignment, retries: Int): Assignment = {
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
 			def hasTurnitinId = {
-				Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
-				assignment.turnitinId.hasText
+				transactional(readOnly = true, propagation = REQUIRES_NEW) {
+					// Re-get this assignment from hibernate as the Turnitin ID has only just been set (in a separate transaction).
+					val freshAssignment = assessmentService.getAssignmentById(assignment.id).getOrElse(throw obsoleteJob)
+					freshAssignment.turnitinId.hasText
+				}
 			}
 
-			hasTurnitinId match {
-				case true => assignment
-				case false if retries == 0 =>
-					if (sendNotifications) {
-						sendFailureNotification(job, assignment)
+				hasTurnitinId match {
+					case true => {
+						transactional(){
+							assessmentService.getAssignmentById(assignment.id).getOrElse(throw obsoleteJob)
+						}
 					}
-					throw new FailedJobException("Failed to submit the assignment to Turnitin")
-				case _ =>
-					// Re-get this assignment from hibernate as the Turnitin ID has only just been set (in a separate transaction).
-					awaitTurnitinId(assessmentService.getAssignmentById(assignment.id).getOrElse (throw obsoleteJob), retries - 1)
-			}
+					case false if retries == 0 =>
+						if (sendNotifications) {
+							sendFailureNotification(job, assignment)
+						}
+						throw new FailedJobException("Failed to submit the assignment to Turnitin")
+					case _ => {
+							Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
+							awaitTurnitinId(assignment, retries - 1)
+					}
+				}
 		}
 	}
 }
