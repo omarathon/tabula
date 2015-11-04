@@ -70,8 +70,8 @@ class TimetableController extends AbstractTimetableController
 		// or we could write an EpochSecondsToDateTime 2-way converter.
 		val start = new DateTime(from * 1000).toLocalDate
 		val end = new DateTime(to * 1000).toLocalDate
-		command.start = start
-		command.end = end
+		command.from = start
+		command.to = end
 		val timetableEvents = command.apply().get
 		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
 		Mav(new JSONView(colourEvents(calendarEvents)))
@@ -153,8 +153,8 @@ abstract class AbstractTimetableICalController
 			if (endOfYear.isAfter(fifteenWeeksTime)) endOfYear else fifteenWeeksTime
 		}
 
-		command.start = start
-		command.end = end
+		command.from = start
+		command.to = end
 
 		val timetableEvents = command.apply().get
 
