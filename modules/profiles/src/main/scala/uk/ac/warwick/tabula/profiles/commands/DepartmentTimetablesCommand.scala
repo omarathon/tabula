@@ -53,7 +53,7 @@ class DepartmentTimetablesCommandInternal(
 	staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
 )	extends CommandInternal[(Seq[EventOccurrence], Seq[String])] {
 
-	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent with DepartmentTimetablesCommandState =>
 
 	override def applyInternal() = {
 		val errors: mutable.Buffer[String] = mutable.Buffer()
@@ -79,6 +79,8 @@ class DepartmentTimetablesCommandInternal(
 		val studentEvents = studentCommands.flatMap{case(student, cmd) =>
 			try {
 				permittedByChecks(securityService, user, cmd)
+				cmd.from = start
+				cmd.to = end
 				Some(cmd.apply())
 			} catch {
 				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
@@ -94,6 +96,8 @@ class DepartmentTimetablesCommandInternal(
 		val staffEvents = staffCommands.flatMap{case(staffMember, cmd) =>
 			try {
 				permittedByChecks(securityService, user, cmd)
+				cmd.from = start
+				cmd.to = end
 				Some(cmd.apply())
 			} catch {
 				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>

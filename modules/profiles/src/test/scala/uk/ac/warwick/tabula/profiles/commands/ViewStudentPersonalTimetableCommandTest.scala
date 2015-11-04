@@ -27,12 +27,12 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
 	val studentTimetableEventSource = mock[StudentTimetableEventSource]
 	val scheduledMeetingEventSource = mock[ScheduledMeetingEventSource]
-	val command = new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, testStudent, user)  with EventOccurrenceServiceComponent{
-
+	val command = new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, testStudent, user) with EventOccurrenceServiceComponent {
 		val eventOccurrenceService = mock[EventOccurrenceService]
 	}
-	command.start=  new LocalDate
-	command.end = command.start.plusDays(2)
+
+	command.from = new LocalDate
+	command.to = command.from.plusDays(2)
 	studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns timetableEvents
 	scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns meetingOccurrences
 	command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
