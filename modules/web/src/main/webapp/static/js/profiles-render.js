@@ -463,8 +463,8 @@
 						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 					}
 
-					if (event.description && event.description.length > 0) {
-						content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
+					if (event.name && event.name.length > 0) {
+						content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
 					}
 
 					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
