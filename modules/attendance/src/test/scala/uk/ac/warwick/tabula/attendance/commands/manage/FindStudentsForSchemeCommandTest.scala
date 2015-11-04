@@ -48,7 +48,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 		) returns Seq(student1.universityId, student2.universityId)
 
 		command.attendanceMonitoringService.findSchemeMembershipItems(
-			Seq(student1.universityId, student2.universityId), SchemeMembershipStaticType
+			Seq(student1.universityId, student2.universityId), SchemeMembershipStaticType, scheme.academicYear
 		) returns Seq(
 			SchemeMembershipItem(SchemeMembershipStaticType, student1.firstName, student1.lastName, student1.universityId, student1.userId, Seq()),
 			SchemeMembershipItem(SchemeMembershipStaticType, student2.firstName, student2.lastName, student2.universityId, student2.userId, Seq())

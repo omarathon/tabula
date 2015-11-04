@@ -264,7 +264,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 		}
 
 		// keep the same order
-		universityIds.map(uniId => items.find(_.universityId == uniId)).flatten
+		universityIds.flatMap(uniId => items.find(_.universityId == uniId))
 	}
 
 	def findPoints(
