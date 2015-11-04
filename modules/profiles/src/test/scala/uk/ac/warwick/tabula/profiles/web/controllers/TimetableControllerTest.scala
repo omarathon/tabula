@@ -50,8 +50,8 @@ class TimetableControllerTest extends TestBase with Mockito {
 			override def apply(): Seq[EventOccurrence] = Seq()
 			override def member: Member = Fixtures.staff("1234")
 		}
-		command.start = DateTime.now.toLocalDate
-		command.end = DateTime.now.toLocalDate
+		command.from = DateTime.now.toLocalDate
+		command.to = DateTime.now.toLocalDate
 		controller.termService = termService
 		val icalMav = controller.getIcalFeed(command)
 		icalMav.view.render(JMap("filename" -> "foo"), new MockHttpServletRequest, new MockHttpServletResponse)

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import org.joda.time.Interval
+import org.joda.time.{LocalDate, Interval}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
-import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.data.model.{StudentMember, StaffMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent, ScheduledMeetingEventSource, StaffTimetableEventSource}
@@ -110,7 +110,7 @@ object PublicStaffPersonalTimetableCommand {
 }
 
 trait ViewStaffPersonalTimetableCommandFactory {
-	def apply(staffMember: StaffMember): ComposableCommand[Seq[EventOccurrence]]
+	def apply(staffMember: StaffMember): ComposableCommand[Seq[EventOccurrence]] with DateRangedCommandState
 }
 class ViewStaffPersonalTimetableCommandFactoryImpl(
 	staffTimetableEventSource: StaffTimetableEventSource,

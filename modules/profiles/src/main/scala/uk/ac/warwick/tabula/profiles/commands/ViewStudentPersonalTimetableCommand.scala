@@ -13,9 +13,14 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 // Do not remove
 // Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
-trait PersonalTimetableCommandState {
-	var start: LocalDate = LocalDate.now.minusMonths(12)
-	var end: LocalDate = start.plusMonths(13)
+trait DateRangedCommandState {
+	var from: LocalDate = LocalDate.now.minusMonths(12)
+	var to: LocalDate = start.plusMonths(13)
+	def start = from
+	def end = to
+}
+
+trait PersonalTimetableCommandState extends DateRangedCommandState {
 	def member: Member
 }
 
@@ -76,7 +81,6 @@ trait ViewStudentTimetablePermissions extends RequiresPermissionsChecking{
 
 object ViewStudentPersonalTimetableCommand {
 
-
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
@@ -117,8 +121,9 @@ object PublicStudentPersonalTimetableCommand {
 }
 
 trait ViewStudentPersonalTimetableCommandFactory {
-	def apply(student: StudentMember): ComposableCommand[Seq[EventOccurrence]]
+	def apply(student: StudentMember): ComposableCommand[Seq[EventOccurrence]] with DateRangedCommandState
 }
+
 class ViewStudentPersonalTimetableCommandFactoryImpl(
 	studentTimetableEventSource: StudentTimetableEventSource,
 	scheduledMeetingEventSource: ScheduledMeetingEventSource,
