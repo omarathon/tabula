@@ -40,6 +40,7 @@ class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
 				val validMarkers = group.events
 					.flatMap(_.tutors.users)
 					.filter(markers.contains)
+					.distinct
 
 				val students = group.students.users.filter(validStudents.contains)
 				GroupAllocation(group.name, validMarkers, students)
@@ -55,11 +56,8 @@ class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
 		// do not return sets that have groups that don't have at least one tutor who is a marker
 		setAllocations.filterNot( s =>
 			s.firstMarkerGroups.isEmpty ||
-			s.firstMarkerGroups.exists(_.tutors.isEmpty) ||
-			(assessment.markingWorkflow.hasSecondMarker && (
-				s.secondMarkerGroups.isEmpty ||
-				s.secondMarkerGroups.exists(_.tutors.isEmpty)
-			))
+				assessment.markingWorkflow.hasSecondMarker && s.secondMarkerGroups.isEmpty ||
+				s.firstMarkerGroups.forall(_.tutors.isEmpty) && s.secondMarkerGroups.forall(_.tutors.isEmpty)
 		)
 	}
 }

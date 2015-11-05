@@ -208,7 +208,8 @@
 	// mode buttons
 	$('.mode').on('click', function(){
 		var selector = $(this).data('selector');
-		$('#assign-markers,.mode-nav').fadeOut(300, function() {
+		$('#assign-markers').fadeOut(300);
+		$('.mode-nav').fadeOut(300, function() {
 			$(this).remove();
 			$('.back-nav').show();
 			if(selector === "small-groups") {
