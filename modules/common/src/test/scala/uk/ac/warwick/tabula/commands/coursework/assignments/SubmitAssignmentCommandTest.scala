@@ -22,7 +22,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 	@Test def plagiarism() = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
 		cmd.features = emptyFeatures
 		cmd.features.disabilityOnSubmission = true
 		cmd.profileService = smartMock[ProfileService]
@@ -47,7 +47,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 	@Test def multipleSubmissions() = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
 		cmd.features = emptyFeatures
 		cmd.features.disabilityOnSubmission = true
 		cmd.profileService = smartMock[ProfileService]
@@ -92,7 +92,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 		// common reusable setup
 		trait Setup {
-			val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+			val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
 			cmd.features = emptyFeatures
 			cmd.features.disabilityOnSubmission = true
 			// pre-tick the box
@@ -145,7 +145,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 	@Test def useDisability() = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
 
 		val student = Fixtures.student(user.apparentUser.getWarwickId, user.apparentUser.getUserId)
 		student.disability = Fixtures.disability("Test")
