@@ -80,14 +80,14 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
 		assessmentDao.getExamByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId)
+	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId).filter { _.isVisibleToStudents }
 
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.universityId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId)
+	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId).filter { _.isVisibleToStudents }
 
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
@@ -101,7 +101,7 @@ abstract class AbstractAssessmentService extends AssessmentService {
 		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
 			.distinct
 			.flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
-			.filterNot { a => a.deleted || a.archived }
+			.filter { _.isAlive }
 	}
 
 	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser): Seq[Assignment] =

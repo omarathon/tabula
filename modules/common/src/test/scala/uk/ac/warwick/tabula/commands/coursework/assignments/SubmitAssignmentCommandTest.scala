@@ -177,7 +177,6 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		assignment.openDate = new DateTime().minusWeeks(1)
 		assignment.closeDate = new DateTime().plusWeeks(1)
 		assignment.collectSubmissions = true
-		assignment.active = true
 		assignment.module = new Module
 		assignment
 	}

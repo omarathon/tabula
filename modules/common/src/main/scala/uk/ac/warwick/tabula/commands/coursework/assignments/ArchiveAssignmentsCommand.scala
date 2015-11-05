@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
@@ -21,18 +22,18 @@ object ArchiveAssignmentsCommand {
 }
 
 abstract class ArchiveAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
-with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
+	with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
 
 	self: AssessmentServiceComponent =>
 
-	def applyInternal(): Seq[Assignment] = {
-		val unarchivedAssignments = assignments.asScala.filterNot(_.archived)
+	def applyInternal(): Seq[Assignment] = transactional() {
+		assignments.asScala.foreach { assignment =>
+			assignment.archive()
 
-		for (assignment <- unarchivedAssignments) {
-			assignment.archived = true
 			assessmentService.save(assignment)
 		}
-		unarchivedAssignments
+
+		assignments.asScala
 	}
 
 }

@@ -92,7 +92,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
-					a.deleted = false and a.archived = false""")
+					a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
 			.setString("universityId", user.getWarwickId)
 			.distinct.seq
 

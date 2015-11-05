@@ -19,7 +19,7 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 		val module = Fixtures.module("bs101")
 
 		val assignment = Fixtures.assignment("Essay 1")
-		assignment.archived = true
+		assignment.archive()
 	}
 
 	@Test
@@ -28,14 +28,14 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 			val command = new ArchiveAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 
 			command.assignments = Seq(assignment)
-			assignment.archived.booleanValue should be(true)
-			command.applyInternal()
-			verify(command.assessmentService, never).save(assignment)
-
-			assignment.archived = false
+			assignment.isAlive should be(false)
 			command.applyInternal()
 			verify(command.assessmentService, times(1)).save(assignment)
-			assignment.archived.booleanValue should be(true)
+
+			assignment.unarchive()
+			command.applyInternal()
+			verify(command.assessmentService, times(1)).save(assignment)
+			assignment.isAlive should be(true)
 
 		}
 	}

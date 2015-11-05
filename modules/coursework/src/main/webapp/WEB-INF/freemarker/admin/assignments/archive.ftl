@@ -1,7 +1,7 @@
 <@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/archive')}" commandName="command" cssClass="form-vertical">
 <#assign assignment=command.assignment />
 
-<#if assignment.archived>
+<#if !assignment.isAlive>
 
 	<h3>Unarchive this assignment</h3>
 

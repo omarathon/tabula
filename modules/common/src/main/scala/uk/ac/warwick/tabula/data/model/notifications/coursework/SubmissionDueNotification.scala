@@ -69,7 +69,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 
 	def verb = "Remind"
 
-	def shouldSend: Boolean = assignment.collectSubmissions && !assignment.openEnded && !assignment.archived && !assignment.deleted
+	def shouldSend: Boolean = assignment.collectSubmissions && !assignment.openEnded && assignment.isVisibleToStudents
 
 }
 
