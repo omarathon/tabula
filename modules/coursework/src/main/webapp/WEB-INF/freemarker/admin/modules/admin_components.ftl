@@ -9,7 +9,7 @@
 	<#assign has_assignments=module.hasLiveAssignments />
 	<#assign has_archived_assignments=false />
 	<#list module.assignments as assignment>
-		<#if !assignment.isAlive>
+		<#if !assignment.alive>
 			<#assign has_archived_assignments=true />
 		</#if>
 	</#list>
@@ -121,12 +121,12 @@
 				</#assign>
 			</#if>
 
-			<div class="assignment-info<#if !assignment.isAlive> archived</#if>">
+			<div class="assignment-info<#if !assignment.alive> archived</#if>">
 				<div class="column1">
 					<h3 class="name">
 						<small>
 							${assignment.name}
-							<#if !assignment.isAlive>
+							<#if !assignment.alive>
 								(Archived)
 							</#if>
 						</small>
@@ -234,7 +234,7 @@
 
 						<li>
 							<#assign archive_url><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
-							<#if !assignment.isAlive>
+							<#if !assignment.alive>
 								<#assign archive_caption>Unarchive assignment</#assign>
 							<#else>
 								<#assign archive_caption>Archive assignment</#assign>
