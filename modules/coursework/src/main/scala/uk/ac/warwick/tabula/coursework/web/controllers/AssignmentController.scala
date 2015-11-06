@@ -7,9 +7,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmitAssignmentCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.{SubmitAssignmentRequest, SubmitAssignmentCommand}
 import uk.ac.warwick.tabula.commands.coursework.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
@@ -28,15 +28,16 @@ class AssignmentController extends CourseworkController
 	with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent with AutowiringFeaturesComponent {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
+	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
 
 	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 
 	hideDeletedItems
 
-	validatesSelf[SubmitAssignmentCommand]
+	validatesSelf[SelfValidating]
 
-	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-		restricted(new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
+	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): SubmitAssignmentCommand = {
+		restricted(SubmitAssignmentCommand.self(mandatory(module), mandatory(assignment), user)).orNull
 	}
 
 	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =

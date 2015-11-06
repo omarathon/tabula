@@ -188,7 +188,7 @@ trait TestHelpers extends TestFixtures {
 	  *
 	  * withUser("cusebr") { /* ... your code */  }
 	  */
-	def withUser(code: String, universityId: String = null)(fn: => Unit) {
+	def withUser(code: String, universityId: String = null, profile: Option[Member] = None)(fn: => Unit) {
 		val user = if (code == null) {
 			new AnonymousUser()
 		} else {
@@ -199,7 +199,7 @@ trait TestHelpers extends TestFixtures {
 			u
 		}
 
-		withCurrentUser(new CurrentUser(user, user))(fn)
+		withCurrentUser(new CurrentUser(user, user, profile))(fn)
 	}
 
 	def withCurrentUser(user: CurrentUser)(fn: => Unit) {

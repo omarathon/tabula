@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.web.filters
 
 import java.io._
-import java.util
 
 import org.springframework.util.FileCopyUtils
-import org.springframework.web.multipart.{MultipartHttpServletRequest, MultipartResolver}
+import org.springframework.web.multipart.MultipartResolver
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.util.concurrency.TaskExecutionService

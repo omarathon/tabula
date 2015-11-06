@@ -1,22 +1,16 @@
 package uk.ac.warwick.tabula.web.filters
 
 import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
 import java.util.concurrent.Future
 
 import ch.qos.logback.classic.Level
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.ByteArrayBody
 import org.junit.Ignore
 import org.springframework.mock.web._
-import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
 import org.springframework.util.FileCopyUtils
 import org.springframework.web.multipart.support.StandardServletMultipartResolver
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
 import org.apache.http.entity.{StringEntity, ContentType}
-
-import scala.collection.JavaConverters._
 
 class PostDataLoggingFilterTest extends TestBase {
 	val request = new MockHttpServletRequest

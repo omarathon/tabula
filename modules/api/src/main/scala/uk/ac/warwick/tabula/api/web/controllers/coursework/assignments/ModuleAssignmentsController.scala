@@ -59,7 +59,7 @@ trait ListAssignmentsForModuleApi {
 }
 
 trait CreateAssignmentApi {
-	self: ApiController =>
+	self: ApiController with AssignmentToJsonConverter =>
 
 	@ModelAttribute("createCommand")
 	def command(@PathVariable module: Module): AddAssignmentCommand =
@@ -85,7 +85,12 @@ trait CreateAssignmentApi {
 
 			response.setStatus(HttpStatus.CREATED.value())
 			response.addHeader("Location", toplevelUrl + Routes.api.assignment(assignment))
-			null
+
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok",
+				"assignment" -> jsonAssignmentObject(assignment)
+			)))
 		}
 	}
 }
@@ -109,6 +114,11 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 	@BeanProperty var wordCountConventions: String = null
 
 	override def copyTo(state: A, errors: Errors) {
+		if (Option(openDate).isEmpty && Option(closeDate).nonEmpty) {
+			if (openEnded) openDate = DateTime.now
+			else openDate = closeDate.minusWeeks(2)
+		}
+
 		Option(name).foreach { state.name = _ }
 		Option(openDate).foreach { state.openDate = _ }
 		Option(closeDate).foreach { state.closeDate = _ }
