@@ -25,28 +25,41 @@ import scala.collection.JavaConverters._
 object SubmitAssignmentCommand {
 	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
 
-	def apply(module: Module, assignment: Assignment, user: CurrentUser) =
-		new SubmitAssignmentCommandInternal(module, assignment, user)
+	def self(module: Module, assignment: Assignment, user: CurrentUser) =
+		new SubmitAssignmentCommandInternal(module, assignment, MemberOrUser(user.profile, user.apparentUser))
 			with ComposableCommand[Submission]
 			with SubmitAssignmentBinding
-			with SubmitAssignmentPermissions
+			with SubmitAssignmentAsSelfPermissions
 			with SubmitAssignmentDescription
 			with SubmitAssignmentValidation
 			with SubmitAssignmentNotifications
 			with SubmitAssignmentTriggers
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeaturesComponent
-			with AutowiringProfileServiceComponent
 			with AutowiringZipServiceComponent
 			with AutowiringMonitoringPointProfileTermAssignmentServiceComponent
 			with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
+	def onBehalfOf(module: Module, assignment: Assignment, member: Member) =
+		new SubmitAssignmentCommandInternal(module, assignment, MemberOrUser(member))
+			with ComposableCommand[Submission]
+			with SubmitAssignmentBinding
+			with SubmitAssignmentOnBehalfOfPermissions
+			with SubmitAssignmentDescription
+			with SubmitAssignmentValidation
+			with SubmitAssignmentNotifications
+			with SubmitAssignmentTriggers
+			with AutowiringSubmissionServiceComponent
+			with AutowiringFeaturesComponent
+			with AutowiringZipServiceComponent
+			with AutowiringMonitoringPointProfileTermAssignmentServiceComponent
+			with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 }
 
 trait SubmitAssignmentState {
 	def module: Module
 	def assignment: Assignment
-	def user: CurrentUser
+	def user: MemberOrUser
 }
 
 trait SubmitAssignmentRequest extends SubmitAssignmentState {
@@ -79,20 +92,19 @@ trait SubmitAssignmentRequest extends SubmitAssignmentState {
 
 }
 
-abstract class SubmitAssignmentCommandInternal(val module: Module, val assignment: Assignment, val user: CurrentUser)
+abstract class SubmitAssignmentCommandInternal(val module: Module, val assignment: Assignment, val user: MemberOrUser)
 	extends CommandInternal[Submission] with SubmitAssignmentRequest {
 
 	self: SubmissionServiceComponent
 		with FeaturesComponent
-		with ProfileServiceComponent
 		with ZipServiceComponent
 		with MonitoringPointProfileTermAssignmentServiceComponent
 		with AttendanceMonitoringCourseworkSubmissionServiceComponent
 		with TriggerHandling =>
 
 	override def applyInternal() = transactional() {
-		assignment.submissions.asScala.find(_.isForUser(user.apparentUser)).foreach { existingSubmission =>
-			if (assignment.resubmittable(user.apparentUser)) {
+		assignment.submissions.asScala.find(_.isForUser(user.asUser)).foreach { existingSubmission =>
+			if (assignment.resubmittable(user.asUser)) {
 				triggerService.removeExistingTriggers(existingSubmission)
 				submissionService.delete(existingSubmission)
 			} else { // Validation should prevent ever reaching here.
@@ -100,14 +112,14 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 			}
 		}
 
-		val submitterMember = profileService.getMemberByUser(user.apparentUser)
+		val submitterMember = user.asMember
 
 		val submission = new Submission
 		submission.assignment = assignment
 		submission.submitted = true
 		submission.submittedDate = new DateTime
-		submission.userId = user.apparentUser.getUserId
-		submission.universityId = user.apparentUser.getWarwickId
+		submission.userId = user.usercode
+		submission.universityId = user.universityId
 
 		val savedValues = fields.asScala.map {
 			case (_, submissionValue) =>
@@ -158,7 +170,7 @@ trait SubmitAssignmentBinding extends BindListener {
 	}
 }
 
-trait SubmitAssignmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait SubmitAssignmentAsSelfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: SubmitAssignmentState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
@@ -167,10 +179,19 @@ trait SubmitAssignmentPermissions extends RequiresPermissionsChecking with Permi
 	}
 }
 
+trait SubmitAssignmentOnBehalfOfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: SubmitAssignmentState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, assignment)
+		p.PermissionCheck(Permissions.Submission.CreateOnBehalfOf, mandatory(user.asMember))
+	}
+}
+
 trait SubmitAssignmentValidation extends SelfValidating {
 	self: SubmitAssignmentRequest
-		with FeaturesComponent
-		with ProfileServiceComponent =>
+		with FeaturesComponent =>
 
 	override def validate(errors: Errors) {
 		if (!assignment.isOpened) {
@@ -181,7 +202,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
 			errors.reject("assignment.submit.disabled")
 		}
 
-		val hasExtension = assignment.isWithinExtension(user.apparentUser)
+		val hasExtension = assignment.isWithinExtension(user.asUser)
 
 		if (!assignment.allowLateSubmissions && (assignment.isClosed && !hasExtension)) {
 			errors.reject("assignment.submit.closed")
@@ -212,7 +233,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
 			errors.popNestedPath()
 		}
 
-		if (features.disabilityOnSubmission && profileService.getMemberByUser(user.apparentUser).exists{
+		if (features.disabilityOnSubmission && user.asMember.exists {
 			case student: StudentMember => student.disability.exists(_.reportable)
 			case _ => false
 		} && useDisability == null) {
@@ -248,10 +269,10 @@ trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] wit
 	override def emit(submission: Submission) = {
 		val studentNotifications =
 			if (assignment.isVisibleToStudents)
-				Seq(Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment))
+				Seq(Notification.init(new SubmissionReceiptNotification, user.asUser, Seq(submission), assignment))
 			else Seq()
 
-		studentNotifications ++ Seq(Notification.init(new SubmissionReceivedNotification, user.apparentUser, Seq(submission), assignment))
+		studentNotifications ++ Seq(Notification.init(new SubmissionReceivedNotification, user.asUser, Seq(submission), assignment))
 	}
 
 	override def notificationsToComplete(commandResult: Submission): CompletesNotificationsResult = {
@@ -260,7 +281,7 @@ trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] wit
 				assignment.findExtension(user.universityId).map(
 					notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueWithExtensionNotification]
 				).getOrElse(Seq()),
-			user.apparentUser
+			user.asUser
 		)
 	}
 }

@@ -22,11 +22,9 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 	@Test def plagiarism() = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
+		val cmd = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 		cmd.features = emptyFeatures
 		cmd.features.disabilityOnSubmission = true
-		cmd.profileService = smartMock[ProfileService]
-		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 
 		// no plagiarism box ticked
 		var errors = new BindException(cmd, "command")
@@ -47,11 +45,9 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 	@Test def multipleSubmissions() = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
-		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
+		val cmd = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 		cmd.features = emptyFeatures
 		cmd.features.disabilityOnSubmission = true
-		cmd.profileService = smartMock[ProfileService]
-		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 
 		// scenario
 		assignment.allowResubmission = false
@@ -92,15 +88,13 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 		// common reusable setup
 		trait Setup {
-			val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
+			val cmd = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 			cmd.features = emptyFeatures
 			cmd.features.disabilityOnSubmission = true
 			// pre-tick the box
 			cmd.plagiarismDeclaration = true
 			var errors = new BindException(cmd, "command")
 			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
-			cmd.profileService = smartMock[ProfileService]
-			cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns None
 		}
 
 		new Setup {
@@ -142,33 +136,34 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test def useDisability() = withUser(code = "cusebr", universityId = "0678022") {
-		val assignment = newActiveAssignment
-		val user = RequestInfo.fromThread.get.user
-		val cmd = SubmitAssignmentCommand(assignment.module, assignment, user)
-
-		val student = Fixtures.student(user.apparentUser.getWarwickId, user.apparentUser.getUserId)
+	@Test def useDisability() = {
+		val student = Fixtures.student(universityId = "0678022", userId = "cusebr")
 		student.disability = Fixtures.disability("Test")
-		cmd.profileService = smartMock[ProfileService]
-		cmd.profileService.getMemberByUser(user.apparentUser, disableFilter = false, eagerLoad = false) returns Option(student)
-		cmd.features = emptyFeatures
-		cmd.features.disabilityOnSubmission = true
-		cmd.plagiarismDeclaration = true
 
-		// no disability use selected
-		var errors = new BindException(cmd, "command")
-		cmd.validate(errors)
-		errors.hasErrors should be {true}
-		errors.getErrorCount should be (1)
-		errors.getFieldErrors.asScala.head.getField should be ("useDisability")
-		errors.getFieldErrors.asScala.head.getCodes should contain ("assignment.submit.chooseDisability")
+		withUser(code = "cusebr", universityId = "0678022", profile = Some(student)) {
+			val assignment = newActiveAssignment
+			val user = RequestInfo.fromThread.get.user
+			val cmd = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 
-		// oops, sorry, yes
-		cmd.useDisability = true
+			cmd.features = emptyFeatures
+			cmd.features.disabilityOnSubmission = true
+			cmd.plagiarismDeclaration = true
 
-		errors = new BindException(cmd, "command")
-		cmd.validate(errors)
-		errors.hasErrors should be {false}
+			// no disability use selected
+			var errors = new BindException(cmd, "command")
+			cmd.validate(errors)
+			errors.hasErrors should be {true}
+			errors.getErrorCount should be (1)
+			errors.getFieldErrors.asScala.head.getField should be ("useDisability")
+			errors.getFieldErrors.asScala.head.getCodes should contain ("assignment.submit.chooseDisability")
+
+			// oops, sorry, yes
+			cmd.useDisability = true
+
+			errors = new BindException(cmd, "command")
+			cmd.validate(errors)
+			errors.hasErrors should be {false}
+		}
 	}
 
 	private def newActiveAssignment = {

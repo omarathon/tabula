@@ -58,25 +58,30 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def targetFile(id: String): File = new File(attachmentDir, partition(id))
 	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
 
-	private def saveAttachment(file: FileAttachment) {
+	private def saveAttachment(file: FileAttachment) = {
 		session.saveOrUpdate(file)
 
 		if (!file.hasData && file.uploadedData != null) {
 			persistFileData(file, file.uploadedData)
 		}
+
+		file
 	}
 
-	def saveTemporary(file: FileAttachment) {
+	def saveTemporary(file: FileAttachment) = {
 		file.temporary = true
 		saveAttachment(file)
 	}
 
-	def savePermanent(file: FileAttachment) {
+	def savePermanent(file: FileAttachment) = {
 		file.temporary = false
 		saveAttachment(file)
 	}
 
-	def saveOrUpdate(file: FileAttachment) = session.saveOrUpdate(file)
+	def saveOrUpdate(file: FileAttachment) = {
+		session.saveOrUpdate(file)
+		file
+	}
 
 	def persistFileData(file: FileAttachment, inputStream: InputStream) {
 		val target = targetFile(file.id)

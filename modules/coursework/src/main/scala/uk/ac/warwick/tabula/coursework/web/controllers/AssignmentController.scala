@@ -37,7 +37,7 @@ class AssignmentController extends CourseworkController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): SubmitAssignmentCommand = {
-		restricted(SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
+		restricted(SubmitAssignmentCommand.self(mandatory(module), mandatory(assignment), user)).orNull
 	}
 
 	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
