@@ -106,10 +106,7 @@ class Assignment
 	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
 	private var _archived: JBoolean = false
 
-	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
 	def archive(): Unit = { _archived = true }
-
-	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
 	def unarchive(): Unit = { _archived = false }
 
 	@Column(name="hidden_from_students")
