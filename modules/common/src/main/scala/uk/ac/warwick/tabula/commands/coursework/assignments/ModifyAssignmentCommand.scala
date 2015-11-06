@@ -68,7 +68,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 
 		// TAB-255 Guard to avoid SQL error - if it's null or gigantic it will fail validation in other ways.
 		if (name != null && name.length < 3000) {
-			val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module).filterNot { existing => existing.isAlive || (existing eq assignment) }
+			val duplicates = service.getAssignmentByNameYearModule(name, academicYear, module).filter { existing => existing.isAlive && !(existing eq assignment) }
 			for (duplicate <- duplicates.headOption) {
 				errors.rejectValue("name", "name.duplicate.assignment", Array(name), "")
 			}
