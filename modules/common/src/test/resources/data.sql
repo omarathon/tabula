@@ -31,19 +31,19 @@ insert into route (id,department_id,code,name,active,degreeType,teachingDepartme
 insert into route (id,department_id,code,name,active,degreeType,teachingDepartmentsActive) values ('4','4','g901','AI',1,'PG',0);
 
 -- set up an assignment for the "Intro to Programming" module
-insert into assignment(id, name, module_id, academicyear, active, attachmentlimit,
+insert into assignment(id, name, module_id, academicyear, attachmentlimit,
 	collectmarks,deleted,collectsubmissions,restrictsubmissions,
 	allowlatesubmissions,allowresubmission,displayplagiarismnotice,archived,createdDate)
-	values ('1','Test Assignment','1','2011',1,1,1,1,1,1,1,1,1,1,sysdate);
+	values ('1','Test Assignment','1','2011',1,1,1,1,1,1,1,1,1,sysdate);
 
 -- set up an assignment for the "Intro to Programming" module
-insert into assignment(id, name, module_id, academicyear, active, attachmentlimit,
+insert into assignment(id, name, module_id, academicyear, attachmentlimit,
 	collectmarks,deleted,collectsubmissions,restrictsubmissions,
 	allowlatesubmissions,allowresubmission,displayplagiarismnotice,archived,createdDate)
-	values ('2','Test Computing Assignment','1','2011',1,1,1,1,1,1,1,1,1,1,sysdate);
+	values ('2','Test Computing Assignment','1','2011',1,1,1,1,1,1,1,1,1,sysdate);
 
 -- set up an assignment for the "History of Computing" module
-insert into assignment(id, name, module_id, academicyear, active, attachmentlimit,
+insert into assignment(id, name, module_id, academicyear, attachmentlimit,
 	collectmarks,deleted,collectsubmissions,restrictsubmissions,
 	allowlatesubmissions,allowresubmission,displayplagiarismnotice,archived,createdDate)
-	values ('3','Programming Assignment','2','2011',1,1,1,1,1,1,1,1,1,1,sysdate);
+	values ('3','Programming Assignment','2','2011',1,1,1,1,1,1,1,1,1,sysdate);

@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Assignment, Module}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 /** Simply marks an assignment as archived. */
@@ -15,16 +16,20 @@ object ArchiveAssignmentCommand {
 		with ArchiveAssignmentDescription
 		with ArchiveAssignmentCommandState
 		with ArchiveAssignmentNotifications
+		with AutowiringAssessmentServiceComponent
 }
 
 class ArchiveAssignmentCommandInternal(val module: Module, val assignment: Assignment)
 	extends CommandInternal[Assignment] {
 
-	self: ArchiveAssignmentCommandState =>
+	self: ArchiveAssignmentCommandState with AssessmentServiceComponent =>
 
 	def applyInternal() = {
 		transactional() {
-			assignment.archived = !unarchive
+			if (unarchive) assignment.unarchive()
+			else assignment.archive()
+
+			assessmentService.save(assignment)
 		}
 		assignment
 	}

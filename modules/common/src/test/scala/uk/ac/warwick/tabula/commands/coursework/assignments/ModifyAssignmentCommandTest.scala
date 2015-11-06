@@ -185,7 +185,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 		withClue("correct error code") { errors.getFieldErrors("name").asScala.map(_.getCode).head should be ("name.duplicate.assignment") }
 
 		// Archive existing, should stop error
-		module.assignments.get(0).archived = true
+		module.assignments.get(0).archive()
 		errors = new BindException(cmd, "command")
 
 		cmd.name = "test"

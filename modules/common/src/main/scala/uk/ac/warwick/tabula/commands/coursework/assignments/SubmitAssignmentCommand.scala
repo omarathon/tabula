@@ -68,9 +68,6 @@ class SubmitAssignmentCommand(
 	}
 
 	def validate(errors: Errors) {
-		if (!assignment.active) {
-			errors.reject("assignment.submit.inactive")
-		}
 		if (!assignment.isOpened) {
 			errors.reject("assignment.submit.notopen")
 		}
@@ -192,10 +189,12 @@ class SubmitAssignmentCommand(
 	}
 
 	def emit(submission: Submission) = {
-		Seq(
-			Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment),
-			Notification.init(new SubmissionReceivedNotification, user.apparentUser, Seq(submission), assignment)
-		)
+		val studentNotifications =
+			if (assignment.isVisibleToStudents)
+				Seq(Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment))
+			else Seq()
+
+		studentNotifications ++ Seq(Notification.init(new SubmissionReceivedNotification, user.apparentUser, Seq(submission), assignment))
 	}
 
 	def notificationsToComplete(commandResult: Submission): CompletesNotificationsResult = {

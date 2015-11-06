@@ -58,8 +58,6 @@ trait ListAssignmentsForModuleApi {
 	}
 }
 
-
-
 trait CreateAssignmentApi {
 	self: ApiController =>
 
@@ -138,6 +136,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }
 		Option(automaticallyReleaseToMarkers).foreach { state.automaticallyReleaseToMarkers = _ }
 		Option(automaticallySubmitToTurnitin).foreach { state.automaticallySubmitToTurnitin = _ }
+		Option(hiddenFromStudents).foreach { state.hiddenFromStudents = _ }
 	}
 
 }
