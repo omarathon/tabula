@@ -18,7 +18,7 @@ trait RequestLevelCaching[A, B] {
 		case Some(cache) => cache.getOrElseUpdate(key, default)
 		case _ => {
 			// Include error to get stack trace
-			requestLevelCachingLogger.warn("Calling a request level cache outside of a request", new RequestLevelCachingError)
+			requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
 			default
 		}
 	}
