@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.validation.BindException
-import org.springframework.web.bind.annotation.{RequestParam, RequestHeader, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, RequestParam, RequestHeader, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.FileAttachmentToJsonConverter
@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 @RequestMapping(Array("/v1/attachments"))
 class FileAttachmentController extends ApiController
 	with CreateFileAttachmentApi
+	with GetFileAttachmentApi
 	with FileAttachmentToJsonConverter
 	with AutowiringFileDaoComponent
 
@@ -73,6 +74,20 @@ trait CreateFileAttachmentApi {
 		errors.reject("fileattachment.api.nofilename")
 
 		new JSONErrorView(errors)
+	}
+
+}
+
+trait GetFileAttachmentApi {
+	self: ApiController with FileAttachmentToJsonConverter =>
+
+	@RequestMapping(method = Array(GET), value = Array("/{attachment}"), produces = Array("application/json"))
+	def getAttachment(@PathVariable attachment: FileAttachment) = {
+		Mav(new JSONView(Map(
+			"success" -> true,
+			"status" -> "ok",
+			"attachment" -> jsonFileAttachmentObject(mandatory(attachment))
+		)))
 	}
 
 }
