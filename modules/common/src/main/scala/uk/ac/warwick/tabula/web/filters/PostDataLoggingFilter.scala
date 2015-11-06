@@ -96,7 +96,7 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 		data.append(allParams)
 
-		if (isLogRequestBody(request)) {
+		if (!multipart && isLogRequestBody(request)) {
 			data.append("requestBody=")
 			data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
 		}
