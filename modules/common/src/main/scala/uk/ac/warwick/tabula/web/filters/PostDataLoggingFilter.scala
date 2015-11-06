@@ -3,20 +3,18 @@ package uk.ac.warwick.tabula.web.filters
 import java.io._
 import java.util
 
-import org.apache.commons.fileupload.FileItemStream
-import org.apache.commons.fileupload.servlet.ServletFileUpload
-import org.apache.commons.fileupload.util.Streams
 import org.springframework.util.FileCopyUtils
+import org.springframework.web.multipart.{MultipartHttpServletRequest, MultipartResolver}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.util.concurrency.TaskExecutionService
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
-import javax.servlet.{ServletInputStream, Filter, FilterChain}
+import javax.servlet.{ReadListener, ServletInputStream, Filter, FilterChain}
 import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest, HttpServletResponse}
 
-import org.slf4j.{LoggerFactory, Logger}
+import org.slf4j.LoggerFactory
 
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
 import uk.ac.warwick.tabula.helpers.{Logging, Runnable}
@@ -36,6 +34,8 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 	@transient lazy val postLogger = LoggerFactory.getLogger("POST_LOGGER")
 
+	var multipartResolver = Wire[MultipartResolver]
+
 	val executionService = new TaskExecutionService
 
 	// For tests to access the Future of an asynchronous task
@@ -53,10 +53,10 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 		// but reading parameters also messes with file uploads.
 		if (request.getMethod.equalsIgnoreCase("post")) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Logging POST data for request to " + request.getRequestURI())
+				logger.debug("Logging POST data for request to " + request.getRequestURI)
 			}
 
-			if (ServletFileUpload.isMultipartContent(request) || isLogRequestBody(request)) {
+			if (multipartResolver.isMultipart(request) || isLogRequestBody(request)) {
 				// Multipart - wrap the request to spy on the body as it's read,
 				// without disturbing the original reader.
 				val forkingRequest = new ForkingInputStreamHttpServletRequest(request)
@@ -78,7 +78,7 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 
 	def generateLogLine(request: HttpServletRequest): String = {
 		val data = new StringBuilder()
-		val multipart = ServletFileUpload.isMultipartContent(request)
+		val multipart = multipartResolver.isMultipart(request)
 
 		data.append("userId=").append(SSOClientFilter.getUserFromRequest(request).getUserId)
 		data.append(" ")
@@ -87,35 +87,18 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 		data.append(request.getRequestURI)
 		data.append(" ")
 
-		if (multipart) {
-			// This reads the request body, so you wouldn't want to do it on the main
-			// request as the stream would then be empty when the app came to parse uploaded
-			// files.
-			val iter = new ServletFileUpload().getItemIterator(request)
-			var pairs = mutable.ListBuffer[String]()
-			while (iter.hasNext) {
-				val item: FileItemStream = iter.next
-				if (item.isFormField) {
-					val name = item.getFieldName
-					val value = Streams.asString(item.openStream)
-					pairs += s"$name=$value"
-				}
+		val paramKeys = request.getParameterMap.keySet.asScala
+		val allParams = paramKeys.flatMap { (key) =>
+			request.getParameterValues(key).map { (value) =>
+				s"$key=$value"
 			}
-			data.append(pairs.mkString("&"))
-		} else {
-			val paramKeys = request.getParameterMap.keySet.asInstanceOf[util.Set[String]].asScala
-			val allParams = paramKeys.flatMap { (key) =>
-				request.getParameterValues(key).map { (value) =>
-					s"$key=$value"
-				}
-			}.mkString("&")
+		}.mkString("&")
 
-			data.append(allParams)
+		data.append(allParams)
 
-			if (isLogRequestBody(request)) {
-				data.append("requestBody=")
-				data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
-			}
+		if (!multipart && isLogRequestBody(request)) {
+			data.append("requestBody=")
+			data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
 		}
 
 		data.toString
@@ -203,5 +186,20 @@ object PostDataLoggingFilter {
 		override def close(): Unit = delegate.close()
 		override def available(): Int = delegate.available()
 		override def skip(n: Long): Long = delegate.skip(n)
+
+		override def isFinished: Boolean = delegate match {
+			case servletDelegate: ServletInputStream => servletDelegate.isFinished
+			case _ => throw new UnsupportedOperationException
+		}
+
+		override def isReady: Boolean = delegate match {
+			case servletDelegate: ServletInputStream => servletDelegate.isReady
+			case _ => throw new UnsupportedOperationException
+		}
+
+		override def setReadListener(readListener: ReadListener): Unit = delegate match {
+			case servletDelegate: ServletInputStream => servletDelegate.setReadListener(readListener)
+			case _ => throw new UnsupportedOperationException
+		}
 	}
 }
