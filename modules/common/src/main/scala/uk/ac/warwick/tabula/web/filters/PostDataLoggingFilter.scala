@@ -87,36 +87,18 @@ class PostDataLoggingFilter extends AbstractHttpFilter with Filter with Logging 
 		data.append(request.getRequestURI)
 		data.append(" ")
 
-		if (multipart) {
-			// This reads the request body, so you wouldn't want to do it on the main
-			// request as the stream would then be empty when the app came to parse uploaded
-			// files.
-			val multipartFormFields =
-				request.getParts.asScala
-					.filter { part =>
-						println(part)
-						part.getContentType == null
-					}
-					.map { part =>
-						val value = FileCopyUtils.copyToString(new InputStreamReader(part.getInputStream))
-						s"${part.getName}=$value"
-					}
-
-			data.append(multipartFormFields.mkString("&"))
-		} else {
-			val paramKeys = request.getParameterMap.keySet.asScala
-			val allParams = paramKeys.flatMap { (key) =>
-				request.getParameterValues(key).map { (value) =>
-					s"$key=$value"
-				}
-			}.mkString("&")
-
-			data.append(allParams)
-
-			if (isLogRequestBody(request)) {
-				data.append("requestBody=")
-				data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
+		val paramKeys = request.getParameterMap.keySet.asScala
+		val allParams = paramKeys.flatMap { (key) =>
+			request.getParameterValues(key).map { (value) =>
+				s"$key=$value"
 			}
+		}.mkString("&")
+
+		data.append(allParams)
+
+		if (isLogRequestBody(request)) {
+			data.append("requestBody=")
+			data.append(new String(FileCopyUtils.copyToByteArray(request.getInputStream), request.getCharacterEncoding))
 		}
 
 		data.toString
