@@ -34,7 +34,9 @@
 						</#if>
 						<td>
 						${student.fullName}
-							<input class="allocation" type="hidden" name="${markerBinding}[][${student_index}]" value="${student.userId}" />
+							<#if group.tutors?has_content>
+								<input class="allocation" type="hidden" name="${markerBinding}[][${student_index}]" value="${student.userId}" />
+							</#if>
 						</td>
 					</tr>
 					</#list>
