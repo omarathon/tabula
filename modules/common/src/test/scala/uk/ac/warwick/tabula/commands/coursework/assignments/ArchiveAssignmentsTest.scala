@@ -33,9 +33,10 @@ class ArchiveAssignmentsTest  extends TestBase with Mockito {
 			verify(command.assessmentService, times(1)).save(assignment)
 
 			assignment.unarchive()
-			command.applyInternal()
-			verify(command.assessmentService, times(1)).save(assignment)
 			assignment.isAlive should be(true)
+			command.applyInternal()
+			verify(command.assessmentService, times(2)).save(assignment)
+			assignment.isAlive should be(false)
 
 		}
 	}
