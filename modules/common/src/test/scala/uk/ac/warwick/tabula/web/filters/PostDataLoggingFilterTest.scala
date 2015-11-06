@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.web.filters
 
 import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 import java.util.concurrent.Future
 
 import ch.qos.logback.classic.Level
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.ByteArrayBody
-import org.springframework.mock.web.{MockFilterChain, MockHttpServletResponse, MockHttpServletRequest}
+import org.springframework.mock.web._
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
 import org.springframework.util.FileCopyUtils
+import org.springframework.web.multipart.support.StandardServletMultipartResolver
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
 import org.apache.http.entity.{StringEntity, ContentType}
@@ -19,6 +22,7 @@ class PostDataLoggingFilterTest extends TestBase {
 	val response = new MockHttpServletResponse
 	val chain = new MockFilterChain
 	val filter = new PostDataLoggingFilter
+	filter.multipartResolver = new StandardServletMultipartResolver
 
 	request.setRequestURI("/url.php")
 
@@ -75,20 +79,13 @@ class PostDataLoggingFilterTest extends TestBase {
 	}
 
 	@Test(timeout = 1000) def doFilterMultipart {
+		val request = new MockMultipartHttpServletRequest()
 		request.setMethod("POST")
 
-		val submissionBody = new ByteArrayBody(Array[Byte](32,33,34,35,36,37,38), ContentType.APPLICATION_OCTET_STREAM, "hello.pdf")
+		val submissionBody = new MockMultipartFile("submission", "hello.pdf", "application/octet-stream", Array[Byte](32,33,34,35,36,37,38))
+		request.addFile(submissionBody)
 
-		val entity = MultipartEntityBuilder.create
-			.setBoundary("-----woooop-----")
-			.addTextBody("confirm","yes")
-			.addPart("submission", submissionBody)
-			.build()
-
-		val baos = new ByteArrayOutputStream
-		entity.writeTo(baos)
-		request.setContentType(entity.getContentType.getValue)
-		request.setContent(baos.toByteArray)
+		request.addParameter("confirm", "yes")
 
 		filter.doFilter(request, response, chain)
 
