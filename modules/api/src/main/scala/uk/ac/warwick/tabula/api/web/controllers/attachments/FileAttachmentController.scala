@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 @RequestMapping(Array("/v1/attachments"))
 class FileAttachmentController extends ApiController
 	with CreateFileAttachmentApi
-	with GetFileAttachmentApi
+	with GetFileAttachmentMetadataApi
 	with FileAttachmentToJsonConverter
 	with AutowiringFileDaoComponent
 
@@ -78,11 +78,11 @@ trait CreateFileAttachmentApi {
 
 }
 
-trait GetFileAttachmentApi {
+trait GetFileAttachmentMetadataApi {
 	self: ApiController with FileAttachmentToJsonConverter =>
 
 	@RequestMapping(method = Array(GET), value = Array("/{attachment}"), produces = Array("application/json"))
-	def getAttachment(@PathVariable attachment: FileAttachment) = {
+	def getAttachmentMetadata(@PathVariable attachment: FileAttachment) = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
