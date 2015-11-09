@@ -1,7 +1,7 @@
 {
   "name": "warwick-id7",
   "description": "CSS, JavaScript and sample HTML in order to use the corporate identity on your site",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "homepage": "http://id7.warwick.ac.uk",
   "main": [
     "less/id7.less",
@@ -48,11 +48,11 @@
     "modernizr": ">= 2.8.3",
     "jquery-doublescroll": ">= 0.4"
   },
-  "_release": "1.1.12",
+  "_release": "1.1.13",
   "_resolution": {
     "type": "version",
-    "tag": "v1.1.12",
-    "commit": "7f20b88f5e22da1dfe46115e39652430565040f1"
+    "tag": "v1.1.13",
+    "commit": "65e99d174a52456b31e1533400aaf466cb84ccb1"
   },
   "_source": "git://github.com/universityofwarwick/id7.git",
   "_target": "~1.1.9",
