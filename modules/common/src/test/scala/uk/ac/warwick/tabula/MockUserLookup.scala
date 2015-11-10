@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula
 
 import scala.collection.JavaConverters._
 import org.apache.commons.lang3.StringUtils._
-import uk.ac.warwick.tabula.services.{UserByWarwickIdCache, UserLookupService}
+import uk.ac.warwick.tabula.services.{LenientGroupService, UserByWarwickIdCache, UserLookupService}
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.userlookup.webgroups.GroupInfo
 import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
@@ -30,7 +30,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 
 	val groupService: MockGroupService = new MockGroupService
 
-	override def getGroupService() = groupService
+	override def getGroupService() = new LenientGroupService(groupService)
 
 	def addFindUsersWithFilterResult(user: User) {
 		filterUserResult.add(user)
@@ -144,6 +144,8 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 
 	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
 		warwickIds.map { id => id -> getUserByWarwickUniIdUncached(id, skipMemberLookup) }.toMap
+
+	override def getGroupService = new LenientGroupService(super.getGroupService)
 }
 
 
