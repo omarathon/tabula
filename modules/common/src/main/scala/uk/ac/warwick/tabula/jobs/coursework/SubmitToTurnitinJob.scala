@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.jobs.coursework
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.{MemberOrUser, Describable}
+import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.commands.coursework.turnitin.HasTurnitinApi
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinClassDeletedNotification, TurnitinJobErrorNotification, TurnitinJobSuccessNotification}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, OriginalityReport}
