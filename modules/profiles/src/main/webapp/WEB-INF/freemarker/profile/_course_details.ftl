@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="course-details" class="clearfix">
 	<hr class="full-width"></hr>
 
@@ -198,3 +200,5 @@
 		</#if>
 	</div>
 </#if>
+
+</#escape>

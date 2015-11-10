@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="coursework" class="clearfix">
 	<#if can.do("Profiles.Read.Coursework", profile)>
 		<script type="text/javascript">
@@ -24,3 +26,5 @@
 		</script>
 	</#if>
 </section>
+
+</#escape>

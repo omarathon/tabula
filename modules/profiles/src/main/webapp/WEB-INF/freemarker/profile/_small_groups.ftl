@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <#if !groupsWidgetUrl?has_content>
 	<#assign groupsWidgetUrl = '/groups/student/${profile.universityId}?academicYear=${studentCourseYearDetails.academicYear.startYear?c}' />
 </#if>
@@ -16,3 +18,5 @@
 		});
 	</script>
 </section>
+
+</#escape>

@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="attendance" class="clearfix" >
 	<#assign year=studentCourseYearDetails.academicYear.startYear?string.computer />
 
@@ -48,3 +50,5 @@
 		});
 	</script>
 </section>
+
+</#escape>

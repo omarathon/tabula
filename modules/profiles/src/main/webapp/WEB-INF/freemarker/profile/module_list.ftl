@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <#if user.staff>
 	<div class="pull-right">
 		<@routes.mrm_link studentCourseDetails command.studentCourseYearDetails />
@@ -73,3 +75,5 @@
 <#else>
 	<em>There are no module registrations for this academic year</em>
 </#if>
+
+</#escape>
