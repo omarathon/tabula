@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.jobs.coursework
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.Describable
+import uk.ac.warwick.tabula.commands.{MemberOrUser, Describable}
 import uk.ac.warwick.tabula.commands.coursework.turnitin.HasTurnitinApi
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinClassDeletedNotification, TurnitinJobErrorNotification, TurnitinJobSuccessNotification}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, OriginalityReport}
@@ -77,7 +77,7 @@ class SubmitToTurnitinJob extends Job
 		val className = classNameFor(assignment)
 		val assignmentName = assignmentNameFor(assignment)
 
-		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
+		lazy val session = api.login(job.user.email, job.user.firstName, job.user.lastName).getOrElse(throw loginFailure)
 
 		// Get existing submissions.
 		debug(s"Checking for existing submissions in ${classId.value}, ${assignmentId.value}")

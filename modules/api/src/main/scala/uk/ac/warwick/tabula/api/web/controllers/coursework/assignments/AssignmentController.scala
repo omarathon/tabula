@@ -35,12 +35,11 @@ object AssignmentController {
 }
 
 @Controller
-@RequestMapping(Array("/v1/module/{module}/assignments/{assignment}"))
+@RequestMapping(value = Array("/v1/module/{module}/assignments/{assignment}"), params = Array("!universityId"))
 class AssignmentController extends ApiController
-	with GetAssignmentApi
+	with GetAssignmentApi with GetAssignmentApiFullOutput
 	with EditAssignmentApi
 	with DeleteAssignmentApi
-	with CreateSubmissionApi
 	with AssignmentToJsonConverter
 	with AssessmentMembershipInfoToJsonConverter
 	with AssignmentStudentToJsonConverter
@@ -48,8 +47,16 @@ class AssignmentController extends ApiController
 	validatesSelf[SelfValidating]
 }
 
+@Controller
+@RequestMapping(value = Array("/v1/module/{module}/assignments/{assignment}"), params = Array("universityId"))
+class AssignmentCreateSubmissionController extends ApiController
+	with CreateSubmissionApi
+	with SubmissionToJsonConverter {
+	validatesSelf[SelfValidating]
+}
+
 trait GetAssignmentApi {
-	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+	self: ApiController with GetAssignmentApiOutput =>
 
 	@ModelAttribute("getCommand")
 	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
@@ -64,11 +71,8 @@ trait GetAssignmentApi {
 
 			Mav(new JSONView(Map(
 				"success" -> true,
-				"status" -> "ok",
-				"assignment" -> jsonAssignmentObject(assignment),
-				"genericFeedback" -> assignment.genericFeedback,
-				"students" -> results.students.map(jsonAssignmentStudentObject)
-			)))
+				"status" -> "ok"
+			) ++ outputJson(assignment, results)))
 		}
 	}
 
@@ -80,6 +84,20 @@ trait GetAssignmentApi {
 		})
 	}
 
+}
+
+trait GetAssignmentApiOutput {
+	def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any]
+}
+
+trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
+	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+
+	def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
+		"assignment" -> jsonAssignmentObject(assignment),
+		"genericFeedback" -> assignment.genericFeedback,
+		"students" -> results.students.map(jsonAssignmentStudentObject)
+	)
 }
 
 trait EditAssignmentApi {

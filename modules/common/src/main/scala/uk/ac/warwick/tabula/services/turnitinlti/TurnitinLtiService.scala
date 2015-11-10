@@ -133,7 +133,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
+						if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
 								// listen to callback for actual response
@@ -201,12 +201,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequest(
+	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, email: String, firstName: String, lastName: String): TurnitinLtiResponse = doRequest(
 		s"$apiReportLaunch/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
-		) ++ userParams(user.email, user.firstName, user.lastName),
+		) ++ userParams(email, firstName, lastName),
 		expectedStatusCode = Some(HttpStatus.SC_MOVED_TEMPORARILY)) {
 		request =>
 			request >:+ {
@@ -219,7 +219,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 						<p>The requested Object Result could not be found.</p>
 					</div>
 						**/
-					if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
+					if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 					request >- {
 						(html) => {
 							TurnitinLtiResponse.redirect(location.get)
