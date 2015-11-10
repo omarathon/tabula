@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services
 
+import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException, GroupInfo}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup._
@@ -15,6 +17,8 @@ import uk.ac.warwick.tabula.services.UserLookupService._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 
+import scala.util.{Failure, Success, Try}
+
 object UserLookupService {
 	type UniversityId = String
 }
@@ -28,6 +32,8 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 }
 
 trait UserLookupService extends UserLookupInterface {
+	override def getGroupService: LenientGroupService
+
 	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
 
 	/**
@@ -49,6 +55,8 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	with UserByWarwickIdCache with AutowiringCacheStrategyComponent with Logging {
 
 	var profileService = Wire[ProfileService]
+
+	override def getGroupService: LenientGroupService = new LenientGroupService(super.getGroupService)
 
 	override def getUserByUserId(id: String) = super.getUserByUserId(id) match {
 		case anon: AnonymousUser =>
@@ -252,4 +260,31 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
 	def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
 
+}
+
+class LenientGroupService(delegate: GroupService) extends GroupService with Logging {
+	private def tryOrElse[A](r: => A, default: => A): A =
+		Try(r) match {
+			case Success(any) => any
+			case Failure(e: GroupServiceException) =>
+				logger.warn("Caught GroupService error", e)
+				default
+			case Failure(t) => throw t
+		}
+
+	def isUserInGroup(userId: String, group: String) = tryOrElse(delegate.isUserInGroup(userId, group), false)
+
+	def getGroupInfo(name: String): GroupInfo = tryOrElse(delegate.getGroupInfo(name), throw new GroupNotFoundException(name))
+	def getGroupByName(name: String): Group = tryOrElse(delegate.getGroupByName(name), throw new GroupNotFoundException(name))
+
+	def getGroupsNamesForUser(userId: String): JList[String] = tryOrElse(delegate.getGroupsNamesForUser(userId), JArrayList())
+	def getGroupsForUser(userId: String): JList[Group] = tryOrElse(delegate.getGroupsForUser(userId), JArrayList())
+	def getUserCodesInGroup(group: String): JList[String] = tryOrElse(delegate.getUserCodesInGroup(group), JArrayList())
+	def getGroupsForQuery(search: String): JList[Group] = tryOrElse(delegate.getGroupsForQuery(search), JArrayList())
+	def getRelatedGroups(group: String): JList[Group] = tryOrElse(delegate.getRelatedGroups(group), JArrayList())
+	def getGroupsForDeptCode(deptCode: String): JList[Group] = tryOrElse(delegate.getGroupsForDeptCode(deptCode), JArrayList())
+
+	def getCaches: JMap[String, JSet[Cache[_, _]]] = delegate.getCaches
+	def clearCaches(): Unit = delegate.clearCaches()
+	def setTimeoutConfig(config: WebServiceTimeoutConfig): Unit = delegate.setTimeoutConfig(config)
 }
