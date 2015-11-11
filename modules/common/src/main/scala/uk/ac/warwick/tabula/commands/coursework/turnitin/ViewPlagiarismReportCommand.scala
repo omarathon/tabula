@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiServiceCo
 import uk.ac.warwick.tabula.services.{OriginalityReportServiceComponent, AutowiringOriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.services.turnitin.{GotSubmissions, Turnitin}
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
 
 object ViewPlagiarismReportCommand {
@@ -32,7 +33,6 @@ object ViewPlagiarismReportCommand {
 	def apply(module: Module, assignment: Assignment, attachment: FileAttachment, currentUser: CurrentUser): CommandType =
 		new ViewPlagiarismReportCommandInternal(module, assignment, attachment, currentUser)
 			with ComposableCommand[Either[Uri, TurnitinReportError]]
-			with ViewPlagiarismReportStateForCurrentUser
 			with ViewPlagiarismReportPermissions
 			with ViewPlagiarismReportValidation
 			with CompletesViewPlagiarismReportNotifications
@@ -50,39 +50,36 @@ trait ViewPlagiarismReportState {
 	def attachment: FileAttachment
 }
 
-trait ViewPlagiarismReportStateForCurrentUser extends ViewPlagiarismReportState {
-	def user: CurrentUser
-}
-
-trait ViewPlagiarismReportRequest {
+trait ViewPlagiarismReportRequest extends ViewPlagiarismReportState {
 	self: ViewPlagiarismReportState =>
 
-	var email: String = _
-	var firstName: String = _
-	var lastName: String = _
+	var viewer: User = _
 }
 
 class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: Assignment, val attachment: FileAttachment)
-	extends CommandInternal[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportState with ViewPlagiarismReportRequest with Logging {
+	extends CommandInternal[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportRequest with Logging {
 	self: HasTurnitinApi with TurnitinLtiServiceComponent =>
 
-	def this(module: Module, assignment: Assignment, attachment: FileAttachment, currentUser: CurrentUser) {
+	def this(module: Module, assignment: Assignment, attachment: FileAttachment, user: CurrentUser) {
 		this(module, assignment, attachment)
 
-		email = currentUser.email
-		firstName = currentUser.firstName
-		lastName = currentUser.lastName
+		viewer = user.apparentUser
 	}
 
 	override def applyInternal() = {
+		/*
+		 * We pass a fake email address to the Turnitin API to avoid people being able
+		 * to request a password reset to get direct access.
+		 */
+
 		if (attachment.originalityReport.turnitinId.hasText) {
 			// LTI
 			val response = turnitinLtiService.getOriginalityReportUrl(
 				assignment = assignment,
 				attachment = attachment,
-				email = email,
-				firstName = firstName,
-				lastName = lastName
+				email = s"${viewer.getUserId}@tabula.warwick.ac.uk",
+				firstName = viewer.getFirstName,
+				lastName = viewer.getLastName
 			)
 
 			if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.OK.value) {
@@ -94,7 +91,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 		} else {
 			debug("Getting document viewer URL for FileAttachment %s", attachment.id)
 
-			api.login(email, firstName, lastName) match {
+			api.login(s"${viewer.getUserId}@tabula.warwick.ac.uk", viewer.getFirstName, viewer.getLastName) match {
 				case Some(session) =>
 
 					val classId = Turnitin.classIdFor(assignment, api.classPrefix)
@@ -127,9 +124,7 @@ trait ViewPlagiarismReportValidation extends SelfValidating {
 	self: ViewPlagiarismReportState with ViewPlagiarismReportRequest =>
 
 	override def validate(errors: Errors): Unit = {
-		if (email.isEmptyOrWhitespace) errors.rejectValue("email", "NotEmpty")
-		if (firstName.isEmptyOrWhitespace) errors.rejectValue("firstName", "NotEmpty")
-		if (lastName.isEmptyOrWhitespace) errors.rejectValue("lastName", "NotEmpty")
+		if (viewer == null || !viewer.isFoundUser) errors.rejectValue("viewer", "NotEmpty")
 
 		if (attachment.originalityReport == null) {
 			errors.reject("fileattachment.originalityReport.empty")
@@ -147,7 +142,7 @@ trait ViewPlagiarismReportPermissions extends RequiresPermissionsChecking with P
 }
 
 trait CompletesViewPlagiarismReportNotifications extends CompletesNotifications[Either[Uri, TurnitinReportError]] {
-	self: ViewPlagiarismReportRequest with ViewPlagiarismReportStateForCurrentUser with NotificationHandling with OriginalityReportServiceComponent =>
+	self: ViewPlagiarismReportRequest with NotificationHandling with OriginalityReportServiceComponent =>
 
 	override def notificationsToComplete(commandResult: Either[Uri, TurnitinReportError]): CompletesNotificationsResult = {
 		commandResult match {
@@ -155,7 +150,7 @@ trait CompletesViewPlagiarismReportNotifications extends CompletesNotifications[
 				originalityReportService.getOriginalityReportByFileId(attachment.id).map(report =>
 					CompletesNotificationsResult(
 						notificationService.findActionRequiredNotificationsByEntityAndType[TurnitinJobSuccessNotification](report),
-						user.apparentUser
+						viewer
 					)
 				).getOrElse(EmptyCompletesNotificationsResult)
 			case Right(_) =>

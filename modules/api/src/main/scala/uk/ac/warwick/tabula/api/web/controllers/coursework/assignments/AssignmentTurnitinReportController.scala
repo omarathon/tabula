@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.turnitin.{TurnitinReportErrorWithMessage, ViewPlagiarismReportCommand, ViewPlagiarismReportRequest}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment, Module}
 import uk.ac.warwick.tabula.web.views.{JSONRequestFailedView, JSONView, JSONErrorView}
+import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 
@@ -65,14 +66,10 @@ trait GenerateTurnitinReportUriApi {
 @JsonAutoDetect
 class GenerateTurnitinReportRequest extends JsonApiRequest[ViewPlagiarismReportRequest] {
 
-	@BeanProperty var firstName: String = _
-	@BeanProperty var lastName: String = _
-	@BeanProperty var email: String = _
+	@BeanProperty var viewer: User = _
 
 	override def copyTo(state: ViewPlagiarismReportRequest, errors: Errors): Unit = {
-		state.firstName = firstName
-		state.lastName = lastName
-		state.email = email
+		state.viewer = viewer
 	}
 
 }

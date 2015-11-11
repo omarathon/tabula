@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.UniversityId
  */
 class UserConverter extends TwoWayConverter[String, User] {
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire[UserLookupService]
 
 	override def convertRight(userId: String) = {
 		if (UniversityId.isValid(userId)) {
