@@ -176,6 +176,7 @@
 	    <property name="formatters">
 	    	<list>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+	    		<bean class="uk.ac.warwick.tabula.data.convert.EpochSecondsJodaLocalDateConverter"/>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalTimeConverter"/>
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
