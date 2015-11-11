@@ -61,8 +61,6 @@ class TimetableController extends AbstractTimetableController
 
 	@RequestMapping
 	def getEvents(
-		@RequestParam from: Long,
-		@RequestParam to: Long,
 		@ModelAttribute("command") command: TimetableCommand
 	): Mav = {
 		val timetableEvents = command.apply().get
