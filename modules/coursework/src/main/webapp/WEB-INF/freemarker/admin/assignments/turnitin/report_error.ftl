@@ -2,7 +2,7 @@
 <h1>Whoops</h1>
 <#if problem = "no-object">
 <p>
-  This document doesn't appear to exist in Turnitin. It's possible that somebody deleted it by accident.
+  This document doesn't appear to exist in Turnitin.
 </p>
 <#elseif problem = "no-session">
 <p>

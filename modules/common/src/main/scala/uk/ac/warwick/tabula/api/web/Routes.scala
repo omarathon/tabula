@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.api.web
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -33,5 +34,10 @@ object Routes {
 	object attachment {
 		def apply(attachment: FileAttachment) =
 			context + "/attachments/%s" format encoded(attachment.id)
+	}
+
+	object job {
+		def apply(job: JobInstance) =
+			context + "/job/%s" format encoded(job.id)
 	}
 }

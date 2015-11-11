@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web
 
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.userlookup.User
@@ -138,7 +139,11 @@ object Routes {
 
 			object turnitin {
 				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
-				def report(submission: Submission, attachment: FileAttachment) = assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(attachment.id))
+				def report(submission: Submission, report: OriginalityReport) =
+					if (report.turnitinId.hasText)
+						assignmentroot(submission.assignment) + "/turnitin-lti-report/%s".format (encoded(report.attachment.id))
+					else
+						assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(report.attachment.id))
 			}
 
 			object turnitinlti {

@@ -47,6 +47,8 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	var realUser: String = _
 	var apparentUser: String = _
 
+	def userId = apparentUser
+
 	@transient var user: CurrentUser = _
 
 	var createdDate: DateTime = new DateTime
