@@ -36,7 +36,7 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 
 		userLookup.registerUserObjects(tutor, student)
 
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService, mockModuleAndDepartmentService, userLookup)
+		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), student.getWarwickId, locationFetchingService, mockModuleAndDepartmentService, userLookup)
 		events.size should be (10)
 		events.head should be (TimetableEvent(
 			uid="945ff0ef192ccb9d328be90c9268873a",
