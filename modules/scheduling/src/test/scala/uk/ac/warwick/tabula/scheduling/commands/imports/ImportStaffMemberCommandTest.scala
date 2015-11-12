@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.joda.time.{DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Member, StaffMember, StaffProperties}
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StaffProperties}
 import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, MembershipMember}
-import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 // scalastyle:off magic.number
 class ImportStaffMemberCommandTest extends TestBase with Mockito {
@@ -26,6 +26,9 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 		)
 
 		val mac = MembershipInformation(mm)
+		val ssoUser = new User("cuscav"){
+			setWarwickId("0672089")
+		}
 	}
 
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
@@ -34,7 +37,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
-			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
+			val command = new ImportStaffMemberCommand(mac, ssoUser)
 			command.memberDao = memberDao
 
 			val member = command.applyInternal()
@@ -63,7 +66,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
 
-			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
+			val command = new ImportStaffMemberCommand(mac, ssoUser)
 			command.memberDao = memberDao
 
 			val member = command.applyInternal()
@@ -81,6 +84,89 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 
 			verify(memberDao, times(1)).saveOrUpdate(existing)
 		}
+	}
+
+	@Test def guessedUsercode() {
+		// No usercode in membership and unknown in SSO
+		val nullUsercode = MembershipInformation(MembershipMember(
+			universityId = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = null,
+			gender = Male,
+			userType = Staff
+		))
+		val memberDao = smartMock[MemberDao]
+		memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
+		val command = new ImportStaffMemberCommand(nullUsercode, new AnonymousUser)
+		command.memberDao = memberDao
+
+		val member = command.applyInternal()
+		member.isInstanceOf[StaffProperties] should be {true}
+		member.universityId should be ("0672089")
+		member.userId should be (s"u0672089")
+
+		verify(memberDao, times(1)).saveOrUpdate(any[Member])
+	}
+
+	@Test def nonPrimaryUnknownInSSO() {
+		val nonPrimary = MembershipInformation(MembershipMember(
+			universityId = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			gender = Male,
+			userType = Staff
+		))
+		val memberDao = smartMock[MemberDao]
+		memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
+		val command = new ImportStaffMemberCommand(nonPrimary, new AnonymousUser)
+		command.memberDao = memberDao
+
+		val member = command.applyInternal()
+		member.isInstanceOf[StaffProperties] should be {true}
+		member.universityId should be ("0672089")
+		member.userId should be (null)
+
+		verify(memberDao, times(1)).saveOrUpdate(any[Member])
+	}
+
+	@Test def nonPrimaryDifferentInSSO() {
+		// SSO thinks cuscav is owned by 1234567, so set the usercode to null for 0672089
+		val ssoUser = new User("cuscav"){
+			setWarwickId("1234567")
+		}
+		val nonPrimary = MembershipInformation(MembershipMember(
+			universityId = "0672089",
+			email = "M.Mannion@warwick.ac.uk",
+			title = "Mr",
+			preferredForenames = "Mathew",
+			preferredSurname = "Mannion",
+			dateOfBirth = new LocalDate(1984, DateTimeConstants.AUGUST, 19),
+			usercode = "cuscav",
+			gender = Male,
+			userType = Staff
+		))
+		val memberDao = smartMock[MemberDao]
+		memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
+		val command = new ImportStaffMemberCommand(nonPrimary, ssoUser)
+		command.memberDao = memberDao
+
+		val member = command.applyInternal()
+		member.isInstanceOf[StaffProperties] should be {true}
+		member.universityId should be ("0672089")
+		member.userId should be (null)
+
+		verify(memberDao, times(1)).saveOrUpdate(any[Member])
 	}
 
 }
