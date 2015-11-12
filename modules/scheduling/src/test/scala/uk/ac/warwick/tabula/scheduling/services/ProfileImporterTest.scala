@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand}
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
@@ -45,6 +45,9 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		)
 
 		val mac = MembershipInformation(mm)
+		val ssoUser = new User("cuscav"){
+			setWarwickId("0672089")
+		}
 	}
 
 	// SITS names come uppercased - check that we reformat various names correctly.
@@ -61,7 +64,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				))
 
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
+				val member = ImportStudentRowCommand(mac, ssoUser, rs, importCommandFactory)
 				member.firstName should be (name)
 			}
 		}
@@ -82,7 +85,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				))
 
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
+				val member = ImportStudentRowCommand(mac, ssoUser, rs, importCommandFactory)
 				member.lastName should be (name)
 			}
 		}
@@ -124,6 +127,9 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			gender					= Male,
 			userType				= Staff
 		))
+		val ssoUser = new User("cuscav"){
+			setWarwickId("0672089")
+		}
 
 		val importer = new ProfileImporterImpl
 
@@ -132,7 +138,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val memberDao = mock[MemberDao]
 		memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
-		val command = new ImportStaffMemberCommand(mac, new AnonymousUser)
+		val command = new ImportStaffMemberCommand(mac, ssoUser)
 
 		command.memberDao = memberDao
 
