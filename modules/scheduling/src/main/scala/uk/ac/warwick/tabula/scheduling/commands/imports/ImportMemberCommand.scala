@@ -64,7 +64,7 @@ with MemberProperties with Unaudited with PropertyCopying {
 					else
 						usercodeFromMembership
 				case _ =>
-					s"u${member.universityId}" // TAB-3625
+					s"u${member.universityId}" // TAB-3635
 			}
 		}
 
