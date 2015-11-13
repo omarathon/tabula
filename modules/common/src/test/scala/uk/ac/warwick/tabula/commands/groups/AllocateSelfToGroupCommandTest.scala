@@ -110,7 +110,6 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 
 		testGroup.maxGroupSize = 0
-		testGroupSet.defaultMaxGroupSizeEnabled = true
 		testGroup should be ('full)
 
 		signUpValidator.validate(errors)
