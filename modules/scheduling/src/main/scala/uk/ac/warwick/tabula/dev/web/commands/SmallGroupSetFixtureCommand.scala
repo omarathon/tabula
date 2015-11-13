@@ -43,10 +43,6 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.releasedToStudents = releasedToStudents
 			groupSet.groups = JArrayList()
 			groupSet.members = UserGroup.ofUsercodes
-			if (maxGroupSize > 0){
-				groupSet.defaultMaxGroupSize = maxGroupSize
-				groupSet.defaultMaxGroupSizeEnabled = true
-			}
 			for (i <- 1 to groupCount) {
 				val group = new SmallGroup
 				group.name = s"Group $i"
