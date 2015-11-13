@@ -30,34 +30,26 @@ abstract class AbstractTriggerService extends TriggerService with Logging {
 		triggerDao.save(trigger)
 	}
 
-	private def executeTrigger[A >: Null <: ToEntityReference, B](trigger: Trigger[A, B]): Option[B] = {
-		try {
-			trigger.target.entity match {
-				case entity: CanBeDeleted if entity.deleted =>
-					None
-				case entity =>
-					Some(trigger.apply())
-			}
-		} catch {
-			// Can happen if reference to an entity has since been deleted, e.g.
-			// a submission is resubmitted and the old submission is removed. Skip this trigger.
-			case onf: ObjectNotFoundException =>
-				debug("Skipping scheduled notification %s as a referenced object was not found", trigger)
-				None
-		}
-	}
-
 	def processTriggers(): Unit = {
 		transactional() {
 			triggerDao.triggersToRun(RunBatchSize).foreach { trigger =>
 				logger.info(s"Processing trigger $trigger")
 
-				executeTrigger(trigger) match {
-					case Some(triggerResult) =>
-						trigger.completedDate = DateTime.now
-						triggerDao.save(trigger)
-					case _ =>
+				try {
+					trigger.target.entity match {
+						case entity: CanBeDeleted if entity.deleted =>
+						case entity =>
+							trigger.apply()
+					}
+				} catch {
+					// Can happen if reference to an entity has since been deleted, e.g.
+					// a submission is resubmitted and the old submission is removed. Skip this trigger.
+					case onf: ObjectNotFoundException =>
+						debug("Skipping scheduled notification %s as a referenced object was not found", trigger)
 				}
+
+				trigger.completedDate = DateTime.now
+				triggerDao.save(trigger)
 			}
 		}
 	}
