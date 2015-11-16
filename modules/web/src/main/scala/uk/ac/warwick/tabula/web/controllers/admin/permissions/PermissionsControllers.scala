@@ -125,9 +125,13 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 //	@ModelAttribute("existingRoleDefinitions") // Not a ModelAttribute because this changes after a change
 	def existingRoleDefinitions(@PathVariable("target") target: A) = {
-		SortedMap(permissionsService.getAllGrantedRolesFor(target).groupBy { _.roleDefinition }.map { case (defn, roles) =>
-			(defn -> roles.head.build())
-		}.toSeq:_*)
+		SortedMap(
+			permissionsService.getAllGrantedRolesFor(target)
+				.groupBy { _.roleDefinition }
+				.filterKeys { _.isAssignable }
+				.map { case (defn, roles) => defn -> roles.head.build() }
+				.toSeq:_*
+		)
 	}
 
 	private def parentDepartments[B <: PermissionsTarget](permissionsTarget: B): Seq[Department] = permissionsTarget match {
