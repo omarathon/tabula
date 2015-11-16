@@ -39,9 +39,8 @@ class SubmitToTurnitinLtiJob extends Job
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 
 	// Turnitin have requested that submissions should be sent at a rate of no more than 1 per second
-	val WaitingRequestsToTurnitinSleep = 2000
-	val WaitingRequestsToTurnitinRetries = 30
-
+	val WaitingRequestsToTurnitinSleep = 20000
+	val WaitingRequestsToTurnitinRetries = 50
 
 	val WaitingRequestsFromTurnitinCallbackSleep = 2000
 	val WaitingRequestsFromTurnitinCallbacksRetries = 20

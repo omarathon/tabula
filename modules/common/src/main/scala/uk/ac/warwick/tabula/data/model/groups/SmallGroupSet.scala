@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import scala.collection.JavaConverters._
-import javax.persistence._
 import javax.persistence.CascadeType._
+import javax.persistence._
 import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
-import org.hibernate.annotations.{Type, Filter, FilterDef, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -54,7 +55,6 @@ class SmallGroupSet
 	type Entity = SmallGroupSet
 
 	import SmallGroupSet.Settings
-	import SmallGroup._
 
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssessmentMembershipService]
@@ -263,13 +263,6 @@ class SmallGroupSet
 
 	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
 	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
-
-	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
-	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
-
-	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
-	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
-
 
 	def toStringProps = Seq(
 		"id" -> id,

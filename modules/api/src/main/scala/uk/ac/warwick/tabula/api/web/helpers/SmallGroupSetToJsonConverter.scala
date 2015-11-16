@@ -19,8 +19,6 @@ trait SmallGroupSetToJsonConverter {
 			"releasedToStudents" -> set.releasedToStudents,
 			"studentsCanSeeTutorName" -> set.studentsCanSeeTutorName,
 			"studentsCanSeeOtherMembers" -> set.studentsCanSeeOtherMembers,
-			"defaultMaxGroupSizeEnabled" -> set.defaultMaxGroupSizeEnabled,
-			"defaultMaxGroupSize" -> set.defaultMaxGroupSize,
 			"collectAttendance" -> set.collectAttendance,
 			"emailTutorsOnChange" -> set.emailTutorsOnChange,
 			"emailStudentsOnChange" -> set.emailStudentsOnChange

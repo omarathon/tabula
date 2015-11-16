@@ -39,9 +39,7 @@ object ViewPlagiarismReportCommand {
 			with ReadOnly with Unaudited
 			with HasTurnitinApi
 			with AutowiringTurnitinLtiServiceComponent
-			with AutowiringOriginalityReportServiceComponent {
-			val user = currentUser
-		}
+			with AutowiringOriginalityReportServiceComponent
 }
 
 trait ViewPlagiarismReportState {
@@ -67,17 +65,12 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 	}
 
 	override def applyInternal() = {
-		/*
-		 * We pass a fake email address to the Turnitin API to avoid people being able
-		 * to request a password reset to get direct access.
-		 */
-
 		if (attachment.originalityReport.turnitinId.hasText) {
 			// LTI
 			val response = turnitinLtiService.getOriginalityReportUrl(
 				assignment = assignment,
 				attachment = attachment,
-				email = s"${viewer.getUserId}@tabula.warwick.ac.uk",
+				email = viewer.getEmail,
 				firstName = viewer.getFirstName,
 				lastName = viewer.getLastName
 			)
@@ -91,7 +84,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 		} else {
 			debug("Getting document viewer URL for FileAttachment %s", attachment.id)
 
-			api.login(s"${viewer.getUserId}@tabula.warwick.ac.uk", viewer.getFirstName, viewer.getLastName) match {
+			api.login(viewer.getEmail, viewer.getFirstName, viewer.getLastName) match {
 				case Some(session) =>
 
 					val classId = Turnitin.classIdFor(assignment, api.classPrefix)

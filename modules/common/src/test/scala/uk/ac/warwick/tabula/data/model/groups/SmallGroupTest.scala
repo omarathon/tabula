@@ -91,8 +91,6 @@ class SmallGroupTest extends TestBase with Mockito {
     }
 
     val sourceSet = new SmallGroupSet
-    sourceSet.defaultMaxGroupSize = 11
-    sourceSet.defaultMaxGroupSizeEnabled = true
 
     source.name = "name"
     source.groupSet = sourceSet
@@ -109,8 +107,6 @@ class SmallGroupTest extends TestBase with Mockito {
     source.maxGroupSize = 12
 
     val targetSet = new SmallGroupSet
-    targetSet.defaultMaxGroupSize = 10
-    targetSet.defaultMaxGroupSizeEnabled = true
 
     val target = source.duplicateTo(targetSet, transient = true)
 
@@ -130,12 +126,11 @@ class SmallGroupTest extends TestBase with Mockito {
   }
 
 	@Test
-	def fullReportsFullnessWhenGroupSizeLimitsEnabled(){
+	def fullReportsFullnessWhenGroupSizeSet(){
 
 		// set up a group with 1 member, with group size limits enabled
 		val group = newSmallGroupWithMockedServices
 		group.groupSet = new SmallGroupSet()
-		group.groupSet.defaultMaxGroupSizeEnabled = true
 		group.students.add(new User("test") {{ setWarwickId("00000001") }})
 
 
@@ -148,26 +143,6 @@ class SmallGroupTest extends TestBase with Mockito {
 		group.maxGroupSize = 0
 		group should be('full)
 
-	}
-
-	@Test
-	def fullIsFalseWhenGroupSizeLimitsNotEnabled(){
-
-		// set up a group with 1 member, with group size limits enabled
-		val group = newSmallGroupWithMockedServices
-		group.groupSet = new SmallGroupSet()
-		group.groupSet.defaultMaxGroupSizeEnabled = false
-		group.students.add(new User("test"))
-
-
-		group.maxGroupSize = 2
-		group should not be 'full
-
-		group.maxGroupSize = 1
-		group should not be 'full
-
-		group.maxGroupSize = 0
-		group should not be 'full
 	}
 
 	@Test

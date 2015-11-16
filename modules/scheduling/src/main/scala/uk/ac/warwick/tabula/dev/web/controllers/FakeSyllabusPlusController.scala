@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.dev.web.controllers
 
 import dispatch.classic.thread.ThreadSafeHttpClient
 import dispatch.classic.{Http, thread, url}
+import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, RequestMethod, RequestParam}
@@ -60,12 +61,13 @@ class FakeSyllabusPlusController extends Logging {
 	// i.e. 1213 for academic year 2012-2013
 	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/student"))
 	def saveStudent(@RequestParam studentId: String, @RequestParam year:String, @RequestParam content: String) {
+		val unescapedContent = StringEscapeUtils.unescapeHtml4(content)
 		if (!studentId.matches("^[0-9]+")){
 			// it's probably a usercode, since functional tests don't have access  to warwickIds for their users
 			val user = userLookup.getUserByUserId(studentId)
-			studentTimetables.put(StudentYearKey(user.getWarwickId, year), content)
+			studentTimetables.put(StudentYearKey(user.getWarwickId, year), unescapedContent)
 		}else{
-			studentTimetables.put(StudentYearKey(studentId, year), content)
+			studentTimetables.put(StudentYearKey(studentId, year), unescapedContent)
 		}
 	}
 
