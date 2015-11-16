@@ -19,7 +19,7 @@
 
 		h2 {
 			font-size: 18px;
-			margin: 0 0 8px 0;
+			margin: 0;
 		}
 
 		#header {
@@ -32,15 +32,17 @@
 		}
 
 		.student {
+			position: relative;
 			display: block;
 			border-top: 1px solid #ddd;
 			border-bottom: 1px solid #ddd;
-			padding: 10px;
+			padding-top: 10px;
+			padding-bottom: 5px;
 			page-break-inside: avoid;
+			min-height: 40px;
 		}
 
 		.student .photo { display: inline-block; width: 10%; vertical-align: middle; }
-		.student .photo.hidden { width: 0; height: 80px; }
 		.student .name { display: inline-block; width: 50%; vertical-align: middle; }
 		.student .name.no-photo { width: 60%; }
 		.student .check-box, .student .signature-line { display: inline-block; vertical-align: middle; text-align: right; width: 35%; }
@@ -49,7 +51,7 @@
 		.student .name .muted { font-size: 80%; color: #666; }
 
 		.student .check-box input[type="checkbox"] { width: 30px; height: 30px; }
-		.student .signature-line { vertical-align: bottom; }
+		.student .signature-line { position: absolute; bottom: 0px; right: 0px; }
 		.student .signature-line hr { color: #888; }
 	</style>
 	<title>BLAHBLAHBLAH</title>
@@ -72,12 +74,12 @@
 		<p><em>There are no students allocated to this group.</em></p>
 	<#else>
 		<#macro studentRow student>
-			<div class="student<#if displayCheck == "line"> with-signature</#if>">
-				<div class="photo<#if !showPhotos> hidden</#if>">
-					<#if showPhotos>
+			<div class="student<#if displayCheck == "line"> with-signature</#if><#if !showPhotos> no-photo</#if>">
+				<#if showPhotos>
+					<div class="photo">
 						<img data-universityid="${student.universityId}" style="width: 100%;" />
-					</#if>
-				</div>
+					</div>
+				</#if>
 
 				<div class="name<#if !showPhotos> no-photo</#if>">
 					<#if displayName == "both">
