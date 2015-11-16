@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.sysadmin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, RequestMapping}
 import uk.ac.warwick.tabula.web.Mav
-import org.joda.time.DateTime
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -19,12 +19,9 @@ class SystemEventCalendarController extends BaseSysadminController {
 	@RequestMapping def view = Mav("sysadmin/event-calendar")
 
 	@RequestMapping(value = Array("/events"))
-	def getEvents(@RequestParam from: Long, @RequestParam to: Long): Mav = {
-		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
-		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
-		// or we could write an EpochSecondsToDateTime 2-way converter.
-		val start = new DateTime(from * 1000)
-		val end = new DateTime(to * 1000)
+	def getEvents(@RequestParam from: LocalDate, @RequestParam to: LocalDate): Mav = {
+		val start = from.toDateTimeAtStartOfDay
+		val end = to.toDateTimeAtStartOfDay
 
 		val assignments =
 			assignmentService.getAssignmentsClosingBetween(start, end)
@@ -51,8 +48,8 @@ class SystemEventCalendarController extends BaseSysadminController {
 					FullCalendarEvent(
 						title = s"${assignments.length} assignments, ${totalCount} students",
 						allDay = true,
-						start = date.toDateTimeAtStartOfDay().getMillis / 1000,
-						end = date.toDateTimeAtStartOfDay().getMillis / 1000,
+						start = date.toDateTimeAtStartOfDay.getMillis / 1000,
+						end = date.toDateTimeAtStartOfDay.getMillis / 1000,
 						formattedCloseDate = shortTimeFormat.print(date),
 						description =
 							countsByDepartment.map { case (department, assignmentCount, studentCount) =>
