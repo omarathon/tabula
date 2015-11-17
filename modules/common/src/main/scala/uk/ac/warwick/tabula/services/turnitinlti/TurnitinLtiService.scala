@@ -40,7 +40,7 @@ object TurnitinLtiService {
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
 	val maxFileSizeInMegabytes = 20
-	val maxFileSize = maxFileSizeInMegabytes * 1000 * 1000  // 20M
+	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024  // 20M
 	
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
