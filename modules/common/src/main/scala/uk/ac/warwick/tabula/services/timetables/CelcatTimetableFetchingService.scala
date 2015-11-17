@@ -69,11 +69,6 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
 				staffListInBSV = true,
 				enabledFn = { () => features.celcatTimetablesChemistry }
-			),
-			"es" -> CelcatDepartmentConfiguration(
-				baseUri = "https://www2.warwick.ac.uk/appdata/eng-timetables",
-				staffListInBSV = false,
-				enabledFn = { () => features.celcatTimetablesEngineering }
 			)
 		)
 
