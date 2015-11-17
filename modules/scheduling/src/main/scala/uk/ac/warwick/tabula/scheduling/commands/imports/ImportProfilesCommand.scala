@@ -72,8 +72,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
 									case FoundUser(u) => u
-									case _ if usercode != null => userLookup.getUserByUserId(usercode)
-									case _ => new AnonymousUser
+									case _ => userLookup.getUserByUserId(usercode)
 								}
 
 								m.member.universityId -> user

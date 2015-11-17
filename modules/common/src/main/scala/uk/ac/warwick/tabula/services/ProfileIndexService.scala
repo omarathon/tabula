@@ -182,7 +182,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		val doc = new Document
 
 		doc add plainStringField(IdField, item.universityId)
-		doc add plainStringField("userId", item.userId.maybeText.getOrElse(""))
+		doc add plainStringField("userId", item.userId)
 
 		indexTokenised(doc, "firstName", Option(item.firstName))
 		indexTokenised(doc, "lastName", Option(item.lastName))

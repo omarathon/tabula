@@ -478,7 +478,7 @@ object ProfileImporter extends Logging {
 			preferredSurname				= rs.getString("pref_surname"),
 			position								= rs.getString("desc_position"),
 			dateOfBirth							= sqlDateToLocalDate(rs.getDate("dob")),
-			usercode								= rs.getString("its_usercode"),
+			usercode								= rs.getString("its_usercode").maybeText.getOrElse(s"u${rs.getString("university_number")}"),
 			startDate								= sqlDateToLocalDate(rs.getDate("dt_start")),
 			endDate									= sqlDateToLocalDate(rs.getDate("dt_end")),
 			modified								= sqlDateToDateTime(rs.getDate("dt_modified")),
