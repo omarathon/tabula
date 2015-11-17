@@ -8,6 +8,7 @@ import org.springframework.validation.{ ValidationUtils, Errors }
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object AddModuleCommand {
 	def apply(department: Department) =
@@ -42,6 +43,10 @@ trait AddModuleCommandValidation extends SelfValidating {
 
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "code", "NotEmpty")
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
+
+		if (code.hasText && !code.matches("^[a-z0-9][a-z0-9\\-]*[a-z0-9]$")) {
+			errors.rejectValue("code", "code.invalid.module")
+		}
 
 		// check for duplicate name or code
 		if (!errors.hasErrors) {

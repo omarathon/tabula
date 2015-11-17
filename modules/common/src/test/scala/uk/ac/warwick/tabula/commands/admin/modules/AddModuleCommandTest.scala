@@ -65,6 +65,18 @@ class AddModuleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("NotEmpty.code")
 	}}
 
+	@Test def rejectInvalidCode { new ValidationFixture {
+		command.code = "CS 205"
+		command.name = "Introduction to module creation"
+
+		val errors = new BindException(command, "command")
+		command.validate(errors)
+
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("code")
+		errors.getFieldError.getCodes should contain ("code.invalid.module")
+	}}
+
 	@Test def rejectEmptyName { new ValidationFixture {
 		command.code = "cs205"
 		command.name = "        "
