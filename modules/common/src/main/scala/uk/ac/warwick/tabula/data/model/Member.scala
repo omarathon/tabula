@@ -36,7 +36,6 @@ object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
 	final val FreshOnlyFilter = "freshMemberOnly"
-	final val HasUserIdFilter = "hasUserId"
 }
 
 /**
@@ -49,14 +48,12 @@ object Member {
 @FilterDefs(Array(
 		new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
 		new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
-		new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null"),
-		new FilterDef(name = Member.HasUserIdFilter, defaultCondition = "userId is not null")
+		new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
 	))
 	@Filters(Array(
 		new Filter(name = Member.StudentsOnlyFilter),
 		new Filter(name = Member.ActiveOnlyFilter),
-		new Filter(name = Member.FreshOnlyFilter),
-		new Filter(name = Member.HasUserIdFilter)
+		new Filter(name = Member.FreshOnlyFilter)
 	))
 @Entity
 @Access(AccessType.FIELD)

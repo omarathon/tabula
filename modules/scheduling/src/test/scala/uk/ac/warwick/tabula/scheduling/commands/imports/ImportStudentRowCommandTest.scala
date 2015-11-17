@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportCommandFactory}
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, ProfileServiceComponent, RelationshipService}
-import uk.ac.warwick.userlookup.{User, AnonymousUser}
+import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
@@ -158,12 +158,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			phoneNumber				= null,
 			gender					= null,
 			alternativeEmailAddress	= null,
-			userType				= Student
-		)
-
-		val ssoUser = new User("cuscav"){
-			setWarwickId("0672089")
-		}
+			userType				= Student)
 	}
 
 	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup
@@ -180,7 +175,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		tier4RequirementImporter.hasTier4Requirement("0672089") returns false
 
-		val rowCommand = new ImportStudentRowCommandInternal(mac, ssoUser, rs, importCommandFactory) with ComponentMixins
+		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, importCommandFactory) with ComponentMixins
 		rowCommand.memberDao = memberDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 		rowCommand.profileService = profileService

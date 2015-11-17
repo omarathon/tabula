@@ -53,20 +53,7 @@ with MemberProperties with Unaudited with PropertyCopying {
 		this.universityId = oneOf(Option(member.universityId), optString("university_id")).get
 
 		// TAB-2014
-		this.userId = {
-			member.usercode match {
-				case usercodeFromMembership: String =>
-					// TAB-3746
-					// If sso user is Anonymous (so "") or a different Uni ID or usercode than the one in membership
-					// set the userId to null so it isn't returned by queries
-					if (ssoUser.getWarwickId != member.universityId || ssoUser.getUserId != usercodeFromMembership)
-						null
-					else
-						usercodeFromMembership
-				case _ =>
-					s"u${member.universityId}" // TAB-3635
-			}
-		}
+		this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, optString("user_code")).get
 
 		this.userType = member.userType
 

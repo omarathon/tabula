@@ -1,1 +1,0 @@
-ALTER TABLE member MODIFY userid null;
