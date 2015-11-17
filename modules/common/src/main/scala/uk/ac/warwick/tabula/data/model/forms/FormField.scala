@@ -290,7 +290,7 @@ class FileField extends AssignmentFormField {
 
 	def individualFileSizeLimit: JInteger = getProperty[JInteger]("individualFileSizeLimit", null)
 	def individualFileSizeLimit_=(limit: JInteger) = setProperty("individualFileSizeLimit", limit)
-	private def individualFileSizeLimitInBytes: JLong = JLong(Option(individualFileSizeLimit).map(_.longValue() * 1000 * 1000))
+	private def individualFileSizeLimitInBytes: JLong = JLong(Option(individualFileSizeLimit).map(_.longValue() * 1024 * 1024))
 
 	// This is after onBind is called, so any multipart files have been persisted as attachments
 	override def validate(value: FormValue, errors: Errors) {
