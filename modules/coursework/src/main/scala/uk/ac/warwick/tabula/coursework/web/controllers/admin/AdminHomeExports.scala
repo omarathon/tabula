@@ -33,7 +33,7 @@ object AdminHomeExports {
 		}
 
 		def toXML = {
-			val assignments = info.modules.flatMap { _.assignments.asScala }.filter { a => !a.deleted && !a.archived }
+			val assignments = info.modules.flatMap { _.assignments.asScala }.filter { _.isAlive }
 
 			<assignments>
 				{ assignments map assignmentElement }

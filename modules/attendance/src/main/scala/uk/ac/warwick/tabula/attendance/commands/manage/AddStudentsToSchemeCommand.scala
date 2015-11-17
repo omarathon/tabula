@@ -125,9 +125,10 @@ trait AddStudentsToSchemeCommandState {
 	def membershipItems: Seq[SchemeMembershipItem] = {
 		val staticMemberItems = attendanceMonitoringService.findSchemeMembershipItems(
 			(staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala,
-			SchemeMembershipStaticType
+			SchemeMembershipStaticType,
+			scheme.academicYear
 		)
-		val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType)
+		val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
 
 		(staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 	}

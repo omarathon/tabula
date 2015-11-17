@@ -64,7 +64,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				command.archive = true
 				val newAssignment = command.applyInternal().get(0)
 
-				assignment.archived.booleanValue should be {true}
+				assignment.isAlive should be {false}
 				newAssignment.academicYear.toString should be("13/14")
 				newAssignment.module should be(module)
 				newAssignment.name should be("Test")

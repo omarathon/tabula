@@ -150,8 +150,10 @@ trait ViewMemberEventsState {
 // Request parameters
 trait ViewMemberEventsRequest extends ViewMemberEventsState {
 	var academicYear: AcademicYear = null
-	var start: LocalDate = LocalDate.now.minusMonths(12)
-	var end: LocalDate = start.plusMonths(13)
+	var from: LocalDate = LocalDate.now.minusMonths(12)
+	var to: LocalDate = from.plusMonths(13)
+	def start = from
+	def end = to
 }
 
 trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -174,7 +176,7 @@ trait ViewMemberEventsValidation extends SelfValidating {
 }
 
 trait ViewStaffPersonalTimetableCommandFactory {
-	def apply(staffMember: StaffMember): ComposableCommand[Try[Seq[EventOccurrence]]]
+	def apply(staffMember: StaffMember): ComposableCommand[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
 }
 
 class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
@@ -188,7 +190,7 @@ class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
 }
 
 trait ViewStudentPersonalTimetableCommandFactory {
-	def apply(student: StudentMember): ComposableCommand[Try[Seq[EventOccurrence]]]
+	def apply(student: StudentMember): ComposableCommand[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
 }
 
 class ViewStudentPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)

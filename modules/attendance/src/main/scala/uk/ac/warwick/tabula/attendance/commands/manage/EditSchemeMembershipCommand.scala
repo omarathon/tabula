@@ -53,8 +53,8 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 
 	override def applyInternal() = {
 		val membershipItems: Seq[SchemeMembershipItem] = {
-			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType)
-			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems( includedStudentIds.asScala, SchemeMembershipIncludeType)
+			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType, scheme.academicYear)
+			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems( includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
 			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 		}
 

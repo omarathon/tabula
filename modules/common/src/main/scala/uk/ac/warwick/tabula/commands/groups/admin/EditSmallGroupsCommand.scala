@@ -37,7 +37,7 @@ object EditSmallGroupsCommand {
 	}
 
 	class NewGroupProperties(val module: Module, val set: SmallGroupSet) extends GroupProperties {
-		maxGroupSize = if (set.defaultMaxGroupSizeEnabled) set.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+		maxGroupSize = SmallGroup.DefaultGroupSize
 	}
 
 	class ExistingGroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends GroupProperties {

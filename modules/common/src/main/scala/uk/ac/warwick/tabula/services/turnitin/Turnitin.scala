@@ -16,7 +16,7 @@ import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.{CurrentUser, HttpClientDefaults}
+import uk.ac.warwick.tabula.HttpClientDefaults
 
 case class FileData(file: File, name: String)
 
@@ -113,8 +113,6 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 	}
 
-	def login(user: CurrentUser): Option[Session] = login( user.email, user.firstName, user.lastName )
-
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
 		val userEmail = if (email == null || email.isEmpty) firstName + lastName + "@turnitin.warwick.ac.uk" else email
@@ -135,4 +133,3 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	}
 
 }
-

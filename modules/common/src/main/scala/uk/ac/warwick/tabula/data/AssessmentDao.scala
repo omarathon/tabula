@@ -106,7 +106,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.add(is("m.adminDepartment", department))
 			.add(is("academicYear", year))
 			.add(is("deleted", false))
-			.add(is("archived", false))
+			.add(is("_archived", false))
 			.seq
 		assignments
 	}

@@ -27,7 +27,7 @@ trait MemberDao {
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime): Scrollable[Member]
@@ -139,7 +139,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 			.seq
 	}
 
-	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
@@ -148,11 +148,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 			val criteria =
 				session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
-					.add(disjunction()
-						.add(is("inUseFlag", "Active"))
-						.add(like("inUseFlag", "Inactive - Starts %"))
-					)
 					.addOrder(asc("universityId"))
+			if (activeOnly)
+				criteria.add(disjunction()
+					.add(is("inUseFlag", "Active"))
+					.add(like("inUseFlag", "Inactive - Starts %"))
+				)
+
 
 			if (eagerLoad) {
 				criteria

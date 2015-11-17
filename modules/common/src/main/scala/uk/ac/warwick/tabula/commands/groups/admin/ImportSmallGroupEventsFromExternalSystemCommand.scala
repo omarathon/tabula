@@ -66,7 +66,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
 			.map { case (e, group) =>
 				val tutorUsercodes = e.staff.map { _.getUserId }
 
-				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 			}
 
 		smallGroupService.saveOrUpdate(set)
@@ -89,9 +89,11 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 	)
 
 	override def populate(): Unit = {
-		set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
-			if (eventsToImport.size() > index) {
-				eventsToImport.get(index).group = group
+		if (set.groups.asScala.forall { _.events.isEmpty }) {
+			set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
+				if (eventsToImport.size() > index) {
+					eventsToImport.get(index).group = group
+				}
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
+<#escape x as x?html>
+
 <!-- nav to choose other years: -->
 <#if (studentCourseDetails.freshStudentCourseYearDetails)??>
 
@@ -136,3 +138,5 @@
 		</script>
 	</div>
 </#if>
+
+</#escape>

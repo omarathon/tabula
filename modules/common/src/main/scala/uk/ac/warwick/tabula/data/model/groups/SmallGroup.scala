@@ -123,7 +123,7 @@ class SmallGroup
 		
 	def removeMaxGroupSize() = settings -= Settings.MaxGroupSize
 
-	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize <= students.size
+	def isFull = Option(maxGroupSize).exists(_ <= students.size)
 
 	def toStringProps = Seq(
 		"id" -> id,

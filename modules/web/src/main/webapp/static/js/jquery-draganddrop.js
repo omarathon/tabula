@@ -117,9 +117,13 @@ Method calls (after initialising):
             var itemCountToBeDividedUp = items.length;
             var unlimitedTargets = $targets.length;
 
+			var availableSlots = function($target) {
+				return ($target.data("max-members") || 1000000) - $target.find('li').length;
+			};
+
             // check for any limits on group numbers <= average items per target, adjust items per target accordingly
             $targets.each(function(index, target){
-                var targetLimit = $(target).data("max-members");
+                var targetLimit = availableSlots($(target));
                 if(targetLimit <= itemsPerTarget) {
                     itemCountToBeDividedUp = itemCountToBeDividedUp - targetLimit;
                     unlimitedTargets--;
@@ -135,7 +139,7 @@ Method calls (after initialising):
 
             $targets.each(function(index, target){
                 var $target = $(target);
-                var targetLimit = $target.data("max-members");
+                var targetLimit = availableSlots($target);
                 var itemsForTarget;
 
                 // grab appropriate number of members for this group from pool, respecting any limits

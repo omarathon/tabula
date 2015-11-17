@@ -161,6 +161,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplateIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetFilterConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.JobInstanceIdConverter"/>
 	</util:list>
 
 	<bean id="typeConverter"
@@ -415,7 +416,7 @@
 
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
 

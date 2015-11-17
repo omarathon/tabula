@@ -67,7 +67,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 trait UnarchivedAssignmentsMap {
 
 	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-		for(module <- modules) yield module.code ->  module.assignments.asScala.filterNot(a => a.archived || a.deleted)
+		for(module <- modules) yield module.code ->  module.assignments.asScala.filter { _.isAlive }
 	).toMap.filterNot(_._2.isEmpty)
 
 }

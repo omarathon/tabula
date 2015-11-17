@@ -33,8 +33,8 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		val scalaAssignments = assignments.asScala
 
 		if (archive) {
-			for (assignment <- scalaAssignments.filterNot(_.archived)) {
-				assignment.archived = true
+			for (assignment <- scalaAssignments) {
+				assignment.archive()
 				assessmentService.save(assignment)
 			}
 		}
@@ -48,9 +48,8 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 
 	def copy(assignment: Assignment) : Assignment = {
 		val newAssignment = new Assignment()
-		newAssignment.assignmentService = assignment.assignmentService // Used in testing
+		newAssignment.assignmentService = assignment.assignmentService // FIXME Used in testing
 		newAssignment.academicYear = academicYear
-		newAssignment.archived = false
 
 		// best guess of new open and close dates. likely to be wrong by up to a few weeks but better than out by years
 		val yearOffest = academicYear.startYear - assignment.academicYear.startYear

@@ -16,7 +16,7 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 	var messageSource = Wire.auto[MessageSource]
 
 	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
-		response.setContentType(getContentType)
+		response.setContentType(getContentType())
 		response.setStatus(HttpStatus.BAD_REQUEST.value())
 
 		val out = response.getWriter
@@ -40,7 +40,7 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 
 	def getMessage(key: String, args: Object*) = messageSource.getMessage(key, if (args == null) Array() else args.toArray, null)
 
-	case class GlobalError(val code: String, val message: String)
-	case class FieldError(val code: String, val field: String, val message: String)
+	case class GlobalError(code: String, message: String)
+	case class FieldError(code: String, field: String, message: String)
 
 }

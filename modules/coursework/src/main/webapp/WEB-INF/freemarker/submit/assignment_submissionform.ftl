@@ -1,4 +1,4 @@
-<#if !submission?? && assignment.collectSubmissions && !assignment.archived>
+<#if !submission?? && assignment.collectSubmissions && assignment.alive>
 	<#include "_assignment_deadline.ftl" />
 </#if>
 
@@ -167,7 +167,7 @@
 
 <#elseif !submission??>
 
-	<#if assignment.archived>
+	<#if !assignment.alive>
 		<p>
 			This assignment is no longer collecting submissions through Tabula because it has been archived.
 		</p>

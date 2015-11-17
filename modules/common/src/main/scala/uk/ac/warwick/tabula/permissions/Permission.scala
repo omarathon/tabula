@@ -202,6 +202,8 @@ object Permissions {
 		case object Read extends Permission("View a coursework submission")
 		case object Update extends Permission("Edit a coursework submission")
 		case object Delete extends Permission("Remove a coursework submission")
+
+		case object CreateOnBehalfOf extends Permission("Add a coursework submission on behalf of another member")
 	}
 
 	object AssignmentFeedback {

@@ -1,45 +1,74 @@
 package uk.ac.warwick.tabula.commands.coursework.turnitin
 
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.turnitin.Turnitin
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.jobs.{JobServiceComponent, AutowiringJobServiceComponent, JobInstance}
 import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinLtiJob
 import org.springframework.validation.Errors
 
-/**
- * Creates a job that submits the assignment to Turnitin.
- *
- * Returns the job instance ID for status tracking.
- */
-class SubmitToTurnitinCommand(val module: Module, val assignment: Assignment, val user: CurrentUser) extends Command[JobInstance]
-	with SelfValidating {
+object SubmitToTurnitinCommand {
+	type CommandType = Appliable[JobInstance] with SubmitToTurnitinRequest with SelfValidating
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
+	/**
+		* Creates a job that submits the assignment to Turnitin.
+		*
+		* Returns the job instance ID for status tracking.
+		*/
+	def apply(module: Module, assignment: Assignment, user: CurrentUser): CommandType =
+		new SubmitToTurnitinCommandInternal(module, assignment, user)
+			with ComposableCommand[JobInstance]
+			with SubmitToTurnitinPermissions
+			with SubmitToTurnitinDescription
+			with SubmitToTurnitinValidation
+			with AutowiringJobServiceComponent
+			with AutowiringFeaturesComponent
+}
 
-	var jobService = Wire[JobService]
+trait SubmitToTurnitinState {
+	def module: Module
+	def assignment: Assignment
+	def user: CurrentUser
+}
 
-	def applyInternal() = {
+trait SubmitToTurnitinRequest extends SubmitToTurnitinState {
+	// No request params currently
+}
+
+abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignment: Assignment, val user: CurrentUser)
+	extends CommandInternal[JobInstance]
+		with SubmitToTurnitinRequest {
+	self: JobServiceComponent with FeaturesComponent =>
+
+	override def applyInternal() = {
 		if (features.turnitinLTI) jobService.add(Option(user), SubmitToTurnitinLtiJob(assignment))
 		else jobService.add(Option(user), SubmitToTurnitinJob(assignment))
 	}
 
-	def describe(d: Description) = d.assignment(assignment)
+}
 
-	def incompatibleFiles = {
-		val allAttachments = assignment.submissions.asScala.flatMap{ _.allAttachments }
-		allAttachments.filterNot(a => Turnitin.validFileType(a) && Turnitin.validFileSize(a))
+trait SubmitToTurnitinPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: SubmitToTurnitinState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		p.PermissionCheck(Permissions.Submission.CheckForPlagiarism, assignment)
 	}
+}
+
+trait SubmitToTurnitinDescription extends Describable[JobInstance] {
+	self: SubmitToTurnitinState =>
+
+	override def describe(d: Description) = d.assignment(assignment)
+}
+
+trait SubmitToTurnitinValidation extends SelfValidating {
+	self: SubmitToTurnitinState with FeaturesComponent =>
 
 	override def validate(errors: Errors) {
 		if (!features.turnitinSubmissions) errors.reject("turnitin.submissions.disabled")
 	}
-
 }

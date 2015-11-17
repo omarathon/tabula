@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <script>
 	var weeks = ${weekRangesDumper()}
 </script>
@@ -52,3 +54,5 @@
 	</ol>
 
 </div>
+
+</#escape>

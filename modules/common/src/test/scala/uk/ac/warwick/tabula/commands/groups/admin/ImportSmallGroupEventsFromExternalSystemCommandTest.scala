@@ -40,15 +40,16 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
 	private trait CommandTestSupport extends SmallGroupEventGenerator {
 		self: MockServices with ImportSmallGroupEventsFromExternalSystemCommandState =>
 
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 			val event = new SmallGroupEvent(group)
-			updateEvent(module, set, group, event, weeks, day, startTime, endTime, location, tutorUsercodes)
+			updateEvent(module, set, group, event, weeks, day, startTime, endTime, location, title, tutorUsercodes)
 
 			group.addEvent(event)
 			event
 		}
 
-		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+			event.title = title
 			event.weekRanges = weeks
 			event.day = day
 			event.startTime = startTime

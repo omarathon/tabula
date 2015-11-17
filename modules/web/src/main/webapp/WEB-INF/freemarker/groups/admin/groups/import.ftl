@@ -1,33 +1,4 @@
-<#macro eventDetails event><#compress>
-	<div class="day-time">
-		${(event.day.name)!""}
-		<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if>
-		-
-		<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
-	</div>
-	<#if event.staff?size gt 0>
-		Tutor<#if event.staff?size gt 1>s</#if>:
-		<#list event.staff as user>
-			${user.fullName}<#if user_has_next>,</#if>
-		</#list>
-	</#if>
-	<#if ((event.location.name)!"")?has_content>
-		<div class="location">
-			Room: <@fmt.location event.location />
-		</div>
-	</#if>
-	<div class="running">
-		Running: <#compress>
-			<#if event.weekRanges?size gt 0 && event.day??>
-				${weekRangesFormatter(event.weekRanges, event.day, academicYear, department)}
-			<#elseif event.weekRanges?size gt 0>
-				[no day of week selected]
-			<#else>
-				[no dates selected]
-			</#if>
-		</#compress>
-	</div>
-</#compress></#macro>
+<#import "*/group_components.ftl" as components />
 
 <#macro groups_details timetabledEvent>
 	<div class="set-info striped-section collapsible">
@@ -64,7 +35,7 @@
 						<div class="span8">
 							<#if event.startTime??><@fmt.time event.startTime /></#if> ${(event.day.name)!""}
 
-							<#local popoverContent><@eventDetails event /></#local>
+							<#local popoverContent><@components.timetableEventDetails event academicYear department /></#local>
 							<a class="use-popover"
 							   data-html="true"
 							   data-content="${popoverContent?html}"><i class="icon-question-sign"></i></a>
@@ -77,8 +48,6 @@
 </#macro>
 
 <#escape x as x?html>
-	<#import "*/group_components.ftl" as components />
-
 	<#macro deptheaderroutemacro department>
 		<@routes.groups.import_groups_for_year department academicYear />
 	</#macro>

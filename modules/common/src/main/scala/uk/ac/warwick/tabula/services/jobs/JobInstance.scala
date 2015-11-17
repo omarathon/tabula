@@ -43,4 +43,5 @@ trait JobInstance {
 	def json: JsonMap
 
 	def user: CurrentUser
+	def userId: String
 }

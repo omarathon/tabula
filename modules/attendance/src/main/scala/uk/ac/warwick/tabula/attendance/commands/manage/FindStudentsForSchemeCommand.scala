@@ -63,7 +63,8 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 			val startResult = studentsPerPage * (page-1)
 			val staticMembershipItemsToDisplay = attendanceMonitoringService.findSchemeMembershipItems(
 				staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage),
-				SchemeMembershipStaticType
+				SchemeMembershipStaticType,
+				scheme.academicYear
 			)
 
 			val membershipItems: Seq[SchemeMembershipItem] = {

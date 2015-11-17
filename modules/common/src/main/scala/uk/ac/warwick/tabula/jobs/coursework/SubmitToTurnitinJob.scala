@@ -77,7 +77,7 @@ class SubmitToTurnitinJob extends Job
 		val className = classNameFor(assignment)
 		val assignmentName = assignmentNameFor(assignment)
 
-		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
+		lazy val session = api.login(job.user.email, job.user.firstName, job.user.lastName).getOrElse(throw loginFailure)
 
 		// Get existing submissions.
 		debug(s"Checking for existing submissions in ${classId.value}, ${assignmentId.value}")

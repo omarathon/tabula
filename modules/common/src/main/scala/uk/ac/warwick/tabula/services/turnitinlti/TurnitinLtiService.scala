@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
+import javax.crypto.{Mac, SecretKey}
+import javax.crypto.spec.SecretKeySpec
 
-import com.google.api.client.auth.oauth.OAuthHmacSigner
-import com.google.gdata.client.authn.oauth.{OAuthParameters, OAuthUtil}
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
+import net.oauth.OAuthMessage
+import net.oauth.signature.OAuthSignatureMethod
 import org.apache.commons.io.FilenameUtils._
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
@@ -22,10 +24,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.api.web.Routes
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats, HttpClientDefaults}
 
-import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 object TurnitinLtiService {
@@ -131,7 +133,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
+						if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
 								// listen to callback for actual response
@@ -199,12 +201,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, user: CurrentUser): TurnitinLtiResponse = doRequest(
+	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, email: String, firstName: String, lastName: String): TurnitinLtiResponse = doRequest(
 		s"$apiReportLaunch/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
-		) ++ userParams(user.email, user.firstName, user.lastName),
+		) ++ userParams(email, firstName, lastName),
 		expectedStatusCode = Some(HttpStatus.SC_MOVED_TEMPORARILY)) {
 		request =>
 			request >:+ {
@@ -217,7 +219,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 						<p>The requested Object Result could not be found.</p>
 					</div>
 						**/
-					if (!location.isDefined) throw new IllegalStateException(s"Expected a redirect url")
+					if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 					request >- {
 						(html) => {
 							TurnitinLtiResponse.redirect(location.get)
@@ -253,7 +255,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		assignment: Assignment,
 		user: CurrentUser ) = {
 
-		val signedParams = getSignedParamsWithKey(
+		val signedParams = getSignedParams(
 			Map(
 				"lis_result_sourcedid" -> assignment.id,
 				"lis_outcome_service_url" -> s"$topLevelUrl/api/v1/turnitin/turnitin-lti-outcomes/assignment/${assignment.id}",
@@ -271,7 +273,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"custom_debug" -> "true"
 
 			)  ++ userParams(email, givenName, familyName) ++ customParamsForTesting(customParams, email) filter(p => p._2.nonEmpty),
-			endpoint, Some(secret), key
+			endpoint, Some(secret), Some(key)
 		)
 
 		logger.debug("doRequest: " + signedParams)
@@ -317,7 +319,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		endpoint: String, secret: String, key: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
 	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
-		val signedParams = getSignedParamsWithKey(params, endpoint, Some(secret), key)
+		val signedParams = getSignedParams(params, endpoint, Some(secret), Some(key))
 
 		logger.debug("doRequest: " + signedParams)
 
@@ -345,10 +347,10 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	}
 
 	def doRequest(
-	endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
+		endpoint: String, params: Map[String, String], expectedStatusCode: Option[Int] = None
 	) (transform: Request => Handler[TurnitinLtiResponse]): TurnitinLtiResponse = {
 
-		val signedParams = getSignedParams(params, endpoint, None)
+		val signedParams = getSignedParams(params, endpoint)
 
 		val req = (url(endpoint) <:< Map()).POST << signedParams
 
@@ -374,47 +376,24 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		}
 	}
 
-	def getSignedParams(params: Map[String, String], endpoint: String, optionalSecret: Option[String]): Map[String, String] = {
-		val hmacSigner = new OAuthHmacSigner()
-		hmacSigner.clientSharedSecret = optionalSecret.getOrElse(sharedSecretKey)
+	def getSignedParams(params: Map[String, String], endpoint: String, secret: Option[String] = None, key: Option[String] = None): Map[String, String] = {
+		val clientSharedSecret = secret.orElse(Some(sharedSecretKey))
 
-		val oauthparams = new OAuthParameters()
-		oauthparams.setOAuthConsumerKey(turnitinAccountId)
-		oauthparams.setOAuthNonce(OAuthUtil.getNonce)
-		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
-		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
-		oauthparams.setOAuthCallback("about:blank")
-		oauthparams.addCustomBaseParameter("oauth_version", "1.0")
+		val oauthParams = Map(
+			"oauth_consumer_key" -> key.getOrElse(turnitinAccountId),
+			"oauth_nonce" -> System.nanoTime().toString,
+			"oauth_timestamp" -> (System.currentTimeMillis() / 1000).toString,
+			"oauth_signature_method" -> "HMAC-SHA1",
+			"oauth_callback" -> "about:blank",
+			"oauth_version" -> "1.0"
+		)
 
-		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
+		val allParams = commonParameters ++ params ++ oauthParams
 
-		val signatureBaseString = OAuthUtil.getSignatureBaseString(endpoint, "POST", allParams.asJava)
-		val signature = hmacSigner.computeSignature(signatureBaseString)
+		val signatureBaseString = TurnitinLtiOAuthSupport.getSignatureBaseString(endpoint, "POST", allParams)
+		val signature = TurnitinLtiOAuthSupport.sign(signatureBaseString, clientSharedSecret)
 
-		oauthparams.addCustomBaseParameter("oauth_signature", signature)
-		val allParamsIncludingSignature = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
-		allParamsIncludingSignature
-	}
-
-	def getSignedParamsWithKey(params: Map[String, String], endpoint: String, optionalSecret: Option[String], key: String): Map[String, String] = {
-		val hmacSigner = new OAuthHmacSigner()
-		hmacSigner.clientSharedSecret = optionalSecret.getOrElse(sharedSecretKey)
-
-		val oauthparams = new OAuthParameters()
-		oauthparams.setOAuthConsumerKey(key)
-		oauthparams.setOAuthNonce(OAuthUtil.getNonce)
-		oauthparams.setOAuthTimestamp(OAuthUtil.getTimestamp)
-		oauthparams.setOAuthSignatureMethod("HMAC-SHA1")
-		oauthparams.setOAuthCallback("about:blank")
-
-		val allParams = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
-
-		val signatureBaseString = OAuthUtil.getSignatureBaseString(endpoint, "POST", allParams.asJava)
-		val signature = hmacSigner.computeSignature(signatureBaseString)
-
-		oauthparams.addCustomBaseParameter("oauth_signature", signature)
-		val allParamsIncludingSignature = commonParameters ++ params ++ oauthparams.getBaseParameters.asScala ++ oauthparams.getExtraParameters.asScala
-		allParamsIncludingSignature
+		allParams + ("oauth_signature" -> signature)
 	}
 }
 
@@ -433,3 +412,34 @@ case class ClassId(value: String)
 case class AssignmentName(value: String)
 
 case class AssignmentId(value: String)
+
+object TurnitinLtiOAuthSupport {
+
+	def sign(baseString: String, clientSharedSecret: Option[String] = None, tokenSharedSecret: Option[String] = None): String = {
+		def getBytesUtf8 = org.apache.commons.codec.binary.StringUtils.getBytesUtf8 _
+		def encodeBase64String = org.apache.commons.codec.binary.Base64.encodeBase64String _
+
+		// compute key
+		val keyBuf = new StringBuilder
+
+		clientSharedSecret.foreach(keyBuf.append)
+		keyBuf.append('&')
+		tokenSharedSecret.foreach(keyBuf.append)
+
+		val key = keyBuf.toString
+
+		// sign
+		val secretKey: SecretKey = new SecretKeySpec(getBytesUtf8(key), "HmacSHA1")
+		val mac: Mac = Mac.getInstance("HmacSHA1")
+		mac.init(secretKey)
+
+		encodeBase64String(mac.doFinal(getBytesUtf8(baseString)))
+	}
+
+	def getSignatureBaseString(requestUrl: String, httpMethod: String, baseParameters: Map[String, String]) = {
+		val message = new OAuthMessage(httpMethod, requestUrl, JMap(baseParameters.toSeq: _*).entrySet())
+
+		OAuthSignatureMethod.getBaseString(message)
+	}
+
+}

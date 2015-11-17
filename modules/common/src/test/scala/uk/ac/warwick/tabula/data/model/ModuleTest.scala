@@ -62,12 +62,12 @@ class ModuleTest extends TestBase {
 		assignment1.deleted = true
 
 		val assignment2 = new Assignment()
-		assignment2.archived = true
+		assignment2.archive()
 
 		module.assignments = Seq(assignment1, assignment2).asJava
 		module.hasLiveAssignments should be(false)
 
-		assignment2.archived = false
+		assignment2.unarchive()
 		module.hasLiveAssignments should be(true)
 	}
 

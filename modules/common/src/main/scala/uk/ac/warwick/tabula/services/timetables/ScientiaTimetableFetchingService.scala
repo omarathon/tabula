@@ -91,9 +91,9 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			val events = parseXml(node, year, locationFetchingService, moduleAndDepartmentService, userLookup)
+			val events = parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 
 			if (excludeSmallGroupEventsInTabula)
 				events.filterNot { event =>
@@ -131,16 +131,16 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 			// else return an empty list.
-			logger.info(s"Requesting timetable data from $uri")
+			logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 
-			val result = Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula)))
+			val result = Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param)))
 
 			// Some extra logging here
 			result match {
 				case Success(ev) =>
-					if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
+					if (ev.isEmpty) logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
 				case Failure(e) =>
-					logger.warn(s"Request for $uri failed: ${e.getMessage}")
+					logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 			}
 
 			result
@@ -151,7 +151,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 }
 
-object ScientiaHttpTimetableFetchingService {
+object ScientiaHttpTimetableFetchingService extends Logging {
 
 	val cacheName = "SyllabusPlusTimetables"
 
@@ -169,11 +169,13 @@ object ScientiaHttpTimetableFetchingService {
 	def parseXml(
 		xml: Elem,
 		year: AcademicYear,
+		uniId: String,
 		locationFetchingService: LocationFetchingService,
 		moduleAndDepartmentService: ModuleAndDepartmentService,
 		userLookup: UserLookupService
 	): Seq[TimetableEvent] = {
 		val moduleCodes = (xml \\ "module").map(_.text.toLowerCase).distinct
+		if (moduleCodes.isEmpty) logger.info(s"No modules returned for: $uniId")
 		val moduleMap = moduleAndDepartmentService.getModulesByCodes(moduleCodes).groupBy(_.code).mapValues(_.head)
 		xml \\ "Activity" map { activity =>
 			val name = (activity \\ "name").text

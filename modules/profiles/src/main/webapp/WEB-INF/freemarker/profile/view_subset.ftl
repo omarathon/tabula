@@ -1,4 +1,6 @@
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#escape x as x?html>
+
 <#if isMember>
 	<@modal.header>
 		<h1><@fmt.profile_name profile /></h1>
@@ -136,3 +138,5 @@
 		</div>
 	</@modal.body>
 </#if>
+
+</#escape>

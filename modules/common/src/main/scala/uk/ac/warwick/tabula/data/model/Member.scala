@@ -477,7 +477,6 @@ trait MemberProperties extends StringId {
 	@Id var universityId: String = _
 	def id = universityId
 
-	@Column(nullable = false)
 	@Restricted(Array("Profiles.Read.Usercode"))
 	var userId: String = _
 

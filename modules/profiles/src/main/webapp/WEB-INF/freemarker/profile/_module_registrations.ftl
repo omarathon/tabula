@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="module-registrations" class="clearfix">
 	<#assign moduleRegsUrl><@routes.listModuleRegs studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/></#assign>
 	<i class="icon-spinner icon-spin"></i><em> Loading modules&hellip;</em>
@@ -19,3 +21,5 @@
 		});
 	</script>
 </section>
+
+</#escape>
