@@ -8,14 +8,14 @@ import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 @Component
-class ScheduledMeetingRecordConfirmerRoleProvider extends RoleProvider with TaskBenchmarking {
+class ScheduledMeetingRecordCreatorRoleProvider extends RoleProvider with TaskBenchmarking {
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordConfirmerRoleProvider") {
 		scope match {
 			case meeting: ScheduledMeetingRecord if meeting.creator.universityId == user.universityId =>
 				Stream(
-					customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordConfirmerRoleDefinition, meeting)
-						.getOrElse(ScheduledMeetingRecordConfirmer(meeting))
+					customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordCreatorRoleDefinition(meeting.relationship.relationshipType), meeting)
+						.getOrElse(ScheduledMeetingRecordCreator(meeting, meeting.relationship.relationshipType))
 				)
 
 			// ScheduledMeetingRecordConfirmer is only checked at the meeting level
@@ -23,6 +23,6 @@ class ScheduledMeetingRecordConfirmerRoleProvider extends RoleProvider with Task
 		}
 	}
 
-	def rolesProvided = Set(classOf[ScheduledMeetingRecordConfirmer])
+	def rolesProvided = Set(classOf[ScheduledMeetingRecordCreator])
 
 }
