@@ -104,6 +104,8 @@ abstract class Member
 
 	var missingFromImportSince: DateTime = _
 
+	var lastImportDate: DateTime = _
+
 	def fullName: Option[String] = {
 		(Option(firstName) ++ Option(lastName)).toList match {
 			case Nil => None
