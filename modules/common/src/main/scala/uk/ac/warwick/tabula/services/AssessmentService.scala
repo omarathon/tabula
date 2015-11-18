@@ -80,14 +80,14 @@ abstract class AbstractAssessmentService extends AssessmentService {
 	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
 		assessmentDao.getExamByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId).filter { _.isVisibleToStudents }
+	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(universityId).filter { _.isVisibleToStudentsHistoric }
 
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.universityId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId).filter { _.isVisibleToStudents }
+	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId).filter { _.isVisibleToStudentsHistoric }
 
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
