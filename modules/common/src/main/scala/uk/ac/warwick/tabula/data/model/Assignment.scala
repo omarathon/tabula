@@ -400,6 +400,11 @@ class Assignment
 	def isVisibleToStudents = isAlive && !_hiddenFromStudents
 
 	/**
+		* Whether this assignment should be visible to students historically (this allows archived assignments)
+		*/
+	def isVisibleToStudentsHistoric = !deleted && !_hiddenFromStudents
+
+	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
 	def submittable(user: User) = isAlive && collectSubmissions && isOpened && (allowLateSubmissions || !isClosed || isWithinExtension(user))
