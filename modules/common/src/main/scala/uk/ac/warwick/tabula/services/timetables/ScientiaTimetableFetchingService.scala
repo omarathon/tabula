@@ -137,7 +137,10 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param)))
 					.flatMap { ev =>
 						if (ev.nonEmpty) Success(ev)
-						else Failure(new TimetableEmptyException(uri, param))
+						else {
+							logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
+							Failure(new TimetableEmptyException(uri, param))
+						}
 					}
 
 			// Some extra logging here
