@@ -85,7 +85,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		}
 	}
 
-	override def destroy {
+	override def destroy() {
 		http.shutdown()
 	}
 
@@ -133,14 +133,20 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			// else return an empty list.
 			logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 
-			val result = Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param)))
+			val result =
+				Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param)))
+					.flatMap { ev =>
+						if (ev.nonEmpty) Success(ev)
+						else {
+							logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
+							Failure(new TimetableEmptyException(uri, param))
+						}
+					}
 
 			// Some extra logging here
-			result match {
-				case Success(ev) =>
-					if (ev.isEmpty) logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
-				case Failure(e) =>
-					logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+			if (result.isFailure) {
+				val e = result.failed.get
+				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 			}
 
 			result
@@ -150,6 +156,9 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	}
 
 }
+
+class TimetableEmptyException(val uri: String, val param: String)
+	extends IllegalStateException(s"Received an empty timetable from $uri for $param")
 
 object ScientiaHttpTimetableFetchingService extends Logging {
 
