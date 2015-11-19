@@ -42,6 +42,9 @@ class SubmitToTurnitinLtiJob extends Job
 	val WaitingRequestsToTurnitinSleep = 20000
 	val WaitingRequestsToTurnitinRetries = 50
 
+	val WaitingRequestsToTurnitinSubmitPaperSleep = 2000
+	val WaitingRequestsToTurnitinSubmitPaperRetries = 20
+
 	val WaitingRequestsFromTurnitinCallbackSleep = 2000
 	val WaitingRequestsFromTurnitinCallbacksRetries = 20
 
@@ -124,7 +127,7 @@ class SubmitToTurnitinLtiJob extends Job
 					if (attachment.originalityReport == null || !attachment.originalityReport.reportReceived) {
 						val attachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
 						val submitPaper = transactional(){
-							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinRetries)
+							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinSubmitPaperRetries)
 						}
 							if (!submitPaper.success) {
 								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
@@ -145,7 +148,7 @@ class SubmitToTurnitinLtiJob extends Job
 		): TurnitinLtiResponse = {
 
 			def submit() = {
-				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				Thread.sleep(WaitingRequestsToTurnitinSubmitPaperSleep)
 				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
 					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.universityId, "Student")
 			}
@@ -168,11 +171,13 @@ class SubmitToTurnitinLtiJob extends Job
 						}
 					response
 				case response if retries == 0 =>
-					logger.warn("Failed to upload '" + attachment.name + "' - " + response.statusMessage.getOrElse(""))
+					logger.warn(s"Failed to upload ' ${attachment.name} ' - ${response.statusMessage.getOrElse("")}")
 					response
+				case response if response.statusMessage.isDefined =>
+					logger.warn(s"Failing to upload '${attachment.name} ' - ${response.statusMessage.getOrElse("")}. Try one more time")
+					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, 0)
 				case _ => {
-					val newAttachmentAccessUrl = getAttachmentAccessUrl(submission, attachment)
-					submitSinglePaper(assignment, newAttachmentAccessUrl, submission, attachment, retries - 1)
+					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, retries - 1)
 				}
 			}
 		}
