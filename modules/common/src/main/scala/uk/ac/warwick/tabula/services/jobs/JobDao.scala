@@ -16,6 +16,7 @@ trait JobDao {
 	def unfinishedInstances: Seq[JobInstance]
 	def listRecent(start: Int, count: Int): Seq[JobInstance]
 	def update(instance: JobInstance): Unit
+	def listRunningJobs: Seq[JobInstance]
 }
 
 trait HasJobDao {
@@ -36,12 +37,12 @@ class JobDaoImpl extends JobDao with Daoisms {
 
 	def findOutstandingInstance(example: JobInstance): Option[JobInstance] = transactional(readOnly = true) {
 		/*
-		 * TAB-724
+		 * TAB-724 and TAB 3872
 		 *
 		 * We only check unstarted jobs here because started jobs may take a long time. It's perfectly possible
 		 * that a user genuinely wants to create ANOTHER Turnitin submission job while the other one has been running
 		 * for half an hour, and we don't have to worry about that happening because they will execute in separate
-		 * transactions - the job runner doesn't get any new jobs until it's finished all the ones that it's running.
+		 * transactions - the job runner won't start an identical job until this one is finished.
 		 */
 
 		session.newCriteria[JobInstanceImpl]
@@ -86,4 +87,11 @@ class JobDaoImpl extends JobDao with Daoisms {
 			.setMaxResults(count)
 			.seq
 
+	def listRunningJobs: Seq[JobInstance] =
+		transactional(readOnly = true) {
+			session.newCriteria[JobInstanceImpl]
+				.add(is("started", true))
+				.add(is("finished", false))
+				.seq
+		}
 }

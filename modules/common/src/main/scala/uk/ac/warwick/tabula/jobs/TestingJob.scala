@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.jobs
 
-import uk.ac.warwick.tabula.jobs._
+import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.services.jobs._
-import org.springframework.stereotype.Component
-import org.springframework.stereotype.Component
 
 object TestingJob {
 	val id = "testing"
@@ -20,7 +18,7 @@ class TestingJob extends Job {
 	def run(implicit job: JobInstance) {
 		val name = job.getString("name")
 		val sleepTime = job.getString("sleepTime").toInt
-		updateStatus("Running the job with name %s." format (name))
+		updateStatus("Running the job with name %s." format name)
 		for (i <- 1 to 50) {
 			updateProgress(i*2)
 			if (sleepTime != 0) Thread.sleep(10)
