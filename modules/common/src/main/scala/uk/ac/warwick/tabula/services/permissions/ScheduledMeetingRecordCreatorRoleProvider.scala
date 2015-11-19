@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class ScheduledMeetingRecordCreatorRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordConfirmerRoleProvider") {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordCreatorRoleProvider") {
 		scope match {
 			case meeting: ScheduledMeetingRecord if meeting.creator.universityId == user.universityId =>
 				Stream(
@@ -18,7 +18,7 @@ class ScheduledMeetingRecordCreatorRoleProvider extends RoleProvider with TaskBe
 						.getOrElse(ScheduledMeetingRecordCreator(meeting, meeting.relationship.relationshipType))
 				)
 
-			// ScheduledMeetingRecordConfirmer is only checked at the meeting level
+			// ScheduledMeetingRecordCreator is only checked at the meeting level
 			case _ => Stream.empty
 		}
 	}
