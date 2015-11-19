@@ -174,7 +174,7 @@ class SubmitToTurnitinLtiJob extends Job
 					logger.warn(s"Failed to upload ' ${attachment.name} ' - ${response.statusMessage.getOrElse("")}")
 					response
 				case response if response.statusMessage.isDefined =>
-					logger.warn(s"Failing to upload '${attachment.name} ' - ${response.statusMessage.getOrElse("")} try one more time")
+					logger.warn(s"Failing to upload '${attachment.name} ' - ${response.statusMessage.getOrElse("")}. Try one more time")
 					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, 0)
 				case _ => {
 					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, retries - 1)
