@@ -111,7 +111,7 @@ class ScheduledJobs {
 			}
 		}
 
-	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
+	@Scheduled(fixedRate = 10 * 1000) // every 10 seconds
 	def jobs(): Unit =
 		if (features.schedulingJobService) maintenanceGuard {
 			exceptionResolver.reportExceptions { jobService.run() }

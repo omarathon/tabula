@@ -28,7 +28,16 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	@Autowired var jobs: Array[Job] = Array()
 
 	def run() {
-		jobDao.findOutstandingInstances(RunBatchSize).par foreach processInstance
+		val runningJobs = jobDao.listRunningJobs
+		if (runningJobs.size < RunBatchSize) {
+			jobDao
+				.findOutstandingInstances(RunBatchSize - runningJobs.size)
+				.filterNot(prospectiveJob => runningJobs.exists(runningJob =>
+					runningJob.jobType == prospectiveJob.jobType && runningJob.json == prospectiveJob.json
+				))
+				.par
+				.foreach(processInstance)
+		}
 	}
 
 	def getInstance(id: String) = jobDao.getById(id)
