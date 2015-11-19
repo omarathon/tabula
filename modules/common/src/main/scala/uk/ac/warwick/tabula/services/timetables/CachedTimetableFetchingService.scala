@@ -75,8 +75,12 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 	}
 
 	// rather than using 5 little caches, use one big one with a composite key
-	lazy val timetableCache =
-		Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+	lazy val timetableCache = {
+		val cache = Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+		// serve stale data if we have it while we update in the background
+		cache.setAsynchronousUpdateEnabled(true)
+		cache
+	}
 
 	def getTimetableForStudent(universityId: String) = Try(timetableCache.get(StudentKey(universityId)))
 	def getTimetableForModule(moduleCode: String) = Try(timetableCache.get(ModuleKey(moduleCode)))
