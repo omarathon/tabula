@@ -9,15 +9,25 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.jobs.{JobServiceComponent, AutowiringJobServiceComponent, JobInstance}
 import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinLtiJob
 import org.springframework.validation.Errors
+import uk.ac.warwick.userlookup.User
 
+/**
+	* Creates a job that submits the assignment to Turnitin.
+	*
+	* Returns the job instance ID for status tracking.
+	*/
 object SubmitToTurnitinCommand {
 	type CommandType = Appliable[JobInstance] with SubmitToTurnitinRequest with SelfValidating
 
-	/**
-		* Creates a job that submits the assignment to Turnitin.
-		*
-		* Returns the job instance ID for status tracking.
-		*/
+	def apply(module: Module, assignment: Assignment): CommandType =
+		new SubmitToTurnitinCommandInternal(module, assignment)
+			with ComposableCommand[JobInstance]
+			with SubmitToTurnitinPermissions
+			with SubmitToTurnitinDescription
+			with SubmitToTurnitinValidation
+			with AutowiringJobServiceComponent
+			with AutowiringFeaturesComponent
+
 	def apply(module: Module, assignment: Assignment, user: CurrentUser): CommandType =
 		new SubmitToTurnitinCommandInternal(module, assignment, user)
 			with ComposableCommand[JobInstance]
@@ -31,21 +41,26 @@ object SubmitToTurnitinCommand {
 trait SubmitToTurnitinState {
 	def module: Module
 	def assignment: Assignment
-	def user: CurrentUser
 }
 
 trait SubmitToTurnitinRequest extends SubmitToTurnitinState {
-	// No request params currently
+	var submitter: User = _
 }
 
-abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignment: Assignment, val user: CurrentUser)
+abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignment: Assignment)
 	extends CommandInternal[JobInstance]
 		with SubmitToTurnitinRequest {
 	self: JobServiceComponent with FeaturesComponent =>
 
+	def this(module: Module, assignment: Assignment, user: CurrentUser) {
+		this(module, assignment)
+
+		submitter = user.apparentUser
+	}
+
 	override def applyInternal() = {
-		if (features.turnitinLTI) jobService.add(Option(user), SubmitToTurnitinLtiJob(assignment))
-		else jobService.add(Option(user), SubmitToTurnitinJob(assignment))
+		if (features.turnitinLTI) jobService.add(submitter, SubmitToTurnitinLtiJob(assignment))
+		else jobService.add(submitter, SubmitToTurnitinJob(assignment))
 	}
 
 }
@@ -66,9 +81,12 @@ trait SubmitToTurnitinDescription extends Describable[JobInstance] {
 }
 
 trait SubmitToTurnitinValidation extends SelfValidating {
-	self: SubmitToTurnitinState with FeaturesComponent =>
+	self: SubmitToTurnitinRequest with FeaturesComponent =>
 
 	override def validate(errors: Errors) {
 		if (!features.turnitinSubmissions) errors.reject("turnitin.submissions.disabled")
+
+		if (!Option(submitter).exists(_.isFoundUser))
+			errors.rejectValue("submitter", "userId.notfound")
 	}
 }
