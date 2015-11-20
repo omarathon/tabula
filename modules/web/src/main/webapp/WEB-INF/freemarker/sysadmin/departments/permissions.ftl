@@ -21,7 +21,7 @@
 			   data-original-title="Departmental admins"
 			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
-			<@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
+			<@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "Departmental Administrator" />
 		</div>
 		<div class="span6">
 			<#assign popover>
@@ -34,7 +34,7 @@
 			   data-original-title="Departmental User Access Manager"
 			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
-			<@pm.roleTable deptperms_url "deptuam-table" department "UserAccessMgrRoleDefinition" "user access managers" />
+			<@pm.roleTable deptperms_url "deptuam-table" department "UserAccessMgrRoleDefinition" "User Access Manager" />
 		</div>
 
 	</div>

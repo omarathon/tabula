@@ -12,7 +12,7 @@
 			   data-original-title="Module Managers"
 			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
-			<@pm.roleTable perms_url "modulemanager-table" scope "ModuleManagerRoleDefinition" "module managers" />
+			<@pm.roleTable perms_url "modulemanager-table" scope "ModuleManagerRoleDefinition" "Module Manager" />
 		</div>
 
 		<div class="span6">
@@ -24,7 +24,7 @@
 			   data-original-title="Module Assistants"
 			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
-			<@pm.roleTable perms_url "moduleassistant-table" scope "ModuleAssistantRoleDefinition" "module assistants" />
+			<@pm.roleTable perms_url "moduleassistant-table" scope "ModuleAssistantRoleDefinition" "Module Assistant" />
 		</div>
 	</div>
 
@@ -38,7 +38,7 @@
 			   data-original-title="Module Auditors"
 			   data-content="${popover}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 
-			<@pm.roleTable perms_url "moduleauditor-table" scope "ModuleAuditorRoleDefinition" "module auditors" />
+			<@pm.roleTable perms_url "moduleauditor-table" scope "ModuleAuditorRoleDefinition" "Module Auditor" />
 		</div>
 	</div>
 </#escape>
