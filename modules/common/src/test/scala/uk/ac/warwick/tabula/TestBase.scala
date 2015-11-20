@@ -49,8 +49,8 @@ abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 
-	// No test should take longer than a minute
-	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
+	// No test should take longer than 2 minutes
+	val minuteTimeout = new Timeout(2, TimeUnit.MINUTES)
 	@Rule def timeoutRule = minuteTimeout
 
 	@After
