@@ -39,7 +39,7 @@ class TurnitinLtiServiceTest extends TestBase {
 	}}
 
 	@Test def generatedAssignmentName() { new Fixture {
-		TurnitinLtiService.assignmentNameFor(assignment).value should be("1500 word assignment (14/15)")
+		TurnitinLtiService.assignmentNameFor(assignment).value should be("12345 - 1500 word assignment (14/15)")
 	}}
 
 }
