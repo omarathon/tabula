@@ -67,7 +67,7 @@ object TurnitinLtiService {
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(s"${assignment.id} - ${assignment.name} (${assignment.academicYear.toString})")
+		AssignmentName(s"${assignment.id} (${assignment.academicYear.toString}) ${assignment.name}")
 	}
 }
 
