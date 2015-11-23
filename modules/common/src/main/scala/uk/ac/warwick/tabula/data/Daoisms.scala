@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import javax.sql.DataSource
 
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{DetachedCriteria, PropertySubqueryExpression}
+import org.hibernate.criterion.{Projection, DetachedCriteria, PropertySubqueryExpression}
 import org.hibernate.proxy.HibernateProxy
 import org.hibernate.{Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
@@ -58,12 +58,24 @@ trait HelperRestrictions extends Logging {
 		} else if (iterable.length <= Daoisms.MaxInClauseCount) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
 		} else {
+			logger.warn("TAB-3888 - Use multiple queries where possible instead of passing more than 1000 entities")
 			val or = disjunction()
 			iterable.grouped(Daoisms.MaxInClauseCount).foreach { subitr =>
 				or.add(org.hibernate.criterion.Restrictions.in(propertyName, subitr.asJavaCollection))
 			}
 			or
 		}
+	}
+	def safeInSeq[A](criteria: ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
+		iterable.grouped(Daoisms.MaxInClauseCount).toSeq.flatMap(maxedIterable =>
+			criteria.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)).seq
+		)
+	}
+	def safeInSeq[A](criteria: ScalaCriteria[_], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[A] = {
+		iterable.grouped(Daoisms.MaxInClauseCount).toSeq.flatMap(maxedIterable => {
+			criteria.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection))
+			criteria.project[A](projection).seq
+		})
 	}
 }
 

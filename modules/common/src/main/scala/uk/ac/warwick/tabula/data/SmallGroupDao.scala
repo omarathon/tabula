@@ -148,7 +148,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	}
 
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] = {
-		if(studentIds.size == 0 || occurrences.size == 0)
+		if(studentIds.isEmpty || occurrences.isEmpty)
 			return Seq()
 
 		session.newCriteria[SmallGroupEventAttendanceNote]
@@ -180,7 +180,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 				.add(le("occurrence.week", endWeek))
 				.seq
 		} else {
-			session.newCriteria[SmallGroupEventAttendance]
+			val c = session.newCriteria[SmallGroupEventAttendance]
 				.createAlias("occurrence", "occurrence")
 				.createAlias("occurrence.event", "event")
 				.createAlias("event.group", "group")
@@ -188,8 +188,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 				.add(is("universityId", student.universityId))
 				.add(ge("occurrence.week", startWeek))
 				.add(le("occurrence.week", endWeek))
-				.add(safeIn("groupSet.module", modules))
-				.seq
+			safeInSeq(c, "groupSet.module", modules)
 		}
 
 	}

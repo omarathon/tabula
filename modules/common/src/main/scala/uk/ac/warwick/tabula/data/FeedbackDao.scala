@@ -53,15 +53,14 @@ abstract class AbstractFeedbackDao extends FeedbackDao {
 	}
 
 	override def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback] = {
-		session.newCriteria[ExamFeedback]
-			.add(is("exam", exam))
-			.add(safeIn("universityId", users.map(_.getWarwickId)))
-			.seq
-			.groupBy(_.universityId)
-			.map{case(universityId, feedbacks) =>
-				users.find(_.getWarwickId == universityId).get -> feedbacks.head
-			}
-
+		safeInSeq(
+			session.newCriteria[ExamFeedback]
+				.add(is("exam", exam)),
+			"universityId",
+			users.map(_.getWarwickId)
+		).groupBy(_.universityId).map{case(universityId, feedbacks) =>
+			users.find(_.getWarwickId == universityId).get -> feedbacks.head
+		}
 	}
 
 

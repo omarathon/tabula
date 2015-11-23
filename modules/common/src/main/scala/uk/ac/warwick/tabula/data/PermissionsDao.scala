@@ -155,13 +155,12 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			val c =
 				session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
 				.createAlias("_users", "users")
-				.add(safeIn("users.baseWebgroup", groupNames))
 
 			GrantedRole.discriminator[A] foreach { discriminator =>
 				c.add(is("class", discriminator))
 			}
 
-			c.seq
+			safeInSeq(c, "users.baseWebgroup", groupNames)
 		} else Nil
 	}
 
@@ -192,13 +191,12 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		else {
 			val c = session.newCriteria[GrantedPermission[A]]
 				.createAlias("_users", "users")
-				.add(safeIn("users.baseWebgroup", groupNames))
 
 			GrantedPermission.discriminator[A] map { discriminator =>
 				c.add(is("class", discriminator))
 			}
 
-			c.seq
+			safeInSeq(c, "users.baseWebgroup", groupNames)
 		}
 	}
 

@@ -371,57 +371,57 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			student: StudentAssociationData
 		)
 
-		val memberAssociations = session.newCriteria[MemberStudentRelationship]
-			.createAlias("_agentMember", "member")
-			.createAlias("studentCourseDetails", "course")
-			.add(Restrictions.and(
-				Restrictions.eq("relationshipType", relationshipType),
-				Restrictions.or(
-					Restrictions.isNull("endDate"),
-					Restrictions.gt("endDate", DateTime.now)
-				)
-			))
-			.add(safeIn("course.student.universityId", studentData.map(_.universityId)))
-			.project[Array[java.lang.Object]](Projections.projectionList()
+		val memberAssociations = safeInSeq[Array[java.lang.Object]](
+			session.newCriteria[MemberStudentRelationship]
+				.createAlias("_agentMember", "member")
+				.createAlias("studentCourseDetails", "course")
+				.add(Restrictions.and(
+					Restrictions.eq("relationshipType", relationshipType),
+					Restrictions.or(
+						Restrictions.isNull("endDate"),
+						Restrictions.gt("endDate", DateTime.now)
+					)
+				)),
+			Projections.projectionList()
 				.add(property("member.universityId"))
 				.add(property("member.firstName"))
 				.add(property("member.lastName"))
 				.add(property("member.homeDepartment.id"))
-				.add(property("course.student.universityId"))
-			)
-			.seq
-			.map(r => StudentAssociationEntityDataSingle(
-				r(0).asInstanceOf[String],
-				Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
-				Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
-				Option(r(3)).map(_.asInstanceOf[String] == department.id),
-				None,
-				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
-			))
+				.add(property("course.student.universityId")),
+			"course.student.universityId",
+			studentData.map(_.universityId)
+		).map(r => StudentAssociationEntityDataSingle(
+			r(0).asInstanceOf[String],
+			Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+			Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
+			Option(r(3)).map(_.asInstanceOf[String] == department.id),
+			None,
+			studentData.find(_.universityId == r(4).asInstanceOf[String]).get
+		))
 
-		val externalAssociations: Seq[StudentAssociationEntityDataSingle] = session.newCriteria[ExternalStudentRelationship]
-			.createAlias("studentCourseDetails", "course")
-			.add(Restrictions.and(
-				Restrictions.eq("relationshipType", relationshipType),
-				Restrictions.or(
-					Restrictions.isNull("endDate"),
-					Restrictions.gt("endDate", DateTime.now)
-				)
-			))
-			.add(safeIn("course.student.universityId", studentData.map(_.universityId)))
-			.project[Array[java.lang.Object]](Projections.projectionList()
+		val externalAssociations: Seq[StudentAssociationEntityDataSingle] = safeInSeq[Array[java.lang.Object]](
+			session.newCriteria[ExternalStudentRelationship]
+				.createAlias("studentCourseDetails", "course")
+				.add(Restrictions.and(
+					Restrictions.eq("relationshipType", relationshipType),
+					Restrictions.or(
+						Restrictions.isNull("endDate"),
+						Restrictions.gt("endDate", DateTime.now)
+					)
+				)),
+			Projections.projectionList()
 				.add(property("_agentName"))
-				.add(property("course.student.universityId"))
-			)
-			.seq
-			.map(r => StudentAssociationEntityDataSingle(
-				r(0).asInstanceOf[String],
-				r(0).asInstanceOf[String],
-				r(0).asInstanceOf[String],
-				None,
-				None,
-				studentData.find(_.universityId == r(4).asInstanceOf[String]).get
-			))
+				.add(property("course.student.universityId")),
+			"course.student.universityId",
+			studentData.map(_.universityId)
+		).map(r => StudentAssociationEntityDataSingle(
+			r(0).asInstanceOf[String],
+			r(0).asInstanceOf[String],
+			r(0).asInstanceOf[String],
+			None,
+			None,
+			studentData.find(_.universityId == r(4).asInstanceOf[String]).get
+		))
 
 		val dbEntities = (memberAssociations ++ externalAssociations).groupBy(_.entityId).values.map(entityList => StudentAssociationEntityData(
 			entityList.head.entityId,
@@ -435,23 +435,23 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		val additionalEntities = if (additionalEntityIds.isEmpty) {
 			Seq()
 		} else {
-			session.newCriteria[Member]
-				.add(safeIn("universityId", additionalEntityIds))
-				.project[Array[java.lang.Object]](Projections.projectionList()
+			safeInSeq[Array[java.lang.Object]](
+				session.newCriteria[Member],
+				Projections.projectionList()
 					.add(property("universityId"))
 					.add(property("firstName"))
 					.add(property("lastName"))
-					.add(property("homeDepartment.id"))
-				)
-				.seq
-				.map(r => StudentAssociationEntityData(
-					r(0).asInstanceOf[String],
-					Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
-					Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
-					Option(r(3)).map(_.asInstanceOf[String] == department.id),
-					None,
-					Nil
-				))
+					.add(property("homeDepartment.id")),
+				"universityId",
+				additionalEntityIds
+			).map(r => StudentAssociationEntityData(
+				r(0).asInstanceOf[String],
+				Seq(r(1).asInstanceOf[String], r(2).asInstanceOf[String]).mkString(" "),
+				Seq(r(2).asInstanceOf[String], r(1).asInstanceOf[String]).mkString(" "),
+				Option(r(3)).map(_.asInstanceOf[String] == department.id),
+				None,
+				Nil
+			))
 		}
 
 		(dbEntities ++ additionalEntities).sortBy(_.sortName)

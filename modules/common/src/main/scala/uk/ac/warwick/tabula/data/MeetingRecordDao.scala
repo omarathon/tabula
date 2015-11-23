@@ -34,20 +34,18 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 		if (rel.isEmpty)
 			Seq()
 		else
-			addMeetingRecordListRestrictions(session.newCriteria[MeetingRecord], rel, currentUser).seq
+			addMeetingRecordListRestrictionsAndList(session.newCriteria[MeetingRecord], rel, currentUser)
 	}
 
 	def listScheduled(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[ScheduledMeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
-			addMeetingRecordListRestrictions(session.newCriteria[ScheduledMeetingRecord], rel, currentUser).seq
+			addMeetingRecordListRestrictionsAndList(session.newCriteria[ScheduledMeetingRecord], rel, currentUser)
 	}
 
-	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]) = {
-		criteria.add(safeIn("relationship", rel.toSeq))
-
-		// and only pick records where deleted = 0 or the current user id is the creator id
+	private def addMeetingRecordListRestrictionsAndList[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[A] = {
+		// only pick records where deleted = 0 or the current user id is the creator id
 		// - so that no-one can see records created and deleted by someone else
 		currentUser match {
 			case None | Some(_: RuntimeMember) => criteria.add(is("deleted", false))
@@ -58,6 +56,8 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 		}
 
 		criteria.addOrder(Order.desc("meetingDate")).addOrder(Order.desc("lastUpdatedDate"))
+
+		safeInSeq(criteria, "relationship", rel.toSeq)
 	}
 
 	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
