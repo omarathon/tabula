@@ -30,13 +30,15 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	def run() {
 		val runningJobs = jobDao.listRunningJobs
 		if (runningJobs.size < RunBatchSize) {
-			jobDao
-				.findOutstandingInstances(RunBatchSize - runningJobs.size)
-				.filterNot(prospectiveJob => runningJobs.exists(runningJob =>
+			val jobsToRun = jobDao.findOutstandingInstances(RunBatchSize - runningJobs.size)
+			if (jobsToRun.nonEmpty) {
+				logger.info(s"Found ${jobsToRun.size} jobs to run")
+				val nonIdenticalJobsToRun = jobsToRun.filterNot(prospectiveJob => runningJobs.exists(runningJob =>
 					runningJob.jobType == prospectiveJob.jobType && runningJob.json == prospectiveJob.json
 				))
-				.par
-				.foreach(processInstance)
+				logger.info(s"Found ${nonIdenticalJobsToRun.size} jobs not matching jobs already running")
+				nonIdenticalJobsToRun.par.foreach(processInstance)
+			}
 		}
 	}
 
@@ -50,6 +52,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	}
 
 	def processInstance(instance: JobInstance, job: Job) {
+		logger.info(s"Running job ${instance.id}")
 		start(instance)
 		run(instance, job)
 	}
