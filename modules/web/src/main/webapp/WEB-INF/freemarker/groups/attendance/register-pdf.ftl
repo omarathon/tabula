@@ -36,10 +36,15 @@
 			display: block;
 			border-top: 1px solid #ddd;
 			border-bottom: 1px solid #ddd;
-			padding-top: 10px;
-			padding-bottom: 5px;
+			<#if showPhotos>
+				padding-top: 10px;
+				padding-bottom: 5px;
+				min-height: 40px;
+			<#else>
+				padding-top: 7px;
+				padding-bottom: 5px;
+			</#if>
 			page-break-inside: avoid;
-			min-height: 40px;
 		}
 
 		.student .photo { display: inline-block; width: 10%; vertical-align: middle; }
