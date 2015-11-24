@@ -24,8 +24,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
-			"es" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/eng-timetables")
+			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables")
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")

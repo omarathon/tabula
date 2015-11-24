@@ -3,26 +3,23 @@ package uk.ac.warwick.tabula.scheduling.web.controllers.sysadmin
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
-import uk.ac.warwick.tabula.data.model.{StaffMember, Department, Member, StudentMember}
+import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
-import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
-import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportDepartmentsModulesCommand, ImportAssignmentsCommand, ImportAcademicInformationCommand, ImportProfilesCommand}
-import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportAcademicInformationCommand, ImportAssignmentsCommand, ImportDepartmentsModulesCommand, ImportProfilesCommand}
+import uk.ac.warwick.tabula.scheduling.commands.{CleanupUnreferencedFilesCommand, SanityCheckFilesystemCommand, SyncReplicaFilesystemCommand}
+import uk.ac.warwick.tabula.scheduling.jobs.ImportMembersJob
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -37,7 +34,7 @@ abstract class BaseSysadminController extends BaseController {
 
 	def redirectToHome = {
 		// Redirect cross-context
-		Redirect(urlRewriter.exec(JArrayList("/sysadmin/", "/", true)).toString())
+		Redirect(urlRewriter.exec(JArrayList("/sysadmin/", "/", true)).toString)
 	}
 }
 
@@ -113,7 +110,7 @@ class SysadminNotificationsAuditController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def reindex(form: ReindexNotificationsCommand) = {
-		form.apply
+		form.apply()
 		redirectToHome
 	}
 }
@@ -125,7 +122,7 @@ class SysadminIndexAuditController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def reindex(form: ReindexAuditEventsCommand) = {
-		form.apply
+		form.apply()
 		redirectToHome
 	}
 }
@@ -137,7 +134,7 @@ class SysadminIndexProfilesController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def reindex(form: ReindexProfilesCommand) = {
-		form.apply
+		form.apply()
 		redirectToHome
 	}
 }
@@ -180,8 +177,16 @@ class ImportSitsController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
-class ImportProfilesController extends BaseSysadminController {
-	@ModelAttribute("importProfilesCommand") def importProfilesCommand = new ImportProfilesCommand
+class ImportProfilesController extends BaseSysadminController with AutowiringJobServiceComponent {
+
+	@ModelAttribute("importProfilesCommand")
+	def importProfilesCommand = new ImportProfilesCommand
+
+	@RequestMapping(method = Array(POST), params = Array("members"))
+	def importSpecificProfiles(@RequestParam members: String) = {
+		val jobInstance = jobService.add(None, ImportMembersJob(members.split('\n')))
+		Redirect(Routes.scheduling.jobs.status(jobInstance))
+	}
 
 	@RequestMapping(method = Array(POST))
 	def importProfiles(@ModelAttribute("importProfilesCommand") command: ImportProfilesCommand) = {
@@ -210,7 +215,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 		}
 
 		// Redirect cross-context
-		Redirect(urlRewriter.exec(JArrayList("/view/" + universityId, "/profiles", true)).toString())
+		Redirect(urlRewriter.exec(JArrayList("/view/" + universityId, "/profiles", true)).toString)
 	}
 }
 

@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats, HttpClientDefaults}
+import uk.ac.warwick.util.core.StringUtils
 
 import scala.util.{Failure, Success, Try}
 
@@ -34,32 +35,30 @@ object TurnitinLtiService {
 
 	val AssignmentPrefix = "Assignment-"
 
+	val turnitinAssignmentNameMaxCharacters = 99
+
 	/**
 	 * Quoted supported types are...
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
 	 */
 	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
 	val maxFileSizeInMegabytes = 20
-	val maxFileSize = maxFileSizeInMegabytes * 1000 * 1000  // 20M
-	
+	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024  // 20M
+
 	def validFileType(file: FileAttachment): Boolean =
 		validExtensions contains getExtension(file.name).toLowerCase
 
 	def validFileSize(file: FileAttachment): Boolean =
 		file.actualDataLength < maxFileSize
-	
+
 	def validFile(file: FileAttachment): Boolean = validFileType(file) && validFileSize(file)
-	
+
 	/**
 	 * ID that we should store classes under. They are per-module so we base it on the module code.
 	 * This ID is stored within TurnitinLti and requests for the same ID should return the same class.
 	 */
 	def classIdFor(assignment: Assignment, prefix: String) = ClassId(s"$prefix-${assignment.module.code}")
 
-	/**
-	 * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
-	 * This ID is stored within TurnitinLti and requests for the same ID should return the same assignment.
-	 */
 	def assignmentIdFor(assignment: Assignment) = AssignmentId(s"$AssignmentPrefix${assignment.id}")
 
 	def classNameFor(assignment: Assignment) = {
@@ -68,7 +67,7 @@ object TurnitinLtiService {
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
-		AssignmentName(s"${assignment.name} (${assignment.academicYear.toString})")
+		AssignmentName(s"${assignment.id} (${assignment.academicYear.toString}) ${assignment.name}")
 	}
 }
 
@@ -121,7 +120,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			Map(
 				"roles" -> "Instructor",
 				"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
-				"resource_link_title" -> TurnitinLtiService.assignmentNameFor(assignment).value,
+				"resource_link_title" -> StringUtils.safeSubstring(TurnitinLtiService.assignmentNameFor(assignment).value, 0, TurnitinLtiService.turnitinAssignmentNameMaxCharacters),
 				"resource_link_description" -> TurnitinLtiService.assignmentNameFor(assignment).value,
 				"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,

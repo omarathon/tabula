@@ -118,6 +118,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							rationaliseRelationships(importMemberCommands)
 						}
 					}
+
+					transactional() {
+						importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u)).foreach(member => {
+							member.lastImportDate = DateTime.now
+							memberDao.saveOrUpdate(member)
+						})
+					}
 				}
 			}
 		}
@@ -157,7 +164,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		logger.info("Saving or updating module registrations")
 
 		val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
-			(importModRegCommands map {_.apply() }).flatten
+			importModRegCommands flatMap { _.apply() }
 		}
 
 		val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }
@@ -178,7 +185,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		val importAccreditedPriorLearningCommands = accreditedPriorLearningImporter.getAccreditedPriorLearning(membershipInfo, users)
 
-		(importAccreditedPriorLearningCommands map {_.apply() }).flatten
+		importAccreditedPriorLearningCommands flatMap {
+			_.apply()
+		}
 	}
 
 
@@ -267,8 +276,14 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					updateAccreditedPriorLearning(List(membInfo), Map(universityId -> user))
 					rationaliseRelationships(importMemberCommands)
 
+					val freshMembers = members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) }
 					// TAB-1435 refresh profile index
-					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })
+					profileIndexService.indexItemsWithoutNewTransaction(freshMembers)
+
+					freshMembers.foreach(member => {
+						member.lastImportDate = DateTime.now
+						memberDao.saveOrUpdate(member)
+					})
 
 					for (thisMember <- members) session.evict(thisMember)
 					for (modReg <- newModuleRegistrations) session.evict(modReg)

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import scala.collection.Seq
-import scala.collection.mutable.ArrayBuffer
 import java.util.UUID
+
+import scala.collection.mutable.ArrayBuffer
 
 class MockJobDao extends JobDao {
 
@@ -35,4 +35,5 @@ class MockJobDao extends JobDao {
 
 	def update(instance: JobInstance) {}
 
+	override def listRunningJobs = instances.toSeq.filterNot(_.finished).filter(_.started)
 }

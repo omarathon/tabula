@@ -834,7 +834,10 @@ var LocationPicker = function (options) {
 	};
 
 	$typeahead.updater = function() {
-		return this.$menu.find('.active .name').text();
+		var roomName = this.$menu.find('.active .name').text();
+		var buildingName = this.$menu.find('.active .department').text();
+
+		return buildingName ? roomName + ' (' + buildingName + ')' : roomName;
 	};
 };
 

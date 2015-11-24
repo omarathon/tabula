@@ -55,8 +55,8 @@ trait TurnitinLtiSubmitAssignmentResponseCommandDescription extends Describable[
 
 	def describe(d: Description) {
 		d.assignment(assignment)
-		d.property("existing turnitin id", assignment.turnitinId)
-		d.property("new turnitin id", assignmentid)
+		d.property("existingTurnitinId", assignment.turnitinId)
+		d.property("newTurnitinId", assignmentid)
 	}
 
 }

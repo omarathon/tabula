@@ -4,7 +4,7 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{MissedUnauthorised, NotRecorded}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState._
 import uk.ac.warwick.util.csv.CSVLineWriter
 
 class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorResult, val department: Department)
@@ -16,10 +16,13 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 
 	val headers = Seq("First name","Last name","University ID") ++
 		events.map(e => s"${e.moduleCode} ${e.setName} ${e.format} ${e.groupName} ${e.dayString} Week ${e.week}") ++
-		Seq("Unrecorded","Missed (unauthorised)")
+		Seq("Not recorded", "Not recorded - Late", "Missed (unauthorised)", "Missed (authorised)", "Attended")
 
-	val unrecordedIndex = headers.size - 2
-	val missedIndex = headers.size - 1
+	val unrecordedIndex = headers.size - 5
+	val unrecordedLateIndex = headers.size - 4
+	val missedIndex = headers.size - 3
+	val authorisedIndex = headers.size - 2
+	val attendedIndex = headers.size - 1
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
 
@@ -33,18 +36,30 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 				studentData.universityId
 			case index if index == unrecordedIndex =>
 				attendance.get(studentData).map(eventMap =>
+					eventMap.map{case(event, state) => state}.count(_ == NotRecorded).toString
+				).getOrElse("0")
+			case index if index == unrecordedLateIndex =>
+				attendance.get(studentData).map(eventMap =>
 					eventMap.map{case(event, state) => event}.count(_.isLate).toString
 				).getOrElse("0")
 			case index if index == missedIndex =>
 				attendance.get(studentData).map(eventMap =>
 					eventMap.map{case(event, state) => state}.count(_ == MissedUnauthorised).toString
 				).getOrElse("0")
+			case index if index == authorisedIndex =>
+				attendance.get(studentData).map(eventMap =>
+					eventMap.map{case(event, state) => state}.count(_ == MissedAuthorised).toString
+				).getOrElse("0")
+			case index if index == attendedIndex =>
+				attendance.get(studentData).map(eventMap =>
+					eventMap.map{case(event, state) => state}.count(_ == Attended).toString
+				).getOrElse("0")
 			case _ =>
 				val thisEvent = events(eventIndex - 3)
 				attendance.get(studentData).flatMap(_.get(thisEvent).map{
 					case state if state == NotRecorded =>
 						if (thisEvent.isLate)
-							"Late"
+							"Not recorded - Late"
 						else
 							state.description
 					case state =>

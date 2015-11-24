@@ -8,13 +8,14 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.services.jobs.JobService
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{Features, CurrentUser}
 import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 import scala.collection.JavaConverters._
 
@@ -26,6 +27,7 @@ class TurnitinController extends CourseworkController {
 
 	@Autowired var jobService: JobService = _
 	@Autowired var assignmentService: AssessmentService = _
+	@Autowired var features: Features = _
 
 	validatesSelf[SelfValidating]
 
@@ -36,7 +38,10 @@ class TurnitinController extends CourseworkController {
 	@ModelAttribute("incompatibleFiles")
 	def incompatibleFiles(@PathVariable("assignment") assignment: Assignment) = {
 		val allAttachments = mandatory(assignment).submissions.asScala.flatMap{ _.allAttachments }
-		allAttachments.filterNot(a => Turnitin.validFileType(a) && Turnitin.validFileSize(a))
+		allAttachments.filterNot(a =>
+			if (features.turnitinLTI) TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
+			else Turnitin.validFileType(a) && Turnitin.validFileSize(a)
+		)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("!jobId"))
