@@ -66,15 +66,17 @@ trait HelperRestrictions extends Logging {
 			or
 		}
 	}
-	def safeInSeq[A](criteria: ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
-		iterable.grouped(Daoisms.MaxInClauseCount).toSeq.flatMap(maxedIterable =>
-			criteria.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)).seq
-		)
-	}
-	def safeInSeq[A](criteria: ScalaCriteria[_], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[A] = {
+	def safeInSeq[A](criteriaFactory: () => ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
 		iterable.grouped(Daoisms.MaxInClauseCount).toSeq.flatMap(maxedIterable => {
-			criteria.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection))
-			criteria.project[A](projection).seq
+			val c = criteriaFactory.apply()
+			c.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)).seq
+		})
+	}
+	def safeInSeqWithProjection[A, B](criteriaFactory: () => ScalaCriteria[A], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[B] = {
+		iterable.grouped(Daoisms.MaxInClauseCount).toSeq.flatMap(maxedIterable => {
+			val c = criteriaFactory.apply()
+			c.add(org.hibernate.criterion.Restrictions.in(propertyName, maxedIterable.asJavaCollection))
+			c.project[B](projection).seq
 		})
 	}
 }

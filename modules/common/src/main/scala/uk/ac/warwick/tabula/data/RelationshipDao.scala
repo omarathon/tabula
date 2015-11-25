@@ -371,17 +371,19 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			student: StudentAssociationData
 		)
 
-		val memberAssociations = safeInSeq[Array[java.lang.Object]](
-			session.newCriteria[MemberStudentRelationship]
-				.createAlias("_agentMember", "member")
-				.createAlias("studentCourseDetails", "course")
-				.add(Restrictions.and(
-					Restrictions.eq("relationshipType", relationshipType),
-					Restrictions.or(
-						Restrictions.isNull("endDate"),
-						Restrictions.gt("endDate", DateTime.now)
-					)
-				)),
+		val memberAssociations = safeInSeqWithProjection[MemberStudentRelationship, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[MemberStudentRelationship]
+					.createAlias("_agentMember", "member")
+					.createAlias("studentCourseDetails", "course")
+					.add(Restrictions.and(
+						Restrictions.eq("relationshipType", relationshipType),
+						Restrictions.or(
+							Restrictions.isNull("endDate"),
+							Restrictions.gt("endDate", DateTime.now)
+						)
+					))
+			},
 			Projections.projectionList()
 				.add(property("member.universityId"))
 				.add(property("member.firstName"))
@@ -399,16 +401,18 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			studentData.find(_.universityId == r(4).asInstanceOf[String]).get
 		))
 
-		val externalAssociations: Seq[StudentAssociationEntityDataSingle] = safeInSeq[Array[java.lang.Object]](
-			session.newCriteria[ExternalStudentRelationship]
-				.createAlias("studentCourseDetails", "course")
-				.add(Restrictions.and(
-					Restrictions.eq("relationshipType", relationshipType),
-					Restrictions.or(
-						Restrictions.isNull("endDate"),
-						Restrictions.gt("endDate", DateTime.now)
-					)
-				)),
+		val externalAssociations: Seq[StudentAssociationEntityDataSingle] = safeInSeqWithProjection[ExternalStudentRelationship, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[ExternalStudentRelationship]
+					.createAlias("studentCourseDetails", "course")
+					.add(Restrictions.and(
+						Restrictions.eq("relationshipType", relationshipType),
+						Restrictions.or(
+							Restrictions.isNull("endDate"),
+							Restrictions.gt("endDate", DateTime.now)
+						)
+					))
+			},
 			Projections.projectionList()
 				.add(property("_agentName"))
 				.add(property("course.student.universityId")),
@@ -435,8 +439,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		val additionalEntities = if (additionalEntityIds.isEmpty) {
 			Seq()
 		} else {
-			safeInSeq[Array[java.lang.Object]](
-				session.newCriteria[Member],
+			safeInSeqWithProjection[Member, Array[java.lang.Object]](
+				() => { session.newCriteria[Member] },
 				Projections.projectionList()
 					.add(property("universityId"))
 					.add(property("firstName"))

@@ -8,6 +8,7 @@ import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.TermService
@@ -105,7 +106,6 @@ trait AttendanceMonitoringDao {
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
@@ -211,10 +211,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			return Seq()
 
 		val termCounts = {
-			val c = session.newCriteria[MonitoringPointReport]
-				.add(is("academicYear", academicYear))
-			safeInSeq[Array[java.lang.Object]](
-				c,
+			safeInSeqWithProjection[MonitoringPointReport, Array[java.lang.Object]](
+				() => {
+					session.newCriteria[MonitoringPointReport]
+						.add(is("academicYear", academicYear))
+				},
 				Projections.projectionList()
 					.add(Projections.groupProperty("monitoringPeriod"))
 					.add(Projections.count("monitoringPeriod")),
@@ -233,18 +234,24 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 		if (studentsIds.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
-			.add(is("academicYear", academicYear))
-			.add(is("monitoringPeriod", period))
-		safeInSeq(c, "student.universityId", studentsIds)
+		safeInSeq(() => {
+			session.newCriteria[MonitoringPointReport]
+				.add(is("academicYear", academicYear))
+				.add(is("monitoringPeriod", period))
+			},
+			"student.universityId",
+			studentsIds
+		)
 	}
 
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
 		if (universityIds.isEmpty)
 			return Seq()
 
-		val items = safeInSeq[Array[java.lang.Object]](
-			session.newCriteria[StudentMember],
+		val items = safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[StudentMember]
+			},
 				Projections.projectionList()
 					.add(Projections.property("firstName"))
 					.add(Projections.property("lastName"))
@@ -321,8 +328,8 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 	}
 
 	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData] = {
-		val result = safeInSeq[Array[java.lang.Object]](
-			session.newCriteria[AttendanceMonitoringCheckpoint],
+		val result = safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Array[java.lang.Object]](
+			() => { session.newCriteria[AttendanceMonitoringCheckpoint] },
 			Projections.projectionList()
 				.add(property("point"))
 				.add(property("_state"))
@@ -345,8 +352,10 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			Map()
 		else {
 			val checkpoints = safeInSeq(
-				session.newCriteria[AttendanceMonitoringCheckpoint]
-					.add(is("student", student)),
+				() => {
+					session.newCriteria[AttendanceMonitoringCheckpoint]
+						.add(is("student", student))
+				},
 				"point",
 				points
 			)
@@ -403,12 +412,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 		if (points.isEmpty)
 			false
 		else {
-			safeInSeq[Number](
-				session.newCriteria[AttendanceMonitoringCheckpoint],
-				Projections.rowCount(),
-				"point",
-				points
-			).headOption.exists(_.intValue() > 0)
+			safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Number](() => { session.newCriteria[AttendanceMonitoringCheckpoint] }, Projections.rowCount(), "point", points).headOption.exists(_.intValue() > 0)
 		}
 	}
 
@@ -477,13 +481,6 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 
 	}
 
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal] = {
-		val c = session.newCriteria[AttendanceMonitoringCheckpointTotal]
-			.add(is("department", department))
-			.add(is("academicYear", academicYear))
-		safeInSeq(c, "student", students)
-	}
-
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal] = {
 		session.newCriteria[AttendanceMonitoringCheckpointTotal]
 			.add(is("department", department))
@@ -501,8 +498,8 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 		if (relevantPoints.isEmpty) {
 			Seq()
 		} else {
-			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = safeInSeq[Array[java.lang.Object]](
-				session.newCriteria[AttendanceMonitoringCheckpoint],
+			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Array[java.lang.Object]](
+				() => { session.newCriteria[AttendanceMonitoringCheckpoint] },
 				Projections.projectionList()
 					.add(Projections.groupProperty("point"))
 					.add(Projections.count("point")),
@@ -527,7 +524,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 		if (relevantPoints.isEmpty) {
 			Seq()
 		} else {
-			val checkpointsByPoint = safeInSeq(session.newCriteria[AttendanceMonitoringCheckpoint], "point", relevantPoints)
+			val checkpointsByPoint = safeInSeq(() => { session.newCriteria[AttendanceMonitoringCheckpoint] }, "point", relevantPoints)
 				.groupBy(_.point).withDefaultValue(Seq())
 
 			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
@@ -589,7 +586,7 @@ case class AttendanceMonitoringStudentData(
 	def fullName = s"$firstName $lastName"
 }
 
-trait AttendanceMonitoringStudentDataFetcher {
+trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 	self: Daoisms =>
 
 	import org.hibernate.criterion.Projections._
@@ -610,21 +607,22 @@ trait AttendanceMonitoringStudentDataFetcher {
 			}
 			projections
 		}
-		def setupCriteria(projection: ProjectionList, withEndDate: Boolean = false, nullEndDateData: Seq[AttendanceMonitoringStudentData] = Seq()) = {
-			val criteria = session.newCriteria[StudentMember]
-				.createAlias("studentCourseDetails","studentCourseDetails")
-				.createAlias("studentCourseDetails.studentCourseYearDetails","studentCourseYearDetails")
-				.createAlias("studentCourseDetails.route","route")
-				.add(isNull("studentCourseDetails.missingFromImportSince"))
-				.add(is("studentCourseYearDetails.academicYear", academicYear))
-			if (withEndDate) {
-				criteria.add(isNotNull("studentCourseDetails.endDate"))
-					// TODO Is there a way to do not-in with multiple queries?
-					.add(not(safeIn("universityId", nullEndDateData.map(_.universityId))))
-			} else {
-				criteria.add(isNull("studentCourseDetails.endDate"))
+		def setupCriteria(projection: ProjectionList, withEndDate: Boolean = false) = {
+			def criteriaFactory(): ScalaCriteria[StudentMember] = {
+				val criteria = session.newCriteria[StudentMember]
+					.createAlias("studentCourseDetails", "studentCourseDetails")
+					.createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
+					.createAlias("studentCourseDetails.route", "route")
+					.add(isNull("studentCourseDetails.missingFromImportSince"))
+					.add(is("studentCourseYearDetails.academicYear", academicYear))
+
+				if (withEndDate) {
+					criteria.add(isNotNull("studentCourseDetails.endDate"))
+				} else {
+					criteria.add(isNull("studentCourseDetails.endDate"))
+				}
 			}
-			safeInSeq[Array[java.lang.Object]](criteria, projection, "universityId", universityIds)
+			safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](criteriaFactory, projection, "universityId", universityIds)
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
@@ -640,8 +638,8 @@ trait AttendanceMonitoringStudentDataFetcher {
 					routeName
 				)
 		}
-		// Then get the not-nulls, which won't include any student already in the nulls
-		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true, nullEndDateData).map {
+		// Then get the not-nulls
+		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
 			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, scdEndDate: LocalDate) =>
 				AttendanceMonitoringStudentData(
 					firstName,
@@ -654,7 +652,7 @@ trait AttendanceMonitoringStudentDataFetcher {
 					routeName
 				)
 		}
-		// Then combine the two
-		nullEndDateData ++ hasEndDateData
+		// Then combine the two, but filter any ended found in the not-ended
+		benchmarkTask("Combine data and filter") { nullEndDateData ++ hasEndDateData.filterNot(s => nullEndDateData.exists(_.universityId == s.universityId)) }
 	}
 }

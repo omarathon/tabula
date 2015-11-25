@@ -128,11 +128,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
-		else safeInSeq(session.newCriteria[Member], "universityId", universityIds map { _.safeTrim })
+		else safeInSeq(() => { session.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = {
 		if (universityIds.isEmpty) Seq.empty
-		else safeInSeq(sessionWithoutFreshFilters.newCriteria[Member], "universityId", universityIds map { _.safeTrim })
+		else safeInSeq(() => { sessionWithoutFreshFilters.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 	}
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = {

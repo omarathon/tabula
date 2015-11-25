@@ -41,7 +41,7 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 
 	def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits] = {
 		safeInSeq(
-			session.newCriteria[FeedbackForSits],
+			() => session.newCriteria[FeedbackForSits],
 			"feedback",
 			feedbacks
 		).groupBy(_.feedback).mapValues(_.head)

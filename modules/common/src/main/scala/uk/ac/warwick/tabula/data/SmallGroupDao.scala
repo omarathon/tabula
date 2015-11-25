@@ -180,14 +180,16 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 				.add(le("occurrence.week", endWeek))
 				.seq
 		} else {
-			val c = session.newCriteria[SmallGroupEventAttendance]
-				.createAlias("occurrence", "occurrence")
-				.createAlias("occurrence.event", "event")
-				.createAlias("event.group", "group")
-				.createAlias("group.groupSet", "groupSet")
-				.add(is("universityId", student.universityId))
-				.add(ge("occurrence.week", startWeek))
-				.add(le("occurrence.week", endWeek))
+			val c = () => {
+				session.newCriteria[SmallGroupEventAttendance]
+					.createAlias("occurrence", "occurrence")
+					.createAlias("occurrence.event", "event")
+					.createAlias("event.group", "group")
+					.createAlias("group.groupSet", "groupSet")
+					.add(is("universityId", student.universityId))
+					.add(ge("occurrence.week", startWeek))
+					.add(le("occurrence.week", endWeek))
+			}
 			safeInSeq(c, "groupSet.module", modules)
 		}
 

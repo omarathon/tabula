@@ -152,9 +152,10 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.seq
 
 	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] = {
-		val c = session.newCriteria[Exam]
-			.add(is("academicYear", academicYear))
-			.add(isNot("deleted", true))
-		safeInSeq(c, "module", modules).groupBy(_.module)
+		safeInSeq(() => {
+			session.newCriteria[Exam]
+				.add(is("academicYear", academicYear))
+				.add(isNot("deleted", true))
+		}, "module", modules).groupBy(_.module)
 	}
 }

@@ -34,30 +34,34 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 		if (rel.isEmpty)
 			Seq()
 		else
-			addMeetingRecordListRestrictionsAndList(session.newCriteria[MeetingRecord], rel, currentUser)
+			addMeetingRecordListRestrictionsAndList(() => session.newCriteria[MeetingRecord], rel, currentUser)
 	}
 
 	def listScheduled(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[ScheduledMeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
-			addMeetingRecordListRestrictionsAndList(session.newCriteria[ScheduledMeetingRecord], rel, currentUser)
+			addMeetingRecordListRestrictionsAndList(() => session.newCriteria[ScheduledMeetingRecord], rel, currentUser)
 	}
 
-	private def addMeetingRecordListRestrictionsAndList[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[A] = {
+	private def addMeetingRecordListRestrictionsAndList[A](criteriaFactory: () => ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[A] = {
 		// only pick records where deleted = 0 or the current user id is the creator id
 		// - so that no-one can see records created and deleted by someone else
-		currentUser match {
-			case None | Some(_: RuntimeMember) => criteria.add(is("deleted", false))
-			case Some(cu) => criteria.add(Restrictions.disjunction()
-				.add(is("deleted", false))
-				.add(is("creator", cu))
-			)
+		val c = () => {
+			val criteria = criteriaFactory.apply()
+
+			currentUser match {
+				case None | Some(_: RuntimeMember) => criteria.add(is("deleted", false))
+				case Some(cu) => criteria.add(Restrictions.disjunction()
+					.add(is("deleted", false))
+					.add(is("creator", cu))
+				)
+			}
+
+			criteria.addOrder(Order.desc("meetingDate")).addOrder(Order.desc("lastUpdatedDate"))
 		}
 
-		criteria.addOrder(Order.desc("meetingDate")).addOrder(Order.desc("lastUpdatedDate"))
-
-		safeInSeq(criteria, "relationship", rel.toSeq)
+		safeInSeq(c, "relationship", rel.toSeq)
 	}
 
 	def list(rel: StudentRelationship): Seq[MeetingRecord] = {

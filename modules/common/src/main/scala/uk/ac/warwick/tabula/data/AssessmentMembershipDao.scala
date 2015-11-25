@@ -205,11 +205,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 		if (deptModules.isEmpty) Nil
 		else {
-			val c = session.newCriteria[AssessmentComponent]
-				.add(is("inUse", true))
-				.addOrder(asc("moduleCode"))
-				.addOrder(asc("sequence"))
-			safeInSeq(c, "module", deptModules)
+			safeInSeq(() => {
+				session.newCriteria[AssessmentComponent]
+					.add(is("inUse", true))
+					.addOrder(asc("moduleCode"))
+					.addOrder(asc("sequence"))
+			}, "module", deptModules)
 		}
 	}
 
