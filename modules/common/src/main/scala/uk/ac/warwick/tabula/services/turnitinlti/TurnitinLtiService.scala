@@ -35,7 +35,7 @@ object TurnitinLtiService {
 
 	val AssignmentPrefix = "Assignment-"
 
-	val turnitinAssignmentNameMaxCharacters = 100
+	val turnitinAssignmentNameMaxCharacters = 99
 
 	/**
 	 * Quoted supported types are...
