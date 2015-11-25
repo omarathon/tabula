@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula
 
-import org.springframework.beans.factory.annotation.Value
+import uk.ac.warwick.spring.Wire
 
 object HttpClientDefaults {
 
-	@Value("${httpclient.connectTimeout}") var connectTimeout: Int = _
+	var connectTimeout: Int = Integer.parseInt(Wire.property("${httpclient.connectTimeout}"))
 
-	@Value("${httpclient.socketTimeout}") var socketTimeout: Int = _
+	var socketTimeout: Int = Integer.parseInt(Wire.property("${httpclient.socketTimeout}"))
 
 }
