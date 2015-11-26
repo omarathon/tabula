@@ -194,20 +194,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		))
 	}
 
-	@Test(timeout = 5000) def tab3899regex() {
-		val summary = "Head - Rodger, Alison/Bugg, Tim 2/Bon, Stefan 3-4/Fox, David/Bayley, Lynne/u1472796"
-
-		val parsed = summary.maybeText
-			.filter { _.contains(" - ") }
-			.map { _.split(" - ", 2).last }
-			.map { _.split('/').toSeq.collect {
-				case r"([^/]+?)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial
-			}}
-
-		parsed should be (Some(Seq("Rodger, Alison", "Bugg, Tim", "Bon, Stefan", "Fox, David", "Bayley, Lynne", "u1472796")))
-	}
-
-	@Test(timeout = 50000) def tab3899() {
+	@Test(timeout = 5000) def tab3899() {
 		// Mock the BSV request
 		val bsvResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
 		bsvResponse.setEntity(new InputStreamEntity(resourceAsStream("staff.bsv")))
