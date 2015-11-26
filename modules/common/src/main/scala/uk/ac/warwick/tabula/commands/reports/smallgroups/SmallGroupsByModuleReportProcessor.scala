@@ -41,7 +41,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 	self: SmallGroupsByModuleReportProcessorState with TermServiceComponent =>
 
 	override def applyInternal() = {
-		val processedStudents = students.asScala.map{case(_, properties) =>
+		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -53,7 +53,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 				null
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
-		val processedModules = modules.asScala.map{ case (_, properties) =>
+		val processedModules = modules.asScala.map{properties =>
 			ModuleData(
 				properties.get("id"),
 				properties.get("code"),
@@ -75,9 +75,7 @@ trait SmallGroupsByModuleReportProcessorState extends ReportCommandState {
 	var counts: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 
-	var students: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var students: JList[JMap[String, String]] = JArrayList()
 
-	var modules: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var modules: JList[JMap[String, String]] = JArrayList()
 }

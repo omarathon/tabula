@@ -2,15 +2,19 @@ package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
 
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.AcademicYear
+import org.apache.commons.lang3.StringEscapeUtils
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable}
+import uk.ac.warwick.tabula.{JsonHelper, AcademicYear}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
+import collection.JavaConverters._
 
 
 abstract class AbstractSmallGroupsByModuleReportController extends ReportsController {
@@ -20,6 +24,8 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	val filePrefix: String
 
 	def page(cmd: Appliable[AllSmallGroupsReportCommandResult], department: Department, academicYear: AcademicYear): Mav
+
+	type SmallGroupsByModuleReportProcessor = Appliable[SmallGroupsByModuleReportProcessorResult] with SmallGroupsByModuleReportProcessorState
 
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
@@ -66,11 +72,12 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
 	def csv(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsByModuleReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
 		val csvBuilder = new SmallGroupsByModuleReportExporter(processorResult, department)
@@ -86,11 +93,12 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
 	def xlsx(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsByModuleReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new SmallGroupsByModuleReportExporter(processorResult, department).toXLSX
 
@@ -99,13 +107,38 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
 	def xml(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsByModuleReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsByModuleReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		new SmallGroupsByModuleReportExporter(processorResult, department).toXML
 	}
 
+	private def getProcessorResult(processor: SmallGroupsByModuleReportProcessor, data: String): SmallGroupsByModuleReportProcessorResult = {
+		val request = JsonHelper.fromJson[SmallGroupsByModuleReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		request.copyTo(processor)
+		processor.apply()
+	}
+
+}
+
+class SmallGroupsByModuleReportRequest extends Serializable {
+
+	var counts: JMap[String, JMap[String, String]] =
+		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+
+	var students: JList[JMap[String, String]] = JArrayList()
+
+	var modules: JList[JMap[String, String]] = JArrayList()
+
+	def copyTo(state: SmallGroupsByModuleReportProcessorState) {
+		state.counts = counts
+
+		state.students = students
+
+		state.modules = modules
+	}
 }

@@ -52,7 +52,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 	self: SmallGroupsReportProcessorState with TermServiceComponent =>
 
 	override def applyInternal() = {
-		val processedStudents = students.asScala.map{case(_, properties) =>
+		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -66,7 +66,7 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
 		val thisDay = DateTime.now.getDayOfWeek
-		val processedEvents = events.asScala.map{ case (_, properties) =>
+		val processedEvents = events.asScala.map{properties =>
 			EventData(
 				properties.get("id"),
 				properties.get("moduleCode"),
@@ -97,9 +97,7 @@ trait SmallGroupsReportProcessorState extends ReportCommandState {
 	var attendance: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 
-	var students: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var students: JList[JMap[String, String]] = JArrayList()
 
-	var events: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var events: JList[JMap[String, String]] = JArrayList()
 }

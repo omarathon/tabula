@@ -43,7 +43,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 	self: AttendanceReportProcessorState =>
 
 	override def applyInternal() = {
-		val processedStudents = students.asScala.map{case(_, properties) =>
+		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -56,7 +56,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		val processedPoints = points.asScala.map{case(_, properties) =>
+		val processedPoints = points.asScala.map{properties =>
 			PointData(
 				properties.get("id"),
 				properties.get("name"),
@@ -80,9 +80,7 @@ trait AttendanceReportProcessorState extends ReportCommandState {
 	var attendance: JMap[String, JMap[String, String]] =
 		LazyMaps.create{_: String => JMap[String, String]() }.asJava
 
-	var students: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var students: JList[JMap[String, String]] = JArrayList()
 
-	var points: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+	var points: JList[JMap[String, String]] = JArrayList()
 }
