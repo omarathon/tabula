@@ -1,12 +1,16 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.Credentials
+import dispatch.classic.{Http, Credentials}
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.Component
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.io.IOUtils
+import org.apache.http.entity.InputStreamEntity
+import org.apache.http.message.BasicHttpResponse
+import org.apache.http.{HttpVersion, HttpRequest, HttpHost}
 import org.apache.http.auth.AuthScope
+import org.apache.http.client.HttpClient
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
@@ -17,10 +21,13 @@ import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val module = Fixtures.module("es186")
+
+	val httpClient = mock[HttpClient]
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		val departmentConfiguration =	Map(
@@ -39,6 +46,10 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		val moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
+		}
+
+		override val http: Http = new Http {
+			override def make_client = httpClient
 		}
 	}
 
@@ -180,6 +191,107 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("14/15")
+		))
+	}
+
+	@Test(timeout = 5000) def tab3899regex() {
+		val summary = "Head - Rodger, Alison/Bugg, Tim/Bon, Stefan/Fox, David/Bayley, Lynne/u1472796"
+
+		val parsed = summary.maybeText
+			.filter { _.contains(" - ") }
+			.map { _.split(" - ", 2).last }
+			.map { _.split('/') }
+			.flatten
+
+		parsed should be (Some(Seq("Rodger, Alison", "Bugg, Tim", "Bon, Stefan", "Fox, David", "Bayley, Lynne", "u1472796")))
+	}
+
+	@Test(timeout = 50000) def tab3899() {
+		// Mock the BSV request
+		val bsvResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		bsvResponse.setEntity(new InputStreamEntity(resourceAsStream("staff.bsv")))
+
+		httpClient.execute(any[HttpHost], any[HttpRequest]) returns bsvResponse
+
+		val events = service.parseICal(
+			resourceAsStream("1524943.ics"),
+			CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+				staffListInBSV = true
+			)
+		)
+		events.size should be (122)
+
+		val combined = service.combineIdenticalEvents(events).sorted
+		combined.size should be (109)
+
+		// Check that the first few events are as expected
+
+		/*
+		BEGIN:VEVENT
+		DTSTAMP:20140811T221200Z
+		SEQUENCE:0
+		TRANSP:OPAQUE
+		LAST-MODIFIED:20140811T221200Z
+		DTSTART;TZID=Europe/London:20130930T111500
+		DTEND;TZID=Europe/London:20130930T130000
+		SUMMARY:ES186 - AMP/DAH/DJB/MVC/NGS
+		UID:CT-1313406-6447-2013-09-30-R021@eng.warwick.ac.uk
+		DESCRIPTION:Engineering Skills, Induction
+		CATEGORIES:Briefing
+		LOCATION:R021
+		END:VEVENT
+		 */
+		combined.head should be (TimetableEvent(
+			"CT-1313406-6447-2013-09-30-R021@eng.warwick.ac.uk",
+			"ES186 - AMP/DAH/DJB/MVC/NGS",
+			"",
+			"Engineering Skills, Induction",
+			TimetableEventType.Other("Briefing"),
+			Seq(WeekRange(1)),
+			DayOfWeek.Monday,
+			new LocalTime(11, 15),
+			new LocalTime(13, 0),
+			Some(NamedLocation("R021")),
+			TimetableEvent.Parent(Some(module)),
+			None,
+			Nil,
+			Nil,
+			AcademicYear.parse("13/14")
+		))
+
+		/*
+		BEGIN:VEVENT
+		DTSTAMP:20140811T221200Z
+		SEQUENCE:0
+		TRANSP:OPAQUE
+		LAST-MODIFIED:20140811T221200Z
+		DTSTART;TZID=Europe/London:20131007T100000
+		DTEND;TZID=Europe/London:20131007T110000
+		SUMMARY:ES186 - SJL
+		UID:CT-1313406-6147-2013-10-07-P521@eng.warwick.ac.uk
+		DESCRIPTION:Engineering Skills, Support sessions for students without A-level Physics
+		CATEGORIES:Lecture
+		LOCATION:P521
+		RRULE:FREQ=WEEKLY;COUNT=2;BYDAY=MO
+		END:VEVENT
+		 */
+		combined(15) should be (TimetableEvent(
+			"CT-1313406-6147-2013-10-07-P521@eng.warwick.ac.uk",
+			"ES186 - SJL",
+			"",
+			"Engineering Skills, Support sessions for students without A-level Physics",
+			TimetableEventType.Lecture,
+			Seq(WeekRange(2, 3), WeekRange(5, 10)),
+			DayOfWeek.Monday,
+			new LocalTime(10, 0),
+			new LocalTime(11, 0),
+			Some(NamedLocation("P521")),
+			TimetableEvent.Parent(Some(module)),
+			None,
+			Nil,
+			Nil,
+			AcademicYear.parse("13/14")
 		))
 	}
 

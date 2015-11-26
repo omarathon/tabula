@@ -156,12 +156,15 @@ object CelcatHttpTimetableFetchingService {
 
 			val weekRange = WeekRange(startWeek, endWeek)
 
+			println(summary)
 			val staffIds: Seq[UniversityId] =
 				if (allStaff.nonEmpty)
 					summary.maybeText
 						.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
-						namesOrInitials.split('/').toSeq
-							.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
+							println(namesOrInitials)
+							namesOrInitials.split('/')
+								.toSeq
+								.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
 					}
 					.map { namesOrInitials =>
 						namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
