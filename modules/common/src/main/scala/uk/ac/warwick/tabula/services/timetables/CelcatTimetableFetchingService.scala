@@ -156,15 +156,21 @@ object CelcatHttpTimetableFetchingService {
 
 			val weekRange = WeekRange(startWeek, endWeek)
 
+			// From the Celcat iCal files we get SUMMARY in the format of
+			// (ROOM) - STAFF1/STAFF2 (WEEK_START-WEEK_END)/STAFF3 etc - all optional. Do nasty format parsing
 			val staffIds: Seq[UniversityId] =
 				if (allStaff.nonEmpty)
 					summary.maybeText
-						.filter { _.contains(" - ") }
-						.map { _.split(" - ", 2).last }
-						.map { _.split('/').toSeq.collect {
-							case r"([^/]+?)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial
-						}}
+						.filter { _.contains(" - ") } // Quick exit - only look for summaries in the right format
+						.map { _.split(" - ", 2).last } // Strip the "room" from the start
+						.map {
+							// Split on / to get a list of names and their optional week numbers
+							_.split('/').toSeq
+								// Strip the week numbers off the end
+								.collect { case r"([^/]+?)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
+						}
 						.map { namesOrInitials =>
+							// Match up against the staff BSV fetched separately
 							namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
 								info.fullName == nameOrInitial || info.initials == nameOrInitial
 							}.map { _.universityId }}
