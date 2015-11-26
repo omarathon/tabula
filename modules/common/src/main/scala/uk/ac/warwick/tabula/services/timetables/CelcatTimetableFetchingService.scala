@@ -156,21 +156,19 @@ object CelcatHttpTimetableFetchingService {
 
 			val weekRange = WeekRange(startWeek, endWeek)
 
-			println(summary)
 			val staffIds: Seq[UniversityId] =
 				if (allStaff.nonEmpty)
 					summary.maybeText
-						.collect { case r"^.* - ((?:[^/0-9]+(?: (?:[0-9\\-]+,?)+)?/?)+)${namesOrInitials}" =>
-							println(namesOrInitials)
-							namesOrInitials.split('/')
-								.toSeq
-								.collect { case r"([^/0-9]+)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial }
-					}
-					.map { namesOrInitials =>
-						namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
-							info.fullName == nameOrInitial || info.initials == nameOrInitial
-						}.map { _.universityId }}
-					}.getOrElse(Nil)
+						.filter { _.contains(" - ") }
+						.map { _.split(" - ", 2).last }
+						.map { _.split('/').toSeq.collect {
+							case r"([^/]+?)${nameOrInitial}(?: (?:[0-9\\-]+,?)+)?" => nameOrInitial
+						}}
+						.map { namesOrInitials =>
+							namesOrInitials.flatMap { nameOrInitial => allStaff.values.find { info =>
+								info.fullName == nameOrInitial || info.initials == nameOrInitial
+							}.map { _.universityId }}
+						}.getOrElse(Nil)
 				else Nil
 
 			val staff = userLookup.getUsersByWarwickUniIds(staffIds).values.collect { case FoundUser(u) => u }.toSeq
