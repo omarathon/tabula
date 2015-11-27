@@ -23,13 +23,21 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	student2.mostSignificantCourse.route = route
 	student2.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
+	val student3 = Fixtures.student("2346","2346")
+	student3.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
+	student3.mostSignificantCourse.route = route
+	student3.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
+
 	val userLookup = new MockUserLookup
 	userLookup.registerUserObjects(
 		MemberOrUser(student1).asUser,
 		MemberOrUser(student2).asUser
 	)
 
-	val attendanceMonitoringDao = new AttendanceMonitoringDaoImpl
+	val attendanceMonitoringDao = new AttendanceMonitoringDaoImpl {
+		// Force the multi-query IN() clauses for 3 or more items
+		override val maxInClause = 2
+	}
 
 	val scheme1 = new AttendanceMonitoringScheme
 	scheme1.academicYear = academicYear
@@ -90,15 +98,12 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		point1student1checkpoint.updatedDate = DateTime.now
 		session.save(point1student1checkpoint)
 
-		val point2student1checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.Attended)
-		point2student1checkpoint.updatedBy = ""
-		point2student1checkpoint.updatedDate = DateTime.now
-		session.save(point2student1checkpoint)
-
-		val point2student2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.Attended)
-		point2student2checkpoint.updatedBy = ""
-		point2student2checkpoint.updatedDate = DateTime.now
-		session.save(point2student2checkpoint)
+		for (s <- Seq(student1, student2)) {
+			val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, s, AttendanceState.Attended)
+			checkpoint.updatedBy = ""
+			checkpoint.updatedDate = DateTime.now
+			session.save(checkpoint)
+		}
 
 		val points = attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, new LocalDate(2014, 10, 4))
 		points.size should be (2)
@@ -143,6 +148,32 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
 		val users = attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, new LocalDate(2014, 10, 4))
 		users.size should be (2)
+	}}
+
+	@Test def findNonReportedTerms() { transactional { tx =>
+		session.save(department)
+		session.save(route)
+		session.save(student1)
+		session.save(student2)
+		session.save(student3)
+		session.save(scheme1)
+		session.save(point2)
+
+		for (s <- Seq(student1, student2, student3)) {
+			val report = new MonitoringPointReport()
+			report.student = s
+			report.academicYear = academicYear
+			report.monitoringPeriod = "Spring"
+			report.reporter = ""
+			report.missed = 1
+			report.createdDate = new DateTime()
+			session.save(report)
+		}
+
+		val terms = attendanceMonitoringDao.findNonReportedTerms(Seq(student1, student2, student3), academicYear)
+
+		// All students recorded against Spring, so that should be missing.
+		terms should be (Seq("Autumn", "Christmas vacation", "Easter vacation", "Summer", "Summer vacation"))
 	}}
 
 	@Test def resetTotalsForStudentsNotInAScheme() { transactional { tx =>
@@ -216,3 +247,4 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	}}
 
 }
+

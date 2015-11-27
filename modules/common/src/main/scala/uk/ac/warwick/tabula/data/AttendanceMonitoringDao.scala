@@ -225,6 +225,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
 			}
 		}
+
 		TermService.orderedTermNames.diff(termCounts.filter { case (term, count) => count.intValue() == students.size}.map {
 			_._1
 		})

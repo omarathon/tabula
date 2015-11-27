@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Order, Restrictions}
+import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
@@ -44,7 +46,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			addMeetingRecordListRestrictionsAndList(() => session.newCriteria[ScheduledMeetingRecord], rel, currentUser)
 	}
 
-	private def addMeetingRecordListRestrictionsAndList[A](criteriaFactory: () => ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[A] = {
+	private def addMeetingRecordListRestrictionsAndList[A <: AbstractMeetingRecord](criteriaFactory: () => ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[A] = {
 		// only pick records where deleted = 0 or the current user id is the creator id
 		// - so that no-one can see records created and deleted by someone else
 		val c = () => {
@@ -61,7 +63,8 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			criteria.addOrder(Order.desc("meetingDate")).addOrder(Order.desc("lastUpdatedDate"))
 		}
 
-		safeInSeq(c, "relationship", rel.toSeq)
+		val meetings = safeInSeq(c, "relationship", rel.toSeq)
+		meetings.sortBy(m => (m.meetingDate, m.lastUpdatedDate))(Ordering[(DateTime,DateTime)].reverse)
 	}
 
 	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
