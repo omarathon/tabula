@@ -99,8 +99,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
+			HttpConnectionParams.setConnectionTimeout(getParams, 15000)
+			HttpConnectionParams.setSoTimeout(getParams, 15000)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
