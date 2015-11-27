@@ -226,9 +226,15 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			}
 		}
 
-		TermService.orderedTermNames.diff(termCounts.filter { case (term, count) => count.intValue() == students.size}.map {
-			_._1
-		})
+		// the safeInSeq does multiple queries which will mess up the group-by, returning e.g. (Autumn,1) and (Autumn,3)
+		// separately. This will merge it back into (Autumn,4)
+		val mergedTermCounts = termCounts.groupBy(_._1)
+			.mapValues { value => value.map(_._2).sum } // christ.
+
+		val reportedTerms = mergedTermCounts.toSeq
+			.filter { case (term, count) => count.intValue() == students.size}
+			.map { _._1 }
+		TermService.orderedTermNames diff reportedTerms
 	}
 
 	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {
