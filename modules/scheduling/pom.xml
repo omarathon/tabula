@@ -152,7 +152,7 @@
 
 		<dependency>
 			<groupId>uk.ac.warwick.util</groupId>
-			<artifactId>warwickutils_spring4-httpclient4</artifactId>
+			<artifactId>warwickutils-httpclient4</artifactId>
 			<version>${warwickutils.version}</version>
 			<exclusions>
 				<exclusion>
@@ -161,7 +161,7 @@
 				</exclusion>
 				<exclusion>
 					<groupId>uk.ac.warwick.sso</groupId>
-					<artifactId>sso-client_spring4</artifactId>
+					<artifactId>sso-client</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
