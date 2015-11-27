@@ -115,6 +115,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	def toStringProps = Seq(
 		"creator" -> creator,
 		"creationDate" -> creationDate,
+		"meetingDate"  -> meetingDate,
 		"relationship" -> relationship)
 
 	override def toEntityReference = new MeetingRecordEntityReference().put(this)

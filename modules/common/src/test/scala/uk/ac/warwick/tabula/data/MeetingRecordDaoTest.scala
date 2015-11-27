@@ -62,7 +62,6 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		meetingDao.saveOrUpdate(newestMeeting)
 
 		val savedMeetings = meetingDao.list(relSet, Some(currentMember))
-
 		savedMeetings.size should be (3)
 		savedMeetings.head should be (newestMeeting)
 		savedMeetings.last should be (earliestMeeting)

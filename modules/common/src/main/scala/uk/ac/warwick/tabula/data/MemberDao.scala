@@ -128,15 +128,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
-		else session.newCriteria[Member]
-			.add(safeIn("universityId", universityIds map { _.safeTrim }))
-			.seq
+		else safeInSeq(() => { session.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = {
 		if (universityIds.isEmpty) Seq.empty
-		else sessionWithoutFreshFilters.newCriteria[Member]
-			.add(safeIn("universityId", universityIds map { _.safeTrim }))
-			.seq
+		else safeInSeq(() => { sessionWithoutFreshFilters.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 	}
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = {
@@ -321,6 +317,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 
 		val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
 
+		// TODO Is there a way of doing multiple safeIn queries with DB-set prders and max results?
 		orders.foreach { c.addOrder }
 
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
