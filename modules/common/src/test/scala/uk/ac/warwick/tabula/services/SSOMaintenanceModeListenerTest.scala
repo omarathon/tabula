@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.sso.client.cache.spring.DatabaseUserCache
+import uk.ac.warwick.sso.client.cache.DatabaseUserCache
 import org.springframework.mock.web.MockServletContext
 import uk.ac.warwick.sso.client.SSOConfigLoader
 import uk.ac.warwick.util.queue.Queue

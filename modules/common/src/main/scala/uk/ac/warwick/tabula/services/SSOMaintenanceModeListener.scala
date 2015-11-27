@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.stereotype.Component
 import org.springframework.web.context.ServletContextAware
 import javax.servlet.ServletContext
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.SSOConfigLoader
 import uk.ac.warwick.sso.client.SSOConfiguration
-import uk.ac.warwick.sso.client.cache.spring.DatabaseUserCache
+import uk.ac.warwick.sso.client.cache.DatabaseUserCache
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
