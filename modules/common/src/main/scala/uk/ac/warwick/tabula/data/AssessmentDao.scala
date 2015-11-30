@@ -151,11 +151,11 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.addOrder(asc("closeDate"))
 			.seq
 
-	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
-		session.newCriteria[Exam]
-			.add(safeIn("module", modules))
-			.add(is("academicYear", academicYear))
-			.add(isNot("deleted", true))
-			.seq
-			.groupBy(_.module)
+	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] = {
+		safeInSeq(() => {
+			session.newCriteria[Exam]
+				.add(is("academicYear", academicYear))
+				.add(isNot("deleted", true))
+		}, "module", modules).groupBy(_.module)
+	}
 }

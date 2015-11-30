@@ -2,14 +2,19 @@ package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
 
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.AcademicYear
+import org.apache.commons.lang3.StringEscapeUtils
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
+
+import scala.collection.JavaConverters._
 
 
 abstract class AbstractSmallGroupsReportController extends ReportsController {
@@ -18,6 +23,8 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 
 	val pageRenderPath: String
 	val filePrefix: String
+
+	type SmallGroupsReportProcessor = Appliable[SmallGroupsReportProcessorResult] with SmallGroupsReportProcessorState
 
 	@ModelAttribute("processor")
 	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -80,11 +87,12 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
 	def csv(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
 		val csvBuilder = new SmallGroupsReportExporter(processorResult, department)
@@ -100,11 +108,12 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
 	def xlsx(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new SmallGroupsReportExporter(processorResult, department).toXLSX
 
@@ -113,13 +122,38 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
 	def xml(
-		@ModelAttribute("processor") processor: Appliable[SmallGroupsReportProcessorResult],
+		@ModelAttribute("processor") processor: SmallGroupsReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		new SmallGroupsReportExporter(processorResult, department).toXML
 	}
 
+	private def getProcessorResult(processor: SmallGroupsReportProcessor, data: String): SmallGroupsReportProcessorResult = {
+		val request = JsonHelper.fromJson[SmallGroupsReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		request.copyTo(processor)
+		processor.apply()
+	}
+
+}
+
+class SmallGroupsReportRequest extends Serializable {
+
+	var attendance: JMap[String, JMap[String, String]] =
+		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+
+	var students: JList[JMap[String, String]] = JArrayList()
+
+	var events: JList[JMap[String, String]] = JArrayList()
+
+	def copyTo(state: SmallGroupsReportProcessorState) {
+		state.attendance = attendance
+
+		state.students = students
+
+		state.events = events
+	}
 }

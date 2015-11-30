@@ -92,7 +92,6 @@ trait AttendanceMonitoringService {
 	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
@@ -382,10 +381,6 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			total.academicYear = academicYear
 			total
 		}
-	}
-
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal] = {
-		attendanceMonitoringDao.getCheckpointTotals(students, department, academicYear)
 	}
 
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
