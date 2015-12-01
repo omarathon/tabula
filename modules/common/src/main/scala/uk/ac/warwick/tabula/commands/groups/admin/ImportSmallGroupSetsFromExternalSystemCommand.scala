@@ -85,8 +85,7 @@ trait LookupEventsFromModuleTimetables {
 			.flatMap { module =>
 			val events =
 				timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-					.filter { event => event.year == academicYear }
-					.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
+					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 					.groupBy { _.eventType }
 
 			events.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sorted) }
