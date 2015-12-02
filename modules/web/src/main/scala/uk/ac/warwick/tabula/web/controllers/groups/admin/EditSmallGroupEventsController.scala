@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.{PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
+import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupEventsFromExternalSystemCommand, PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService}
@@ -21,10 +21,7 @@ trait SyllabusPlusEventCountForModule {
 	@ModelAttribute("syllabusPlusEventCount")
 	def syllabusPlusEventCount(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-			.count { event =>
-			event.year == set.academicYear &&
-				(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar)
-		}
+			.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 }
 
 abstract class AbstractEditSmallGroupEventsController extends GroupsController

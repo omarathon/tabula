@@ -45,8 +45,7 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def event: SmallGroupEvent
 
 	lazy val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter { event => event.year == set.academicYear }
-		.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
+		.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 		.sorted
 
 }
