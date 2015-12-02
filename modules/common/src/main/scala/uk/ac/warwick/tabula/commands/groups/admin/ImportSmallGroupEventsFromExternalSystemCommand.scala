@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -31,6 +32,10 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 			with LookupEventsFromModuleTimetable
+
+	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent) =
+		event.year == academicYear &&
+			(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar || event.eventType == TimetableEventType.Other("WRB-ACTIVE"))
 
 	class EventToImport {
 		def this(event: TimetableEvent) {
@@ -81,8 +86,7 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 
 	eventsToImport.clear()
 	eventsToImport.addAll(timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter { event => event.year == set.academicYear }
-		.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
+		.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 		.sorted
 		.map(new EventToImport(_))
 		.asJava
