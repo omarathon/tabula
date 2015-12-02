@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats, HttpClientDefaults}
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
 
 import scala.util.{Failure, Success, Try}
@@ -40,8 +40,10 @@ object TurnitinLtiService {
 	/**
 	 * Quoted supported types are...
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
+	 *
+	 * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
 	 */
-	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
+	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
 	val maxFileSizeInMegabytes = 20
 	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024  // 20M
 

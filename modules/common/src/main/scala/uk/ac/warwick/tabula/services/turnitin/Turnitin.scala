@@ -24,8 +24,10 @@ object Turnitin {
 	/**
 	 * Quoted supported types are...
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
+	 *
+	 * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
 	 */
-	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
+	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
 	val maxFileSizeInMegabytes = 20
 	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024;  // 20MB
 	
