@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Future
 import scala.util.Success
 
 class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with Mockito {
@@ -138,7 +139,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			year = AcademicYear(2012)
 		)
 
-		timetableFetchingService.getTimetableForModule("IN101") returns Success(Seq(
+		timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(Seq(
 			tEventSeminar1, tEventSeminar2,
 			TimetableEvent(
 				uid="uuid3",

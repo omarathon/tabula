@@ -7,13 +7,14 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation, Location, Module}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.{FoundUser, SystemClockComponent}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.TimetableEventType
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object UpdateSmallGroupEventFromExternalSystemCommand {
 
@@ -44,9 +45,10 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def group: SmallGroup
 	def event: SmallGroupEvent
 
-	lazy val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
-		.sorted
+	lazy val timetableEvents =
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)
+			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+			.sorted
 
 }
 

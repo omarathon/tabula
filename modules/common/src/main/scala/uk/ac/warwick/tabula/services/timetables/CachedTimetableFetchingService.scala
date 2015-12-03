@@ -7,6 +7,9 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 
+import scala.concurrent.{Future, Await}
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 
 /**
@@ -61,7 +64,7 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 				}
 			}).map(toEventList)
 
-			result match {
+			Try(Await.result(result, 15.seconds)) match {
 				case Success(ev) => ev
 				case Failure(e) => throw new CacheEntryUpdateException(e)
 			}
@@ -82,11 +85,11 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 		cache
 	}
 
-	def getTimetableForStudent(universityId: String) = Try(timetableCache.get(StudentKey(universityId)))
-	def getTimetableForModule(moduleCode: String) = Try(timetableCache.get(ModuleKey(moduleCode)))
-	def getTimetableForCourse(courseCode: String) = Try(timetableCache.get(CourseKey(courseCode)))
-	def getTimetableForRoom(roomName: String) = Try(timetableCache.get(RoomKey(roomName)))
-	def getTimetableForStaff(universityId: String) = Try(timetableCache.get(StaffKey(universityId)))
+	def getTimetableForStudent(universityId: String) = Future.fromTry(Try(timetableCache.get(StudentKey(universityId))))
+	def getTimetableForModule(moduleCode: String) = Future.fromTry(Try(timetableCache.get(ModuleKey(moduleCode))))
+	def getTimetableForCourse(courseCode: String) = Future.fromTry(Try(timetableCache.get(CourseKey(courseCode))))
+	def getTimetableForRoom(roomName: String) = Future.fromTry(Try(timetableCache.get(RoomKey(roomName))))
+	def getTimetableForStaff(universityId: String) = Future.fromTry(Try(timetableCache.get(StaffKey(universityId))))
 
 }
 
@@ -116,9 +119,9 @@ class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetching
 }
 
 object TimetableCacheKey {
-	case class StudentKey(val id: String) extends TimetableCacheKey
-	case class StaffKey(val id: String) extends TimetableCacheKey
-	case class CourseKey(val id: String) extends TimetableCacheKey
-	case class RoomKey(val id: String) extends TimetableCacheKey
-	case class ModuleKey(val id: String) extends TimetableCacheKey
+	case class StudentKey(id: String) extends TimetableCacheKey
+	case class StaffKey(id: String) extends TimetableCacheKey
+	case class CourseKey(id: String) extends TimetableCacheKey
+	case class RoomKey(id: String) extends TimetableCacheKey
+	case class ModuleKey(id: String) extends TimetableCacheKey
 }
