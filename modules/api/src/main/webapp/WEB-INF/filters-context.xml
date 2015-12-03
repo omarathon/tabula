@@ -19,6 +19,7 @@
 			<excluded-url-pattern>/v1/termdates</excluded-url-pattern>
 			<excluded-url-pattern>/v1/termdates.*</excluded-url-pattern>
 			<excluded-url-pattern>/v1/termdates/*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/timetable/calendar/*</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 
