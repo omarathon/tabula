@@ -15,9 +15,9 @@ trait SmallGroupEventToJsonConverter {
 					"maxWeek" -> max
 				)
 			},
-			"day" -> event.day.name,
-			"startTime" -> event.startTime.toString("HH:mm"),
-			"endTime" -> event.startTime.toString("HH:mm"),
+			"day" -> Option(event.day).map { _.name }.orNull,
+			"startTime" -> Option(event.startTime).map { _.toString("HH:mm") }.orNull,
+			"endTime" -> Option(event.endTime).map { _.toString("HH:mm") }.orNull,
 			"location" -> Option(event.location).map {
 				case NamedLocation(name) => Map("name" -> name)
 				case MapLocation(name, locationId) => Map("name" -> name, "locationId" -> locationId)
