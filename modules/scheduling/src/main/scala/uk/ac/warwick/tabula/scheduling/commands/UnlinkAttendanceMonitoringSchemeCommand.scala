@@ -29,7 +29,7 @@ class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Ma
 	self: TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 		val schemeMap = transactional() {
 			attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(academicYear)
 		}

@@ -20,7 +20,7 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		with PopulateOpenAndCloseDepartmentsCommand {
 			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 			moduleAndDepartmentService.allRootDepartments returns Seq()
-			val termService = mock[TermService]
+			implicit val termService = mock[TermService]
 	}
 
 	trait OpenAndCloseDepartmentsWorld {
@@ -34,7 +34,7 @@ class OpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 		val autumnTerm = new TermImpl(null, now, null, TermType.autumn)
 		command.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 		command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
-		val currentYear = AcademicYear.findAcademicYearContainingDate(now, command.termService )
+		val currentYear = AcademicYear.findAcademicYearContainingDate(now)(command.termService)
 	}
 
 	@Test

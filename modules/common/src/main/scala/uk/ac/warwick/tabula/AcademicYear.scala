@@ -122,7 +122,7 @@ object AcademicYear {
 	 * This will tell you which academic year you're currently in, assuming that the year starts on day 1 of week 1 in term 1
 	 *
 	 */
-	def findAcademicYearContainingDate(date: BaseDateTime, termService:TermService): AcademicYear = {
+	def findAcademicYearContainingDate(date: BaseDateTime)(implicit termService: TermService): AcademicYear = {
 		try {
 			val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
 			def findAutumnTermForTerm(term: Term): Term = {

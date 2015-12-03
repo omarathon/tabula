@@ -27,8 +27,8 @@ trait MeetingRecordService {
 	def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord]
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
-	def getAcademicYear(meeting: AbstractMeetingRecord, termService: TermService): Option[AcademicYear]
-	def getAcademicYear(id: String, termService: TermService): Option[AcademicYear]
+	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear]
+	def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear]
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 }
 
@@ -55,8 +55,8 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 		case _ => None
 	}
 	def purge(meeting: AbstractMeetingRecord): Unit = meetingRecordDao.purge(meeting)
-	def getAcademicYear(meeting: AbstractMeetingRecord, termService: TermService): Option[AcademicYear] = Some(AcademicYear.findAcademicYearContainingDate(meeting.meetingDate, termService))
-  def getAcademicYear(id: String, termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear(_, termService))
+	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear] = Some(AcademicYear.findAcademicYearContainingDate(meeting.meetingDate))
+  def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear)
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit =
 		meetingRecordDao.migrate(from, to)
 }

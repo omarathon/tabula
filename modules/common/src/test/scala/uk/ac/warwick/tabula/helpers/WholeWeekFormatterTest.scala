@@ -4,15 +4,18 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
-import uk.ac.warwick.tabula.services.TermServiceImpl
+import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent, TermServiceImpl}
 
 class WholeWeekFormatterTest extends TestBase {
 
-	val termService = new TermServiceImpl
+	implicit val termService = new TermServiceImpl
+
+	private trait TestTermServiceComponent extends TermServiceComponent {
+		override def termService: TermService = WholeWeekFormatterTest.this.termService
+	}
 
 	@Test def termNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		formatter.termService = termService
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)) with TestTermServiceComponent
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 1")
 		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 7")
@@ -34,8 +37,7 @@ class WholeWeekFormatterTest extends TestBase {
 
 
 	@Test def cumulativeTermNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		formatter.termService = termService
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)) with TestTermServiceComponent
 
 		formatter.format(Seq(WeekRange(4)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 4")
 		formatter.format(Seq(WeekRange(10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 10")
@@ -58,19 +60,18 @@ class WholeWeekFormatterTest extends TestBase {
 
 
 	@Test def academicWeekNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		formatter.termService = termService
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)) with TestTermServiceComponent
 
-		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 1")
-		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 7")
-		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 16")
-		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 52")
-		formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 14")
-		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 25")
+		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, week 1")
+		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, week 7")
+		formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 2, week 16")
+		formatter.format(Seq(WeekRange(52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Summer vacation, week 52")
+		formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Christmas vacation, week 14")
+		formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Easter vacation, week 25")
 
-		formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Week 1")
-		formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Weeks 1-2")
-		formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Weeks 1-14")
+		formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, week 1")
+		formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, weeks 1-2")
+		formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = false) should be("Term 1, weeks 1-10; Christmas vacation, weeks 11-14")
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("1")
 		formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic, short = true) should be("7")
@@ -81,8 +82,7 @@ class WholeWeekFormatterTest extends TestBase {
 	}
 
 	@Test def noWeekNumbers() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
-		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		formatter.termService = termService
+		val formatter = new WholeWeekFormatter(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)) with TestTermServiceComponent
 
 		formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
 		formatter.format(Seq(WeekRange(5)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 31<sup>st</sup> Oct 2011")
