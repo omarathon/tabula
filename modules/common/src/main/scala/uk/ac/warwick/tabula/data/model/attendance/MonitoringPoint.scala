@@ -28,7 +28,7 @@ class MonitoringPoint extends CommonMonitoringPointProperties with MonitoringPoi
 	}
 
 	def isStartDateInFuture: Boolean = {
-		val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(new DateTime()).startYear
+		val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now())(termService).startYear
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
 
 		currentAcademicYear < pointSet.academicYear.startYear ||

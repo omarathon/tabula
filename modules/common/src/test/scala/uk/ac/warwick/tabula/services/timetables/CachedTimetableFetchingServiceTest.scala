@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache.HashMapCacheStore
 
-import scala.util.Success
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
@@ -20,7 +21,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
 		val delegate = mock[CompleteTimetableFetchingService]
 
-		delegate.getTimetableForStudent(studentId) returns Success(studentEvents)
+		delegate.getTimetableForStudent(studentId) returns Future.successful(studentEvents)
 
 		val cache = new CachedCompleteTimetableFetchingService(delegate, "cacheName")
 	}
@@ -31,14 +32,14 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	@Test
 	def firstRequestIsPassedThrough(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
+		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
 	@Test
 	def repeatedRequestsAreCached(){new Fixture {
-		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
-		cache.getTimetableForStudent(studentId) should be (Success(studentEvents))
+		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
+		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
@@ -48,12 +49,12 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
 		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
-		delegate.getTimetableForStaff(studentId) returns Success(staffEvents)
+		delegate.getTimetableForStaff(studentId) returns Future.successful(staffEvents)
 
-		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
-		cache.getTimetableForStudent(studentId)  should be(Success(studentEvents))
-		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
-		cache.getTimetableForStaff(studentId)  should be(Success(staffEvents))
+		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
+		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
+		Await.result(cache.getTimetableForStaff(studentId), 1.second) should be (staffEvents)
+		Await.result(cache.getTimetableForStaff(studentId), 1.second) should be (staffEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 		verify(delegate, times(1)).getTimetableForStaff(studentId)
 

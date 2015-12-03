@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfiguration
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.Try
 
 object ViewModuleTimetableCommand {
@@ -51,7 +53,7 @@ abstract class ViewModuleTimetableCommandInternal(val module: Module)
 	self: ModuleTimetableFetchingServiceComponent =>
 
 	def applyInternal(): Try[Seq[TimetableEvent]] = {
-		timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds))
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
 }

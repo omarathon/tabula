@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
 import org.scalatest.Matchers
+import org.scalatest.concurrent.ScalaFutures
 
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
@@ -45,7 +46,7 @@ import uk.ac.warwick.tabula.data.Transactions
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
+abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 

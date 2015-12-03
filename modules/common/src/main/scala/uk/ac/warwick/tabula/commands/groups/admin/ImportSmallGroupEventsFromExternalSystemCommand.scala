@@ -13,8 +13,11 @@ import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingSe
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 import ImportSmallGroupEventsFromExternalSystemCommand._
+
+import scala.concurrent.Await
 
 object ImportSmallGroupEventsFromExternalSystemCommand {
 
@@ -85,11 +88,12 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 		with ModuleTimetableFetchingServiceComponent =>
 
 	eventsToImport.clear()
-	eventsToImport.addAll(timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
-		.sorted
-		.map(new EventToImport(_))
-		.asJava
+	eventsToImport.addAll(
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)
+			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+			.sorted
+			.map(new EventToImport(_))
+			.asJava
 	)
 
 	override def populate(): Unit = {

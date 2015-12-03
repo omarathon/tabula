@@ -10,12 +10,13 @@ import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{FoundUser, ClockComponent, Logging}
+import uk.ac.warwick.tabula.helpers.{Futures, FoundUser, ClockComponent, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.xml.Elem
 
 trait ScientiaConfiguration {
@@ -115,17 +116,9 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
 	def getTimetableForStaff(universityId: String) = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
 
-	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Try[Seq[TimetableEvent]] = {
-		def flatten[T](xs: Seq[Try[Seq[T]]]): Try[Seq[T]] = {
-			val (ss: Seq[Success[Seq[T]]] @unchecked, fs: Seq[Failure[Seq[T]]] @unchecked) =
-				xs.partition(_.isSuccess)
-
-			if (fs.isEmpty) Success(ss.flatMap(_.get))
-			else Failure[Seq[T]](fs.head.exception) // Only keep the first failure
-		}
-
+	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Future[Seq[TimetableEvent]] = {
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
-		val results = uris.map { case (uri, year) =>
+		val results: Seq[Future[Seq[TimetableEvent]]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request.
@@ -133,26 +126,26 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			// else return an empty list.
 			logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 
-			val result =
-				Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param)))
-					.flatMap { ev =>
-						if (ev.nonEmpty) Success(ev)
-						else {
-							logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
-							Failure(new TimetableEmptyException(uri, param))
-						}
-					}
+			val result = Future {
+				val ev = http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param))
+
+				if (ev.isEmpty) {
+					logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
+					throw new TimetableEmptyException(uri, param)
+				}
+
+				ev
+			}
 
 			// Some extra logging here
-			if (result.isFailure) {
-				val e = result.failed.get
+			result.onFailure { case e =>
 				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 			}
 
 			result
 		}
 
-		flatten(results)
+		Futures.flatten(results)
 	}
 
 }

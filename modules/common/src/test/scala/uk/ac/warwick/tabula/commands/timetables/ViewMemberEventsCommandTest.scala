@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEventType, TimetableEvent}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
 
+import scala.concurrent.Future
 import scala.util.Success
 
 class ViewMemberEventsCommandTest extends TestBase with Mockito {
@@ -43,8 +44,8 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 		command.from =  new LocalDate
 		command.to = command.start.plusDays(2)
-		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Success(timetableEvents)
-		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Success(meetingOccurrences)
+		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(timetableEvents)
+		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(meetingOccurrences)
 		command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 	}
 

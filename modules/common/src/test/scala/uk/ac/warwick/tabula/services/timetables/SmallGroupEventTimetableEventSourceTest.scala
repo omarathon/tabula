@@ -47,16 +47,19 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		mockSmallGroupService.findSmallGroupEventsByTutor(any[User]) returns Nil
 		mockSmallGroupService.findManuallyAddedAttendance(any[String]) returns Nil
 	  val events = eventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student)
-		events.get.size should be (1)
-		val tte:TimetableEvent = events.get.head
-		tte.day should be(DayOfWeek.Monday)
-		tte.description should be("groupset name: group name")
-		tte.endTime should be(event.endTime)
-		tte.eventType should be(TimetableEventType.Practical)
-		tte.location should be(Some(NamedLocation("location")))
-		tte.parent.shortName should be(Some("MODCODE"))
-		tte.name should be("groupset name: group name")
-		tte.startTime should be (event.startTime)
+		whenReady(events) { e =>
+			e.size should be (1)
+
+			val tte: TimetableEvent = e.head
+			tte.day should be(DayOfWeek.Monday)
+			tte.description should be("groupset name: group name")
+			tte.endTime should be(event.endTime)
+			tte.eventType should be(TimetableEventType.Practical)
+			tte.location should be(Some(NamedLocation("location")))
+			tte.parent.shortName should be(Some("MODCODE"))
+			tte.name should be("groupset name: group name")
+			tte.startTime should be (event.startTime)
+		}
 	}
 
 }

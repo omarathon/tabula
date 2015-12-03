@@ -12,7 +12,11 @@ import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.EventOccurrence
 
+import scala.concurrent.Await
 import scala.util.Try
+import scala.concurrent.duration._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ViewModuleEventsCommand {
 	def apply(module: Module) =
@@ -75,14 +79,14 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 			end = termService.getTermFromDate((academicYear + 1).dateInTermOne).getStartDate.toLocalDate.minusDays(1)
 		}
 
-		timetableEvents.map { events =>
+		Try(Await.result(timetableEvents.map { events =>
 			// Converter to make localDates sortable
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 			events.flatMap { event =>
 				eventOccurrenceService.fromTimetableEvent(event, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 			}.sortBy(_.start)
-		}
+		}, 15.seconds))
 	}
 }
 
