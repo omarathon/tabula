@@ -28,7 +28,7 @@ object ModuleTimetableController {
 class ModuleTimetableController extends ApiController
 	with GetModuleTimetableApi
 	with TimetableEventToJsonConverter
-with AutowiringProfileServiceComponent
+	with AutowiringProfileServiceComponent
 
 trait GetModuleTimetableApi {
 	self: ApiController with TimetableEventToJsonConverter =>

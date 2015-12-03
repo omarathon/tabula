@@ -20,12 +20,12 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 
 	val weekToDateConverter: WeekToDateConverter = new TermAwareWeekRangeToDateConversionService
 
-	class TermAwareWeekRangeToDateConversionService extends WeekToDateConverter{
+	class TermAwareWeekRangeToDateConversionService extends WeekToDateConverter {
 
 
 		def getWeekContainingDate(date: LocalDate): Option[WeekRange.Week] = {
 			val zonedDate = date.toDateTimeAtStartOfDay
-			val year = AcademicYear.findAcademicYearContainingDate(zonedDate, termService)
+			val year = AcademicYear.findAcademicYearContainingDate(zonedDate)
 			val weeks = weeksForYear(year)
 			// brute-force search through the map; since there should never be more than 53 entries to look for it's
 			// hopefully OK

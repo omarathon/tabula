@@ -373,7 +373,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	}
 
 	private def getRelevantPoints(student: StudentMember, relationshipType: StudentRelationshipType, format: MeetingFormat, date: DateTime) = {
-		val academicYear = AcademicYear.findAcademicYearContainingDate(date, termService)
+		val academicYear = AcademicYear.findAcademicYearContainingDate(date)
 		monitoringPointService.getPointSetForStudent(student, academicYear).map(set =>
 			set.points.asScala.filter(point =>
 				// only points relevant to this meeting

@@ -150,9 +150,9 @@ case class Vacation(before: Term, after: Term) extends Term {
 }
 
 trait TermServiceComponent {
-	def termService: TermService
+	implicit def termService: TermService
 }
 
 trait AutowiringTermServiceComponent extends TermServiceComponent {
-	var termService = Wire[TermService]
+	override implicit val termService: TermService = Wire[TermService]
 }

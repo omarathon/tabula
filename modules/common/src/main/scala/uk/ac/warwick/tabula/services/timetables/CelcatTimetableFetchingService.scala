@@ -107,11 +107,10 @@ object CelcatHttpTimetableFetchingService {
 		event: VEvent,
 		allStaff: Map[UniversityId, CelcatStaffInfo],
 		config: CelcatDepartmentConfiguration,
-		termService: TermService,
 		locationFetchingService: LocationFetchingService,
 		moduleMap: Map[String, Module],
 		userLookup: UserLookupService
-	): Option[TimetableEvent] = {
+	)(implicit termService: TermService): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
@@ -142,7 +141,7 @@ object CelcatHttpTimetableFetchingService {
 
 			val day = DayOfWeek(start.getDayOfWeek)
 
-			val year = AcademicYear.findAcademicYearContainingDate(start, termService)
+			val year = AcademicYear.findAcademicYearContainingDate(start)
 
 			// Convert the date to an academic week number
 			val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
@@ -384,7 +383,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}}.toList
 	}
 
-	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
+	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration)(implicit termService: TermService): Seq[TimetableEvent] = {
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
 
@@ -398,7 +397,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			vEvents.flatMap(e => parseModuleCode(e).map(_.toLowerCase)).distinct
 		).groupBy(_.code).mapValues(_.head)
 		vEvents.flatMap { event =>
-			parseVEvent(event, allStaff, config, termService, locationFetchingService, moduleMap, userLookup)
+			parseVEvent(event, allStaff, config, locationFetchingService, moduleMap, userLookup)
 		}
 	}
 }

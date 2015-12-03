@@ -41,19 +41,22 @@ class TimetableControllerTest extends TestBase with Mockito {
 
 	@Test
 	def emptyTimetableValidates() {
-		val termService = smartMock[TermService]
 		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
 		val academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		termService.getTermFromAcademicWeek(1, academicYear) returns autumnTerm
-		termService.getTermFromAcademicWeek(1, academicYear + 1) returns autumnTerm
-		val controller = new TimetableICalController
+
+		val controller = new TimetableICalController {
+			override val termService = smartMock[TermService]
+		}
+
+		controller.termService.getTermFromAcademicWeek(1, academicYear) returns autumnTerm
+		controller.termService.getTermFromAcademicWeek(1, academicYear + 1) returns autumnTerm
+
 		val command = new Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest {
 			override def apply(): Try[Seq[EventOccurrence]] = Success(Seq())
 			override val member: Member = Fixtures.staff("1234")
 		}
 		command.from = DateTime.now.toLocalDate
 		command.to = DateTime.now.toLocalDate
-		controller.termService = termService
 		val icalMav = controller.getIcalFeed(command)
 		icalMav.view.render(JMap("filename" -> "foo"), new MockHttpServletRequest, new MockHttpServletResponse)
 		// doesn't throw an exception

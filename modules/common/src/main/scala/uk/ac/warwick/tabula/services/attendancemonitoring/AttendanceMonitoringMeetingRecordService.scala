@@ -32,7 +32,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 		} else {
 			meeting.relationship.studentMember.flatMap{
 				case studentMember: StudentMember =>
-					val academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate, termService)
+					val academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
 					val relevantPoints = getRelevantPoints(
 						attendanceMonitoringService.listStudentsPoints(studentMember, None, academicYear),
 						meeting,

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserSettingsService, TermService}
+import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
@@ -21,11 +21,11 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		val departmentWithNumberingSystem = new Department()
 		departmentWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
 
-		val dumper = new WeekRangesDumper with StoppedClockComponent {
+		val dumper = new WeekRangesDumper with StoppedClockComponent with UserSettingsServiceComponent with TermServiceComponent with ModuleAndDepartmentServiceComponent {
 			val stoppedTime = TEST_TIME
-			userSettings = mock[UserSettingsService]
-			termService = mock[TermService]
-			departmentService = mock[ModuleAndDepartmentService]
+			val userSettingsService = mock[UserSettingsService]
+			val termService = mock[TermService]
+			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val singleWeek = Seq((AcademicYear(2012),1,new Interval(TEST_TIME.minusWeeks(1), TEST_TIME)))
@@ -34,8 +34,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def getsWeekRangesFromTermService() {new Fixture{ withUser("test") {
 			dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns Nil
-			dumper.userSettings.getByUserId(any[String]) returns None
-			dumper.departmentService.getDepartmentByCode(null) returns None
+			dumper.userSettingsService.getByUserId(any[String]) returns None
+			dumper.moduleAndDepartmentService.getDepartmentByCode(null) returns None
 			dumper.getWeekRangesAsJSON(null) // don't need a formatter as we're not returning any rows
 
 			verify(dumper.termService, times(1)).getAcademicWeeksBetween(TEST_TIME.minusYears(2), TEST_TIME.plusYears(2))
@@ -44,7 +44,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def usesUsersPreferredNumberingSystemIfAvailable(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
-		dumper.userSettings.getByUserId("test") returns Some(settingsWithNumberingSystem)
+		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 			numberingSystem should be(settingsWithNumberingSystem.weekNumberingSystem)
@@ -62,8 +62,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		val user = new CurrentUser(u,u)
 		withCurrentUser(user) {
 			dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
-			dumper.userSettings.getByUserId("test") returns None
-			dumper.departmentService.getDepartmentByCode(any[String]) returns Some(departmentWithNumberingSystem)
+			dumper.userSettingsService.getByUserId("test") returns None
+			dumper.moduleAndDepartmentService.getDepartmentByCode(any[String]) returns Some(departmentWithNumberingSystem)
 
 			def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 				numberingSystem should be(departmentWithNumberingSystem.weekNumberingSystem)
@@ -74,7 +74,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def passesYearAndWeekNumberToFormatter(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
-		dumper.userSettings.getByUserId("test") returns Some(settingsWithNumberingSystem)
+		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 			year should be (AcademicYear(2012))
@@ -88,7 +88,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def outputsJSONArray(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
-		dumper.userSettings.getByUserId("test") returns Some(settingsWithNumberingSystem)
+		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 			"Term 7 Week 95" // Use a value which won't be filtered out by the vacation-filter.
