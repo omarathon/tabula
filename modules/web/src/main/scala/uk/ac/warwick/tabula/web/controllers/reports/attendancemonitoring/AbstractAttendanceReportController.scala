@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.reports.attendancemonitoring
 import java.io.StringWriter
 
 import freemarker.template.{Configuration, DefaultObjectWrapper}
-import org.apache.commons.lang3.StringEscapeUtils
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
@@ -132,7 +131,7 @@ abstract class AbstractAttendanceReportController extends ReportsController {
 	}
 
 	private def getProcessorResult(processor: AttendanceReportProcessor, data: String): AttendanceReportProcessorResult = {
-		val request = JsonHelper.fromJson[AttendanceReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		val request = JsonHelper.fromJson[AttendanceReportRequest](data)
 		request.copyTo(processor)
 		processor.apply()
 	}

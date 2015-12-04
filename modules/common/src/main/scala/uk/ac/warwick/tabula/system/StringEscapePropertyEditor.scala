@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.system
 
 import java.beans.PropertyEditorSupport
+import java.util.regex.Pattern
 
 import org.apache.commons.lang3.StringEscapeUtils
 
 final class StringEscapePropertyEditor extends PropertyEditorSupport {
+
 	override def setAsText(text: String) {
 		super.setValue(escape(text))
 	}
@@ -16,7 +18,7 @@ final class StringEscapePropertyEditor extends PropertyEditorSupport {
 	private def escape(textObject: AnyRef): String = {
 		textObject match {
 			case text: String =>
-				StringEscapeUtils.escapeHtml4(text)
+				text.replaceAll("</{0,1}script", "")
 			case _ => ""
 		}
 	}
