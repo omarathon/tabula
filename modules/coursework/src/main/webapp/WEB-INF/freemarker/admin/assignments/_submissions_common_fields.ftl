@@ -211,9 +211,10 @@ so that they can be passed around between requests.
 						<@f.errors path="wordCountMax" cssClass="error" />
 						<@f.input path="wordCountMax" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
 						<div class="help-block">
-							If you enter a minimum and/or maximum word count, students will be required to declare the word count for
-							their submissions. They will not be allowed to submit unless their declaration is within your specified range.
-							Students won't be asked if both boxes are left blank. There's a system-wide maximum of <@fmt.p maxWordCount "word" />.
+							If you specify a minimum and/or maximum word count, students will be required to declare the word count for
+							their submissions. They will not be able to submit unless their declaration is within your specified range.
+							If you don't specify a minimum and/or maximum, students will not be asked to declare a word count. Note that Tabula
+							does not actually check the number of words in submissions. Students can submit work with any number of words.
 						</div>
 					</@form.field>
 				</@form.row>
