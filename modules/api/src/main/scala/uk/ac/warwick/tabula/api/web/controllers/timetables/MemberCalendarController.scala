@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.timetables.{ViewMemberEventsCommand, ViewMe
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 import uk.ac.warwick.tabula.web.views.{IcalView, FullCalendarEvent, JSONView, JSONErrorView}
 
 import scala.util.{Failure, Success, Try}
@@ -131,20 +131,13 @@ trait GetMemberCalendarIcalApi {
 	self: ApiController
 		with MemberCalendarApi
 		with UserLookupComponent
-		with GeneratesTimetableIcalFeed =>
+		with GeneratesTimetableIcalFeed
+		with TermServiceComponent =>
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
 	def icalMemberTimetable(@Valid @ModelAttribute("getTimetableCommand") command: TimetableCommand) = {
-		val cal = getIcalFeed(command)
-		Mav(new IcalView(cal), "filename" -> s"${command.member.universityId}.ics")
-	}
+		val member = command.member
 
-}
-
-trait GeneratesTimetableIcalFeed {
-	self: TermServiceComponent with EventOccurrenceServiceComponent =>
-
-	def getIcalFeed(command: TimetableCommand): Calendar = {
 		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
@@ -166,15 +159,29 @@ trait GeneratesTimetableIcalFeed {
 		command.from = start
 		command.to = end
 
-		val timetableEvents = command.apply().get
+		command.apply() match {
+			case Success(events) =>
+				val cal = getIcalFeed(events, member)
+				Mav(new IcalView(cal), "filename" -> s"${member.universityId}.ics")
+			case Failure(t) =>
+				throw new RequestFailedException("The timetabling service could not be reached", t)
+		}
 
+	}
+
+}
+
+trait GeneratesTimetableIcalFeed {
+	self: EventOccurrenceServiceComponent =>
+
+	def getIcalFeed(timetableEvents: Seq[EventOccurrence], member: Member): Calendar = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
 		cal.getProperties.add(CalScale.GREGORIAN)
 		cal.getProperties.add(Method.PUBLISH)
 		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
-		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${command.member.universityId}"))
+		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${member.universityId}"))
 
 		for (event <- timetableEvents) {
 			val vEvent: VEvent = eventOccurrenceService.toVEvent(event)

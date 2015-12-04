@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.Try
 
 trait SyllabusPlusEventCountForModule {
@@ -23,7 +22,7 @@ trait SyllabusPlusEventCountForModule {
 
 	@ModelAttribute("syllabusPlusEventCount")
 	def syllabusPlusEventCount(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)).getOrElse(Nil)
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)).getOrElse(Nil)
 			.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 }
 

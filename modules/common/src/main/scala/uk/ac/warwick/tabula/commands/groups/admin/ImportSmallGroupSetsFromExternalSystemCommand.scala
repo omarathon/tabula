@@ -86,7 +86,7 @@ trait LookupEventsFromModuleTimetables {
 		modules.toSeq
 			.flatMap { module =>
 				val allEvents =
-					Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)
+					Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 						.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 						.groupBy { _.eventType }
 

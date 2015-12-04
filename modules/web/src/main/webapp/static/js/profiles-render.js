@@ -364,7 +364,7 @@
 						'from':startToSend.getTime()/1000,
 						'to':endToSend.getTime()/1000
 					},
-					success:function(data){
+					success: function(data) {
 						//
 						// TODO
 						//
@@ -377,7 +377,21 @@
 							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 						});
+
+						$container.find('> .alert-error').remove();
 						callback(data.events);
+					},
+					error: function (jqXHR) {
+						try {
+							var data = $.parseJSON(jqXHR.responseText);
+
+							var errors = $.map(data.errors, function (error) { return error.message; });
+
+							$container.find('> .alert-error').remove();
+							$container.prepend(
+								$('<div />').addClass('alert').addClass('alert-error').text(errors.join(', '))
+							);
+						} catch (e) {}
 					},
 					complete: function() {
 						complete = true;

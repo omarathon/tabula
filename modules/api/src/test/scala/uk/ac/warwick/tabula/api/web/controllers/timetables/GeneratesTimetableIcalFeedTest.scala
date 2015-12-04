@@ -24,20 +24,7 @@ class GeneratesTimetableIcalFeedTest extends TestBase with Mockito {
 
 	@Test
 	def emptyTimetableValidates() {
-		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
-		val academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-
-		generator.termService.getTermFromAcademicWeek(1, academicYear) returns autumnTerm
-		generator.termService.getTermFromAcademicWeek(1, academicYear + 1) returns autumnTerm
-
-		val command = new Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest {
-			override def apply(): Try[Seq[EventOccurrence]] = Success(Seq())
-			override val member: Member = Fixtures.staff("1234")
-		}
-		command.from = DateTime.now.toLocalDate
-		command.to = DateTime.now.toLocalDate
-
-		val ical = generator.getIcalFeed(command)
+		val ical = generator.getIcalFeed(Seq(), Fixtures.staff("1234"))
 
 		new CalendarOutputter().output(ical, new MockHttpServletResponse().getWriter)
 		// doesn't throw an exception

@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComp
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
-import scala.concurrent.duration._
 
 object UpdateSmallGroupEventFromExternalSystemCommand {
 
@@ -46,7 +45,7 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def event: SmallGroupEvent
 
 	lazy val timetableEvents =
-		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 			.sorted
 
