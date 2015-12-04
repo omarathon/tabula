@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest}
-import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 @Controller
 @RequestMapping(Array("/department/{department}/timetables"))

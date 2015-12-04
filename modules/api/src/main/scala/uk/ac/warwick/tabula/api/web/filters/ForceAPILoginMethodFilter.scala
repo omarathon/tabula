@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.sso.client.trusted.TrustedApplication
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.exceptions.UserError
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
@@ -28,6 +29,10 @@ class ForceAPILoginMethodFilter extends AbstractHttpFilter with Logging {
 
 			// Trusted Apps request
 			case _ if request.getHeader(TrustedApplication.HEADER_CERTIFICATE).hasText =>
+				chain.doFilter(request, response)
+
+			// Ajax (GET only, don't enable it for anything else without understanding the CSRF implications)
+			case _ if request.isAjaxRequest && request.getMethod.toUpperCase == "GET" =>
 				chain.doFilter(request, response)
 
 			case _ => throw new APILoginMethodMissingException()

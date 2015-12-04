@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.web.views
+package uk.ac.warwick.tabula.web.views
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -93,4 +93,3 @@ object FullCalendarEvent {
 		)
 	}
 }
-
