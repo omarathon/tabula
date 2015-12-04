@@ -12,12 +12,14 @@ import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 
-import scala.concurrent.{Future, Await}
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
 object ViewMemberEventsCommand extends Logging {
+	val Timeout = 15.seconds
+
 	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest with SelfValidating
 
 	def apply(member: Member, currentUser: CurrentUser) = member match {
@@ -123,7 +125,7 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
 
 		Try(Await.result(
-			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), 15.seconds
+			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 
@@ -143,7 +145,7 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
 
 		Try(Await.result(
-			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), 15.seconds
+			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 

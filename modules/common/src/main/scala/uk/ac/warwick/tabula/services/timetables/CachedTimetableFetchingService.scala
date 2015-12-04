@@ -20,6 +20,7 @@ import scala.util.{Try, Success, Failure}
 class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingService, cacheName: String) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
 
 	val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
+	val FetchTimeout = 15.seconds
 
 	/**
 	 * Yukkiness Ahead.
@@ -64,7 +65,7 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 				}
 			}).map(toEventList)
 
-			Try(Await.result(result, 15.seconds)) match {
+			Try(Await.result(result, FetchTimeout)) match {
 				case Success(ev) => ev
 				case Failure(e) => throw new CacheEntryUpdateException(e)
 			}

@@ -19,6 +19,8 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object ViewModuleEventsCommand {
+	val Timeout = 15.seconds
+
 	def apply(module: Module) =
 		new ViewModuleEventsCommandInternal(module)
 			with ComposableCommand[Try[Seq[EventOccurrence]]]
@@ -86,7 +88,7 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 			events.flatMap { event =>
 				eventOccurrenceService.fromTimetableEvent(event, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 			}.sortBy(_.start)
-		}, 15.seconds))
+		}, ViewModuleEventsCommand.Timeout))
 	}
 }
 

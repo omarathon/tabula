@@ -21,6 +21,8 @@ import scala.concurrent.Await
 
 object ImportSmallGroupEventsFromExternalSystemCommand {
 
+	val Timeout = 15.seconds
+
 	val RequiredPermission = Permissions.SmallGroups.Update
 
 	def apply(module: Module, set: SmallGroupSet) =
@@ -89,7 +91,7 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 
 	eventsToImport.clear()
 	eventsToImport.addAll(
-		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), 15.seconds)
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 			.sorted
 			.map(new EventToImport(_))

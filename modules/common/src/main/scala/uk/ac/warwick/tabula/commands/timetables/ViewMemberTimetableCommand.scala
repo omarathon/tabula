@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.Try
 
 object ViewMemberTimetableCommand extends Logging {
@@ -47,7 +46,7 @@ abstract class ViewStudentTimetableCommandInternal(val member: StudentMember, cu
 	self: StudentTimetableEventSourceComponent =>
 
 	def applyInternal(): Try[Seq[TimetableEvent]] = {
-		Try(Await.result(studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student), 15.seconds))
+		Try(Await.result(studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student), ViewMemberEventsCommand.Timeout))
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
 
@@ -60,7 +59,7 @@ abstract class ViewStaffTimetableCommandInternal(val member: StaffMember, curren
 	self: StaffTimetableEventSourceComponent =>
 
 	def applyInternal(): Try[Seq[TimetableEvent]] = {
-		Try(Await.result(staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff), 15.seconds))
+		Try(Await.result(staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff), ViewMemberEventsCommand.Timeout))
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
 
