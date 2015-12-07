@@ -62,7 +62,7 @@ object Assignment {
 @Entity
 @Access(AccessType.FIELD)
 class Assignment
-		extends Assessment
+	extends Assessment
 		with ToString
 		with HasSettings
 		with PostLoadBehaviour
@@ -75,6 +75,9 @@ class Assignment
 
 	@transient
 	var assignmentService = Wire[AssessmentService]("assignmentService")
+
+	@transient
+	var submissionService = Wire[SubmissionService]("submissionService")
 
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
@@ -202,6 +205,17 @@ class Assignment
 
 		workingDaysHelper.getNumWorkingDays(now, deadline) + offset
 	}
+
+	/**
+		* An Assignment has outstanding feedback if it has a submission that isn't feedback deadline-exempt
+		* and there isn't released feedback for that submission.
+		*/
+	def hasOutstandingFeedback: Boolean =
+		submissionService.getSubmissionsByAssignment(this)
+			.exists { submission =>
+				submission.feedbackDeadline.nonEmpty &&
+					!feedbackService.getAssignmentFeedbackByUniId(this, submission.universityId).exists(_.released)
+			}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))

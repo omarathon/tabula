@@ -94,7 +94,7 @@
 			<#-- Build feedback deadline rendering -->
 			<#assign feedbackLabel = "" />
 			<#assign feedbackDeadline = "" />
-			<#if assignment.isClosed() && (features.submissions && assignment.collectSubmissions) && assignment.feedbackDeadlineWorkingDaysAway??>
+			<#if assignment.isClosed() && (features.submissions && assignment.collectSubmissions) && assignment.hasOutstandingFeedback && assignment.feedbackDeadlineWorkingDaysAway??>
 				<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
 				<#if workingDaysAway lt 0>
 					<#if assignment.hasUnreleasedFeedback>
