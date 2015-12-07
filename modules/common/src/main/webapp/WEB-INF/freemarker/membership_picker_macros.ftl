@@ -91,8 +91,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 	<#local sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt fa fa-list-alt"></i></span><span class="hide">SITS</span></#local>
 
 	<#local membershipInfo = command.membershipInfo />
-	<#local hasMembers = membershipInfo.totalCount gt 0 />
-
+	<#local hasMembers=(membershipInfo.totalCount gt 0 || membershipInfo.includeCount gt 0 || membershipInfo.excludeCount gt 0) />
 
 	<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
 	<#-- <p class="alert alert-success"><i class="icon-ok fa fa-check"></i> This ${name} is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
