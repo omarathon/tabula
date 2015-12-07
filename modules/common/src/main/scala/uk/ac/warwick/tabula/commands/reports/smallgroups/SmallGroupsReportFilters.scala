@@ -24,18 +24,18 @@ object SmallGroupsReportFilters {
 		AllSmallGroupsReportCommandResult(
 			unrecordedMap,
 			unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)),
-			unrecordedMap.flatMap(_._2.map(_._1)).toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+			unrecordedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}
 
-	def missedUnauthorised(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
+	def missed(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
 		val missedMap = result.attendance.map{ case(studentData, eventMap) =>
-			studentData -> eventMap.filter { case (_, state) =>	state == AttendanceState.MissedUnauthorised	}
+			studentData -> eventMap.filter { case (_, state) =>	state == AttendanceState.MissedUnauthorised || state == AttendanceState.MissedAuthorised	}
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
 		AllSmallGroupsReportCommandResult(
 			missedMap,
 			missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)),
-			missedMap.flatMap(_._2.map(_._1)).toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
+			missedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}
 }
