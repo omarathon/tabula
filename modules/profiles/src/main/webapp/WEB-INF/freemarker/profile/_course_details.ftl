@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="course-details" class="clearfix">
 	<hr class="full-width"></hr>
 
@@ -154,6 +156,24 @@
 		</div>
 	</#if>
 
+	<#if showIntro("profiles-missing-info", "anywhere")>
+		<div style="clear: both">
+			<#assign introText>
+				<p>
+					Tabula displays course information stored in SITS. If your information has recently been added to or updated in SITS,
+					please note that it can take up to 24 hours for these changes to appear in Tabula.
+				</p>
+			</#assign>
+			<a href="#"
+			   id="profiles-missing-info"
+			   class="use-introductory auto"
+			   data-hash="${introHash("profiles-missing-info", "anywhere")}"
+			   data-placement="bottom"
+			   data-html="true"
+			   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i> Missing or incorrect information?</a>
+		</div>
+	</#if>
+
 
 </section>
 
@@ -180,3 +200,5 @@
 		</#if>
 	</div>
 </#if>
+
+</#escape>

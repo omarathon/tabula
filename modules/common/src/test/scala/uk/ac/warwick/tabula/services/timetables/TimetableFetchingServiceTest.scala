@@ -5,9 +5,9 @@ import org.mockito.Matchers
 import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{Mockito, Fixtures, AcademicYear, TestBase}
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.userlookup.User
 
 import scala.xml.XML
 
@@ -24,7 +24,19 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
 		}
 
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), locationFetchingService, mockModuleAndDepartmentService)
+		val userLookup = new MockUserLookup
+
+		val tutor = new User("abcdef")
+		tutor.setFoundUser(true)
+		tutor.setWarwickId("1170047")
+
+		val student = new User("student")
+		student.setFoundUser(true)
+		student.setWarwickId("1234567")
+
+		userLookup.registerUserObjects(tutor, student)
+
+		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), student.getWarwickId, locationFetchingService, mockModuleAndDepartmentService, userLookup)
 		events.size should be (10)
 		events.head should be (TimetableEvent(
 			uid="945ff0ef192ccb9d328be90c9268873a",
@@ -39,12 +51,12 @@ class TimetableFetchingServiceTest extends TestBase with Mockito {
 			location=Some(NamedLocation("L5")),
 			parent=TimetableEvent.Parent(Some(module)),
 			comments=None,
-			staffUniversityIds=Seq("1170047"),
-			studentUniversityIds=Nil,
+			staff=Seq(tutor),
+			students=Nil,
 		  year = AcademicYear(2012)
 		))
 		events(1).comments should be (Some("Some comments"))
-		events(1).studentUniversityIds should be (Seq("1234567"))
+		events(1).students should be (Seq(student))
 	}
 
 	val TimetableEvents = """<?xml version="1.0" encoding="UTF-8"?>

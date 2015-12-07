@@ -65,46 +65,16 @@
 					$mainContent.find('.loading p em').html('Downloading data&hellip;');
 					$mainContent.find('.loading .bar').width('100%');
 					setTimeout(function(){
-						var key, key1, key2, result = [];
+						var key, key1, key2;
 						window.ReportBuilder.reportData = data;
-						for (key in data) {
-							if (data.hasOwnProperty(key)) {
-								if ($.isArray(data[key])) {
-									$.each(data[key], function(i, obj){
-										for (key1 in obj) {
-											if (obj.hasOwnProperty(key1)) {
-												result.push(
-													$('<input/>').prop({
-														'type': 'hidden',
-														'name': key + '[' + i + '][' + key1 + ']',
-														'value': obj[key1]
-													})
-												);
-											}
-										}
-									})
-								} else {
-									for (key1 in data[key]) {
-										if (data[key].hasOwnProperty(key1)) {
-											for (key2 in data[key][key1]) {
-												if (data[key][key1].hasOwnProperty(key2)) {
-													result.push(
-															$('<input/>').prop({
-																'type': 'hidden',
-																'name': key + '[' + key1 + '][' + key2 + ']',
-																'value': data[key][key1][key2]
-															})
-													);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
+						$('form.report-target-form').append(
+							$('<input/>').prop({
+								'type': 'hidden',
+								'name': 'data',
+								'value': JSON.stringify(data)
+							})
+						);
 
-						$('form.report-target-form').append(result);
-	
 						$mainContent.find('div.loading').hide();
 						$mainContent.find('div.complete').show();
 

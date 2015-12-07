@@ -92,7 +92,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
-					a.deleted = false and a.archived = false""")
+					a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
 			.setString("universityId", user.getWarwickId)
 			.distinct.seq
 
@@ -205,12 +205,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 		if (deptModules.isEmpty) Nil
 		else {
-			session.newCriteria[AssessmentComponent]
-				.add(safeIn("module", deptModules))
-				.add(is("inUse", true))
-				.addOrder(asc("moduleCode"))
-				.addOrder(asc("sequence"))
-				.seq
+			val components = safeInSeq(() => {
+				session.newCriteria[AssessmentComponent]
+					.add(is("inUse", true))
+					.addOrder(asc("moduleCode"))
+					.addOrder(asc("sequence"))
+			}, "module", deptModules)
+			components.sortBy { c =>
+				(c.moduleCode, c.sequence)
+			}
 		}
 	}
 
@@ -250,6 +253,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]
+			// TODO Is there a way to do not-in with multiple queries?
 			.add(not(safeIn("id", ids)))
 			.add(safeIn("academicYear", academicYears))
 			.seq

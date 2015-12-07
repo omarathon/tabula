@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.assignments.CopyAssignmentsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.CopyAssignmentsCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 
 @Controller
@@ -67,7 +67,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 trait UnarchivedAssignmentsMap {
 
 	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-		for(module <- modules) yield module.code ->  module.assignments.asScala.filterNot(a => a.archived || a.deleted)
+		for(module <- modules) yield module.code ->  module.assignments.asScala.filter { _.isAlive }
 	).toMap.filterNot(_._2.isEmpty)
 
 }

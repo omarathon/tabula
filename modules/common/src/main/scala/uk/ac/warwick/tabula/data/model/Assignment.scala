@@ -101,8 +101,18 @@ class Assignment
 	var attachmentLimit: Int = 1
 
 	override var name: String = _
-	var active: JBoolean = true
-	var archived: JBoolean = false
+
+	@Column(name="archived")
+	@deprecated("118", "Archived will be removed in future in preference to academic year scoping")
+	private var _archived: JBoolean = false
+
+	def archive(): Unit = { _archived = true }
+	def unarchive(): Unit = { _archived = false }
+
+	@Column(name="hidden_from_students")
+	private var _hiddenFromStudents: JBoolean = false
+
+	def hideFromStudents(): Unit = { _hiddenFromStudents = true }
 
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
@@ -382,7 +392,17 @@ class Assignment
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
-	def isAlive = active && !deleted && !archived
+	def isAlive = !deleted && !_archived
+
+	/**
+		* Whether this assignment should be visible to students
+		*/
+	def isVisibleToStudents = isAlive && !_hiddenFromStudents
+
+	/**
+		* Whether this assignment should be visible to students historically (this allows archived assignments)
+		*/
+	def isVisibleToStudentsHistoric = !deleted && !_hiddenFromStudents
 
 	/**
 	 * Calculates whether we could submit to this assignment.
@@ -645,7 +665,7 @@ class Assignment
 	def mustReleaseForMarking = hasWorkflow
 
 	def needsFeedbackPublishing = {
-		if (openEnded || !collectSubmissions || archived) {
+		if (openEnded || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -653,7 +673,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingIgnoreExtensions = {
-		if (openEnded || !collectSubmissions || archived) {
+		if (openEnded || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !findExtension(s.universityId).exists(_.approved) && !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -661,7 +681,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingFor(universityId: String) = {
-		if (openEnded || !collectSubmissions || archived) {
+		if (openEnded || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -736,6 +756,7 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
+	@BeanProperty var hiddenFromStudents: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -751,6 +772,9 @@ trait BooleanAssignmentProperties {
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions
 		assignment.automaticallyReleaseToMarkers = automaticallyReleaseToMarkers
 		assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
+
+		// You can only hide an assignment, no un-hiding.
+		if (hiddenFromStudents) assignment.hideFromStudents()
 	}
 }
 

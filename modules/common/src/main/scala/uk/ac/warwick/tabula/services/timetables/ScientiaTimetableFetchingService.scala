@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{url, thread, Http}
+import dispatch.classic.{Http, thread, url}
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.params.HttpConnectionParams
 import org.joda.time.{DateTimeConstants, LocalTime}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
-import uk.ac.warwick.tabula.helpers.{Logging, ClockComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{Futures, FoundUser, ClockComponent, Logging}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.xml.Elem
 
 trait ScientiaConfiguration {
@@ -37,9 +38,9 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
 		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.guessSITSAcademicYearByDate(clock.now))
 		lazy val prevAcademicYear: Option[AcademicYear] = {
-			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < NOVEMBER
+			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
 			val month = clock.now.getMonthOfYear
-			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.NOVEMBER)
+			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
 				currentAcademicYear.map { _ - 1 }
 			else
 				None
@@ -55,7 +56,7 @@ trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFet
 }
 
 private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: ScientiaConfiguration) extends CompleteTimetableFetchingService with Logging with DisposableBean {
-	self: LocationFetchingServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: LocationFetchingServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent with UserLookupComponent =>
 
 	import ScientiaHttpTimetableFetchingService._
 
@@ -79,19 +80,21 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
-	override def destroy {
+	override def destroy() {
 		http.shutdown()
 	}
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			val events = parseXml(node, year, locationFetchingService, moduleAndDepartmentService)
+			val events = parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 
 			if (excludeSmallGroupEventsInTabula)
 				events.filterNot { event =>
@@ -113,48 +116,49 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
 	def getTimetableForStaff(universityId: String) = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
 
-	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Try[Seq[TimetableEvent]] = {
-		def flatten[T](xs: Seq[Try[Seq[T]]]): Try[Seq[T]] = {
-			val (ss: Seq[Success[Seq[T]]] @unchecked, fs: Seq[Failure[Seq[T]]] @unchecked) =
-				xs.partition(_.isSuccess)
-
-			if (fs.isEmpty) Success(ss.flatMap(_.get))
-			else Failure[Seq[T]](fs.head.exception) // Only keep the first failure
-		}
-
+	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Future[Seq[TimetableEvent]] = {
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
-		val results = uris.map { case (uri, year) =>
+		val results: Seq[Future[Seq[TimetableEvent]]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request.
 			// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 			// else return an empty list.
-			logger.info(s"Requesting timetable data from $uri")
+			logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 
-			val result = Try(http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula)))
+			val result = Future {
+				val ev = http.when(_==200)(req >:+ handler(year, excludeSmallGroupEventsInTabula, param))
+
+				if (ev.isEmpty) {
+					logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
+					throw new TimetableEmptyException(uri, param)
+				}
+
+				ev
+			}
 
 			// Some extra logging here
-			result match {
-				case Success(ev) =>
-					if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
-				case Failure(e) =>
-					logger.warn(s"Request for $uri failed: ${e.getMessage}")
+			result.onFailure { case e =>
+				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 			}
 
 			result
 		}
 
-		flatten(results)
+		Futures.flatten(results)
 	}
 
 }
 
-object ScientiaHttpTimetableFetchingService {
+class TimetableEmptyException(val uri: String, val param: String)
+	extends IllegalStateException(s"Received an empty timetable from $uri for $param")
+
+object ScientiaHttpTimetableFetchingService extends Logging {
 
 	val cacheName = "SyllabusPlusTimetables"
 
 	def apply(scientiaConfiguration: ScientiaConfiguration) = {
-		val service = new ScientiaHttpTimetableFetchingService(scientiaConfiguration) with WAI2GoHttpLocationFetchingServiceComponent with AutowiringSmallGroupServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringWAI2GoConfigurationComponent
+		val service = new ScientiaHttpTimetableFetchingService(scientiaConfiguration) with WAI2GoHttpLocationFetchingServiceComponent with AutowiringSmallGroupServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringWAI2GoConfigurationComponent with AutowiringUserLookupComponent
 
 		if (scientiaConfiguration.perYearUris.exists(_._1.contains("stubTimetable"))) {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
@@ -167,10 +171,13 @@ object ScientiaHttpTimetableFetchingService {
 	def parseXml(
 		xml: Elem,
 		year: AcademicYear,
+		uniId: String,
 		locationFetchingService: LocationFetchingService,
-		moduleAndDepartmentService: ModuleAndDepartmentService
+		moduleAndDepartmentService: ModuleAndDepartmentService,
+		userLookup: UserLookupService
 	): Seq[TimetableEvent] = {
 		val moduleCodes = (xml \\ "module").map(_.text.toLowerCase).distinct
+		if (moduleCodes.isEmpty) logger.info(s"No modules returned for: $uniId")
 		val moduleMap = moduleAndDepartmentService.getModulesByCodes(moduleCodes).groupBy(_.code).mapValues(_.head)
 		xml \\ "Activity" map { activity =>
 			val name = (activity \\ "name").text
@@ -220,12 +227,12 @@ object ScientiaHttpTimetableFetchingService {
 					_.maybeText
 				},
 				parent = parent,
-				staffUniversityIds = (activity \\ "staffmember") map {
+				staff = userLookup.getUsersByWarwickUniIds((activity \\ "staffmember") map {
 					_.text
-				},
-				studentUniversityIds = (activity \\ "student") map {
+				}).values.collect { case FoundUser(u) => u }.toSeq,
+				students = userLookup.getUsersByWarwickUniIds((activity \\ "student") map {
 					_.text
-				},
+				}).values.collect { case FoundUser(u) => u }.toSeq,
 				year = year
 			)
 		}

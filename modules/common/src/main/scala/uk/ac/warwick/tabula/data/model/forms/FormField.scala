@@ -288,6 +288,10 @@ class FileField extends AssignmentFormField {
 	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: Seq[String])
 
+	def individualFileSizeLimit: JInteger = getProperty[JInteger]("individualFileSizeLimit", null)
+	def individualFileSizeLimit_=(limit: JInteger) = setProperty("individualFileSizeLimit", limit)
+	private def individualFileSizeLimitInBytes: JLong = JLong(Option(individualFileSizeLimit).map(_.longValue() * 1024 * 1024))
+
 	// This is after onBind is called, so any multipart files have been persisted as attachments
 	override def validate(value: FormValue, errors: Errors) {
 
@@ -307,9 +311,15 @@ class FileField extends AssignmentFormField {
 					val attachmentStrings = attachmentTypes.map(s => "." + s)
 					val fileNames = v.file.fileNames map (_.toLowerCase)
 					val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
-					if (invalidFiles.size > 0) {
+					if (invalidFiles.nonEmpty) {
 						if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+					}
+				} else if (Option(individualFileSizeLimit).nonEmpty){
+					val invalidFiles = v.file.individualFileSizes.filter(_._2 > individualFileSizeLimitInBytes)
+					if (invalidFiles.nonEmpty) {
+						if (invalidFiles.size == 1) errors.rejectValue("file", "file.toobig.one", Array(invalidFiles.map(_._1).mkString("")), "")
+						else errors.rejectValue("file", "file.toobig", Array(invalidFiles.map(_._1).mkString(", ")), "")
 					}
 				}
 		}
@@ -322,6 +332,7 @@ class FileField extends AssignmentFormField {
 		newField.context = this.context
 		newField.attachmentLimit = this.attachmentLimit
 		newField.attachmentTypes = this.attachmentTypes
+		newField.individualFileSizeLimit = this.individualFileSizeLimit
 		newField
 	}
 }

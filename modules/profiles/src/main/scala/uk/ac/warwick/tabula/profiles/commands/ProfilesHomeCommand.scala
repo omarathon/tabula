@@ -36,17 +36,7 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 		if (user.isStaff || isAgent(user.universityId)) {
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") {
-					smallGroupService.findSmallGroupsByTutor(user.apparentUser)
-						.filter { group =>
-							!group.groupSet.deleted &&
-							(
-								// The set is visible to tutors; OR
-								group.groupSet.releasedToTutors ||
-
-								// I have permission to view the membership of the set anyway
-								securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
-							)
-						}
+					smallGroupService.findReleasedSmallGroupsByTutor(user)
 				}
 				else Nil
 

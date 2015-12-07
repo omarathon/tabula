@@ -3,21 +3,23 @@ package uk.ac.warwick.tabula.web.controllers.reports.attendancemonitoring
 import java.io.StringWriter
 
 import freemarker.template.{Configuration, DefaultObjectWrapper}
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.AcademicYear
+import org.apache.commons.lang3.StringEscapeUtils
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring.AllAttendanceReportCommand.AllAttendanceReportCommandResult
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.helpers.IntervalFormatter
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
+import scala.collection.JavaConverters._
 
 abstract class AbstractAttendanceReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
@@ -35,6 +37,8 @@ abstract class AbstractAttendanceReportController extends ReportsController
 	val pageRenderPath: String
 	val filePrefix: String
 	def urlGeneratorFactory(department: Department): (AcademicYear) => String
+
+	type AttendanceReportProcessor = Appliable[AttendanceReportProcessorResult] with AttendanceReportProcessorState
 
 	@ModelAttribute("processor")
 	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -92,11 +96,12 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
 	def csv(
-		@ModelAttribute("processor") processor: Appliable[AttendanceReportProcessorResult],
+		@ModelAttribute("processor") processor: AttendanceReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
 		val csvBuilder = new AttendanceReportExporter(processorResult, department)
@@ -112,11 +117,12 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
 	def xlsx(
-		@ModelAttribute("processor") processor: Appliable[AttendanceReportProcessorResult],
+		@ModelAttribute("processor") processor: AttendanceReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new AttendanceReportExporter(processorResult, department).toXLSX
 
@@ -125,13 +131,38 @@ abstract class AbstractAttendanceReportController extends ReportsController
 
 	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
 	def xml(
-		@ModelAttribute("processor") processor: Appliable[AttendanceReportProcessorResult],
+		@ModelAttribute("processor") processor: AttendanceReportProcessor,
 		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam data: String
 	) = {
-		val processorResult = processor.apply()
+		val processorResult = getProcessorResult(processor, data)
 
 		new AttendanceReportExporter(processorResult, department).toXML
 	}
 
+	private def getProcessorResult(processor: AttendanceReportProcessor, data: String): AttendanceReportProcessorResult = {
+		val request = JsonHelper.fromJson[AttendanceReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		request.copyTo(processor)
+		processor.apply()
+	}
+
+}
+
+class AttendanceReportRequest extends Serializable {
+
+	var attendance: JMap[String, JMap[String, String]] =
+		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+
+	var students: JList[JMap[String, String]] = JArrayList()
+
+	var points: JList[JMap[String, String]] = JArrayList()
+
+	def copyTo(state: AttendanceReportProcessorState) {
+		state.attendance = attendance
+
+		state.students = students
+
+		state.points = points
+	}
 }

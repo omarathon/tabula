@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import javax.sql.DataSource
 
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{DetachedCriteria, PropertySubqueryExpression}
+import org.hibernate.criterion.{Projection, DetachedCriteria, PropertySubqueryExpression}
 import org.hibernate.proxy.HibernateProxy
 import org.hibernate.{Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
@@ -47,6 +47,7 @@ trait ExtendedSessionComponent extends SessionComponent {
 }
 
 trait HelperRestrictions extends Logging {
+	@transient protected val maxInClause = Daoisms.MaxInClauseCount
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 	def isNot = org.hibernate.criterion.Restrictions.neOrIsNotNull _
 	def isSubquery(propertyName: String, subquery: DetachedCriteria) = new PropertySubqueryExpressionWithToString(propertyName, subquery)
@@ -55,15 +56,29 @@ trait HelperRestrictions extends Logging {
 		if (iterable.isEmpty) {
 			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
 			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
-		} else if (iterable.length <= Daoisms.MaxInClauseCount) {
+		} else if (iterable.length <= maxInClause) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
 		} else {
+			logger.warn("TAB-3888 - Use multiple queries where possible instead of passing more than 1000 entities")
 			val or = disjunction()
-			iterable.grouped(Daoisms.MaxInClauseCount).foreach { subitr =>
+			iterable.grouped(maxInClause).foreach { subitr =>
 				or.add(org.hibernate.criterion.Restrictions.in(propertyName, subitr.asJavaCollection))
 			}
 			or
 		}
+	}
+	def safeInSeq[A](criteriaFactory: () => ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
+		iterable.grouped(maxInClause).toSeq.flatMap(maxedIterable => {
+			val c = criteriaFactory.apply()
+			c.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)).seq
+		})
+	}
+	def safeInSeqWithProjection[A, B](criteriaFactory: () => ScalaCriteria[A], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[B] = {
+		iterable.grouped(maxInClause).toSeq.flatMap(maxedIterable => {
+			val c = criteriaFactory.apply()
+			c.add(org.hibernate.criterion.Restrictions.in(propertyName, maxedIterable.asJavaCollection))
+			c.project[B](projection).seq
+		})
 	}
 }
 

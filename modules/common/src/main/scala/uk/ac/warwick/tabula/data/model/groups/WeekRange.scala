@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import java.sql.Types
 
 import org.hibernate.`type`.StandardBasicTypes
-import org.joda.time.{DateMidnight, DateTimeConstants}
-import uk.ac.warwick.spring.Wire
+import org.joda.time.{LocalDate, DateTimeConstants}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.services.TermService
@@ -23,8 +22,6 @@ case class WeekRange(minWeek: WeekRange.Week, maxWeek: WeekRange.Week) {
 
 object WeekRange {
 	type Week = Int
-
-	var termService = Wire[TermService]
 
 	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
 	def fromString(rep: String) = rep.split('-') match {
@@ -50,9 +47,9 @@ object WeekRange {
 			}
 		}
 
-	def termWeekRanges(year: AcademicYear): Seq[WeekRange] = {
+	def termWeekRanges(year: AcademicYear)(implicit termService: TermService): Seq[WeekRange] = {
 		// We are confident that November 1st is always in term 1 of the year
-		val autumnTerm = termService.getTermFromDate(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
+		val autumnTerm = termService.getTermFromDate(new LocalDate(year.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay)
 		val springTerm = termService.getNextTerm(autumnTerm)
 		val summerTerm = termService.getNextTerm(springTerm)
 

@@ -5,14 +5,18 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.commands.coursework.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
+import uk.ac.warwick.tabula.jobs.coursework.{SubmitToTurnitinLtiJob, SubmitToTurnitinJob}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.{Features, AutowiringFeaturesComponent}
 
-trait HandlesAssignmentTrigger extends Logging{
+trait HandlesAssignmentTrigger extends Logging {
 
 	@transient
 	var jobService = Wire[JobService]
+
+	@transient
+	var features = Wire[Features]
 
 	def assignment: Assignment
 
@@ -24,7 +28,7 @@ trait HandlesAssignmentTrigger extends Logging{
 			releaseToMarkersCommand.onBind(null)
 			releaseToMarkersCommand.apply()
 		}
-		if (assignment.automaticallySubmitToTurnitin) {
+		if (assignment.automaticallySubmitToTurnitin && features.turnitinSubmissions) {
 			val user = {
 				if (assignment.module.managers.users.isEmpty) {
 					assignment.module.adminDepartment.owners.users.headOption
@@ -32,7 +36,11 @@ trait HandlesAssignmentTrigger extends Logging{
 					assignment.module.managers.users.headOption
 				}
 			}
-			user.map(jobUser =>	jobService.add(jobUser, SubmitToTurnitinJob(assignment))).getOrElse(
+
+			user.map(jobUser => {
+				if (features.turnitinLTI) jobService.add(jobUser, SubmitToTurnitinLtiJob(assignment))
+				else jobService.add(jobUser, SubmitToTurnitinJob(assignment))
+			}).getOrElse(
 				logger.error(s"Could not submit to Turnitin for trigger $this as no module managers or dept admins found.")
 			)
 

@@ -37,9 +37,7 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 			val xthml = textRenderer.renderTemplate(templateId, model)
 			val renderer = new ITextRenderer
 			val elementFactory = new ProfileImageReplacedElementFactory(renderer.getSharedContext.getReplacedElementFactory)
-				with MemberPhotoUrlGeneratorComponent {
-				def photoUrlGenerator = parentUrlGenerator
-			}
+				with MemberPhotoUrlGeneratorComponent
 			renderer.getSharedContext.setReplacedElementFactory(elementFactory)
 			renderer.setDocumentFromString(xthml.replace("&#8194;", " "), topLevelUrl)
 			renderer.layout()
@@ -50,7 +48,7 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 }
 
 class ProfileImageReplacedElementFactory(delegate: ReplacedElementFactory) extends ReplacedElementFactory
-	with ServesPhotosFromExternalApplication with AutowiringProfileServiceComponent {
+	with ServesPhotosFromExternalApplication with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringProfileServiceComponent {
 
 	this: MemberPhotoUrlGeneratorComponent =>
 

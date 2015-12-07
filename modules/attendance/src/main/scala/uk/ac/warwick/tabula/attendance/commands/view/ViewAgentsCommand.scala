@@ -37,7 +37,7 @@ class ViewAgentsCommandInternal(val department: Department, val academicYear: Ac
 		val relationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
 		relationships.groupBy(_.agent).map{case(agent, agentRelationships) =>
 			val tutees = agentRelationships.flatMap(_.studentMember)
-			val tuteesDepartmentCounts = tutees.flatMap(_.attendanceCheckpointTotals.asScala).filter(_.department == department)
+			val tuteesDepartmentCounts = tutees.flatMap(_.attendanceCheckpointTotals.asScala).filter(t => t.department == department && t.academicYear == academicYear)
 			ViewAgentsCommandResult(
 				agent,
 				agentRelationships.head.agentMember.orNull,

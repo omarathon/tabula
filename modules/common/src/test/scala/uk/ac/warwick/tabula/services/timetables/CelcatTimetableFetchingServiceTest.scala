@@ -1,12 +1,16 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.Credentials
+import dispatch.classic.{Http, Credentials}
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.Component
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.io.IOUtils
+import org.apache.http.entity.InputStreamEntity
+import org.apache.http.message.BasicHttpResponse
+import org.apache.http.{HttpVersion, HttpRequest, HttpHost}
 import org.apache.http.auth.AuthScope
+import org.apache.http.client.HttpClient
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
@@ -14,7 +18,6 @@ import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
@@ -22,10 +25,11 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val module = Fixtures.module("es186")
 
+	val httpClient = mock[HttpClient]
+
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
-			"es" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/eng-timetables")
+			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables")
 		)
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
@@ -41,10 +45,14 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
 		}
+
+		override val http: Http = new Http {
+			override def make_client = httpClient
+		}
 	}
 
 	@Test def parseICal() {
-		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
+		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
 		events.size should be (142)
 
 		val combined = service.combineIdenticalEvents(events).sorted
@@ -121,7 +129,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 	}
 
 	@Test def tab2662() {
-		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))
+		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
 		events.size should be (2)
 
 		val combined = service.combineIdenticalEvents(events).sorted
@@ -158,10 +166,10 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 				cal.getComponent(Component.VEVENT).asInstanceOf[VEvent],
 				Map(),
 				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
-				service.termService,
 				service.locationFetchingService,
-				Map(module.code -> module)
-			)
+				Map(module.code -> module),
+				service.userLookup
+			)(service.termService)
 
 		parsed should be ('defined)
 		parsed.get should be (TimetableEvent(
@@ -181,6 +189,23 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			AcademicYear.parse("14/15")
 		))
+	}
+
+	@Test(timeout = 5000) def tab3899() {
+		// Mock the BSV request
+		val bsvResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		bsvResponse.setEntity(new InputStreamEntity(resourceAsStream("staff.bsv")))
+
+		httpClient.execute(any[HttpHost], any[HttpRequest]) returns bsvResponse
+
+		val events = service.parseICal(
+			resourceAsStream("1524943.ics"),
+			CelcatDepartmentConfiguration(
+				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
+				staffListInBSV = true
+			)
+		)(service.termService)
+		events.size should be (122)
 	}
 
 }

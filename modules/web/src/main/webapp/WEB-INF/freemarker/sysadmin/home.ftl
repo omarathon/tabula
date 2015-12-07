@@ -70,6 +70,13 @@
 			</@f.form>
 		</p>
 
+		<p>
+			<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}" commandName="blankForm">
+				<textarea id="import-profiles-specific" name="members" class="input-block-level" placeholder="University IDs (one per line)" rows="2"></textarea>
+				<input class="btn btn-danger" type="submit" value="Specific profile(s)">
+			</@f.form>
+		</p>
+
 		<h2>Indexing</h2>
 
 		<#macro reindex_form name text>

@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
+import scala.util.Success
+
 class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestBase with Mockito {
 	val student = new StudentMember
 	student.universityId = "university ID"
@@ -43,7 +45,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	@Test
 	def callsBothServicesAndGeneratesOccurrence(){
-		source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff) should be (Seq(occurrence))
+		whenReady(source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff)) { _ should be (Seq(occurrence)) }
 	}
 
 

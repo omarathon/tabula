@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="marking-details" class="marking-detail clearfix">
 	<h4>Coursework Marking</h4>
 	<#list marking as assignment>
@@ -17,3 +19,5 @@
 		</div>
 	</#list>
 </section>
+
+</#escape>

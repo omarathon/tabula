@@ -2,18 +2,20 @@ package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
+import org.apache.http.params.HttpConnectionParams
 import org.springframework.beans.factory.DisposableBean
+import uk.ac.warwick.tabula.HttpClientDefaults
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation, Location}
+import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
-import uk.ac.warwick.util.cache.{Caches, CacheEntryFactory}
+import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 import uk.ac.warwick.util.web.Uri
-import scala.util.{Failure, Success, Try}
-import scala.util.parsing.json.JSON
 
 import scala.collection.JavaConverters._
+import scala.util.parsing.json.JSON
+import scala.util.{Failure, Success, Try}
 
 /**
  * A service that takes a location as a String, and tries to turn it into a
@@ -87,7 +89,9 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 

@@ -4,8 +4,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, PathVariable}
 import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.{StudentMemberSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
-import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.{StudentMemberSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
 
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}/{studentMember}"))

@@ -1,21 +1,27 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.{FoundUser, SystemClockComponent}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 import ImportSmallGroupEventsFromExternalSystemCommand._
 
+import scala.concurrent.Await
+
 object ImportSmallGroupEventsFromExternalSystemCommand {
+
+	val Timeout = 15.seconds
 
 	val RequiredPermission = Permissions.SmallGroups.Update
 
@@ -31,6 +37,10 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 			with LookupEventsFromModuleTimetable
+
+	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent) =
+		event.year == academicYear &&
+			(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar || event.eventType == TimetableEventType.Other("WRB-ACTIVE"))
 
 	class EventToImport {
 		def this(event: TimetableEvent) {
@@ -64,11 +74,9 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
 			.map { e => (e.timetableEvent, Option(e.group)) }
 			.filter { case (_, group) => group.nonEmpty }
 			.map { case (e, group) =>
-				val tutorUsercodes = e.staffUniversityIds.flatMap { id =>
-					Option(userLookup.getUserByWarwickUniId(id)).collect { case FoundUser(u) => u.getUserId }
-				}
+				val tutorUsercodes = e.staff.map { _.getUserId }
 
-				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 			}
 
 		smallGroupService.saveOrUpdate(set)
@@ -82,18 +90,20 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 		with ModuleTimetableFetchingServiceComponent =>
 
 	eventsToImport.clear()
-	eventsToImport.addAll(timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter { event => event.year == set.academicYear }
-		.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
-		.sorted
-		.map(new EventToImport(_))
-		.asJava
+	eventsToImport.addAll(
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+			.sorted
+			.map(new EventToImport(_))
+			.asJava
 	)
 
 	override def populate(): Unit = {
-		set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
-			if (eventsToImport.size() > index) {
-				eventsToImport.get(index).group = group
+		if (set.groups.asScala.forall { _.events.isEmpty }) {
+			set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
+				if (eventsToImport.size() > index) {
+					eventsToImport.get(index).group = group
+				}
 			}
 		}
 	}

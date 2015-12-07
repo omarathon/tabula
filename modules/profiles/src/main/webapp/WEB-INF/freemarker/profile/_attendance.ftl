@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="attendance" class="clearfix" >
 	<#assign year=studentCourseYearDetails.academicYear.startYear?string.computer />
 
@@ -35,7 +37,6 @@
 					var pane = $('#attendance-pane');
 					if ($('#attendance .small-groups').find('.seminar-attendance-profile').length > 0) {
 						$('#attendance .small-groups').show();
-						pane.show();
 						window.GlobalScripts.initCollapsible();
 						$('.use-tooltip').tooltip();
 						$('.use-popover').tabulaPopover({
@@ -49,3 +50,5 @@
 		});
 	</script>
 </section>
+
+</#escape>

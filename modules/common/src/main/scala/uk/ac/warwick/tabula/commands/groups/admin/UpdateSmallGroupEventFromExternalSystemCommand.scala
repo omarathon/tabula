@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation, Location, Module}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.{FoundUser, SystemClockComponent}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.TimetableEventType
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
 
 object UpdateSmallGroupEventFromExternalSystemCommand {
 
@@ -44,10 +44,10 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def group: SmallGroup
 	def event: SmallGroupEvent
 
-	lazy val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter { event => event.year == set.academicYear }
-		.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
-		.sorted
+	lazy val timetableEvents =
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+			.sorted
 
 }
 
@@ -63,11 +63,9 @@ class UpdateSmallGroupEventFromExternalSystemCommandInternal(val module: Module,
 	override def applyInternal(): SmallGroupEvent = transactional() {
 		val e = timetableEvents(index)
 
-		val tutorUsercodes = e.staffUniversityIds.flatMap { id =>
-			Option(userLookup.getUserByWarwickUniId(id)).collect { case FoundUser(u) => u.getUserId }
-		}
+		val tutorUsercodes = e.staff.map { _.getUserId }
 
-		updateEvent(module, set, group, event, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+		updateEvent(module, set, group, event, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 
 		smallGroupService.saveOrUpdate(event)
 		smallGroupService.getOrCreateSmallGroupEventOccurrences(event)
@@ -107,11 +105,11 @@ trait UpdateSmallGroupEventFromExternalSystemDescription extends Describable[Sma
 }
 
 trait SmallGroupEventUpdater {
-	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]): SmallGroupEvent
+	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent
 }
 
 trait CommandSmallGroupEventUpdater extends SmallGroupEventUpdater {
-	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 		val command = ModifySmallGroupEventCommand.edit(module, set, group, event)
 		command.weekRanges = weeks
 		command.day = day
@@ -124,6 +122,8 @@ trait CommandSmallGroupEventUpdater extends SmallGroupEventUpdater {
 				command.location = name
 				command.locationId = locationId
 		}
+
+		command.title = title
 
 		// Remove existing tutors if we're overwriting. This means that if we update the tutor in Tabula and there isn't
 		// one in S+, we don't overwrite it. If there is one in S+ and then it's overwritten to have no tutor any more,

@@ -8,17 +8,19 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.bind.WebDataBinder
 
-import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.UpstreamGroup
 import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
+import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
-class EditAssignmentController extends CourseworkController {
+class EditAssignmentController extends CourseworkController with AutowiringFeaturesComponent {
 
 	validatesSelf[EditAssignmentCommand]
 
@@ -44,8 +46,9 @@ class EditAssignmentController extends CourseworkController {
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount,
-			"openDetails" -> openDetails)
-			.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+			"openDetails" -> openDetails,
+			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
+		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=submit"))

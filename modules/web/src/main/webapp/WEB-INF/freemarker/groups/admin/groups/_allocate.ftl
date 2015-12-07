@@ -193,7 +193,7 @@
 													</div>
 												</div>
 
-												<ul class="drag-list hide" data-bindpath="mapping[${group.id}]">
+												<ul class="drag-list hide" data-bindpath="mapping[${group.id}]" <#if group.maxGroupSize??>data-max-members="${group.maxGroupSize}"</#if>>
 													<#list existingStudents as student>
 														<@student_item student "mapping[${group.id}][${student_index}]" />
 													</#list>

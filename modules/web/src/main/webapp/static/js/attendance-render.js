@@ -424,6 +424,11 @@ $(function(){
 						success: function(result) {
 							$this.find('.loading').hide();
 							$this.append(result);
+							// Enable any freshly loaded popovers
+							jQuery('.use-popover').tabulaPopover({
+								trigger: 'click',
+								container: '#container'
+							});
 						}
 					})
 				}

@@ -2,16 +2,15 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommandFactoryImpl
+import uk.ac.warwick.tabula.commands.timetables.{ViewStudentPersonalTimetableCommandFactoryImpl, ViewStaffPersonalTimetableCommandFactoryImpl, ViewModuleTimetableCommandFactoryImpl}
 import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest, ViewStaffPersonalTimetableCommandFactoryImpl, ViewStudentPersonalTimetableCommandFactoryImpl}
-import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
+import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 @Controller
 @RequestMapping(Array("/department/{department}/timetables"))
@@ -21,34 +20,6 @@ class DepartmentTimetablesController extends ProfilesController
 
 	val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
-	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).studentTimetableEventSource
-
-	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).staffTimetableEventSource
-
-	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
-		with AutowiringRelationshipServiceComponent
-		with AutowiringMeetingRecordServiceComponent
-		with AutowiringSecurityServiceComponent
-		).scheduledMeetingEventSource
-
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department) = {
 		DepartmentTimetablesCommand(
@@ -56,16 +27,8 @@ class DepartmentTimetablesController extends ProfilesController
 			academicYear,
 			user,
 			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
-			new ViewStudentPersonalTimetableCommandFactoryImpl(
-				studentTimetableEventSource,
-				scheduledMeetingEventSource,
-				user
-			),
-			new ViewStaffPersonalTimetableCommandFactoryImpl(
-				staffTimetableEventSource,
-				scheduledMeetingEventSource,
-				user
-			)
+			new ViewStudentPersonalTimetableCommandFactoryImpl(user),
+			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
 		)
 	}
 

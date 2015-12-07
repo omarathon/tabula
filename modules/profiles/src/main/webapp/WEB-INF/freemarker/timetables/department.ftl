@@ -197,8 +197,12 @@
 						$container.fadeTo('fast', 0.3);
 					}
 				}, 300);
-				$('#from').val(start.getTime()/1000);
-				$('#to').val(end.getTime()/1000);
+				var startToSend = new Date(start.getTime());
+				startToSend.setDate(startToSend.getDate() - 1);
+				var endToSend = new Date(end.getTime());
+				endToSend.setDate(endToSend.getDate() + 1);
+				$('#from').val(startToSend.getTime()/1000);
+				$('#to').val(endToSend.getTime()/1000);
 				$.ajax({
 					url:'${submitUrl}',
 					type: 'POST',
@@ -257,7 +261,44 @@
 				},
 				eventAfterRender: function(event, element, view) {
 					if (event.allDay) $(element).addClass('allday');
-					$(element).tabulaPopover({html:true, container:"#container", placement: 'bottom', title:event.title, content:event.description.replace(/\n/g, '<br>')})
+
+					var content = "<table class='event-info'>";
+					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
+						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
+					}
+
+					if (event.fullTitle && event.fullTitle.length > 0) {
+						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
+					}
+
+					if (event.name && event.name.length > 0) {
+						content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
+					}
+
+					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+
+					if (event.location && event.location.length > 0) {
+						content = content + "<tr><th>Where</th><td>";
+
+						if (event.locationId && event.locationId.length > 0) {
+							content = content + "<span class='map-location' data-lid='" + event.locationId + "'>" + event.location + "</span>";
+						} else {
+							content = content + event.location;
+						}
+
+						content = content + "</td></tr>";
+					}
+
+					if (event.tutorNames.length > 0){
+						content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
+					}
+
+					if (event.comments && event.comments.length > 0) {
+						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
+					}
+
+					content = content + "</table>";
+					$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
 				}
 			});
 		}

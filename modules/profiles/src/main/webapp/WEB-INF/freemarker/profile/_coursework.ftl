@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <section id="coursework" class="clearfix">
 	<#if can.do("Profiles.Read.Coursework", profile)>
 		<script type="text/javascript">
@@ -8,7 +10,6 @@
 					if (title != '' && title != undefined) {
 						pane.find('.title').html(title);
 						window.GlobalScripts.initCollapsible();
-						$('#coursework-pane').show();
 					}
 				});
 			});
@@ -20,8 +21,10 @@
 			var pane = jQuery('#coursework-pane');
 			var title = pane.find('h4').first().html();
 			if (title != '' && title != undefined) {
-				pane.find('.title').html(title).show();
+				pane.find('.title').html(title);
 			}
 		</script>
 	</#if>
 </section>
+
+</#escape>

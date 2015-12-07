@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.{FeedbackAuditData, FeedbackAuditCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{FeedbackAuditData, FeedbackAuditCommand}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{MarkingMethod, Assignment}
 import uk.ac.warwick.userlookup.User

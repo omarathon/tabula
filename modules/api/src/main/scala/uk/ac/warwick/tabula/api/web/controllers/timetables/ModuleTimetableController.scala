@@ -7,9 +7,11 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.RequestFailedException
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.helpers.TimetableEventToJsonConverter
 import uk.ac.warwick.tabula.commands.timetables.{ViewModuleTimetableCommand, ViewModuleTimetableRequest}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.data.model.{MapLocation, Module}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import ModuleTimetableController._
@@ -25,9 +27,11 @@ object ModuleTimetableController {
 @RequestMapping(Array("/v1/module/{module}/timetable"))
 class ModuleTimetableController extends ApiController
 	with GetModuleTimetableApi
+	with TimetableEventToJsonConverter
+	with AutowiringProfileServiceComponent
 
 trait GetModuleTimetableApi {
-	self: ApiController =>
+	self: ApiController with TimetableEventToJsonConverter =>
 
 	validatesSelf[SelfValidating]
 
@@ -43,30 +47,7 @@ trait GetModuleTimetableApi {
 			case Success(events) => Mav(new JSONView(Map(
 				"success" -> true,
 				"status" -> "ok",
-				"events" -> events.map { event => Map(
-					"uid" -> event.uid,
-					"name" -> event.name,
-					"title" -> event.title,
-					"description" -> event.description,
-					"eventType" -> event.eventType.displayName,
-					"weekRanges" -> event.weekRanges.map { range => Map("minWeek" -> range.minWeek, "maxWeek" -> range.maxWeek) },
-					"day" -> event.day.name,
-					"startTime" -> event.startTime.toString("HH:mm"),
-					"endTime" -> event.endTime.toString("HH:mm"),
-					"location" -> (event.location match {
-						case Some(l: MapLocation) => Map(
-							"name" -> l.name,
-							"locationId" -> l.locationId
-						)
-						case Some(l) => Map("name" -> l.name)
-						case _ => null
-					}),
-					"context" -> event.parent.shortName,
-					"parent" -> event.parent,
-					"comments" -> event.comments.orNull,
-					"staffUniversityIds" -> event.staffUniversityIds,
-					"year" -> event.year.toString
-				)}
+				"events" -> events.map(jsonTimetableEventObject)
 			)))
 			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
 		}

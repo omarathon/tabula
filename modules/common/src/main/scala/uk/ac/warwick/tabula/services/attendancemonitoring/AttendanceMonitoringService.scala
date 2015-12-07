@@ -56,7 +56,7 @@ trait AttendanceMonitoringService {
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
-	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType, academicYear: AcademicYear): Seq[SchemeMembershipItem]
 	def findPoints(
 		department: Department,
 		academicYear: AcademicYear,
@@ -92,7 +92,6 @@ trait AttendanceMonitoringService {
 	def updateCheckpointTotalsAsync(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
@@ -171,7 +170,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport] =
 		attendanceMonitoringDao.findReports(studentIds, year, period)
 
-	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType, academicYear: AcademicYear): Seq[SchemeMembershipItem] = {
 		val items = attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
 		items.map{ item => {
 			val user = userLookup.getUserByWarwickUniId(item.universityId)
@@ -181,7 +180,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 				item.lastName,
 				item.universityId,
 				item.userId,
-				membersHelper.findBy(user)
+				membersHelper.findBy(user).filter(_.academicYear == academicYear)
 			)
 		}}
 	}
@@ -306,7 +305,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint] = {
 		val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
-		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).map(_._1).map(existingCheckpoints.get).flatten.toSeq
+		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).keys.flatMap(existingCheckpoints.get).toSeq
 		val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap{case(point, state) =>
 			val checkpoint = existingCheckpoints.getOrElse(point, {
 				val checkpoint = new AttendanceMonitoringCheckpoint
@@ -350,7 +349,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			listStudentsPoints(student, Option(department), academicYear)
 		}
 		val checkpointMap = getCheckpoints(points, student, withFlush = true)
-		val allCheckpoints = checkpointMap.map(_._2)
+		val allCheckpoints = checkpointMap.values
 
 		val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.endDate.isBefore(DateTime.now.toLocalDate))
 		val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
@@ -382,10 +381,6 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			total.academicYear = academicYear
 			total
 		}
-	}
-
-	def getCheckpointTotals(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal] = {
-		attendanceMonitoringDao.getCheckpointTotals(students, department, academicYear)
 	}
 
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {

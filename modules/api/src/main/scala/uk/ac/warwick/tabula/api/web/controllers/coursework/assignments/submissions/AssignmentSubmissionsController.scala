@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.SubmissionToJsonConverter
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 

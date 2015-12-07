@@ -56,7 +56,8 @@ abstract class Features {
 	@Value("${features.privacyStatement:true}") var privacyStatement = defaults.privacyStatement
 	@Value("${features.collectMarks:true}") var collectMarks = defaults.collectMarks
 	@Value("${features.turnitin:true}") var turnitin = defaults.turnitin
-	@Value("${features.turnitinLTI:false}") var turnitinLTI = defaults.turnitinLTI
+	@Value("${features.turnitinSubmissions:true}") var turnitinSubmissions = defaults.turnitinSubmissions
+	@Value("${features.turnitinLTI:true}") var turnitinLTI = defaults.turnitinLTI
 	@Value("${features.assignmentMembership:true}") var assignmentMembership = defaults.assignmentMembership
 	@Value("${features.extensions:true}") var extensions = defaults.extensions
 	@Value("${features.feedbackTemplates:true}") var feedbackTemplates = defaults.feedbackTemplates
@@ -133,7 +134,6 @@ abstract class Features {
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
-	@Value("${features.celcatTimetablesEngineering:true}") var celcatTimetablesEngineering = defaults.celcatTimetablesEngineering
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -184,7 +184,8 @@ class FeaturesMessage {
 	@BeanProperty var privacyStatement = true
 	@BeanProperty var collectMarks = true
 	@BeanProperty var turnitin = true
-	@BeanProperty var turnitinLTI = false
+	@BeanProperty var turnitinSubmissions = true
+	@BeanProperty var turnitinLTI = true
 	@BeanProperty var assignmentMembership = true
 	@BeanProperty var extensions = true
 	@BeanProperty var feedbackTemplates = true
@@ -215,7 +216,6 @@ class FeaturesMessage {
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
-	@BeanProperty var celcatTimetablesEngineering = true
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true

@@ -28,7 +28,7 @@ class MonitoringPoint extends CommonMonitoringPointProperties with MonitoringPoi
 	}
 
 	def isStartDateInFuture: Boolean = {
-		val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(new DateTime(), termService).startYear
+		val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now())(termService).startYear
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
 
 		currentAcademicYear < pointSet.academicYear.startYear ||
@@ -83,7 +83,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	var assignmentService = Wire[AssessmentService]
 
 	@transient
-	var termService = Wire[TermService]
+	implicit var termService = Wire[TermService]
 
 	override def postLoad() {
 		ensureSettings

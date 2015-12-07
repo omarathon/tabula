@@ -72,11 +72,11 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 
 		And("the first should be the lecture")
 		val lecture = events.head
-		lecture("title") should be("CS132 Lecture (L5)")
+		lecture("title") should be("CS132 Computer Organisation & Architecture Lecture (L5)")
 
 		And("the second should be the small group event")
 		val smallGroup = events.last
-		smallGroup("title") should be("XXX654 Tutorial (Test Place)")
+		smallGroup("title") should be(s"XXX654 $TEST_MODULE_NAME Tutorial (Test Place)")
 	}
 	"A tutor" should "be able to request their tutees timetable" in {
 		Given("Marker 1 is tutor to Student 1")
@@ -88,7 +88,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		Then("Marker 1 should be able to view Student 1's timetable")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker1))
 		// we should be able to find the event we just created
-		events.find(e=>e("title") == "CS132 Lecture (L5)") should be ('defined)
+		events.find(e=>e("title") == "CS132 Computer Organisation & Architecture Lecture (L5)") should be ('defined)
 	}
 
 	"A user" should "not be able to view another users timetable without permission" in {

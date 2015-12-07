@@ -17,7 +17,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro search><@_u page="/search" /></#macro>
 <#macro profile profile><@_u page="/view/${profile.universityId}"/></#macro>
 <#macro profile_by_id student><@_u page="/view/${student}"/></#macro>
-<#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg"/><#else><@_u resource="/static/images/no-photo.jpg" /></#if></#macro>
+<#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
 <#macro filter_students department><@_u page="/department/${department.code}/students" /></#macro>
@@ -85,7 +85,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro timetable profile><@_u page="/timetable/${profile.universityId}"/></#macro>
 <#macro timetable_ical profile webcal=true><#compress>
-	<#local https_url><@_u page="/timetable/ical/${profile.timetableHash}.ics" /></#local>
+	<#local https_url><@_u context="/api/v1" page="/timetable/calendar/${profile.timetableHash}.ics" /></#local>
 	<#if webcal>
 		${https_url?replace('https','webcal')}
 	<#else>

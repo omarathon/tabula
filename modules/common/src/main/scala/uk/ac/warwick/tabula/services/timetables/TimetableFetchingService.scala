@@ -1,30 +1,32 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.util.Try
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait PartialTimetableFetchingService
 
 trait StudentTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStudent(universityId: String): Try[Seq[TimetableEvent]]
+	def getTimetableForStudent(universityId: String): Future[Seq[TimetableEvent]]
 }
 
 trait ModuleTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForModule(moduleCode: String): Try[Seq[TimetableEvent]]
+	def getTimetableForModule(moduleCode: String): Future[Seq[TimetableEvent]]
 }
 
 trait CourseTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForCourse(courseCode: String): Try[Seq[TimetableEvent]]
+	def getTimetableForCourse(courseCode: String): Future[Seq[TimetableEvent]]
 }
 
 trait RoomTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForRoom(roomName: String): Try[Seq[TimetableEvent]]
+	def getTimetableForRoom(roomName: String): Future[Seq[TimetableEvent]]
 }
 
 trait StaffTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStaff(universityId: String): Try[Seq[TimetableEvent]]
+	def getTimetableForStaff(universityId: String): Future[Seq[TimetableEvent]]
 }
 
 trait CompleteTimetableFetchingService
@@ -76,59 +78,78 @@ trait CombinedHttpTimetableFetchingServiceComponent extends CompleteTimetableFet
 
 }
 
-class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService {
+class CombinedTimetableFetchingService(services: PartialTimetableFetchingService*) extends CompleteTimetableFetchingService with Logging {
 
 	def mergeDuplicates(events: Seq[TimetableEvent]): Seq[TimetableEvent] = {
 		// If an event runs on the same day, between the same times, in the same weeks, of the same type, on the same module, it is the same
 		events.groupBy { event => (event.year, event.day, event.startTime, event.endTime, event.weekRanges, event.eventType, event.parent.shortName) }
 			.mapValues {
 				case event :: Nil => event
-				case events => {
-					val event = events.head
+				case groupedEvents =>
+					val event = groupedEvents.head
 					TimetableEvent(
 						event.uid,
-						events.flatMap { _.name.maybeText }.headOption.getOrElse(""),
-						events.flatMap { _.title.maybeText }.headOption.getOrElse(""),
-						events.flatMap { _.description.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.name.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.title.maybeText }.headOption.getOrElse(""),
+						groupedEvents.flatMap { _.description.maybeText }.headOption.getOrElse(""),
 						event.eventType,
 						event.weekRanges,
 						event.day,
 						event.startTime,
 						event.endTime,
-						events.flatMap { _.location }.headOption,
+						groupedEvents.flatMap { _.location }.headOption,
 						event.parent,
-						events.flatMap { _.comments }.headOption,
-						events.flatMap { _.staffUniversityIds }.distinct,
-						events.flatMap { _.studentUniversityIds }.distinct,
+						groupedEvents.flatMap { _.comments }.headOption,
+						groupedEvents.flatMap { _.staff }.distinct,
+						groupedEvents.flatMap { _.students }.distinct,
 						event.year
 					)
-				}
 			}
 			.values.toSeq
 	}
 
 	def getTimetableForStudent(universityId: String) =
-		Try(services.collect { case service: StudentTimetableFetchingService => service }.flatMap {
-			_.getTimetableForStudent(universityId).get
-		}).map(mergeDuplicates)
+		Futures.flatten(services
+			.collect { case service: StudentTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForStudent(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
+			}
+		).map(mergeDuplicates)
 
 	def getTimetableForModule(moduleCode: String) =
-		Try(services.collect { case service: ModuleTimetableFetchingService => service }.flatMap {
-			_.getTimetableForModule(moduleCode).get
-		}).map(mergeDuplicates)
+		Futures.flatten(services
+			.collect { case service: ModuleTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForModule(moduleCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
+			}
+		).map(mergeDuplicates)
 
 	def getTimetableForCourse(courseCode: String) =
-		Try(services.collect { case service: CourseTimetableFetchingService => service }.flatMap {
-			_.getTimetableForCourse(courseCode).get
-		}).map(mergeDuplicates)
+		Futures.flatten(services
+			.collect { case service: CourseTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForCourse(courseCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
+			}
+		).map(mergeDuplicates)
 
 	def getTimetableForStaff(universityId: String) =
-		Try(services.collect { case service: StaffTimetableFetchingService => service }.flatMap {
-			_.getTimetableForStaff(universityId).get
-		}).map(mergeDuplicates)
+		Futures.flatten(services
+			.collect { case service: StaffTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForStaff(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
+			}
+		).map(mergeDuplicates)
 
 	def getTimetableForRoom(roomName: String) =
-		Try(services.collect { case service: RoomTimetableFetchingService => service }.flatMap {
-			_.getTimetableForRoom(roomName).get
-		}).map(mergeDuplicates)
+		Futures.flatten(services
+			.collect { case service: RoomTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForRoom(roomName).recover { case t => logger.warn("Error fetching timetable", t); Nil }
+			}
+		).map(mergeDuplicates)
 }

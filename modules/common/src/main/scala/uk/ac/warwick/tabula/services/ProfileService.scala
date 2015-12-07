@@ -24,7 +24,7 @@ trait ProfileService {
 	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
@@ -91,8 +91,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.getAllWithUniversityIdsStaleOrFresh(universityIds)
 	}
 
-	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
-		memberDao.getAllByUserId(userId, disableFilter, eagerLoad)
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = transactional(readOnly = true) {
+		memberDao.getAllByUserId(userId, disableFilter, eagerLoad, activeOnly)
 	}
 
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {

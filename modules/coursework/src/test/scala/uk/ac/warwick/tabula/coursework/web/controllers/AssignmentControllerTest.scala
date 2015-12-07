@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.coursework.commands.assignments._
+import uk.ac.warwick.tabula.commands.coursework.assignments._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.coursework.commands.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommandInternal}
+import uk.ac.warwick.tabula.commands.coursework.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommandInternal}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.coursework.commands.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
 
 class AssignmentControllerTest extends TestBase with Mockito {
 
@@ -20,7 +20,7 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val controller = new AssignmentController with TestControllerOverrides
 		val assignment = newDeepAssignment("CS101")
 		val module = assignment.module
-		val form = new SubmitAssignmentCommand(module, assignment, currentUser)
+		val form = SubmitAssignmentCommand.self(module, assignment, currentUser)
 		val errors = new BindException(form, "command")
 
 		val feedbackService = smartMock[FeedbackService]

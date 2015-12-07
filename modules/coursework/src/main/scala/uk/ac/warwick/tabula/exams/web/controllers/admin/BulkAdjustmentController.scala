@@ -6,9 +6,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.feedback.GenerateGradesFromMarkCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.data.model.{Mark, Module, Exam}
-import uk.ac.warwick.tabula.exams.commands.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
+import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentTemplateCommand, BulkAdjustmentCommand}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers

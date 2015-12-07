@@ -887,7 +887,7 @@
 			</#local>
 
 			<td>
-				<i class="use-popover fa fa-fw ${class}" data-content="${renderedTitle}" data-html="true"></i>
+				<i class="use-popover fa fa-fw ${class}" data-content="${renderedTitle?replace('\"', '')}" data-html="true"></i>
 			</td>
 		</#list>
 		<td>
@@ -1400,6 +1400,44 @@
 		Running: <#compress>
 			<#if event.weekRanges?size gt 0 && event.day??>
 				${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.department)}
+			<#elseif event.weekRanges?size gt 0>
+				[no day of week selected]
+			<#else>
+				[no dates selected]
+			</#if>
+		</#compress>
+	</div>
+</#compress></#macro>
+
+<#macro timetableEventDetails event academicYear department><#compress>
+	<#if (event.name)?has_content>
+		<div class="title">
+			${event.name}
+		</div>
+	</#if>
+	<div class="day-time">
+		${(event.day.name)!""}
+		<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if>
+		-
+		<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
+	</div>
+	<#if event.staff?size gt 0>
+		<div class="tutors">
+			Tutor<#if event.staff?size gt 1>s</#if>:
+			<#list event.staff as user>
+				${user.fullName}<#if user_has_next>,</#if>
+			</#list>
+		</div>
+	</#if>
+	<#if ((event.location.name)!"")?has_content>
+		<div class="location">
+			Room: <@fmt.location event.location />
+		</div>
+	</#if>
+	<div class="running">
+		Running: <#compress>
+			<#if event.weekRanges?size gt 0 && event.day??>
+				${weekRangesFormatter(event.weekRanges, event.day, academicYear, department)}
 			<#elseif event.weekRanges?size gt 0>
 				[no day of week selected]
 			<#else>

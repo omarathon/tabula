@@ -1,41 +1,3 @@
-<#macro eventDetails event><#compress>
-<div class="day-time">
-${(event.day.name)!""}
-	<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if>
-	-
-	<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>
-</div>
-	<#if event.staffUniversityIds?size gt 0>
-	Tutor<#if event.staffUniversityIds?size gt 1>s</#if>:
-		<@userlookup ids=event.staffUniversityIds lookupByUniversityId=true>
-			<#list returned_users?keys?sort as id> <#compress> <#-- intentional space -->
-				<#local returned_user=returned_users[id] />
-				<#if returned_user.foundUser>
-				${returned_user.fullName}<#if id_has_next>,</#if>
-				<#else>
-				${id}<#if id_has_next>,</#if>
-				</#if>
-			</#compress></#list>
-		</@userlookup>
-	</#if>
-	<#if ((event.location.name)!"")?has_content>
-	<div class="location">
-		Room: <@fmt.location event.location />
-	</div>
-	</#if>
-<div class="running">
-	Running: <#compress>
-	<#if event.weekRanges?size gt 0 && event.day??>
-	${weekRangesFormatter(event.weekRanges, event.day, smallGroupSet.academicYear, module.adminDepartment)}
-	<#elseif event.weekRanges?size gt 0>
-		[no day of week selected]
-	<#else>
-		[no dates selected]
-	</#if>
-</#compress>
-</div>
-</#compress></#macro>
-
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
@@ -70,7 +32,7 @@ ${(event.day.name)!""}
 								<@f.radiobutton path="index" value=timetableEvent_index cssClass="radio inline" />
 							</div>
 							<div style="margin-left: 20px;">
-								<@eventDetails timetableEvent />
+								<@components.timetableEventDetails timetableEvent smallGroupSet.academicYear, module.adminDepartment />
 							</div>
 						</td>
 					</tr>

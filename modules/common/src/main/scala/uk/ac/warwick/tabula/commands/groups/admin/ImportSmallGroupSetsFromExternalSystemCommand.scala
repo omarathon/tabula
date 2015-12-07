@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent, FoundUser}
+import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.services._
@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, Perm
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 import ImportSmallGroupSetsFromExternalSystemCommand._
 
@@ -83,14 +85,13 @@ trait LookupEventsFromModuleTimetables {
 	lazy val timetabledEvents =
 		modules.toSeq
 			.flatMap { module =>
-			val events =
-				timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-					.filter { event => event.year == academicYear }
-					.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
-					.groupBy { _.eventType }
+				val allEvents =
+					Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+						.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
+						.groupBy { _.eventType }
 
-			events.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sorted) }
-		}.sortBy { e => (e.module.code, e.eventType.code) }
+				allEvents.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sorted) }
+			}.sortBy { e => (e.module.code, e.eventType.code) }
 
 }
 
@@ -126,7 +127,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 		// For each combination of module & event type, create a small group set with a group for each event
 		timetabledEvents.zipWithIndex
 			.filter { case (_, i) => selected.get(i) }
-			.map { case (TimetabledSmallGroupEvent(module, eventType, events), i) =>
+			.map { case (TimetabledSmallGroupEvent(module, eventType, events), _) =>
 				val (name, format) = generateSmallGroupSetNameAndFormat(module, eventType)
 
 				val set = createSet(module, format, name)
@@ -134,17 +135,15 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 				events.zipWithIndex.foreach { case (e, i) =>
 					val group = new SmallGroup(set)
 					group.name = s"Group ${i + 1}"
-					group.students.knownType.includedUserIds = e.studentUniversityIds
+					e.students.foreach(group.students.add)
 
 					smallGroupService.saveOrUpdate(group)
 
 					set.groups.add(group)
 
-					val tutorUsercodes = e.staffUniversityIds.flatMap { id =>
-						Option(userLookup.getUserByWarwickUniId(id)).collect { case FoundUser(u) => u }.map { _.getUserId }
-					}
+					val tutorUsercodes = e.staff.map { _.getUserId }
 
-					createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, tutorUsercodes)
+					createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 				}
 
 				smallGroupService.saveOrUpdate(set)
@@ -171,11 +170,11 @@ trait CommandSmallGroupSetGenerator extends SmallGroupSetGenerator {
 }
 
 trait SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]): SmallGroupEvent
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent
 }
 
 trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
-	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+	def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 		val command = ModifySmallGroupEventCommand.create(module, set, group)
 		command.weekRanges = weeks
 		command.day = day
@@ -189,6 +188,7 @@ trait CommandSmallGroupEventGenerator extends SmallGroupEventGenerator {
 				command.locationId = locationId
 		}
 
+		command.title = title
 		command.tutors.addAll(tutorUsercodes.asJavaCollection)
 
 		command.apply()
@@ -207,7 +207,7 @@ trait ImportSmallGroupSetsFromExternalSystemPermissions extends RequiresPermissi
 			val managedModules = modulesWithPermission.toList
 
 			// This is implied by the above, but it's nice to check anyway. Avoid exception if there are no managed modules
-			if (!managedModules.isEmpty) p.PermissionCheckAll(RequiredPermission, managedModules)
+			if (managedModules.nonEmpty) p.PermissionCheckAll(RequiredPermission, managedModules)
 			else p.PermissionCheck(RequiredPermission, department)
 		}
 	}

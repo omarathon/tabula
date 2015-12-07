@@ -11,7 +11,7 @@ trait AssignmentToJsonConverter {
 	def jsonAssignmentObject(assignment: Assignment): Map[String, Any] = {
 		val basicInfo = Map(
 			"id" -> assignment.id,
-			"archived" -> assignment.archived,
+			"archived" -> !assignment.isAlive, // TODO don't like this inferred value but don't want to change API spec
 			"academicYear" -> assignment.academicYear.toString,
 			"name" -> assignment.name,
 			"studentUrl" -> (toplevelUrl + Routes.coursework.assignment(assignment)),
@@ -39,6 +39,7 @@ trait AssignmentToJsonConverter {
 					"allowExtensions" -> assignment.allowExtensions,
 					"fileAttachmentLimit" -> assignment.attachmentLimit,
 					"fileAttachmentTypes" -> assignment.fileExtensions,
+					"individualFileSizeLimit" -> assignment.attachmentField.map { _.individualFileSizeLimit }.orNull,
 					"submissionFormText" -> assignment.commentField.map { _.value }.getOrElse(""),
 					"wordCountMin" -> assignment.wordCountField.map { _.min }.orNull,
 					"wordCountMax" -> assignment.wordCountField.map { _.max }.orNull,

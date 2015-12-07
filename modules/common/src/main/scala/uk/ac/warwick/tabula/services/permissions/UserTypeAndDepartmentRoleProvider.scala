@@ -21,17 +21,21 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
 
 	private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
-		val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
+		if (member.inUseFlag == "Active" || member.inUseFlag.startsWith("Inactive - Starts ")) {
+			val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
 
-		memberRole #:: (member.userType match {
-			case Staff => member.affiliatedDepartments.map { department =>
-				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
-			}
-			case Emeritus => member.affiliatedDepartments.map { department =>
-				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
-			}
-			case _ => Stream.empty
-		})
+			memberRole #:: (member.userType match {
+				case Staff => member.affiliatedDepartments.map { department =>
+					customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
+				}
+				case Emeritus => member.affiliatedDepartments.map { department =>
+					customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
+				}
+				case _ => Stream.empty
+			})
+		} else {
+			Stream(customRoleFor(Option(member.homeDepartment))(PreviousUniversityMemberRoleDefinition, member).getOrElse(PreviousUniversityMemberRole(member)))
+		}
 	}
 
 	/**
@@ -52,7 +56,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 
 	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for UserTypeAndDepartmentRoleProvider") {
 		if (user.realUser.isLoggedIn) {
-			val members = profileService.getAllMembersWithUserId(user.apparentId, disableFilter = true)
+			val members = profileService.getAllMembersWithUserId(user.apparentId, disableFilter = true, activeOnly = false)
 
 			if (members.nonEmpty) getRolesForMembers(members) :+ LoggedInRole(user.apparentUser)
 			else getRolesForSSO(user) :+ LoggedInRole(user.apparentUser)

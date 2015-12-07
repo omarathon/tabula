@@ -1,142 +1,33 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import net.fortuna.ical4j.model.Calendar
-import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.model.property._
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
-import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.helpers.Tap._
-import uk.ac.warwick.tabula.profiles.commands.{PersonalTimetableCommandState, PublicStaffPersonalTimetableCommand, PublicStudentPersonalTimetableCommand, ViewStaffPersonalTimetableCommand, ViewStudentPersonalTimetableCommand}
-import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
-import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringProfileServiceComponent, AutowiringRelationshipServiceComponent, AutowiringSecurityServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
-import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, ItemNotFoundException}
+import org.springframework.web.bind.annotation._
+import org.springframework.web.servlet.view.RedirectView
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-
-abstract class AbstractTimetableController extends ProfilesController with AutowiringProfileServiceComponent {
-
-	type TimetableCommand = Appliable[Seq[EventOccurrence]] with PersonalTimetableCommandState
-
-	// re-use the event source, so it can cache lookups between requests
-	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).studentTimetableEventSource
-
-	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-		).staffTimetableEventSource
-
-	val scheduledMeetingEventSource: ScheduledMeetingEventSource = (new MeetingRecordServiceScheduledMeetingEventSourceComponent
-		with AutowiringRelationshipServiceComponent
-		with AutowiringMeetingRecordServiceComponent
-		with AutowiringSecurityServiceComponent
-		).scheduledMeetingEventSource
-
-	protected def commandForMember(whoFor: Member): TimetableCommand = whoFor match {
-		case student: StudentMember => ViewStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, user)
-		case staff: StaffMember => ViewStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, user)
-		case _ =>
-			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${whoFor.universityId}, ${whoFor.userType})")
-			throw new ItemNotFoundException
-	}
-
-	protected def commandForTimetableHash(timetableHash: String): TimetableCommand = {
-		// Use a mocked up CurrentUser, as the actual current user is probably not logged in
-		def currentUser(m: Member) =
-			new CurrentUser(
-				realUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
-				apparentUser = m.asSsoUser.tap { _.setIsLoggedIn(true) },
-				profile = Some(m),
-				sysadmin = false,
-				masquerader = false,
-				god = false
-			)
-
-		profileService.getMemberByTimetableHash(timetableHash).map {
-			case student: StudentMember => PublicStudentPersonalTimetableCommand(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser(student))
-			case staff: StaffMember => PublicStaffPersonalTimetableCommand(staffTimetableEventSource, scheduledMeetingEventSource, staff, currentUser(staff))
-		}.getOrElse(throw new ItemNotFoundException)
-	}
-
-}
-
-@Controller
-@RequestMapping(value = Array("/timetable/api"))
-class TimetableController extends AbstractTimetableController with AutowiringUserLookupComponent {
-
-	@ModelAttribute("command")
-	def command(@RequestParam(value="whoFor") whoFor: Member) = commandForMember(whoFor)
-
-	@RequestMapping
-	def getEvents(
-		@RequestParam from: Long,
-		@RequestParam to: Long,
-		@ModelAttribute("command") command: TimetableCommand
-	): Mav = {
-		// from and to are seconds since the epoch, because that's what FullCalendar likes to send.
-		// This conversion could move onto the command, if anyone felt strongly that it was a concern of the command
-		// or we could write an EpochSecondsToDateTime 2-way converter.
-		val start = new DateTime(from * 1000).toLocalDate
-		val end = new DateTime(to * 1000).toLocalDate
-		command.from = start
-		command.to = end
-		val timetableEvents = command.apply()
-		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
-		Mav(new JSONView(colourEvents(calendarEvents)))
-	}
-
-	def colourEvents(uncoloured: Seq[FullCalendarEvent]):Seq[FullCalendarEvent] = {
-		val colours = Seq("#239b92","#a3b139","#ec8d22","#ef3e36","#df4094","#4daacc","#167ec2","#f1592a","#818285")
-		// an infinitely repeating stream of colours
-		val colourStream = Stream.continually(colours.toStream).flatten
-		val contexts = uncoloured.map(_.parentShortName).distinct
-		val contextsWithColours = contexts.zip(colourStream)
-		uncoloured.map { event =>
-			if (event.title == "Busy") { // FIXME hack
-				event.copy(backgroundColor = "#bbb", borderColor = "#bbb")
-			} else {
-				val colour = contextsWithColours.find(_._1 == event.parentShortName).get._2
-				event.copy(backgroundColor = colour, borderColor = colour)
-			}
-		}
-	}
-}
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
 class ViewMyTimetableController extends ProfilesController {
 	@RequestMapping def redirect(user: CurrentUser) =
 		user.profile match {
-			case Some(profile) => Redirect(Routes.profile.viewTimetable(profile))
-			case _ => Redirect(Routes.home)
+			case Some(profile) => Redirect(Routes.profiles.profile.viewTimetable(profile))
+			case _ => Redirect(Routes.profiles.home)
 		}
 }
 
 @Controller
 @RequestMapping(value = Array("/timetable/{member}"))
-class TimetableForMemberController extends AbstractTimetableController with AutowiringUserLookupComponent {
+class TimetableForMemberController extends ProfilesController
+	with AutowiringUserLookupComponent
+	with AutowiringProfileServiceComponent {
 
 	@RequestMapping
 	def viewTimetable(
@@ -155,90 +46,64 @@ class TimetableForMemberController extends AbstractTimetableController with Auto
 
 }
 
-abstract class AbstractTimetableICalController
-	extends AbstractTimetableController
-		with AutowiringTermBasedEventOccurrenceServiceComponent
-		with AutowiringTermServiceComponent {
+/*** LEGACY REDIRECTS BELOW ***/
+
+@Controller
+@RequestMapping(value = Array("/timetable/api"))
+class TimetableController extends BaseController {
+
+	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def getIcalFeed(@ModelAttribute("command") command: TimetableCommand): Mav = {
-		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-
-		// Start from either 1 week ago, or the start of the current academic year, whichever is earlier
-		val start = {
-			val startOfYear = termService.getTermFromAcademicWeek(1, year).getStartDate.toLocalDate
-			val oneWeekAgo = DateTime.now.minusWeeks(1).toLocalDate
-
-			if (startOfYear.isBefore(oneWeekAgo)) startOfYear else oneWeekAgo
-		}
-
-		// End either at the end of the current academic year, or in 15 weeks time, whichever is later
-		val end = {
-			val endOfYear = termService.getTermFromAcademicWeek(1, year + 1).getStartDate.toLocalDate
-			val fifteenWeeksTime = DateTime.now.plusWeeks(15).toLocalDate
-
-			if (endOfYear.isAfter(fifteenWeeksTime)) endOfYear else fifteenWeeksTime
-		}
-
-		command.from = start
-		command.to = end
-
-		val timetableEvents = command.apply()
-
-		val cal: Calendar = new Calendar
-		cal.getProperties.add(Version.VERSION_2_0)
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
-		cal.getProperties.add(CalScale.GREGORIAN)
-		cal.getProperties.add(Method.PUBLISH)
-		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
-		cal.getProperties.add(new XProperty("X-WR-CALNAME", s"Tabula timetable - ${command.member.universityId}"))
-
-		for (event <- timetableEvents) {
-			val vEvent: VEvent = eventOccurrenceService.toVEvent(event)
-			cal.getComponents.add(vEvent)
-		}
-
-		// TAB-2722 Empty calendars throw a validation exception
-		// Add Xmas day to get around this
-		if (timetableEvents.isEmpty) {
-			val xmasVEvent = new VEvent(
-				new net.fortuna.ical4j.model.DateTime(new DateTime(DateTime.now.getYear, 12, 25, 0, 0).getMillis),
-				new net.fortuna.ical4j.model.DateTime(new DateTime(DateTime.now.getYear, 12, 25, 0, 0).getMillis),
-				"Christmas day"
-			)
-			xmasVEvent.getProperties.add(new Organizer("MAILTO:no-reply@tabula.warwick.ac.uk"))
-			xmasVEvent.getProperties.add(new Uid("Tabula-Stub-Xmas"))
-			cal.getComponents.add(xmasVEvent)
-		}
-
-		Mav(new IcalView(cal), "filename" -> s"${command.member.universityId}.ics")
+	def redirect(@RequestParam(value="whoFor") whoFor: Member) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendar(whoFor))
+		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
+		r
 	}
 
 }
 
 @Controller
 @RequestMapping(value = Array("/timetable/ical/{timetableHash}.ics"))
-class TimetableICalController extends AbstractTimetableICalController {
+class TimetableICalController extends BaseController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable(value="timetableHash") timetableHash: String) = commandForTimetableHash(timetableHash)
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	@RequestMapping
+	def redirect(@PathVariable timetableHash: String) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)))
+		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
+		r
+	}
 
 }
 
 @Controller
 @RequestMapping(value = Array("/timetable/ical"))
-class LegacyTimetableICalController extends AbstractTimetableICalController {
+class LegacyTimetableICalController extends BaseController {
 
-	@ModelAttribute("command")
-	def command(@RequestParam(value="timetableHash") timetableHash: String) = commandForTimetableHash(timetableHash)
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	@RequestMapping
+	def redirect(@RequestParam("timetableHash") timetableHash: String) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)))
+		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
+		r
+	}
 
 }
 
 @Controller
 @RequestMapping(value = Array("/timetable/{member}/ical", "/timetable/{member}/timetable.ics"))
-class TimetableICalForMemberController extends AbstractTimetableICalController {
+class TimetableICalForMemberController extends BaseController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member) = commandForMember(member)
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	@RequestMapping
+	def redirect(@PathVariable member: Member) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICal(mandatory(member)))
+		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
+		r
+	}
 
 }

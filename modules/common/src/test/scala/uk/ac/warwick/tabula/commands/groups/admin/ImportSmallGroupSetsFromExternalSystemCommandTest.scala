@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Future
 import scala.util.Success
 
 class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mockito {
@@ -50,8 +51,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			set
 		}
 
-		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], tutorUsercodes: Seq[String]) = {
+		def createEvent(module: Module, set: SmallGroupSet, group: SmallGroup, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
 			val event = new SmallGroupEvent(group)
+			event.title = title
 			event.weekRanges = weeks
 			event.day = day
 			event.startTime = startTime
@@ -88,6 +90,38 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 
 		command.securityService.can(currentUser, Permissions.SmallGroups.ImportFromExternalSystem, department) returns true
 
+		val tutor = new User("abcdef")
+		tutor.setFoundUser(true)
+		tutor.setWarwickId("1170047")
+
+		command.userLookup.registerUserObjects(tutor)
+
+		val student1 = new User("student1")
+		student1.setFoundUser(true)
+		student1.setWarwickId("0000001")
+
+		val student2 = new User("student2")
+		student2.setFoundUser(true)
+		student2.setWarwickId("0000002")
+
+		val student3 = new User("student3")
+		student3.setFoundUser(true)
+		student3.setWarwickId("0000003")
+
+		val student4 = new User("student4")
+		student4.setFoundUser(true)
+		student4.setWarwickId("0000004")
+
+		val student5 = new User("student5")
+		student5.setFoundUser(true)
+		student5.setWarwickId("0000005")
+
+		val student6 = new User("student6")
+		student6.setFoundUser(true)
+		student6.setWarwickId("0000006")
+
+		command.userLookup.registerUserObjects(student1, student2, student3, student4, student5, student6)
+
 		val tEventModule1Seminar1 = TimetableEvent(
 			uid="uuid1",
 			name="IN101S",
@@ -101,8 +135,8 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			location=Some(NamedLocation("CS1.04")),
 			parent=TimetableEvent.Parent(Some(module1)),
 			comments=None,
-			staffUniversityIds=Seq("1170047"),
-			studentUniversityIds=Seq("0000001", "0000002", "0000003"),
+			staff=Seq(tutor),
+			students=Seq(student1, student2, student3),
 			year = AcademicYear(2012)
 		)
 		val tEventModule1Seminar2 = TimetableEvent(
@@ -118,12 +152,12 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			location=Some(NamedLocation("CS1.04")),
 			parent=TimetableEvent.Parent(Some(module1)),
 			comments=None,
-			staffUniversityIds=Seq("1170047"),
-			studentUniversityIds=Seq("0000004", "0000005", "0000006"),
+			staff=Seq(tutor),
+			students=Seq(student4, student5, student6),
 			year = AcademicYear(2012)
 		)
 
-		command.timetableFetchingService.getTimetableForModule("IN101") returns Success(Seq(
+		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(Seq(
 			tEventModule1Seminar1, tEventModule1Seminar2,
 			TimetableEvent(
 				uid="uuid3",
@@ -138,12 +172,12 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				location=Some(NamedLocation("L5")),
 				parent=TimetableEvent.Parent(Some(module1)),
 				comments=None,
-				staffUniversityIds=Seq("1170047"),
-				studentUniversityIds=Nil,
+				staff=Seq(tutor),
+				students=Nil,
 				year = AcademicYear(2012)
 			)
 		))
-		command.timetableFetchingService.getTimetableForModule("IN102") returns Success(Seq(
+		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(Seq(
 			TimetableEvent(
 				uid="uuid4",
 				name="IN102S",
@@ -157,16 +191,11 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				location=Some(NamedLocation("CS1.04")),
 				parent=TimetableEvent.Parent(Some(module2)),
 				comments=None,
-				staffUniversityIds=Seq("1170047"),
-				studentUniversityIds=Seq("0000004", "0000005", "0000006"),
+				staff=Seq(tutor),
+				students=Seq(student4, student5, student6),
 				year = AcademicYear(2013)
 			)
 		))
-
-		val tutor = new User("abcdef")
-		tutor.setFoundUser(true)
-		tutor.setWarwickId("1170047")
-		command.userLookup.registerUserObjects(tutor)
 	}
 
 	@Test def init() { new CommandFixture with FixtureWithSingleSeminarForYear {

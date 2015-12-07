@@ -8,14 +8,15 @@ import dispatch.classic.thread.ThreadSafeHttpClient
 import org.apache.commons.io.FilenameUtils.getExtension
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
+import org.apache.http.params.HttpConnectionParams
 import org.apache.http.protocol.HttpContext
 import org.apache.http.{HttpRequest, HttpResponse}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.HttpClientDefaults
 
 case class FileData(file: File, name: String)
 
@@ -23,9 +24,12 @@ object Turnitin {
 	/**
 	 * Quoted supported types are...
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
+	 *
+	 * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
 	 */
-	val validExtensions = Seq("doc", "docx", "pdf", "rtf", "txt", "wpd", "htm", "html", "ps", "odt")
-	val maxFileSize = 20 * 1000 * 1000;  // 20MB
+	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
+	val maxFileSizeInMegabytes = 20
+	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024;  // 20MB
 	
 	def validFileType(file: FileAttachment): Boolean =
 		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
@@ -94,6 +98,8 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
@@ -108,8 +114,6 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	override def afterPropertiesSet {
 
 	}
-
-	def login(user: CurrentUser): Option[Session] = login( user.email, user.firstName, user.lastName )
 
 	def login(email:String, firstName:String, lastName:String): Option[Session] = {
 		val session = new Session(this, null)
@@ -131,4 +135,3 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	}
 
 }
-

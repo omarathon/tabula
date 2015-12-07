@@ -34,7 +34,7 @@
 		<net.databinder.dispatch.version>0.8.10</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>
-		<warwickutils.version>20150910</warwickutils.version>
+		<warwickutils.version>20151203</warwickutils.version>
 		<surefire.version>2.18.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -547,7 +547,7 @@
 					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
-						<jvmArg>-Xmx2048m</jvmArg>
+						<jvmArg>-Xmx4096m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
@@ -930,7 +930,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>

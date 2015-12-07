@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <#if !groupsWidgetUrl?has_content>
 	<#assign groupsWidgetUrl = '/groups/student/${profile.universityId}?academicYear=${studentCourseYearDetails.academicYear.startYear?c}' />
 </#if>
@@ -12,8 +14,9 @@
 					pane.find('.title').html(title);
 					$('a.ajax-modal', '#small-groups').ajaxModalLink();
 				}
-				pane.show();
 			});
 		});
 	</script>
 </section>
+
+</#escape>

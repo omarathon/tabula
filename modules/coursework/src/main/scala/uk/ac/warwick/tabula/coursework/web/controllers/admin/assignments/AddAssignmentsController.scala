@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{AddAssignmentsCommand, AddAssignmentsCommandOnBind, AddAssignmentsValidation, PopulatesAddAssignmentsCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentsCommand, AddAssignmentsCommandOnBind, AddAssignmentsValidation, PopulatesAddAssignmentsCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}

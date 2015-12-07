@@ -101,6 +101,8 @@ abstract class Member
 
 	var missingFromImportSince: DateTime = _
 
+	var lastImportDate: DateTime = _
+
 	def fullName: Option[String] = {
 		(Option(firstName) ++ Option(lastName)).toList match {
 			case Nil => None
@@ -477,7 +479,6 @@ trait MemberProperties extends StringId {
 	@Id var universityId: String = _
 	def id = universityId
 
-	@Column(nullable = false)
 	@Restricted(Array("Profiles.Read.Usercode"))
 	var userId: String = _
 

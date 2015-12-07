@@ -54,7 +54,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 	}
 
-	"Department Admin" should "be able to set a default maximum group size" in {
+	"Department Admin" should "be able to set a maximum group size" in {
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
 
 		When("I log in as admin")
@@ -64,14 +64,11 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			go to groupsetSummaryPage.url
 			val editGroups = groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
-		Then("I should see the options to set a default maximum group size")
-			radioButton("defaultMaxGroupSizeEnabled") should not be null
-			find("defaultMaxGroupSizeeee") should not be null
+		Then("I should see the options to set maximum group size")
 
-		When("I set group size to be limited, select a default value, and click Save")
-				radioButtonGroup("defaultMaxGroupSizeEnabled").value = "true"
-				id("defaultMaxGroupSize").webElement.clear()
-				id("defaultMaxGroupSize").webElement.sendKeys("12")
+		When("I set the first group size to be limited, and click Save")
+				id("1-maxGroupSize").webElement.clear()
+				id("1-maxGroupSize").webElement.sendKeys("12")
 				editGroups.submitAndExit()
 
 		Then("The page is the groupset summary page")
@@ -80,16 +77,12 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I navigate to the edit groups page again")
 		  groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
-		Then("Group size should still be limited")
-			radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("true")
-
-		And("The default value should be enabled and should have been saved")
-			id("defaultMaxGroupSize").webElement.isEnabled should be {true}
-			id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
+		And("The first group value should have been saved")
+			id("1-maxGroupSize").webElement.getAttribute("value") should be ("12")
 
 		When("I set group size to be unlimited")
-			radioButtonGroup("defaultMaxGroupSizeEnabled").value = "false"
-			editGroups.submitAndExit()
+		id("1-maxGroupSize").webElement.clear()
+		editGroups.submitAndExit()
 
 		Then("The page is the groupset summary page")
 			groupsetSummaryPage should be('currentPage)
@@ -97,12 +90,8 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		When("I navigate to the edit groups page again")
 			groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups
 
-		Then("Group size should be unlimited")
-		radioButtonGroup("defaultMaxGroupSizeEnabled").value should be("false")
-
-		And("The default value should remain the same but the field disabled")
-			id("defaultMaxGroupSize").webElement.isEnabled should be {false}
-			id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
+		And("The group value should be unlimited")
+			id("1-maxGroupSize").webElement.getAttribute("value") should be ("")
 
 	}
 

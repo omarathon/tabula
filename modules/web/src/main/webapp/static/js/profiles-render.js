@@ -353,15 +353,18 @@
 				setTimeout(function() {
 					if (!complete) $container.fadeTo('fast', 0.3);
 				}, 300);
-				$.ajax({url:'/profiles/timetable/api',
+				var startToSend = new Date(start.getTime());
+				startToSend.setDate(startToSend.getDate() - 1);
+				var endToSend = new Date(end.getTime());
+				endToSend.setDate(endToSend.getDate() + 1);
+				$.ajax({url:'/api/v1/member/' + studentId + '/timetable/calendar',
 					// make the from/to params compatible with what FullCalendar sends if you just specify a URL
 					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
 					data:{
-						'from':start.getTime()/1000,
-						'to':end.getTime()/1000,
-						'whoFor':studentId
+						'from':startToSend.getTime()/1000,
+						'to':endToSend.getTime()/1000
 					},
-					success:function(data){
+					success: function(data) {
 						//
 						// TODO
 						//
@@ -370,11 +373,25 @@
 						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
 						//
 						// TAB-3008 - Change times to Europe/London
-						$.each(data, function(i, event){
+						$.each(data.events, function(i, event){
 							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 							event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
 						});
-						callback(data);
+
+						$container.find('> .alert-error').remove();
+						callback(data.events);
+					},
+					error: function (jqXHR) {
+						try {
+							var data = $.parseJSON(jqXHR.responseText);
+
+							var errors = $.map(data.errors, function (error) { return error.message; });
+
+							$container.find('> .alert-error').remove();
+							$container.prepend(
+								$('<div />').addClass('alert').addClass('alert-error').text(errors.join(', '))
+							);
+						} catch (e) {}
 					},
 					complete: function() {
 						complete = true;
@@ -459,8 +476,8 @@
 						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
 					}
 
-					if (event.description && event.description.length > 0) {
-						content = content + "<tr><th>What</th><td>" + event.description + "</td></tr>";
+					if (event.name && event.name.length > 0) {
+						content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
 					}
 
 					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";

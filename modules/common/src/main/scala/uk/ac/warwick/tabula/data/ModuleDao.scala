@@ -40,9 +40,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 
 	def getAllByCodes(codes: Seq[String]): Seq[Module] = {
-		session.newCriteria[Module]
-			.add(safeIn("code", codes))
-			.seq
+		safeInSeq(() => { session.newCriteria[Module] }, "code", codes)
 	}
 
 	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String) =

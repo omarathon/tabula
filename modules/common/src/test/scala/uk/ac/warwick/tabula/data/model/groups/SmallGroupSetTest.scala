@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.groups
 import org.hibernate.{Session, SessionFactory}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Module, UpstreamAssessmentGroup, UserGroup}
-import uk.ac.warwick.tabula.helpers.Tap
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -46,7 +45,6 @@ class SmallGroupSetTest extends TestBase with Mockito {
     source.permissionsService = mock[PermissionsService]
     source.releasedToStudents = true
     source.releasedToTutors = true
-    source.defaultMaxGroupSize = 22
     val cloneModule = new Module
     val assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()
 
@@ -72,8 +70,6 @@ class SmallGroupSetTest extends TestBase with Mockito {
     clone.permissionsService should be(source.permissionsService)
     clone.releasedToStudents should be(source.releasedToStudents)
     clone.releasedToTutors should be (source.releasedToTutors)
-    clone.defaultMaxGroupSize should be (source.defaultMaxGroupSize)
-    clone.defaultMaxGroupSizeEnabled should be (source.defaultMaxGroupSizeEnabled)
   }
 
 	@Test
@@ -89,16 +85,12 @@ class SmallGroupSetTest extends TestBase with Mockito {
 	def duplicateCreatesNewSettingsMap(){
 		val source = new SmallGroupSet
 		source.studentsCanSeeOtherMembers = true
-		source.defaultMaxGroupSize = 3
 		source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
 		source.defaultTutors.asInstanceOf[UserGroup].sessionFactory = sessionFactory
 		val clone = source.duplicateTo(transient = true)
 		clone.studentsCanSeeOtherMembers should be {true}
-		clone.defaultMaxGroupSize should be (3)
 		source.studentsCanSeeOtherMembers = false
-		source.defaultMaxGroupSize = 5
 		clone.studentsCanSeeOtherMembers should be {true}
-		clone.defaultMaxGroupSize should be (3)
 	}
 
 	@Test
@@ -115,22 +107,6 @@ class SmallGroupSetTest extends TestBase with Mockito {
 		set.studentsCanSeeOtherMembers should be {false}
 		set.studentsCanSeeOtherMembers  = true
 		set.studentsCanSeeOtherMembers should be {true}
-	}
-
-	@Test
-	def canGetAndSetDefaultMaxSize(){
-		val set = new SmallGroupSet()
-		set.defaultMaxGroupSize should be (SmallGroup.DefaultGroupSize)
-		set.defaultMaxGroupSize  = 7
-		set.defaultMaxGroupSize should be (7)
-	}
-
-	@Test
-	def canGetAndSetDefaultMaxSizeEnabled(){
-		val set = new SmallGroupSet()
-		set.defaultMaxGroupSizeEnabled should be {false}
-		set.defaultMaxGroupSizeEnabled  = true
-		set.defaultMaxGroupSizeEnabled should be {true}
 	}
 
 	@Test

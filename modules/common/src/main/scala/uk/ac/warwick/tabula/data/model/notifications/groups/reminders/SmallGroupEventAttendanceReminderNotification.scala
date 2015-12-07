@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.WholeWeekFormatter
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, ModuleAndDepartmentService}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -27,6 +27,8 @@ class SmallGroupEventAttendanceReminderNotification
 	override def urlTitle = "record attendance for these seminars"
 
 	override def url = Routes.tutor.registerForWeek(event, item.entity.week)
+
+	@transient implicit var termService = Wire[TermService]
 
 	@transient
 	final lazy val event = item.entity.event
@@ -70,7 +72,7 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def allRecipients: Seq[User] = {
 		val attendanceIds = item.entity.attendance.asScala.map(_.universityId)
-		if (!event.group.groupSet.collectAttendance || event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
+		if (!event.group.groupSet.collectAttendance || event.group.groupSet.archived || event.group.students.isEmpty || event.group.students.users.map(_.getWarwickId).forall(attendanceIds.contains)) {
 			Seq()
 		} else {
 			var users: Seq[User] = Seq()

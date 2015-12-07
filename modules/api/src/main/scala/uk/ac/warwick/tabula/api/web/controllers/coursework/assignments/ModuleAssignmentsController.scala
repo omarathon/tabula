@@ -10,15 +10,15 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
-import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
-import uk.ac.warwick.tabula.coursework.commands.assignments.{ModifyAssignmentCommand, AddAssignmentCommand}
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.{DateFormats, AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, ViewViewableCommand}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, AssignmentToJsonConverter}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentCommand, ModifyAssignmentCommand}
+import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
@@ -58,10 +58,8 @@ trait ListAssignmentsForModuleApi {
 	}
 }
 
-
-
 trait CreateAssignmentApi {
-	self: ApiController =>
+	self: ApiController with AssignmentToJsonConverter =>
 
 	@ModelAttribute("createCommand")
 	def command(@PathVariable module: Module): AddAssignmentCommand =
@@ -87,7 +85,12 @@ trait CreateAssignmentApi {
 
 			response.setStatus(HttpStatus.CREATED.value())
 			response.addHeader("Location", toplevelUrl + Routes.api.assignment(assignment))
-			null
+
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok",
+				"assignment" -> jsonAssignmentObject(assignment)
+			)))
 		}
 	}
 }
@@ -105,11 +108,17 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 	@BeanProperty var upstreamGroups: JList[UpstreamGroup] = null
 	@BeanProperty var fileAttachmentLimit: JInteger = null
 	@BeanProperty var fileAttachmentTypes: JList[String] = null
+	@BeanProperty var individualFileSizeLimit: JInteger = null
 	@BeanProperty var minWordCount: JInteger = null
 	@BeanProperty var maxWordCount: JInteger = null
 	@BeanProperty var wordCountConventions: String = null
 
 	override def copyTo(state: A, errors: Errors) {
+		if (Option(openDate).isEmpty && Option(closeDate).nonEmpty) {
+			if (openEnded) openDate = DateTime.now
+			else openDate = closeDate.minusWeeks(2)
+		}
+
 		Option(name).foreach { state.name = _ }
 		Option(openDate).foreach { state.openDate = _ }
 		Option(closeDate).foreach { state.closeDate = _ }
@@ -120,6 +129,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(upstreamGroups).foreach { state.upstreamGroups = _ }
 		Option(fileAttachmentLimit).foreach { state.fileAttachmentLimit = _ }
 		Option(fileAttachmentTypes).foreach { state.fileAttachmentTypes = _ }
+		Option(individualFileSizeLimit).foreach { state.individualFileSizeLimit = _ }
 		Option(minWordCount).foreach { state.wordCountMin = _ }
 		Option(maxWordCount).foreach { state.wordCountMax = _ }
 		Option(wordCountConventions).foreach { state.wordCountConventions = _ }
@@ -136,6 +146,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }
 		Option(automaticallyReleaseToMarkers).foreach { state.automaticallyReleaseToMarkers = _ }
 		Option(automaticallySubmitToTurnitin).foreach { state.automaticallySubmitToTurnitin = _ }
+		Option(hiddenFromStudents).foreach { state.hiddenFromStudents = _ }
 	}
 
 }

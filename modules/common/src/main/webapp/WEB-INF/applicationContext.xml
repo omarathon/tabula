@@ -161,6 +161,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplateIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetFilterConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.JobInstanceIdConverter"/>
 	</util:list>
 
 	<bean id="typeConverter"
@@ -232,6 +233,7 @@
 
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
 		p:order="1"
+	    p:contentNegotiationManager-ref="contentNegotiationManager"
 		p:useSuffixPatternMatch="false" /><!-- so that {pathvariables} match extensions at end of url -->
 
 	<bean id="webBindingInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer"
@@ -254,7 +256,12 @@
 			</list>
 		</property>
 		<property name="customConverters" ref="customConverters" />
+		<property name="contentNegotiationManager" ref="contentNegotiationManager" />
 	</bean>
+
+	<bean id="defaultContentNegotiationManager" abstract="true" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean" />
+
+	<import resource="content-negotiation-context.xml" />
 
 	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
 
@@ -415,7 +422,7 @@
 
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
 

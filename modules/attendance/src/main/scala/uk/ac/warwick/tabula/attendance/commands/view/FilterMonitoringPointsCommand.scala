@@ -95,9 +95,6 @@ trait FilterMonitoringPointsCommandState extends AttendanceFilterExtras {
 
 	final val MaxStudentsFromFilter = 600
 
-	def department: Department
-	def academicYear: AcademicYear
-
 	val defaultOrder = Seq(asc("lastName"), asc("firstName"))
 	var sortOrder: JList[Order] = null // No sorting in this command
 

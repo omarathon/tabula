@@ -43,7 +43,7 @@ class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with Fu
 		notification.title should be ("CS118 seminars attendance needs recording for Tuesday, Term 1, week 1")
 
 		department.weekNumberingSystem = WeekRange.NumberingSystem.Academic
-		notification.title should be ("CS118 seminars attendance needs recording for Tuesday, Week 1")
+		notification.title should be ("CS118 seminars attendance needs recording for Tuesday, Term 1, week 1")
 
 		department.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
 		notification.title should be ("CS118 seminars attendance needs recording for Tuesday, Term 1, week 1")

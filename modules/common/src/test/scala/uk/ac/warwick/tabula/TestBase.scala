@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
 import org.scalatest.Matchers
+import org.scalatest.concurrent.ScalaFutures
 
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
@@ -45,12 +46,12 @@ import uk.ac.warwick.tabula.data.Transactions
   *
   * Also a bunch of methods for generating fake support resources.
   */
-abstract class TestBase extends JUnitSuite with Matchers with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
+abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with AssertionsForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
 
-	// No test should take longer than a minute
-	val minuteTimeout = new Timeout(60000, TimeUnit.MILLISECONDS)
+	// No test should take longer than 2 minutes
+	val minuteTimeout = new Timeout(2, TimeUnit.MINUTES)
 	@Rule def timeoutRule = minuteTimeout
 
 	@After
@@ -188,7 +189,7 @@ trait TestHelpers extends TestFixtures {
 	  *
 	  * withUser("cusebr") { /* ... your code */  }
 	  */
-	def withUser(code: String, universityId: String = null)(fn: => Unit) {
+	def withUser(code: String, universityId: String = null, profile: Option[Member] = None)(fn: => Unit) {
 		val user = if (code == null) {
 			new AnonymousUser()
 		} else {
@@ -199,7 +200,7 @@ trait TestHelpers extends TestFixtures {
 			u
 		}
 
-		withCurrentUser(new CurrentUser(user, user))(fn)
+		withCurrentUser(new CurrentUser(user, user, profile))(fn)
 	}
 
 	def withCurrentUser(user: CurrentUser)(fn: => Unit) {

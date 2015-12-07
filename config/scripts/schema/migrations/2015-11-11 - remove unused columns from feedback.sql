@@ -1,0 +1,3 @@
+-- TAB-3408
+alter table FEEDBACK set unused (ADJUSTEDMARK, ADJUSTEDGRADE, ADJUSTMENTREASON, ADJUSTMENTCOMMENTS);
+alter table FEEDBACK drop unused columns;

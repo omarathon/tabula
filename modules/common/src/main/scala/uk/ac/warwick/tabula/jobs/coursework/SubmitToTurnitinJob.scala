@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -40,7 +41,8 @@ abstract class DescribableJob(instance: JobInstance) extends Describable[Nothing
  */
 @Component
 class SubmitToTurnitinJob extends Job
-	with HasTurnitinApi with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering {
+	with HasTurnitinApi with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering
+	with AutowiringFeaturesComponent {
 
 	val identifier = SubmitToTurnitinJob.identifier
 
@@ -53,8 +55,10 @@ class SubmitToTurnitinJob extends Job
 	var sendNotifications = true
 
 	def run(implicit job: JobInstance) = {
-		transactional() {
-			new Runner(job).run()
+		if (features.turnitinSubmissions) {
+			transactional() {
+				new Runner(job).run()
+			}
 		}
 	}
 
@@ -73,7 +77,7 @@ class SubmitToTurnitinJob extends Job
 		val className = classNameFor(assignment)
 		val assignmentName = assignmentNameFor(assignment)
 
-		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
+		lazy val session = api.login(job.user.email, job.user.firstName, job.user.lastName).getOrElse(throw loginFailure)
 
 		// Get existing submissions.
 		debug(s"Checking for existing submissions in ${classId.value}, ${assignmentId.value}")

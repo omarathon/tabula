@@ -47,7 +47,7 @@
 	<ul class="profile-user-list">
 	<#list students as student>
 	<#-- If the current user is a member no need to show them their own photo -->
-	<#if student.universityId != userUniId>
+	<#if student.universityId != userUniId!"">
 		<li>
 			<div class="profile clearfix">
 				<#if student.isMember()>

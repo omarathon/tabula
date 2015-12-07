@@ -6,7 +6,7 @@ import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
-import org.joda.time.{LocalDate, DateTimeConstants, DateMidnight, Interval, DateTime}
+import org.joda.time.{LocalDate, DateTimeConstants, Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
@@ -113,7 +113,7 @@ class TermServiceImpl extends TermService {
 	}
 
 	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term = {
-		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val approxStartDate = new LocalDate(academicYear.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 		val day = DayOfWeek.Thursday
 		val weeksForYear = getAcademicWeeksForYear(approxStartDate).toMap
 		if (includeVacations)
@@ -150,9 +150,9 @@ case class Vacation(before: Term, after: Term) extends Term {
 }
 
 trait TermServiceComponent {
-	def termService: TermService
+	implicit def termService: TermService
 }
 
 trait AutowiringTermServiceComponent extends TermServiceComponent {
-	var termService = Wire[TermService]
+	override implicit val termService: TermService = Wire[TermService]
 }

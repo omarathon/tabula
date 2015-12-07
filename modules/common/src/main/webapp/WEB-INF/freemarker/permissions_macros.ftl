@@ -36,7 +36,7 @@
 	</#if>
 </#macro>
 
-<#macro roleTable permsUrl cssClass scope roleDefinition roleNamePlural>
+<#macro roleTable permsUrl cssClass scope roleDefinition roleName>
 	<@manageRole scope=scope roleName=roleDefinition>
 		<div class="permission-list ${cssClass}">
 			<div class="row">
@@ -51,7 +51,7 @@
 									<button class="btn btn-default" type="submit"><i class="icon-plus fa fa-plus"></i></button>
 								<#else>
 									<#local popoverText>
-										<p>You can't add new ${roleNamePlural} because you don't have permission to:</p>
+										<p>You can't add a new ${roleName} because you don't have permission to:</p>
 										<ul>
 											<#list denied_permissions as perm>
 												<li>${perm.description}</li>
@@ -82,7 +82,7 @@
 									</form>
 								<#else>
 									<#local popoverText>
-										<p>You can't remove ${roleNamePlural} because you don't have permission to:</p>
+										<p>You can't remove a ${roleName} because you don't have permission to:</p>
 										<ul>
 											<#list denied_permissions as perm>
 												<li>${perm.description}</li>
@@ -102,7 +102,7 @@
 				</#list>
 			<#else>
 				<div class="row"><div class="col-md-12">
-					There are no ${roleNamePlural} yet.
+					There is no ${roleName} yet.
 				</div></div>
 			</#if>
 		</div>

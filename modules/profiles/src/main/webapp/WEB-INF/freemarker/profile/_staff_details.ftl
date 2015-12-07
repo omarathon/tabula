@@ -1,3 +1,5 @@
+<#escape x as x?html>
+
 <script>
 	var weeks = ${weekRangesDumper()}
 </script>
@@ -15,7 +17,7 @@
 
 		<#-- The url for staff only shows groups for current user - if staff profiles become viewable by more people this needs to change -->
 		<#if isSelf && (smallGroups?size > 0)>
-			<li id="sg-pane" style="display:none;" data-title="Groups">
+			<li id="sg-pane" data-title="Groups">
 				<#assign groupsWidgetUrl = '/groups/tutor/' />
 				<#include "_small_groups.ftl" />
 			</li>
@@ -52,3 +54,5 @@
 	</ol>
 
 </div>
+
+</#escape>

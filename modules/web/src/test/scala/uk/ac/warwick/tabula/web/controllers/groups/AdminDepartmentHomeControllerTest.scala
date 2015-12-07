@@ -17,9 +17,10 @@ import scala.collection.immutable.ListMap
 class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 
 	def createController = {
-		val controller = new GroupsAdminDepartmentController()
+		val controller = new GroupsAdminDepartmentController() {
+			override val termService = mock[TermService]
+		}
 		controller.securityService = smartMock[SecurityService]
-		controller.termService = smartMock[TermService]
 		controller.features = emptyFeatures
 		when(controller.securityService.can(any[CurrentUser], any[Permission], any[PermissionsTarget])).thenReturn{true}
 		when(controller.termService.getAcademicWeeksForYear(any[BaseDateTime])).thenReturn(Nil)
