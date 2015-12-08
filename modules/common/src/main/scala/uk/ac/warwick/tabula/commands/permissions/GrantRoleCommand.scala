@@ -58,7 +58,7 @@ class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) 
 }
 
 trait GrantRoleCommandValidation extends SelfValidating {
-	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent with UserLookupComponent =>
 
 	def validate(errors: Errors) {
 		if (usercodes.asScala.forall { _.isEmptyOrWhitespace }) {
@@ -67,6 +67,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
 			val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
 				override def alreadyHasCode = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
 			}
+			usercodeValidator.userLookup = userLookup
 
 			usercodeValidator.validate(errors)
 		}
