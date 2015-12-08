@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
@@ -408,21 +409,43 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringPoints
 	}
 
+	private def getApplicableStudentsForPoints(points: Seq[AttendanceMonitoringPoint], academicYear: AcademicYear): Map[AttendanceMonitoringPoint, Seq[AttendanceMonitoringStudentData]] = {
+		if (points.isEmpty) {
+			Map()
+		} else {
+			// Fetch student details for every student linked to one of the related points
+			val allStudents: Map[UniversityId, AttendanceMonitoringStudentData] =
+				attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(
+					points.flatMap { _.scheme.members.members }.distinct,
+					academicYear
+				).map { data => data.universityId -> data }.toMap
+
+			// Map schemes to student lists
+			val studentsForScheme: Map[AttendanceMonitoringScheme, Seq[AttendanceMonitoringStudentData]] =
+				points.map { _.scheme }.distinct.map { scheme =>
+					scheme -> scheme.members.members.map(allStudents.apply)
+				}.toMap
+
+			points.map { point =>
+				val students = studentsForScheme(point.scheme)
+
+				point -> students.filter { student => point.applies(student.scdBeginDate, student.scdEndDate) }
+			}.toMap
+		}
+	}
+
 	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] = {
 		val relevantPoints = attendanceMonitoringDao.findRelevantPoints(department, academicYear, endDate)
 
 		if (relevantPoints.isEmpty) {
 			Seq()
 		} else {
+			val applicableStudents = getApplicableStudentsForPoints(relevantPoints, academicYear)
 			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = attendanceMonitoringDao.countCheckpointsForPoints(relevantPoints)
 
 			relevantPoints.filter { point =>
 				// every student that should have a checkpoint for this point
-				val students =
-					attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
-						.count { student =>
-							point.applies(student.scdBeginDate, student.scdEndDate)
-						}
+				val students = applicableStudents(point).size
 
 				checkpointCounts(point) < students
 			}
@@ -435,18 +458,17 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		if (relevantPoints.isEmpty) {
 			Seq()
 		} else {
+			val applicableStudents = getApplicableStudentsForPoints(relevantPoints, academicYear)
 			val checkpointsByPoint = attendanceMonitoringDao.getAllCheckpoints(relevantPoints)
 
 			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
 				// every student that should have a checkpoint for this point
-				val students = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
+				val students = applicableStudents(point)
 
 				// filter to users that don't have a checkpoint for this point
-				students.filter(student =>
+				students.filter { student =>
 					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
-				).filter(student =>
-					point.applies(student.scdBeginDate, student.scdEndDate)
-				)
+				}
 			}).distinct
 		}
 	}
