@@ -408,11 +408,48 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringPoints
 	}
 
-	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] =
-		attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, endDate)
+	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] = {
+		val relevantPoints = attendanceMonitoringDao.findRelevantPoints(department, academicYear, endDate)
 
-	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] =
-		attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, endDate)
+		if (relevantPoints.isEmpty) {
+			Seq()
+		} else {
+			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = attendanceMonitoringDao.countCheckpointsForPoints(relevantPoints)
+
+			relevantPoints.filter { point =>
+				// every student that should have a checkpoint for this point
+				val students =
+					attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
+						.count { student =>
+							point.applies(student.scdBeginDate, student.scdEndDate)
+						}
+
+				checkpointCounts(point) < students
+			}
+		}
+	}
+
+	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] = {
+		val relevantPoints = attendanceMonitoringDao.findRelevantPoints(department, academicYear, endDate)
+
+		if (relevantPoints.isEmpty) {
+			Seq()
+		} else {
+			val checkpointsByPoint = attendanceMonitoringDao.getAllCheckpoints(relevantPoints)
+
+			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
+				// every student that should have a checkpoint for this point
+				val students = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
+
+				// filter to users that don't have a checkpoint for this point
+				students.filter(student =>
+					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
+				).filter(student =>
+					point.applies(student.scdBeginDate, student.scdEndDate)
+				)
+			}).distinct
+		}
+	}
 
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]] =
 		attendanceMonitoringDao.findSchemesLinkedToSITSByDepartment(academicYear)
