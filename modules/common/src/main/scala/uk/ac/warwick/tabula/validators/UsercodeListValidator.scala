@@ -36,5 +36,5 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String) {
 	// can override for custom check for pre-existing usercode.
 	def alreadyHasCode = false
 
-	private def usercodesEmpty = usercodes.find { _.hasText }.isEmpty
+	private def usercodesEmpty = !usercodes.exists(_.hasText)
 }

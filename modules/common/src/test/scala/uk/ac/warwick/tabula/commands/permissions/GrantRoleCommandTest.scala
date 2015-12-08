@@ -36,14 +36,14 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
 	}
 
-	@Test def itWorksForNewRole { new Fixture {
+	@Test def itWorksForNewRole() { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		command.userLookup.registerUsers("cuscav", "cusebr")
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
+		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
 
 		val grantedRole = command.applyInternal()
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
@@ -58,7 +58,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 
-	@Test def itWorksWithExisting { new Fixture {
+	@Test def itWorksWithExisting() { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -68,10 +68,10 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val existing = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns Some(existing)
 
 		val grantedRole = command.applyInternal()
-		(grantedRole.eq(existing)) should be (true)
+		grantedRole.eq(existing) should be (true)
 
 		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
 		grantedRole.users.size should be (3)
@@ -85,12 +85,13 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 
-	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {
+	@Test def validatePasses() { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
+		command.userLookup.registerUsers("cuscav", "cusebr")
 
-		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (None)
+		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns None
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
@@ -99,10 +100,10 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}}}
 
-	@Test def noUsercodes { withUser("cuscav", "0672089") { new Fixture {
+	@Test def noUsercodes() { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
+		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
@@ -114,7 +115,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
 
-	@Test def duplicateUsercode { withUser("cuscav", "0672089") { new Fixture {
+	@Test def duplicateUsercode() { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = singlePermissionsRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -123,7 +124,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 
-		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns (Some(existing))
+		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns Some(existing)
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
 		val errors = new BindException(command, "command")
@@ -135,11 +136,12 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCode should be ("userId.duplicate")
 	}}}
 
-	@Test def noPermission { withUser("cuscav", "0672089") { new Fixture {
+	@Test def noPermission() { withUser("cuscav", "0672089") { new Fixture {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
+		command.userLookup.registerUsers("cuscav", "cusebr")
 
-		command.permissionsService.getGrantedRole(department, null) returns (None)
+		command.permissionsService.getGrantedRole(department, null) returns None
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -150,12 +152,13 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCode should be ("NotEmpty")
 	}}}
 
-	@Test def cantGiveWhatYouDontHave { withUser("cuscav", "0672089") { new Fixture {
+	@Test def cantGiveWhatYouDontHave() { withUser("cuscav", "0672089") { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
+		command.userLookup.registerUsers("cuscav", "cusebr")
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
+		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
 		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns false
 
 		val errors = new BindException(command, "command")
@@ -168,7 +171,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 	}}}
 
 	@Test
-	def describe {
+	def describe() {
 		val dept = Fixtures.department("in")
 		dept.id = "dept-id"
 
@@ -193,7 +196,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		))
 	}
 
-	@Test def gluesEverythingTogether {
+	@Test def gluesEverythingTogether() {
 		val department = Fixtures.department("in")
 		val command = GrantRoleCommand(department)
 
