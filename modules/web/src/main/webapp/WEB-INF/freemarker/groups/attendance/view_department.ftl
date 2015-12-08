@@ -28,7 +28,7 @@
 	<#macro deptheaderroutemacro dept>
 		<@routes.groups.departmentAttendance dept adminCommand.academicYear />
 	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes/>
+	<#assign deptheaderroute = deptheaderroutemacro in routes.groups />
 	<@fmt.deptheader "Attendance" "for" department routes.groups "deptheaderroute" "with-settings" />
 
 	<#if !modules?has_content>
