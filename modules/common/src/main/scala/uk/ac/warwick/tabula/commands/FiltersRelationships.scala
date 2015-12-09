@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands
 
 import org.hibernate.criterion.{Restrictions, Projections, DetachedCriteria}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{Daoisms, AliasAndJoinType, ScalaRestriction}
+import uk.ac.warwick.tabula.data.{HibernateHelpers, AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.data.model._
 
@@ -61,6 +61,6 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
 	protected override def latestYearDetailsForYear(year: AcademicYear): DetachedCriteria =
 		DetachedCriteria.forClass(classOf[StudentCourseYearDetails], "latestSCYD")
 			.setProjection(Projections.max("latestSCYD.sceSequenceNumber"))
-			.add(Daoisms.is("latestSCYD.academicYear", year))
+			.add(HibernateHelpers.is("latestSCYD.academicYear", year))
 			.add(Restrictions.eqProperty("latestSCYD.studentCourseDetails.scjCode", "this.scjCode"))
 }

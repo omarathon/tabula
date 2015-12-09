@@ -4,7 +4,7 @@ import org.hibernate.NullPrecedence
 import org.hibernate.criterion.DetachedCriteria
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.data.{AliasAndJoinType, Daoisms, ScalaOrder, ScalaRestriction}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
@@ -99,8 +99,8 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
 	def latestStudentCourseYearDetailsForYearRestrictions(year: AcademicYear): Seq[ScalaRestriction] = {
 		// We need to restrict the studentCourseYearDetails to the latest one by year
 		Seq(
-			new ScalaRestriction(Daoisms.isSubquery("studentCourseYearDetails.sceSequenceNumber", latestYearDetailsForYear(year))),
-			new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", year))
+			new ScalaRestriction(HibernateHelpers.isSubquery("studentCourseYearDetails.sceSequenceNumber", latestYearDetailsForYear(year))),
+			new ScalaRestriction(HibernateHelpers.is("studentCourseYearDetails.academicYear", year))
 		)
 	}
 

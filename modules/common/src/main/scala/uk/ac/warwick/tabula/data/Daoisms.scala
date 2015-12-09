@@ -91,9 +91,9 @@ trait HibernateHelpers {
 		}.orNull
 }
 
-object HibernateHelpers extends HibernateHelpers
+object HibernateHelpers extends HibernateHelpers with HelperRestrictions
 
-object Daoisms extends HelperRestrictions {
+object Daoisms {
 	/**
 	 * Adds a method to Session which returns a wrapped Criteria or Query that works
 	 * better with Scala's generics support.
