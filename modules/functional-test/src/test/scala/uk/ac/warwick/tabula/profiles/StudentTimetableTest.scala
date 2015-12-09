@@ -67,8 +67,6 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		When("I request the lecture API for the whole year, as that student")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1)
 
-		println(events)
-
 		Then("I should get two events back")
 		events.size should be(2)
 
