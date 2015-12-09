@@ -8,7 +8,7 @@ var BrowserDetect = {
 		this.resolution = screen.width + "x" + screen.height;
 	},
 	findIP: function(callback) {
-		jQuery.getJSON("https://jsonip.appspot.com?callback=?", function(data){
+		jQuery.getJSON("https://api.ipify.org?format=jsonp&callback=?", function(data){
 			callback(data.ip);
 		})
 	},
