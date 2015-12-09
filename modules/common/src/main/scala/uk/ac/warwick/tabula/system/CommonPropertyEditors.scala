@@ -17,7 +17,6 @@ class CommonPropertyEditors extends PropertyEditorRegistrar {
 
 	override def registerCustomEditors(registry: PropertyEditorRegistry) {
 		registry.register[String](new TrimmedStringPropertyEditor)
-		registry.register[String](new StringEscapePropertyEditor)
 	}
 
 }

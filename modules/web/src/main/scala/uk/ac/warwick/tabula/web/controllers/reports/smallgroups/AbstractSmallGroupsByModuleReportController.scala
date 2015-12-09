@@ -2,22 +2,22 @@ package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
 
-import org.apache.commons.lang3.StringEscapeUtils
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.{JsonHelper, AcademicYear}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.reports.ReportsController
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 abstract class AbstractSmallGroupsByModuleReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
@@ -129,7 +129,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	}
 
 	private def getProcessorResult(processor: SmallGroupsByModuleReportProcessor, data: String): SmallGroupsByModuleReportProcessorResult = {
-		val request = JsonHelper.fromJson[SmallGroupsByModuleReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		val request = JsonHelper.fromJson[SmallGroupsByModuleReportRequest](data)
 		request.copyTo(processor)
 		processor.apply()
 	}

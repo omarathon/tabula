@@ -58,19 +58,18 @@ class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) 
 }
 
 trait GrantRoleCommandValidation extends SelfValidating {
-	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent with UserLookupComponent =>
 
 	def validate(errors: Errors) {
 		if (usercodes.asScala.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
 		} else {
-			grantedRole.map { _.users }.foreach { users =>
-				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode = usercodes.asScala.exists { users.knownType.includesUserId }
-				}
-
-				usercodeValidator.validate(errors)
+			val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+				override def alreadyHasCode = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
 			}
+			usercodeValidator.userLookup = userLookup
+
+			usercodeValidator.validate(errors)
 		}
 
 		// Ensure that the current user can delegate everything that they're trying to grant permissions for

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.reports.smallgroups
 
 import java.io.StringWriter
 
-import org.apache.commons.lang3.StringEscapeUtils
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
@@ -143,7 +142,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 	}
 
 	private def getProcessorResult(processor: SmallGroupsReportProcessor, data: String): SmallGroupsReportProcessorResult = {
-		val request = JsonHelper.fromJson[SmallGroupsReportRequest](StringEscapeUtils.unescapeHtml4(data))
+		val request = JsonHelper.fromJson[SmallGroupsReportRequest](data)
 		request.copyTo(processor)
 		processor.apply()
 	}

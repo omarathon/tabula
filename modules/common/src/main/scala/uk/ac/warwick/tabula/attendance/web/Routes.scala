@@ -121,7 +121,7 @@ object Routes {
 		def points(department: Department, academicYear: AcademicYear) =
 			context + "/view/%s/%s/points" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def pointsUnrecorded(department: Department, academicYear: AcademicYear) =
-			context + "/view/%s/%s/points?otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
+			context + "/view/%s/%s/points?hasBeenFiltered=true&otherCriteria=Unrecorded" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def agents(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType) =
 			context + "/view/%s/%s/agents/%s" format(
 				encoded(department.code),

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.{Fixtures, TestBase}
+
+import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
+import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeConstants
@@ -7,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, TextField, Extension}
 
 // scalastyle:off magic.number
-class AssignmentTest extends TestBase {
+class AssignmentTest extends TestBase with Mockito {
 	@Test def academicYear() {
 
 		withFakeTime(dateTime(2011,NOVEMBER)) {
@@ -321,4 +323,63 @@ class AssignmentTest extends TestBase {
 		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 23, 0, 0, 0) // Monday 11pm
 		assignment.workingDaysLate(submission) should be (2)
 	}
+
+	@Test def hasOutstandingFeedback(): Unit = {
+		val assignment = new Assignment
+		assignment.dissertation = false
+		assignment.openDate = new DateTime(2015, DateTimeConstants.APRIL, 1, 12, 0, 0, 0)
+		assignment.closeDate = assignment.openDate.plusWeeks(2)
+
+		assignment.submissionService = smartMock[SubmissionService]
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.extensionService = smartMock[ExtensionService]
+
+		assignment.extensionService.hasExtensions(assignment) returns false
+
+		assignment.submissionService.getSubmissionsByAssignment(assignment) returns (Nil)
+
+		assignment.hasOutstandingFeedback should be (false)
+
+		reset(assignment.submissionService)
+
+		val submission1 = new Submission
+		submission1.universityId = "0000001"
+		submission1.assignment = assignment
+
+		val submission2 = new Submission
+		submission2.universityId = "0000002"
+		submission2.assignment = assignment
+
+		assignment.submissionService.getSubmissionsByAssignment(assignment) returns Seq(submission1, submission2)
+		assignment.openEnded = true // so submissions don't need a feedback deadline
+
+		assignment.hasOutstandingFeedback should be (false)
+
+		assignment.openEnded = false
+
+		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000001") returns None
+		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000002") returns None
+
+		assignment.hasOutstandingFeedback should be (true)
+
+		reset(assignment.feedbackService)
+
+		// Publish feedback for student 1, add feedback for student 2 but don't publish it
+		val feedback1 = new AssignmentFeedback
+		feedback1.released = true
+
+		val feedback2 = new AssignmentFeedback
+		feedback2.released = false
+
+		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000001") returns Some(feedback1)
+		assignment.feedbackService.getAssignmentFeedbackByUniId(assignment, "0000002") returns Some(feedback2)
+
+		assignment.hasOutstandingFeedback should be (true)
+
+		// Once feedback2 is released, there's no longer outstanding feedback
+		feedback2.released = true
+
+		assignment.hasOutstandingFeedback should be (false)
+	}
+
 }

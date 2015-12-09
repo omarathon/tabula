@@ -260,7 +260,9 @@
 				container.append(
 					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-exclamation-triangle fa-fw late').prop('title', 'Unrecorded'))
 				).append(
-					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').prop('title', 'Missed events'))
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times fa-fw unauthorised').prop('title', 'Missed (unauthorised) events'))
+				).append(
+					$('<th/>').addClass('sortable').append($('<i/>').addClass('fa fa-times-circle-o fa-fw authorised').prop('title', 'Missed (authorised) events'))
 				);
 				return container;
 			};
@@ -279,7 +281,7 @@
 						}).html(student.universityId)
 					)
 				);
-				var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0;
+				var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0, authorisedCount = 0;
 				$.each(window.ReportBuilder.reportData.events, function(i, event){
 					if (attendance[event.id] == undefined) {
 						container.append($('<td/>').append($('<i/>').addClass('fa fa-fw')));
@@ -288,6 +290,7 @@
 							container.append($('<td/>').append($('<i/>').addClass('fa fa-fw fa-ok attended')));
 						} else if (attendance[event.id] === 'authorised') {
 							container.append($('<td/>').append($('<i/>').addClass('fa fa-fw fa-times-circle-o authorised')));
+							authorisedCount++;
 						} else if (attendance[event.id] === 'unauthorised') {
 							container.append($('<td/>').append($('<i/>').addClass('fa fa-fw fa-times unauthorised')));
 							missedCount++;
@@ -306,6 +309,10 @@
 				).append(
 					$('<td/>').addClass('missed').append(
 						$('<span/>').addClass('badge progress-bar-' + ((missedCount > 2) ? 'danger' : ((missedCount > 0) ? 'warning' : 'success'))).html(missedCount)
+					)
+				).append(
+					$('<td/>').addClass('authorised').append(
+						$('<span/>').addClass('badge badge-' + ((authorisedCount > 2) ? 'important' : ((authorisedCount > 0) ? 'warning' : 'success'))).html(authorisedCount)
 					)
 				);
 				return container;

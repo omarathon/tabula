@@ -82,13 +82,15 @@ class SubmitToTurnitinLtiJob extends Job
 			val failedUploads = submitPapers(assignmentWithTurnitinId, uploadsTotal)
 
 			updateStatus("Getting similarity reports from Turnitin")
-			val (originalityReports, noResults) = retrieveResults(uploadsTotal)
+			val (originalityReports, noResults) = retrieveResults(uploadsTotal, failedUploads.keys.toSeq)
 
 			if (sendNotifications) {
 				debug("Sending an email to " + job.user.email)
 				val notification = Notification.init(new TurnitinJobSuccessNotification, job.user.apparentUser, originalityReports, assignment)
 				// there shouldn't be dupes, but if there are, the first, failed upload, error message is more useful
-				notification.failedUploads.value = noResults ++ failedUploads
+				notification.failedUploads.value = noResults ++ failedUploads.map { case(fileAttachment, reason) =>
+						fileAttachment.name -> reason
+				}
 				pushNotification(job, notification)
 			}
 			transactional() {
@@ -116,9 +118,9 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
-		private def submitPapers(assignment: Assignment, uploadsTotal: Int): Map[String, String] = {
+		private def submitPapers(assignment: Assignment, uploadsTotal: Int): Map[FileAttachment, String] = {
 
-			var failedUploads = Map[String, String]()
+			var failedUploads = Map[FileAttachment, String]()
 			var uploadsDone: Int = 0
 
 			assignment.submissions.asScala.foreach(submission => {
@@ -130,7 +132,7 @@ class SubmitToTurnitinLtiJob extends Job
 							submitSinglePaper(assignment, attachmentAccessUrl, submission, attachment, WaitingRequestsToTurnitinSubmitPaperRetries)
 						}
 							if (!submitPaper.success) {
-								failedUploads += (attachment.name -> submitPaper.statusMessage.getOrElse("failed upload"))
+								failedUploads += (attachment -> submitPaper.statusMessage.getOrElse("failed upload"))
 							}
 					}
 					uploadsDone += 1
@@ -182,12 +184,12 @@ class SubmitToTurnitinLtiJob extends Job
 			}
 		}
 
-		def retrieveResults(uploadsTotal: Int): (Seq[OriginalityReport], Map[String, String]) = {
+		def retrieveResults(uploadsTotal: Int, notSubmitted: Seq[FileAttachment]): (Seq[OriginalityReport], Map[String, String]) = {
 			var resultsReceived = 0
 			val originalityReports = Seq()
 			var failedResults = Map[String, String]()
 			assignment.submissions.asScala.foreach(submission => {
-				submission.allAttachments.filter(TurnitinLtiService.validFile).foreach(attachment => {
+				submission.allAttachments.filter(TurnitinLtiService.validFile) diff notSubmitted foreach(attachment => {
 					val originalityReport = transactional(readOnly = true) {
 						originalityReportService.getOriginalityReportByFileId(attachment.id)
 					}
