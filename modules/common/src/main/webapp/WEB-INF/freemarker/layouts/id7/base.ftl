@@ -36,7 +36,7 @@
 		</#if>
 		<#if (user.masquerading)!false>
 			<div id="masquerade-notice" class="sysadmin-only-content">
-				Masquerading as <strong>${user.apparentUser.fullName}</strong>. <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
+				Masquerading as <strong>${user.apparentUser.fullName}</strong> (${user.apparentUser.userId}<#if user.apparentUser.warwickId?has_content>, ${user.apparentUser.warwickId}</#if>). <a href="<@url page="/masquerade?returnTo=${info.requestedUri}" context="/admin"/>">Change</a>
 			</div>
 		</#if>
 		<#if isProxying!false && proxyingAs??>
