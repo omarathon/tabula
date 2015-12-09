@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
+import javax.servlet.http.HttpServletRequest
+
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
@@ -55,8 +57,8 @@ class TimetableController extends BaseController {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def redirect(@RequestParam(value="whoFor") whoFor: Member) = {
-		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendar(whoFor))
+	def redirect(@RequestParam(value="whoFor") whoFor: Member, request: HttpServletRequest) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendar(whoFor) + request.getQueryString.maybeText.map("?" + _).getOrElse(""))
 		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
 		r
 	}
@@ -70,8 +72,8 @@ class TimetableICalController extends BaseController {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def redirect(@PathVariable timetableHash: String) = {
-		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)))
+	def redirect(@PathVariable timetableHash: String, request: HttpServletRequest) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)) + request.getQueryString.maybeText.map("?" + _).getOrElse(""))
 		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
 		r
 	}
@@ -85,8 +87,8 @@ class LegacyTimetableICalController extends BaseController {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def redirect(@RequestParam("timetableHash") timetableHash: String) = {
-		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)))
+	def redirect(@RequestParam("timetableHash") timetableHash: String, request: HttpServletRequest) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICalForHash(mandatory(timetableHash)) + request.getQueryString.maybeText.map("?" + _).getOrElse(""))
 		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
 		r
 	}
@@ -100,8 +102,8 @@ class TimetableICalForMemberController extends BaseController {
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
 	@RequestMapping
-	def redirect(@PathVariable member: Member) = {
-		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICal(mandatory(member)))
+	def redirect(@PathVariable member: Member, request: HttpServletRequest) = {
+		val r = new RedirectView(toplevelUrl + Routes.api.timetables.calendarICal(mandatory(member)) + request.getQueryString.maybeText.map("?" + _).getOrElse(""))
 		r.setStatusCode(HttpStatus.MOVED_PERMANENTLY)
 		r
 	}
