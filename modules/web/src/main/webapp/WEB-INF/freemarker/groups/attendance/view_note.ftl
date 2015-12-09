@@ -13,10 +13,11 @@
 				<#else>
 					Not recorded:
 				</#if>
+				<#if attendanceNote.occurrence.event.title?has_content>${attendanceNote.occurrence.event.title},</#if>
 				${attendanceNote.occurrence.event.group.groupSet.name},
 				${attendanceNote.occurrence.event.group.name},
 				${attendanceNote.occurrence.event.day.name} <@fmt.time attendanceNote.occurrence.event.startTime /> - <@fmt.time attendanceNote.occurrence.event.endTime />,
-					Week ${attendanceNote.occurrence.week}
+				<@fmt.singleWeekFormat week=attendanceNote.occurrence.week academicYear=attendanceNote.occurrence.event.group.groupSet.academicYear dept=attendanceNote.occurrence.event.group.groupSet.module.adminDepartment />
 			</p>
 
 

@@ -12,10 +12,11 @@
 <div class="alert alert-info">
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
     Attendance at
+		<#if updatedOccurrence.event.title?has_content>${updatedOccurrence.event.title},</#if>
 		${updatedOccurrence.event.group.groupSet.name},
 		${updatedOccurrence.event.group.name}:
 		${updatedOccurrence.event.day.name} <@fmt.time updatedOccurrence.event.startTime /> - <@fmt.time updatedOccurrence.event.endTime />
-		in <strong>Week ${updatedOccurrence.week}</strong> has been recorded.
+		in <strong><@fmt.singleWeekFormat week=updatedOccurrence.week academicYear=updatedOccurrence.event.group.groupSet.academicYear dept=updatedOccurrence.event.group.groupSet.module.adminDepartment /></strong> has been recorded.
 </div>
 </#if>
 

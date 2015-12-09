@@ -38,6 +38,7 @@
 		<div class="deptheader">
 			<h1>Record attendance</h1>
 			<h4 class="with-related"><span class="muted">for</span>
+				<#if command.event.title?has_content>${command.event.title},</#if>
 				${command.event.group.groupSet.module.code?upper_case} ${command.event.group.groupSet.nameWithoutModulePrefix},
 				${command.event.group.name}</h4>
 		</div>
@@ -96,7 +97,7 @@
 		</div>
 
 		<h6>
-			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
+			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, <@fmt.singleWeekFormat week=command.week academicYear=command.event.group.groupSet.academicYear dept=command.event.group.groupSet.module.adminDepartment />
 			<#if command.event.tutors.users?has_content>
 				<br /><@fmt.p number=command.event.tutors.users?size singular="Tutor" shownumber=false/>: <#list command.event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
 			</#if>
@@ -199,8 +200,9 @@
 
 								<#if linked_info.replacesAttendance??>
 									<p>Attending instead of
+									<#if linked_info.replacesAttendance.occurrence.event.title?has_content>${linked_info.replacesAttendance.occurrence.event.title},</#if>
 									${linked_info.replacesAttendance.occurrence.event.group.groupSet.name}, ${linked_info.replacesAttendance.occurrence.event.group.name}:
-									${linked_info.replacesAttendance.occurrence.event.day.name} <@fmt.time linked_info.replacesAttendance.occurrence.event.startTime /> - <@fmt.time linked_info.replacesAttendance.occurrence.event.endTime />, Week ${linked_info.replacesAttendance.occurrence.week}.
+									${linked_info.replacesAttendance.occurrence.event.day.name} <@fmt.time linked_info.replacesAttendance.occurrence.event.startTime /> - <@fmt.time linked_info.replacesAttendance.occurrence.event.endTime />, <@fmt.singleWeekFormat week=linked_info.replacesAttendance.occurrence.week academicYear=linked_info.replacesAttendance.occurrence.event.group.groupSet.academicYear dept=linked_info.replacesAttendance.occurrence.event.group.groupSet.module.adminDepartment />.
 									</p>
 								</#if>
 
@@ -216,8 +218,10 @@
 							<#list linked_info.replacedBy as replaced_by>
 								<i class="icon-link use-tooltip" data-container="body" title="<#compress>
 								Replaced by attendance at
+								<#if replaced_by.occurrence.event.title?has_content>${replaced_by.occurrence.event.title},</#if>
 								${replaced_by.occurrence.event.group.groupSet.name}, ${replaced_by.occurrence.event.group.name}:
-								${replaced_by.occurrence.event.day.name} <@fmt.time replaced_by.occurrence.event.startTime /> - <@fmt.time replaced_by.occurrence.event.endTime />, Week ${replaced_by.occurrence.week}.
+								${replaced_by.occurrence.event.day.name} <@fmt.time replaced_by.occurrence.event.startTime /> - <@fmt.time replaced_by.occurrence.event.endTime />,
+								<@fmt.singleWeekFormat week=replaced_by.occurrence.week academicYear=replaced_by.occurrence.event.group.groupSet.academicYear dept=replaced_by.occurrence.event.group.groupSet.module.adminDepartment />.
 							</#compress>"></i>
 							</#list>
 						</#if>
