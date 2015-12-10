@@ -76,10 +76,9 @@ trait OpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] 
 }
 
 trait OpenAndCloseDepartmentsCommandState {
-
 	self: TermServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+	lazy val currentAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 	lazy val previousAcademicYear = currentAcademicYear.previous
 
 	lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments

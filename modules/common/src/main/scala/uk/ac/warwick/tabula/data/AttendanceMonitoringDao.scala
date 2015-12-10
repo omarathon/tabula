@@ -89,10 +89,12 @@ trait AttendanceMonitoringDao {
 		types: Seq[MonitoringPointType]
 	): Seq[MonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
+	def getAllCheckpoints(points: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Seq[AttendanceMonitoringCheckpoint]]
 	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], students: Seq[StudentMember]): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]]
 	def countCheckpointsForPoint(point: AttendanceMonitoringPoint): Int
+	def countCheckpointsForPoints(points: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Int]
 	def getNonActiveCheckpoints(
 		student: StudentMember,
 		departmentOption: Option[Department],
@@ -107,10 +109,10 @@ trait AttendanceMonitoringDao {
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
-	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
-	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData]
+	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 }
 
 
@@ -494,59 +496,29 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			.seq
 	}
 
-	def findUnrecordedPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] = {
-		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
+	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint] =
+		session.newCriteria[AttendanceMonitoringPoint]
 			.createAlias("scheme", "scheme")
 			.add(is("scheme.department", department))
 			.add(is("scheme.academicYear", academicYear))
 			.add(le("endDate", endDate))
 			.seq
 
-		if (relevantPoints.isEmpty) {
-			Seq()
-		} else {
-			val checkpointCounts: Map[AttendanceMonitoringPoint, Int] = safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Array[java.lang.Object]](
-				() => { session.newCriteria[AttendanceMonitoringCheckpoint] },
-				Projections.projectionList()
-					.add(Projections.groupProperty("point"))
-					.add(Projections.count("point")),
-				"point",
-				relevantPoints
-			).map{ objArray =>
-				objArray(0).asInstanceOf[AttendanceMonitoringPoint] -> objArray(1).asInstanceOf[Long].toInt
-			}.toMap.withDefaultValue(0)
+	def getAllCheckpoints(relevantPoints: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Seq[AttendanceMonitoringCheckpoint]] =
+		safeInSeq(() => { session.newCriteria[AttendanceMonitoringCheckpoint] }, "point", relevantPoints)
+			.distinct.groupBy(_.point).withDefaultValue(Seq())
 
-			relevantPoints.filter(p => checkpointCounts(p) < p.scheme.members.members.size)
-		}
-	}
-
-	def findUnrecordedStudents(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringStudentData] = {
-		val relevantPoints = session.newCriteria[AttendanceMonitoringPoint]
-			.createAlias("scheme", "scheme")
-			.add(is("scheme.department", department))
-			.add(is("scheme.academicYear", academicYear))
-			.add(le("endDate", endDate))
-			.seq
-
-		if (relevantPoints.isEmpty) {
-			Seq()
-		} else {
-			val checkpointsByPoint = safeInSeq(() => { session.newCriteria[AttendanceMonitoringCheckpoint] }, "point", relevantPoints)
-				.groupBy(_.point).withDefaultValue(Seq())
-
-			relevantPoints.filterNot { _.scheme.members.isEmpty }.flatMap(point => {
-				// every student that should have a checkpoint for this point
-				val students = getAttendanceMonitoringDataForStudents(point.scheme.members.members, academicYear)
-
-				// filter to users that don't have a checkpoint for this point
-				students.filter(student =>
-					!checkpointsByPoint(point).exists(_.student.universityId == student.universityId)
-				).filter(student =>
-					point.applies(student.scdBeginDate, student.scdEndDate)
-				)
-			}).distinct
-		}
-	}
+	def countCheckpointsForPoints(relevantPoints: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Int] =
+		safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Array[java.lang.Object]](
+			() => { session.newCriteria[AttendanceMonitoringCheckpoint] },
+			Projections.projectionList()
+				.add(Projections.groupProperty("point"))
+				.add(Projections.count("point")),
+			"point",
+			relevantPoints
+		).map { objArray =>
+			objArray(0).asInstanceOf[AttendanceMonitoringPoint] -> objArray(1).asInstanceOf[Long].toInt
+		}.toMap.withDefaultValue(0)
 
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]] = {
 		session.newCriteria[AttendanceMonitoringScheme]

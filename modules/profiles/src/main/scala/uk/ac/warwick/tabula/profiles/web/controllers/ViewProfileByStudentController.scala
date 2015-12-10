@@ -34,7 +34,7 @@ class ViewProfileByStudentController
 			val meeting = meetingRecordService.get(openMeetingId)
 			meeting.flatMap { m =>
 				val latestScyd = s.latestStudentCourseYearDetails
-				val meetingScyd = meetingRecordService.getAcademicYear(m, termService).flatMap(studentCourseYearFromYear(s, _))
+				val meetingScyd = meetingRecordService.getAcademicYear(m).flatMap(studentCourseYearFromYear(s, _))
 			  meetingScyd.filter(_ != latestScyd).map((_, m))
 			}
 		} getOrElse(None)

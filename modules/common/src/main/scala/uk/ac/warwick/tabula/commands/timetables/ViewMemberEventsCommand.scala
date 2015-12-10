@@ -6,15 +6,20 @@ import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServic
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
 object ViewMemberEventsCommand extends Logging {
+	val Timeout = 15.seconds
+
 	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest with SelfValidating
 
 	def apply(member: Member, currentUser: CurrentUser) = member match {
@@ -78,7 +83,7 @@ trait MemberTimetableCommand {
 	self: ViewMemberEventsRequest with TermServiceComponent with EventOccurrenceServiceComponent =>
 
 	protected def eventsToOccurrences(events: Seq[TimetableEvent]): Seq[EventOccurrence] = {
-		val dateRange = getDateRange()
+		val dateRange = createDateRange()
 
 		if (academicYear != null) {
 			events.filter { event => event.year == academicYear }
@@ -89,7 +94,7 @@ trait MemberTimetableCommand {
 		}
 	}
 
-	private def getDateRange(): Interval = {
+	private def createDateRange(): Interval = {
 		val startDate: DateTime =
 			Option(start).map(_.toDateTimeAtStartOfDay).getOrElse(termService.getTermFromDate(academicYear.dateInTermOne).getStartDate)
 
@@ -119,7 +124,9 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
 
-		Try(Seq(timetableOccurrences, meetingOccurrences).flatMap(_.get)).map(sorted)
+		Try(Await.result(
+			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
+		)).map(sorted)
 	}
 
 }
@@ -137,7 +144,9 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
 
-		Try(Seq(timetableOccurrences, meetingOccurrences).flatMap(_.get)).map(sorted)
+		Try(Await.result(
+			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
+		)).map(sorted)
 	}
 
 }

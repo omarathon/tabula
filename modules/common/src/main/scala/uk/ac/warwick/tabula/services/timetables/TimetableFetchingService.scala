@@ -1,31 +1,32 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait PartialTimetableFetchingService
 
 trait StudentTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStudent(universityId: String): Try[Seq[TimetableEvent]]
+	def getTimetableForStudent(universityId: String): Future[Seq[TimetableEvent]]
 }
 
 trait ModuleTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForModule(moduleCode: String): Try[Seq[TimetableEvent]]
+	def getTimetableForModule(moduleCode: String): Future[Seq[TimetableEvent]]
 }
 
 trait CourseTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForCourse(courseCode: String): Try[Seq[TimetableEvent]]
+	def getTimetableForCourse(courseCode: String): Future[Seq[TimetableEvent]]
 }
 
 trait RoomTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForRoom(roomName: String): Try[Seq[TimetableEvent]]
+	def getTimetableForRoom(roomName: String): Future[Seq[TimetableEvent]]
 }
 
 trait StaffTimetableFetchingService extends PartialTimetableFetchingService {
-	def getTimetableForStaff(universityId: String): Try[Seq[TimetableEvent]]
+	def getTimetableForStaff(universityId: String): Future[Seq[TimetableEvent]]
 }
 
 trait CompleteTimetableFetchingService
@@ -108,42 +109,47 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 	}
 
 	def getTimetableForStudent(universityId: String) =
-		Try(services.collect { case service: StudentTimetableFetchingService => service }.flatMap { s =>
-			s.getTimetableForStudent(universityId) match {
-				case Success(t) => t
-				case Failure(t) => Seq() // TODO something better than this
+		Futures.flatten(services
+			.collect { case service: StudentTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForStudent(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
 			}
-		}).map(mergeDuplicates)
+		).map(mergeDuplicates)
 
 	def getTimetableForModule(moduleCode: String) =
-		Try(services.collect { case service: ModuleTimetableFetchingService => service }.flatMap { s =>
-			s.getTimetableForModule(moduleCode) match {
-				case Success(t) => t
-				case Failure(t) => Seq()
+		Futures.flatten(services
+			.collect { case service: ModuleTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForModule(moduleCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
 			}
-		}).map(mergeDuplicates)
+		).map(mergeDuplicates)
 
 	def getTimetableForCourse(courseCode: String) =
-		Try(services.collect { case service: CourseTimetableFetchingService => service }.flatMap { s =>
-			s.getTimetableForCourse(courseCode) match {
-				case Success(t) => t
-				case Failure(t) => Seq()
+		Futures.flatten(services
+			.collect { case service: CourseTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForCourse(courseCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
 			}
-		}).map(mergeDuplicates)
+		).map(mergeDuplicates)
 
 	def getTimetableForStaff(universityId: String) =
-		Try(services.collect { case service: StaffTimetableFetchingService => service }.flatMap { s =>
-			s.getTimetableForStaff(universityId) match {
-				case Success(t) => t
-				case Failure(t) => Seq()
+		Futures.flatten(services
+			.collect { case service: StaffTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForStaff(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
 			}
-		}).map(mergeDuplicates)
+		).map(mergeDuplicates)
 
 	def getTimetableForRoom(roomName: String) =
-		Try(services.collect { case service: RoomTimetableFetchingService => service }.flatMap { s =>
-			s.getTimetableForRoom(roomName) match {
-				case Success(t) => t
-				case Failure(t) => Seq()
+		Futures.flatten(services
+			.collect { case service: RoomTimetableFetchingService => service }
+			.map {
+				// On downstream failures, just return Nil
+				_.getTimetableForRoom(roomName).recover { case t => logger.warn("Error fetching timetable", t); Nil }
 			}
-		}).map(mergeDuplicates)
+		).map(mergeDuplicates)
 }

@@ -40,6 +40,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		applicationContext.getBean("assignmentMembershipService") returns smartMock[AssessmentMembershipService]
 		applicationContext.getBean("feedbackService") returns smartMock[FeedbackService]
 		applicationContext.getBean("extensionService") returns extensionService
+		applicationContext.getBean("submissionService") returns smartMock[SubmissionService]
 		val sessionFactory = smartMock[SessionFactory]
 		val session = smartMock[Session]
 		sessionFactory.getCurrentSession returns session

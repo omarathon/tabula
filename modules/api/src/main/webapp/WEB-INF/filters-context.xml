@@ -13,7 +13,16 @@
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
 			<excluded-url-pattern>/error/*</excluded-url-pattern>
+
+			<!-- Public APIs -->
 			<excluded-url-pattern>/v1/turnitin/*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/termdates</excluded-url-pattern>
+			<excluded-url-pattern>/v1/termdates.*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/termdates/*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/timetable/calendar/*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/holidaydates</excluded-url-pattern>
+			<excluded-url-pattern>/v1/holidaydates.*</excluded-url-pattern>
+			<excluded-url-pattern>/v1/holidaydates/*</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 

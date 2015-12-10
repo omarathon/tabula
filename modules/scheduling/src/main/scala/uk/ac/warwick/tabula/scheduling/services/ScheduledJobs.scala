@@ -33,7 +33,7 @@ class ScheduledJobs {
 	var notificationIndexService = Wire[NotificationIndexService]
 	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
-	var termService = Wire[TermService]
+	implicit var termService = Wire[TermService]
 	var triggerService = Wire[TriggerService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
@@ -146,7 +146,7 @@ class ScheduledJobs {
 				UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
 			}
 			exceptionResolver.reportExceptions {
-				val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
+				val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 				if (thisAcademicYear.isSITSInFlux(DateTime.now)) {
 					UnlinkAttendanceMonitoringSchemeCommand().apply()
 				}

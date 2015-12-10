@@ -129,6 +129,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>net.databinder</groupId>
 			<artifactId>dispatch_${scala.major.version}</artifactId>
 			<version>${net.databinder.dispatch.version}</version>

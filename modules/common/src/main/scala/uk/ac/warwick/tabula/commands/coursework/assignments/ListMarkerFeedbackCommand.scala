@@ -42,7 +42,7 @@ class ListMarkerFeedbackCommand(val assignment: Assignment, val module: Module, 
 	self: UserLookupComponent =>
 
 	def applyInternal() = {
-		val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker)
+		val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker).distinct
 		val workflow = assignment.markingWorkflow
 
 		val feedbackItems = students.map(student => {

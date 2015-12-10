@@ -30,6 +30,8 @@ import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 sealed abstract class FilenameGenerationStrategy
@@ -107,11 +109,10 @@ object CelcatHttpTimetableFetchingService {
 		event: VEvent,
 		allStaff: Map[UniversityId, CelcatStaffInfo],
 		config: CelcatDepartmentConfiguration,
-		termService: TermService,
 		locationFetchingService: LocationFetchingService,
 		moduleMap: Map[String, Module],
 		userLookup: UserLookupService
-	): Option[TimetableEvent] = {
+	)(implicit termService: TermService): Option[TimetableEvent] = {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
@@ -142,7 +143,7 @@ object CelcatHttpTimetableFetchingService {
 
 			val day = DayOfWeek(start.getDayOfWeek)
 
-			val year = AcademicYear.findAcademicYearContainingDate(start, termService)
+			val year = AcademicYear.findAcademicYearContainingDate(start)
 
 			// Convert the date to an academic week number
 			val startWeek = termService.getAcademicWeekForAcademicYear(start, year)
@@ -233,16 +234,16 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		req >> { (is) => combineIdenticalEvents(parseICal(is, config)) }
 	}
 
-	def getTimetableForStudent(universityId: UniversityId): Try[Seq[TimetableEvent]] = {
+	def getTimetableForStudent(universityId: UniversityId): Future[Seq[TimetableEvent]] = {
 		userLookup.getUserByWarwickUniId(universityId) match {
 			case FoundUser(u) if u.getDepartmentCode.hasText =>
 				configs.get(u.getDepartmentCode.toLowerCase).filter(_.enabled).map { config =>
 					doRequest(s"${u.getWarwickId}.ics", config)
-				}.getOrElse(Success(Nil))
+				}.getOrElse(Future.successful(Nil))
 			case FoundUser(u) =>
 				logger.warn(s"Found user for ${u.getWarwickId}, but not departmentCode. Returning empty Celcat timetable")
-				Success(Nil)
-			case _ => Failure(new UserLookupException(s"No user found for university ID $universityId"))
+				Future.successful(Nil)
+			case _ => Future.failed(new UserLookupException(s"No user found for university ID $universityId"))
 		}
 	}
 
@@ -262,7 +263,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}
 	}
 
-	def getTimetableForStaff(universityId: UniversityId): Try[Seq[TimetableEvent]] = {
+	def getTimetableForStaff(universityId: UniversityId): Future[Seq[TimetableEvent]] = {
 		findConfigForStaff(universityId).map { config =>
 			val filename = config.staffFilenameLookupStrategy match {
 				case FilenameGenerationStrategy.Default => s"$universityId.ics"
@@ -270,7 +271,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			}
 
 			doRequest(filename, config)
-		}.getOrElse(Success(Nil))
+		}.getOrElse(Future.successful(Nil))
 	}
 
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
@@ -320,7 +321,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			}
 		} else Map()
 
-	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Try[Seq[TimetableEvent]] = {
+	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[Seq[TimetableEvent]] = {
 		// Add {universityId}.ics to the URL
 		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
 
@@ -328,23 +329,17 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
 		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
-		val result = try {
-			Success(http.when(_==200)(req >:+ handler(config)))
-		}	catch {
-			case StatusCode(404, _) =>
-				// Special case a 404, just return no events
-				logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
-				Success(Nil)
-			case e: Throwable =>
-				Failure(e)
-		}
+		val result =
+			Future(http.when(_==200)(req >:+ handler(config)))
+				.recover { case StatusCode(404, _) =>
+					// Special case a 404, just return no events
+					logger.warn(s"Request for ${req.to_uri.toString} returned a 404")
+					Nil
+				}
 
 		// Extra logging
-		result match {
-			case Success(ev) =>
-				if (ev.isEmpty) logger.info("Timetable request successful but no events returned")
-			case Failure(e) =>
-				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+		result.onFailure { case e =>
+			logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 		}
 
 		result
@@ -384,7 +379,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		}}.toList
 	}
 
-	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration): Seq[TimetableEvent] = {
+	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration)(implicit termService: TermService): Seq[TimetableEvent] = {
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING, true)
 		CompatibilityHints.setHintEnabled(CompatibilityHints.KEY_RELAXED_VALIDATION, true)
 
@@ -398,7 +393,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 			vEvents.flatMap(e => parseModuleCode(e).map(_.toLowerCase)).distinct
 		).groupBy(_.code).mapValues(_.head)
 		vEvents.flatMap { event =>
-			parseVEvent(event, allStaff, config, termService, locationFetchingService, moduleMap, userLookup)
+			parseVEvent(event, allStaff, config, locationFetchingService, moduleMap, userLookup)
 		}
 	}
 }

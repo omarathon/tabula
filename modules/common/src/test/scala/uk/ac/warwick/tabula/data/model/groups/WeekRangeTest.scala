@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.services.{TermServiceImpl, TermService}
 
 class WeekRangeTest extends TestBase {
 
-	val termService = new TermServiceImpl
-	WeekRange.termService = termService
+	implicit val termService = new TermServiceImpl
 
 	@Test
 	def fromString {

@@ -28,7 +28,7 @@ object Routes {
 
 	object turnitin {
 		def submitAssignmentCallback(assignment: Assignment) =
-			context + "/turnitin/turnitin-submit-assignment-response/assignment/%s" format (encoded(assignment.id))
+			context + "/turnitin/turnitin-submit-assignment-response/assignment/%s" format encoded(assignment.id)
 	}
 
 	object attachment {
@@ -39,5 +39,16 @@ object Routes {
 	object job {
 		def apply(job: JobInstance) =
 			context + "/job/%s" format encoded(job.id)
+	}
+
+	object timetables {
+		def calendar(member: Member) =
+			context + "/member/%s/timetable/calendar" format encoded(member.universityId)
+
+		def calendarICal(member: Member) =
+			context + "/member/%s/timetable/calendar.ics" format encoded(member.universityId)
+
+		def calendarICalForHash(timetableHash: String) =
+			context + "/timetable/calendar/%s.ics" format encoded(timetableHash)
 	}
 }

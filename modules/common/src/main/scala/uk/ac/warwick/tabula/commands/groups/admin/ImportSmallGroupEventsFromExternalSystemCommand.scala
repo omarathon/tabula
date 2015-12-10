@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -12,10 +13,15 @@ import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingSe
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 import ImportSmallGroupEventsFromExternalSystemCommand._
 
+import scala.concurrent.Await
+
 object ImportSmallGroupEventsFromExternalSystemCommand {
+
+	val Timeout = 15.seconds
 
 	val RequiredPermission = Permissions.SmallGroups.Update
 
@@ -31,6 +37,10 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 			with LookupEventsFromModuleTimetable
+
+	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent) =
+		event.year == academicYear &&
+			(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar || event.eventType == TimetableEventType.Other("WRB-ACTIVE"))
 
 	class EventToImport {
 		def this(event: TimetableEvent) {
@@ -80,12 +90,12 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 		with ModuleTimetableFetchingServiceComponent =>
 
 	eventsToImport.clear()
-	eventsToImport.addAll(timetableFetchingService.getTimetableForModule(module.code.toUpperCase).getOrElse(Nil)
-		.filter { event => event.year == set.academicYear }
-		.filter { event => event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar }
-		.sorted
-		.map(new EventToImport(_))
-		.asJava
+	eventsToImport.addAll(
+		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+			.sorted
+			.map(new EventToImport(_))
+			.asJava
 	)
 
 	override def populate(): Unit = {

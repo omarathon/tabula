@@ -20,7 +20,7 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	priority = NotificationPriority.Critical
 
 	@transient
-	var termService = Wire[TermService]
+	implicit var termService = Wire[TermService]
 
 	@transient
 	var attendanceMonitoringService = Wire[AttendanceMonitoringService]
@@ -31,7 +31,7 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	final def referenceDate = created.plusDays(-7)
 
 	@transient
-	lazy val academicYear = AcademicYear.findAcademicYearContainingDate(referenceDate, termService)
+	lazy val academicYear = AcademicYear.findAcademicYearContainingDate(referenceDate)
 
 	final def department = item.entity
 

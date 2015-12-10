@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, CommandInternal, Describable, Description, SelfValidating}
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, Describable, Description, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, UserLookupService, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.validators.UsercodeListValidator
-import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect._
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
+
+import scala.collection.JavaConverters._
+import scala.reflect._
 
 object GrantRoleCommand {
 	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedRole[A]] with GrantRoleCommandState[A] =
@@ -57,19 +58,18 @@ class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) 
 }
 
 trait GrantRoleCommandValidation extends SelfValidating {
-	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+	self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent with UserLookupComponent =>
 
 	def validate(errors: Errors) {
 		if (usercodes.asScala.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
 		} else {
-			grantedRole.map { _.users }.foreach { users =>
-				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode = usercodes.asScala.exists { users.knownType.includesUserId }
-				}
-
-				usercodeValidator.validate(errors)
+			val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+				override def alreadyHasCode = usercodes.asScala.exists { u => grantedRole.exists(_.users.knownType.includesUserId(u)) }
 			}
+			usercodeValidator.userLookup = userLookup
+
+			usercodeValidator.validate(errors)
 		}
 
 		// Ensure that the current user can delegate everything that they're trying to grant permissions for
@@ -81,7 +81,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
 
 			val permissionsToAdd = roleDefinition.allPermissions(Some(scope)).keys
 			val deniedPermissions = permissionsToAdd.filterNot(securityService.canDelegate(user,_,scope))
-			if ((!deniedPermissions.isEmpty) && (!user.god)) {
+			if (deniedPermissions.nonEmpty && (!user.god)) {
 				errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.map { _.description }.mkString("\n"), scope),"")
 			}
 		}
