@@ -4,6 +4,7 @@ import org.joda.time.{Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -15,8 +16,6 @@ import uk.ac.warwick.tabula.timetables.EventOccurrence
 import scala.concurrent.Await
 import scala.util.Try
 import scala.concurrent.duration._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object ViewModuleEventsCommand {
 	val Timeout = 15.seconds
