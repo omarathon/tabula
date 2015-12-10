@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -14,7 +15,6 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
 object ViewMemberEventsCommand extends Logging {

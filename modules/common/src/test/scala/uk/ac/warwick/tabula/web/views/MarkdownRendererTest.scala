@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.TestBase
 
 import scala.concurrent._
 import scala.util.{Try, Success, Failure}
-import ExecutionContext.Implicits.global
+import uk.ac.warwick.tabula.helpers.Futures._
 import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
 

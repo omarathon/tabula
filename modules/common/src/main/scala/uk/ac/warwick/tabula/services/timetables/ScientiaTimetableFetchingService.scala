@@ -9,6 +9,7 @@ import org.joda.time.{DateTimeConstants, LocalTime}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Futures, FoundUser, ClockComponent, Logging}
 import uk.ac.warwick.tabula.services._
@@ -16,7 +17,6 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.xml.Elem
 
 trait ScientiaConfiguration {
@@ -94,14 +94,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	// the timetable response doesn't include its year, so we pass that in separately.
 	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
-			val events = parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
-
-			if (excludeSmallGroupEventsInTabula)
-				events.filterNot { event =>
-					event.eventType == TimetableEventType.Seminar &&
-					hasSmallGroups(event.parent.shortName, year)
-				}
-			else events
+			parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 		}
 	}
 
@@ -142,7 +135,14 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
 			}
 
-			result
+			result.map { events =>
+				if (excludeSmallGroupEventsInTabula)
+					events.filterNot { event =>
+						event.eventType == TimetableEventType.Seminar &&
+							hasSmallGroups(event.parent.shortName, year)
+					}
+				else events
+			}
 		}
 
 		Futures.flatten(results)
