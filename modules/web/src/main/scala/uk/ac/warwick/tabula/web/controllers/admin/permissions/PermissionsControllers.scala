@@ -74,7 +74,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addRole(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors) : Mav =  {
 		val target = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(target)
 		} else {
 			val role = Some(command.apply().roleDefinition)
@@ -87,7 +87,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	def removeRole(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
 											 errors: Errors): Mav = {
 		val target = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(target)
 		} else {
 			val role = Some(command.apply().roleDefinition)
@@ -99,7 +99,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	@RequestMapping(method = Array(POST), params = Array("_command=addSingle"))
 	def addPermission(@Valid @ModelAttribute("addSingleCommand") command: GrantPermissionsCommand, errors: Errors) : Mav =  {
 		val target = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(target)
 		} else {
 			val grantedPermission = Some(command.apply())
@@ -112,7 +112,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	def removePermission(@Valid @ModelAttribute("removeSingleCommand") command: RevokePermissionsCommand,
 											 errors: Errors): Mav = {
 		val target = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(target)
 		} else {
 			val grantedPermission = Some(command.apply())
@@ -178,7 +178,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
 //	@ModelAttribute("existingPermissions") // Not a ModelAttribute because this changes after a change
 	def existingPermissions(@PathVariable("target") target: A) = {
-		permissionsService.getAllGrantedPermissionsFor(target)
+		permissionsService.getAllGrantedPermissionsFor(target).filter(!_.users.isEmpty)
 	}
 
 	@ModelAttribute("allPermissions") def allPermissions(@PathVariable("target") target: A) = {

@@ -1,4 +1,6 @@
 package uk.ac.warwick.tabula
+
+import uk.ac.warwick.tabula.system.UserNavigation
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -21,10 +23,12 @@ class CurrentUser(
 	val profile: Option[Member] = None,
 	val sysadmin: Boolean = false,
 	val masquerader: Boolean = false,
-	val god: Boolean = false) {
+	val god: Boolean = false,
+	var navigation: UserNavigation = UserNavigation("", "")
+) {
 
 	def loggedIn = realUser.isLoggedIn
-	def idForPermissions = apparentUser.getUserId()
+	def idForPermissions = apparentUser.getUserId
 	def exists = realUser.isFoundUser
 
 	/**
@@ -41,11 +45,11 @@ class CurrentUser(
 	def masquerading = !apparentId.equals(realId)
 
 	/** Full name of the apparent user. */
-	def fullName = profile flatMap { _.fullName } getOrElse(apparentUser.getFullName)
+	def fullName = profile flatMap { _.fullName } getOrElse apparentUser.getFullName
 	/** First name of the apparent user. */
-	def firstName = profile map { _.firstName } getOrElse(apparentUser.getFirstName)
+	def firstName = profile map { _.firstName } getOrElse apparentUser.getFirstName
 	/** Surname of the apparent user. */
-	def lastName = profile map { _.lastName } getOrElse(apparentUser.getLastName)
+	def lastName = profile map { _.lastName } getOrElse apparentUser.getLastName
 	/** Warwick Uni ID of the apparent user. */
 	def universityId = apparentUser.getWarwickId
 	/** Department code of the apparent user. */
@@ -81,7 +85,7 @@ class CurrentUser(
 				builder append ")"
 			}
 			if (god) builder append " +GodMode"
-			builder.toString
+			builder.toString()
 		}
 	}
 }

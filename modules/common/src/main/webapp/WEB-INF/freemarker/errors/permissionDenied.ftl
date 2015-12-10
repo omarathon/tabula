@@ -50,7 +50,7 @@
 				<input type="hidden" name="permission" value="[One of many]" />
 			</#if>
 
-			<button class="btn btn-large" type="submit">Why can't I see this?</button>
+			<button class="btn btn-default btn-large" type="submit">Why can't I see this?</button>
 		</@f.form>
 
 		<p>Alternatively, harness unlimited power by entering God mode:</p>

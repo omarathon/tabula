@@ -1,14 +1,14 @@
 <#escape x as x?html>
 
 <div class="pull-right">
-	<a href="<@url page="/sysadmin/relationships/add" />" class="btn btn-success btn-medium pull-right">
-		<i class="icon-plus fa fa-plus"></i> Add a new relationship type
+	<a href="<@url page="/sysadmin/relationships/add" />" class="btn btn-primary btn-medium pull-right">
+		Add a new relationship type
 	</a>
 </div>
 
-<h1>Student relationship types</h1>
+<h1 class="with-settings">Student relationship types</h1>
 
-<table class="relationship-types-list table table-bordered table-striped">
+<table class="table table-striped">
 	<thead>
 		<tr>
 			<th>URL string</th>
@@ -34,8 +34,14 @@
 				<td><#if relationshipType.expectedPGT><b>Yes</b><#else>No</#if></td>
 				<td><#if relationshipType.expectedPGR><b>Yes</b><#else>No</#if></td>
 				<td>
-					<a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/edit" />" class="btn btn-info btn-mini"><i class="icon-pencil fa fa-pencil"></i> Edit</a>
-					<a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/delete" />" class="btn btn-danger btn-mini<#if !relationshipType.empty> disabled use-tooltip" title="Can't delete this type as there are relationships associated with it</#if>"><i class="icon-remove fa fa-times"></i> Delete</a>
+					<a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/edit" />" class="btn btn-primary btn-xs">Edit</a>
+					<#if !relationshipType.empty>
+					<div class="use-tooltip" title="Can't delete this type as there are relationships associated with it">
+						<a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/delete" />" class="btn btn-danger btn-xs disabled">Delete</a>
+					</div>
+					<#else>
+						<a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/delete" />" class="btn btn-danger btn-xs">Delete</a>
+					</#if>
 				</td>
 			</tr>
 		</#list>

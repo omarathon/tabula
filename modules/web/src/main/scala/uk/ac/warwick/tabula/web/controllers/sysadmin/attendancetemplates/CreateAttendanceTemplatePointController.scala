@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringTemplate, AttendanceMonitoringTemplatePoint}
 import uk.ac.warwick.tabula.commands.sysadmin.attendancetemplates.CreateAttendanceTemplatePointCommand
-import uk.ac.warwick.tabula.web.controllers.sysadmin.BaseSysadminController
+import uk.ac.warwick.tabula.web.controllers.sysadmin.{SysadminBreadcrumbs, BaseSysadminController}
 import uk.ac.warwick.tabula.sysadmin.web.Routes
 
 @Controller
@@ -21,12 +21,15 @@ class CreateAttendanceTemplatePointController extends BaseSysadminController {
 	def command(@PathVariable template: AttendanceMonitoringTemplate) = CreateAttendanceTemplatePointCommand(template)
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint]) = {
-		render
+	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint], @PathVariable template: AttendanceMonitoringTemplate) = {
+		render(template)
 	}
 
-	private def render = {
-		Mav("sysadmin/attendancetemplates/newpoint")
+	private def render(template: AttendanceMonitoringTemplate) = {
+		Mav("sysadmin/attendancetemplates/newpoint").crumbs(
+			SysadminBreadcrumbs.AttendanceTemplates.Home,
+			SysadminBreadcrumbs.AttendanceTemplates.Edit(template)
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -36,11 +39,16 @@ class CreateAttendanceTemplatePointController extends BaseSysadminController {
 		@PathVariable template: AttendanceMonitoringTemplate
 	) = {
 		if (errors.hasErrors) {
-			render
+			render(template)
 		} else {
 			cmd.apply()
 			Redirect(Routes.AttendanceTemplates.edit(template))
 		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("cancel"))
+	def cancel(@PathVariable template: AttendanceMonitoringTemplate) = {
+		Redirect(Routes.AttendanceTemplates.edit(template))
 	}
 
 }

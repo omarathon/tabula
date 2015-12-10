@@ -101,7 +101,7 @@
 							   href="#" >
 								<i class="icon-random"></i> Randomly allocate
 							</a>
-							<a href="#" title="" class="btn use-popover .tabulaPopover-init" data-disabled-on="no-allocation" data-title="Remove All Allocations" data-html="true" data-trigger="hover"
+							<a href="#" title="" class="btn use-popover" data-disabled-on="no-allocation" data-title="Remove All Allocations" data-html="true" data-trigger="hover"
 							   data-content=
 								'<div class="alert" >Are you sure you want to remove all existing allocations
 								including ${department.name} students allocated by other departments?</div>

@@ -1,28 +1,41 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetFilters}
+import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSetFilters, SmallGroupAllocationMethod, SmallGroupSet}
-import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation, AdminSmallGroupsHomeCommand}
-import uk.ac.warwick.tabula.commands.Appliable
+abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with GroupsDepartmentsAndModulesWithPermission {
 
-abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent {
 	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
-	hideDeletedItems
+	override val departmentPermission: Permission = null
 
-	@ModelAttribute("academicYears") def academicYearChoices: JList[AcademicYear] =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+
+	@ModelAttribute("departmentsWithPermission")
+	override def departmentsWithPermission: Seq[Department] = {
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
+
+		allDepartmentsForPermission(user, Permissions.Module.ManageSmallGroups)
+			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
+	}
+
+	hideDeletedItems
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
@@ -54,6 +67,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 		)
 
 		Mav(view, model)
+			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(year => Routes.admin(department, year)):_*)
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
@@ -69,16 +83,25 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 @RequestMapping(value=Array("/groups/admin/department/{department}"))
 class GroupsAdminDepartmentController extends AbstractGroupsAdminDepartmentHomeController {
 
-	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminSmallGroupsHomeCommand =
-		AdminSmallGroupsHomeCommand(mandatory(dept), AcademicYear.guessSITSAcademicYearByDate(DateTime.now), user, calculateProgress = ajax)
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+
+	@ModelAttribute("adminCommand")
+	def command(@PathVariable("department") dept: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear], user: CurrentUser): AdminSmallGroupsHomeCommand =
+		AdminSmallGroupsHomeCommand(mandatory(dept), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)), user, calculateProgress = ajax)
 
 }
 
 @Controller
 @RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}"))
-class GroupsAdminDepartmentForYearController extends AbstractGroupsAdminDepartmentHomeController {
+class GroupsAdminDepartmentForYearController extends AbstractGroupsAdminDepartmentHomeController
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
 
-	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+
+	@ModelAttribute("adminCommand")
+	def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
 		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user, calculateProgress = ajax)
 
 }

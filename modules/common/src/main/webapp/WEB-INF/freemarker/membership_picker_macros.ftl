@@ -1,5 +1,6 @@
 <#include "prelude.ftl" />
 <#import "_profile_link.ftl" as pl />
+<#import "*/modal_macros.ftl" as modal />
 
 <#--
 
@@ -17,15 +18,7 @@
 		<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
 			when necessary and you still need to ensure that the upstream SITS data gets fixed.</p>
 	</#local>
-
-	<a href="#"
-	   title="Students"
-	   class="use-popover"
-	   data-title="Students"
-	   data-trigger="hover"
-	   data-html="true"
-	   data-content="${popoverText}"
-			><i class="icon-question-sign fa fa-question-circle"></i></a>
+	<@fmt.help_popover id="what_is_this" title="Students" content="${popoverText}" html=true />
 </#macro>
 
 <#--
@@ -43,9 +36,9 @@
 		<span class="uneditable-value enrolledCount">
 			${membershipInfo.totalCount} enrolled
 			<#if membershipInfo.excludeCount gt 0 || membershipInfo.includeCount gt 0>
-				<span class="muted">(${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)</span>
+				<span class="muted very-subtle">(${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)</span>
 			<#else>
-				<span class="muted">from SITS</span>
+				<span class="muted very-subtle">from SITS</span>
 			</#if>
 		<@_what_is_this />
 		</span>
@@ -85,10 +78,10 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		<#local membersGroup=status.actualValue />
 	</@spring.bind>
 
-	<#local includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up fa fa-hand-o-up"></i></span><span class="hide">Added</span></#local>
-	<#local pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove fa fa-times"></i></span><span class="hide">Pending deletion</span></#local>
-	<#local excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle fa fa-ban"></i></span><span class="hide">Removed</span></#local>
-	<#local sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt fa fa-list-alt"></i></span><span class="hide">SITS</span></#local>
+	<#local includeText><span class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
+	<#local pendingDeletionText><span class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
+	<#local excludeText><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
+	<#local sitsText><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
 
 	<#local membershipInfo = command.membershipInfo />
 	<#local hasMembers=(membershipInfo.totalCount gt 0 || membershipInfo.includeCount gt 0 || membershipInfo.excludeCount gt 0) />
@@ -96,16 +89,16 @@ Generates the bulk of the picker HTML, inside a fieldset element
 	<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
 	<#-- <p class="alert alert-success"><i class="icon-ok fa fa-check"></i> This ${name} is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 
-	<p>
+	<div style="margin-bottom: 8px;">
 		<#if linkedUpstreamAssessmentGroups?has_content>
-			<a class="btn use-tooltip disabled show-sits-picker" title="Change the linked SITS ${name} used for enrolment data">Change link to SITS</a>
+			<a class="btn btn-default use-tooltip disabled show-sits-picker" title="Change the linked SITS ${name} used for enrolment data">Change link to SITS</a>
 		<#elseif availableUpstreamGroups?has_content>
-			<a class="btn use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more ${name}s recorded in SITS">Add link to SITS</a>
+			<a class="btn btn-default use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more ${name}s recorded in SITS">Add link to SITS</a>
 		<#else>
-			<a class="btn use-tooltip disabled" title="No ${name}s are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
+			<a class="btn btn-default use-tooltip disabled" title="No ${name}s are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 		</#if>
 
-		<a class="btn use-tooltip disabled show-adder"
+		<a class="btn btn-default use-tooltip disabled show-adder"
 		   <#if availableUpstreamGroups??>title="This will only enrol a student for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 		>
 			Add students manually
@@ -115,32 +108,46 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			<#if component.name == 'groups'>
 				<a
 					data-href="<@routes.withdrawnStudents command.set />"
-					class="btn select-withdrawn member-action use-tooltip"
+					class="btn btn-default select-withdrawn member-action use-tooltip"
 					title="Select permanently withdrawn students" data-loading-text="Loading&hellip;"
 				>
 					Select PWD students
 				</a>
 			</#if>
-			<a class="btn btn-warning disabled remove-users member-action use-tooltip"
-			   <#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
-			>
-				Remove
-			</a>
+			<div class="use-tooltip" style="display: inline-block;" <#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>>
+				<a class="btn btn-primary disabled remove-users member-action">Remove</a>
+			</div>
 
-			<a class="btn btn-success restore-users disabled use-tooltip" title="Re-enrol selected students">Restore</a>
+			<div class="use-tooltip" style="display: inline-block;" title="Re-enrol selected students">
+				<a class="btn btn-primary restore-users disabled">Restore</a>
+			</div>
+
+			<#if showIntro("membership-buttons-disabled", "anywhere")>
+				<#assign introText>
+					<p>Checkbox entries must be selected to activate options.</p>
+				</#assign>
+				<a href="#"
+				   id="membership-buttons-disabled-intro"
+				   class="use-introductory auto"
+				   data-hash="${introHash("tier4-filtering", "anywhere")}"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
+			</#if>
+
 		</#if>
 
 		<span class="help-inline" id="js-hint"><small><i class="icon-lightbulb fa fa-lightbulb-o"></i> Javascript is required for editing</small></span>
-	</p>
+	</div>
 
 	<#if hasMembers>
 		<div id="enrolment">
 			<div id="profile-modal" class="modal fade profile-subset"></div>
-			<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
+			<table id="enrolment-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers <#if component.name == 'courses'>tabula-orangeLight</#if>">
 				<thead>
 					<tr>
 						<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
-						<th class="sortable" style="width: 50px;">Source</th>
+						<th class="sortable" style="width: 1px;">Source</th>
 						<th class="sortable">First name</th>
 						<th class="sortable">Last name</th>
 						<th class="sortable">ID</th>
@@ -156,21 +163,29 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							<td>
 								<#-- TAB-1240: use the right key -->
 								<#if command.members.universityIds && item.universityId?has_content>
-									<@form.selector_check_row "modifyEnrolment" item.universityId />
+									<#if component.name == 'groups'>
+										<@bs3form.selector_check_row "modifyEnrolment" item.universityId />
+									<#else>
+										<@form.selector_check_row "modifyEnrolment" item.universityId />
+									</#if>
 								<#elseif item.userId?has_content>
-									<@form.selector_check_row "modifyEnrolment" item.userId />
+									<#if component.name == 'groups'>
+										<@bs3form.selector_check_row "modifyEnrolment" item.userId />
+									<#else>
+										<@form.selector_check_row "modifyEnrolment" item.userId />
+									</#if>
 								<#else>
 									<i class="icon-ban-circle fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
 								</#if>
 							</td>
-							<td class="source">
+							<td class="source" style="white-space: nowrap;">
 								<#noescape>
 									<#if item.itemTypeString='include'>
-										${includeIcon}
+										${includeText}
 									<#elseif item.itemTypeString='exclude'>
-										${excludeIcon}
+										${excludeText}
 									<#else>
-										${sitsIcon}
+										${sitsText}
 									</#if>
 								</#noescape>
 							</td>
@@ -225,84 +240,81 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 <#-- Modal to add students manually -->
 <div class="${classifier}Modals">
-	<div class="modal fade hide adder">
-		<div class="modal-header">
-			<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-			<h6>Add students manually</h6>
-		</div>
+	<div class="modal fade <#if component.name == 'courses'>hide</#if> adder">
+		<@modal.wrapper>
+			<@modal.header>
+				<h6 class="modal-title">Add students manually</h6>
+			</@modal.header>
 
-		<div class="modal-body">
-			<p>
-				Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
-			</p>
-			<p class="alert">
-				<i class="icon-lightbulb fa fa-lightbulb-o icon-large fa fa-lg"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
-				as other University systems won't know about any changes you make here.
-			</p>
-			<#-- SOMETIME
-			<div>
-				<a href="#" class="btn"><i class="icon-user fa fa-user"></i> Lookup user</a>
-			</div>
-			-->
-			<textarea rows="6" class="input-block-level" name="massAddUsers"></textarea>
-		</div>
+			<@modal.body>
+				<p>
+					Type or paste in a list of usercodes or University numbers here, separated by white space, then click <code>Add</code>.
+				</p>
+				<p class="alert">
+					<i class="icon-lightbulb fa fa-lightbulb-o icon-large fa fa-lg"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
+					as other University systems won't know about any changes you make here.
+				</p>
+				<textarea rows="6" class="input-block-level form-control" name="massAddUsers"></textarea>
+			</@modal.body>
 
-		<div class="modal-footer">
-			<a class="btn btn-success disabled spinnable spinner-auto add-students">Add</a>
-		</div>
+			<@modal.footer>
+				<a class="btn btn-primary disabled spinnable spinner-auto add-students">Add</a>
+			</@modal.footer>
+		</@modal.wrapper>
 	</div><#-- manual student modal -->
 
 
 	<#-- Modal picker to select an upstream assessment group (${name}+occurrence) -->
-	<div class="modal fade hide sits-picker">
-		<div class="modal-header">
-			<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-			<h6>SITS link</h6>
-		</div>
+	<div class="modal fade <#if component.name == 'courses'>hide</#if> sits-picker">
+		<@modal.wrapper cssClass="modal-lg">
+			<@modal.header>
+				<h6>SITS link</h6>
+			</@modal.header>
 
-		<#if command.availableUpstreamGroups?has_content>
-			<div class="modal-body">
-				<p>Add students by linking this ${name} to one or more of the following assessment components in SITS for
-				${command.module.code?upper_case} in ${command.academicYear.label}.</p>
+			<#if command.availableUpstreamGroups?has_content>
+				<@modal.body>
+					<p>Add students by linking this ${name} to one or more of the following assessment components in SITS for
+					${command.module.code?upper_case} in ${command.academicYear.label}.</p>
 
-				<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
-					<thead>
-						<tr>
-							<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
-							<th class="sortable">Name</th>
-							<th class="sortable">Members</th>
-							<th class="sortable">Assessment group</th>
-							<th class="sortable">CATS</th>
-							<th class="sortable">Occurrence</th>
-							<th class="sortable">Sequence</th>
-							<th class="sortable">Type</th>
-						</tr>
-					</thead>
-					<tbody><#list command.availableUpstreamGroups as available>
-						<#local isLinked = available.isLinked(command.assessmentGroups) />
-						<tr>
-							<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
-							<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
-							<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
-							<td>${available.group.assessmentGroup}</td>
-							<td>${available.cats!'-'}</td>
-							<td>${available.occurrence}</td>
-							<td>${available.sequence}</td>
-							<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
-						</tr>
-					</#list></tbody>
-				</table>
-			</div>
+					<table id="sits-table" class="table <#if component.name == 'courses'>table-bordered tabula-orangeLight</#if> table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers">
+						<thead>
+							<tr>
+								<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
+								<th class="sortable">Name</th>
+								<th class="sortable">Members</th>
+								<th class="sortable">Assessment group</th>
+								<th class="sortable">CATS</th>
+								<th class="sortable">Occurrence</th>
+								<th class="sortable">Sequence</th>
+								<th class="sortable">Type</th>
+							</tr>
+						</thead>
+						<tbody><#list command.availableUpstreamGroups as available>
+							<#local isLinked = available.isLinked(command.assessmentGroups) />
+							<tr>
+								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
+								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-primary">Linked</span></#if></label></td>
+								<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
+								<td>${available.group.assessmentGroup}</td>
+								<td>${available.cats!'-'}</td>
+								<td>${available.occurrence}</td>
+								<td>${available.sequence}</td>
+								<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
+							</tr>
+						</#list></tbody>
+					</table>
+				</@modal.body>
 
-			<div class="modal-footer">
-				<a class="btn btn-success disabled sits-picker-action spinnable spinner-auto link-sits">Link</a>
-				<a class="btn btn-warning disabled sits-picker-action spinnable spinner-auto unlink-sits">Unlink</a>
-			</div>
-		<#else>
-			<div class="modal-body">
-				<p class="alert alert-warning">No SITS membership groups for ${command.module.code?upper_case} are available</p>
-			</div>
-		</#if>
+				<@modal.footer>
+					<a class="btn btn-primary disabled sits-picker-action spinnable spinner-auto link-sits">Link</a>
+					<a class="btn btn-danger disabled sits-picker-action spinnable spinner-auto unlink-sits">Unlink</a>
+				</@modal.footer>
+			<#else>
+				<@modal.body>
+					<p class="alert alert-danger">No SITS membership groups for ${command.module.code?upper_case} are available</p>
+				</@modal.body>
+			</#if>
+		</@modal.wrapper>
 	</div><#-- link picker modal -->
 </div>
 
@@ -535,9 +547,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(untypedId));
 				if ($tr.is('.item-type-sits')) {
-					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+					$tr.find('.source').html('<#noescape>${excludeText}</#noescape>');
 				} else {
-					$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
+					$tr.find('.source').html('<#noescape>${pendingDeletionText}</#noescape>');
 				}
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
@@ -558,7 +570,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				// update both hidden fields and table
 				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ untypedId + ']').remove();
 				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(untypedId));
-				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
+				$tr.find('.source').html('<#noescape>${includeText}</#noescape>');
 
 				$tr.removeClass(function(i, css) {
 					return (css.match(/\bitem-type-\S+/g) || []).join(' ');

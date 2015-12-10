@@ -83,23 +83,18 @@
         }
       }
 
-      // SBTWO-5105 check tables after load, in case contents cause resize
-      function onLoad() {
-        self.findWideTables(o.container).each(handleTable);
-      }
-
-      $(window).load(onLoad);
+      self.findWideTables(o.container).each(handleTable);
     }
 
     $.extend(WideTables.prototype, {
       findWideTables: function findWideTables($container) {
         return $container.find('table').filter(function () {
           var $table = $(this);
-          return Math.floor($table.width()) > $table.parent().width();
+          return !$table.data('id7.wide-tables.wrapped') && Math.floor($table.width()) > $table.parent().width();
         });
       },
       wrap: function wrap($table, wrapperClass, containerClass) {
-        $table.wrap($('<div />').addClass(containerClass).append($('<div />').addClass(wrapperClass)));
+        $table.wrap($('<div />').addClass(containerClass).append($('<div />').addClass(wrapperClass))).data('id7.wide-tables.wrapped', true);
 
         return $table.parent();
       },
@@ -147,8 +142,12 @@
     return this.each(attach);
   };
 
-  $(function () {
+  // SBTWO-5105 check tables after load, in case contents cause resize
+  $(window).on('load id7:ready', function () {
     $('.id7-main-content').wideTables();
   });
 
+  $(function () {
+    $(window).trigger('id7:ready');
+  });
 })(jQuery);

@@ -29,7 +29,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 	// The code that updates the calendar title seems to trigger the error, but it doesn't happen
 	// in any real browsers that I've tested with.
 	// Using Firefox JS emulation avoids the problem.
-	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_24
+	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
 
 	// TODO provide the functional tests with a TermFactory so we can work out what week we're in right now,
 	// and create the events in that week. Then we can verify that they actually show up on the calendar
@@ -45,12 +45,12 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
 
 		When("Student1 views their profile")
-		signIn as(P.Student1) to (Path("/profiles"))
+		signIn as P.Student1 to Path("/profiles")
 		val profilePage = new ProfilePage()
 		profilePage should be('currentPage)
 
 		profilePage.timetablePane should be ('defined)
-		val timetable = profilePage.timetablePane.get
+		val timetable = profilePage.timetablePane().get
 		timetable should be('showingCalendar)
 
 	}
@@ -99,7 +99,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		val events = Try(requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker2)))
 		events match {
 			case _:Success[Seq[Map[String,Any]]]=>fail("Didn't expect to be able to get timetable feed without permission")
-			case _:Failure[Seq[Map[String,Any]]]=> {} //OK
+			case _:Failure[Seq[Map[String,Any]]]=> //OK
 		}
 	}
 

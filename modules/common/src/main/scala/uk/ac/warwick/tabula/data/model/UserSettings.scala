@@ -1,15 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection._
-import scala.collection.JavaConversions._
-import org.hibernate.annotations.Type
 import javax.persistence._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
 import org.apache.commons.codec.digest.DigestUtils
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+
+import scala.collection._
 
 @Entity
 class UserSettings extends GeneratedId with SettingsMap with HasNotificationSettings with PermissionsTarget {
 	import UserSettings._
+
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	@Column(unique = true)
 	var userId: String = _
@@ -27,8 +33,16 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 	def bulkEmailSeparator = getStringSetting(Settings.BulkEmailSeparator) getOrElse(DefaultBulkEmailSeparator)
 	def bulkEmailSeparator_= (separator: String) = settings += (Settings.BulkEmailSeparator -> separator)
 
-	def profilesDefaultView = getStringSetting(Settings.ProfilesDefaultView) getOrElse(DefaultProfilesDefaultView)
+	def profilesDefaultView = getStringSetting(Settings.ProfilesDefaultView).getOrElse(DefaultProfilesDefaultView)
 	def profilesDefaultView_= (view: String) = settings += (Settings.ProfilesDefaultView -> view)
+
+	// Active department should be Optional; if the user has chosen one yet they must pick the initial value
+	def activeDepartment: Option[Department] = getStringSetting(Settings.ActiveDepartment).flatMap(moduleAndDepartmentService.getDepartmentByCode)
+	def activeDepartment_= (department: Department) = settings += (Settings.ActiveDepartment -> department.code)
+
+	// Active academic year should be Optional; we handle getting the latest year eslewhere
+	def activeAcademicYear: Option[AcademicYear] = getIntSetting(Settings.ActiveAcademicYear).map(y => AcademicYear(y))
+	def activeAcademicYear_= (academicYear: AcademicYear) = settings += (Settings.ActiveAcademicYear -> academicYear.startYear)
 
 	def string(key: String) = getStringSetting(key).orNull
 
@@ -57,7 +71,9 @@ object UserSettings {
 		val WeekNumberingSystem = "weekNumberSystem"
 		val BulkEmailSeparator = "bulkEmailSeparator"
 		val ProfilesDefaultView = "profilesDefaultView"
-
+		val ActiveDepartment = "activeDepartment"
+		val ActiveAcademicYear = "activeAcademicYear"
+			
 		def hiddenIntroHash(mappedPage: String, setting: String) = {
 			val popover = mappedPage + ":" + setting
 			val shaHash = DigestUtils.shaHex(popover)

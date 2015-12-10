@@ -1,53 +1,28 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 
 <h1>All ${departments?size} departments</h1>
 
-<table class="department-list">
-<tbody>
-	<#list departments as department>
-		<#if !department.hasParent>
-			<@department_item department />
-		</#if>
-	</#list>
-</tbody>
-</table>
+<#list departments as department>
+	<#if !department.hasParent>
+		<@department_item department 0 />
+	</#if>
+</#list>
 
-<div id="department-list-edit-dropdown">
-
-</div>
-
-<#macro department_item department>
-	<tbody>
-	<tr>
-		<td>
-			${(department.code!'?')?upper_case}
-		</td>
-		<td>
-		<a href="<@url page="/sysadmin/departments/${department.code}/" />"><strong>${department.name}</strong></a>
-
-		<#if department.children?has_content>
-			<table><tbody>
-			<#list department.children as child>
-				<@department_item child />
-			</#list>
-			</tbody></table>
-		</#if>
-
-		</td>
-		<td>
-		<#--
-			<#if department.hasParent>
-				<a href="#" class="btn btn-mini">Edit</a>
-			<#else>
-				<a href="#" class="btn btn-mini">New child</a>
-				<a href="#" class="btn btn-mini">Arrange modules</a>
-			</#if>
-
-			-->
-		</td>
-	</tr>
-	</tbody>
+<#macro department_item department indent>
+	<div class="row">
+		<div class="col-md-1 col-md-offset-${indent}">
+		${(department.code!'?')?upper_case}
+		</div>
+		<div class="col-md-6">
+			<a href="<@url page="/sysadmin/departments/${department.code}/" />"><strong>${department.name}</strong></a>
+		</div>
+	</div>
+	<#if department.children?has_content>
+		<#local indent = indent + 1 />
+		<#list department.children as child>
+			<@department_item child indent />
+		</#list>
+	</#if>
 </#macro>
 
 

@@ -1,8 +1,10 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
-	<h1>Create events from Syllabus+</h1>
-	<h4><span class="muted">for</span> ${smallGroupSet.name}</h4>
+	<div class="deptheader">
+		<h1>Create events from Syllabus+</h1>
+		<h4 class="with-related"><span class="muted">for</span> ${smallGroupSet.name}</h4>
+	</div>
 
 	<p>Here are all the small group events for <@fmt.module_name module false /> in the central timetabling system Syllabus+.</p>
 
@@ -22,7 +24,7 @@
 						<tr>
 							<td><@components.timetableEventDetails eventToImport.timetableEvent smallGroupSet.academicYear, module.adminDepartment /></td>
 							<td>
-								<@f.select path="group">
+								<@f.select path="group" cssClass="form-control">
 									<@f.option value="">Do not import</@f.option>
 									<@f.options items=groups itemLabel="name" itemValue="id" />
 								</@f.select>
@@ -40,7 +42,7 @@
 				name="create"
 				value="Save"
 				/>
-			<a class="btn" href="${cancelUrl}">Cancel</a>
+			<a class="btn btn-default" href="${cancelUrl}">Cancel</a>
 		</div>
 	</@f.form>
 </#escape>

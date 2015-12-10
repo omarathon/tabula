@@ -13,10 +13,6 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 
-		// HTMLUnit javascript messes up the DOM when you have use-tooltip on a form element you want to query for
-		// Without disabling js, it's impossible to click on the submit button
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
-
 		When(s"I go to /attendance/manage/xxx/$thisAcademicYearString")
 		go to Path(s"/attendance/manage/xxx/$thisAcademicYearString")
 
@@ -29,6 +25,10 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("0 from SITS")
 
 		When("I add a student manually")
+		click on cssSelector("details.manually-added summary")
+		eventually {
+			findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+		}
 		click on cssSelector("input[name=manuallyAddForm]")
 		eventually(pageSource should include("Add students manually"))
 		click on cssSelector("textarea[name=massAddUsers]")
@@ -43,6 +43,14 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("(0 from SITS, plus 2 added manually)")
 
 		When("I choose a route")
+		click on cssSelector("details.find-students summary")
+		eventually {
+			findAll(cssSelector("details.find-students div.student-filter")).forall { _.isDisplayed } should be {true}
+		}
+		click on cssSelector("#main-content span[data-placeholder='All routes']")
+		eventually {
+			findAll(cssSelector("#main-content input[name=routes]")).forall { _.isDisplayed } should be {true}
+		}
 		click on cssSelector("#main-content input[name=routes]")
 
 		And("I click on Find")
@@ -84,6 +92,10 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		if (!isSitsInFlux) {
 
 			When("I reset both manually added students")
+			click on cssSelector("details.manually-added summary")
+			eventually {
+				findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+			}
 			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=resetMembership]")
 
@@ -95,6 +107,10 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 			pageSource should include("2 students on this scheme")
 
 			When("I exclude the SITS students")
+			click on cssSelector("details.find-students summary")
+			eventually {
+				findAll(cssSelector("details.find-students div.student-filter")).forall { _.isDisplayed } should be {true}
+			}
 			cssSelector("details.find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=manuallyExclude]")
 
@@ -108,6 +124,10 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
 		} else {
 
 			When("I reset all manually added students")
+			click on cssSelector("details.manually-added summary")
+			eventually {
+				findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+			}
 			cssSelector("details.manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
 			click on cssSelector("input[name=resetMembership]")
 

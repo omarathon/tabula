@@ -2,14 +2,12 @@
 <#escape x as x?html>
 	<div class="btn-toolbar dept-toolbar">
 		<#if !modules?has_content && department.children?has_content>
-			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
-				<i class="icon-wrench"></i>
+			<a class="btn btn-default dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				Manage
 			</a>
 		<#else>
 			<div class="btn-group dept-settings">
-				<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-					<i class="icon-wrench"></i>
+				<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
 					Manage
 					<span class="caret"></span>
 				</a>
@@ -20,8 +18,9 @@
 							permission='Department.ManageDisplaySettings'
 							scope=department
 							action_descr='manage department settings'
-							href=settings_url>
-							<i class="icon-list-alt icon-fixed-width"></i> Department settings
+							href=settings_url
+						>
+							Department settings
 						</@fmt.permission_button>
 					</li>
 					<li>
@@ -30,8 +29,9 @@
 							permission='Department.ManageNotificationSettings'
 							scope=department
 							action_descr='manage department notification settings'
-							href=settings_url>
-							<i class="icon-envelope icon-fixed-width"></i> Notification settings
+							href=settings_url
+						>
+							Notification settings
 						</@fmt.permission_button>
 					</li>
 
@@ -40,11 +40,12 @@
 					<li<#if !modules?has_content> class="disabled"</#if>>
 						<#assign import_url><@routes.groups.import_groups_for_year department adminCommand.academicYear /></#assign>
 						<@fmt.permission_button
-						permission='SmallGroups.ImportFromExternalSystem'
-						scope=department
-						action_descr='import small groups from Syllabus+'
-						href=import_url>
-							<i class="icon-cloud-download icon-fixed-width"></i> Create small groups from Syllabus+
+							permission='SmallGroups.ImportFromExternalSystem'
+							scope=department
+							action_descr='import small groups from Syllabus+'
+							href=import_url
+						>
+							Create small groups from Syllabus+
 						</@fmt.permission_button>
 					</li>
 					<li<#if !modules?has_content> class="disabled"</#if>>
@@ -53,19 +54,21 @@
 							permission='SmallGroups.Create'
 							scope=department
 							action_descr='copy groups from previous years'
-							href=copy_url>
-							<i class="icon-share-alt icon-fixed-width"></i> Copy small groups from previous years
+							href=copy_url
+						>
+							Copy small groups from previous years
 						</@fmt.permission_button>
 					</li>
 					<#if features.smallGroupCrossModules>
 						<li>
 							<#assign cross_module_url><@routes.groups.crossmodulegroups department /></#assign>
 							<@fmt.permission_button
-							permission='SmallGroups.Create'
-							scope=department
-							action_descr='create reusable small group allocations'
-							href=cross_module_url>
-								<i class="icon-group icon-fixed-width"></i> Reusable small groups
+								permission='SmallGroups.Create'
+								scope=department
+								action_descr='create reusable small group allocations'
+								href=cross_module_url
+							>
+								Reusable small groups
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -79,8 +82,9 @@
 								permission='SmallGroups.Update'
 								scope=department
 								action_descr='open small groups'
-								href=open_url>
-								<i class="icon-unlock-alt icon-fixed-width"></i> Open
+								href=open_url
+							>
+								Open
 							</@fmt.permission_button>
 						</li>
 						<li ${hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")}>
@@ -89,8 +93,9 @@
 								permission='SmallGroups.Update'
 								scope=department
 								action_descr='close small groups'
-								href=close_url>
-								<i class="icon-lock icon-fixed-width"></i> Close
+								href=close_url
+							>
+								Close
 							</@fmt.permission_button>
 						</li>
 					</#if>
@@ -101,64 +106,43 @@
 							permission='SmallGroups.Update'
 							scope=department
 							action_descr='publish groups to students and staff'
-							href=notify_url>
-							<i class="icon-envelope-alt icon-fixed-width"></i> Publish
+							href=notify_url
+						>
+							Publish
 						</@fmt.permission_button>
 					</li>
 
 					<li class="divider"></li>
 
 					<li<#if !hasGroupAttendance> class="disabled"</#if>>
-						<a href="<@routes.groups.departmentAttendance department adminCommand.academicYear />"><i class="icon-group icon-fixed-width"></i> View attendance</a>
+						<a href="<@routes.groups.departmentAttendance department adminCommand.academicYear />">View attendance</a>
 					</li>
 				</ul>
 			</div>
 		</#if>
-
-		<div class="btn-group dept-settings">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-				<i class="icon-calendar"></i>
-				${adminCommand.academicYear.label}
-				<span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu pull-right">
-				<#list academicYears as year>
-					<li>
-						<a href="<@routes.groups.departmenthome department year />">
-							<#if year.startYear == adminCommand.academicYear.startYear>
-								<strong>${year.label}</strong>
-							<#else>
-								${year.label}
-							</#if>
-						</a>
-					</li>
-				</#list>
-			</ul>
-		</div>
 	</div>
 
-	<#macro deptheaderroutemacro department>
-		<@routes.groups.departmenthome department adminCommand.academicYear />
-	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes.groups />
-
-	<@fmt.deptheader "" "" department routes.groups "deptheaderroute" "with-settings" />
+	<#function route_function dept>
+		<#local result><@routes.groups.departmenthome dept adminCommand.academicYear /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader title="${department.name}" route_function=route_function />
 
 	<#if !hasGroups && !isFiltered>
-		<p class="alert alert-info empty-hint"><i class="icon-lightbulb"></i> There are no small groups set up for ${adminCommand.academicYear.label} in ${department.name}.</p>
+		<p class="alert alert-info empty-hint">There are no small groups set up for ${adminCommand.academicYear.label} in ${department.name}.</p>
 	</#if>
 
 	<h2>Create groups</h2>
 
 	<div class="form-inline creation-form" style="margin-bottom: 10px;">
 		<label for="module-picker">For this module:</label>
-		<select id="module-picker" class="input-xlarge" placeholder="Start typing a module code or name&hellip;" data-provide="typeahead">
+		<select id="module-picker" class="form-control" style="width: 360px;" placeholder="Start typing a module code or name&hellip;">
 			<option value=""></option>
 			<#list modules as module>
 				<option value="${module.code}"><@fmt.module_name module false /></option>
 			</#list>
 		</select>
-		<button type="button" class="btn disabled">Create</button>
+		<button type="button" class="btn btn-default disabled">Create</button>
 	</div>
 
 	<script type="text/javascript">
@@ -168,6 +152,8 @@
 
 			var $picker = $('.creation-form #module-picker');
 			var $button = $('.creation-form button');
+
+			$picker.comboTypeahead();
 
 			var manageButtonState = function(value) {
 				if (value) {
@@ -200,18 +186,18 @@
 				<@f.form commandName="adminCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
 					<@f.errors cssClass="error form-errors" />
 
-					<div class="small-groups-filter btn-group-group well well-small">
+					<div class="small-groups-filter btn-group-group well well-sm">
 						<button type="button" class="clear-all-filters btn btn-link">
-							<span class="icon-stack">
-								<i class="icon-filter"></i>
-								<i class="icon-ban-circle icon-stack-base"></i>
+							<span class="fa-stack">
+								<i class="fa fa-filter fa-stack-1x"></i>
+								<i class="fa fa-ban fa-stack-2x"></i>
 							</span>
 						</button>
 
 						<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
 							<@spring.bind path=path>
 								<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-									<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+									<a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
 										<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 										<span class="caret"></span>
 									</a>
@@ -315,13 +301,11 @@
 					(function($) {
 						var processContainer = function($container) {
 							Groups.zebraStripeGroups($container);
-							Groups.wireModalButtons($container);
 							$container.mapPopups();
-							AjaxPopup.wireAjaxPopupLinks($container);
 							$container.find('.use-tooltip').tooltip();
 							$container.find('.use-popover').tabulaPopover({
 								trigger: 'click',
-								container: '#container'
+								container: 'body'
 							});
 						};
 
@@ -351,7 +335,7 @@
 							$list.find('> ul').prepend(
 									$('<li />').addClass('clear-this-filter')
 											.append(
-											$('<button />').attr('type', 'button')
+												$('<button />').attr('type', 'button')
 													.addClass('btn btn-link')
 													.html('<i class="icon-ban-circle"></i> Clear selected items')
 													.on('click', function(e) {
@@ -363,7 +347,7 @@
 
 														doRequest($list.closest('form'));
 													})
-									)
+											)
 											.append($('<hr />'))
 							);
 						}
@@ -394,7 +378,7 @@
 					} else {
 						$('.clear-all-filters').removeAttr("disabled");
 					}
-				}
+				};
 
 				var doRequest = function($form, preventPageReset) {
 					if (typeof history.pushState !== 'undefined')

@@ -1,19 +1,14 @@
 package uk.ac.warwick.tabula.web
 
-import uk.ac.warwick.tabula.BrowserTest
-import org.openqa.selenium.By
-import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.NoLogging
 import dispatch.classic._
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import dispatch.classic.thread.ThreadSafeHttpClient
-import uk.ac.warwick.tabula.FunctionalTestProperties
 import org.apache.http.HttpStatus
+import org.openqa.selenium.By
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestProperties}
 
 trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 
 	def setFeatureState(name:String, state:Boolean){
-		signIn as(P.Sysadmin) to (Path("/sysadmin/features"))
+		signIn as P.Sysadmin to Path("/sysadmin/features")
 		val featureForm = webDriver.findElement(By.id(name + "_form"))
 		val buttonText = state.toString
 		val button = featureForm.findElement(By.xpath(s"./input[@type='submit' and @value='$buttonText']"))
@@ -27,11 +22,11 @@ trait FeaturesDriver extends BrowserTest with SimpleHttpFetching {
 	}
 
 	def enableFeature(name:String) {
-		setFeatureState(name, true)
+		setFeatureState(name, state = true)
 	}
 
 	def disableFeature(name:String) {
-		setFeatureState(name, false)
+		setFeatureState(name, state = false)
 	}
 
 	def isFeatureEnabled(name: String) = {

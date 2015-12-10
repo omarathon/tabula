@@ -1,10 +1,10 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
-<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
+<#macro pagination currentPage totalResults resultsPerPage>
 	<#local totalPages = (totalResults / resultsPerPage)?ceiling />
-	<div class="pagination pagination-right ${extra_classes}">
-		<ul>
+	<nav class="pull-right">
+		<ul class="pagination pagination-sm">
 			<#if currentPage lte 1>
 				<li class="disabled"><span>&laquo;</span></li>
 			<#else>
@@ -25,7 +25,7 @@
 				<li><a data-page="${currentPage + 1}">&raquo;</a></li>
 			</#if>
 		</ul>
-	</div>
+	</nav>
 </#macro>
 
 <div class="add-student-to-set">
@@ -42,8 +42,8 @@
 
 	<details class="find-students" <#if expandFind>open</#if> data-submitparam="${ManageDepartmentSmallGroupsMappingParameters.findStudents}">
 		<summary class="large-chevron collapsible">
-			<span class="legend">Find students
-				<small>Select students by route, year of study etc.</small>
+			<span class="lead">Find students
+				<span class="very-subtle">Select students by route, year of study etc.</span>
 			</span>
 		</summary>
 		<div>
@@ -53,18 +53,18 @@
 		<@f.hidden path="findCommand.page" />
 		<@f.hidden path="findCommand.sortOrder" />
 
-		<div class="student-filter btn-group-group well well-small">
+		<div class="student-filter btn-group-group well well-sm">
 			<button type="button" class="clear-all-filters btn btn-link">
-				<span class="icon-stack">
-					<i class="icon-filter"></i>
-					<i class="icon-ban-circle icon-stack-base"></i>
+				<span class="fa-stack">
+					<i class="fa fa-filter fa-stack-1x"></i>
+					<i class="fa fa-ban fa-stack-2x"></i>
 				</span>
 			</button>
 
 			<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
 				<@spring.bind path=path>
 					<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-						<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+						<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 							<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 							<span class="caret"></span>
 						</a>
@@ -81,14 +81,14 @@
 												</#if>
 											</#list>
 										</#if>
-										<li class="check-list-item" data-natural-sort="${item_index}">
+										<li class="checkbox check-list-item" data-natural-sort="${item_index}">
 											<label class="checkbox <#if !isValid>disabled</#if>">
 												<#nested item isValid/>
 											</label>
 										</li>
 									</#list>
 								<#else>
-									<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+									<li><small class="very-subtle" style="padding-left: 5px;">N/A for this department</small></li>
 								</#if>
 							</ul>
 						</div>
@@ -163,9 +163,7 @@
 			</@filter>
 
 			<div class="btn-group">
-				<button disabled class="btn btn-mini btn-primary search" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.findStudents}" value="true">
-					<i class="icon-search"></i> Find
-				</button>
+				<button disabled class="btn btn-xs btn-primary search" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.findStudents}" value="true">Find</button>
 			</div>
 
 		</div>
@@ -176,7 +174,6 @@
 					currentPage=findCommand.page
 					resultsPerPage=findCommand.studentsPerPage
 					totalResults=findCommand.totalResults
-					extra_classes="pagination-small"
 				/>
 			</div>
 
@@ -201,22 +198,20 @@
 
 	<details class="manually-added" <#if expandManual>open</#if>>
 		<summary class="large-chevron collapsible">
-			<span class="legend">Manually add students
-				<small>Add a list of students by university ID or username</small>
+			<span class="lead">Manually add students
+				<small class="very-subtle">Add a list of students by university ID or username</small>
 			</span>
 		</summary>
 		<div>
 
 		<p style="margin-bottom: 1em;">
-			<input style="margin-right: 8px;" class="btn" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.manuallyAddForm}" value="Add students manually" />
-			<@fmt.p editMembershipCommandResult.includedStudentIds?size "student" />
-			added manually and
-			<@fmt.p editMembershipCommandResult.excludedStudentIds?size "student" />
-			removed manually
+			<input style="margin-right: 8px;" class="btn btn-default" type="submit" name="${ManageDepartmentSmallGroupsMappingParameters.manuallyAddForm}" value="Add students manually" />
+			<@fmt.p editMembershipCommandResult.includedStudentIds?size "student" /> added manually and
+			<@fmt.p editMembershipCommandResult.excludedStudentIds?size "student" /> removed manually
 		</p>
 
 		<#if (addUsersResult.missingUsers?size > 0)>
-			<div class="alert alert-warning">
+			<div class="alert alert-danger">
 				The following students could not be added as they were not found:
 				<ul>
 					<#list addUsersResult.missingUsers as user>

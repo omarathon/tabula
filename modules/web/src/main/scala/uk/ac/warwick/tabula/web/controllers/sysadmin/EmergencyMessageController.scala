@@ -50,8 +50,7 @@ class EmergencyMessageController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: EmergencyMessageCommand, errors: Errors) =
-		Mav("sysadmin/emergency-message").crumbs(Breadcrumbs.Current("Sysadmin emergency message"))
-			.noLayoutIf(ajax)
+		Mav("sysadmin/emergency-message").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid form: EmergencyMessageCommand, errors: Errors) = {

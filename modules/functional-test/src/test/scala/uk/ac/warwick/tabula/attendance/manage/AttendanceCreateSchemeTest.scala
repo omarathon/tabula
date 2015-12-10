@@ -12,10 +12,6 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 
-		// HTMLUnit javascript messes up the DOM when you have use-tooltip on a form element you want to query for
-		// Without disabling js, it's impossible to click on the submit button
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
-
 		When(s"I go to /attendance/manage/xxx/$thisAcademicYearString/new")
 		go to Path(s"/attendance/manage/xxx/$thisAcademicYearString/new")
 
@@ -31,6 +27,14 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		eventually(currentUrl should endWith(s"students"))
 
 		When("I choose a route")
+		click on cssSelector("details.find-students summary")
+		eventually {
+			findAll(cssSelector("details.find-students div.student-filter")).forall { _.isDisplayed } should be {true}
+		}
+		click on cssSelector("#main-content span[data-placeholder='All routes']")
+		eventually {
+			findAll(cssSelector("#main-content input[name=routes]")).forall { _.isDisplayed } should be {true}
+		}
 		click on cssSelector("#main-content input[name=routes]")
 
 		And("I click on Find")
@@ -44,6 +48,10 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("(2 from SITS)")
 
 		When("I add a student manually")
+		click on cssSelector("details.manually-added summary")
+		eventually {
+			findAll(cssSelector("details.manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
+		}
 		click on cssSelector("input[name=manuallyAddForm]")
 		eventually(pageSource should include("Add students manually"))
 		click on cssSelector("textarea[name=massAddUsers]")

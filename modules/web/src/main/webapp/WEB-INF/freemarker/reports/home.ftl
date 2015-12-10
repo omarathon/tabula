@@ -10,7 +10,7 @@
 	This is a service for viewing reports for various aspects of Tabula.
 </p>
 
-<#if departments?size == 0 && user.staff>
+<#if departmentsWithPermission?size == 0 && user.staff>
 	<p>
 		You do not currently have permission to view any reports. Please contact your
 		departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
@@ -27,10 +27,10 @@
 	</script>
 </#if>
 
-<#if departments?has_content>
+<#if departmentsWithPermission?has_content>
 	<h2>View reports</h2>
 	<ul>
-		<#list departments as department>
+		<#list departmentsWithPermission as department>
 			<#list academicYears as year>
 				<li><h3><a href="<@routes.reports.departmentWithYear department year />">${department.name} ${year.toString}</a></h3></li>
 			</#list>

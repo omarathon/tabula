@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.data.Daoisms._
-import org.hibernate.criterion.Restrictions.{eq => is}
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.userlookup.User
@@ -17,7 +15,7 @@ trait FeedbackDao {
 	def getExamFeedbackMap(exam: Exam, users: Seq[User]): Map[User, ExamFeedback]
 }
 
-abstract class AbstractFeedbackDao extends FeedbackDao {
+abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 	self: ExtendedSessionComponent =>
 
 	override def getAssignmentFeedback(id: String) = getById[AssignmentFeedback](id)

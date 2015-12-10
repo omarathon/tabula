@@ -261,13 +261,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		val departmentRestriction = Aliasable.addAliases(
 			new ScalaRestriction(
 				org.hibernate.criterion.Restrictions.or(
-					Daoisms.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
-					Daoisms.is("route.adminDepartment", queryDepartment),
-					Daoisms.is("homeDepartment", queryDepartment),
-					Daoisms.is("department.parent", queryDepartment),
+					HibernateHelpers.is("studentCourseYearDetails.enrolmentDepartment", queryDepartment),
+					HibernateHelpers.is("route.adminDepartment", queryDepartment),
+					HibernateHelpers.is("homeDepartment", queryDepartment),
+					HibernateHelpers.is("department.parent", queryDepartment),
 					org.hibernate.criterion.Restrictions.and(
-						Daoisms.is("route.teachingDepartmentsActive", true),
-						Daoisms.is("teachingInfo.department", queryDepartment)
+						HibernateHelpers.is("route.teachingDepartmentsActive", true),
+						HibernateHelpers.is("teachingInfo.department", queryDepartment)
 					)
 				)
 			),

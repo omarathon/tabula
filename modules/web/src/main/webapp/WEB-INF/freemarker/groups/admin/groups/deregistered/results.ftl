@@ -7,7 +7,7 @@
 
 	<p>The following students have been deregistered for groups in ${smallGroupSet.name}:</p>
 
-	<table class="table table-bordered table-striped table-condensed table-hover table-checkable">
+	<table class="table table-striped table-condensed table-hover table-checkable">
 		<thead>
 			<tr>
 				<th>First name</th>

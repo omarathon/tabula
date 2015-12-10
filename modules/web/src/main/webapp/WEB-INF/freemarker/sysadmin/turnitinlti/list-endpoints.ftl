@@ -2,18 +2,18 @@
 
 <h1>Turnitin LTI - list endpoints for an assignment</h1>
 
-	<@f.form method="post" action="${url('/sysadmin/turnitinlti/listendpoints')}" commandName="turnitinLtiListEndpointsCommand" cssClass="form-horizontal">
+	<@f.form method="post" action="${url('/sysadmin/turnitinlti/listendpoints')}" commandName="turnitinLtiListEndpointsCommand">
 
 		<@f.errors cssClass="error form-errors" />
 
-		<@form.labelled_row "turnitinAssignmentId" "Turnitin Assignment ID">
-			<@f.input path="turnitinAssignmentId" cssClass="text" />
-		</@form.labelled_row>
+		<@bs3form.labelled_form_group path="turnitinAssignmentId" labelText="Turnitin Assignment ID">
+			<@f.input path="turnitinAssignmentId" cssClass="form-control" />
+		</@bs3form.labelled_form_group>
 
-	<div class="submit-buttons">
-		<input type="submit" value="Save" class="btn btn-primary">
-		<a class="btn" href="<@url page="/sysadmin/turnitinlti" />">Cancel</a>
-	</div>
+		<@bs3form.labelled_form_group>
+			<input type="submit" value="Save" class="btn btn-primary">
+			<a class="btn btn-default" href="<@url page="/sysadmin/turnitinlti" />">Cancel</a>
+		</@bs3form.labelled_form_group>
 
 	</@f.form>
 

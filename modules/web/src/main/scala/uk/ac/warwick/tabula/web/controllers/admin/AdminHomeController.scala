@@ -1,27 +1,62 @@
 package uk.ac.warwick.tabula.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.spring.Wire
+import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.admin.web.Routes
+import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 
-@Controller class AdminHomeController extends AdminController {
+import scala.collection.JavaConverters._
 
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var routeService = Wire[CourseAndRouteService]
+trait AdminDepartmentsModulesAndRoutes {
 
-	@RequestMapping(Array("/admin")) def home(user: CurrentUser) = {
+	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent =>
+
+	case class Result(departments: Set[Department], modules: Set[Module], routes: Set[Route])
+
+	def ownedDepartmentsModulesAndRoutes(user: CurrentUser): Result = {
 		val ownedDepartments =
-			moduleService.departmentsWithPermission(user, Permissions.Module.Administer) ++
-			moduleService.departmentsWithPermission(user, Permissions.Route.Administer)
-		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.Administer)
-		val ownedRoutes = routeService.routesWithPermission(user, Permissions.Route.Administer)
+			moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.Administer) ++
+				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Route.Administer)
+		val ownedModules = moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.Administer)
+		val ownedRoutes = courseAndRouteService.routesWithPermission(user, Permissions.Route.Administer)
+		Result(ownedDepartments, ownedModules, ownedRoutes)
+	}
+}
 
-		Mav("admin/home/view",
-			"ownedDepartments" -> ownedDepartments,
-			"ownedModuleDepartments" -> ownedModules.map { _.adminDepartment },
-			"ownedRouteDepartments" -> ownedRoutes.map { _.adminDepartment })
+@Controller
+class AdminHomeController extends AdminController with DepartmentScopedController with AdminDepartmentsModulesAndRoutes
+	with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent with AutowiringUserSettingsServiceComponent {
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(department: Department): Option[Department] = retrieveActiveDepartment(None)
+
+	override val departmentPermission: Permission = null
+
+	@ModelAttribute("departmentsWithPermission")
+	override def departmentsWithPermission: Seq[Department] = {
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
+
+		val result = ownedDepartmentsModulesAndRoutes(user)
+		(result.departments ++ result.modules.map(_.adminDepartment) ++ result.routes.map(_.adminDepartment))
+			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
+	}
+	
+	@RequestMapping(Array("/admin"))
+	def home(@ModelAttribute("activeDepartment") activeDepartment: Option[Department]) = {
+		if (activeDepartment.isDefined) {
+			Redirect(Routes.department(activeDepartment.get))
+		} else {
+			val result = ownedDepartmentsModulesAndRoutes(user)
+
+			Mav("admin/home/view",
+				"ownedDepartments" -> result.departments,
+				"ownedModuleDepartments" -> result.modules.map { _.adminDepartment },
+				"ownedRouteDepartments" -> result.routes.map { _.adminDepartment })
+		}
 	}
 
 }

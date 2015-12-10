@@ -13,16 +13,15 @@
 			You can delete small groups if they've been created in error.
 		</p>
 
-		<@f.errors path="confirm" cssClass="error" />
-		<@form.label checkbox=true>
+		<@bs3form.checkbox path="confirm">
 			<@f.checkbox path="confirm" id="confirmCheck" />
 			<strong> I definitely will not need these groups again and wish to delete them entirely.</strong>
-		</@form.label>
+		</@bs3form.checkbox>
 
-		<div class="submit-buttons">
+		<@bs3form.form_group>
 			<input type="submit" value="Delete" class="btn btn-danger">
-			<a href="<@routes.groups.editset smallGroupSet />" class="btn">Cancel</a>
-		</div>
+			<a href="<@routes.groups.editset smallGroupSet />" class="btn btn-default">Cancel</a>
+		</@bs3form.form_group>
 	</@f.form>
 
 	<script type="text/javascript">

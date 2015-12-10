@@ -16,16 +16,16 @@
 </#function>
 
 <#macro render_tree node>
-	${node.target.humanReadableId} (${node.target.urlCategory}) <a class="btn btn-mini" href="<@routes.admin.permissions node.target />">Edit permissions</a>
+	${node.target.humanReadableId} (${node.target.urlCategory}) <a class="btn btn-xs btn-default" href="<@routes.admin.permissions node.target />">Edit permissions</a>
 	<ul>
 		<#list node.roles as role>
 			<li>
-				<i class="icon-user fa fa-user" title="Role"></i> <#noescape>${roleDescription(role.definition)}</#noescape>: <@render_users role.users />
+				<i class="fa fa-user" title="Role"></i> <#noescape>${roleDescription(role.definition)}</#noescape>: <@render_users role.users />
 			</li>
 		</#list>
 		<#list node.permissions as permission>
 			<li>
-				<i class="icon-lock fa fa-lock" title="Permission"></i> ${permission.permission.description}: <@render_users permission.users />
+				<i class="fa fa-lock" title="Permission"></i> ${permission.permission.description}: <@render_users permission.users />
 			</li>
 		</#list>
 		<#list node.children as child>
@@ -54,27 +54,18 @@
 	</#if>
 </#macro>
 
-<#if target.urlCategory == 'department'>
-	<@fmt.deptheader "Roles and permissions" "for" target routes.admin "permissionstree" "" />
-<#else>
+<div class="deptheader">
 	<h1>Roles and permissions</h1>
-	<h5>
+	<h5 class="with-related">
 		<span class="muted">for</span>
 		${target.humanReadableId}
 	</h5>
-</#if>
+</div>
 
 <ul>
 	<li><@render_tree tree /></li>
 </ul>
 
 <div id="profile-modal" class="modal fade profile-subset"></div>
-<script type="text/javascript">
-	jQuery(function($) {
-		$('.use-popover').on('shown', function() {
-			$('a.ajax-modal').ajaxModalLink();
-		});
-	});
-</script>
 
 </#escape></#compress>

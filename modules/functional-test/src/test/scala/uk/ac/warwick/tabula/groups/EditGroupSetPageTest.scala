@@ -7,7 +7,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 	"Department Admin" should "be able to view the Edit page for an existing group" in {
 		Given("I am logged in as admin")
-			signIn as(P.Admin1)  to (Path("/groups/"))
+			signIn as P.Admin1  to Path("/groups/")
 		And("I view the small group page for test services")
 			val groupsPage = new SmallGroupTeachingPage("xxx")
 			go to groupsPage.url
@@ -27,15 +27,15 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			enableFeature("smallGroupTeachingStudentSignUp")
 
 		When("I log in as admin")
-			signIn as(P.Admin1)  to (Path("/groups/"))
+			signIn as P.Admin1  to Path("/groups/")
 
 		And(" I view the edit properties page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url
 			val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditProperties
 
 		Then("I should see the options to show/hide tutor name")
-			checkbox("studentsCanSeeTutorName") should not be (null)
-			checkbox("studentsCanSeeOtherMembers") should not be (null)
+			checkbox("studentsCanSeeTutorName") should not be null
+			checkbox("studentsCanSeeOtherMembers") should not be null
 
 		When("I check the checkboxes and click Save")
 			checkbox("studentsCanSeeTutorName").select()
@@ -58,7 +58,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
 
 		When("I log in as admin")
-			signIn as(P.Admin1)  to (Path("/groups/"))
+			signIn as P.Admin1  to Path("/groups/")
 
 		And("I view the edit groups page for xxx01/Test Lab")
 			go to groupsetSummaryPage.url
@@ -72,7 +72,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 				editGroups.submitAndExit()
 
 		Then("The page is the groupset summary page")
-			groupsetSummaryPage should be('currentPage)
+			groupsetSummaryPage.isCurrentPage should be {true}
 
 		When("I navigate to the edit groups page again")
 		  groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups

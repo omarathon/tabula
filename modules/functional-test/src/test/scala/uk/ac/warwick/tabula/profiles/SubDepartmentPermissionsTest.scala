@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles
 
 import uk.ac.warwick.tabula.profiles.pages.SubDepartmentFixture
 
-class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
+class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 	/**
 	 * These tests all assume that:
@@ -14,9 +14,9 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 	 *
 	 */
 
-		before{
-			beforeEverything()
-		}
+	before{
+		beforeEverything()
+	}
 
 	"A departmental administrator" should "have admin rights on students in their department" in {
 
@@ -26,7 +26,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student1),"xxx198")
 
 		Then("Admin1 can view Student1's timetable")
-		signIn as (P.Admin1) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
+		signIn as P.Admin1 to Path(s"/profiles/view/${P.Student1.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
@@ -36,7 +36,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student2),"xug19")
 
 		Then("Admin1 can view Student2's profile")
-		signIn as (P.Admin1) to (Path(s"/profiles/view/${P.Student2.warwickId}"))
+		signIn as P.Admin1 to Path(s"/profiles/view/${P.Student2.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
@@ -47,8 +47,8 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student3),"xpg12")
 
 		Then("Admin3 can't view Student3's profile")
-		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student3.warwickId}"))
-		find(cssSelector("#timetable-pane")) should not be ('defined)
+		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student3.warwickId}")
+		find(cssSelector("#timetable-pane")) should not be 'defined
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students who match their sub-departments" in {
@@ -58,7 +58,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student1),"xxx198")
 
 		Then("Admin3 can view Student1's profile")
-		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
+		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student1.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
@@ -69,7 +69,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student2),"xug19")
 
 		Then("Admin3 can view Student2's profile")
-		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student2.warwickId}"))
+		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student2.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
@@ -84,13 +84,13 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 		registerStudentsOnModule(Seq(P.Student2),"xug19")
 
 		Then("Admin4 can view Student1's profile")
-		signIn as (P.Admin4) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
+		signIn as P.Admin4 to Path(s"/profiles/view/${P.Student1.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 
 		And("Admin4 cannot view student2's profile")
 
-		go to(Path(s"/profiles/view/${P.Student2.warwickId}"))
-		find(cssSelector("#timetable-pane")) should not be ('defined)
+		go to Path(s"/profiles/view/${P.Student2.warwickId}")
+		find(cssSelector("#timetable-pane")) should not be 'defined
 	}
 
 }

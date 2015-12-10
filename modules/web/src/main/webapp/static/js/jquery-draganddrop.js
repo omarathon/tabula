@@ -130,7 +130,7 @@ Method calls (after initialising):
                 }
             });
 
-            // recalculate items per target if any of the targets have limits less than/equal to 
+            // recalculate items per target if any of the targets have limits less than/equal to
             if(itemCountToBeDividedUp != itemsPerTarget) {
                 itemsPerTarget = Math.floor(itemCountToBeDividedUp / unlimitedTargets)
             }
@@ -393,7 +393,7 @@ Method calls (after initialising):
 
                 if (multidrag) msg = $element.closest('ul').find('.ui-selected').length + " " + itemName + "s";
                 return $('<div>')
-                    .addClass('label')
+                    .addClass('label label-default')
                     .addClass('multiple-items-drag-placeholder')
                     .html(msg);
             },

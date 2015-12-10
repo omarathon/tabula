@@ -82,7 +82,27 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		attendanceMonitoringDao.sessionFactory = sessionFactory
 	}
 
-	@Test def findUnrecordedPoints() { transactional { tx =>
+	@Test def findRelevantPoints() { transactional { tx =>
+		session.save(department)
+		session.save(route)
+		session.save(student1)
+		session.save(student2)
+		session.save(scheme1)
+		session.save(point1)
+		session.save(point2)
+		session.save(point3)
+		session.save(point4)
+
+		val points = attendanceMonitoringDao.findRelevantPoints(department, academicYear, new LocalDate(2014, 10, 4))
+		points.size should be (3)
+		points.contains(point1) should be {true}
+		points.contains(point2) should be {true}
+		points.contains(point3) should be {true}
+		// Point too late
+		points.contains(point4) should be {false}
+	}}
+
+	@Test def getAllCheckpoints() { transactional { tx =>
 		session.save(department)
 		session.save(route)
 		session.save(student1)
@@ -105,20 +125,15 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 			session.save(checkpoint)
 		}
 
-		val points = attendanceMonitoringDao.findUnrecordedPoints(department, academicYear, new LocalDate(2014, 10, 4))
-		points.size should be (2)
-		// 2 students, 1 recorded
-		points.contains(point1) should be {true}
-		// 2 students, 2 recorded
-		points.contains(point2) should be {false}
-		// 2 students, 0 recorded
-		points.contains(point3) should be {true}
-		// Point too late
-		points.contains(point4) should be {false}
-
+		val checkpoints = attendanceMonitoringDao.getAllCheckpoints(Seq(point1, point2, point3, point4))
+		checkpoints.size should be (2)
+		checkpoints(point1).size should be (1)
+		checkpoints(point2).size should be (2)
+		checkpoints(point3).size should be (0)
+		checkpoints(point4).size should be (0)
 	}}
 
-	@Test def findUnrecordedStudents() { transactional { tx =>
+	@Test def countCheckpointsForPoints() { transactional { tx =>
 		session.save(department)
 		session.save(route)
 		session.save(student1)
@@ -129,25 +144,24 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		session.save(point3)
 		session.save(point4)
 
-		scheme1.members.asInstanceOf[UserGroup].userLookup = userLookup
-
 		val point1student1checkpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.Attended)
 		point1student1checkpoint.updatedBy = ""
 		point1student1checkpoint.updatedDate = DateTime.now
 		session.save(point1student1checkpoint)
 
-		val point2student1checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student1, AttendanceState.Attended)
-		point2student1checkpoint.updatedBy = ""
-		point2student1checkpoint.updatedDate = DateTime.now
-		session.save(point2student1checkpoint)
+		for (s <- Seq(student1, student2)) {
+			val checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, s, AttendanceState.Attended)
+			checkpoint.updatedBy = ""
+			checkpoint.updatedDate = DateTime.now
+			session.save(checkpoint)
+		}
 
-		val point2student2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.Attended)
-		point2student2checkpoint.updatedBy = ""
-		point2student2checkpoint.updatedDate = DateTime.now
-		session.save(point2student2checkpoint)
-
-		val users = attendanceMonitoringDao.findUnrecordedStudents(department, academicYear, new LocalDate(2014, 10, 4))
-		users.size should be (2)
+		val checkpoints = attendanceMonitoringDao.countCheckpointsForPoints(Seq(point1, point2, point3, point4))
+		checkpoints.size should be (2)
+		checkpoints(point1) should be (1)
+		checkpoints(point2) should be (2)
+		checkpoints(point3) should be (0)
+		checkpoints(point4) should be (0)
 	}}
 
 	@Test def findNonReportedTerms() { transactional { tx =>
@@ -247,4 +261,3 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	}}
 
 }
-

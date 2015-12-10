@@ -12,7 +12,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 
 		checkbox("showStudentName").select()
 
-		cssSelector("div.submit-buttons input.btn-primary").webElement.click()
+		cssSelector("#displaySettingsCommand input.btn-primary").webElement.click()
 
 		// Ensure that we've been redirected back to the dept admin page
 		currentUrl should endWith ("/department/xxx/")
@@ -20,7 +20,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 		// Check that when we go back to the page, all of the settings have been populated
 		openDisplaySettings()
 
-		checkbox("showStudentName").isSelected should be (true)
+		checkbox("showStudentName").isSelected should be {true}
 	}
 
 	"Department admin" should "be able to set default group signup method for a department" in {
@@ -34,7 +34,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
  			openDisplaySettings()
 
 	  Then("the administrator can see the option to set a default signup method")
-			radioButtonGroup("defaultGroupAllocationMethod") should not be(null)
+			radioButtonGroup("defaultGroupAllocationMethod") should not be null
 
 
 		When("the administrator selects 'Manual Allocation' and submits")
@@ -60,12 +60,12 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 		eventually {
 			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
 		}
-		click on (cssSelector(".dept-settings a.dropdown-toggle"))
+		click on cssSelector(".dept-settings a.dropdown-toggle")
 		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Department settings"))
 		eventually {
-			displayLink.isDisplayed should be (true)
+			displayLink.isDisplayed should be {true}
 		}
-		click on (displayLink)
+		click on displayLink
 	}
 
 }

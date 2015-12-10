@@ -15,20 +15,17 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 @Controller
-@RequestMapping(Array("/sysadmin/departments/"))
+@RequestMapping(Array("/sysadmin/departments"))
 class SysadminDeptDetailsController extends BaseSysadminController {
 
 	@RequestMapping
-	def departments = Mav("sysadmin/departments/list",
-		"departments" -> moduleService.allDepartments.sortBy{ _.name })
-		.crumbs(Breadcrumbs.Current("Sysadmin department list"))
+	def departments =
+		Mav("sysadmin/departments/list", "departments" -> moduleService.allDepartments.sortBy{ _.name })
 
 	@RequestMapping(Array("/{dept}/"))
 	def department(@PathVariable("dept") dept: Department) = {
 		mandatory(dept)
-		Mav("sysadmin/departments/single",
-			"department" -> dept)
-			.crumbs(Breadcrumbs.Current(s"Sysadmin ${dept.name} overview"))
+		Mav("sysadmin/departments/single","department" -> dept).crumbs(SysadminBreadcrumbs.Departments.Home)
 	}
 }
 
@@ -44,8 +41,10 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 		RevokeRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
 	def form(@PathVariable("department") department: Department): Mav = {
-		Mav("sysadmin/departments/permissions", "department" -> department)
-			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
+		Mav("sysadmin/departments/permissions", "department" -> department).crumbs(
+			SysadminBreadcrumbs.Departments.Home,
+			SysadminBreadcrumbs.Departments.Department(department)
+		)
 	}
 
 	def form(department: Department, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
@@ -54,8 +53,11 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 			"department" -> department,
 			"users" -> users,
 			"role" -> role,
-			"action" -> action)
-			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
+			"action" -> action
+		).crumbs(
+			SysadminBreadcrumbs.Departments.Home,
+			SysadminBreadcrumbs.Departments.Department(department)
+		)
 	}
 }
 
@@ -74,7 +76,7 @@ class SysadminDepartmentAddPermissionController extends BaseSysadminController w
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors): Mav = {
 		val department = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(department)
 		} else {
 			val role = Some(command.apply().roleDefinition)
@@ -92,7 +94,7 @@ class SysadminDepartmentRemovePermissionController extends BaseSysadminControlle
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
 	def addPermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand, errors: Errors): Mav = {
 		val department = command.scope
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			form(department)
 		} else {
 			val role = Some(command.apply().roleDefinition)

@@ -6,7 +6,8 @@
 
 	<p>You are deleting point: ${point.name}. Are you sure?</p>
 
-	<input type="submit" value="Delete" class="btn btn-danger"/> <a class="btn" href="<@url page="/sysadmin/attendancetemplates/${point.scheme.id}/edit"/>">Cancel</a>
+	<input type="submit" value="Delete" class="btn btn-danger"/>
+	<a class="btn btn-default" href="<@url page="/sysadmin/attendancetemplates/${point.scheme.id}/edit"/>">Cancel</a>
 
 </form>
 
