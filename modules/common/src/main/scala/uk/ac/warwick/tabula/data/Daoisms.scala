@@ -70,7 +70,7 @@ trait HelperRestrictions extends Logging {
 	def safeInSeq[A](criteriaFactory: () => ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
 		iterable.grouped(maxInClause).toSeq.flatMap(maxedIterable => {
 			val c = criteriaFactory.apply()
-			c.add(org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)).seq
+			c.add(org.hibernate.criterion.Restrictions.in(propertyName, maxedIterable.asJavaCollection)).seq
 		})
 	}
 	def safeInSeqWithProjection[A, B](criteriaFactory: () => ScalaCriteria[A], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[B] = {
