@@ -17,10 +17,10 @@ class ListSmallGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[M
 	PermissionCheck(Permissions.SmallGroups.ReadMembership, group)
 
 	override def applyInternal() = {
-		group.students.users map { user =>
+		group.students.users.map { user =>
 			val member = profileService.getMemberByUniversityId(user.getWarwickId)
 			MemberOrUser(member, user)
-		} sortBy { s => (s.lastName,s.firstName) }
+		}.sortBy { s => (s.lastName,s.firstName) }
 	}
 
 }
