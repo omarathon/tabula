@@ -2,18 +2,18 @@
 
 <h1>Turnitin LTI - submit an assignment</h1>
 
-<@f.form method="post" action="${url('/sysadmin/turnitinlti/submitassignment')}" commandName="turnitinLtiSubmitAssignmentCommand" cssClass="form-horizontal">
+<@f.form method="post" action="${url('/sysadmin/turnitinlti/submitassignment')}" commandName="turnitinLtiSubmitAssignmentCommand">
 
 	<@f.errors cssClass="error form-errors" />
 
-	<@form.labelled_row "assignment" "Tabula assignment id">
-		<@f.input path="assignment" cssClass="text" />
-	</@form.labelled_row>
+	<@bs3form.labelled_form_group path="assignment" labelText="Tabula assignment id">
+		<@f.input path="assignment" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-	<div class="submit-buttons">
+	<@bs3form.labelled_form_group>
 		<input type="submit" value="Save" class="btn btn-primary">
-		<a class="btn" href="<@url page="/sysadmin/turnitinlti" />">Cancel</a>
-	</div>
+		<a class="btn btn-default" href="<@url page="/sysadmin/turnitinlti" />">Cancel</a>
+	</@bs3form.labelled_form_group>
 
 </@f.form>
 
