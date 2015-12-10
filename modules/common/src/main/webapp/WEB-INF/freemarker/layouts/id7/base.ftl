@@ -90,13 +90,35 @@
 					</div>
 
 					<div class="id7-header-text clearfix">
-						<h1>
-							<div class="pull-right btn-toolbar" style="margin-bottom: -12px;">
+						<div class="pull-right btn-toolbar hidden-xs" style="margin-top: 12px; margin-left: 12px;">
 							<#if user?? && user.loggedIn>
 								<a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
 							</#if>
-								<a class="btn btn-brand btn-sm" id="app-feedback-link" href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Problems, questions?</a>
+							<a class="btn btn-brand btn-sm" id="app-feedback-link" href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Problems, questions?</a>
+						</div>
+						<#if (info.maintenance)!false || (activeSpringProfiles!"") == "sandbox">
+							<div class="pull-right" style="line-height: 54px;">
+								<#if (info.maintenance)!false>
+									<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="bottom" data-container="body" data-content="This system has been placed in a read-only mode. You will be able to download files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
+									<script>
+										jQuery(function($){
+											$('#maintenance-mode-label').popover();
+										});
+									</script>
+								</#if>
+
+								<#if (activeSpringProfiles!"") == "sandbox">
+									<span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="bottom" data-container="body" data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i class="fa fa-sun-o"></i> Sandbox</span>
+									<script>
+										jQuery(function($){
+											$('#sandbox-label').popover();
+										});
+									</script>
+								</#if>
 							</div>
+						</#if>
+
+						<h1>
 							<span class="id7-current-site-link"><a href="/">Tabula</a></span>
 						</h1>
 					</div>
