@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.helpers.{Futures, SystemClockComponent}
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait StudentTimetableEventSource extends TimetableEventSource[StudentMember] {
 	override def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[Seq[TimetableEvent]]

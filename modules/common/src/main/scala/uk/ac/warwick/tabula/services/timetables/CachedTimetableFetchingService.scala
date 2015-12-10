@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, CacheEntryFactory, Caches}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 
 import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 
 /**
