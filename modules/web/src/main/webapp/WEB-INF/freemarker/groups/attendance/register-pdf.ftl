@@ -66,7 +66,7 @@
 		<img src="/static/images/logo-full-black.png" style="width: 30%; float: right;" />
 		<h1>${set.module.code?upper_case} ${set.nameWithoutModulePrefix}, ${group.name}</h1>
 		<h2 class="sgt-event-details">
-			${event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${week} (${formattedEventDate})
+			${event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, <@fmt.singleWeekFormat week=week academicYear=set.academicYear dept=set.module.adminDepartment /> (${formattedEventDate})
 			<#if event.tutors.users?has_content>
 				<br /><@fmt.p number=event.tutors.users?size singular="Tutor" shownumber=false/>: <#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
 			</#if>

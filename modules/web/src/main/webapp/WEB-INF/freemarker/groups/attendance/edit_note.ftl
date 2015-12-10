@@ -46,10 +46,11 @@
 				<#else>
 					Not recorded:
 				</#if>
+				<#if command.occurrence.event.title?has_content>${command.occurrence.event.title},</#if>
 				${command.occurrence.event.group.groupSet.name},
 				${command.occurrence.event.group.name},
 				${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
-				Week ${command.occurrence.week}
+				<@fmt.singleWeekFormat week=command.occurrence.week academicYear=command.occurrence.event.group.groupSet.academicYear dept=command.occurrence.event.group.groupSet.module.adminDepartment />
 
 				<#if command.customState?? && command.attendance?? && command.customState.dbValue != command.attendance.state.dbValue>
 					<small class="subtle help-block">

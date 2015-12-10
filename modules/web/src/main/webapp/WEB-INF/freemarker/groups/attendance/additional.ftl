@@ -3,7 +3,7 @@
 <form action="" method="post">
 	<@modal.wrapper>
 		<@modal.header>
-			<h6 class="modal-title">Add ${student.fullName} to ${event.group.groupSet.name}, ${event.group.name}</h6>
+			<h6 class="modal-title">Add ${student.fullName} to <#if event.title?has_content>${event.title}, </#if>${event.group.groupSet.name}, ${event.group.name}</h6>
 		</@modal.header>
 		<@modal.body>
 			<p>${student.fullName} will be manually added to the register for this occurrence of the event only.</p>
@@ -23,8 +23,9 @@
 				<option></option>
 				<#list possibleReplacements as replacement>
 					<option value="${replacement.event.id}_${replacement.week}" data-event="${replacement.event.id}" data-week="${replacement.week}">
+						<#if replacement.event.title?has_content>${replacement.event.title},</#if>
 						${replacement.event.group.groupSet.name}, ${replacement.event.group.name}:
-						${replacement.event.day.name} <@fmt.time replacement.event.startTime /> - <@fmt.time replacement.event.endTime />, Week ${replacement.week}
+						${replacement.event.day.name} <@fmt.time replacement.event.startTime /> - <@fmt.time replacement.event.endTime />, <@fmt.singleWeekFormat week=replacement.week academicYear=replacement.event.group.groupSet.academicYear dept=replacement.event.group.groupSet.module.adminDepartment />
 						<#if replacement.attendance?? && ((replacement.attendance.state.description)!)?has_content>
 							(currently ${replacement.attendance.state.description})
 						</#if>
