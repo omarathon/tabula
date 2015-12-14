@@ -1,15 +1,8 @@
+<#escape x as x?html>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro autoGradeOnline gradePath gradeLabel markPath markingId assessment="" isExam=false>
-	<#if !assessment?has_content>
-		<#local assessment = command.assignment/>
-	</#if>
-	<#if isExam>
-		<#local generateUrl><@routes.generateExamGradesForMarks assessment /></#local>
-	<#else>
-		<#local generateUrl><@routes.generateGradesForMarks assessment /></#local>
-	</#if>
+<#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
 	<@form.label path="${gradePath}">${gradeLabel}</@form.label>
 	<@form.field>
 		<@f.input path="${gradePath}" cssClass="input-small auto-grade" id="auto-grade-${markingId}" />
@@ -449,3 +442,5 @@
 		<@feedbackGradeValidation isGradeValidation gradeValidation />
 	</#if>
 </#macro>
+
+</#escape>

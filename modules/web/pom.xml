@@ -359,6 +359,8 @@
 								<include>js/combo-typeahead.js</include>
 								<include>js/map-popups.js</include>
 								<include>js/jquery-biglist.js</include>
+								<include>js/id7/jquery-expandingTable.js</include>
+								<include>js/jquery.form.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -403,6 +405,15 @@
 								<include>groups-admin.js</include>
 								<include>groups-render.js</include>
 								<include>id7/attendance-recording.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/exams.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>exams-admin.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

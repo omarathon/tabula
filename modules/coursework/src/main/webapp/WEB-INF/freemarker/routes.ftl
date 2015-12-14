@@ -140,28 +140,3 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro submissionAttachment submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/attachment/${attachment.name?url}" /></#macro>
 <#macro submissionAttachment_in_profile submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/attachment/${attachment.name?url}" /></#macro>
-
-
-<#-- Exams -->
-<#macro examAddMarks exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks" /></#macro>
-<#macro examMarkerAddMarks exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks" /></#macro>
-<#macro generateExamGradesForMarks exam><@_u page="/admin/module/${exam.module.code}/exams/${exam.id}/generate-grade"/></#macro>
-<#macro examMarkstemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marks-template" /></#macro>
-<#macro examMarkerMarksTemplate exam marker><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/marker/${marker.warwickId}/marks-template" /></#macro>
-<#macro createExam module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/exams/new" /></#macro>
-<#macro editExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/edit" /></#macro>
-<#macro moduleHomeWithYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}" /></#macro>
-<#macro departmentHomeWithYearNoModule department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" /></#macro>
-<#macro departmentHomeWithYear module academicYear><@_u page="/admin/department/${module.department.code}/${academicYear.startYear?c}/#module-${module.code}" /></#macro>
-<#macro viewExam exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}" /></#macro>
-<#macro uploadExamToSits exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/upload-to-sits"/></#macro>
-<#macro examFeedbackAdjustment exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments"/></#macro>
-<#macro examFeedbackAdjustmentForm exam studentid><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments/${studentid}"/></#macro>
-<#macro examBulkAdjustment exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment"/></#macro>
-<#macro examBulkAdjustmentTemplate exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment/template"/></#macro>
-<#macro examAssignMarkers exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/assign-markers" /></#macro>
-<#macro examReleaseForMarking exam><@_u page="/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/release-for-marking" /></#macro>
-<#macro examAssignMarkersSmallGroups exam><@_u context="/groups" page="/admin/marker-allocation/exam/${exam.id}" /></#macro>
-<#macro examExportExcel module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xlsx" /></#macro>
-<#macro examExportCSV module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.csv" /></#macro>
-<#macro examExportXML module exam><@_u page="/admin/module/${module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/export.xml" /></#macro>
