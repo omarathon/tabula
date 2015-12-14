@@ -161,7 +161,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		assignment.id = "12345"
 
 		val maybeDate = indexer.getAssignmentCreatedDate(assignment)
-		whenReady(maybeDate) { _ should be (Some(d)) }
+		maybeDate.futureValue should be (Some(d))
 
 	}
 
@@ -210,9 +210,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		val user = new User("jeb")
 		user.setWarwickId("0123456")
 
-		whenReady(indexer.listRecent(0, 1000)) { _.size should be (1000) }
+		indexer.listRecent(0, 1000).futureValue.size should be (1000)
 
-		whenReady(indexer.student(user)) { _.size should be (20) }
+		indexer.student(user).futureValue.size should be (20)
 
 		val moreEvents = {
 			val events = Seq(addParsedData(AuditEvent(
@@ -225,18 +225,18 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		}
 		indexer.indexItems(moreEvents)
 
-		whenReady(indexer.student(user)) { _.size should be (21) }
+		indexer.student(user).futureValue.size should be (21)
 
-		whenReady(indexer.listRecent(0, 13)) { _.size should be (13) }
+		indexer.listRecent(0, 13).futureValue.size should be (13)
 
-		whenReady(indexer.openQuery("eventType:PublishFeedback", 0, 100)) { _.size should be (21) }
+		indexer.openQuery("eventType:PublishFeedback", 0, 100).futureValue.size should be (21)
 
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
-			whenReady(newest) { _.head.getValues("eventId").toList.head should be ("d1000") }
+			newest.futureValue.head.getValues("eventId").toList.head should be ("d1000")
 			stopwatch.stop()
 		}
 
@@ -343,8 +343,8 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		paged2.items.length should be (70)
 
 		// Find by user ID
-		whenReady(indexer.findByUserId("bob")) { _.size should be (140) }
-		whenReady(indexer.findByUserId("fred")) { _.size should be (0) }
+		indexer.findByUserId("bob").futureValue.size should be (140)
+		indexer.findByUserId("fred").futureValue.size should be (0)
 
 		val beforeFeedbackJsonData = json.writeValueAsString(Map(
 					"assignment" -> assignment.id,
@@ -378,8 +378,8 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 			service.save(addParsedData(event))
 		}
 
-		whenReady(indexer.findPublishFeedbackEvents(dept)) { _.length should be (0) }
-		whenReady(indexer.findPublishFeedbackEvents(Fixtures.department("in"))) { _.length should be (0) }
+		indexer.findPublishFeedbackEvents(dept).futureValue.length should be (0)
+		indexer.findPublishFeedbackEvents(Fixtures.department("in")).futureValue.length should be (0)
 	}
 
 }

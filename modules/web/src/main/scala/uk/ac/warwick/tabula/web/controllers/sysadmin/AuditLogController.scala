@@ -51,15 +51,16 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 		val start = (page * pageSize) + 1
 		val max = pageSize
 		val end = start + max - 1
-		val recentFuture = benchmarkTask("Query audit event index") {
+		val recentFuture =
 			if (query.hasText) {
 				auditEventIndexService.openQuery(query, page * pageSize, pageSize)
 			} else {
 				auditEventIndexService.listRecent(page * pageSize, pageSize)
 			}
-		}
 
-		val recent = Await.result(recentFuture, 15.seconds)
+		val recent = benchmarkTask("Query audit event index") {
+			Await.result(recentFuture, 15.seconds)
+		}
 
 		AuditLogQueryResults(
 			results = benchmarkTask("Parse into rich audit items") { recent.map(toRichAuditItem) },

@@ -45,7 +45,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	@Test
 	def callsBothServicesAndGeneratesOccurrence(){
-		whenReady(source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff)) { _ should be (Seq(occurrence)) }
+		source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff).futureValue should be (Seq(occurrence))
 	}
 
 

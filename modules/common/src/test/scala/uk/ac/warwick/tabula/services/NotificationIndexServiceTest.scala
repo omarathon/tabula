@@ -92,9 +92,9 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 		val sort = new Sort(new SortField(service.UpdatedDateField, SortField.Type.LONG, true))
 		val result = service.search(new TermQuery(new Term("recipient", "xyz") ), sort)
-		val dates = whenReady(result) { _.transform { doc =>
+		val dates = result.futureValue.transform { doc =>
 			service.documentValue(doc, "created")
-		}}
+		}
 
 		dates.size should be (50)
 		dates.head.toLong should be (recipientNotifications.map{_.notification.created}.max.getMillis)

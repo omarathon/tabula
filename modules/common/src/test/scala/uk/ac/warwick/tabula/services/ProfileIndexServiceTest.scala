@@ -86,7 +86,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		whenReady(indexer.listRecent(0, 1000)) { _.size should be (1) }
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("Mathew", Seq(dept), Set(), false).head should be (m)
@@ -121,7 +121,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		whenReady(indexer.listRecent(0, 1000)) { _.size should be (1) }
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("joconnell", Seq(dept), Set(), false) should be ('empty)
@@ -153,7 +153,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		whenReady(indexer.listRecent(0, 1000)) { _.size should be (1) }
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("Aist\u0117", Seq(dept), Set(), false).head should be (m)
@@ -199,7 +199,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 
 		stopwatch.stop()
 
-		whenReady(indexer.listRecent(0, 100)) { _.size should be (100) }
+		indexer.listRecent(0, 100).futureValue.size should be (100)
 
 		val moreItems = {
 			val m = new StudentMember
@@ -216,14 +216,14 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		}
 		indexer.indexItems(moreItems)
 
-		whenReady(indexer.listRecent(0, 13)) { _.size should be (13) }
+		indexer.listRecent(0, 13).futureValue.size should be (13)
 
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
-			whenReady(newest) { _.head.getValues("universityId").toList.head should be ("100") }
+			newest.futureValue.head.getValues("universityId").toList.head should be ("100")
 			stopwatch.stop()
 		}
 
