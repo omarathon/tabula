@@ -17,7 +17,8 @@ class ViewSmallGroupCommand(val user: CurrentUser, val smallGroup: SmallGroup) e
 	PermissionCheck(Permissions.SmallGroups.Read, smallGroup)
 
 	def applyInternal() = {
-		smallGroup.students.users.flatMap(u => memberDao.getByUniversityId(u.getWarwickId))
+		val members = smallGroup.students.users.flatMap(u => memberDao.getByUniversityId(u.getWarwickId))
+		members.sortBy { student =>  (student.lastName, student.firstName) }
 	}
 
 }
