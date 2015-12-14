@@ -85,9 +85,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 
 		val auditEvent = recordAudit(command)
 
-		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 		indexer.incrementalIndex
-		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.toList)
 
 	}
 
@@ -119,9 +119,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 
 		val auditEvent = recordAudit(command)
 
-		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 		indexer.incrementalIndex()
-		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.toList)
 	}
 
 	def recordAudit(command:Command[_]) = {

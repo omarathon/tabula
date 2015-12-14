@@ -52,14 +52,17 @@ object Futures extends Futures {
 				// one - we don't do this in the general case because session's aren't supposed to be thread-safe
 
 				// Grab any resources bound to ThreadLocals and re-bind them inside the Runnable
-				val resources = TransactionSynchronizationManager.getResourceMap.asScala
+				val resources = Map(TransactionSynchronizationManager.getResourceMap.asScala.toSeq: _*)
 
 				ExecutionContext.Implicits.global.execute(Runnable {
+					// Don't try and rebind or unbind something already bound
+					val resourcesToBind = resources.filterNot { case (key, _) => TransactionSynchronizationManager.hasResource(key) }
+
 					try {
-						resources.foreach { case (key, value) => TransactionSynchronizationManager.bindResource(key, value) }
+						resourcesToBind.foreach { case (key, value) => TransactionSynchronizationManager.bindResource(key, value) }
 						runnable.run()
 					} finally {
-						resources.keys.foreach(TransactionSynchronizationManager.unbindResource)
+						resourcesToBind.keys.foreach(TransactionSynchronizationManager.unbindResource)
 					}
 				})
 
