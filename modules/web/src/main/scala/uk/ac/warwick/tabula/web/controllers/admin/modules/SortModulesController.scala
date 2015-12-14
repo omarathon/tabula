@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.{Routes, Mav}
 import javax.validation.Valid
@@ -22,7 +22,8 @@ import uk.ac.warwick.tabula.commands.{GroupsObjects, SelfValidating, Appliable}
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}/sort-modules"))
 class SortModulesController extends AdminController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	type SortModulesCommand = Appliable[Unit] with GroupsObjects[Module, Department] with SortModulesCommandState
 	validatesSelf[SelfValidating]

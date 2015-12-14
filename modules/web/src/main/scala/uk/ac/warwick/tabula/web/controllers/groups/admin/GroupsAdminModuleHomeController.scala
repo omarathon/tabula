@@ -6,14 +6,14 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.services.AutowiringUserSettingsServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @Controller
 @RequestMapping(value=Array("/groups/admin/module/{module}", "/groups/admin/module/{module}/groups"))
 class GroupsAdminModuleHomeController extends GroupsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent {
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)

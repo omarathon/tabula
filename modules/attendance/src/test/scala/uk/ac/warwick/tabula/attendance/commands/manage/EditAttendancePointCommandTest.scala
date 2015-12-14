@@ -83,7 +83,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def testApply() { new CommandFixture {
+	def testApply(): Unit = withFakeTime(new DateTime(2015, DateTimeConstants.NOVEMBER, 30, 12, 35, 0, 0)) { new CommandFixture {
 		val points = command.applyInternal()
 		points.foreach(_.createdDate should be (originalCreatedDate))
 		points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be {true})

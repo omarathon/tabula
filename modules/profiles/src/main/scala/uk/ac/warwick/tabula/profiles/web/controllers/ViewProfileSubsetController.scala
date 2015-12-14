@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.commands.Appliable
 
-import uk.ac.warwick.tabula.profiles.commands.{ProfileSubset, ViewProfileSubsetCommand}
+import uk.ac.warwick.tabula.commands.profiles.{ProfileSubset, ViewProfileSubsetCommand}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 

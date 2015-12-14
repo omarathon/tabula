@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.web.bind.annotation.RequestMethod
 import javax.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.profiles.commands.DownloadMeetingRecordFilesCommand
+import uk.ac.warwick.tabula.commands.profiles.DownloadMeetingRecordFilesCommand
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller

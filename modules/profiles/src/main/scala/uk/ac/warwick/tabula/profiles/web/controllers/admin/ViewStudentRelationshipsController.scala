@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Department, StudentCourseDetails, StudentRelationshipType}
-import uk.ac.warwick.tabula.profiles.commands.{MissingStudentRelationshipCommand, ViewRelatedStudentsCommand, ViewStudentRelationshipsCommand}
+import uk.ac.warwick.tabula.commands.profiles.{MissingStudentRelationshipCommand, ViewRelatedStudentsCommand, ViewStudentRelationshipsCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 

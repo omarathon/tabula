@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.admin.department.NotificationSettingsCommand
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
@@ -17,7 +17,8 @@ import uk.ac.warwick.tabula.data.model.Department
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/notification"))
 class NotificationSettingsController extends AdminController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 	
 	type NotificationSettingsCommand = Appliable[Department]
 

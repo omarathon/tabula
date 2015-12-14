@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.ScheduledMeetingRecord
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONErrorView
-import uk.ac.warwick.tabula.profiles.commands.ScheduledMeetingRecordMissedCommand
+import uk.ac.warwick.tabula.commands.profiles.ScheduledMeetingRecordMissedCommand
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}

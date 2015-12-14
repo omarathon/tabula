@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 
-import uk.ac.warwick.tabula.profiles.commands.DeleteMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.DeleteMeetingRecordCommand
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.AbstractMeetingRecord
@@ -9,8 +9,8 @@ import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.views.JSONErrorView
-import uk.ac.warwick.tabula.profiles.commands.RestoreMeetingRecordCommand
-import uk.ac.warwick.tabula.profiles.commands.PurgeMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.RestoreMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.PurgeMeetingRecordCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController

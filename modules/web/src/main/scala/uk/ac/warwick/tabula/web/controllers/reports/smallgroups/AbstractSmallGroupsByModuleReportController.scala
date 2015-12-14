@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -20,7 +20,8 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 import scala.collection.JavaConverters._
 
 abstract class AbstractSmallGroupsByModuleReportController extends ReportsController
-	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 

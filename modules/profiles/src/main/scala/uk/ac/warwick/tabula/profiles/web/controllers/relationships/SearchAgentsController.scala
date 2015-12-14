@@ -4,9 +4,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.commands.SearchAgentsCommand
+import uk.ac.warwick.tabula.helpers.profiles.SearchJSONHelpers
+import uk.ac.warwick.tabula.commands.profiles.SearchAgentsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
-import uk.ac.warwick.tabula.profiles.helpers.SearchJSONHelpers
 
 
 @Controller

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.profiles.commands.ViewModuleRegistrationsCommand
+import uk.ac.warwick.tabula.commands.profiles.ViewModuleRegistrationsCommand
 import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller

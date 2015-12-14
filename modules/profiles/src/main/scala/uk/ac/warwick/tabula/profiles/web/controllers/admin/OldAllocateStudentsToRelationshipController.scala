@@ -6,8 +6,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.profiles.relationships.{OldTransientStudentRelationshipTemplateCommand, OldAllocateStudentsToRelationshipCommand}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.profiles.commands.relationships.{OldAllocateStudentsToRelationshipCommand, OldTransientStudentRelationshipTemplateCommand}
+import uk.ac.warwick.tabula.commands.profiles.relationships.OldTransientStudentRelationshipTemplateCommand
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav

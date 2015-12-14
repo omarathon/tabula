@@ -59,12 +59,12 @@
 		.student .signature-line { position: absolute; bottom: 0px; right: 0px; }
 		.student .signature-line hr { color: #888; }
 	</style>
-	<title>BLAHBLAHBLAH</title>
+	<title>Register</title>
 </head>
 <body>
 	<div id="header">
 		<img src="/static/images/logo-full-black.png" style="width: 30%; float: right;" />
-		<h1>${set.module.code?upper_case} ${set.nameWithoutModulePrefix}, ${group.name}</h1>
+		<h1><#if event.title?has_content>${event.title}, </#if>${set.module.code?upper_case} ${set.nameWithoutModulePrefix}, ${group.name}</h1>
 		<h2 class="sgt-event-details">
 			${event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, <@fmt.singleWeekFormat week=week academicYear=set.academicYear dept=set.module.adminDepartment /> (${formattedEventDate})
 			<#if event.tutors.users?has_content>

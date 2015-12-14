@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
-import uk.ac.warwick.tabula.profiles.commands.PurgeMemberNoteCommand
+import uk.ac.warwick.tabula.commands.profiles.PurgeMemberNoteCommand
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
