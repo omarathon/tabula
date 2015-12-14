@@ -46,10 +46,3 @@ trait CurrentMemberComponent {
 	def optionalCurrentMember: Option[Member]
 	def currentMember: Member
 }
-
-trait ChecksAgent extends AutowiringRelationshipDaoComponent {
-
-	def isAgent(universityId:String):Boolean = {
-		relationshipDao.isAgent(universityId)
-	}
-}

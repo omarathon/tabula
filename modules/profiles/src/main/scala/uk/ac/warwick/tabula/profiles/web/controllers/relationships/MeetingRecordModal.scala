@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
-import uk.ac.warwick.tabula.profiles.commands.{ModifyMeetingRecordCommand, ViewMeetingRecordCommand}
+import uk.ac.warwick.tabula.commands.profiles.{ModifyMeetingRecordCommand, ViewMeetingRecordCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.{MeetingRecordAcademicYearFiltering, CurrentMemberComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent

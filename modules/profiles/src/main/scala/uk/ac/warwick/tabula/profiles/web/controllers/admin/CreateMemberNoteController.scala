@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.controllers.BaseController
-import uk.ac.warwick.tabula.profiles.commands.CreateMemberNoteCommand
+import uk.ac.warwick.tabula.commands.profiles.CreateMemberNoteCommand
 
 @Controller
 @RequestMapping(Array("/{member}/note/add"))

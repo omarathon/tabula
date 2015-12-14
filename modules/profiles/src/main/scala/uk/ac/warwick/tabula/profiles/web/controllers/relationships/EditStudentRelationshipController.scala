@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.profiles.relationships.EditStudentRelationshipCommand
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.profiles.commands.relationships.EditStudentRelationshipCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import org.springframework.validation.Errors

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.profiles.commands.{ProfilesHomeCommand, ProfilesHomeInformation, SearchProfilesCommand}
+import uk.ac.warwick.tabula.commands.profiles.{ChecksAgent, ProfilesHomeCommand, ProfilesHomeInformation, SearchProfilesCommand}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 

@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval}
-import uk.ac.warwick.tabula.profiles.commands.ApproveMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.ApproveMeetingRecordCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
