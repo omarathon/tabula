@@ -23,7 +23,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		cmd.title = "A title"
 		cmd.format = FaceToFace
 		cmd.meetingDateTime  = dateTime(3903, DateTimeConstants.MARCH) // it's the future
-		cmd.maintenanceMode = maintenanceModeService
+		cmd.maintenanceModeService = maintenanceModeService
 		cmd.notificationService = notificationService
 		cmd.scheduledNotificationService = scheduledNotificationService
 

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
@@ -69,7 +69,7 @@ class CopyModuleSmallGroupSetsController extends CopySmallGroupSetsController {
 @RequestMapping(value = Array("/groups/admin/department/{department}/groups/copy"))
 class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsController
 	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with GroupsDepartmentsAndModulesWithPermission {
+	with GroupsDepartmentsAndModulesWithPermission with AutowiringMaintenanceModeServiceComponent {
 
 	override val departmentPermission: Permission = null
 

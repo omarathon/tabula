@@ -11,11 +11,14 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.{Command, ReadOnly, SelfValidating, Unaudited}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{MaintenanceModeMessage, MaintenanceModeService}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, MaintenanceModeMessage}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.util.queue.Queue
 
-class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
+class MaintenanceModeCommand extends Command[Unit]
+	with ReadOnly with Unaudited
+	with SelfValidating
+	with AutowiringMaintenanceModeServiceComponent {
 
 	PermissionCheck(Permissions.ManageMaintenanceMode)
 
@@ -23,24 +26,24 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 
-	var enable: Boolean = service.enabled
+	var enable: Boolean = maintenanceModeService.enabled
 
 	@WithinYears(maxFuture = 1, maxPast = 1) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(DefaultMaintenanceMinutes)
+	var until: DateTime = maintenanceModeService.until.getOrElse(DateTime.now.plusMinutes(DefaultMaintenanceMinutes))
 
-	var message: String = service.message.orNull
+	var message: String = maintenanceModeService.message.orNull
 
 	def applyInternal() {
 		if (!enable) {
 			message = null
 			until = null
 		}
-		service.message = Option(message)
-		service.until = Option(until)
-		if (enable) service.enable
-		else service.disable
+		maintenanceModeService.message = Option(message)
+		maintenanceModeService.until = Option(until)
+		if (enable) maintenanceModeService.enable
+		else maintenanceModeService.disable
 
-		queue.send(new MaintenanceModeMessage(service))
+		queue.send(new MaintenanceModeMessage(enable, Option(until), Option(message)))
 	}
 
 	def validate(errors: Errors) {
@@ -51,11 +54,9 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 @Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
-	var service = Wire.auto[MaintenanceModeService]
-
 	validatesSelf[MaintenanceModeCommand]
 
-	@ModelAttribute def cmd = new MaintenanceModeCommand(service)
+	@ModelAttribute def cmd = new MaintenanceModeCommand
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: MaintenanceModeCommand, errors: Errors) =

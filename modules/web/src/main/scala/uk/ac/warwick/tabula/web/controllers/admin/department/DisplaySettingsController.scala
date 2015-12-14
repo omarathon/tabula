@@ -11,13 +11,14 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
 import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/display"))
 class DisplaySettingsController extends AdminController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 	
 	var relationshipService = Wire[RelationshipService]
 

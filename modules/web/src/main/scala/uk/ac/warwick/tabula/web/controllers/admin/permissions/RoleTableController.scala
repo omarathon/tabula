@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 @Controller
@@ -121,7 +121,8 @@ class RoleTableController extends AbstractRoleTableController {
 
 @Controller
 class DepartmentRoleTableController extends AbstractRoleTableController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	override val departmentPermission: Permission = Permissions.Department.ArrangeRoutesAndModules
 

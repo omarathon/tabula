@@ -19,7 +19,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		}
 		cmd.copyToCommand(meeting)
 		cmd.title = "Updated title fools"
-		cmd.maintenanceMode = maintenanceModeService
+		cmd.maintenanceModeService = maintenanceModeService
 		cmd.notificationService = notificationService
 		cmd.scheduledNotificationService = scheduledNotificationService
 		cmd.meetingRecordDao = meetingRecordDao

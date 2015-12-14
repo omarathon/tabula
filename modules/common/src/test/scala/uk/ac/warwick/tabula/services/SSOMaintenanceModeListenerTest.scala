@@ -17,12 +17,11 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 	context.setAttribute(SSOConfigLoader.SSO_CONFIG_KEY, config)
 
 	val queue = mock[Queue]
-			val maintenanceModeService = new MaintenanceModeServiceImpl
 
 	val observer = new SSOMaintenanceModeListener
+	observer.maintenanceModeService = new MaintenanceModeServiceImpl
 	observer.setServletContext(context)
 	observer.queue = queue
-	observer.maintenanceModeService = maintenanceModeService
 
 	observer.afterPropertiesSet()
 
@@ -58,7 +57,7 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 	}
 
 	@Test def enableSameHost {
-		maintenanceModeService.enable
+		observer.maintenanceModeService.enable
 
 		cache.isDatabaseEnabled() should be (false)
 		config.getString("mode") should be ("old")
@@ -67,8 +66,8 @@ class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 
 	@Test def disableSameHost {
 		// Enable then disable to override the defaults
-		maintenanceModeService.enable
-		maintenanceModeService.disable
+		observer.maintenanceModeService.enable
+		observer.maintenanceModeService.disable
 
 		cache.isDatabaseEnabled() should be (true)
 		config.getString("mode") should be ("new")

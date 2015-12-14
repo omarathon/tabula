@@ -424,8 +424,6 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 
-	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
-
 	<bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.CachingImageResizer">
 		<constructor-arg>
 			<bean class="uk.ac.warwick.util.files.imageresize.SingleThreadedImageResizer">

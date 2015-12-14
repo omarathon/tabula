@@ -12,31 +12,36 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 	val queue = mock[Queue]
 	val service = mock[MaintenanceModeService]
 
-	@Test def populateEmpty {
-		service.until returns (None)
-		service.message returns (None)
+	@Test def populateEmpty(): Unit = {
+		service.until returns None
+		service.message returns None
 
-		val cmd = new MaintenanceModeCommand(service)
-		cmd.until should not be (null)
+		val cmd = new MaintenanceModeCommand()
+		cmd.maintenanceModeService = service
+
+		cmd.until should not be null
 		cmd.message should be (null)
 	}
 
-	@Test def populateNotEmpty {
+	@Test def populateNotEmpty(): Unit = {
 		val dt = DateTime.now
 
-		service.until returns (Some(dt))
-		service.message returns (Some("yes"))
+		service.until returns Some(dt)
+		service.message returns Some("yes")
 
-		val cmd = new MaintenanceModeCommand(service)
+		val cmd = new MaintenanceModeCommand()
+		cmd.maintenanceModeService = service
+
 		cmd.until should be (dt)
 		cmd.message should be ("yes")
 	}
 
-	@Test def enable {
-		service.until returns (None)
-		service.message returns (None)
+	@Test def enable(): Unit = {
+		service.until returns None
+		service.message  returns None
 
-		val cmd = new MaintenanceModeCommand(service)
+		val cmd = new MaintenanceModeCommand()
+		cmd.maintenanceModeService = service
 		cmd.queue = queue
 
 		val dt = DateTime.now
@@ -45,7 +50,7 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 		cmd.message = "Sound the alarm"
 		cmd.until = dt
 
-		cmd.applyInternal
+		cmd.applyInternal()
 
 		verify(service, times(1)).message_=(Some("Sound the alarm"))
 		verify(service, times(1)).until_=(Some(dt))
@@ -53,11 +58,12 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 		verify(queue, times(1)).send(isA[MaintenanceModeMessage])
 	}
 
-	@Test def disable {
-		service.until returns (None)
-		service.message returns (None)
+	@Test def disable(): Unit = {
+		service.until returns None
+		service.message returns None
 
-		val cmd = new MaintenanceModeCommand(service)
+		val cmd = new MaintenanceModeCommand()
+		cmd.maintenanceModeService = service
 		cmd.queue = queue
 
 		val dt = DateTime.now
@@ -66,7 +72,7 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 		cmd.message = "Sound the alarm"
 		cmd.until = dt
 
-		cmd.applyInternal
+		cmd.applyInternal()
 
 		// even though it was set in the command, we re-set to None
 		verify(service, times(1)).message_=(None)

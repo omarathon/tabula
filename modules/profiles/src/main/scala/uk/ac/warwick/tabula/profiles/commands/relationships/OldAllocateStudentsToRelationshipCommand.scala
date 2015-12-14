@@ -270,7 +270,7 @@ class OldAllocateStudentsToRelationshipCommand(val department: Department, val r
 			scd <- student.mostSignificantCourseDetails
 		} yield {
 			val cmd = new EndStudentRelationshipCommand(rel, viewer)
-			cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
+			cmd.maintenanceModeService = this.maintenanceModeService // FIXME hack override default in case this is being called in a test
 			cmd
 		}
 		commands.toSet
@@ -285,8 +285,8 @@ class OldAllocateStudentsToRelationshipCommand(val department: Department, val r
 		{
 			val cmd = new EditStudentRelationshipCommand(scd, relationshipType, tutorInfo.oldTutors.toSeq, viewer, remove=false)
 			cmd.agent = newAgent
-			cmd.maintenanceMode = this.maintenanceMode // override default in case this is being called in a test
-			cmd.relationshipService = relationshipService // override default in case this is being called in a test
+			cmd.maintenanceModeService = this.maintenanceModeService // FIXME hack override default in case this is being called in a test
+			cmd.relationshipService = relationshipService // FIXME hack override default in case this is being called in a test
 			cmd
 		}
 		commands.toSet

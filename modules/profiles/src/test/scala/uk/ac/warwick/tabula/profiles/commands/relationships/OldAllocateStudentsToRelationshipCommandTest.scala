@@ -71,7 +71,7 @@ class OldAllocateStudentsToRelationshipCommandTest extends TestBase with Mockito
 		val cmd = new OldAllocateStudentsToRelationshipCommand(department, relationshipType, currentUser)
 		cmd.relationshipService = relationshipService
 		cmd.profileService = profileService
-		cmd.maintenanceMode = maintenanceModeService
+		cmd.maintenanceModeService = maintenanceModeService
 		cmd.file.maintenanceMode = maintenanceModeService
 	}
 

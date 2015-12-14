@@ -40,3 +40,11 @@ class SHAMessageAuthenticationCodeGenerator extends MessageAuthenticationCodeGen
 	override def isValidSalt = salt.hasText
 
 }
+
+trait MessageAuthenticationCodeGeneratorComponent {
+	def messageAuthenticationCodeGenerator: MessageAuthenticationCodeGenerator
+}
+
+trait AutowiringMessageAuthenticationCodeGeneratorComponent extends MessageAuthenticationCodeGeneratorComponent {
+	val messageAuthenticationCodeGenerator = Wire[MessageAuthenticationCodeGenerator]
+}

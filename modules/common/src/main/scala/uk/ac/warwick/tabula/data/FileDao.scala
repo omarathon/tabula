@@ -12,6 +12,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import org.hibernate.criterion.{ Restrictions => Is }
 import org.hibernate.criterion.Order._
+import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.transaction.annotation.Propagation._
@@ -24,20 +25,26 @@ import uk.ac.warwick.spring.Wire
 import java.io.FileInputStream
 
 trait FileDaoComponent {
-	val fileDao: FileDao
+	def fileDao: FileDao
 }
 
 trait AutowiringFileDaoComponent extends FileDaoComponent {
 	val fileDao = Wire[FileDao]
 }
 
+trait FileHasherComponent {
+	def fileHasher: FileHasher
+}
+
+trait SHAFileHasherComponent extends FileHasherComponent {
+	val fileHasher = new SHAFileHasher
+}
+
 @Repository
-class FileDao extends Daoisms with InitializingBean with Logging {
+class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHasherComponent {
 
 	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
-
-	var fileHasher = Wire[FileHasher]
 
 	val idSplitSize = 2
 	val idSplitSizeCompat = 4 // for existing paths split by 4 chars

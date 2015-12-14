@@ -29,7 +29,8 @@ trait AdminDepartmentsModulesAndRoutes {
 
 @Controller
 class AdminHomeController extends AdminController with DepartmentScopedController with AdminDepartmentsModulesAndRoutes
-	with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent with AutowiringUserSettingsServiceComponent {
+	with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(department: Department): Option[Department] = retrieveActiveDepartment(None)

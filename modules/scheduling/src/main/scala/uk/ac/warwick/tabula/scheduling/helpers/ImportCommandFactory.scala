@@ -50,19 +50,19 @@ class ImportCommandFactory() {
 			command.sitsStatusImporter = sitsStatusImporter
 			command.moduleAndDepartmentService = modAndDeptService
 
-			// needed by Command, extended by ImportStudentCourseCommand
-			command.maintenanceMode = maintenanceModeService
+			// FIXME horrible hack needed by Command, extended by ImportStudentCourseCommand
+			command.maintenanceModeService = maintenanceModeService
 		}
 		command
 	}
 
 	def createImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails) = {
 		val command = new ImportStudentCourseYearCommand(row, studentCourseDetails, rowTracker)
-		if (test) {
+		if (test) { // FIXME horrible hack
 			command.modeOfAttendanceImporter = modeOfAttendanceImporter
 			command.profileService = profileService
 			command.sitsStatusImporter = sitsStatusImporter
-			command.maintenanceMode = maintenanceModeService
+			command.maintenanceModeService = maintenanceModeService
 			command.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 		}
 		command
