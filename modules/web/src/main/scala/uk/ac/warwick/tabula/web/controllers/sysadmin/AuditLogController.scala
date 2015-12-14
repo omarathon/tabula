@@ -2,12 +2,9 @@ package uk.ac.warwick.tabula.web.controllers.sysadmin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation
-import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.AuditEventIndexService
-import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.commands._
@@ -21,6 +18,9 @@ import uk.ac.warwick.tabula.services.AutowiringAuditEventServiceComponent
 import uk.ac.warwick.tabula.services.AuditEventServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAuditEventIndexServiceComponent
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object AuditLogQueryCommand {
 
@@ -51,13 +51,15 @@ class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults]
 		val start = (page * pageSize) + 1
 		val max = pageSize
 		val end = start + max - 1
-		val recent = benchmarkTask("Query audit event index") {
+		val recentFuture = benchmarkTask("Query audit event index") {
 			if (query.hasText) {
 				auditEventIndexService.openQuery(query, page * pageSize, pageSize)
 			} else {
 				auditEventIndexService.listRecent(page * pageSize, pageSize)
 			}
 		}
+
+		val recent = Await.result(recentFuture, 15.seconds)
 
 		AuditLogQueryResults(
 			results = benchmarkTask("Parse into rich audit items") { recent.map(toRichAuditItem) },

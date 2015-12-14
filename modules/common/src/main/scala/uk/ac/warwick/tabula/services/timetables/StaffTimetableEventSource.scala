@@ -28,7 +28,7 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 			val timetableEvents: Future[Seq[TimetableEvent]] = timetableFetchingService.getTimetableForStaff(staff.universityId)
 			val smallGroupEvents: Future[Seq[TimetableEvent]] = staffGroupEventSource.eventsFor(staff, currentUser, context)
 
-			Futures.flatten(Seq(timetableEvents, smallGroupEvents))
+			Futures.flatten(timetableEvents, smallGroupEvents)
 		}
 
 	}

@@ -23,6 +23,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.lucene.{DelimitByCharacterFilter, SurnamePunctuationFilter, SynonymAwareWildcardMultiFieldQueryParser}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Methods for querying stuff out of the index. Separated out from
@@ -90,7 +92,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			)
 			bq.add(courseEndedQuery, Occur.MUST)
 
-			search(bq) transformAll { toItems }
+			Await.result(search(bq), 15.seconds).transformAll(toItems)
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}

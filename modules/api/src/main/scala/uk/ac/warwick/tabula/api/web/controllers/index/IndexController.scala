@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.apache.lucene.queryparser.classic.ParseException
 import org.apache.lucene.search.{LuceneQuerySerializer, SortField, Sort, Query}
 import org.bouncycastle.util.encoders.Base64
-import org.springframework.http.{HttpStatus, MediaType}
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{RequestBody, ModelAttribute, RequestMapping}
@@ -27,6 +27,9 @@ import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 import IndexController._
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 trait IndexServiceComponent[A] {
 	def indexService: AbstractIndexService[A]
@@ -104,13 +107,13 @@ object SearchLuceneIndexCommand {
 }
 
 class SearchLuceneIndexCommandInternal(val indexService: AbstractIndexService[_]) extends CommandInternal[RichSearchResults] with SearchLuceneIndexState {
-	override protected def applyInternal(): RichSearchResults = {
+	override protected def applyInternal(): RichSearchResults = Await.result({
 		if (max.nonEmpty) {
 			indexService.search(query, max.get, sort.orNull, offset.getOrElse(0))
 		} else {
 			indexService.search(query, sort.orNull)
 		}
-	}
+	}, 15.seconds)
 }
 
 trait SearchLuceneIndexState {

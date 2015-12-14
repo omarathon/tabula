@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.File
+import uk.ac.warwick.tabula.helpers.Futures
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.apache.lucene.analysis._
@@ -16,9 +18,12 @@ import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.Futures._
 import AuditEventIndexService._
 import org.apache.lucene.index.IndexWriterConfig
 import org.apache.lucene.index.SortingMergePolicy
+
+import scala.concurrent.Future
 
 object AuditEventIndexService {
 	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
@@ -40,19 +45,18 @@ trait AuditEventNoteworthySubmissionsService {
  */
 trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { self: AuditEventIndexService =>
 
-	def student(user: User) = search(termQuery("students", user.getWarwickId))
+	def student(user: User): Future[RichSearchResults] = search(termQuery("students", user.getWarwickId))
 
-	def findByUserId(usercode: String) = search(termQuery("userId", usercode))
+	def findByUserId(usercode: String): Future[RichSearchResults] = search(termQuery("userId", usercode))
 
-	def findPublishFeedbackEvents(dept: Department) = {
-		val searchResults = search(all(
+	def findPublishFeedbackEvents(dept: Department): Future[Seq[AuditEvent]] =
+		search(all(
 			termQuery("eventType", "PublishFeedback"),
-			termQuery("department", dept.code)))
-			.transformAll(toParsedAuditEvents)
-			.filterNot { _.hadError }
-
-		searchResults
-	}
+			termQuery("department", dept.code)
+		)).map { docs =>
+			docs.transformAll(toParsedAuditEvents)
+				.filterNot { _.hadError }
+		}
 
 	private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]) = referenceDate match {
 		case Some(createdDate) => all(
@@ -62,15 +66,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		case _ => termQuery("assignment", assignment.id)
 	}
 
-
-
 	def submissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
 
 		val searchResults = search(
-			query = all(termQuery("eventType", "SubmitAssignment"),
-						some(moduleTerms:_*)
-					),
+			query = all(
+				termQuery("eventType", "SubmitAssignment"),
+				some(moduleTerms:_*)
+			),
 			max = max,
 			sort = reverseDateSort,
 			last = last,
@@ -79,36 +82,38 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		new PagedAuditEvents(parsedAuditEvents(searchResults.results), searchResults.last, searchResults.token, searchResults.total)
 	}
 
-	def submissionsForAssignment(assignment: Assignment): Seq[AuditEvent] = search(
+	def submissionsForAssignment(assignment: Assignment): Future[Seq[AuditEvent]] = search(
 		query = all(
 			termQuery("eventType", "SubmitAssignment"),
 			assignmentRangeRestriction(assignment, assignment.submissions.asScala.map { _.submittedDate }.sorted.headOption.orElse { Option(assignment.createdDate )})
 		)
-	).transformAll(toParsedAuditEvents)
+	).map { _.transformAll(toParsedAuditEvents) }
 
 
-	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] =
+	def publishFeedbackForStudent(assignment: Assignment, student: User): Future[Seq[AuditEvent]] =
 		publishFeedbackForStudent(assignment, student.getWarwickId)
 
-	def publishFeedbackForStudent(assignment: Assignment, warwickId: String): Seq[AuditEvent] = search(
+	def publishFeedbackForStudent(assignment: Assignment, warwickId: String): Future[Seq[AuditEvent]] = search(
 		query = all(
 			termQuery("eventType", "PublishFeedback"),
 			termQuery("students", warwickId),
 			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
 		)
-	).transformAll(toParsedAuditEvents)
-	.sortBy(_.eventDate).reverse
+	).map {
+		_.transformAll(toParsedAuditEvents)
+			.sortBy(_.eventDate).reverse
+	}
 
-	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
+	def submissionForStudent(assignment: Assignment, student: User): Future[Seq[AuditEvent]] = search(
 		query = all(
 			termQuery("eventType", "SubmitAssignment"),
 			termQuery("masqueradeUserId", student.getUserId),
 			assignmentRangeRestriction(assignment, assignment.submissions.asScala.map { _.submittedDate }.sorted.headOption.orElse { Option(assignment.createdDate )})
 		)
-	).transformAll(toParsedAuditEvents)
-	.sortBy(_.eventDate).reverse
-
-
+	).map {
+		_.transformAll(toParsedAuditEvents)
+			.sortBy(_.eventDate).reverse
+	}
 
 	def noteworthySubmissionsForModules(modules: Seq[Module], last: Option[ScoreDoc], token: Option[Long], max: Int = DefaultMaxEvents): PagedAuditEvents = {
 		val moduleTerms = for (module <- modules) yield termQuery("module", module.id)
@@ -130,98 +135,120 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	 * Work out which submissions have been downloaded from the admin interface
 	 * based on the audit events.
 	 */
-	def adminDownloadedSubmissions(assignment: Assignment): Seq[Submission] = {
+	def adminDownloadedSubmissions(assignment: Assignment): Future[Seq[Submission]] = {
 		val assignmentTerm = assignmentRangeRestriction(assignment, assignment.submissions.asScala.map { _.submittedDate }.sorted.headOption.orElse { Option(assignment.createdDate )})
 
 		// find events where you downloaded all available submissions
-		val allDownloaded = parsedAuditEvents(
-			search(
-				query = all(
-					assignmentTerm,
-					termQuery("eventType", "DownloadAllSubmissions")
-				)
+		val allDownloaded = search(
+			query = all(
+				assignmentTerm,
+				termQuery("eventType", "DownloadAllSubmissions")
 			)
-		).sortBy(_.eventDate).reverse
+		).map {
+			parsedAuditEvents(_).sortBy(_.eventDate).reverse
+		}
 
 		// take most recent event and find submissions made before then.
-		val submissions1: Seq[Submission] = allDownloaded.headOption match {
+		val submissions1: Future[Seq[Submission]] = allDownloaded.map { _.headOption match {
 			case None => Nil
 			case Some(event) =>
 				val latestDate = event.eventDate
-				assignment.submissions.filter { _.submittedDate isBefore latestDate }
-		}
+				assignment.submissions.filter { _.submittedDate.isBefore(latestDate) }
+		}}
 
 		// find events where selected submissions were downloaded
-		val someDownloaded = parsedAuditEvents(search(
-			all(assignmentTerm, termQuery("eventType", "DownloadSubmissions"))))
-		val submissions2 = someDownloaded.flatMap(_.submissionIds).flatMap(id => assignment.submissions.find(_.id == id))
+		val someDownloaded =
+			search(all(assignmentTerm, termQuery("eventType", "DownloadSubmissions")))
+				.map(parsedAuditEvents)
+
+		val submissions2: Future[Seq[Submission]] = someDownloaded.map {
+			_.flatMap(_.submissionIds)
+				.flatMap(id =>
+					assignment.submissions.find(_.id == id)
+				)
+		}
 
 		// find events where individual submissions were downloaded
-		val individualDownloads = parsedAuditEvents(
-				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
-		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find(_.id == id))
-		(submissions1 ++ submissions2 ++ submissions3).distinct
+		val individualDownloads =
+			search(all(
+				assignmentTerm,
+				termQuery("eventType", "AdminGetSingleSubmission")
+			)).map(parsedAuditEvents)
+
+		val submissions3: Future[Seq[Submission]] = individualDownloads.map {
+			_.flatMap(_.submissionId)
+				.flatMap(id =>
+					assignment.submissions.find(_.id == id)
+				)
+		}
+
+		Futures.flatten(submissions1, submissions2, submissions3).map { _.distinct }
 	}
 
-	def feedbackDownloads(assignment: Assignment) = {
+	def feedbackDownloads(assignment: Assignment) =
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
-			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})))
-			.transformAll(toItems)
-			.filterNot { _.hadError }
-			.map( whoDownloaded => {
-				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
-			})
-	}
+			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
+		)).map {
+			_.transformAll(toItems)
+				.filterNot {
+					_.hadError
+				}
+				.map(whoDownloaded => {
+					(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
+				})
+		}
 
-	def latestAssignmentEvent(assignment: Assignment, eventName: String) = {
+	def latestAssignmentEvent(assignment: Assignment, eventName: String): Future[Seq[(String, DateTime)]] = // User ID to DateTime
 		search(all(
 			termQuery("eventType", "ViewOnlineFeedback"),
-			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})))
-			.transformAll(toItems)
-			.filterNot { _.hadError }
-			.map { user => (user.masqueradeUserId, user.eventDate) }
-			.groupBy { case (userId, _) => userId }
-			.map { case (_, events) => events.maxBy { case (_, eventDate) => eventDate } }
-			.toSeq
-	}
+			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
+		)).map {
+			_.transformAll(toItems)
+				.filterNot { _.hadError }
+				.map { user => (user.masqueradeUserId, user.eventDate) }
+				.groupBy { case (userId, _) => userId }
+				.map { case (_, events) => events.maxBy { case (_, eventDate) => eventDate } }
+				.toSeq
+		}
 
-	def latestOnlineFeedbackViews(assignment: Assignment) = latestAssignmentEvent(assignment, "ViewOnlineFeedback")
-	def latestDownloadFeedbackAsPdf(assignment: Assignment) = latestAssignmentEvent(assignment, "DownloadFeedbackAsPdf")
+	def latestOnlineFeedbackViews(assignment: Assignment): Future[Seq[(String, DateTime)]] = latestAssignmentEvent(assignment, "ViewOnlineFeedback")
+	def latestDownloadFeedbackAsPdf(assignment: Assignment): Future[Seq[(String, DateTime)]] = latestAssignmentEvent(assignment, "DownloadFeedbackAsPdf")
 
-	def latestGenericFeedbackAdded(assignment: Assignment): Option[DateTime] = {
-		val allEvents =
-			search( all(
-				termQuery("eventType", "GenericFeedback"),
-				assignmentRangeRestriction(assignment, Option(assignment.createdDate)))
-			).transformAll(toItems)
+	def latestGenericFeedbackAdded(assignment: Assignment): Future[Option[DateTime]] =
+		search(all(
+			termQuery("eventType", "GenericFeedback"),
+			assignmentRangeRestriction(assignment, Option(assignment.createdDate))
+		)).map { _.transformAll(toItems) match {
+			case Nil => None
+			case allEvents => Some(allEvents.maxBy(_.eventDate).eventDate)
+		}}
 
-		if (allEvents.isEmpty) None
-		else Some(allEvents.maxBy(_.eventDate).eventDate)
-	}
-
-	def latestOnlineFeedbackAdded(assignment: Assignment) =
+	def latestOnlineFeedbackAdded(assignment: Assignment): Future[Seq[(String, DateTime)]] =
 		search(all(
 			termQuery("eventType", "OnlineFeedback"),
-			assignmentRangeRestriction(assignment, Option(assignment.createdDate))))
-			.transformAll(toParsedAuditEvents)
-			.filterNot { _.hadError }
-			.flatMap(auditEvent => auditEvent.students.map( student => (student, auditEvent.eventDate)))
-			.groupBy( _._1)
-			.map(x => x._2.maxBy(_._2))
-			.toSeq
+			assignmentRangeRestriction(assignment, Option(assignment.createdDate))
+		)).map {
+			_.transformAll(toParsedAuditEvents)
+				.filterNot { _.hadError }
+				.flatMap(auditEvent => auditEvent.students.map(student => (student, auditEvent.eventDate)))
+				.groupBy(_._1)
+				.map(x => x._2.maxBy(_._2))
+				.toSeq
+		}
 
-	def whoDownloadedFeedback(assignment: Assignment) =
+	def whoDownloadedFeedback(assignment: Assignment): Future[Seq[String]] = // User IDs
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
-			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})))
-			.transformAll(toItems)
-			.filterNot { _.hadError }
-			.map { _.masqueradeUserId }
-			.filterNot { _ == null }
-			.distinct
+			assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
+		)).map {
+			_.transformAll(toItems)
+				.filterNot { _.hadError }
+				.flatMap { event => Option(event.masqueradeUserId) }
+				.distinct
+		}
 
-	def mapToAssignments(results: RichSearchResults) =
+	private def mapToAssignments(results: RichSearchResults) =
 		results.transformAll(toParsedAuditEvents)
 		.flatMap(_.assignmentId)
 		.flatMap(assignmentService.getAssignmentById)
@@ -229,34 +256,43 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	/**
 	 * Return the most recently created assignment for this moodule
 	 */
-	def recentAssignment(module: Module): Option[Assignment] = {
-		mapToAssignments(search(query = all(
-			termQuery("eventType", "AddAssignment"),
-			termQuery("module", module.id)),
+	def recentAssignment(module: Module): Future[Option[Assignment]] =
+		search(
+			query = all(
+				termQuery("eventType", "AddAssignment"),
+				termQuery("module", module.id)
+			),
 			max = 1,
-			sort = reverseDateSort)).headOption
-	}
+			sort = reverseDateSort
+		).map { docs => mapToAssignments(docs).headOption }
 
-	def recentAssignment(department: Department): Option[Assignment] = {
-		mapToAssignments(search(query = all(
-			termQuery("eventType", "AddAssignment"),
-			termQuery("department", department.code)),
+	def recentAssignment(department: Department): Future[Option[Assignment]] =
+		search(
+			query = all(
+				termQuery("eventType", "AddAssignment"),
+				termQuery("department", department.code)
+			),
 			max = 1,
-			sort = reverseDateSort)).headOption
-	}
+			sort = reverseDateSort
+		).map { docs => mapToAssignments(docs).headOption }
 
-	def getAssignmentCreatedDate(assignment: Assignment): Option[DateTime] = {
-		search(all(term("eventType" -> "AddAssignment"), assignmentRangeRestriction(assignment, Option(assignment.createdDate))))
-			.transform { doc: Document =>
+	def getAssignmentCreatedDate(assignment: Assignment): Future[Option[DateTime]] =
+		search(
+			all(
+				term("eventType" -> "AddAssignment"),
+				assignmentRangeRestriction(assignment, Option(assignment.createdDate))
+			)
+		).map {
+			_.transform { doc: Document =>
 				doc.getField("eventDate") match {
 					case field: StoredField if field.numericValue() != null =>
 						Some(new DateTime(field.numericValue()))
 					case _ =>
 						None
 				}
-			}
-			.headOption
-	}
+			}.headOption
+		}
+
 }
 
 /**
@@ -377,7 +413,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 
 	protected def toParsedAuditEvents(doc: Seq[Document]): Seq[AuditEvent] = toItems(doc).map { event =>
 		event.parsedData = service.parseData(event.data)
-		event.related.map { e =>
+		event.related.foreach { e =>
 			e.parsedData = service.parseData(e.data)
 		}
 		event
@@ -421,14 +457,16 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		Seq(doc)
 	}
 
-	def openQuery(queryString: String, start: Int, count: Int) = {
+	def openQuery(queryString: String, start: Int, count: Int): Future[Seq[AuditEvent]] = {
 		logger.info("Opening query: " + queryString)
 		val query = parser.parse(queryString)
-		val docs = search(query,
+
+		search(
+			query = query,
 			sort = reverseDateSort,
 			offset = start,
-			max = count)
-		docs.transformAll(toItems)
+			max = count
+		).map { _.transformAll(toItems) }
 	}
 
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
