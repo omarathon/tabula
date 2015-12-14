@@ -3,82 +3,81 @@ package uk.ac.warwick.tabula.web.controllers.sysadmin
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.util.queue.Queue
-import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.{SettingsSyncQueueComponent, MaintenanceModeServiceComponent, MaintenanceModeService, MaintenanceModeMessage}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.MaintenanceModeMessage
 
 class MaintenanceModeCommandTest extends TestBase with Mockito {
 
-	val queue = mock[Queue]
-	val service = mock[MaintenanceModeService]
-
-	@Test def populateEmpty(): Unit = {
-		service.until returns None
-		service.message returns None
-
-		val cmd = new MaintenanceModeCommand()
-		cmd.maintenanceModeService = service
-
-		cmd.until should not be null
-		cmd.message should be (null)
+	private trait CommandTestSupport extends MaintenanceModeServiceComponent with SettingsSyncQueueComponent {
+		val maintenanceModeService: MaintenanceModeService = mock[MaintenanceModeService]
+		val settingsSyncQueue: Queue = mock[Queue]
 	}
 
-	@Test def populateNotEmpty(): Unit = {
+	private trait CommandFixture {
+		val command = new MaintenanceModeCommandInternal with CommandTestSupport with MaintenanceModeCommandPopulation
+	}
+
+	@Test def populateEmpty(): Unit = new CommandFixture {
+		command.maintenanceModeService.until returns None
+		command.maintenanceModeService.message returns None
+
+		command.populate()
+
+		command.until should not be null
+		command.message should be (null)
+	}
+
+	@Test def populateNotEmpty(): Unit = new CommandFixture {
 		val dt = DateTime.now
 
-		service.until returns Some(dt)
-		service.message returns Some("yes")
+		command.maintenanceModeService.until returns Some(dt)
+		command.maintenanceModeService.message returns Some("yes")
 
-		val cmd = new MaintenanceModeCommand()
-		cmd.maintenanceModeService = service
+		command.populate()
 
-		cmd.until should be (dt)
-		cmd.message should be ("yes")
+		command.until should be (dt)
+		command.message should be ("yes")
 	}
 
-	@Test def enable(): Unit = {
-		service.until returns None
-		service.message  returns None
+	@Test def enable(): Unit = new CommandFixture {
+		command.maintenanceModeService.until returns None
+		command.maintenanceModeService.message  returns None
 
-		val cmd = new MaintenanceModeCommand()
-		cmd.maintenanceModeService = service
-		cmd.queue = queue
-
-		val dt = DateTime.now
-
-		cmd.enable = true
-		cmd.message = "Sound the alarm"
-		cmd.until = dt
-
-		cmd.applyInternal()
-
-		verify(service, times(1)).message_=(Some("Sound the alarm"))
-		verify(service, times(1)).until_=(Some(dt))
-		verify(service, times(1)).enable
-		verify(queue, times(1)).send(isA[MaintenanceModeMessage])
-	}
-
-	@Test def disable(): Unit = {
-		service.until returns None
-		service.message returns None
-
-		val cmd = new MaintenanceModeCommand()
-		cmd.maintenanceModeService = service
-		cmd.queue = queue
+		command.populate()
 
 		val dt = DateTime.now
 
-		cmd.enable = false
-		cmd.message = "Sound the alarm"
-		cmd.until = dt
+		command.enable = true
+		command.message = "Sound the alarm"
+		command.until = dt
 
-		cmd.applyInternal()
+		command.applyInternal()
+
+		verify(command.maintenanceModeService, times(1)).message_=(Some("Sound the alarm"))
+		verify(command.maintenanceModeService, times(1)).until_=(Some(dt))
+		verify(command.maintenanceModeService, times(1)).enable
+		verify(command.settingsSyncQueue, times(1)).send(isA[MaintenanceModeMessage])
+	}
+
+	@Test def disable(): Unit = new CommandFixture {
+		command.maintenanceModeService.until returns None
+		command.maintenanceModeService.message returns None
+
+		command.populate()
+
+		val dt = DateTime.now
+
+		command.enable = false
+		command.message = "Sound the alarm"
+		command.until = dt
+
+		command.applyInternal()
 
 		// even though it was set in the command, we re-set to None
-		verify(service, times(1)).message_=(None)
-		verify(service, times(1)).until_=(None)
-		verify(service, times(1)).disable
-		verify(queue, times(1)).send(isA[MaintenanceModeMessage])
+		verify(command.maintenanceModeService, times(1)).message_=(None)
+		verify(command.maintenanceModeService, times(1)).until_=(None)
+		verify(command.maintenanceModeService, times(1)).disable
+		verify(command.settingsSyncQueue, times(1)).send(isA[MaintenanceModeMessage])
 	}
 
 }

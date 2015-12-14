@@ -107,6 +107,14 @@ trait AutowiringMaintenanceModeServiceComponent extends MaintenanceModeServiceCo
 	var maintenanceModeService = Wire[MaintenanceModeService]
 }
 
+trait SettingsSyncQueueComponent {
+	def settingsSyncQueue: Queue
+}
+
+trait AutowiringSettingsSyncQueueComponent extends SettingsSyncQueueComponent {
+	var settingsSyncQueue = Wire.named[Queue]("settingsSyncTopic")
+}
+
 /**
  * Exception thrown when a command tries to run during
  * maintenance mode, and it's not readonly. The view handler

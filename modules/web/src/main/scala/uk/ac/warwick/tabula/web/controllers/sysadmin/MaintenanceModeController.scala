@@ -7,33 +7,44 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.commands.{Command, ReadOnly, SelfValidating, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, MaintenanceModeMessage}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.util.queue.Queue
 
-class MaintenanceModeCommand extends Command[Unit]
-	with ReadOnly with Unaudited
-	with SelfValidating
-	with AutowiringMaintenanceModeServiceComponent {
-
-	PermissionCheck(Permissions.ManageMaintenanceMode)
+object MaintenanceModeCommand {
+	type Command = Appliable[MaintenanceModeMessage] with SelfValidating with PopulateOnForm
 
 	val DefaultMaintenanceMinutes = 30
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	def apply(): Command =
+		new MaintenanceModeCommandInternal
+			with ComposableCommand[MaintenanceModeMessage]
+			with MaintenanceModeCommandPopulation
+			with MaintenanceModeCommandValidation
+			with ManageMaintenanceModePermissions
+			with AutowiringMaintenanceModeServiceComponent
+			with AutowiringSettingsSyncQueueComponent
+			with ReadOnly with Unaudited
+}
 
-	var enable: Boolean = maintenanceModeService.enabled
+trait MaintenanceModeCommandRequest {
+
+	var enable: Boolean = _
 
 	@WithinYears(maxFuture = 1, maxPast = 1) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var until: DateTime = maintenanceModeService.until.getOrElse(DateTime.now.plusMinutes(DefaultMaintenanceMinutes))
+	var until: DateTime = _
 
-	var message: String = maintenanceModeService.message.orNull
+	var message: String = _
 
-	def applyInternal() {
+}
+
+class MaintenanceModeCommandInternal extends CommandInternal[MaintenanceModeMessage] with MaintenanceModeCommandRequest {
+	self: MaintenanceModeServiceComponent with SettingsSyncQueueComponent =>
+
+	override def applyInternal(): MaintenanceModeMessage = {
 		if (!enable) {
 			message = null
 			until = null
@@ -43,27 +54,54 @@ class MaintenanceModeCommand extends Command[Unit]
 		if (enable) maintenanceModeService.enable
 		else maintenanceModeService.disable
 
-		queue.send(new MaintenanceModeMessage(enable, Option(until), Option(message)))
+		val msg = new MaintenanceModeMessage(enable, Option(until), Option(message))
+
+		settingsSyncQueue.send(msg)
+
+		msg
 	}
 
-	def validate(errors: Errors) {
+}
 
+trait MaintenanceModeCommandPopulation extends PopulateOnForm {
+	self: MaintenanceModeCommandRequest with MaintenanceModeServiceComponent =>
+
+	override def populate(): Unit = {
+		enable = maintenanceModeService.enabled
+
+		until = maintenanceModeService.until.getOrElse(DateTime.now.plusMinutes(MaintenanceModeCommand.DefaultMaintenanceMinutes))
+
+		message = maintenanceModeService.message.orNull
 	}
+}
+
+trait MaintenanceModeCommandValidation extends SelfValidating {
+
+	override def validate(errors: Errors): Unit = {}
+
+}
+
+trait ManageMaintenanceModePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		p.PermissionCheck(Permissions.ManageMaintenanceMode)
+	}
+
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/maintenance"))
 class MaintenanceModeController extends BaseSysadminController {
-	validatesSelf[MaintenanceModeCommand]
+	validatesSelf[SelfValidating]
 
-	@ModelAttribute def cmd = new MaintenanceModeCommand
+	@ModelAttribute("command") def cmd: MaintenanceModeCommand.Command = MaintenanceModeCommand()
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(form: MaintenanceModeCommand, errors: Errors) =
+	def showForm(@ModelAttribute("command") form: MaintenanceModeCommand.Command, errors: Errors) =
 		Mav("sysadmin/maintenance").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: MaintenanceModeCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") form: MaintenanceModeCommand.Command, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
