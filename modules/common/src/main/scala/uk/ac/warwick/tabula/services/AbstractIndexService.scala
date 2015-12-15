@@ -28,12 +28,16 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.Closeables._
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.{Features, HttpClientDefaults}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 import scala.language.implicitConversions
+import scala.util.Try
 import scala.util.parsing.json.JSON
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
@@ -41,7 +45,7 @@ trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexServic
 	/**
 	 * Get recent items.
 	 */
-	def listRecent(start: Int, count: Int): Seq[A] = {
+	def listRecent(start: Int, count: Int): Future[Seq[A]] = {
 		val min = new DateTime().minusYears(2)
 		val docs = benchmarkTask("Search for recent items") {
 			search(
@@ -51,7 +55,8 @@ trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexServic
 				max = count
 			)
 		}
-		benchmarkTask("Transform documents to items") { docs.transformAll { docs => toItems(docs) } }
+
+		docs.map { _.transformAll(toItems) }
 	}
 
 }
@@ -193,7 +198,7 @@ abstract class AbstractIndexService[A]
 		guardMultipleIndexes {
 			val stopWatch = StopWatch()
 			stopWatch.record("Incremental index") {
-				val startDate = latestIndexItem
+				val startDate = Await.result(latestIndexItem, 5.seconds)
 				val newItems = listNewerThan(startDate, IncrementalBatchSize)
 				if (newItems.isEmpty) {
 					logger.debug("No new items to index.")
@@ -278,15 +283,19 @@ abstract class AbstractIndexService[A]
 	 * or look up the most recent item in the index, or else index everything
 	 * from the past year.
 	 */
-	def latestIndexItem: DateTime = {
-		mostRecentIndexedItem.fold{
-			// extract possible list of UpdatedDateField values from possible newest item and get possible first value as a Long.
-			documentValue(newest(), UpdatedDateField).fold{
-				logger.info("No recent document found, indexing since Tabula year zero")
-				new DateTime(yearZero, 1, 1, 0, 0)
-			}(v => new DateTime(v.toLong).minusMinutes(10))
-		}(_.minusSeconds(30))
-	}
+	def latestIndexItem: Future[DateTime] =
+		mostRecentIndexedItem match {
+			case Some(value) => Future.successful(value.minusSeconds(30))
+			case _ =>
+				// extract possible list of UpdatedDateField values from possible newest item and get possible first value as a Long.
+				newest().map { doc =>
+					documentValue(doc, UpdatedDateField).map { value => new DateTime(value.toLong).minusMinutes(10) }
+						.getOrElse {
+							logger.info("No recent document found, indexing since Tabula year zero")
+							new DateTime(yearZero, 1, 1, 0, 0)
+						}
+				}
+		}
 
 	/**
 	 * Try to get the first value out of a document field.
@@ -357,18 +366,18 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 *
 	 * @param since Optional lower bound for date - recommended if possible, as it is faster.
 	 */
-	def newest(since: DateTime = null): Option[Document] = {
+	def newest(since: DateTime = null): Future[Option[Document]] = {
 		initialiseSearching()
 
 		if (searcherManager == null) { // usually if we've never indexed before, no index file
-			None
+			Future.successful(None)
 		} else {
 			val min: Option[JLong] = Option(since).map { _.getMillis }
 			val docs = search(
 				query = NumericRangeQuery.newLongRange(UpdatedDateField, min.orNull, null, true, true),
 				sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
 				max = 1)
-			docs.first // Some(firstResult) or None if empty
+			docs.map { _.first } // Some(firstResult) or None if empty
 		}
 	}
 
@@ -411,17 +420,17 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
 
-	def search(query: Query): RichSearchResults = doSearch(query, None, null, 0)
-	def search(query: Query, sort: Sort): RichSearchResults = doSearch(query, None, sort, 0)
-	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
+	def search(query: Query): Future[RichSearchResults] = doSearch(query, None, null, 0)
+	def search(query: Query, sort: Sort): Future[RichSearchResults] = doSearch(query, None, sort, 0)
+	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): Future[RichSearchResults] = doSearch(query, Some(max), sort, offset)
 
 	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult =
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
-	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
+	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): Future[RichSearchResults] = {
 		if (searchOverHttp) {
 			performSearchOverHttp(query, max, sort, offset)
-		} else {
+		} else Future.fromTry(Try {
 			initialiseSearching()
 			if (searcherManager == null) {
 				logger.warn("Tried to search but no searcher manager is available")
@@ -436,7 +445,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 					else searcher.search(query, null, offset + maxResults, sort)
 				transformResults(searcher, results, offset, maxResults)
 			}
-		}
+		})
 	}
 
 	private def acquireSearcher[T](work: IndexSearcher => T): T = {
@@ -570,66 +579,75 @@ trait HttpSearching {
 	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
 	lazy val serializer = new LuceneQuerySerializer
 
-	def performSearchOverHttp(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
-		val bos: ByteArrayOutputStream = new ByteArrayOutputStream
-		val oos: ObjectOutputStream = new ObjectOutputStream(bos)
-		serializer.writeQuery(oos, query)
-		oos.close
+	def performSearchOverHttp(query: Query, max: Option[Int], sort: Sort, offset: Int): Future[RichSearchResults] = {
+		// Get a reference to the lazy vals above outside of the Future
+		// (mostly for the trusted app config which uses the SSO Config threadlocal)
+		val httpExecutor = http
+		val trustedApp = currentApplication
+		val querySerializer = serializer
 
-		// Convert the request to JSON
-		val requestMap =
-			Map(
-				"querySerialized" -> new String(Base64.encode(bos.toByteArray), "UTF-8"),
-				"offset" -> offset
-			) ++
-				max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
-				Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
-					Map(
-						"field" -> sortField.getField,
-						"type" -> sortField.getType.name(),
-						"reverse" -> sortField.getReverse
-					)
-				}) }.getOrElse(Map())
+		Future {
+			val bos: ByteArrayOutputStream = new ByteArrayOutputStream
+			val oos: ObjectOutputStream = new ObjectOutputStream(bos)
+			querySerializer.writeQuery(oos, query)
+			oos.close
 
-		if (debugEnabled) logger.debug(requestMap.toString)
+			// Convert the request to JSON
+			val requestMap =
+				Map(
+					"querySerialized" -> new String(Base64.encode(bos.toByteArray), "UTF-8"),
+					"offset" -> offset
+				) ++
+					max.map { m => Map("max" -> m) }.getOrElse(Map()) ++
+					Option(sort).map { s => Map("sort" -> s.getSort.map { sortField =>
+						Map(
+							"field" -> sortField.getField,
+							"type" -> sortField.getType.name(),
+							"reverse" -> sortField.getReverse
+						)
+					})
+					}.getOrElse(Map())
 
-		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
-			req >- { (json) =>
-				JSON.parseFull(json) match {
-					case Some(json: Map[String, Any] @unchecked) =>
-						json.get("results") match {
-							case Some(docs: Seq[Map[String, Any]] @unchecked) =>
-								docs.map { fields =>
-									val doc = new Document
+			if (debugEnabled) logger.debug(requestMap.toString)
 
-									fields.foreach { case (key, value) =>
-										doc.add(value match {
-											case s: String => plainStringField(key, s)
-											case d: Double => doubleField(key, d)
-											case n: Number => new LongField(key, n.longValue(), Store.YES)
-											case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
-										})
+			def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
+				req >- { (json) =>
+					JSON.parseFull(json) match {
+						case Some(json: Map[String, Any]@unchecked) =>
+							json.get("results") match {
+								case Some(docs: Seq[Map[String, Any]]@unchecked) =>
+									docs.map { fields =>
+										val doc = new Document
+
+										fields.foreach { case (key, value) =>
+											doc.add(value match {
+												case s: String => plainStringField(key, s)
+												case d: Double => doubleField(key, d)
+												case n: Number => new LongField(key, n.longValue(), Store.YES)
+												case o => throw new IllegalArgumentException("Unexpected field type: " + o.getClass.getName)
+											})
+										}
+
+										doc
 									}
-
-									doc
-								}
-							case _ => Nil
-						}
-					case _ => Nil
+								case _ => Nil
+							}
+						case _ => Nil
+					}
 				}
 			}
+
+			val endpoint = s"$toplevelUrl/api/v1/index/$apiIndexName"
+
+			val trustedAppHeaders =
+				TrustedApplicationUtils.getRequestHeaders(trustedApp, "tabula-search-api-user", endpoint)
+					.asScala.map { header => header.getName -> header.getValue }
+					.toMap
+
+			val req =
+				url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
+
+			httpExecutor.when(_ == 200)(req >:+ handler)
 		}
-
-		val endpoint = s"$toplevelUrl/api/v1/index/$apiIndexName"
-
-		val trustedAppHeaders =
-			TrustedApplicationUtils.getRequestHeaders(currentApplication, "tabula-search-api-user", endpoint)
-				.asScala.map { header => header.getName -> header.getValue }
-				.toMap
-
-		val req =
-			url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
-
-		http.when(_ == 200)(req >:+ handler)
 	}
 }

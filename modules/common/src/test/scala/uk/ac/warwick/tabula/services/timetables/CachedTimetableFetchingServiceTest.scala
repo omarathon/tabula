@@ -10,8 +10,7 @@ import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache.HashMapCacheStore
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
@@ -32,14 +31,14 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	@Test
 	def firstRequestIsPassedThrough(){new Fixture {
-		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
+		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
 	@Test
 	def repeatedRequestsAreCached(){new Fixture {
-		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
-		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
+		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
+		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 	}}
 
@@ -51,10 +50,10 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
 		delegate.getTimetableForStaff(studentId) returns Future.successful(staffEvents)
 
-		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
-		Await.result(cache.getTimetableForStudent(studentId), 1.second) should be (studentEvents)
-		Await.result(cache.getTimetableForStaff(studentId), 1.second) should be (staffEvents)
-		Await.result(cache.getTimetableForStaff(studentId), 1.second) should be (staffEvents)
+		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
+		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
+		cache.getTimetableForStaff(studentId).futureValue should be (staffEvents)
+		cache.getTimetableForStaff(studentId).futureValue should be (staffEvents)
 		verify(delegate, times(1)).getTimetableForStudent(studentId)
 		verify(delegate, times(1)).getTimetableForStaff(studentId)
 

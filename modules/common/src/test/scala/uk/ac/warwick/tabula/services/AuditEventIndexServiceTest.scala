@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula._
 import org.junit.After
 import org.junit.Before
@@ -23,6 +24,9 @@ import uk.ac.warwick.tabula.data.SessionComponent
 
 // scalastyle:off magic.number
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with Logging {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	var indexer:AuditEventIndexService = _
 	val service:AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
@@ -81,9 +85,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 
 		val auditEvent = recordAudit(command)
 
-		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 		indexer.incrementalIndex
-		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.toList)
 
 	}
 
@@ -115,9 +119,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 
 		val auditEvent = recordAudit(command)
 
-		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 		indexer.incrementalIndex()
-		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
+		indexer.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.toList)
 	}
 
 	def recordAudit(command:Command[_]) = {
@@ -157,8 +161,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		assignment.id = "12345"
 
 		val maybeDate = indexer.getAssignmentCreatedDate(assignment)
-		if (maybeDate.isEmpty) fail("No date found")
-		else for (date <- maybeDate) date should be (d)
+		maybeDate.futureValue should be (Some(d))
 
 	}
 
@@ -207,9 +210,9 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		val user = new User("jeb")
 		user.setWarwickId("0123456")
 
-		indexer.listRecent(0, 1000).size should be (1000)
+		indexer.listRecent(0, 1000).futureValue.size should be (1000)
 
-		indexer.student(user).size should be (20)
+		indexer.student(user).futureValue.size should be (20)
 
 		val moreEvents = {
 			val events = Seq(addParsedData(AuditEvent(
@@ -222,19 +225,19 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		}
 		indexer.indexItems(moreEvents)
 
-		indexer.student(user).size should be (21)
+		indexer.student(user).futureValue.size should be (21)
 
-		indexer.listRecent(0, 13).size should be (13)
+		indexer.listRecent(0, 13).futureValue.size should be (13)
 
-		indexer.openQuery("eventType:PublishFeedback", 0, 100).size should be (21)
+		indexer.openQuery("eventType:PublishFeedback", 0, 100).futureValue.size should be (21)
 
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
+			newest.futureValue.head.getValues("eventId").toList.head should be ("d1000")
 			stopwatch.stop()
-      newest.head.getValues("eventId").toList.head should be ("d1000")
 		}
 
 		// index again to check that it doesn't do any once-only stuff
@@ -340,8 +343,8 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		paged2.items.length should be (70)
 
 		// Find by user ID
-		indexer.findByUserId("bob").size should be (140)
-		indexer.findByUserId("fred").size should be (0)
+		indexer.findByUserId("bob").futureValue.size should be (140)
+		indexer.findByUserId("fred").futureValue.size should be (0)
 
 		val beforeFeedbackJsonData = json.writeValueAsString(Map(
 					"assignment" -> assignment.id,
@@ -375,8 +378,8 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 			service.save(addParsedData(event))
 		}
 
-		indexer.findPublishFeedbackEvents(dept).length should be (0)
-		indexer.findPublishFeedbackEvents(Fixtures.department("in")).length should be (0)
+		indexer.findPublishFeedbackEvents(dept).futureValue.length should be (0)
+		indexer.findPublishFeedbackEvents(Fixtures.department("in")).futureValue.length should be (0)
 	}
 
 }

@@ -34,7 +34,11 @@ import scala.collection.JavaConverters._
  */
 @Entity
 @Access(AccessType.FIELD)
-class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup with Daoisms {
+class UserGroup private(val universityIds: Boolean)
+	extends UnspecifiedTypeUserGroup
+		with GeneratedId
+		with KnownTypeUserGroup
+		with Daoisms {
 
 	/* For Hibernate xx */
 	def this() { this(false) }

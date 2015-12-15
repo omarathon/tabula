@@ -145,7 +145,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			}
 		}
 
-		Futures.flatten(results)
+		Futures.flatten(results: _*)
 	}
 
 }
