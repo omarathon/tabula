@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.helpers.profiles.SearchJSONHelpers
+import uk.ac.warwick.tabula.commands.profiles.SearchProfilesCommand
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
-import uk.ac.warwick.tabula.profiles.helpers.SearchJSONHelpers
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.util.core.StringUtils
 

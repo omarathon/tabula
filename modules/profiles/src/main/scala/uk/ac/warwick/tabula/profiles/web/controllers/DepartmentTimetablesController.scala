@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.timetables.{ViewStudentPersonalTimetableCom
 import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.profiles.commands.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest}
+import uk.ac.warwick.tabula.commands.timetables.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.timetables.EventOccurrence

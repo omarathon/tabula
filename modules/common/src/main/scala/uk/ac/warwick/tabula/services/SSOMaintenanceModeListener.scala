@@ -20,9 +20,8 @@ import uk.ac.warwick.util.queue.conversion.ItemType
  * This listener both listens to the queue and observes, as the queue listener
  * automatically removes messages from the same source, which we don't want.
  */
-class SSOMaintenanceModeListener extends QueueListener with InitializingBean with Logging with ServletContextAware {
+class SSOMaintenanceModeListener extends QueueListener with InitializingBean with Logging with ServletContextAware with AutowiringMaintenanceModeServiceComponent {
 
-	var maintenanceModeService = Wire.auto[MaintenanceModeService]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 
 	def config = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {

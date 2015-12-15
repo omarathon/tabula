@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
-import uk.ac.warwick.tabula.profiles.commands.EditMemberNoteCommand
+import uk.ac.warwick.tabula.commands.profiles.EditMemberNoteCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import org.springframework.validation.Errors

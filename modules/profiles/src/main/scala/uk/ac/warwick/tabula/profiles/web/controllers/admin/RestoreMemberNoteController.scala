@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.profiles.commands.RestoreMemberNoteCommand
+import uk.ac.warwick.tabula.commands.profiles.RestoreMemberNoteCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 

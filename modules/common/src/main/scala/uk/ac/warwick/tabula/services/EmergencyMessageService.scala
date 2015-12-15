@@ -89,6 +89,14 @@ class EmergencyMessageServiceImpl extends EmergencyMessageService with Logging {
 	}
 }
 
+trait EmergencyMessageServiceComponent {
+	def emergencyMessageService: EmergencyMessageService
+}
+
+trait AutowiringEmergencyMessageServiceComponent extends EmergencyMessageServiceComponent {
+	val emergencyMessageService = Wire[EmergencyMessageService]
+}
+
 /**
  * Exception thrown when a command tries to run during
  * emergency message, and it's not readonly. The view handler
@@ -113,13 +121,13 @@ class CannotPerformWriteOperationException(callee: Describable[_])
 class EmergencyMessage {
 	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the EmergencyMessageController
 
-	def this(status: EmergencyMessageStatus) {
+	def this(enabled: Boolean, message: Option[String]) {
 		this()
 
 		val bean = new BeanWrapperImpl(this)
 
-		bean.setPropertyValue("enabled", status.enabled)
-		bean.setPropertyValue("message", status.message.orNull)
+		bean.setPropertyValue("enabled", enabled)
+		bean.setPropertyValue("message", message.orNull)
 
 	}
 
@@ -127,15 +135,14 @@ class EmergencyMessage {
 	@BeanProperty var message: String = _
 }
 
-class EmergencyMessageListener extends QueueListener with InitializingBean with Logging {
+class EmergencyMessageListener extends QueueListener with InitializingBean with Logging with AutowiringEmergencyMessageServiceComponent {
 
 	var queue = Wire.named[Queue]("settingsSyncTopic")
-	var service = Wire.auto[EmergencyMessageService]
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {
 		item match {
-			case copy: EmergencyMessage => service.update(copy)
+			case copy: EmergencyMessage => emergencyMessageService.update(copy)
 			case _ =>
 		}
 	}

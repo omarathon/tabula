@@ -250,7 +250,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
 		cmd.service = mockAssignmentService
 		cmd.assessmentMembershipService = mockAssignmentMembershipService
-		cmd.maintenanceMode = smartMock[MaintenanceModeService]
+		cmd.maintenanceModeService = smartMock[MaintenanceModeService]
 		cmd.listener = smartMock[EventListener]
 		cmd.scheduledNotificationService = smartMock[ScheduledNotificationService]
 

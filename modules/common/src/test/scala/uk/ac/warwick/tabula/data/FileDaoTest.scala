@@ -20,7 +20,6 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 	@Before def setup() {
 		dao.attachmentDir = createTemporaryDirectory()
 		dao.sessionFactory = sessionFactory
-		dao.fileHasher = new SHAFileHasher
 	}
 
 	@Test def deletingTemporaryFiles = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {

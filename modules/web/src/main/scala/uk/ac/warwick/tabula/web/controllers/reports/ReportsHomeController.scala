@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.reports.web.Routes
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 
 /**
@@ -17,7 +17,8 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @RequestMapping(Array("/reports"))
 class ReportsHomeController extends ReportsController with CurrentSITSAcademicYear
 	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent  {
+	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	override val departmentPermission: Permission = Permissions.Department.Reports
 

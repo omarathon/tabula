@@ -8,10 +8,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.profiles.commands.ViewProfilePhotoCommand
+import uk.ac.warwick.tabula.commands.profiles.ViewProfilePhotoCommand
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.tabula.profiles.commands.ViewStudentRelationshipPhotoCommand
+import uk.ac.warwick.tabula.commands.profiles.ViewStudentRelationshipPhotoCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.StudentMember

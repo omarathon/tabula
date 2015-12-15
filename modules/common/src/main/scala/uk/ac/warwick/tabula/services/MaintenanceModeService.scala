@@ -99,6 +99,22 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	}
 }
 
+trait MaintenanceModeServiceComponent {
+	def maintenanceModeService: MaintenanceModeService
+}
+
+trait AutowiringMaintenanceModeServiceComponent extends MaintenanceModeServiceComponent {
+	var maintenanceModeService = Wire[MaintenanceModeService]
+}
+
+trait SettingsSyncQueueComponent {
+	def settingsSyncQueue: Queue
+}
+
+trait AutowiringSettingsSyncQueueComponent extends SettingsSyncQueueComponent {
+	var settingsSyncQueue = Wire.named[Queue]("settingsSyncTopic")
+}
+
 /**
  * Exception thrown when a command tries to run during
  * maintenance mode, and it's not readonly. The view handler
@@ -120,14 +136,14 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 class MaintenanceModeMessage {
 	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the MaintenanceModeController
 
-	def this(status: MaintenanceStatus) {
+	def this(enabled: Boolean, until: Option[DateTime], message: Option[String]) {
 		this()
 
 		val bean = new BeanWrapperImpl(this)
 
-		bean.setPropertyValue("enabled", status.enabled)
-		bean.setPropertyValue("until", status.until map { _.getMillis } getOrElse(-1))
-		bean.setPropertyValue("message", status.message.orNull)
+		bean.setPropertyValue("enabled", enabled)
+		bean.setPropertyValue("until", until.map { _.getMillis }.getOrElse(-1))
+		bean.setPropertyValue("message", message.orNull)
 
 	}
 
@@ -136,15 +152,14 @@ class MaintenanceModeMessage {
 	@BeanProperty var message: String = _
 }
 
-class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
+class MaintenanceModeListener extends QueueListener with InitializingBean with Logging with AutowiringMaintenanceModeServiceComponent {
 
 		var queue = Wire.named[Queue]("settingsSyncTopic")
-		var service = Wire.auto[MaintenanceModeService]
 
 		override def isListeningToQueue = true
 		override def onReceive(item: Any) {
 				item match {
-						case copy: MaintenanceModeMessage => service.update(copy)
+						case copy: MaintenanceModeMessage => maintenanceModeService.update(copy)
 						case _ =>
 				}
 		}

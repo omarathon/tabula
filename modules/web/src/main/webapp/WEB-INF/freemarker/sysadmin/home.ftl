@@ -106,7 +106,7 @@
 
 		<h4>Maintenance mode</h4>
 
-		<#if maintenanceModeService.enabled>
+		<#if maintenanceModeEnabled>
 			<p>Currently <strong>enabled</strong>.</p>
 		<#else>
 			<p>Disabled.</p>
@@ -115,7 +115,7 @@
 		<p><a href="<@url page="/sysadmin/maintenance"/>">Update settings</a></p>
 
 		<h4>Emergency message</h4>
-		<#if emergencyMessageService.enabled>
+		<#if emergencyMessageEnabled>
 			<p>Currently <strong>enabled</strong>.</p>
 		<#else>
 			<p>Disabled.</p>

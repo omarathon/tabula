@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.admin.department.AdminDepartmentHomeCommand
 import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.{AdminController, AdminDepartmentsModulesAndRoutes}
@@ -17,7 +17,8 @@ import scala.collection.JavaConverters._
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}"))
 class AdminDepartmentHomeController extends AdminController with DepartmentScopedController with AutowiringUserSettingsServiceComponent
-	with AdminDepartmentsModulesAndRoutes with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent {
+	with AdminDepartmentsModulesAndRoutes with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	hideDeletedItems
 

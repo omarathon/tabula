@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.groups.admin.{ViewDepartmentAttendanceComma
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsDepartmentsAndModulesWithPermission, GroupsController}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 
 abstract class AbstractViewDepartmentAttendanceController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with GroupsDepartmentsAndModulesWithPermission {
+	with AutowiringMaintenanceModeServiceComponent with GroupsDepartmentsAndModulesWithPermission {
 
 	override val departmentPermission: Permission = null
 

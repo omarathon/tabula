@@ -3,9 +3,10 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, StudentAssociationResult}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.profiles.commands.relationships._
+import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.views.{JSONView, ExcelView}

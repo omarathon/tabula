@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
@@ -21,7 +21,8 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 import scala.collection.JavaConverters._
 
 abstract class AbstractAttendanceReportController extends ReportsController
-	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	override val departmentPermission: Permission = Permissions.Department.Reports
 

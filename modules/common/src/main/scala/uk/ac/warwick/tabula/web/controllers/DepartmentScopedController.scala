@@ -6,13 +6,13 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, UserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{MaintenanceModeServiceComponent, ModuleAndDepartmentServiceComponent, UserSettingsServiceComponent}
 
 import scala.collection.JavaConverters._
 
 trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permission), Seq[Department]] {
 
-	self: BaseController with UserSettingsServiceComponent with ModuleAndDepartmentServiceComponent =>
+	self: BaseController with UserSettingsServiceComponent with ModuleAndDepartmentServiceComponent with MaintenanceModeServiceComponent =>
 
 	def departmentPermission: Permission
 
@@ -29,6 +29,9 @@ trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permi
 
 	protected def retrieveActiveDepartment(departmentOption: Option[Department]): Option[Department] = {
 		departmentOption match {
+			case Some(department) if (departmentsWithPermission.contains(department) || user.god) && maintenanceModeService.enabled =>
+				// Don't store if maintenance mode is enabled
+				Some(department)
 			case Some(department) if departmentsWithPermission.contains(department) || user.god =>
 				// Store the new active department and return it
 				val settings = new UserSettings(user.apparentId)
@@ -36,7 +39,7 @@ trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permi
 				transactional() {
 					userSettingsService.save(user, settings)
 				}
-				Option(department)
+				Some(department)
 			case Some(department) =>
 				None
 			case _ =>

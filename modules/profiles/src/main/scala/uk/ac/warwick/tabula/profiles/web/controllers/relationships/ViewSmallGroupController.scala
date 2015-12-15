@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.profiles.commands.ViewSmallGroupCommand
+import uk.ac.warwick.tabula.commands.profiles.ViewSmallGroupCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.CurrentUser
 

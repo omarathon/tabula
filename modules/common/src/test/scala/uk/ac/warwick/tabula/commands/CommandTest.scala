@@ -2,11 +2,10 @@ package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.tabula.events.{EventHandling, SLF4JEventListener}
-import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, MaintenanceModeServiceImpl}
+import uk.ac.warwick.tabula.services._
 
 
 class CommandTest extends TestBase {
-
 
 	@Test def commandName() {
 		Spell6Command().eventName should be("DefendCastle")
@@ -19,8 +18,8 @@ class CommandTest extends TestBase {
 		mmService.disable
 
 		val cmd = Spell6Command()
-		cmd.maintenanceMode = mmService
 		cmd.listener = new SLF4JEventListener
+		cmd.maintenanceModeService = mmService
 
 		cmd.apply() should be(true)
 	}
@@ -32,7 +31,7 @@ class CommandTest extends TestBase {
 		mmService.enable
 
 		val cmd = Spell6Command()
-		cmd.maintenanceMode = mmService
+		cmd.maintenanceModeService = mmService
 
 		cmd.apply()
 		fail("expected exception")
@@ -43,8 +42,8 @@ class CommandTest extends TestBase {
 		mmService.enable
 
 		val cmd = CastFlameSpellCommand()
-		cmd.maintenanceMode = mmService
 		cmd.listener = new SLF4JEventListener
+		cmd.maintenanceModeService = mmService
 
 		cmd.apply() should be(true)
 	}

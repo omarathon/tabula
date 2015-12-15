@@ -401,6 +401,7 @@
 				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
 				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 				<entry key="attendanceMonitoringCheckpointFormatter"><bean class="uk.ac.warwick.tabula.helpers.AttendanceMonitoringCheckpointFormatter" /></entry>
+				<entry key="phoneNumberFormatter"><bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter" /></entry>
 				<entry key="googleAnalyticsCode" value="${tabula.analytics.code}" />
 			</map>
 		</property>
@@ -423,8 +424,6 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
-
-	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
 
 	<bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.CachingImageResizer">
 		<constructor-arg>
