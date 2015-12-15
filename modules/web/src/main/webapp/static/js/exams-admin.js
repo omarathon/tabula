@@ -17,19 +17,12 @@ exports.prepareAjaxForm = function($form, callback) {
 		iframe: true,
 		statusCode: {
 			403: function(jqXHR) {
-				$container.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
+				$container.html("<p>Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p>Refresh the page and try again. If it remains a problem, please let us know using the 'Problems, questions?' button at the top of the page.</p>");
 				$container.trigger('tabula.expandingTable.contentChanged');
 			}
 		},
 		success: function(response) {
-			var result;
-
-			if (response.indexOf('id="dev"') >= 0) {
-				// for debugging freemarker...
-				result = $(response).find('#column-1-content');
-			} else {
-				result = callback(response);
-			}
+			var result = callback(response);
 
 			if (!result || /^\s*$/.test(result)) {
 				// reset if empty

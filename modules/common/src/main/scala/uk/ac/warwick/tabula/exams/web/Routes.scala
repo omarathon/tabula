@@ -17,14 +17,12 @@ object Routes {
 
 	object admin {
 
-		private def departmentRoot(department: Department) = context + "/admin/department/%s" format(encoded(department.code))
+		private def departmentRoot(department: Department) = context + "/admin/department/%s" format encoded(department.code)
 
 		def department(department: Department, academicYear: AcademicYear) =
-			departmentRoot(department) + "/%s" format(encoded(academicYear.startYear.toString))
+			departmentRoot(department) + "/%s" format encoded(academicYear.startYear.toString)
 
-		object module {
-			def apply(module: Module, academicYear: AcademicYear) = department(module.adminDepartment, academicYear) + "#module-" + encoded(module.code)
-		}
+		def module(module: Module, academicYear: AcademicYear) = context + "/admin/module/%s/%s" format(encoded(module.code), encoded(academicYear.startYear.toString))
 
 		object markingWorkflow {
 			def list(department: Department) = admin.departmentRoot(department) + "/markingworkflows"

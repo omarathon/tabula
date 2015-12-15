@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommandState, GenerateGradesFromMarkCommand}
+import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, GenerateGradesFromMarkCommandState}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Exam, GradeBoundary, Assignment, Module}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.exams.web.controllers.ExamsController
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.{Assignment, GradeBoundary, Module}
+
+import scala.collection.JavaConverters._
 
 abstract class AbstractGenerateGradeFromMarkController extends CourseworkController {
 
@@ -60,15 +59,5 @@ class GenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFro
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
-
-}
-
-@Controller
-@RequestMapping(Array("/exams/admin/module/{module}/exams/{exam}/generate-grade"))
-class GenerateExamGradeFromMarkController extends AbstractGenerateGradeFromMarkController {
-
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam))
 
 }

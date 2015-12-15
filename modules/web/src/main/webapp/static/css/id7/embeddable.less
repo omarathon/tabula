@@ -833,3 +833,45 @@ ul.profile-user-list {
 		border-color: @btn-primary-border;
 	}
 }
+
+.content-container {
+	position: absolute;
+	width: 100%;
+	padding: 10px;
+	border-top: 1px solid @table-border-color;
+
+	.content {
+		h3 {
+			font-size: 18px;
+			letter-spacing: -1px;
+
+			display: inline-block;
+		}
+
+		h3 + .labels {
+			display: inline-block;
+
+			position: relative;
+			top: -2px;
+		}
+
+		.stage-group {
+			margin-top: 12px;
+			&:first-child { margin-top: 0; }
+
+			.stage {
+				&.incomplete {
+					color: @very-subtle-text-color;
+
+					&.preconditions-not-met {
+						color: lighten(@very-subtle-text-color, 10%);
+					}
+
+					&.current {
+						color: darken(@very-subtle-text-color, 10%);
+					}
+				}
+			}
+		}
+	}
+}

@@ -23,7 +23,7 @@ trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permi
 		cachedBy((user, departmentPermission)) {
 			moduleAndDepartmentService.departmentsWithPermission(user, departmentPermission)
 				.toSeq.sortBy(_.fullName)
-				.flatMap(withSubDepartments)
+				.flatMap(withSubDepartments).distinct
 		}
 	}
 
