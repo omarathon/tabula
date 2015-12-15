@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.commands.exams.ReleaseExamForMarkingCommand
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/release-for-marking"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/release-for-marking"))
 class ReleaseExamForMarkingController extends ExamsController {
 
 	@ModelAttribute("command")
@@ -22,14 +22,17 @@ class ReleaseExamForMarkingController extends ExamsController {
 
 	@RequestMapping(method = Array(GET))
 	def form(@PathVariable module: Module, @PathVariable exam: Exam) = {
-		Mav("exams/admin/release")
-			.crumbs(Breadcrumbs.Department(module.adminDepartment, exam.academicYear), Breadcrumbs.Module(module, exam.academicYear))
+		Mav("exams/exams/admin/release").crumbs(
+			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
+			Breadcrumbs.Exams.Module(module, exam.academicYear)
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam) = {
 		cmd.apply()
-		Redirect(Routes.admin.module(exam.module, exam.academicYear))
+		Redirect(Routes.Exams.admin.module(exam.module, exam.academicYear))
 	}
 
 }

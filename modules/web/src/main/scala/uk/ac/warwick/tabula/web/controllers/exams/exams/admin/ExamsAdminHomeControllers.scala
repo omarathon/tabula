@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,14 +52,14 @@ case class ExamsDepartmentHomeInformation(modules: Seq[Module], notices: Map[Str
  */
 
 @Controller
-@RequestMapping(Array("/exams/admin", "/exams/admin/department", "/exams/admin/module"))
+@RequestMapping(Array("/exams/exams/exams/admin", "/exams/exams/admin/department", "/exams/exams/admin/module"))
 class ExamsAdminHomeController extends ExamsController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
 @Controller
-@RequestMapping(Array("/exams/admin"))
+@RequestMapping(Array("/exams/exams/admin"))
 class ExamsAdminHomeDefaultAcademicYearController extends ExamsController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
@@ -68,15 +68,15 @@ class ExamsAdminHomeDefaultAcademicYearController extends ExamsController
 
 	@RequestMapping(value = Array("/department/{department}"), method = Array(GET, HEAD))
 	def handleDepartment(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		Redirect(Routes.admin.department(mandatory(department), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.Exams.admin.department(mandatory(department), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 
 	@RequestMapping(value = Array("/module/{module}"), method = Array(GET, HEAD))
 	def handleModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		Redirect(Routes.admin.module(mandatory(module), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
+		Redirect(Routes.Exams.admin.module(mandatory(module), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))))
 }
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/department/{department}/{academicYear}"))
+@RequestMapping(value=Array("/exams/exams/admin/department/{department}/{academicYear}"))
 class ExamsAdminDepartmentHomeController extends ExamsController
 	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
 	with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent {
@@ -101,17 +101,19 @@ class ExamsAdminDepartmentHomeController extends ExamsController
 	def adminDepartment(cmd: ExamsAdminDepartmentHomeCommand, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		val result = cmd.apply()
 
-		Mav("exams/admin/department",
+		Mav("exams/exams/admin/department",
 			"department" -> department,
 			"modules" -> result.sortWith(_.code.toLowerCase < _.code.toLowerCase),
 			"examMap" -> cmd.modulesAndExams
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.department(department, year)):_*)
+		)
+			.crumbs(Breadcrumbs.Exams.Home)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Exams.admin.department(department, year)):_*)
 	}
 
 }
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/module/{module}/{academicYear}"))
+@RequestMapping(value=Array("/exams/exams/admin/module/{module}/{academicYear}"))
 class ExamsAdminModuleHomeController extends ExamsController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
@@ -134,9 +136,11 @@ class ExamsAdminModuleHomeController extends ExamsController
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module], @PathVariable module: Module, @PathVariable academicYear: AcademicYear) = {
 		val module = cmd.apply()
 
-		if (ajax) Mav("exams/admin/modules/admin_partial").noLayout()
-		else Mav("exams/admin/modules/admin")
-			.crumbs(Breadcrumbs.Department(module.adminDepartment, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.module(module, year)):_*)
+		if (ajax) Mav("exams/exams/admin/modules/admin_partial").noLayout()
+		else Mav("exams/exams/admin/modules/admin")
+			.crumbs(
+				Breadcrumbs.Exams.Home,
+				Breadcrumbs.Exams.Department(module.adminDepartment, academicYear)
+			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Exams.admin.module(module, year)):_*)
 	}
 }

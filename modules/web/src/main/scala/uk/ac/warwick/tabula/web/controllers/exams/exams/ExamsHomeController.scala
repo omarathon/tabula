@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams
+package uk.ac.warwick.tabula.web.controllers.exams.exams
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -7,9 +7,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CurrentSITSAcademicYear, TaskBenchmarking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentService, FeedbackService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(Array("/exams"))
+@RequestMapping(Array("/exams/exams"))
 class ExamsHomeController extends ExamsController with CurrentSITSAcademicYear with TaskBenchmarking {
 
 	@Autowired var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
@@ -35,7 +36,7 @@ class ExamsHomeController extends ExamsController with CurrentSITSAcademicYear w
 			})
 		}.toMap
 
-		Mav("exams/home/view",
+		Mav("exams/exams/home/view",
 			"currentAcademicYear" -> academicYear,
 			"examsForMarking" -> examsForMarking,
 			"ownedDepartments" -> ownedDepartments,

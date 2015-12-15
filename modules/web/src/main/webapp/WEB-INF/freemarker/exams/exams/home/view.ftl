@@ -10,7 +10,7 @@
 
 <#if !user.loggedIn>
 	<#if IS_SSO_PROTECTED!true>
-		<p class="alert">
+		<p class="alert alert-info">
 			You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 			to see a personalised view.
 		</p>

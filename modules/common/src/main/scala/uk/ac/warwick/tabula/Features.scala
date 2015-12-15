@@ -108,6 +108,15 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.version2:true}")	var attendanceMonitoringVersion2 = defaults.attendanceMonitoringVersion2
 	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.attendanceMonitoring.academicYear2015:true}")	var attendanceMonitoringAcademicYear2015 = defaults.attendanceMonitoringAcademicYear2015
+	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
+	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
+	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
+	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
+	@Value("${features.reports:true}") var reports = defaults.reports
+	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
+	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
+	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
+
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
 	@Value("${features.scheduling.assignmentsImport:true}") var schedulingAssignmentsImport = defaults.schedulingAssignmentsImport
@@ -123,17 +132,11 @@ abstract class Features {
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
-	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
-	@Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite = defaults.masqueradersCanWrite
-	@Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions = defaults.masqueradeElevatedPermissions
-	@Value("${features.profiles.autoGroupDeregistration:false}") var autoGroupDeregistration = defaults.autoGroupDeregistration
-	@Value("${features.reports:true}") var reports = defaults.reports
-	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
-	@Value("${features.exams:true}") var exams = defaults.exams
-	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
-	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
+
+	@Value("${features.exams:true}") var exams = defaults.exams
+	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -256,6 +259,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingTriggers = true
 
 	@BeanProperty var exams = true
+	@BeanProperty var examGrids = false
 
 	@BeanProperty var reports = true
 }

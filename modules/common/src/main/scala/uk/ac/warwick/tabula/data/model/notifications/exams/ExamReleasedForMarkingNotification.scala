@@ -28,7 +28,7 @@ class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
 		"exam" -> exam
 	))
 
-	def url = web.Routes.admin.markerFeedback(exam, recipient)
+	def url = web.Routes.Exams.admin.markerFeedback(exam, recipient)
 	def urlTitle = "enter marks"
 
 }

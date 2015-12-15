@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import javax.validation.Valid
 
@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments"))
 class ExamFeedbackAdjustmentsListController extends ExamsController {
 
 	type FeedbackAdjustmentListCommand = Appliable[Seq[StudentInfo]]
@@ -30,19 +30,20 @@ class ExamFeedbackAdjustmentsListController extends ExamsController {
 	) = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
-		Mav("exams/admin/adjustments/list",
+		Mav("exams/exams/admin/adjustments/list",
 			"studentInfo" -> studentInfo,
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"isGradeValidation" -> exam.module.adminDepartment.assignmentGradeValidation
 		).crumbs(
-				Breadcrumbs.Department(exam.module.adminDepartment, exam.academicYear),
-				Breadcrumbs.Module(exam.module, exam.academicYear)
+			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Department(exam.module.adminDepartment, exam.academicYear),
+			Breadcrumbs.Exams.Module(exam.module, exam.academicYear)
 		)
 	}
 }
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments/{student}"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/adjustments/{student}"))
 class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringProfileServiceComponent {
 
 	validatesSelf[SelfValidating]
@@ -53,7 +54,7 @@ class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringP
 
 	@RequestMapping(method=Array(GET))
 	def showForm(@PathVariable exam: Exam) = {
-		Mav("exams/admin/adjustments/student",
+		Mav("exams/exams/admin/adjustments/student",
 			"isGradeValidation" -> exam.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
 	}

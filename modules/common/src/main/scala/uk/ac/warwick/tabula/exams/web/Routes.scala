@@ -15,99 +15,114 @@ object Routes {
 	private val context = "/exams"
 	def home = context + "/"
 
-	object admin {
+	object Exams {
 
-		private def departmentRoot(department: Department) = context + "/admin/department/%s" format encoded(department.code)
+		private val context = "/exams/exams"
 
-		def department(department: Department, academicYear: AcademicYear) =
-			departmentRoot(department) + "/%s" format encoded(academicYear.startYear.toString)
+		def home = context + "/"
 
-		def module(module: Module, academicYear: AcademicYear) = context + "/admin/module/%s/%s" format(encoded(module.code), encoded(academicYear.startYear.toString))
+		object admin {
 
-		object markingWorkflow {
-			def list(department: Department) = admin.departmentRoot(department) + "/markingworkflows"
-			def add(department: Department) = list(department) + "/add"
-			def edit(scheme: MarkingWorkflow) = list(scheme.department) + "/edit/" + scheme.id
-		}
+			private def departmentRoot(department: Department) = context + "/admin/department/%s" format encoded(department.code)
 
-		object exam {
-			def apply(exam: Exam) =
-				context + "/admin/module/%s/%s/exams/%s" format(
-					encoded(exam.module.code),
-					encoded(exam.academicYear.startYear.toString),
-					encoded(exam.id)
-				)
+			def department(department: Department, academicYear: AcademicYear) =
+				departmentRoot(department) + "/%s" format encoded(academicYear.startYear.toString)
 
-			object assignMarkers {
-				def apply(exam: Exam) = admin.exam(exam) + "/assign-markers"
+			def module(module: Module, academicYear: AcademicYear) = context + "/admin/module/%s/%s" format(encoded(module.code), encoded(academicYear.startYear.toString))
+
+			object markingWorkflow {
+				def list(department: Department) = admin.departmentRoot(department) + "/markingworkflows"
+				def add(department: Department) = list(department) + "/add"
+				def edit(scheme: MarkingWorkflow) = list(scheme.department) + "/edit/" + scheme.id
 			}
-		}
 
-		private def markerroot(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}"
+			object exam {
+				def apply(exam: Exam) =
+					context + "/admin/module/%s/%s/exams/%s" format(
+						encoded(exam.module.code),
+						encoded(exam.academicYear.startYear.toString),
+						encoded(exam.id)
+						)
 
-		object markerFeedback {
-			def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/list"
-			object complete {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marking-completed"
-			}
-			object uncomplete {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marking-uncompleted"
-				def apply(exam: Exam, marker: User, previousRole: String) = markerroot(exam, marker) + "/marking-uncompleted?previousStageRole="+previousRole
-			}
-			object bulkApprove {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/moderation/bulk-approve"
-			}
-			object marksTemplate {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marks-template"
-			}
-			object onlineFeedback {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/feedback/online"
-
-				object student {
-					def apply(exam: Exam, marker: User, student: User) =
-						markerroot(exam, marker) + s"/feedback/online/${student.getWarwickId}/"
-				}
-				object moderation {
-					def apply(exam: Exam, marker: User, student: User) =
-						markerroot(exam, marker) + s"/feedback/online/moderation/${student.getWarwickId}/"
+				object assignMarkers {
+					def apply(exam: Exam) = admin.exam(exam) + "/assign-markers"
 				}
 			}
 
-			object marks {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marks"
-			}
-			object feedback {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/feedback"
-			}
-			object submissions {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/submissions.zip"
-			}
-			object downloadFeedback {
-				object marker {
-					def apply(exam: Exam, marker: User, feedbackId: String, filename: String) =
-						markerroot(exam, marker) + s"/feedback/download/$feedbackId/$filename"
+			private def markerroot(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}"
+
+			object markerFeedback {
+				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/list"
+				object complete {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marking-completed"
+				}
+				object uncomplete {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marking-uncompleted"
+					def apply(exam: Exam, marker: User, previousRole: String) = markerroot(exam, marker) + "/marking-uncompleted?previousStageRole="+previousRole
+				}
+				object bulkApprove {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/moderation/bulk-approve"
+				}
+				object marksTemplate {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marks-template"
+				}
+				object onlineFeedback {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/feedback/online"
+
+					object student {
+						def apply(exam: Exam, marker: User, student: User) =
+							markerroot(exam, marker) + s"/feedback/online/${student.getWarwickId}/"
+					}
+					object moderation {
+						def apply(exam: Exam, marker: User, student: User) =
+							markerroot(exam, marker) + s"/feedback/online/moderation/${student.getWarwickId}/"
+					}
 				}
 
-				object all {
-					def apply(exam: Exam, marker: User, markerFeedback: String) = markerroot(exam, marker) + s"/feedback/download/$markerFeedback/attachments/"
+				object marks {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marks"
 				}
+				object feedback {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/feedback"
+				}
+				object submissions {
+					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/submissions.zip"
+				}
+				object downloadFeedback {
+					object marker {
+						def apply(exam: Exam, marker: User, feedbackId: String, filename: String) =
+							markerroot(exam, marker) + s"/feedback/download/$feedbackId/$filename"
+					}
 
-				object one {
-					def apply(exam: Exam, marker: User, markerFeedback: String, filename: String) = markerroot(exam, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
+					object all {
+						def apply(exam: Exam, marker: User, markerFeedback: String) = markerroot(exam, marker) + s"/feedback/download/$markerFeedback/attachments/"
+					}
+
+					object one {
+						def apply(exam: Exam, marker: User, markerFeedback: String, filename: String) = markerroot(exam, marker) + s"/feedback/download/$markerFeedback/attachment/$filename"
+					}
+				}
+				object returnsubmissions {
+					def apply(exam: Exam) = admin.exam(exam) + "/submissionsandfeedback/return-submissions"
 				}
 			}
-			object returnsubmissions {
-				def apply(exam: Exam) = admin.exam(exam) + "/submissionsandfeedback/return-submissions"
+
+			object onlineModeration {
+				def apply(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
+			}
+
+			object onlineSecondMarker {
+				def apply(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}/feedback/online/secondmarker"
 			}
 		}
 
-		object onlineModeration {
-			def apply(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
-		}
+	}
 
-		object onlineSecondMarker {
-			def apply(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}/feedback/online/secondmarker"
-		}
+	object Grids {
+
+		private val context = "/exams/grids"
+
+		def home = context + "/"
 
 	}
 

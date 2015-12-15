@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers/template"))
+@RequestMapping(value=Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers/template"))
 class ExamAssignMarkersTemplateController extends ExamsController {
 
 	@ModelAttribute("command")

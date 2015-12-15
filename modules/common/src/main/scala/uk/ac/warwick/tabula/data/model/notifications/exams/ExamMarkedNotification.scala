@@ -61,7 +61,7 @@ class ExamMarkedNotification
 		))
 
 
-	def url = web.Routes.admin.exam(exam)
+	def url = web.Routes.Exams.admin.exam(exam)
 	def urlTitle = "view the exam"
 
 	def recipients = exam.module.adminDepartment.owners.users

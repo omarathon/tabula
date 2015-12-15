@@ -3,7 +3,7 @@
 <#if marker??>
 	<#assign formUrl><@routes.exams.markerAddMarks exam marker/></#assign>
 	<#assign templateUrl><@routes.exams.markerMarksTemplate exam marker/></#assign>
-	<#assign cancelUrl><@routes.exams.home /></#assign>
+	<#assign cancelUrl><@routes.exams.examsHome /></#assign>
 <#else>
 	<#assign formUrl><@routes.exams.addMarks exam /></#assign>
 	<#assign templateUrl><@routes.exams.markstemplate exam=exam /></#assign>

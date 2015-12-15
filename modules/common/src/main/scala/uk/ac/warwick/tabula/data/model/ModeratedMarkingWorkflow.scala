@@ -25,9 +25,9 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with A
 
 	override def examMarkingUrl(exam: Exam, marker: User, studentId: String) = {
 		if (exam.isReleasedToSecondMarker(studentId) && getStudentsSecondMarker(exam, studentId).contains(marker.getUserId))
-			Routes.exams.admin.onlineModeration(exam, marker)
+			Routes.exams.Exams.admin.onlineModeration(exam, marker)
 		else
-			Routes.exams.admin.markerFeedback.onlineFeedback(exam, marker)
+			Routes.exams.Exams.admin.markerFeedback.onlineFeedback(exam, marker)
 	}
 
 	// True if this marking workflow uses a second marker
