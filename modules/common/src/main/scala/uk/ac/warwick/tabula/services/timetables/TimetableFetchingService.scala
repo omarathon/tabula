@@ -114,7 +114,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.map {
 				// On downstream failures, just return Nil
 				_.getTimetableForStudent(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
-			}
+			}: _*
 		).map(mergeDuplicates)
 
 	def getTimetableForModule(moduleCode: String) =
@@ -123,7 +123,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.map {
 				// On downstream failures, just return Nil
 				_.getTimetableForModule(moduleCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
-			}
+			}: _*
 		).map(mergeDuplicates)
 
 	def getTimetableForCourse(courseCode: String) =
@@ -132,7 +132,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.map {
 				// On downstream failures, just return Nil
 				_.getTimetableForCourse(courseCode).recover { case t => logger.warn("Error fetching timetable", t); Nil }
-			}
+			}: _*
 		).map(mergeDuplicates)
 
 	def getTimetableForStaff(universityId: String) =
@@ -141,7 +141,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.map {
 				// On downstream failures, just return Nil
 				_.getTimetableForStaff(universityId).recover { case t => logger.warn("Error fetching timetable", t); Nil }
-			}
+			}: _*
 		).map(mergeDuplicates)
 
 	def getTimetableForRoom(roomName: String) =
@@ -150,6 +150,6 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 			.map {
 				// On downstream failures, just return Nil
 				_.getTimetableForRoom(roomName).recover { case t => logger.warn("Error fetching timetable", t); Nil }
-			}
+			}: _*
 		).map(mergeDuplicates)
 }

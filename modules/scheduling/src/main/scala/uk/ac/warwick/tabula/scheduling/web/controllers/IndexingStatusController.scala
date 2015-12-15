@@ -7,6 +7,9 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.services.{AuditEventIndexService, AuditEventService}
 import uk.ac.warwick.spring.Wire
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 @Controller
 @RequestMapping(Array("/index/nagios"))
 class IndexingStatusController extends BaseController {
@@ -18,7 +21,7 @@ class IndexingStatusController extends BaseController {
 	@RequestMapping(Array("/status"))
 	def lastrun(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val latestDb = auditEventService.latest
-		val latestIndex = auditEventIndexService.latestIndexItem
+		val latestIndex = Await.result(auditEventIndexService.latestIndexItem, 1.second)
 		val latestIndexMinutesAgo = (latestDb.getMillis - latestIndex.getMillis) / MillisInAMinute
 
 		val allDetails = s"latestDatabase,${latestDb.getMillis},latestIndex,${latestIndex.getMillis},latestIndexMinutesAgo,${latestIndexMinutesAgo}"
