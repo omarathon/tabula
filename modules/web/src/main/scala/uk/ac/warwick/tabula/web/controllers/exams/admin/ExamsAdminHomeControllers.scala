@@ -61,7 +61,7 @@ class ExamsAdminHomeController extends ExamsController {
 @Controller
 @RequestMapping(Array("/exams/admin"))
 class ExamsAdminHomeDefaultAcademicYearController extends ExamsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent {
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
@@ -79,7 +79,7 @@ class ExamsAdminHomeDefaultAcademicYearController extends ExamsController
 @RequestMapping(value=Array("/exams/admin/department/{department}/{academicYear}"))
 class ExamsAdminDepartmentHomeController extends ExamsController
 	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
-	with AcademicYearScopedController {
+	with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent {
 
 	hideDeletedItems
 
@@ -113,7 +113,7 @@ class ExamsAdminDepartmentHomeController extends ExamsController
 @Controller
 @RequestMapping(value=Array("/exams/admin/module/{module}/{academicYear}"))
 class ExamsAdminModuleHomeController extends ExamsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent {
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
 	hideDeletedItems
 
