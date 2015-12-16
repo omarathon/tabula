@@ -170,7 +170,7 @@ so that they can be passed around between requests.
 							</ul>
 						</div>
 						<div class="help-block">
-							Enter the file types you would like to allow separated by spaces (e.g. "pdf doc docx"). Only attachments with the extensions specified will be permitted. Leave this field blank to accept attachments with any extension.
+							Enter the file types you would like to allow separated by spaces (e.g. "pdf doc docx"). Press the spacebar individually after each file type. Only attachments with the extensions specified will be permitted. Leave this field blank to accept attachments with any extension.
 						</div>
 					</@form.field>
 				</@form.row>

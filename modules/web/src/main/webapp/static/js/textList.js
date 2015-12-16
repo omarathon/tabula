@@ -116,7 +116,16 @@ TextListController.prototype = {
 	},
 
 	addItem: function(text){
-		this.inputContainer.before(this.newItemHead + text + this.newItemTail);
+		//check if the individual value is separated by spaces/tabs etc - user might copy/paste direct value
+		var items = text.split(/\s+/);
+		var fieldObject = this;
+		jQuery.each(items, function(index, item) {
+			var isPresent = fieldObject.isDuplicate(item);
+			if(!isPresent) {
+				fieldObject.inputContainer.before(fieldObject.newItemHead + item + fieldObject.newItemTail);
+			}
+
+		});
 		this.syncFormField();
 		this.resizeInputContainer();
 	},
