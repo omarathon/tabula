@@ -43,7 +43,8 @@ If you are trying to re-use this assignment, you should go back and create a sep
 
 <div class="submit-buttons">
 	<input class="btn btn-danger" type="submit" value="Delete">
-	<a class="btn" href="<@routes.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a>
+	<a class="btn" href="<@routes.assignmentsubmissionsandfeedback assignment />"> Cancel</a>
+
 </div>
 </@f.form>
 
