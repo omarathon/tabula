@@ -138,6 +138,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.StudentCourseYearDetailsIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.CourseCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>

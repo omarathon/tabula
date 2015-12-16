@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.mutable.HashSet
-import org.hibernate.criterion._
 import org.hibernate.criterion.Projections._
+import org.hibernate.criterion._
 import org.hibernate.transform.Transformers
-import org.joda.time.DateTime
+import org.joda.time.{LocalDate, DateTime}
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model._
+
+import scala.collection.mutable
 
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
@@ -18,14 +20,14 @@ trait StudentCourseYearDetailsDao {
 	def getFreshIds: Seq[String]
 	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
-	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String]
+	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
+
+	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int): Seq[StudentCourseYearDetails]
 }
 
 @Repository
 class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
-	import Restrictions._
-	import Order._
 
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails) = {
 		session.saveOrUpdate(studentCourseYearDetails)
@@ -72,7 +74,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 	// TODO - put these two methods in a service
-	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] =
+	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String] =
 			keys.flatMap {
 				key => getIdFromKey(key)
 			}
@@ -85,23 +87,36 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		.uniqueResult
 	}
 
-		def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime) = {
-			newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
-				var sqlString = """
-					update
-						StudentCourseYearDetails
-					set
-						missingFromImportSince = :importStart
-					where
-						id in (:newStaleScydIds)
-					"""
+	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime) = {
+		newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
+			val sqlString = """
+				update
+					StudentCourseYearDetails
+				set
+					missingFromImportSince = :importStart
+				where
+					id in (:newStaleScydIds)
+				"""
 
-					session.newQuery(sqlString)
-						.setParameter("importStart", importStart)
-						.setParameterList("newStaleScydIds", newStaleIds)
-						.executeUpdate
-			}
+				session.newQuery(sqlString)
+					.setParameter("importStart", importStart)
+					.setParameterList("newStaleScydIds", newStaleIds)
+					.executeUpdate()
 		}
+	}
+
+	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int): Seq[StudentCourseYearDetails] =
+		session.newCriteria[StudentCourseYearDetails]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("academicYear", academicYear))
+			.add(is("yearOfStudy", yearOfStudy))
+			.add(is("scd.course", course))
+			.add(is("scd.route", route))
+			.add(Restrictions.or(
+				Restrictions.isNull("scd.endDate"),
+				Restrictions.ge("scd.endDate", LocalDate.now)
+			))
+			.seq
 }
 
 trait StudentCourseYearDetailsDaoComponent {
