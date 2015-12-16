@@ -52,7 +52,7 @@ case class ExamsDepartmentHomeInformation(modules: Seq[Module], notices: Map[Str
  */
 
 @Controller
-@RequestMapping(Array("/exams/exams/exams/admin", "/exams/exams/admin/department", "/exams/exams/admin/module"))
+@RequestMapping(Array("/exams/exams/admin", "/exams/exams/admin/department", "/exams/exams/admin/module"))
 class ExamsAdminHomeController extends ExamsController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
