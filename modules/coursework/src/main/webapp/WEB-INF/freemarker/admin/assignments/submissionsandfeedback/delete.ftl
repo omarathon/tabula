@@ -4,7 +4,6 @@
 
 
 <@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete')}" commandName="deleteSubmissionsAndFeedbackCommand">
-
 <h1>Delete submissions and/or feedback for ${assignment.name}</h1>
 
 <@form.errors path="" />
@@ -43,7 +42,8 @@ If you are trying to re-use this assignment, you should go back and create a sep
 </p>
 
 <div class="submit-buttons">
-<input class="btn btn-danger" type="submit" value="Delete">
+	<input class="btn btn-danger" type="submit" value="Delete">
+	<a class="btn" href="<@routes.assignmentsubmissionsandfeedback assignment />"><i class="icon-reply"></i> Return to previous page</a>
 </div>
 </@f.form>
 
