@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin.markingworkflows
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin.markingworkflows
 
 import javax.validation.Valid
 
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/department/{department}/markingworkflows/delete/{markingWorkflow}"))
+@RequestMapping(value=Array("/exams/exams/admin/department/{department}/markingworkflows/delete/{markingWorkflow}"))
 class ExamsDeleteMarkingWorkflowController extends ExamsController {
 
 	type DeleteMarkingWorkflowCommand = Appliable[Unit]	with SelfValidating with DeleteMarkingWorkflowCommandState
@@ -26,7 +26,7 @@ class ExamsDeleteMarkingWorkflowController extends ExamsController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
-		Mav("exams/admin/markingworkflows/delete").noLayoutIf(ajax)
+		Mav("exams/exams/admin/markingworkflows/delete").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
@@ -35,7 +35,7 @@ class ExamsDeleteMarkingWorkflowController extends ExamsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.markingWorkflow.list(cmd.department))
+			Redirect(Routes.Exams.admin.markingWorkflow.list(cmd.department))
 		}
 	}
 

@@ -123,7 +123,7 @@
 		<input type="hidden" name="confirm" value="true">
 		<input class="btn btn-primary" type="submit" value="Confirm">
 		<#if marker??>
-			<a class="btn btn-default" href="<@routes.exams.home />">Cancel</a>
+			<a class="btn btn-default" href="<@routes.exams.examsHome />">Cancel</a>
 		<#else>
 			<a class="btn btn-default" href="<@routes.exams.moduleHomeWithYear module=exam.module academicYear=exam.academicYear/>">Cancel</a>
 		</#if>

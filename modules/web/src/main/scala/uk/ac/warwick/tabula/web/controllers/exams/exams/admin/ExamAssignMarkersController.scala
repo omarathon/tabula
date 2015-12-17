@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers"))
 class ExamAssignMarkersController extends ExamsController {
 
 	@Autowired var userLookup: UserLookupService = _
@@ -65,16 +65,20 @@ class ExamAssignMarkersController extends ExamsController {
 			new ExamStudent(user, seatOrder, module)
 		}
 
-		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.map(_.students).flatten.contains)
+		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.flatMap(_.students).contains)
 
-		Mav("exams/admin/assignmarkers/form",
+		Mav("exams/exams/admin/assignmarkers/form",
 			"assessment" -> exam,
 			"isExam" -> true,
-			"assignMarkersURL" -> Routes.admin.exam.assignMarkers(exam),
+			"assignMarkersURL" -> Routes.Exams.admin.exam.assignMarkers(exam),
 			"hasSecondMarker" -> false,
 			"firstMarkerUnassignedStudents" -> firstMarkerUnassignedStudents,
-			"cancelUrl" -> Routes.admin.module(module, academicYear)
-		).crumbs(Breadcrumbs.Department(module.adminDepartment, exam.academicYear), Breadcrumbs.Module(module, exam.academicYear))
+			"cancelUrl" -> Routes.Exams.admin.module(module, academicYear)
+		).crumbs(
+			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
+			Breadcrumbs.Exams.Module(module, exam.academicYear)
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!uploadSpreadsheet"))
@@ -84,7 +88,7 @@ class ExamAssignMarkersController extends ExamsController {
 		@ModelAttribute("command") cmd: Appliable[Exam]
 	) = {
 		cmd.apply()
-		Redirect(Routes.admin.module(module, exam.academicYear))
+		Redirect(Routes.Exams.admin.module(module, exam.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("uploadSpreadsheet"))
@@ -95,12 +99,12 @@ class ExamAssignMarkersController extends ExamsController {
 		@ModelAttribute("command") cmd: Appliable[Exam],
 		errors: Errors
 	) = {
-		Mav("exams/admin/assignmarkers/upload-preview",
+		Mav("exams/exams/admin/assignmarkers/upload-preview",
 			"assessment" -> exam,
 			"isExam" -> true,
-			"assignMarkersURL" -> Routes.admin.exam.assignMarkers(exam),
+			"assignMarkersURL" -> Routes.Exams.admin.exam.assignMarkers(exam),
 			"firstMarkerRole" -> exam.markingWorkflow.firstMarkerRoleName,
-			"cancelUrl" -> Routes.admin.module(module, academicYear)
+			"cancelUrl" -> Routes.Exams.admin.module(module, academicYear)
 		)
 	}
 

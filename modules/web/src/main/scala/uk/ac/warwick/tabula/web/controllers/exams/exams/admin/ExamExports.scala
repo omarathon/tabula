@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.poi.hssf.usermodel.HSSFDataFormat

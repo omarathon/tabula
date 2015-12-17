@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -18,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.exams.ExamMarkerAddMarksCommand
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks"))
 class ExamMarkerAddMarksController extends ExamsController {
 
 	@Autowired var feedbackService: FeedbackService = _
@@ -37,8 +37,9 @@ class ExamMarkerAddMarksController extends ExamsController {
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear) = mav.crumbs(
-		Breadcrumbs.Department(module.adminDepartment, academicYear),
-		Breadcrumbs.Module(module, academicYear)
+		Breadcrumbs.Exams.Home,
+		Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
+		Breadcrumbs.Exams.Module(module, academicYear)
 	)
 
 	@RequestMapping(method = Array(HEAD, GET))
@@ -57,7 +58,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 			noteMarkItem(member, feedback)
 		}
 
-		crumbed(Mav("exams/admin/marks/marksform",
+		crumbed(Mav("exams/exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
@@ -95,7 +96,7 @@ class ExamMarkerAddMarksController extends ExamsController {
 		if (errors.hasErrors) viewMarkUploadForm(module, exam, academicYear, marker, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
-			crumbed(Mav("exams/admin/marks/markspreview"), module, academicYear)
+			crumbed(Mav("exams/exams/admin/marks/markspreview"), module, academicYear)
 		}
 	}
 

@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import java.io.StringWriter
 
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
 class ExportExamsController extends ExamsController with ExamExports  {
 
 	@RequestMapping(Array("/export.csv"))

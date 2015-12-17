@@ -13,29 +13,33 @@ object ExamsBreadcrumbs {
 	abstract class Abstract extends BreadCrumb
 	case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
-	/**
-	 * Special case breadcrumb for the department admin page.
-	 */
-	case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
-		val title = department.name
-		val url = Some(Routes.admin.department(department, academicYear))
+	object Exams {
+
+		case object Home extends Abstract {
+			val title = "Manage Exams"
+			val url = Some(Routes.Exams.home)
+		}
+
+		case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = department.name
+			val url = Some(Routes.Exams.admin.department(department, academicYear))
+		}
+
+		case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
+			val title = module.code.toUpperCase
+			val url = Some(Routes.Exams.admin.module(module, academicYear))
+			override val tooltip = module.name
+		}
+
 	}
 
-	/**
-	 * Special case breadcrumb for a module admin page.
-	 * Text is the module code, showing the name as a tooltip on hover.
-	 */
-	case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
-		val title = module.code.toUpperCase
-		val url = Some(Routes.admin.module(module, academicYear))
-		override val tooltip = module.name
+	object Grids {
+
+		case object Home extends Abstract {
+			val title = "Manage Exam Grids"
+			val url = Some(Routes.Grids.home)
+		}
+
 	}
 
-	/**
-	 * A breadcrumb without a link, to represent the current page.
-	 * We don't currently include the current page in crumbs, but can use this for page titles
-	 */
-	case class Current(title: String) extends Abstract {
-		val url = None
-	}
 }

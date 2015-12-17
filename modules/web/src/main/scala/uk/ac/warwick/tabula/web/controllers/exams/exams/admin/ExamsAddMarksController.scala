@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks"))
 class ExamsAddMarksController extends ExamsController {
 
 	@Autowired var feedbackService: FeedbackService = _
@@ -32,8 +32,9 @@ class ExamsAddMarksController extends ExamsController {
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav: Mav, module: Module, academicYear: AcademicYear) = mav.crumbs(
-		Breadcrumbs.Department(module.adminDepartment, academicYear),
-		Breadcrumbs.Module(module, academicYear)
+		Breadcrumbs.Exams.Home,
+		Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
+		Breadcrumbs.Exams.Module(module, academicYear)
 	)
 
 	@RequestMapping(method = Array(HEAD, GET))
@@ -57,7 +58,7 @@ class ExamsAddMarksController extends ExamsController {
 				case None => m._1.getWarwickId -> None
 			}).toMap
 
-		crumbed(Mav("exams/admin/marks/marksform",
+		crumbed(Mav("exams/exams/admin/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"seatNumberMap" -> members.map(m => m._1.getWarwickId -> m._2).toMap,
 			"studentMarkerMap" -> studentMarkerMap,
@@ -95,7 +96,7 @@ class ExamsAddMarksController extends ExamsController {
 		if (errors.hasErrors) viewMarkUploadForm(module, exam, academicYear, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
-			crumbed(Mav("exams/admin/marks/markspreview"), module, academicYear)
+			crumbed(Mav("exams/exams/admin/marks/markspreview"), module, academicYear)
 		}
 	}
 
@@ -108,7 +109,7 @@ class ExamsAddMarksController extends ExamsController {
 	) = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
-		Redirect(Routes.admin.module(module, academicYear))
+		Redirect(Routes.Exams.admin.module(module, academicYear))
 	}
 
 	private def bindAndValidate(module: Module, cmd: AdminAddMarksCommand, errors: Errors) {

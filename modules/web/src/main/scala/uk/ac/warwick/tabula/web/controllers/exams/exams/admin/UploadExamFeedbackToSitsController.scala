@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/upload-to-sits"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/upload-to-sits"))
 class UploadExamFeedbackToSitsController extends ExamsController {
 
 	@ModelAttribute("command")
@@ -25,18 +25,18 @@ class UploadExamFeedbackToSitsController extends ExamsController {
 
 	@RequestMapping(method = Array(GET))
 	def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable module: Module, @PathVariable academicYear: AcademicYear) = {
-		Mav("exams/admin/upload_to_sits",
+		Mav("exams/exams/admin/upload_to_sits",
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		).crumbs(
-			Breadcrumbs.Department(module.adminDepartment, academicYear),
-			Breadcrumbs.Module(module, academicYear)
+			Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
+			Breadcrumbs.Exams.Module(module, academicYear)
 		)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam) = {
 		cmd.apply()
-		Redirect(Routes.admin.exam(exam))
+		Redirect(Routes.Exams.admin.exam(exam))
 	}
 
 }

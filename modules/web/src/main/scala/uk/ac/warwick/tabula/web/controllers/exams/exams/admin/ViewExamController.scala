@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.exams.{ViewExamCommandResult, ViewExamComma
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
 class ViewExamController extends ExamsController {
 
 	@ModelAttribute("command")
@@ -23,14 +23,14 @@ class ViewExamController extends ExamsController {
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val result = cmd.apply()
-		Mav("exams/admin/view",
+		Mav("exams/exams/admin/view",
 			"students" -> result.students,
 			"seatNumberMap" -> result.seatNumberMap,
 			"feedbackMap" -> result.feedbackMap,
 			"sitsStatusMap" -> result.sitsStatusMap
 		).crumbs(
-			Breadcrumbs.Department(module.adminDepartment, academicYear),
-			Breadcrumbs.Module(module, academicYear)
+			Breadcrumbs.Exams.Department(module.adminDepartment, academicYear),
+			Breadcrumbs.Exams.Module(module, academicYear)
 		)
 	}
 

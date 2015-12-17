@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Controller
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
 class ExamMarksTemplateController extends ExamsController {
 
 	var examMembershipService = Wire[AssessmentMembershipService]
@@ -34,7 +34,7 @@ class ExamMarksTemplateController extends ExamsController {
 }
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks-template"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks-template"))
 class ExamMarkerMarksTemplateController extends ExamsController {
 
 	var examMembershipService = Wire[AssessmentMembershipService]

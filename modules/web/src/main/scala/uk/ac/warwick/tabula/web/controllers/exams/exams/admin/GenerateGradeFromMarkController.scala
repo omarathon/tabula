@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -27,7 +27,7 @@ abstract class AbstractGenerateGradeFromMarkController extends ExamsController {
 			}
 		}
 
-		Mav("exams/admin/_generatedGrades",
+		Mav("exams/exams/admin/_generatedGrades",
 			"grades" -> result,
 			"default" -> default
 		).noLayout()
@@ -44,7 +44,7 @@ abstract class AbstractGenerateGradeFromMarkController extends ExamsController {
 			}
 		}
 
-		Mav("exams/admin/generatedGrades",
+		Mav("exams/exams/admin/generatedGrades",
 			"result" -> result,
 			"defaults" -> defaults
 		).noLayout()
@@ -53,7 +53,7 @@ abstract class AbstractGenerateGradeFromMarkController extends ExamsController {
 }
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/exams/{exam}/generate-grade"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/exams/{exam}/generate-grade"))
 class GenerateExamGradeFromMarkController extends AbstractGenerateGradeFromMarkController {
 
 	@ModelAttribute("command")

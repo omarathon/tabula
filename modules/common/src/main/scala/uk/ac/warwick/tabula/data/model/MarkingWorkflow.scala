@@ -48,7 +48,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
 		Routes.coursework.admin.assignment.markerFeedback.onlineFeedback(assignment, marker)
 
 	def examMarkingUrl(exam: Exam, marker: User, studentId: String) =
-		Routes.exams.admin.markerFeedback.onlineFeedback(exam, marker)
+		Routes.exams.Exams.admin.markerFeedback.onlineFeedback(exam, marker)
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
 	@transient var assessmentService = Wire.option[AssessmentService with AssessmentServiceUserGroupHelpers]

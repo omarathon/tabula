@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import javax.validation.Valid
 
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment"))
 class BulkAdjustmentController extends ExamsController {
 
 	validatesSelf[SelfValidating]
@@ -31,7 +31,7 @@ class BulkAdjustmentController extends ExamsController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form = {
-		Mav("exams/admin/adjustments/bulk/form",
+		Mav("exams/exams/admin/adjustments/bulk/form",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
 			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
@@ -43,7 +43,7 @@ class BulkAdjustmentController extends ExamsController {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
-			Mav("exams/admin/adjustments/bulk/preview")
+			Mav("exams/exams/admin/adjustments/bulk/preview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
@@ -55,14 +55,14 @@ class BulkAdjustmentController extends ExamsController {
 			upload(cmd, errors)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.exam(exam))
+			Redirect(Routes.Exams.admin.exam(exam))
 		}
 	}
 
 }
 
 @Controller
-@RequestMapping(Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment/template"))
+@RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment/template"))
 class BulkAdjustmentTemplateController extends ExamsController {
 
 	@ModelAttribute("command")

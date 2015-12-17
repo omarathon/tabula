@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin
 
 import javax.validation.Valid
 
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value = Array("/exams/admin/module/{module}/{academicYear}/exams/{exam}/edit"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/edit"))
 class EditExamController extends ExamsController {
 
 	type EditExamCommand = Appliable[Exam] with EditExamCommandState with ModifiesExamMembership with PopulateEditExamCommand
@@ -33,14 +33,15 @@ class EditExamController extends ExamsController {
 	}
 
 	private def render(cmd: EditExamCommand) = {
-		Mav("exams/admin/edit",
+		Mav("exams/exams/admin/edit",
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups,
 			"department" -> cmd.module.adminDepartment
 		).crumbs(
-			Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear),
-			Breadcrumbs.Module(cmd.module, cmd.academicYear)
+			Breadcrumbs.Exams.Home,
+			Breadcrumbs.Exams.Department(cmd.module.adminDepartment, cmd.academicYear),
+			Breadcrumbs.Exams.Module(cmd.module, cmd.academicYear)
 		)
 	}
 
@@ -54,7 +55,7 @@ class EditExamController extends ExamsController {
 				render(cmd)
 			} else {
 				cmd.apply()
-				Redirect(Routes.admin.module(cmd.exam.module, cmd.exam.academicYear))
+				Redirect(Routes.Exams.admin.module(cmd.exam.module, cmd.exam.academicYear))
 			}
 	}
 

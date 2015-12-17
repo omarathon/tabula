@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.exams.admin.markingworkflows
+package uk.ac.warwick.tabula.web.controllers.exams.exams.admin.markingworkflows
 
 import javax.validation.Valid
 
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value=Array("/exams/admin/department/{department}/markingworkflows/add"))
+@RequestMapping(value=Array("/exams/exams/admin/department/{department}/markingworkflows/add"))
 class ExamsAddMarkingWorkflowController extends ExamsController {
 
 	validatesSelf[SelfValidating]
@@ -23,7 +23,7 @@ class ExamsAddMarkingWorkflowController extends ExamsController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav("exams/admin/markingworkflows/add", "isExams" -> true)
+		Mav("exams/exams/admin/markingworkflows/add", "isExams" -> true)
 	}
 
 	@RequestMapping(method=Array(POST))
@@ -32,7 +32,7 @@ class ExamsAddMarkingWorkflowController extends ExamsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin.markingWorkflow.list(cmd.department))
+			Redirect(Routes.Exams.admin.markingWorkflow.list(cmd.department))
 		}
 	}
 
