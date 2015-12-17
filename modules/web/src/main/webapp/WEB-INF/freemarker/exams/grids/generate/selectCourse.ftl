@@ -11,7 +11,7 @@
 
 <p class="progress-arrows">
 	<span class="arrow-right active">Select courses</span>
-	<span class="arrow-right arrow-left">Set grid option</span>
+	<span class="arrow-right arrow-left">Set grid options</span>
 	<span class="arrow-right arrow-left">Preview and download</span>
 </p>
 
@@ -22,13 +22,14 @@
 </div>
 
 <form action="<@routes.exams.generateGrid department academicYear />" class="form-inline select-course" method="post">
+
 	<div class="well well-sm">
 		<div class="row">
 			<div class="form-group col-md-4">
 				<select name="course" class="form-control">
 					<option value="" style="display: none">Course</option>
 					<#list selectCourseCommand.courses as course>
-						<option value="${course.code}">${course.code} ${course.name}</option>
+						<option value="${course.code}" <#if (selectCourseCommand.course.code)! == course.code>selected</#if>>${course.code} ${course.name}</option>
 					</#list>
 				</select>
 			</div>
@@ -36,7 +37,7 @@
 				<select name="route" class="form-control" disabled>
 					<option value="" style="display: none">Route</option>
 					<#list selectCourseCommand.routes as route>
-						<option value="${route.code}">${route.code?upper_case} ${route.name}</option>
+						<option value="${route.code}" <#if (selectCourseCommand.route.code)! == route.code>selected</#if>>${route.code?upper_case} ${route.name}</option>
 					</#list>
 				</select>
 			</div>
@@ -44,7 +45,7 @@
 				<select name="yearOfStudy" class="form-control" disabled>
 					<option value="" style="display: none">Year of study</option>
 					<#list selectCourseCommand.yearsOfStudy as year>
-						<option value="${year}">${year}</option>
+						<option value="${year}" <#if (selectCourseCommand.yearOfStudy!0) == year>selected</#if>>${year}</option>
 					</#list>
 				</select>
 			</div>
@@ -53,7 +54,7 @@
 
 	<@bs3form.errors path="selectCourseCommand" />
 
-	<button class="btn btn-primary" type="submit" disabled>Next</button>
+	<button class="btn btn-primary" name="${GenerateExamGridMappingParameters.selectCourse}" type="submit" disabled>Next</button>
 </form>
 
 <script>
@@ -72,7 +73,7 @@
 			if (($yearSelect.val() || '').length > 0) {
 				$submit.prop('disabled', false);
 			}
-		});
+		}).trigger('change');
 	});
 </script>
 </#escape>

@@ -1,13 +1,24 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import org.springframework.beans.factory.annotation.Autowired
+import com.fasterxml.jackson.databind.ObjectMapper
+import dispatch.classic.thread.ThreadSafeHttpClient
+import dispatch.classic.{url, thread, Http}
+import org.apache.http.client.params.{CookiePolicy, ClientPNames}
+import org.apache.http.params.HttpConnectionParams
+import org.apache.lucene.document.Field.Store
+import org.apache.lucene.document.{LongField, Document}
+import org.springframework.beans.factory.annotation.{Value, Autowired}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, SSOConfigTrustedApplicationsManager}
+import uk.ac.warwick.tabula.{HttpClientDefaults, CurrentUser}
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.jobs.{FailedJobException, Job, JobPrototype, ObsoleteJobException}
 import uk.ac.warwick.userlookup.User
+import collection.JavaConverters._
+import scala.util.parsing.json.JSON
 
 trait JobServiceComponent {
 	def jobService: JobService
@@ -18,7 +29,7 @@ trait AutowiringJobServiceComponent extends JobServiceComponent {
 }
 
 @Service
-class JobService extends HasJobDao with Logging with JobNotificationHandling {
+class JobService extends HasJobDao with Logging with JobNotificationHandling with CreatesSchedulerJobs {
 	import uk.ac.warwick.tabula.data.Transactions._
 
 	// How many jobs to load and run each time
@@ -149,6 +160,77 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 			instance.finished = true
 			jobDao.update(instance)
 		}
+	}
+
+}
+
+trait CreatesSchedulerJobs {
+
+	@Autowired var objectMapper: ObjectMapper = _
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	lazy val http: Http = new Http with thread.Safety {
+		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
+			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
+			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+		}
+	}
+
+	lazy val currentApplication = new SSOConfigTrustedApplicationsManager(SSOConfiguration.getConfig).getCurrentApplication
+
+	lazy val endpoint = s"$toplevelUrl/scheduling/sysadmin/jobs/create"
+
+	def addSchedulerJob(identifier: String, data: Map[String, Any], onBehalfOf: User): String = {
+
+		def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
+			req >- { (json) =>
+				JSON.parseFull(json) match {
+					case Some(json: Map[String, Any]@unchecked) =>
+						json.get("success") match {
+							case Some(true) =>
+								json.get("result") match {
+									case Some(result: Map[String, Any]@unchecked) =>
+										result.get("jobId") match {
+											case Some(jobId: String) => jobId
+											case _ => throw new RuntimeException("Could not find jobId")
+										}
+									case _ => throw new RuntimeException("Could not find result in JSON")
+								}
+							case _ =>
+								json.get("errors") match {
+									case Some(errors: Seq[Any]@unchecked) =>
+										val parsedErrors = errors.map(error => error match {
+											case e: String => e
+											case e: Map[String, String]@unchecked => e.map{case(key, value) => s"$key: $value"}.mkString(", ")
+											case _ => ""
+										})
+										throw new RuntimeException(s"Errors creating job: ${parsedErrors.mkString(", ")}")
+									case _ =>
+										throw new RuntimeException("Could not parse JSON")
+								}
+
+						}
+					case _ => throw new RuntimeException("Could not parse JSON")
+				}
+			}
+		}
+
+		val requestMap = Map(
+			"identifier" -> identifier,
+			"data" -> data,
+			"onBehalfOf" -> onBehalfOf.getUserId
+		)
+
+		val trustedAppHeaders =
+			TrustedApplicationUtils.getRequestHeaders(currentApplication, "tabula-search-api-user", endpoint)
+				.asScala.map { header => header.getName -> header.getValue }
+				.toMap
+
+		val req =
+			url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
+
+		http.when(_ == 200)(req >:+ handler)
 	}
 
 }

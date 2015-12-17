@@ -29,6 +29,7 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.notifications" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns" />
 
 	<!-- For sub-modules to implement their own component scanning -->
 	<import resource="spring-component-scan-context.xml" />
