@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import java.util.concurrent.TimeoutException
+
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -9,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
+import uk.ac.warwick.tabula.services.timetables.{TimetableEmptyException, ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 import scala.collection.JavaConverters._
@@ -18,6 +20,7 @@ import scala.concurrent.duration._
 import ImportSmallGroupEventsFromExternalSystemCommand._
 
 import scala.concurrent.Await
+import scala.util.Try
 
 object ImportSmallGroupEventsFromExternalSystemCommand {
 
@@ -90,13 +93,14 @@ trait LookupEventsFromModuleTimetable extends PopulateOnForm {
 		with ModuleTimetableFetchingServiceComponent =>
 
 	eventsToImport.clear()
-	eventsToImport.addAll(
+	eventsToImport.addAll(Try {
 		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 			.sorted
 			.map(new EventToImport(_))
-			.asJava
-	)
+	}.recover {
+		case _: TimeoutException | _: TimetableEmptyException => Nil
+	}.get.asJava)
 
 	override def populate(): Unit = {
 		if (set.groups.asScala.forall { _.events.isEmpty }) {
