@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.commands.timetables
 
+import java.util.concurrent.TimeoutException
+
 import org.joda.time.{Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
@@ -87,7 +89,9 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 			events.flatMap { event =>
 				eventOccurrenceService.fromTimetableEvent(event, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 			}.sortBy(_.start)
-		}, ViewModuleEventsCommand.Timeout))
+		}, ViewModuleEventsCommand.Timeout)).recover {
+			case _: TimeoutException | _: TimetableEmptyException => Nil
+		}
 	}
 }
 
