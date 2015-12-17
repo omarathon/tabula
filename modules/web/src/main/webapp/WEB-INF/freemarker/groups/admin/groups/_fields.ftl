@@ -7,11 +7,30 @@
 		</@f.select>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-		<@spring.bind path="academicYear">
-			<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
-		</@spring.bind>
-	</@bs3form.labelled_form_group>
+	<#if newRecord>
+		<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
+			<@f.select path="academicYear" id="academicYear" cssClass="form-control">
+				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
+			</@f.select>
+		</@bs3form.labelled_form_group>
+
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('#academicYear').on('change', function(e) {
+					var $form = $(this).closest('form');
+					$('#action-submit').val('refresh');
+
+					$form.submit();
+				});
+			});
+		</script>
+	<#else>
+		<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
+			<@spring.bind path="academicYear">
+				<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
+			</@spring.bind>
+		</@bs3form.labelled_form_group>
+	</#if>
 
 	<#assign label>
 		Set name
