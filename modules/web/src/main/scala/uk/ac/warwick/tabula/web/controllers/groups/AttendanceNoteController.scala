@@ -50,7 +50,7 @@ class AttendanceNoteAttachmentController extends GroupsController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable("student") member: Member, @PathVariable occurrence: SmallGroupEventOccurrence) =
-		AttendanceNoteAttachmentCommand(member, occurrence, user)
+		AttendanceNoteAttachmentCommand(mandatory(member), mandatory(occurrence), user)
 
 	@RequestMapping
 	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])

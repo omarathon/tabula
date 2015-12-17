@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.userlookup.User
 
+import scala.util.Try
+
 abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: User, val marker: User, val gradeGenerator: GeneratesGradesFromMarks)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with SubmissionState with BindListener with SelfValidating with ProfileServiceComponent {
 
@@ -56,7 +58,7 @@ abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignm
 
 		// validate grade is department setting is true
 		if (!errors.hasErrors && grade.hasText && module.adminDepartment.assignmentGradeValidation) {
-			val validGrades = gradeGenerator.applyForMarks(Map(student.getWarwickId -> mark.toInt))(student.getWarwickId)
+			val validGrades = Try(mark.toInt).toOption.toSeq.flatMap { m => gradeGenerator.applyForMarks(Map(student.getWarwickId -> m))(student.getWarwickId) }
 			if (validGrades.nonEmpty && !validGrades.exists(_.grade == grade)) {
 				errors.rejectValue("grade", "actualGrade.invalidSITS", Array(validGrades.map(_.grade).mkString(", ")), "")
 			}

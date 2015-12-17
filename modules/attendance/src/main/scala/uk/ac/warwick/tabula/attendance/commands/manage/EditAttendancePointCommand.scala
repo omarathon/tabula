@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
@@ -62,6 +62,8 @@ trait PopulatesEditAttendancePointCommand extends PopulateOnForm {
 
 	override def populate() = {
 		copyFrom(templatePoint)
+
+		if (pointsToEdit.isEmpty) throw new ItemNotFoundException
 	}
 }
 
@@ -202,8 +204,8 @@ trait EditAttendancePointCommandState extends AttendancePointCommandState with F
 		case AttendanceMonitoringPointStyle.Date => findPointsResult.monthGroupedPoints
 	}).flatMap(_._2)
 		.find(p => p.templatePoint.id == templatePoint.id)
-		.getOrElse(throw new IllegalArgumentException)
-		.points
+		.map { _.points }
+		.getOrElse(Nil)
 
 	def schemesToEdit: Seq[AttendanceMonitoringScheme] = pointsToEdit.map(_.scheme)
 }
