@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
+import java.util.concurrent.TimeoutException
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -10,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupEventsFromExternalSystemCommand, PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService}
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
@@ -22,7 +23,8 @@ trait SyllabusPlusEventCountForModule {
 
 	@ModelAttribute("syllabusPlusEventCount")
 	def syllabusPlusEventCount(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)).getOrElse(Nil)
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
+			.recover { case _: TimeoutException | _: TimetableEmptyException => Nil }.get
 			.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 }
 
