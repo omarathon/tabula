@@ -121,8 +121,8 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			// Set up radios to enable/disable self-sign up options fields.
-			$("input:radio[name='allocationMethod']").radioControlled();
+			// Set up radios to show/hide self-sign up options fields.
+			$("input:radio[name='allocationMethod']").radioControlled({mode: 'hidden'});
 		});
 	</script>
 </#escape>

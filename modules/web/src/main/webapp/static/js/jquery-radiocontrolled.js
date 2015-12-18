@@ -83,7 +83,8 @@ jQuery.fn.radioControlled = function(options) {
 
 			if (selector) {
 				var $container = jQuery(selector, parent);
-				toggle($container, item.checked || item.selected);
+				var itemSelected = item.checked || item.selected;
+				toggle($container, !!itemSelected);
 			}
 		});
 	});
