@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.helpers.Tap
 import Tap.tap
@@ -21,12 +22,13 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val command = new HomeCommand(null) with Appliable[HomeInformation] with HomeCommandState with ModuleAndDepartmentServiceComponent
-			with CourseAndRouteServiceComponent with ProfileServiceComponent with RelationshipServiceComponent {
+			with CourseAndRouteServiceComponent with ProfileServiceComponent with RelationshipServiceComponent with AttendanceMonitoringServiceComponent {
 
 			var relationshipService: RelationshipService = _
 			var profileService: ProfileService = _
 			var moduleAndDepartmentService: ModuleAndDepartmentService = _
 			var courseAndRouteService: CourseAndRouteService = _
+			var attendanceMonitoringService: AttendanceMonitoringService = _
 
 			def apply() = info
 		}
