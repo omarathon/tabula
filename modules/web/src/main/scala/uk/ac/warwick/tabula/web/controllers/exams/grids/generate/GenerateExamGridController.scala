@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -85,8 +86,9 @@ class GenerateExamGridController extends ExamsController
 				selectCourseRender(selectCourseCommand, department, academicYear)
 			} else {
 				// TODO Uncomment this
-				//val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.studentCourseDetails.student.universityId)), user.apparentUser)
-				gridOptionsRender("4254f2a5-2f75-49da-b3f3-6ed3f531d077", department, academicYear)
+				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.studentCourseDetails.student.universityId)), user.apparentUser)
+				gridOptionsRender(jobId, department, academicYear)
+				//gridOptionsRender("4254f2a5-2f75-49da-b3f3-6ed3f531d077", department, academicYear)
 			}
 		}
 	}
@@ -119,12 +121,15 @@ class GenerateExamGridController extends ExamsController
 			val columnIDs = gridOptionsCommand.apply()
 			val jobInstance = jobService.getInstance(jobId)
 			if (jobInstance.isDefined && !jobInstance.get.finished) {
+				val scyds = selectCourseCommand.apply()
+				val studentLastImportDates = scyds.map(_.studentCourseDetails.student).distinct.map(s => (s.fullName, s.lastImportDate)).sortBy(_._2)
 				commonCrumbs(
 					Mav("exams/grids/generate/jobProgress",
 						"jobId" -> jobId,
 						"jobProgress" -> jobInstance.get.progress,
 						"jobStatus" -> jobInstance.get.status,
-						"columnIDs" -> columnIDs
+						"columnIDs" -> columnIDs,
+						"studentLastImportDates" -> studentLastImportDates
 					),
 					department,
 					academicYear

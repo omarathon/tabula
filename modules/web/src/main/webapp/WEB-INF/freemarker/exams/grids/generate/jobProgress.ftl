@@ -1,5 +1,7 @@
 <#escape x as x?html>
 
+<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+
 <#function route_function dept>
 	<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
 	<#return selectCourseCommand />
@@ -27,15 +29,39 @@
 
 	<div class="alert alert-info">
 		<div class="progress">
-			<div class="progress-bar progress-bar-striped active" style="width: ${jobProgress}%;"></div>
+			<div class="progress-bar progress-bar-striped active" style="width: ${jobProgress!0}%;"></div>
 		</div>
-		<p class="job-status">${jobStatus}</p>
+		<p class="job-status">${jobStatus!"Waiting for job to start"}</p>
 	</div>
 
 	<p>
 		Tabula is currently importing fresh data for the students you selected from SITS.
+		You can <a href="#" data-toggle="modal" data-target="#student-import-dates">view the last import date for each student</a>.
 		If you wish you can skip this import and proceed to generate the grid.
 	</p>
+
+	<div class="modal fade" id="student-import-dates">
+		<@modal.wrapper>
+			<@modal.body>
+				<table class="table table-condensed table-striped table-hover">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Last imported date</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#list studentLastImportDates as studentDate>
+							<tr>
+								<td>${studentDate._1()}</td>
+								<td><@fmt.date studentDate._2() /></td>
+							</tr>
+						</#list>
+					</tbody>
+				</table>
+			</@modal.body>
+		</@modal.wrapper>
+	</div>
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
 </form>
