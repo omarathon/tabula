@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{RuntimeMember, StudentRelationshipType, StudentMember, Department}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
@@ -23,11 +24,12 @@ object HomeCommand {
 		with AutowiringModuleAndDepartmentServiceComponent
 		with AutowiringCourseAndRouteServiceComponent
 		with AutowiringRelationshipServiceComponent
+		with AutowiringAttendanceMonitoringServiceComponent
 		with Public with ReadOnly with Unaudited
 }
 
 abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeInformation] with HomeCommandState {
-	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with RelationshipServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with RelationshipServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
 		val optionalCurrentMember = user.profile
@@ -46,9 +48,12 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 
 		val viewRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.View)
 
-		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter(d => d.routes.size > 0 || d.modules.size > 0)
+		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter { d =>
+			d.routes.asScala.nonEmpty || d.modules.asScala.nonEmpty || attendanceMonitoringService.listAllSchemes(d).nonEmpty
+		}
 
 		val allViewDepartments = (viewDepartments ++ viewRoutes.map(_.adminDepartment)).flatMap(withSubDepartments)
+		val allManageDepartments = manageDepartments.flatMap(withSubDepartments)
 
 		// These return Sets so no need to distinct the result
 
@@ -61,7 +66,7 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		HomeInformation(
 			hasProfile,
 			allViewDepartments,
-			manageDepartments,
+			allManageDepartments,
 			allRelationshipTypes,
 			relationshipTypesMap
 		)
