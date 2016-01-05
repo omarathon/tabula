@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, MemberOrUser, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -8,11 +9,11 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.userlookup.User
 
-object StudentCourseworkFullScreenCommand {
+object StudentCourseworkUpcomingCommand {
 	def apply(memberOrUser: MemberOrUser): Appliable[StudentAssignments] =
-		new StudentCourseworkFullScreenCommandInternal(memberOrUser)
+		new StudentCourseworkUpcomingCommandInternal(memberOrUser)
 			with ComposableCommand[StudentAssignments]
-			with StudentCourseworkFullScreenCommandPermissions
+			with StudentCourseworkUpcomingCommandPermissions
 			with AutowiringAssessmentServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with AutowiringFeaturesComponent
@@ -20,32 +21,44 @@ object StudentCourseworkFullScreenCommand {
 			with ReadOnly with Unaudited
 }
 
-class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser) extends StudentCourseworkCommandInternal
-	with StudentCourseworkFullScreenCommandState {
+class StudentCourseworkUpcomingCommandInternal(val memberOrUser: MemberOrUser) extends StudentCourseworkCommandInternal
+	with StudentCourseworkUpcomingCommandState {
 
 	self: AssessmentServiceComponent with
 		  AssessmentMembershipServiceComponent with
 		  FeaturesComponent with
 			StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback = assessmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithFeedback = Nil
+	override lazy val overridableAssignmentsWithSubmission = Nil
 
-	override lazy val overridableEnrolledAssignments = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
+	// find enrolled assignments that require submission in the next month
+	override lazy val overridableEnrolledAssignments = {
+		val user = memberOrUser.asUser
+		val monthFromNow = DateTime.now.plusMonths(1)
 
-	override lazy val overridableAssignmentsWithSubmission = assessmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
+		assessmentMembershipService
+			.getEnrolledAssignments(user)
+			.filter(a => a.submittable(user) && a.submissionDeadline(user).isBefore(monthFromNow) && a.submissionDeadline(user).isAfterNow)
+			.sortBy(_.submissionDeadline(user))(Ordering.fromLessThan(_ isBefore _))
+	}
 
 	override val universityId: String = memberOrUser.universityId
-
 	override val user: User = memberOrUser.asUser
+
+	override def applyInternal() = StudentAssignments(
+		enrolledAssignments = enrolledAssignmentsInfo,
+		historicAssignments = Nil
+	)
 
 }
 
-trait StudentCourseworkFullScreenCommandState {
+trait StudentCourseworkUpcomingCommandState {
 	def memberOrUser: MemberOrUser
 }
 
-trait StudentCourseworkFullScreenCommandPermissions extends RequiresPermissionsChecking {
-	self: StudentCourseworkFullScreenCommandState =>
+trait StudentCourseworkUpcomingCommandPermissions extends RequiresPermissionsChecking {
+	self: StudentCourseworkUpcomingCommandState =>
 	def permissionsCheck(p: PermissionsChecking) {
 		memberOrUser.asMember.foreach { member =>
 			p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
