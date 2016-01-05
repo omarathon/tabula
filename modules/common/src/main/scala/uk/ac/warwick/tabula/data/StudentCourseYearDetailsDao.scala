@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion._
 import org.hibernate.transform.Transformers
@@ -23,7 +24,7 @@ trait StudentCourseYearDetailsDao {
 	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 
-	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int): Seq[StudentCourseYearDetails]
+	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails]
 }
 
 @Repository
@@ -105,8 +106,8 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		}
 	}
 
-	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int): Seq[StudentCourseYearDetails] =
-		session.newCriteria[StudentCourseYearDetails]
+	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails] = {
+		val c = session.newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
@@ -116,7 +117,14 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				Restrictions.isNull("scd.endDate"),
 				Restrictions.ge("scd.endDate", LocalDate.now)
 			))
-			.seq
+
+		if (eagerLoad) {
+			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+				.setFetchMode("studentCourseDetails.studentMember", FetchMode.JOIN)
+		}
+
+		c.seq
+	}
 }
 
 trait StudentCourseYearDetailsDaoComponent {

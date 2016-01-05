@@ -30,7 +30,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal() = {
-		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy)
+		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy, eagerLoad = true)
 	}
 
 }
@@ -53,7 +53,7 @@ trait GenerateExamGridSelectCourseValidation extends SelfValidating {
 		if (yearOfStudy == null) {
 			errors.reject("examGrid.yearOfStudy.empty")
 		} else if (!yearsOfStudy.contains(yearOfStudy)) {
-			errors.reject("examGrid.yearOfStudy.invalid")
+			errors.reject("examGrid.yearOfStudy.invalid", Array(FilterStudentsOrRelationships.MaxYearsOfStudy.toString), "")
 		}
 	}
 }
