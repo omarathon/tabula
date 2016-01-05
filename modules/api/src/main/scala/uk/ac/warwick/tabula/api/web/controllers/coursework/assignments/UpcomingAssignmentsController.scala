@@ -7,29 +7,29 @@ import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.StudentAssignmentInfoToJsonConverter
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
-import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkFullScreenCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkUpcomingCommand
 import uk.ac.warwick.tabula.data.model.Member
 
 import MemberAssignmentsController._
 import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 
-object MemberAssignmentsController {
-	type ViewMemberAssignmentsCommand = Appliable[StudentAssignments]
+object UpcomingAssignmentsController {
+	type ViewUpcomingAssignmentsCommand = Appliable[StudentAssignments]
 }
 
 @Controller
-@RequestMapping(Array("/v1/member/{member}/assignments"))
-class MemberAssignmentsController
+@RequestMapping(Array("/v1/member/{member}/assignments/upcoming"))
+class UpcomingAssignmentsController
 	extends ApiController
-		with GetMemberAssignmentsApi
+		with GetUpcomingAssignmentsApi
 		with StudentAssignmentInfoToJsonConverter
 
-trait GetMemberAssignmentsApi {
+trait GetUpcomingAssignmentsApi {
 	self: ApiController with StudentAssignmentInfoToJsonConverter =>
 
 	@ModelAttribute("getAssignmentsCommand")
 	def command(@PathVariable member: Member): ViewMemberAssignmentsCommand =
-		StudentCourseworkFullScreenCommand(MemberOrUser(member))
+		StudentCourseworkUpcomingCommand(MemberOrUser(member))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def list(@ModelAttribute("getAssignmentsCommand") command: ViewMemberAssignmentsCommand, errors: Errors) = {
