@@ -143,7 +143,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 					meeting.meetingDate.toString(ProfileExportSingleCommand.TimeFormat),
 					meeting.title,
 					meeting.format.description,
-					meeting.description
+					meeting.escapedDescription
 				))
 		}
 
