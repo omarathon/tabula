@@ -7,30 +7,10 @@
 		</@f.select>
 	</@bs3form.labelled_form_group>
 
-	<#if newRecord>
-		<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-			<@f.select path="academicYear" id="academicYear" cssClass="form-control">
-				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
-			</@f.select>
-		</@bs3form.labelled_form_group>
-
-		<script type="text/javascript">
-			jQuery(function($) {
-				$('#academicYear').on('change', function(e) {
-					var $form = $(this).closest('form');
-					$('#action-submit').val('refresh');
-
-					$form.submit();
-				});
-			});
-		</script>
-	<#else>
-		<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-			<@spring.bind path="academicYear">
-				<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
-			</@spring.bind>
-		</@bs3form.labelled_form_group>
-	</#if>
+	<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
+		<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
+		<@f.hidden path="academicYear" id="academicYear" value="${status.actualValue.label}" cssClass="form-control-static" />
+	</@bs3form.labelled_form_group>
 
 	<#assign label>
 		Set name
@@ -121,8 +101,8 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			// Set up radios to enable/disable self-sign up options fields.
-			$("input:radio[name='allocationMethod']").radioControlled();
+			// Set up radios to show/hide self-sign up options fields.
+			$("input:radio[name='allocationMethod']").radioControlled({mode: 'hidden'});
 		});
 	</script>
 </#escape>

@@ -86,11 +86,16 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 		cache
 	}
 
-	def getTimetableForStudent(universityId: String) = Future.fromTry(Try(timetableCache.get(StudentKey(universityId))))
-	def getTimetableForModule(moduleCode: String) = Future.fromTry(Try(timetableCache.get(ModuleKey(moduleCode))))
-	def getTimetableForCourse(courseCode: String) = Future.fromTry(Try(timetableCache.get(CourseKey(courseCode))))
-	def getTimetableForRoom(roomName: String) = Future.fromTry(Try(timetableCache.get(RoomKey(roomName))))
-	def getTimetableForStaff(universityId: String) = Future.fromTry(Try(timetableCache.get(StaffKey(universityId))))
+	// Unwraps the CacheEntryUpdateException into its cause, for case matching
+	private def toFuture(eventList: Try[EventList]) = Future.fromTry(
+		eventList.recoverWith { case e: CacheEntryUpdateException => Failure(e.getCause) }
+	)
+
+	def getTimetableForStudent(universityId: String) = toFuture(Try(timetableCache.get(StudentKey(universityId))))
+	def getTimetableForModule(moduleCode: String) = toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
+	def getTimetableForCourse(courseCode: String) = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
+	def getTimetableForRoom(roomName: String) = toFuture(Try(timetableCache.get(RoomKey(roomName))))
+	def getTimetableForStaff(universityId: String) = toFuture(Try(timetableCache.get(StaffKey(universityId))))
 
 }
 

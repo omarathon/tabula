@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
+import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Member}
-import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
