@@ -32,7 +32,7 @@ trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permi
 			case Some(department) if (departmentsWithPermission.contains(department) || user.god) && maintenanceModeService.enabled =>
 				// Don't store if maintenance mode is enabled
 				Some(department)
-			case Some(department) if departmentsWithPermission.contains(department) || user.god =>
+			case Some(department) if user.apparentUser.isFoundUser && (departmentsWithPermission.contains(department) || user.god) =>
 				// Store the new active department and return it
 				val settings = new UserSettings(user.apparentId)
 				settings.activeDepartment = department

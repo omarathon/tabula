@@ -38,7 +38,7 @@ trait HasExamGridColumnCategory {
 
 	self: ExamGridColumn =>
 
-	def category: String
+	val category: String
 
 }
 
@@ -46,7 +46,19 @@ trait HasExamGridColumnSecondaryValue {
 
 	self: ExamGridColumn =>
 
-	def secondaryValueTitle: String
-	def renderSecondaryValue: String
+	val renderSecondaryValue: String
 
+}
+
+trait HasExamGridColumnSection {
+
+	self: ExamGridColumn =>
+
+	val sectionIdentifier: String
+
+	val sectionTitleLabel: String
+
+	val sectionSecondaryValueLabel: String
+
+	val sectionValueLabel: String
 }

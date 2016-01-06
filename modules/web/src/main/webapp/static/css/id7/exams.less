@@ -1,5 +1,26 @@
 @import "embeddable";
 
+.table th.rotated, .table td.rotated {
+	vertical-align: bottom;
+	position: relative;
+	.rotate {
+		float: left;
+		position: absolute;
+		-webkit-transform-origin: 0% 100%;
+		-moz-transform-origin: 0% 100%;
+		-ms-transform-origin: 0% 100%;
+		-o-transform-origin: 0% 100%;
+		transform-origin: 0% 100%;
+		-webkit-transform: rotateZ(-90deg);
+		-moz-transform: rotateZ(-90deg);
+		-ms-transform: rotateZ(-90deg);
+		-o-transform: rotateZ(-90deg);
+		transform: rotateZ(-90deg);
+		white-space: nowrap;
+		left: 50%;
+	}
+}
+
 .simple-assessment-info {
 	.subtle-box-style;
 	padding: 4px;
@@ -60,5 +81,48 @@
 	.mark-header {
 		font-weight: bold;
 		border-bottom: 2px solid #ddd;
+	}
+}
+
+.exam-grid-preview {
+	.key {
+		position: absolute;
+		.table {
+			margin-bottom: 0;
+			border: 1px solid @table-border-color;
+		}
+		thead th {
+			text-align: center;
+			background: @table-bg-hover;
+		}
+	}
+	.exam-grid-fail {
+		color: @brand-danger;
+		text-decoration: underline;
+		border-bottom: 1px solid @brand-danger;
+	}
+	.exam-grid-overcat {
+		color: @brand-success;
+		&:after {
+			content: "*";
+		}
+	}
+	.grid {
+		th, td {
+			border: 1px solid @table-border-color;
+			&.borderless {
+				border: 0;
+			}
+		}
+		th {
+			background: @table-bg-hover;
+		}
+		.title-in-category th, th.section-secondary-label, th.section-value-label {
+			text-align: center;
+			vertical-align: middle;
+		}
+		.student:nth-of-type(odd) {
+			background: @table-bg-accent;
+		}
 	}
 }

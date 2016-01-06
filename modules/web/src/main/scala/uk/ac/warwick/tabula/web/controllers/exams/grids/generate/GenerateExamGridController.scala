@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.exams.grids.generate
 
 import javax.validation.Valid
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -47,7 +48,7 @@ class GenerateExamGridController extends ExamsController
 
 	private def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
 		view.crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.departmentAcademicYear(department, year)): _*)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.generate(department, year)): _*)
 
 	@ModelAttribute("selectCourseCommand")
 	def selectCourseCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
@@ -122,7 +123,9 @@ class GenerateExamGridController extends ExamsController
 			val jobInstance = jobService.getInstance(jobId)
 			if (jobInstance.isDefined && !jobInstance.get.finished) {
 				val scyds = selectCourseCommand.apply()
-				val studentLastImportDates = scyds.map(_.studentCourseDetails.student).distinct.map(s => (s.fullName, s.lastImportDate)).sortBy(_._2)
+				val studentLastImportDates = scyds.map(_.studentCourseDetails.student).distinct.map(s =>
+					(s.fullName, Option(s.lastImportDate).getOrElse(new DateTime(0)))
+				).sortBy(_._2)
 				commonCrumbs(
 					Mav("exams/grids/generate/jobProgress",
 						"jobId" -> jobId,
@@ -177,15 +180,17 @@ class GenerateExamGridController extends ExamsController
 		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
 		val columnIDs = gridOptionsCommand.apply()
 		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).map(_.getColumns(scyds))
-		val columnValues = columns.map(_.map(_.render))
+		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
+		val columnValues = columns.map(_.render)
+		val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 		commonCrumbs(
 			Mav("exams/grids/generate/preview",
 				"columns" -> columns,
 				"columnValues" -> columnValues,
-				"hasCategoryRow" -> columns.exists(_.collect { case c: HasExamGridColumnCategory => c }.nonEmpty),
+				"categories" -> categories,
 				"scyds" -> scyds,
-				"columnIDs" -> columnIDs
+				"columnIDs" -> columnIDs,
+				"generatedDate" -> DateTime.now
 			),
 			department,
 			academicYear

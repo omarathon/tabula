@@ -44,6 +44,18 @@
 		</div>
 	</div>
 
+	<h3>Modules</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("core")>checked</#if>
+				/> Core Modules</label>
+			</div>
+		</div>
+	</div>
+
 	<@bs3form.errors path="gridOptionsCommand" />
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.gridOptions}">Next</button>

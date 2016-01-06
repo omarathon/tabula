@@ -7,7 +7,7 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
+<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check exam-grid-preview" method="post">
 
 	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
 	<input type="hidden" name="route" value="${selectCourseCommand.route.code}" />
@@ -33,16 +33,32 @@
 	</div>
 
 	<div class="key">
-		<dl>
-			<dt>Department:</dt>
-			<dd>${department.name}</dd>
-			<dt>Course:</dt>
-			<dd>${selectCourseCommand.course.code}</dd>
-			<dt>Student count:</dt>
-			<dd>${scyds?size}</dd>
-		</dl>
+		<table class="table table-condensed">
+			<tbody>
+				<tr>
+					<th>Department:</th>
+					<td>${department.name}</td>
+				</tr>
+				<tr>
+					<th>Course:</th>
+					<td>${selectCourseCommand.course.code}</td>
+				</tr>
+				<tr>
+					<th>Year of study:</th>
+					<td>${selectCourseCommand.yearOfStudy}</td>
+				</tr>
+				<tr>
+					<th>Student Count:</th>
+					<td>${scyds?size}</td>
+				</tr>
+				<tr>
+					<th>Grid Generated:</th>
+					<td><@fmt.date date=generatedDate relative=false /></td>
+				</tr>
+			</tbody>
+		</table>
 
-		<table class="table table-condensed table-striped">
+		<table class="table table-condensed">
 			<thead>
 				<tr>
 					<th colspan="2">Key</th>
@@ -50,39 +66,87 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td class="exam-grid-fail">#</td>
+					<td><span class="exam-grid-fail">#</span></td>
 					<td>Failed module</td>
 				</tr>
 				<tr>
-					<td class="exam-grid-overcat">#</td>
+					<td><span class="exam-grid-overcat">#</span></td>
 					<td>Used in overcatting calculation</td>
 				</tr>
 			</tbody>
 		</table>
 	</div>
 
-	<table class="table table-condensed table-striped">
+	<table class="table table-condensed grid">
 		<tbody>
-			<#if hasCategoryRow>
-				<tr></tr>
-			</#if>
-			<tr>
-				<#list columns as columnSet>
-					<#list columnSet as column>
-						<#if !column.category?has_content>
-							<th>${column.title}</th>
+			<#if categories?keys?has_content>
+				<tr class="category">
+					<#assign currentSection = "" />
+					<#assign currentCategory = "" />
+					<#list columns as column>
+						<#if column.sectionIdentifier?has_content>
+							<#if currentSection != column.sectionIdentifier>
+								<#assign currentSection = column.sectionIdentifier />
+								<td class="borderless"></td>
+							</#if>
+						</#if>
+						<#if column.category?has_content>
+							<#if currentCategory != column.category>
+								<#assign currentCategory = column.category />
+								<th class="rotated" colspan="${categories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+							</#if>
+						<#else>
+							<td class="borderless"></td>
 						</#if>
 					</#list>
+				</tr>
+				<tr class="title-in-category">
+					<#assign currentSection = "" />
+					<#list columns as column>
+						<#if column.sectionTitleLabel?has_content>
+							<#if currentSection != column.sectionIdentifier>
+								<#assign currentSection = column.sectionIdentifier />
+								<th>${column.sectionTitleLabel}</th>
+							</#if>
+						</#if>
+						<#if column.category?has_content>
+							<td class="rotated"><div class="rotate">${column.title}</div></td>
+						<#else>
+							<td class="borderless"></td>
+						</#if>
+					</#list>
+				</tr>
+			</#if>
+			<tr>
+				<#assign currentSection = "" />
+				<#list columns as column>
+					<#if column.sectionSecondaryValueLabel?has_content>
+						<#if currentSection != column.sectionIdentifier>
+							<#assign currentSection = column.sectionIdentifier />
+							<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
+						</#if>
+					</#if>
+					<#if !column.category?has_content>
+						<th>${column.title}</th>
+					<#elseif column.renderSecondaryValue?has_content>
+						<td><#noescape>${column.renderSecondaryValue}</#noescape></td>
+					<#else>
+						<td></td>
+					</#if>
 				</#list>
 			</tr>
 			<#list scyds as scyd>
-				<tr>
-					<#list columnValues as columnSet>
-						<#list columnSet as column>
-							<#if column[scyd.id]?has_content>
-								<td>${column[scyd.id]}</td>
+				<tr class="student">
+					<#assign currentSection = "" />
+					<#list columnValues as columnValue>
+						<#assign column = columns[columnValue_index] />
+						<#if column.sectionValueLabel?has_content>
+							<#if currentSection != column.sectionIdentifier && scyd_index == 0>
+								<#assign currentSection = column.sectionIdentifier />
+								<th rowspan="${scyds?size}" class="section-value-label">${column.sectionValueLabel}</th>
 							</#if>
-						</#list>
+						</#if>
+						<td><#if columnValue[scyd.id]?has_content><#noescape>${columnValue[scyd.id]}</#noescape></#if></td>
 					</#list>
 				</tr>
 			</#list>
@@ -91,5 +155,19 @@
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
 </form>
+
+<script>
+	jQuery(function($){
+		$('th.rotated, td.rotated').each(function() {
+			var width = $(this).find('.rotate').width();
+			var height = $(this).find('.rotate').height();
+			$(this).css('height', width + 15).css('width', height + 5);
+			$(this).find('.rotate').css({
+				'margin-top': -(height),
+				'margin-left': height / 2
+			});
+		});
+	});
+</script>
 
 </#escape>
