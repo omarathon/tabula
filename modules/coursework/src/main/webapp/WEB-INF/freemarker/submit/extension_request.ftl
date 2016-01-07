@@ -59,7 +59,7 @@
 			<#if department.extensionGuidelineSummary??>
 				<#include "/WEB-INF/freemarker/submit/formfields/guideline.ftl" >
 			</#if>
-			<#if department.extensionGuidelineLink??>
+			<#if department.extensionGuidelineLink?has_content>
 				<p>You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>
 				before submitting your application for an extension.</p>
 			</#if>
