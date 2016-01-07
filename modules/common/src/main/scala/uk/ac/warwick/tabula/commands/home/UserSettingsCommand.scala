@@ -72,8 +72,18 @@ trait UserSettingsDescription extends Describable[UserSettings] {
 		d.properties("user" -> user.apparentId)
 	}
 
-	override def describeResult(d: Description, result: UserSettings) =
-		d.properties("user" -> user.apparentId, "settings" -> result.id)
+	override def describeResult(d: Description, result: UserSettings) = {
+		if (result.activeDepartment.isDefined) d.department(result.activeDepartment.get)
+		d.properties(
+			"user" -> user.apparentId,
+			"alertsSubmission" -> result.alertsSubmission,
+			"hiddenIntros" -> result.hiddenIntros,
+			"weekNumberingSystem" -> result.weekNumberingSystem,
+			"bulkEmailSeparator" -> result.bulkEmailSeparator,
+			"profilesDefaultView" -> result.profilesDefaultView,
+			"activeAcademicYear" -> result.activeAcademicYear
+		)
+	}
 }
 
 trait UserSettingsPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
