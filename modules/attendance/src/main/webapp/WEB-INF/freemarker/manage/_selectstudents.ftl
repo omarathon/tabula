@@ -232,7 +232,7 @@
 
 		</div>
 
-		<#if findCommand.filterChanged()>
+		<#if findCommand.filterChanged>
 			<div class="well well-small student-filter-changed-box" >
 				<span class="legend">Filter Update</span>
 				<div>
