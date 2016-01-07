@@ -73,7 +73,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
 	}
 
 	override def describeResult(d: Description, result: UserSettings) = {
-		if (result.activeDepartment.isDefined) d.department(result.activeDepartment.get)
+		result.activeDepartment.foreach(d.department)
 		d.properties(
 			"user" -> user.apparentId,
 			"alertsSubmission" -> result.alertsSubmission,
