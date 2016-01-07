@@ -73,7 +73,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
 	}
 
 	override def describeResult(d: Description, result: UserSettings) =
-		d.properties("user" -> user.apparentId, "settings" -> result)
+		d.properties("user" -> user.apparentId, "settings" -> result.id)
 }
 
 trait UserSettingsPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
