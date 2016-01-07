@@ -212,7 +212,7 @@ class GenerateExamGridController extends ExamsController
 		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
 		val columnIDs = gridOptionsCommand.apply()
 		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).map(_.getColumns(scyds))
+		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",

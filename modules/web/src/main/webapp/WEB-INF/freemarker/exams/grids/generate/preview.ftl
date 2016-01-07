@@ -84,11 +84,9 @@
 					<#assign currentSection = "" />
 					<#assign currentCategory = "" />
 					<#list columns as column>
-						<#if column.sectionIdentifier?has_content>
-							<#if currentSection != column.sectionIdentifier>
-								<#assign currentSection = column.sectionIdentifier />
-								<td class="borderless"></td>
-							</#if>
+						<#if column.sectionIdentifier?has_content && currentSection != column.sectionIdentifier>
+							<#assign currentSection = column.sectionIdentifier />
+							<td class="borderless"></td>
 						</#if>
 						<#if column.category?has_content>
 							<#if currentCategory != column.category>
@@ -120,11 +118,9 @@
 			<tr>
 				<#assign currentSection = "" />
 				<#list columns as column>
-					<#if column.sectionSecondaryValueLabel?has_content>
-						<#if currentSection != column.sectionIdentifier>
-							<#assign currentSection = column.sectionIdentifier />
-							<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
-						</#if>
+					<#if column.sectionSecondaryValueLabel?has_content && currentSection != column.sectionIdentifier>
+						<#assign currentSection = column.sectionIdentifier />
+						<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
 					</#if>
 					<#if !column.category?has_content>
 						<th>${column.title}</th>
@@ -140,11 +136,9 @@
 					<#assign currentSection = "" />
 					<#list columnValues as columnValue>
 						<#assign column = columns[columnValue_index] />
-						<#if column.sectionValueLabel?has_content>
-							<#if currentSection != column.sectionIdentifier && scyd_index == 0>
-								<#assign currentSection = column.sectionIdentifier />
-								<th rowspan="${scyds?size}" class="section-value-label">${column.sectionValueLabel}</th>
-							</#if>
+						<#if column.sectionValueLabel?has_content && currentSection != column.sectionIdentifier && scyd_index == 0>
+							<#assign currentSection = column.sectionIdentifier />
+							<th rowspan="${scyds?size}" class="section-value-label">${column.sectionValueLabel}</th>
 						</#if>
 						<td><#if columnValue[scyd.id]?has_content><#noescape>${columnValue[scyd.id]}</#noescape></#if></td>
 					</#list>

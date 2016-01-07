@@ -30,7 +30,7 @@ abstract class ExamGridColumn(scyds: Seq[StudentCourseYearDetails]) {
 		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 	): Unit
 
-	protected def createCell(row: XSSFRow): XSSFCell = row.createCell(Math.max(row.getLastCellNum, 0))
+	protected def createCell(row: XSSFRow, index: Int): XSSFCell = row.createCell(index)
 
 }
 

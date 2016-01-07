@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridExporter
-import uk.ac.warwick.tabula.data.model.{ModuleSelectionStatus, Module, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model.{Module, ModuleSelectionStatus, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns._
 
@@ -59,8 +59,22 @@ class CoreModulesOption extends columns.ExamGridColumnOption {
 			scyd: StudentCourseYearDetails,
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
-			val cell = createCell(row)
-			cell.setCellValue(scyd.studentCourseDetails.student.fullName.getOrElse("[Unknown]"))
+			val cell = createCell(row, index)
+			val modreg = scyd.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
+			modreg.foreach(mr => {
+				if (mr.agreedMark != null) {
+					if (mr.agreedGrade == "F") {
+						cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Fail))
+						cell.setCellValue(mr.agreedMark.toPlainString)
+					} else if (mr.agreedMark.toPlainString == "0") {
+						cell.setCellValue(s"${mr.agreedMark.toPlainString}(${mr.agreedGrade})")
+					}	else {
+						cell.setCellValue(mr.agreedMark.toPlainString)
+					}
+				} else {
+					cell.setCellValue("?")
+				}
+			})
 		}
 
 		override val renderSecondaryValue: String = cats.toPlainString

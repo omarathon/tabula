@@ -27,7 +27,7 @@ class NameColumnOption extends columns.ExamGridColumnOption {
 			scyd: StudentCourseYearDetails,
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
-			val cell = createCell(row)
+			val cell = createCell(row, index)
 			cell.setCellValue(scyd.studentCourseDetails.student.fullName.getOrElse("[Unknown]"))
 		}
 
@@ -57,7 +57,7 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 			scyd: StudentCourseYearDetails,
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
-			val cell = createCell(row)
+			val cell = createCell(row, index)
 			cell.setCellValue(scyd.studentCourseDetails.student.universityId)
 		}
 
