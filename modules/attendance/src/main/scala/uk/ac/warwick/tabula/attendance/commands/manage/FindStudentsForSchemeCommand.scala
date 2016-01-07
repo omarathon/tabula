@@ -164,4 +164,5 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
+	var filterChanged: Boolean = false
 }
