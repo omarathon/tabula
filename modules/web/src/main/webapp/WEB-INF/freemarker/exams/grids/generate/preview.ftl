@@ -91,7 +91,7 @@
 						<#if column.category?has_content>
 							<#if currentCategory != column.category>
 								<#assign currentCategory = column.category />
-								<th class="rotated" colspan="${categories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+								<th class="rotated first-in-category" colspan="${categories[column.category]?size}"><div class="rotate">${column.category}</div></th>
 							</#if>
 						<#else>
 							<td class="borderless"></td>
@@ -100,6 +100,7 @@
 				</tr>
 				<tr class="title-in-category">
 					<#assign currentSection = "" />
+					<#assign currentCategory = "" />
 					<#list columns as column>
 						<#if column.sectionTitleLabel?has_content>
 							<#if currentSection != column.sectionIdentifier>
@@ -108,7 +109,13 @@
 							</#if>
 						</#if>
 						<#if column.category?has_content>
-							<td class="rotated"><div class="rotate">${column.title}</div></td>
+							<#if currentCategory != column.category>
+								<#assign firstInCategory = true />
+								<#assign currentCategory = column.category />
+							<#else>
+								<#assign firstInCategory = false />
+							</#if>
+							<td class="rotated <#if firstInCategory!false>first-in-category</#if>"><div class="rotate">${column.title}</div></td>
 						<#else>
 							<td class="borderless"></td>
 						</#if>
@@ -117,30 +124,46 @@
 			</#if>
 			<tr>
 				<#assign currentSection = "" />
+				<#assign currentCategory = "" />
 				<#list columns as column>
 					<#if column.sectionSecondaryValueLabel?has_content && currentSection != column.sectionIdentifier>
 						<#assign currentSection = column.sectionIdentifier />
 						<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
 					</#if>
+					<#if column.category?has_content && currentCategory != column.category>
+						<#assign firstInCategory = true />
+						<#assign currentCategory = column.category />
+					<#else>
+						<#assign firstInCategory = false />
+					</#if>
 					<#if !column.category?has_content>
 						<th>${column.title}</th>
 					<#elseif column.renderSecondaryValue?has_content>
-						<td><#noescape>${column.renderSecondaryValue}</#noescape></td>
+						<td <#if firstInCategory!false>class="first-in-category"</#if>><#noescape>${column.renderSecondaryValue}</#noescape></td>
 					<#else>
-						<td></td>
+						<td <#if firstInCategory!false>class="first-in-category"</#if>></td>
 					</#if>
 				</#list>
 			</tr>
 			<#list scyds as scyd>
 				<tr class="student">
 					<#assign currentSection = "" />
+					<#assign currentCategory = "" />
 					<#list columnValues as columnValue>
 						<#assign column = columns[columnValue_index] />
 						<#if column.sectionValueLabel?has_content && currentSection != column.sectionIdentifier && scyd_index == 0>
 							<#assign currentSection = column.sectionIdentifier />
 							<th rowspan="${scyds?size}" class="section-value-label">${column.sectionValueLabel}</th>
 						</#if>
-						<td><#if columnValue[scyd.id]?has_content><#noescape>${columnValue[scyd.id]}</#noescape></#if></td>
+						<#if column.category?has_content && currentCategory != column.category>
+							<#assign firstInCategory = true />
+							<#assign currentCategory = column.category />
+						<#else>
+							<#assign firstInCategory = false />
+						</#if>
+						<td <#if firstInCategory!false>class="first-in-category"</#if>>
+							<#if columnValue[scyd.id]?has_content><#noescape>${columnValue[scyd.id]}</#noescape></#if>
+						</td>
 					</#list>
 				</tr>
 			</#list>
