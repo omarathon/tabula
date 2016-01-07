@@ -30,8 +30,6 @@ abstract class ExamGridColumn(scyds: Seq[StudentCourseYearDetails]) {
 		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 	): Unit
 
-	protected def createCell(row: XSSFRow, index: Int): XSSFCell = row.createCell(index)
-
 }
 
 trait HasExamGridColumnCategory {

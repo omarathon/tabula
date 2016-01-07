@@ -56,6 +56,18 @@
 		</div>
 	</div>
 
+	<h3>Marking</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
+				/> Total CATs</label>
+			</div>
+		</div>
+	</div>
+
 	<@bs3form.errors path="gridOptionsCommand" />
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.gridOptions}">Next</button>
