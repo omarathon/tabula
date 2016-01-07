@@ -61,7 +61,7 @@
 			</#if>
 			<#if department.extensionGuidelineLink?has_content>
 				<p>You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>
-				before submitting your application for an extensionhhh.</p>
+				before submitting your application for an extension.</p>
 			</#if>
 		</#if>
 
