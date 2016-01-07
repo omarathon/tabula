@@ -54,6 +54,23 @@
 				/> Core Modules</label>
 			</div>
 		</div>
+		<div class="col-md-3">
+
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="coreoptional"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("coreoptional")>checked</#if>
+				/> Core Optional Modules</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="optional"
+							  <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("optional")>checked</#if>
+				/> Optional Modules</label>
+			</div>
+		</div>
 	</div>
 
 	<h3>Marking</h3>

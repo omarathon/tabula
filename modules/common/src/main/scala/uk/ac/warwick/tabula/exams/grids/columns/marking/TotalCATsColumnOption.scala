@@ -15,7 +15,7 @@ class TotalCATsColumnOption extends columns.ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "cats"
 
-	override val sortOrder: Int = 4
+	override val sortOrder: Int = 12
 
 	case class Column(scyds: Seq[StudentCourseYearDetails], bound: BigDecimal, isUpperBound: Boolean = false, isTotal: Boolean = false)
 		extends ExamGridColumn(scyds) with HasExamGridColumnCategory {
