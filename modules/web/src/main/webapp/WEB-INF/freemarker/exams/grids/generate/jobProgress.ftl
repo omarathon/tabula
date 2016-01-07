@@ -18,6 +18,9 @@
 	<#list columnIDs as column>
 		<input type="hidden" name="predefinedColumnIdentifiers" value="${column}" />
 	</#list>
+	<#list gridOptionsCommand.customColumnTitles as column>
+		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
+	</#list>
 
 	<h2>Importing student data</h2>
 

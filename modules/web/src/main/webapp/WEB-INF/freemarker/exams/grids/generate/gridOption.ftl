@@ -7,7 +7,7 @@
 
 <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check" method="post">
+<form action="<@routes.exams.generateGrid department academicYear />" class="dirty-check grid-options" method="post">
 
 	<input type="hidden" name="jobId" value="${jobId}" />
 	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
@@ -85,9 +85,62 @@
 		</div>
 	</div>
 
+	<h3>Additional columns</h3>
+
+	<div class="customColumnTitles">
+		<#list gridOptionsCommand.customColumnTitles as customColumnTitle>
+			<div class="row form-group customColumnTitle">
+				<div class="col-md-4">
+					<input type="hidden" name="customColumnTitles[${customColumnTitle_index}]" value="${customColumnTitle}" />
+					${customColumnTitle}
+				</div>
+				<div class="col-md-2"><button class="btn btn-danger">Delete</button></div>
+			</div>
+		</#list>
+
+		<div class="well well-sm">
+			<div class="row">
+				<div class="col-md-4"><input class="form-control" placeholder="Enter a column name" /></div>
+				<div class="col-md-2"><button type="button" class="btn btn-default">Add</button></div>
+			</div>
+		</div>
+	</div>
+
 	<@bs3form.errors path="gridOptionsCommand" />
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.gridOptions}">Next</button>
 </form>
+
+<script>
+	jQuery(function($){
+		var fixCustomColumnIndexes = function(){
+			$('.customColumnTitle').each(function(index){
+				$(this).find('input').prop('name', 'customColumnTitles[' + index + ']');
+			});
+		};
+		$('.customColumnTitles').on('click', 'button.btn-danger', function(){
+			$(this).closest('.row').remove();
+			fixCustomColumnIndexes();
+		}).on('click', 'button.btn-default', function(){
+			var newTitle = $(this).closest('.row').find('input').val();
+			$('<div/>').addClass('row form-group customColumnTitle').append(
+				$('<div/>').addClass('col-md-4').append(
+					newTitle
+				).append(
+					$('<input/>').attr({
+						'type' : 'hidden',
+						'value' : newTitle
+					})
+				)
+			).append(
+				$('<div/>').addClass('col-md-2').append(
+					$('<button/>').addClass('btn btn-danger').html('Delete')
+				)
+			).insertBefore($('.customColumnTitles .well'));
+			$(this).closest('.row').find('input').val('');
+			fixCustomColumnIndexes();
+		});
+	});
+</script>
 
 </#escape>

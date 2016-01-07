@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 object GenerateExamGridGridOptionsCommand {
 	def apply() =
 		new GenerateExamGridGridOptionsCommandInternal
-			with Command[Set[ExamGridColumnOption.Identifier]]
+			with Command[(Set[ExamGridColumnOption.Identifier], Seq[String])]
 			with GenerateExamGridGridOptionsValidation
 			with GenerateExamGridGridOptionsCommandState
 			with GenerateExamGridGridOptionsCommandRequest
@@ -20,12 +20,12 @@ object GenerateExamGridGridOptionsCommand {
 }
 
 
-class GenerateExamGridGridOptionsCommandInternal extends CommandInternal[Set[ExamGridColumnOption.Identifier]] {
+class GenerateExamGridGridOptionsCommandInternal extends CommandInternal[(Set[ExamGridColumnOption.Identifier], Seq[String])] {
 
 	self: GenerateExamGridGridOptionsCommandRequest =>
 
 	override def applyInternal() = {
-		predefinedColumnIdentifiers.asScala.toSet
+		(predefinedColumnIdentifiers.asScala.toSet, customColumnTitles.asScala.toSeq)
 	}
 
 }
@@ -53,5 +53,6 @@ trait GenerateExamGridGridOptionsCommandState {
 trait GenerateExamGridGridOptionsCommandRequest {
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
+	var customColumnTitles: JList[String] = JArrayList()
 
 }

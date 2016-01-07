@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Department, StudentCourseYearDetails}
-import uk.ac.warwick.tabula.exams.grids.columns.{HasExamGridColumnCategory, ExamGridColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, BlankColumnOption, HasExamGridColumnCategory, ExamGridColumnOption}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -110,7 +110,7 @@ class GenerateExamGridController extends ExamsController
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.gridOptions))
 	def gridOptions(
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[Set[ExamGridColumnOption.Identifier]],
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
 		errors: Errors,
 		@RequestParam jobId: String,
 		@PathVariable department: Department,
@@ -160,7 +160,7 @@ class GenerateExamGridController extends ExamsController
 	def previewAndDownload(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
 		selectCourseCommandErrors: Errors,
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[Set[ExamGridColumnOption.Identifier]],
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
 		gridOptionsCommandErrors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -173,23 +173,20 @@ class GenerateExamGridController extends ExamsController
 
 	private def previewAndDownloadRender(
 		selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
-		gridOptionsCommand: Appliable[Set[ExamGridColumnOption.Identifier]],
+		gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
-		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
-		val columnIDs = gridOptionsCommand.apply()
-		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
+		val (scyds, columns) = gridData(selectCourseCommand, gridOptionsCommand)
 		val columnValues = columns.map(_.render)
 		val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
+
 		commonCrumbs(
 			Mav("exams/grids/generate/preview",
 				"columns" -> columns,
 				"columnValues" -> columnValues,
 				"categories" -> categories,
 				"scyds" -> scyds,
-				"columnIDs" -> columnIDs,
 				"generatedDate" -> DateTime.now
 			),
 			department,
@@ -201,7 +198,7 @@ class GenerateExamGridController extends ExamsController
 	def export(
 		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]] with GenerateExamGridSelectCourseCommandRequest,
 		selectCourseCommandErrors: Errors,
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[Set[ExamGridColumnOption.Identifier]],
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
 		gridOptionsCommandErrors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -209,15 +206,30 @@ class GenerateExamGridController extends ExamsController
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
 		}
-		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
-		val columnIDs = gridOptionsCommand.apply()
-		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val columns = allExamGridsColumns.filter(c => columnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
+		val (scyds, columns) = gridData(selectCourseCommand, gridOptionsCommand)
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
 			GenerateExamGridExporter(scyds, columns, academicYear)
 		)
+	}
+
+	private def gridData(
+		selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
+		gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])]
+	): (Seq[StudentCourseYearDetails], Seq[ExamGridColumn]) = {
+		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
+
+		val gridOptions = gridOptionsCommand.apply()
+		val predefinedColumnIDs = gridOptions._1
+		val customColumnTitles = gridOptions._2
+
+		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
+		val predefinedColumns = allExamGridsColumns.filter(c => predefinedColumnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
+		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
+		val columns = predefinedColumns ++ customColumns
+
+		(scyds, columns)
 	}
 
 }
