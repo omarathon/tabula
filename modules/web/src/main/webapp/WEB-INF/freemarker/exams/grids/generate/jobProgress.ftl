@@ -15,7 +15,7 @@
 	<input type="hidden" name="course" value="${selectCourseCommand.course.code}" />
 	<input type="hidden" name="route" value="${selectCourseCommand.route.code}" />
 	<input type="hidden" name="yearOfStudy" value="${selectCourseCommand.yearOfStudy}" />
-	<#list columnIDs as column>
+	<#list gridOptionsCommand.predefinedColumnIdentifiers as column>
 		<input type="hidden" name="predefinedColumnIdentifiers" value="${column}" />
 	</#list>
 	<#list gridOptionsCommand.customColumnTitles as column>

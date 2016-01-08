@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import uk.ac.warwick.spring.Wire
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import uk.ac.warwick.tabula.helpers.Logging
+
+import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
+import uk.ac.warwick.tabula.helpers.Logging
 
 /**
  * Stores a Map[String, Any] as JSON and inflates it back out.

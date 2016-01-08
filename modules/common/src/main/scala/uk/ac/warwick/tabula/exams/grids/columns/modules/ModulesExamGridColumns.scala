@@ -72,8 +72,15 @@ abstract class ModuleExamGridColumn(scyds: Seq[StudentCourseYearDetails], module
 
 }
 
+trait ModulesColumnOption extends columns.ExamGridColumnOption {
+
+	final override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
+	def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn]
+
+}
+
 @Component
-class CoreModulesColumnOption extends columns.ExamGridColumnOption {
+class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "core"
 
@@ -85,9 +92,9 @@ class CoreModulesColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
 		scyds.flatMap(_.moduleRegistrations)
-			.filter(_.selectionStatus == ModuleSelectionStatus.Core)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
@@ -96,7 +103,30 @@ class CoreModulesColumnOption extends columns.ExamGridColumnOption {
 }
 
 @Component
-class CoreOptionalModulesColumnOption extends columns.ExamGridColumnOption {
+class CoreRequiredModulesColumnOption extends ModulesColumnOption {
+
+	override val identifier: ExamGridColumnOption.Identifier = "corerequired"
+
+	override val sortOrder: Int = 5
+
+	case class Column(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(scyds, module, cats) {
+
+		override val category: String = "Core Required Modules"
+
+	}
+
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
+		scyds.flatMap(_.moduleRegistrations)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.CoreRequired || departmentCoreRequiredModules.contains(mr.module))
+			.groupBy(mr => (mr.module, mr.cats))
+			.keySet
+			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
+			.map{case(module, cats) => Column(scyds, module, cats)}
+
+}
+
+@Component
+class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "coreoptional"
 
@@ -108,9 +138,9 @@ class CoreOptionalModulesColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
 		scyds.flatMap(_.moduleRegistrations)
-			.filter(_.selectionStatus == ModuleSelectionStatus.OptionalCore)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
@@ -119,7 +149,7 @@ class CoreOptionalModulesColumnOption extends columns.ExamGridColumnOption {
 }
 
 @Component
-class OptionalModulesColumnOption extends columns.ExamGridColumnOption {
+class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "optional"
 
@@ -131,9 +161,9 @@ class OptionalModulesColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
 		scyds.flatMap(_.moduleRegistrations)
-			.filter(_.selectionStatus == ModuleSelectionStatus.Option)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))

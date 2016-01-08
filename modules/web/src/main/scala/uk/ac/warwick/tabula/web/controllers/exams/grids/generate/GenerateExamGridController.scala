@@ -10,7 +10,8 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Department, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model.{Module, Department, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, BlankColumnOption, HasExamGridColumnCategory, ExamGridColumnOption}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
@@ -25,6 +26,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
 	final val gridOptions = "gridOptions"
+	final val coreRequiredModules = "coreRequiredModules"
 	final val previewAndDownload = "previewAndDownload"
 	final val export = "export"
 }
@@ -35,6 +37,9 @@ class GenerateExamGridController extends ExamsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent {
+
+	type SelectCourseCommand = Appliable[Seq[StudentCourseYearDetails]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
+	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])]
 
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
@@ -59,7 +64,7 @@ class GenerateExamGridController extends ExamsController
 
 	@RequestMapping(method = Array(GET, POST))
 	def selectCourseRender(
-		@ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
@@ -72,9 +77,9 @@ class GenerateExamGridController extends ExamsController
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.selectCourse))
 	def selectCourseSubmit(
-		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		errors: Errors,
-		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[Set[ExamGridColumnOption.Identifier]],
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
@@ -86,18 +91,23 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, department, academicYear)
 			} else {
-				// TODO Uncomment this
 				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.studentCourseDetails.student.universityId)), user.apparentUser)
-				gridOptionsRender(jobId, department, academicYear)
-				//gridOptionsRender("4254f2a5-2f75-49da-b3f3-6ed3f531d077", department, academicYear)
+				gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 			}
 		}
 	}
 
-	private def gridOptionsRender(jobId: String, department: Department, academicYear: AcademicYear): Mav = {
+	private def gridOptionsRender(jobId: String, selectCourseCommand: SelectCourseCommand, department: Department, academicYear: AcademicYear): Mav = {
+		val coreRequiredModules = selectCourseCommand.department.getCoreRequiredModules(
+			selectCourseCommand.academicYear,
+			selectCourseCommand.course,
+			selectCourseCommand.route,
+			selectCourseCommand.yearOfStudy
+		)
 		commonCrumbs(
 			Mav("exams/grids/generate/gridOption",
-			"jobId" -> jobId
+				"jobId" -> jobId,
+				"coreRequiredModulesRequired" -> coreRequiredModules.isEmpty
 			),
 			department,
 			academicYear
@@ -109,39 +119,96 @@ class GenerateExamGridController extends ExamsController
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.gridOptions))
 	def gridOptions(
-		@ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		errors: Errors,
 		@RequestParam jobId: String,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		if (errors.hasErrors) {
-			gridOptionsRender(jobId, department, academicYear)
+			gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 		} else {
+			val scyds = selectCourseCommand.apply()
 			val columnIDs = gridOptionsCommand.apply()
-			val jobInstance = jobService.getInstance(jobId)
-			if (jobInstance.isDefined && !jobInstance.get.finished) {
-				val scyds = selectCourseCommand.apply()
-				val studentLastImportDates = scyds.map(_.studentCourseDetails.student).distinct.map(s =>
-					(s.fullName, Option(s.lastImportDate).getOrElse(new DateTime(0)))
-				).sortBy(_._2)
+			val coreRequiredModules = selectCourseCommand.department.getCoreRequiredModules(
+				selectCourseCommand.academicYear,
+				selectCourseCommand.course,
+				selectCourseCommand.route,
+				selectCourseCommand.yearOfStudy
+			)
+			if (columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) && coreRequiredModules.isEmpty) {
 				commonCrumbs(
-					Mav("exams/grids/generate/jobProgress",
+					Mav("exams/grids/generate/coreRequiredModules",
 						"jobId" -> jobId,
-						"jobProgress" -> jobInstance.get.progress,
-						"jobStatus" -> jobInstance.get.status,
-						"columnIDs" -> columnIDs,
-						"studentLastImportDates" -> studentLastImportDates
+						"modules" -> scyds.flatMap(_.moduleRegistrations.map(_.module)).distinct.sortBy(_.code)
 					),
 					department,
 					academicYear
 				)
 			} else {
-				previewAndDownloadRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
+				checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, department, academicYear)
 			}
 		}
+	}
 
+	@ModelAttribute("coreRequiredModulesCommand")
+	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+		GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.coreRequiredModules))
+	def coreRequiredModules(
+		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		@ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
+		@ModelAttribute("coreRequiredModulesCommand") coreRequiredModulesCommand: Appliable[Seq[Module]],
+		@RequestParam jobId: String,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	): Mav = {
+		coreRequiredModulesCommand.apply()
+			val columnIDs = gridOptionsCommand.apply()
+			val coreRequiredModules = selectCourseCommand.department.getCoreRequiredModules(
+				selectCourseCommand.academicYear,
+				selectCourseCommand.course,
+				selectCourseCommand.route,
+				selectCourseCommand.yearOfStudy
+			)
+			if (columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) && coreRequiredModules.isEmpty) {
+				commonCrumbs(
+					Mav("exams/grids/generate/coreRequiredModules", "jobId" -> jobId),
+					department,
+					academicYear
+				)
+			} else {
+				checkJobProgress(jobId, selectCourseCommand, gridOptionsCommand, department, academicYear)
+			}
+	}
+
+	private def checkJobProgress(
+		jobId: String,
+		selectCourseCommand: SelectCourseCommand,
+		gridOptionsCommand: GridOptionsCommand,
+		department: Department,
+		academicYear: AcademicYear
+	): Mav = {
+		val jobInstance = jobService.getInstance(jobId)
+		if (jobInstance.isDefined && !jobInstance.get.finished) {
+			val studentLastImportDates = selectCourseCommand.apply().map(_.studentCourseDetails.student).distinct.map(s =>
+				(s.fullName, Option(s.lastImportDate).getOrElse(new DateTime(0)))
+			).sortBy(_._2)
+			commonCrumbs(
+				Mav("exams/grids/generate/jobProgress",
+					"jobId" -> jobId,
+					"jobProgress" -> jobInstance.get.progress,
+					"jobStatus" -> jobInstance.get.status,
+					"studentLastImportDates" -> studentLastImportDates
+				),
+				department,
+				academicYear
+			)
+		} else {
+			previewAndDownloadRender(selectCourseCommand, gridOptionsCommand, department, academicYear)
+		}
 	}
 
 	@RequestMapping(method = Array(POST), value = Array("/progress"))
@@ -158,9 +225,9 @@ class GenerateExamGridController extends ExamsController
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.previewAndDownload))
 	def previewAndDownload(
-		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		selectCourseCommandErrors: Errors,
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -172,8 +239,8 @@ class GenerateExamGridController extends ExamsController
 	}
 
 	private def previewAndDownloadRender(
-		selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
-		gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
+		selectCourseCommand: SelectCourseCommand,
+		gridOptionsCommand: GridOptionsCommand,
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
@@ -196,9 +263,9 @@ class GenerateExamGridController extends ExamsController
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.export))
 	def export(
-		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]] with GenerateExamGridSelectCourseCommandRequest,
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
 		selectCourseCommandErrors: Errors,
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])],
+		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
 		gridOptionsCommandErrors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
@@ -215,8 +282,8 @@ class GenerateExamGridController extends ExamsController
 	}
 
 	private def gridData(
-		selectCourseCommand: Appliable[Seq[StudentCourseYearDetails]],
-		gridOptionsCommand: Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])]
+		selectCourseCommand: SelectCourseCommand,
+		gridOptionsCommand: GridOptionsCommand
 	): (Seq[StudentCourseYearDetails], Seq[ExamGridColumn]) = {
 		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
 
@@ -225,7 +292,13 @@ class GenerateExamGridController extends ExamsController
 		val customColumnTitles = gridOptions._2
 
 		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val predefinedColumns = allExamGridsColumns.filter(c => predefinedColumnIDs.contains(c.identifier)).flatMap(_.getColumns(scyds))
+		val predefinedColumns = allExamGridsColumns.filter(c => predefinedColumnIDs.contains(c.identifier)).flatMap{
+			case coreRequiredColumn: ModulesColumnOption => coreRequiredColumn.getColumns(
+				selectCourseCommand.department.getCoreRequiredModules(selectCourseCommand.academicYear, selectCourseCommand.course, selectCourseCommand.route, selectCourseCommand.yearOfStudy).getOrElse(Seq()),
+				scyds
+			)
+			case column => column.getColumns(scyds)
+		}
 		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val columns = predefinedColumns ++ customColumns
 
