@@ -35,7 +35,7 @@ trait EditSmallGroupSetProgressWizardLinks {
 class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String): Boolean = {
-		breadCrumbsMatchID7(Seq("Small Group Teaching", "Test Services", moduleName.toUpperCase))
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
 		val heading = find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		heading.text.startsWith("Edit small groups")
@@ -54,7 +54,7 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String): Boolean = {
-		breadCrumbsMatchID7(Seq("Small Group Teaching", "Test Services", moduleName.toUpperCase))
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
 		val heading = find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/groups")
@@ -74,7 +74,7 @@ class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends Web
 class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String): Boolean = {
-		breadCrumbsMatchID7(Seq("Small Group Teaching", "Test Services", moduleName.toUpperCase))
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
 		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/students")
@@ -94,7 +94,7 @@ class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends W
 class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
 	def isCurrentPage(moduleName:String): Boolean = {
-		breadCrumbsMatchID7(Seq("Small Group Teaching", "Test Services", moduleName.toUpperCase))
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
 		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/events")
@@ -113,7 +113,7 @@ class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends Web
 
 class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 	def isCurrentPage(moduleName:String): Boolean = {
-		breadCrumbsMatchID7(Seq("Small Group Teaching", "Test Services", moduleName.toUpperCase))
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
 		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/allocate")
