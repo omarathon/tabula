@@ -18,7 +18,7 @@ trait BreadcrumbsMatcher extends Matchers {
 	}
 
 	def breadCrumbsMatchID7(crumbsToMatch:Seq[String])(implicit webDriver:WebDriver){
-		val crumbs = findAll(cssSelector(".navbar-secondary ul li.nav-breadcrumb")).toSeq
+		val crumbs = findAll(cssSelector(".navbar-secondary ul li.nav-breadcrumb")).filter(_.isDisplayed).toSeq
 		val crumbText = crumbs.map(e=>e.underlying.findElement(By.tagName("a")).getText)
 		withClue(s"$crumbText should be $crumbsToMatch}") {
 			crumbs.size should be (crumbsToMatch.size)
