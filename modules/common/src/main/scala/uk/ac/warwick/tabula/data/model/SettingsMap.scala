@@ -74,12 +74,14 @@ trait HasSettings {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
-	protected def getStringMapSetting(key: String) = {
-		getSetting(key) match {
-			case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
-			case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
-			case _ => None
-		}
+	protected def getStringMapSetting(key: String): Option[Map[String, String]] = {
+		parseMapFromAny(getSetting(key)).map(_.mapValues(_.asInstanceOf[String]))
+	}
+
+	protected def parseMapFromAny(possibleMapOption: Option[Any]): Option[Map[String, Any]] = possibleMapOption match {
+		case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, Any]])
+		case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
+		case _ => None
 	}
 
 	def StringSetting = HasSettings.StringSetting(this)(_, _)

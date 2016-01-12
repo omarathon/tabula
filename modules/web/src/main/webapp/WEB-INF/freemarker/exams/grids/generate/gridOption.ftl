@@ -55,7 +55,14 @@
 			</div>
 		</div>
 		<div class="col-md-3">
-
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="corerequired"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("corerequired")>checked</#if>
+				/> Core Required Modules</label>
+				<#if coreRequiredModulesRequired>
+					<p class="help-block">(You will need to select these in the next step)</p>
+				</#if>
+			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
