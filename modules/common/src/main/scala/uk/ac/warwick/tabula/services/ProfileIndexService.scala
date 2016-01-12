@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.File
+import java.util.concurrent.TimeoutException
 
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents
 import org.apache.lucene.analysis.{Analyzer, TokenStream}
@@ -92,9 +93,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			)
 			bq.add(courseEndedQuery, Occur.MUST)
 
-			Await.result(search(bq), 15.seconds).transformAll(toItems)
+			Await.result(search(bq), 15.seconds)
+				.transformAll(toItems)
 		} catch {
-			case e: ParseException => Seq() // Invalid query string
+			case _: ParseException | _: TimeoutException => Seq() // Invalid query string or timeout
 		}
 
 	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
