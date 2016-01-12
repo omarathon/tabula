@@ -59,6 +59,13 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		notification.userLookup.getUserByWarwickUniId("0133454") returns users(1)
 		anExtension.assignment = assignment
 
+		withClue("Shouldn't send if the extension hasn't been approved") {
+			notification.recipients should be('empty)
+		}
+
+		anExtension.approve()
+		anExtension.expiryDate = DateTime.now.plusWeeks(1)
+
 		withClue("Should only be sent to the one user who has an extension") {
 			notification.recipients should be(Seq(users(1)))
 		}
