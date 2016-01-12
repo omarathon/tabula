@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import java.math
 
-import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridExporter
