@@ -156,7 +156,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		case Some(value: DateTime) => Some(value)
 		case _ => None
 	}
-	def overcattingChosenDate_= (chosenDate: User) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
+	def overcattingChosenDate_= (chosenDate: DateTime) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
 }
 
 trait BasicStudentCourseYearProperties {
