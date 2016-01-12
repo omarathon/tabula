@@ -126,22 +126,26 @@
 			</div>
 		</div>
 
-		<!-- Docs master nav -->
 		<div class="id7-navigation">
-			<nav class="navbar navbar-primary hidden-xs" role="navigation">
-				<#assign navigation>
-					<#if userNavigation?has_content>
-						${(userNavigation.collapsed)!""}
-					<#else>
-						${(user.navigation.collapsed)!""}
-					</#if>
-				</#assign>
+			<#assign navigation><#compress>
+				<#if userNavigation?has_content>
+					${(userNavigation.collapsed)!""}
+				<#else>
+					${(user.navigation.collapsed)!""}
+				</#if>
+			</#compress></#assign>
+			<#assign navigation><#compress>
 				<#if breadcrumbs?has_content>
 					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active next-secondary")}
 				<#else>
 					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active")}
 				</#if>
-			</nav>
+			</#compress></#assign>
+			<#if navigation?has_content>
+				<nav class="navbar navbar-primary hidden-xs" role="navigation">
+					${navigation}
+				</nav>
+			</#if>
 			<#if breadcrumbs?has_content>
 				<nav class="navbar navbar-secondary" role="navigation">
 					<ul class="nav navbar-nav">
