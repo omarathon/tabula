@@ -138,6 +138,13 @@ trait BasicStudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4Visa: JBoolean = _
 
+	/**
+		* Used for determining if the student has over-catted for this course.
+		* Really this should come from SITS, but until that data actually exists, let's just arbitrarily set it to 120
+		*/
+	@transient
+	var normalCATLoad: Int = 120
+
 }
 
 trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {

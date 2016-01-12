@@ -1,10 +1,19 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
+
+trait ModuleRegistrationDaoComponent {
+	val moduleRegistrationDao: ModuleRegistrationDao
+}
+
+trait AutowiringModuleRegistrationDaoComponent extends ModuleRegistrationDaoComponent {
+	val moduleRegistrationDao = Wire[ModuleRegistrationDao]
+}
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)

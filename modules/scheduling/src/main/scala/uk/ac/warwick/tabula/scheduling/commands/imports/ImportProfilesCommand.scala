@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
 import uk.ac.warwick.tabula.scheduling.services.{AccreditedPriorLearningImporter, MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -28,7 +28,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var userLookup = Wire.auto[UserLookupService]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 	var accreditedPriorLearningImporter = Wire.auto[AccreditedPriorLearningImporter]
-	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
+	var moduleRegistrationService = Wire.auto[ModuleRegistrationServiceImpl]
 	var smallGroupService = Wire.auto[SmallGroupService]
 	var profileIndexService = Wire.auto[ProfileIndexService]
 	var memberDao = Wire.auto[MemberDao]
@@ -360,7 +360,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 	def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
-		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
+		val existingModuleRegistrations = moduleRegistrationService.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
 		for (existingMR <- existingModuleRegistrations.filterNot(mr => newModuleRegistrations.contains(mr))) {
 			existingMR.studentCourseDetails.removeModuleRegistration(existingMR)
 			session.delete(existingMR)

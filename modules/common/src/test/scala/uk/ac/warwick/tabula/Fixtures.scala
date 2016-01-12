@@ -336,6 +336,12 @@ object Fixtures extends Mockito {
 		new ModuleRegistration(scd, mod, cats, year, occurrence)
 	}
 
+	def moduleRegistration(cats: BigDecimal, agreedMark: BigDecimal) = {
+		val mr = new ModuleRegistration(null, null, cats.underlying, null, null)
+		mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+		mr
+	}
+
 	def meetingRecordApproval(state: MeetingApprovalState) = {
 		val approval = new MeetingRecordApproval
 		approval.state = state
