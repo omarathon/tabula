@@ -45,7 +45,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration] =
-		getByNotionalKey(studentCourseDetails, module, cats, academicYear, occurrence)
+		moduleRegistrationDao.getByNotionalKey(studentCourseDetails, module, cats, academicYear, occurrence)
 
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
