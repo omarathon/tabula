@@ -92,6 +92,13 @@
 				/> Current year mean mark</label>
 			</div>
 		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("overcatted")>checked</#if>
+				/> Overcatted year mark</label>
+			</div>
+		</div>
 	</div>
 
 	<div class="row">

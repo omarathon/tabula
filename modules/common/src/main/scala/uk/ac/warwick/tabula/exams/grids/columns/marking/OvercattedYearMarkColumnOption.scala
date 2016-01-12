@@ -9,16 +9,16 @@ import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnO
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
-	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
+	override val identifier: ExamGridColumnOption.Identifier = "overcatted"
 
 	override val sortOrder: Int = 9
 
 	case class Column(scyds: Seq[StudentCourseYearDetails])
 		extends ExamGridColumn(scyds) with HasExamGridColumnCategory {
 
-		override val title: String = "Mean Module Mark"
+		override val title: String = "Over Catted Mark"
 
 		override val category: String = "Year Marks"
 
@@ -39,15 +39,12 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 		private def result(scyd: StudentCourseYearDetails): Option[BigDecimal] = {
 			val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-			if (cats > scyd.normalCATLoad) {
-				if (scyd.overcattingModules.isDefined) {
-					// If the student has overcatted and a subset of modules has been chosen for the overcatted mark, show the mark for _all_ the modules
-					moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations)
-				} else {
-					None
-				}
+			if (cats > scyd.normalCATLoad && scyd.overcattingModules.isDefined) {
+				// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
+				// calculate the overcatted mark from that subset
+				moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations.filter(mr => scyd.overcattingModules.get.contains(mr.module)))
 			} else {
-				moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations)
+				None
 			}
 		}
 

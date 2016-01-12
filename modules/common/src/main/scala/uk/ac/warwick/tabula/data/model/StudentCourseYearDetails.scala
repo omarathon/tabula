@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{Basic, Column, Entity, FetchType, JoinColumn, ManyToOne}
+import javax.persistence._
 
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import org.hibernate.annotations.{Filter, FilterDef, FilterDefs, Filters, Type}
@@ -8,15 +8,22 @@ import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.TermNotFoundException
 
 import scala.beans.BeanProperty
 
 object StudentCourseYearDetails {
 	final val FreshCourseYearDetailsOnlyFilter = "freshStudentCourseYearDetailsOnly"
+
+	object Overcatting {
+		final val Modules = "modules"
+		final val ChosenBy = "chosenBy"
+		final val ChosenDate = "chosenDate"
+	}
 }
 
 @FilterDefs(Array(
@@ -122,6 +129,34 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 			case e: TermNotFoundException => collection.mutable.Set()
 		}
 	}
+
+	@Lob
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
+	protected var overcatting: Map[String, Any] = Map()
+
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	def overcattingModules: Option[Seq[Module]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.Modules)) match {
+		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
+		case _ => None
+	}).map(moduleCodes => moduleCodes.flatMap(moduleAndDepartmentService.getModuleByCode))
+	def overcattingModules_= (modules: Seq[Module]) = overcatting += (StudentCourseYearDetails.Overcatting.Modules -> modules.map(_.code))
+
+	@transient
+	var userLookup = Wire[UserLookupService]("userLookup")
+
+	def overcattingChosenBy: Option[User] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenBy)) match {
+		case Some(value: String) => Some(value)
+		case _ => None
+	}).map(userId => userLookup.getUserByUserId(userId))
+	def overcattingChosenBy_= (chosenBy: User) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenBy -> chosenBy.getUserId)
+
+	def overcattingChosenDate: Option[DateTime] = Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenDate)) match {
+		case Some(value: DateTime) => Some(value)
+		case _ => None
+	}
+	def overcattingChosenDate_= (chosenDate: User) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
 }
 
 trait BasicStudentCourseYearProperties {
