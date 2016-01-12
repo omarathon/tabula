@@ -261,4 +261,3 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 	}}
 
 }
-

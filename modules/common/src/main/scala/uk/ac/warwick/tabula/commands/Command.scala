@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.triggers.Trigger
 import uk.ac.warwick.tabula.events._
 import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import uk.ac.warwick.tabula.services.{CannotPerformWriteOperationException, MaintenanceModeService}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, CannotPerformWriteOperationException, MaintenanceModeService}
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{DateFormats, AutowiringFeaturesComponent, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
@@ -92,9 +92,8 @@ trait Appliable[A]{
  */
 trait Command[A] extends Describable[A] with Appliable[A]
 		with JavaImports with EventHandling with NotificationHandling with TriggerHandling
-		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent {
+		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent with AutowiringMaintenanceModeServiceComponent {
 
-	var maintenanceMode = Wire[MaintenanceModeService]
 	val deferredMessages: ArrayBuffer[Object] = ArrayBuffer()
 	var messageQueue: Queue = Wire.named[Queue]("indexTopic")
 
@@ -113,8 +112,8 @@ trait Command[A] extends Describable[A] with Appliable[A]
 							}
 						}
 					}
-				} else if (maintenanceMode.enabled) {
-					throw maintenanceMode.exception(this)
+				} else if (maintenanceModeService.enabled) {
+					throw maintenanceModeService.exception(this)
 				} else {
 					throw new CannotPerformWriteOperationException(this)
 				}
@@ -159,7 +158,7 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		}.isDefined
 
 	private def readOnlyCheck(callee: Describable[_]) = {
-		callee.isInstanceOf[ReadOnly] || (!maintenanceMode.enabled && !isReadOnlyMasquerade)
+		callee.isInstanceOf[ReadOnly] || (!maintenanceModeService.enabled && !isReadOnlyMasquerade)
 	}
 }
 

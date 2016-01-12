@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommandResult, AllSmallGroupsReportCommand, SmallGroupsReportFilters}
+import uk.ac.warwick.tabula.reports.web.Routes
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 
 @Controller
@@ -24,12 +25,12 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		Mav("reports/smallgroups/missedByModule").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Missed(department, academicYear)
-		)
+		Mav("reports/smallgroups/missedByModule")
+			.crumbs(
+				ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
+				ReportsBreadcrumbs.SmallGroups.Missed(department, academicYear)
+			)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.SmallGroups.missedByModule(department, year)):_*)
 	}
 
  }

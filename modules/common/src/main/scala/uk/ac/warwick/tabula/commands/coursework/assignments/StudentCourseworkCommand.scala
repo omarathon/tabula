@@ -1,8 +1,8 @@
-package uk.ac.warwick.tabula.coursework.web.controllers
+package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.data.model.{Submission, Assignment}
 import uk.ac.warwick.tabula.commands.{TaskBenchmarking, CommandInternal}
-import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.userlookup.User
@@ -14,11 +14,7 @@ trait CourseworkCommandTypes {
 }
 
 object StudentCourseworkCommand extends CourseworkCommandTypes {
-
-	case class StudentAssignments(
-		val enrolledAssignments: Seq[AssignmentInfo],
-		val historicAssignments: Seq[AssignmentInfo]
-	)
+	case class StudentAssignments(enrolledAssignments: Seq[AssignmentInfo], historicAssignments: Seq[AssignmentInfo])
 }
 
 trait StudentCourseworkCommandInternal
@@ -28,7 +24,7 @@ trait StudentCourseworkCommandInternal
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
 
-	def applyInternal = StudentAssignments(
+	def applyInternal() = StudentAssignments(
 		enrolledAssignments = enrolledAssignmentsInfo,
 		historicAssignments = getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
 	)
@@ -112,6 +108,7 @@ trait StudentCourseworkCommandHelper
 			"extension" -> extension,
 			"isExtended" -> isExtended,
 			"extensionRequested" -> extensionRequested,
+			"studentDeadline" -> assignment.submissionDeadline(user),
 			"submittable" -> assignment.submittable(user),
 			"resubmittable" -> assignment.resubmittable(user),
 			"closed" -> assignment.isClosed,

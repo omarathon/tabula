@@ -5,12 +5,12 @@ import org.joda.time.DateTime
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.data.{SHAFileHasherComponent, AutowiringFileDaoComponent, FileDao}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.files.hash.FileHasher
-import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, MaintenanceModeService}
 
 /**
  * Job to go through each FileAttachment in the database and alert if there
@@ -19,7 +19,10 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
  * This will ignore any files that have been created since the last sync, if we
  * are a standby.
  */
-class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
+class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly
+	with AutowiringMaintenanceModeServiceComponent
+	with AutowiringFileDaoComponent
+	with SHAFileHasherComponent {
 	import SyncReplicaFilesystemCommand._
 	import SanityCheckFilesystemCommand._
 
@@ -27,9 +30,6 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 
 	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 	var dataDir = Wire[String]("${base.data.dir}")
-	var fileDao = Wire[FileDao]
-	var fileHasher = Wire[FileHasher]
-	var maintenanceModeService = Wire[MaintenanceModeService]
 
 	lazy val lastSanityCheckJobDetailsFile = new File(new File(dataDir), LastSanityCheckJobDetailsFilename)
 

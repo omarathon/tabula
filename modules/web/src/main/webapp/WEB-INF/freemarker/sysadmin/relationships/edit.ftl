@@ -2,17 +2,17 @@
 
 <h1>Edit student relationship type: ${relationshipType.description}</h1>
 
-<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/edit')}" commandName="editStudentRelationshipTypeCommand" cssClass="form-horizontal">
+<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/edit')}" commandName="editStudentRelationshipTypeCommand">
 
 	<@f.errors cssClass="error form-errors" />
 
 	<#assign newRecord=false />
 	<#include "_fields.ftl" />
 
-	<div class="submit-buttons">
+	<@bs3form.form_group>
 		<input type="submit" value="Save" class="btn btn-primary">
-		<a class="btn" href="<@url page="/sysadmin/relationships" />">Cancel</a>
-	</div>
+		<a class="btn btn-default" href="<@url page="/sysadmin/relationships" />">Cancel</a>
+	</@bs3form.form_group>
 
 </@f.form>
 

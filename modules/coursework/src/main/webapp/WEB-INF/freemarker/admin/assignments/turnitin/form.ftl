@@ -31,4 +31,3 @@ already in Turnitin, so it's okay to do this more than once for an assignment.
 		<button>Send to Turnitin</button>
 	</form>
 </#if>
-

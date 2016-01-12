@@ -10,7 +10,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 	private def changedUsers(implicit currentElement: String): Set[String] = {
 		// get the currrently saved set of users with permissions on the role
-		val currentUsers = findAll(cssSelector(s"$currentElement .user .muted")).toList.map(u => u.underlying.getText.trim).toSet
+		val currentUsers = findAll(cssSelector(s"$currentElement .row .very-subtle")).toList.map(u => u.underlying.getText.trim).toSet
 
 		// see what's changed, reset state and return the changes
 		val changes = currentUsers.union(lastUsers).filterNot(currentUsers.intersect(lastUsers))

@@ -50,6 +50,11 @@ object GroupsBreadcrumbs {
 		override val tooltip = module.name
 	}
 
+	case class Reusable(department: model.Department) extends Abstract {
+		val title = "Reusable small groups"
+		val url = Some(Routes.admin.reusable(department))
+	}
+
 	/**
 	 * A breadcrumb without a link, to represent the current page.
 	 * We don't currently include the current page in crumbs, but can use this for page titles

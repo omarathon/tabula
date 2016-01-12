@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}

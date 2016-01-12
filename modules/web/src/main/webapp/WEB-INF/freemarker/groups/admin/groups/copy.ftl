@@ -2,10 +2,16 @@
 <#import "*/group_components.ftl" as components />
 
 <#if department??>
-	<@fmt.deptheader "Copy small groups" "for" department routes.groups "copyDepartment" />
+	<#function route_function dept>
+		<#local result><@routes.groups.copyDepartment dept /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader title="Copy small groups" route_function=route_function preposition="for" />
 <#else>
-	<h1>Copy small groups</h1>
-	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
+	<div class="deptheader">
+		<h1>Copy small groups</h1>
+		<h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
+	</div>
 </#if>
 
 <#if department??>
@@ -17,14 +23,14 @@
 </#if>
 
 <div class="fix-area">
-	<@f.form method="post" action=submitUrl commandName="copySmallGroupSetsCommand" cssClass="form-horizontal">
+	<@f.form method="post" action=submitUrl commandName="copySmallGroupSetsCommand">
 		<input type="hidden" name="action" value="submit" id="action-submit">
 
-		<@form.labelled_row "sourceAcademicYear" "From academic year">
-			<@f.select path="sourceAcademicYear" id="sourceAcademicYear">
+		<@bs3form.labelled_form_group path="sourceAcademicYear" labelText="From academic year">
+			<@f.select path="sourceAcademicYear" id="sourceAcademicYear" cssClass="form-control">
 				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 			</@f.select>
-		</@form.labelled_row>
+		</@bs3form.labelled_form_group>
 
 		<script type="text/javascript">
 			jQuery(function($) {
@@ -37,23 +43,19 @@
 			});
 		</script>
 
-		<@form.labelled_row "targetAcademicYear" "To academic year">
-			<@f.select path="targetAcademicYear" id="targetAcademicYear">
+		<@bs3form.labelled_form_group path="targetAcademicYear" labelText="To academic year">
+			<@f.select path="targetAcademicYear" id="targetAcademicYear" cssClass="form-control">
 				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 			</@f.select>
-		</@form.labelled_row>
+		</@bs3form.labelled_form_group>
 
 		<p>Select sets of groups that you'd wish to copy:</p>
 
-		<table class="table table-bordered table-striped small-group-sets-list" id="copy-groups-table">
+		<table class="table table-striped small-group-sets-list" id="copy-groups-table">
 			<thead>
 				<tr>
 					<th>
-						<div class="check-all checkbox">
-							<label><span class="very-subtle"></span>
-								<input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all">
-							</label>
-						</div>
+						<input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all">
 					</th>
 					<th>Set name</th>
 					<th>
@@ -93,7 +95,7 @@
 
 		<div class="submit-buttons fix-footer">
 			<input type="submit" class="btn btn-primary" value="Create" />
-			<a class="btn dirty-check-ignore" href="${cancelUrl}">Cancel</a>
+			<a class="btn btn-default dirty-check-ignore" href="${cancelUrl}">Cancel</a>
 		</div>
 	</@f.form>
 </div>

@@ -39,14 +39,14 @@ object ScalaRestriction {
 	import Aliasable._
 
 	def is(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
-		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
+		Some(addAliases(new ScalaRestriction(HibernateHelpers.is(property, value)), aliases: _*))
 
 	def isNot(property: String, value: Any, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
-		Some(addAliases(new ScalaRestriction(Daoisms.isNot(property, value)), aliases: _*))
+		Some(addAliases(new ScalaRestriction(HibernateHelpers.isNot(property, value)), aliases: _*))
 
 	def isIfTicked(property: String, value: Any, ticked: Boolean, aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
 		if (!ticked) None
-		else Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
+		else Some(addAliases(new ScalaRestriction(HibernateHelpers.is(property, value)), aliases: _*))
 
 	// if the collection is empty, don't return any restriction - else return the restriction that the property must be in the collection
 	def inIfNotEmpty(property: String, collection: Iterable[Any], aliases: (String, AliasAndJoinType)*): Option[ScalaRestriction] =
@@ -84,8 +84,8 @@ object ScalaRestriction {
 		if (!ticked) None
 		else {
 			val criterion = disjunction()
-			criterion.add(Daoisms.is(property1, true))
-			criterion.add(Daoisms.is(property2, true))
+			criterion.add(HibernateHelpers.is(property1, true))
+			criterion.add(HibernateHelpers.is(property2, true))
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}

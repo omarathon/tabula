@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.admin.permissions
 
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.roles.{SelectorBuiltInRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permissions, PermissionsSelector, Permission}
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
@@ -9,11 +10,11 @@ import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, RelationshipService}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 @Controller
-class RoleTableController extends AdminController {
+abstract class AbstractRoleTableController extends AdminController {
 
 	var permissionsService = Wire[PermissionsService]
 	var relationshipService = Wire[RelationshipService]
@@ -34,7 +35,7 @@ class RoleTableController extends AdminController {
 		case _ => roleDefinition.getName.substring(0, 5)
 	}
 
-	private def rolesTable(department: Option[Department]): RolesTable = {
+	protected def rolesTable(department: Option[Department]): RolesTable = {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
 		val allDepartments = department.toSeq.flatMap(parentDepartments)
@@ -92,7 +93,7 @@ class RoleTableController extends AdminController {
 			.map { permission =>
 				(permission, allDefinitions.map {
 					case (actualDefinition, permsDefinition) => (actualDefinition, permsDefinition match {
-						case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType@unchecked] => {
+						case definition: SelectorBuiltInRoleDefinition[StudentRelationshipType@unchecked] =>
 							permission match {
 								case _ if definition.mayGrant(permission) => Some(true)
 								case selectorPermission: SelectorPermission[StudentRelationshipType@unchecked]
@@ -100,17 +101,33 @@ class RoleTableController extends AdminController {
 										definition.selector <= selectorPermission.selector => None
 								case _ => Some(false)
 							}
-						}
 						case definition => Some(definition.mayGrant(permission))
 					})
 				})
 			}
-			.filter { case (p, defs) => defs.exists { case (_, result) => !result.isDefined || result.exists { b => b } } }
+			.filter { case (p, defs) => defs.exists { case (_, result) => result.isEmpty || result.exists { b => b } } }
 			.sortBy { case (p, _) => groupFn(p) }
 	}
 
-	@RequestMapping(Array("/admin/roles")) def generic =
-		Mav("admin/permissions/role_table", "rolesTable" -> rolesTable(None))
+}
+
+@Controller
+class RoleTableController extends AbstractRoleTableController {
+
+	@RequestMapping(Array("/admin/roles"))
+	def generic = Mav("admin/permissions/role_table", "rolesTable" -> rolesTable(None))
+
+}
+
+@Controller
+class DepartmentRoleTableController extends AbstractRoleTableController
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+
+	override val departmentPermission: Permission = Permissions.Department.ArrangeRoutesAndModules
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@RequestMapping(Array("/admin/department/{department}/roles")) def forDepartment(@PathVariable department: Department) =
 		Mav("admin/permissions/role_table", "rolesTable" -> rolesTable(Some(department)))

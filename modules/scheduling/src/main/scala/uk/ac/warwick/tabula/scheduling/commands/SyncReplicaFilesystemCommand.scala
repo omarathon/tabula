@@ -19,8 +19,8 @@ import org.apache.http.HttpStatus
 import org.apache.http.util.EntityUtils
 import org.json.JSONArray
 import scala.util.control.Breaks._
-import uk.ac.warwick.tabula.scheduling.services.MessageAuthenticationCodeGenerator
-import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.scheduling.services.{AutowiringMessageAuthenticationCodeGeneratorComponent, MessageAuthenticationCodeGenerator}
+import uk.ac.warwick.tabula.data.{SHAFileHasherComponent, AutowiringFileDaoComponent, FileDao}
 import org.springframework.util.Assert
 import uk.ac.warwick.util.web.UriBuilder
 import java.io.FileOutputStream
@@ -40,7 +40,8 @@ import java.io.FileInputStream
 /**
  * This is a ReadOnly command because it runs in Maintenance mode on the replica
  */
-class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadOnly with Logging with HttpResponseHandlers {
+class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadOnly with Logging with HttpResponseHandlers
+	with AutowiringFileDaoComponent with SHAFileHasherComponent with AutowiringMessageAuthenticationCodeGeneratorComponent {
 	import SyncReplicaFilesystemCommand._
 
 	PermissionCheck(Permissions.ReplicaSyncing)
@@ -49,12 +50,6 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 	var replicaMaster = Wire[String]("${tabula.sync.replica.master}")
 
 	var dataDir = Wire[String]("${base.data.dir}")
-
-	var macGenerator = Wire.auto[MessageAuthenticationCodeGenerator]
-
-	var fileDao = Wire.auto[FileDao]
-
-	var fileHasher = Wire[FileHasher]
 
 	lazy val listFilesUrl = Uri.parse(replicaMaster + "/scheduling/sync/listFiles.json")
 	lazy val getFileUrl = Uri.parse(replicaMaster + "/scheduling/sync/getFile")
@@ -264,7 +259,7 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 			val hash = Option(file.optString("hash", null))
 
 			val createdDate = new DateTime(file.getLong("createdDate"))
-			val authCode = macGenerator.generateMessageAuthenticationCode(id)
+			val authCode = messageAuthenticationCodeGenerator.generateMessageAuthenticationCode(id)
 
 			// There are two possible outcomes here. The first is that the database sync is up to date and we get
 			// a valid attachment, for which the file may or may not exist on the filesystem. It's also possible

@@ -34,86 +34,90 @@ trait EditSmallGroupSetProgressWizardLinks {
 
 class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
+	def isCurrentPage(moduleName:String): Boolean = {
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
+		val heading = find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
-
+		heading.text.startsWith("Edit small groups")
 	}
 
 	def submitAndExit() {
-		click on cssSelector("input.btn-primary")
+		click on cssSelector("input.btn-primary[value='Save and exit']")
 	}
 
 	def save() {
-		click on cssSelector("input.btn-success")
+		click on cssSelector("input.btn-primary[value='Save']")
 	}
 
 }
 
 class EditSmallGroupSetGroupsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
+	def isCurrentPage(moduleName:String): Boolean = {
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
+		val heading = find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/groups")
+		currentUrl.endsWith("/groups")
 	}
 
 	def submitAndExit() {
-		click on cssSelector("input.btn-primary")
+		click on cssSelector("input.btn-primary[value='Save and exit']")
 	}
 
 	def save() {
-		click on cssSelector("input.btn-success")
+		click on cssSelector("input.btn-primary[value='Save']")
 	}
 
 }
 
 class EditSmallGroupSetStudentsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
+	def isCurrentPage(moduleName:String): Boolean = {
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
+		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/students")
+		currentUrl.endsWith("/students")
 	}
 
 	def submitAndExit() {
-		click on cssSelector("input.btn-primary")
+		click on cssSelector("input.btn-primary[value='Save and exit']")
 	}
 
 	def save() {
-		click on cssSelector("input.btn-success")
+		click on cssSelector("input.btn-primary[value='Save']")
 	}
 
 }
 
 class EditSmallGroupSetEventsPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
 
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
+	def isCurrentPage(moduleName:String): Boolean = {
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
+		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/events")
+		currentUrl.endsWith("/events")
 	}
 
 	def submitAndExit() {
-		click on cssSelector("input.btn-primary")
+		click on cssSelector("input.btn-primary[value='Save and exit']")
 	}
 
 	def save() {
-		click on cssSelector("input.btn-success")
+		click on cssSelector("input.btn-primary[value='Save']")
 	}
 
 }
 
 class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher with EditSmallGroupSetProgressWizardLinks {
-	def isCurrentPage(moduleName:String){
-		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		val heading =find(cssSelector("#main-content h1")).get
+	def isCurrentPage(moduleName:String): Boolean = {
+		breadCrumbsMatchID7(Seq("Test Services", moduleName.toUpperCase))
+		val heading =find(cssSelector(".id7-main-content h1")).get
 		heading.text should startWith ("Edit small groups")
 		currentUrl should endWith ("/allocate")
+		currentUrl.endsWith("/allocate")
 	}
 
 	def findAllUnallocatedStudents =  {

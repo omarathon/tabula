@@ -13,7 +13,7 @@ trait MeetingRecordAcademicYearFiltering {
 			termService.getAcademicWeekForAcademicYear(meeting.meetingDate, academicYear) match {
 				case Term.WEEK_NUMBER_AFTER_END =>
 					true
-				case Term.WEEK_NUMBER_BEFORE_START =>
+				case Term.WEEK_NUMBER_BEFORE_START if meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty =>
 					meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
 				case _ =>
 					false

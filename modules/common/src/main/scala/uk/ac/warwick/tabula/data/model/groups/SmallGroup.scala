@@ -115,12 +115,12 @@ class SmallGroup
 	def students_=(group: UserGroup) { _studentsGroup = group }
 
 	def maxGroupSize = JInteger(getIntSetting(Settings.MaxGroupSize))
-	def maxGroupSize_=(defaultSize:JInteger) = 
+	def maxGroupSize_=(defaultSize:JInteger) =
 		defaultSize match {
 			case null => removeMaxGroupSize()
 			case _ => settings += (Settings.MaxGroupSize -> defaultSize)
 		}
-		
+
 	def removeMaxGroupSize() = settings -= Settings.MaxGroupSize
 
 	def isFull = Option(maxGroupSize).exists(_ <= students.size)

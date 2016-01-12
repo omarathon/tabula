@@ -6,6 +6,9 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
@@ -16,7 +19,9 @@ import uk.ac.warwick.tabula.web.Routes
 
 @Controller
 @RequestMapping(value = Array("/groups/admin/department/{department}/import-groups"))
-class ImportSmallGroupSetsFromExternalSystemController extends GroupsController {
+class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	validatesSelf[SelfValidating]
 
@@ -26,6 +31,11 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController 
 			with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState
 			with LookupEventsFromModuleTimetables
 			with PopulateOnForm
+
+	override val departmentPermission: Permission = Permissions.SmallGroups.ImportFromExternalSystem
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("academicYearChoices") def academicYearChoices =
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)

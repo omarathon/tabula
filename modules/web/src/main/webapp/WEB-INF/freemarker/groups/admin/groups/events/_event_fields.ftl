@@ -1,41 +1,39 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
 
-	<fieldset>
-		<@form.labelled_row "title" "Title">
-			<@f.input path="title" />
-		</@form.labelled_row>
+	<@bs3form.labelled_form_group path="title" labelText="Title">
+		<@f.input path="title" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
-		<@form.labelled_row "tutors" "Tutors">
-			<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true auto_multiple=false />
-		</@form.labelled_row>
+	<@bs3form.labelled_form_group path="tutors" labelText="Tutors">
+		<@form.flexipicker path="tutors" placeholder="User name" list=true multiple=true auto_multiple=false />
+	</@bs3form.labelled_form_group>
 
-		<@components.week_selector "weeks" allTerms smallGroupSet />
+	<@components.week_selector "weeks" allTerms smallGroupSet />
 
-		<@form.labelled_row "day" "Day">
-			<@f.select path="day" id="day">
-				<@f.option value="" label=""/>
-				<@f.options items=allDays itemLabel="name" itemValue="asInt" />
-			</@f.select>
-		</@form.labelled_row>
+	<@bs3form.labelled_form_group path="day" labelText="Day">
+		<@f.select path="day" id="day" cssClass="form-control">
+			<@f.option value="" label=""/>
+			<@f.options items=allDays itemLabel="name" itemValue="asInt" />
+		</@f.select>
+	</@bs3form.labelled_form_group>
 
-		<#-- The time-picker causes the entire page to become a submit button, can't work out why -->
-		<div class="dateTimePair">
-			<@form.labelled_row "startTime" "Start time">
-				<@f.input path="startTime" cssClass="time-picker startDateTime" />
-				<input class="endoffset" type="hidden" data-end-offset="3600000" />
-			</@form.labelled_row>
+	<#-- The time-picker causes the entire page to become a submit button, can't work out why -->
+	<div class="dateTimePair">
+		<@bs3form.labelled_form_group path="startTime" labelText="Start time">
+			<@f.input path="startTime" cssClass="time-picker startDateTime form-control" />
+			<input class="endoffset" type="hidden" data-end-offset="3600000" />
+		</@bs3form.labelled_form_group>
 
-			<@form.labelled_row "endTime" "End time">
-				<@f.input path="endTime" cssClass="time-picker endDateTime" />
-			</@form.labelled_row>
-		</div>
+		<@bs3form.labelled_form_group path="endTime" labelText="End time">
+			<@f.input path="endTime" cssClass="time-picker endDateTime form-control" />
+		</@bs3form.labelled_form_group>
+	</div>
 
-		<@form.labelled_row "location" "Location">
-			<@f.hidden path="locationId" />
-			<@f.input path="location" />
-		</@form.labelled_row>
-	</fieldset>
+	<@bs3form.labelled_form_group path="location" labelText="Location">
+		<@f.hidden path="locationId" />
+		<@f.input path="location" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
 
 	<style type="text/css">
 		<#-- Hide the confusing dates in the header of the time picker -->

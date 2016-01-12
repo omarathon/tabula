@@ -8,11 +8,10 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.groups.admin.reusable._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, DepartmentSmallGroupSet, SmallGroupAllocationMethod, WeekRange}
-import uk.ac.warwick.tabula.commands.groups.admin.reusable._
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupAllocationMethod}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
@@ -46,7 +45,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 
 	@RequestMapping
 	def form(@ModelAttribute("createDepartmentSmallGroupSetCommand") cmd: CreateDepartmentSmallGroupSetCommand) = {
-		Mav("groups/admin/groups/reusable/new").crumbs(Breadcrumbs.Department(cmd.department))
+		Mav("groups/admin/groups/reusable/new").crumbs(Breadcrumbs.Department(cmd.department), Breadcrumbs.Reusable(cmd.department))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -97,7 +96,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 
 	@RequestMapping
 	def form(@ModelAttribute("editDepartmentSmallGroupSetCommand") cmd: EditDepartmentSmallGroupSetCommand, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet) = {
-		Mav("groups/admin/groups/reusable/edit").crumbs(Breadcrumbs.DepartmentForYear(set.department, set.academicYear))
+		Mav("groups/admin/groups/reusable/edit").crumbs(Breadcrumbs.DepartmentForYear(set.department, set.academicYear), Breadcrumbs.Reusable(set.department))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -150,7 +149,7 @@ class DeleteDepartmentSmallGroupSetController extends GroupsController {
 
 	@RequestMapping
 	def form(@PathVariable("department") department: Department) =
-		Mav("groups/admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department))
+		Mav("groups/admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department), Breadcrumbs.Reusable(department))
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand, errors: Errors, @PathVariable("department") department: Department) =

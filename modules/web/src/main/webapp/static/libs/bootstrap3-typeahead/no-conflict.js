@@ -1,0 +1,1 @@
+jQuery.fn.bootstrap3Typeahead = jQuery.fn.typeahead.noConflict();

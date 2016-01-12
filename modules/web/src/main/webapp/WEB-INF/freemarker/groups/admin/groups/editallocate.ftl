@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <#import "*/group_components.ftl" as components />
 	<h1>Edit small groups</h1>
-	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
+	<h4><span class="muted">for</span> <@fmt.module_name module /> <#if smallGroupSet??>(${smallGroupSet.academicYear.toString})</#if></h4>
 
 	<div id="editEvents">
 		<@components.set_wizard false 'allocate' smallGroupSet />

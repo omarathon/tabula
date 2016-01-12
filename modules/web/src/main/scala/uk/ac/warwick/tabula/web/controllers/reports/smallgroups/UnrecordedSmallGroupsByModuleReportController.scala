@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.smallgroups.{AllSmallGroupsReportCommandResult, AllSmallGroupsReportCommand, SmallGroupsReportFilters}
+import uk.ac.warwick.tabula.reports.web.Routes
 import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 
 @Controller
@@ -24,11 +25,11 @@ class UnrecordedSmallGroupsByModuleReportController extends AbstractSmallGroupsB
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		Mav("reports/smallgroups/unrecordedByModule").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Unrecorded(department, academicYear)
-		)
+		Mav("reports/smallgroups/unrecordedByModule")
+			.crumbs(
+				ReportsBreadcrumbs.SmallGroups.Home(department, academicYear),
+				ReportsBreadcrumbs.SmallGroups.Unrecorded(department, academicYear)
+			)
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.SmallGroups.unrecordedByModule(department, year)):_*)
 	}
 }

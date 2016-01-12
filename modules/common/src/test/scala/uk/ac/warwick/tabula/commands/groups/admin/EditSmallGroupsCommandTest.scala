@@ -49,7 +49,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 		val command = new EditSmallGroupsCommandInternal(module, set) with CommandTestSupport with PopulateEditSmallGroupsCommand with EditSmallGroupsCommandRemoveTrailingEmptyGroups
 		command.populate()
 	}
-	
+
 	@Test def populate { new CommandFixture {
 		set.groups.add(Fixtures.smallGroup("Group A").tap { _.id = "groupAId" })
 		set.groups.add(Fixtures.smallGroup("Group B").tap { _.id = "groupBId" })

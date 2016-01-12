@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula.{Mockito, ItemNotFoundException, TestBase}
 import uk.ac.warwick.tabula.profiles.web.controllers.relationships.EditMeetingRecordController
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, StudentRelationship, MeetingRecord}
-import uk.ac.warwick.tabula.profiles.commands.EditMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.profiles.EditMeetingRecordCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 import uk.ac.warwick.tabula.Fixtures

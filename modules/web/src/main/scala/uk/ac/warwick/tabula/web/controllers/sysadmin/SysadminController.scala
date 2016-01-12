@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.sysadmin.GodModeCommand
-import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -36,19 +36,17 @@ class BlankForm {
 
 @Controller
 @RequestMapping(Array("/sysadmin"))
-class SysadminController extends BaseSysadminController {
-
-	var maintenanceService = Wire.auto[MaintenanceModeService]
-	var emergencyMessageService = Wire.auto[EmergencyMessageService]
+class SysadminController extends BaseSysadminController
+	with AutowiringMaintenanceModeServiceComponent
+	with AutowiringEmergencyMessageServiceComponent {
 
 	@ModelAttribute("blankForm") def blankForm = new BlankForm
 
 	@RequestMapping
 	def home = Mav("sysadmin/home")
-		.crumbs(Breadcrumbs.Current("Sysadmin"))
 		.addObjects(
-			"maintenanceModeService" -> maintenanceService,
-			"emergencyMessageService" -> emergencyMessageService
+			"maintenanceModeEnabled" -> maintenanceModeService.enabled,
+			"emergencyMessageEnabled" -> emergencyMessageService.enabled
 		)
 }
 

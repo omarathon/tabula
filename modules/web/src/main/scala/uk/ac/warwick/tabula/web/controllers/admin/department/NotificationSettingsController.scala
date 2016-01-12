@@ -6,15 +6,20 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.admin.department.NotificationSettingsCommand
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/notification"))
-class NotificationSettingsController extends AdminController {
-
+class NotificationSettingsController extends AdminController
+	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
+	
 	type NotificationSettingsCommand = Appliable[Department]
 
 	validatesSelf[SelfValidating]
@@ -22,11 +27,16 @@ class NotificationSettingsController extends AdminController {
 	@ModelAttribute("command")
 	def command(@PathVariable("department") department: Department): NotificationSettingsCommand = NotificationSettingsCommand(mandatory(department))
 
+	override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@PathVariable("department") department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand) = {
-		crumbed(Mav("admin/notification-settings",
-			"returnTo" -> getReturnTo("")
-		), department)
+		Mav("admin/notification-settings", "returnTo" -> getReturnTo("")).crumbs(
+			Breadcrumbs.Department(department)
+		)
 	}
 
 	@RequestMapping(method = Array(POST))

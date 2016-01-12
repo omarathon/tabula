@@ -24,7 +24,7 @@
 		<h3 id="colour">Colour palette</h3>
 
 		<div class="scrolling-container">
-			<table class="table table-bordered table-striped">
+			<table class="table table-striped">
 				<thead>
 					<tr>
 						<th>class=""</th>
@@ -153,7 +153,7 @@
 
 		<h3 id="buttons">Buttons</h3>
 
-		<table class="table table-bordered table-striped">
+		<table class="table table-striped">
 		    <thead>
 		      <tr>
 		        <th>Button</th>
@@ -227,7 +227,7 @@
 
 		<h3 id="labels">Labels</h3>
 
-		<table class="table table-bordered table-striped">
+		<table class="table table-striped">
 		    <thead>
 		      <tr>
 		        <th>Labels</th>
@@ -288,7 +288,7 @@
 
 		<h3 id="badges">Badges</h3>
 
-		<table class="table table-bordered table-striped">
+		<table class="table table-striped">
 		    <thead>
 		      <tr>
 		        <th>Name</th>

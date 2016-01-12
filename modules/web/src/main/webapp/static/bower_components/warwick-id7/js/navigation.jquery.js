@@ -189,6 +189,46 @@
         });
       },
 
+      updateWrappedState: function updateWrappedState() {
+        this.$container.find('.navbar').each(function () {
+          var $navbar = $(this);
+          var wasWrapped = $navbar.hasClass('navbar-wrapped');
+
+          var $item = $navbar.find('> .nav > li:last');
+          var isWrapped = $item.position().top > 0;
+
+          if (isWrapped != wasWrapped) {
+            $navbar.addClass('important-no-transition');
+            $navbar.toggleClass('navbar-wrapped', isWrapped);
+
+            _.defer(function () {
+              $navbar.removeClass('important-no-transition');
+            });
+          }
+        });
+      },
+
+      updateDropdownBehaviour: function updateDropdownBehaviour(screenConfig) {
+        this.$container.find('.navbar').each(function () {
+          var $navbar = $(this);
+
+          if (screenConfig.name == 'xs') {
+            // Require a click (tap) to open dropdowns
+            $navbar.find('.dropdown-toggle')
+              .attr('data-toggle', 'dropdown')
+              .attr('role', 'button')
+              .attr('aria-expanded', false);
+          } else {
+            // Allow hovering to open dropdowns
+            $navbar.find('.dropdown-toggle')
+              .removeAttr('data-toggle')
+              .removeAttr('role')
+              .removeAttr('aria-expanded')
+              .parent().removeClass('open');
+          }
+        });
+      },
+
       // Return the total height of affixed elements (whether affixed or not)
       getAffixedHeight: function getAffixedHeight() {
         var height = 0;
@@ -234,10 +274,12 @@
         if (document.readyState == 'complete') {
           if (this.options.fixedNav) this.affixNav();
           if (this.options.fixedHeader) this.affixHeader();
+          this.updateWrappedState();
         } else {
           $(window).on('load', $.proxy(function () {
             if (this.options.fixedNav) this.affixNav();
             if (this.options.fixedHeader) this.affixHeader();
+            this.updateWrappedState();
           }, this));
         }
 
@@ -245,6 +287,8 @@
           if (this.options.fitToWidth) this.fitToWidth(screenConfig);
           if (this.options.fixedHeader) this.markHeaderFixedPosition();
           if (this.options.fixedNav) this.markFixedPosition();
+          this.updateWrappedState();
+          this.updateDropdownBehaviour(screenConfig);
         }, this));
 
         this.$container.on('click', '.nav > li', function (e) {

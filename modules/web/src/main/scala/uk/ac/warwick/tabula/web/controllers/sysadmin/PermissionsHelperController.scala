@@ -17,18 +17,14 @@ class PermissionsHelperController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: PermissionsHelperCommand, errors: Errors) =
-		Mav("sysadmin/permissions-helper/form")
-		.crumbs(Breadcrumbs.Current("Sysadmin permissions helper"))
-		.noLayoutIf(ajax)
+		Mav("sysadmin/permissions-helper/form").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid form: PermissionsHelperCommand, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
-			Mav("sysadmin/permissions-helper/results",
-				"results" -> form.apply())
-				.crumbs(Breadcrumbs.Current("Sysadmin permissions helper"))
+			Mav("sysadmin/permissions-helper/results", "results" -> form.apply())
 		}
 	}
 

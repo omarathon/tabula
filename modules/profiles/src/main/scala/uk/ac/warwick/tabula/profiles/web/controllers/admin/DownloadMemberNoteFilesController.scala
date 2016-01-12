@@ -10,7 +10,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 	import org.springframework.web.bind.annotation.RequestMethod
 	import javax.servlet.http.HttpServletResponse
 	import org.springframework.web.bind.annotation.ModelAttribute
-	import uk.ac.warwick.tabula.profiles.commands.DownloadMemberNoteFilesCommand
+	import uk.ac.warwick.tabula.commands.profiles.DownloadMemberNoteFilesCommand
 	import uk.ac.warwick.tabula.ItemNotFoundException
 
 	@Controller

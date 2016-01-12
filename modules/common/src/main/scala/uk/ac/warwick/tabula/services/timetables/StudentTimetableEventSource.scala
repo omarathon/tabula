@@ -31,7 +31,7 @@ trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEvent
 				if (student.isPGR) { timetableFetchingService.getTimetableForStaff(student.universityId) }
 				else Future.successful(Nil)
 
-			Futures.flatten(Seq(timetableEvents, smallGroupEvents, staffEvents))
+			Futures.flatten(timetableEvents, smallGroupEvents, staffEvents)
 		}
 	}
 

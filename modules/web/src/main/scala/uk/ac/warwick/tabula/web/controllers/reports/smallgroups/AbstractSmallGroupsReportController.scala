@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
@@ -15,13 +18,23 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 
 import scala.collection.JavaConverters._
 
-
-abstract class AbstractSmallGroupsReportController extends ReportsController {
+abstract class AbstractSmallGroupsReportController extends ReportsController
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	def command(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 
 	val pageRenderPath: String
 	val filePrefix: String
+	def urlGeneratorFactory(department: Department): (AcademicYear) => String
+
+	override val departmentPermission: Permission = Permissions.Department.Reports
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	type SmallGroupsReportProcessor = Appliable[SmallGroupsReportProcessorResult] with SmallGroupsReportProcessorState
 
@@ -35,11 +48,9 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = {
-		Mav(s"reports/smallgroups/$pageRenderPath").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-			ReportsBreadcrumbs.SmallGroups.Home(department, academicYear)
-		)
+		Mav(s"reports/smallgroups/$pageRenderPath")
+			.crumbs(ReportsBreadcrumbs.SmallGroups.Home(department, academicYear))
+			.secondCrumbs(academicYearBreadcrumbs(academicYear)(urlGeneratorFactory(department)): _*)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -78,7 +89,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController {
 				student.getWarwickId -> eventMap.map{case(sgew, state) =>
 					sgew.id -> Option(state).map(_.dbValue).orNull
 				}
-			}.toMap,
+			},
 			"students" -> allStudents,
 			"events" -> allEvents
 		)))

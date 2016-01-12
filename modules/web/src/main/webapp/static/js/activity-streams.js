@@ -7,12 +7,12 @@ jQuery(function($) {
 
 	// Maps from priority classes to icon classes.
 	var icons = {
-		'priority-complete' : 'icon-ok',
-		'priority-trivial' : 'icon-info-sign',
-		'priority-info' : 'icon-info-sign',
-		'priority-warning' : 'icon-warning-sign',
-		'priority-critical' : 'icon-warning-sign' // same but red.
-	}
+		'priority-complete' : 'icon-ok fa fa-check',
+		'priority-trivial' : 'icon-info-sign fa fa-info-circle',
+		'priority-info' : 'icon-info-sign fa fa-info-circle',
+		'priority-warning' : 'icon-warning-sign fa fa-exclamation-triangle',
+		'priority-critical' : 'icon-warning-sign fa fa-exclamation-triangle' // same but red.
+	};
 
 	var exports = window;
 

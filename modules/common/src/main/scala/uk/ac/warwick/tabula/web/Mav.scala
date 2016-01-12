@@ -62,7 +62,13 @@ class Mav() {
 	 * Add a list of breadcrumbs to display in the navigation.
 	 */
 	def crumbs(pages: BreadCrumb*): Mav = crumbsList(pages.toSeq)
-	def crumbsList(pages: Seq[BreadCrumb]): Mav = addObjects("breadcrumbs" -> pages)
+
+	/**
+	 * Add a secondary list of breadcrumbs to display in the navigation.
+	 */
+	def secondCrumbs(pages: BreadCrumb*): Mav = crumbsList(pages.toSeq, "secondBreadcrumbs")
+
+	def crumbsList(pages: Seq[BreadCrumb], objectName: String = "breadcrumbs"): Mav = addObjects(objectName -> pages)
 
 	/**
 	 * Set a custom title

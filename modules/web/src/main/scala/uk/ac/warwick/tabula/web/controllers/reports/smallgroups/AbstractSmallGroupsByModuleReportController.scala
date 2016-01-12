@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.web.Mav
@@ -16,14 +19,23 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 
 import scala.collection.JavaConverters._
 
-
-abstract class AbstractSmallGroupsByModuleReportController extends ReportsController {
+abstract class AbstractSmallGroupsByModuleReportController extends ReportsController
+	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	def filteredAttendanceCommand(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 
 	val filePrefix: String
 
 	def page(cmd: Appliable[AllSmallGroupsReportCommandResult], department: Department, academicYear: AcademicYear): Mav
+
+	override val departmentPermission: Permission = Permissions.Department.Reports
+
+	@ModelAttribute("activeDepartment")
+	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	type SmallGroupsByModuleReportProcessor = Appliable[SmallGroupsByModuleReportProcessorResult] with SmallGroupsByModuleReportProcessorState
 
@@ -64,7 +76,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 				student.getWarwickId -> moduleMap.map{case(module, count) =>
 					module.id -> count.toString
 				}
-			}.toMap,
+			},
 			"students" -> allStudents,
 			"modules" -> allModules
 		)))

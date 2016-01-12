@@ -161,7 +161,7 @@
 								<include>css/id6a.css</include>
 								<include>${project.build.directory}/${project.build.finalName}/static/css/main.css</include>
 								<include>libs/bootstrap-editable/css/bootstrap-editable.css</include>
-								<include>libs/bootstrap-datetimepicker/css/datetimepicker.css</include>
+								<include>libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css</include>
 								<include>libs/popup/popup.css</include>
 								<include>libs/jquery-rating/jquery.rating.css</include>
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.css</include>
@@ -306,6 +306,116 @@
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 							</includes>
 						</aggregation>
+
+						<!-- ID7 styles -->
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/css/id7/render.css</output>
+							<inputDir>${basedir}/src/main/webapp/static</inputDir>
+							<includes>
+								<include>css/id7/id7-fixes.css</include>
+								<include>css/id7/id7-theme.css</include>
+								<include>${project.build.directory}/${project.build.finalName}/static/css/id7/main.css</include>
+								<include>libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css</include>
+								<include>libs/popup/popup.css</include>
+								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.css</include>
+								<include>libs/jquery-ui-interactions/jquery-ui.min.css</include>
+							</includes>
+						</aggregation>
+
+						<!-- ID7 scripts -->
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/render.js</output>
+							<inputDir>${basedir}/src/main/webapp/static</inputDir>
+							<includes>
+								<include>bower_components/warwick-id7/dist/js/id7-bundle.js</include>
+								<include>libs/jquery-ui-interactions/jquery-ui-1.11.4-custom.js</include>
+								<include>libs/jquery.delayedObserver.js</include>
+								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
+								<include>libs/jquery-tablesorter/jquery.tablesorter.min.js</include>
+								<include>js/moment.js</include>
+								<include>js/moment-timezone-london.js</include>
+								<include>libs/popup/popup.js</include>
+								<include>libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js</include>
+								<include>libs/bootstrap3-typeahead/bootstrap3-typeahead.js</include>
+								<include>libs/bootstrap3-typeahead/no-conflict.js</include>
+								<include>libs/spin-js/spin.min.js</include>
+								<include>libs/spin-js/jquery.spin.js</include>
+								<include>js/jquery-copyable.js</include>
+								<include>js/jquery-details.js</include>
+								<include>js/jquery.are-you-sure.js</include>
+								<include>js/id7/jquery-draganddrop.js</include>
+								<include>js/jquery-filteredlist.js</include>
+								<include>js/jquery-collapsible.js</include>
+								<include>js/id7/jquery-fixheaderfooter.js</include>
+								<include>js/jquery-scrolltofixed.js</include>
+								<include>js/jquery-radiocontrolled.js</include>
+								<include>js/userpicker.js</include>
+								<include>js/id7/flexipicker.js</include>
+								<include>js/ajax-popup.js</include>
+								<include>js/browser-info.js</include>
+								<include>js/id7/app-comments.js</include>
+								<include>js/combo-typeahead.js</include>
+								<include>js/map-popups.js</include>
+								<include>js/jquery-biglist.js</include>
+								<include>js/id7/jquery-expandingTable.js</include>
+								<include>js/jquery.form.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>id7/scripts.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/home.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>activity-streams.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/reports.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/admin.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/groups.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>groups-admin.js</include>
+								<include>groups-render.js</include>
+								<include>id7/attendance-recording.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/exams.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>exams-admin.js</include>
+							</includes>
+						</aggregation>
 					</aggregations>
 				</configuration>
 			</plugin>
@@ -315,7 +425,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>lesscss</id>
+						<id>lesscss-id6</id>
 						<phase>process-classes</phase>
 						<configuration>
 							<target>
@@ -326,6 +436,25 @@
 									todir="${project.build.directory}/${project.build.finalName}/static/css">
 									<fileset dir="${basedir}/src/main/webapp/static/css/id6"
 										includes="*.less" excludes="*.inc.less" />
+								</lesscss>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>lesscss-id7</id>
+						<phase>process-classes</phase>
+						<configuration>
+							<target>
+								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
+										 classpathref="maven.plugin.classpath" />
+
+								<lesscss
+										todir="${project.build.directory}/${project.build.finalName}/static/css/id7">
+									<fileset dir="${basedir}/src/main/webapp/static/css/id7"
+											 includes="*.less" excludes="*.inc.less" />
 								</lesscss>
 							</target>
 						</configuration>

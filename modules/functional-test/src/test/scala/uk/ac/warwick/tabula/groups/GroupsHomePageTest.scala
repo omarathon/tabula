@@ -4,7 +4,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
 import uk.ac.warwick.tabula.groups.pages.{GroupsHomePage, BatchOpenPage, SmallGroupTeachingPage}
 
-class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with BreadcrumbsMatcher{
+class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with BreadcrumbsMatcher {
 
 	val TEST_MODULE_CODE = "xxx999"
 	val TEST_GROUPSET_NAME="Test Tutorial"
@@ -21,13 +21,13 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
 
 		When("I Log in as the student and view the groups page")
-		signIn as(P.Student1)  to (Path("/groups/"))
+		signIn as P.Student1 to Path("/groups/")
 
 		Then("I should not see the unreleased groupset")
 		val groupsPage = new GroupsHomePage
-		groupsPage.isCurrentPage()
+		groupsPage.isCurrentPage
 
-		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be ('defined)
+		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be 'defined
 	}
 
 	"A student" should "be able to see released groups" in {
@@ -42,30 +42,30 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
 
 		When("I Log in as the student and view the groups page")
-		signIn as(P.Student1)  to (Path("/groups/"))
+		signIn as P.Student1  to Path("/groups/")
 
 		Then("I should see the released groupset")
 		val groupsPage = new GroupsHomePage
-		groupsPage.isCurrentPage() should be (true)
+		groupsPage.isCurrentPage should be {true}
 
 		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
 	}
 
 	"Department Admin" should "be offered a link to the department's group pages" in {
 		Given("the administrator is logged in and viewing the groups home page")
-			signIn as(P.Admin1)  to (Path("/groups/"))
+			signIn as P.Admin1  to Path("/groups/")
 			pageTitle should be ("Tabula - Small Group Teaching")
 
 	  When("the administrator clicks to view the admin page")
 				click on linkText("Go to the Test Services admin page")
 
 		Then("The page should be the small group teaching page")
-				breadCrumbsMatch(Seq("Small Group Teaching"))
+				currentUrl should include("/groups/admin/department/xxx/")
 
 		// wait for sets to load ajaxically
 		eventuallyAjax {
 			And("The page should display at least one set")
-			findAll(className("set-info")).toList should not be (Nil)
+			findAll(className("set-info")).toList should not be Nil
 		}
 	}
 
@@ -82,23 +82,23 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", openForSignups = false)
 
 		And("The administrator is logged in and viewing the groups home page")
-		  signIn as(P.Admin1)  to groupsetSummaryPage.url
+		  signIn as P.Admin1  to groupsetSummaryPage.url
 
 		  groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
 		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		Then("The Bulk Open Groups menu button is enabled")
-		  groupsetSummaryPage.getBatchOpenButton() should be ('enabled)
+		  groupsetSummaryPage.getBatchOpenButton should be ('enabled)
 
 		And("The open individual group button is enabled for the specified groupset")
-      setInfo.getOpenButton() should be ('enabled)
+      setInfo.getOpenButton should be ('enabled)
 
 		When("I click the batch open button")
-		  groupsetSummaryPage.getBatchOpenButton().click()
+		  groupsetSummaryPage.getBatchOpenButton.click()
 
 		Then("The open page is displayed")
       val batchOpen = new BatchOpenPage("xxx")
-		  batchOpen should be ('currentPage)
+		  batchOpen.isCurrentPage should be {true}
 
 		When("I check the checkbox next to the groupset")
 		  batchOpen.checkboxForGroupSet(setInfo) should be('enabled)
@@ -111,14 +111,14 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
   		batchOpen should be ('currentPage)
 
 		And("The checkbox to open the groupset is disabled")
-  		batchOpen.checkboxForGroupSet(setInfo) should not be('enabled)
+  		batchOpen.checkboxForGroupSet(setInfo) should not be 'enabled
 
 		When("I go back to the groups home page")
 		val updatedSummary = new SmallGroupTeachingPage("xxx")
 		  go to updatedSummary.url
 
 		Then("The option to open the groupset is absent")
-			updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get should not be ('showingOpenButton)
+			updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get should not be 'showingOpenButton
 	}
 
 }

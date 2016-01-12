@@ -14,16 +14,16 @@
 			background-color: #eee !important;
 			text-decoration: line-through;
 		}
-		
+
 		#container .control-group.flush {
 			margin-bottom:6px;
 		}
 
-		.help-inline.hidden { display: none !important; }
+		.help-block.hidden { display: none !important; }
 	</style>
 
 	<#if smallGroupSet.linked>
-		<@form.row>
+		<@bs3form.form_group>
 			<p>There are <@fmt.p smallGroupSet.groups?size "group" /> in ${smallGroupSet.name} (from ${smallGroupSet.linkedDepartmentSmallGroupSet.name}).</p>
 
 			<#if smallGroupSet.groups?size gt 0>
@@ -33,19 +33,27 @@
 					</#list>
 				</ul>
 			</#if>
-		</@form.row>
+		</@bs3form.form_group>
 	<#else>
 		<@f.hidden path="defaultMaxGroupSizeEnabled" id="limitedDefaultGroupSize" value="true" />
-	
+
+		<@bs3form.form_group>
+			<div class="row flush">
+				<div class="col-md-4 col-md-offset-4">
+				<#-- Well this sucks -->
+					<span class="uneditable-input hidden">&nbsp;</span>
+					&nbsp;
+					Set group numbers
+					<a class="use-popover" data-html="true" data-content="Leave the max group size field empty for no limit" data-original-title="" title="">
+						<i class="icon-question-sign"></i>
+					</a>
+				</div>
+			</div>
+		</@bs3form.form_group>
+
 		<@form.row cssClass="flush">
 			<@form.field>
-				<#-- Well this sucks -->
-				<span class="uneditable-input hidden">&nbsp;</span>
-				&nbsp;
-				Set group numbers
-			<a class="use-popover tabulaPopover-init" data-html="true" data-content="Leave the max group size field empty for no limit" data-original-title="" title="">
-				<i class="icon-question-sign"></i>
-			</a>
+
 			</@form.field>
 		</@form.row>
 
@@ -61,38 +69,48 @@
 				</#if>
 			</#compress></#local>
 
-			<@form.row path="name" cssClass=cssClass>
-				<@form.label for="${index}-name">
-					${index}.
-				</@form.label>
+			<@bs3form.form_group>
+				<div class="row ${cssClass}">
 
-				<@form.field>
-					<@f.input path="name" id="${index}-name" cssClass="text" />
-					&nbsp;
-					<span class="max-group-size-options">
+					<div class="col-md-4">
+						<div class="input-group">
+							<span class="input-group-addon">
+								${index}.
+							</span>
+							<@f.input path="name" id="${index}-name" cssClass="form-control" />
+						</div>
+					</div>
+
+					<div class="col-md-1 max-group-size-options">
 						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" placeholder="Unlimited" type="number" min="0" cssClass="text input-small" />
-					</span>
+					</div>
+
 					<#if !no_remove_button>
-						&nbsp;
-						<#if is_new>
-							<button type="button" class="btn btn-danger" data-toggle="remove"><i class="icon-remove"></i></button>
-						<#else>
-							<@f.hidden path="delete" />
-							<button type="button" class="btn btn-danger" data-toggle="mark-deleted"><i class="icon-remove"></i></button>
-							<button type="button" class="btn btn-info" data-toggle="undo-deleted"><i class="icon-undo"></i></button>
-							<span class="help-inline hidden"><small>
+						<div class="col-md-2">
+							<#if is_new>
+								<button type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button>
+							<#else>
+								<@f.hidden path="delete" />
+								<button type="button" class="btn btn-danger" data-toggle="mark-deleted"><i class="fa fa-times"></i></button>
+								<button type="button" class="btn btn-primary" data-toggle="undo-deleted"><i class="fa fa-undo"></i></button>
+							</#if>
+						</div>
+
+						<#if !is_new>
+							<p class="help-block col-md-12 hidden"><small>
 								Click "Save and add students" or "Save and exit" to delete this group and any events associated with it
-							</small></span>
+							</small></p>
 						</#if>
 					</#if>
 
-					<@form.errors "name" />
-					<@form.errors "maxGroupSize" />
+					<@bs3form.errors "name" />
+					<@bs3form.errors "maxGroupSize" />
 					<#if !is_new>
-						<@form.errors "delete" />
+						<@bs3form.errors "delete" />
 					</#if>
-				</@form.field>
-			</@form.row>
+
+				</div>
+			</@bs3form.form_group>
 		</#macro>
 
 		<#list smallGroupSet.groups as group>
@@ -110,20 +128,18 @@
 			<@fields index=(smallGroupSet.groups?size + command.newGroups?size + 1) is_new=true no_remove_button=true />
 		</@spring.nestedPath>
 
-		<@form.row>
-			<@form.field>
-				<button type="button" class="btn" data-toggle="add" title="Add another group" disabled="disabled">
-					<i class="icon-plus"></i> Add group
-				</button>
-			</@form.field>
-		</@form.row>
+		<@bs3form.form_group>
+			<button type="button" class="btn btn-default" data-toggle="add" title="Add another group" disabled="disabled">
+				Add group
+			</button>
+		</@bs3form.form_group>
 
 		<script type="text/javascript">
 			jQuery(function($) {
 
 				$('button[data-toggle="add"]').each(function() {
 					var $button = $(this);
-					var $group = $button.closest('.control-group').prev('.control-group');
+					var $group = $button.closest('.form-group').prev('.form-group');
 					var $input = $group.find('input[type="text"]');
 
 					$input.on('paste', function() {
@@ -139,23 +155,20 @@
 							$button.attr('disabled', 'disabled');
 						}
 					});
-				});
-
-				$('button[data-toggle="add"]').on('click', function() {
+				}).on('click', function() {
 					var $button = $(this);
-					var $group = $button.closest('.control-group').prev('.control-group');
+					var $group = $button.closest('.form-group').prev('.form-group');
 
-					var offset = $('.control-group.existing-group').length;
+					var offset = $('.row.existing-group').length;
 
 					var $clone = $group.clone();
 
 					var index = parseInt(/\[(\d+)\]/.exec($clone.find('input[type="text"]').attr('name'))[1]);
-					$clone.find('label').text((index + offset + 1) + ".");
+					$clone.find('.input-group-addon').text((index + offset + 1) + ".");
 
 					$clone.insertBefore($group);
-					$clone.find('.controls')
-						.append(' &nbsp; ')
-						.append('<button type="button" class="btn btn-danger" data-toggle="remove"><i class="icon-remove"></i></button>');
+					$clone.find('.row')
+						.append('<div class="col-md-2"><button type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button></div>');
 
 					var nextIndex = index + 1;
 					var $name = $group.find('input[type="text"]');
@@ -166,7 +179,7 @@
 					$max.attr('name', 'newGroups[' + nextIndex + '].maxGroupSize');
 					$max.attr('id', (nextIndex + offset + 1) + '-maxGroupSize');
 
-					$group.find('label').attr('for', $name.attr('id')).text((nextIndex + offset + 1) + '.');
+					$group.find('.input-group-addon').text((nextIndex + offset + 1) + '.');
 
 					$name.val('').focus();
 					$button.attr('disabled', 'disabled');
@@ -175,13 +188,13 @@
 
 				$(document.body).on('click', 'button[data-toggle="remove"]', function() {
 					var $button = $(this);
-					var $group = $button.closest('.control-group');
+					var $group = $button.closest('.form-group');
 
 					$group.remove();
 
 					// Re-order all of the groups
-					var groups = $('.control-group.new-group');
-					var offset = $('.control-group.existing-group').length;
+					var groups = $('.row.new-group').closest('.form-group');
+					var offset = $('.row.existing-group').length;
 					groups.each(function(index) {
 						var $group = $(this);
 
@@ -193,11 +206,11 @@
 						$max.attr('name', 'newGroups[' + index + '].maxGroupSize');
 						$max.attr('id', (index + offset + 1) + '-maxGroupSize');
 
-						$group.find('label').attr('for', $name.attr('id')).text((index + offset + 1) + '.');
+						$group.find('.input-group-addon').text((index + offset + 1) + '.');
 					});
 					$button.closest('form.dirty-check').trigger('rescan.areYouSure');
 				});
-				
+
 				// Stop 'Enter' from submitting the form
 				$('input[name$=".name"]').closest('form')
 						.off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
@@ -213,8 +226,8 @@
 					var $this = $(this);
 
 					var $deleteButton = $this.find('.btn-danger');
-					var $undoButton = $this.find('.btn-info');
-					var $helpBlock = $this.find('.help-inline');
+					var $undoButton = $this.find('.btn-primary');
+					var $helpBlock = $this.find('.help-block');
 					var $hiddenField = $this.find('input[name$="delete"]');
 
 					var handleButtonDisplay = function() {

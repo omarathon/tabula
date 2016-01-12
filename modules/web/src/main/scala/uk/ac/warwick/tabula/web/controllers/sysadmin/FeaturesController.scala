@@ -15,7 +15,7 @@ import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.FeaturesMessage
 import uk.ac.warwick.tabula.JavaImports._
 
-case class FeatureItem(val name: String, val value: Boolean)
+case class FeatureItem(name: String, value: Boolean)
 
 /**
  * Read and write feature flags. Alternative to using JMX.
@@ -43,17 +43,14 @@ final class FeaturesController extends BaseSysadminController with InitializingB
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(): Mav = {
-		Mav("sysadmin/features",
-			"currentValues" -> currentValues)
-			.crumbs(Breadcrumbs.Current(s"Sysadmin features"))
+		Mav("sysadmin/features", "currentValues" -> currentValues)
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))
 	def update(@RequestParam("name") name: String, @RequestParam("value") value: Boolean): Mav = {
 		properties.find { _.getName == name } match {
-			case Some(property) => {
+			case Some(property) =>
 				wrapper.setPropertyValue(property.getName, value)
-			}
 			case None => throw new IllegalArgumentException
 		}
 

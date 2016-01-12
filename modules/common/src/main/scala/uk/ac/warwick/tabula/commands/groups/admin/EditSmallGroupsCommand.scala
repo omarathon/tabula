@@ -67,7 +67,6 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 			val group = props.group
 			group.name = props.name
 			group.maxGroupSize = props.maxGroupSize
-			
 		}
 
 		existingGroups.asScala.values.filter { _.delete }.foreach { props =>
@@ -89,7 +88,6 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 			set.groups.add(group)
 			group.name = props.name
 			group.maxGroupSize = props.maxGroupSize
-	
 		}
 
 		smallGroupService.saveOrUpdate(set)

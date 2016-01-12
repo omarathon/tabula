@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.services
 import java.io.File
 import java.util.concurrent.Executors
 
+import org.scalatest.time.{Millis, Seconds, Span}
+
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
@@ -23,6 +25,9 @@ import scala.concurrent.duration.Duration
 
 // scalastyle:off magic.number
 class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logging with AsyncAssertions {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexer:ProfileIndexService = new ProfileIndexService
 	val dao = new MemberDaoImpl
@@ -81,7 +86,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		indexer.listRecent(0, 1000).size should be (1)
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("Mathew", Seq(dept), Set(), false).head should be (m)
@@ -116,7 +121,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		indexer.listRecent(0, 1000).size should be (1)
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("joconnell", Seq(dept), Set(), false) should be ('empty)
@@ -148,7 +153,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		session.flush
 
 		indexer.incrementalIndex
-		indexer.listRecent(0, 1000).size should be (1)
+		indexer.listRecent(0, 1000).futureValue.size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
 		indexer.find("Aist\u0117", Seq(dept), Set(), false).head should be (m)
@@ -194,7 +199,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 
 		stopwatch.stop()
 
-		indexer.listRecent(0, 100).size should be (100)
+		indexer.listRecent(0, 100).futureValue.size should be (100)
 
 		val moreItems = {
 			val m = new StudentMember
@@ -211,15 +216,15 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		}
 		indexer.indexItems(moreItems)
 
-		indexer.listRecent(0, 13).size should be (13)
+		indexer.listRecent(0, 13).futureValue.size should be (13)
 
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
+			newest.futureValue.head.getValues("universityId").toList.head should be ("100")
 			stopwatch.stop()
-			newest.head.getValues("universityId").toList.head should be ("100")
 		}
 
 		// index again to check that it doesn't do any once-only stuff

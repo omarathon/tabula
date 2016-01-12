@@ -38,7 +38,7 @@ abstract class AllocateStudentsToDepartmentalSmallGroupsController extends Group
 	protected val renderPath: String
 
 	protected def form(cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, department: Department) =
-		Mav(renderPath).crumbs(Breadcrumbs.Department(department))
+		Mav(renderPath).crumbs(Breadcrumbs.Department(department), Breadcrumbs.Reusable(department))
 
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, errors: Errors, @PathVariable("department") department: Department): Mav = {

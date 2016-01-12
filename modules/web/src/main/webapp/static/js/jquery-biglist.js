@@ -1,4 +1,4 @@
-(function ($) { "use strict";
+(function ($) { 'use strict';
 
 /*
     Provides functionality to lists/tables that have checkboxes,
@@ -11,8 +11,7 @@
         onAllChecked($container): callback when all rows selected. defaults to behaviour of onSomeChecked.
         onChange($checkbox): callback when a row is selected/unselected.
 */
-jQuery.fn.bigList = function(options) {
-    var $ = jQuery;
+$.fn.bigList = function(options) {
     this.each(function(){
         var $this = $(this);
 
@@ -35,13 +34,13 @@ jQuery.fn.bigList = function(options) {
         var onAllChecked = options.onAllChecked || onSomeChecked;
 
         this.checkboxChangedFunction = function(){
-            onChange.call(jQuery(this)); // pass the checkbox as the context
-            var allChecked = $checkboxes.not(":checked").length == 0;
-            $selectAll.attr("checked", allChecked);
+            onChange.call($(this)); // pass the checkbox as the context
+            var allChecked = $checkboxes.not(':checked').length == 0;
+            $selectAll.prop('checked', allChecked);
             if (allChecked) {
                 $this.data('checked','all');
                 onAllChecked.call($this);
-            } else if ($checkboxes.is(":checked")) {
+            } else if ($checkboxes.is(':checked')) {
                 $this.data('checked','some');
                 onSomeChecked.call($this);
             } else {
@@ -49,14 +48,15 @@ jQuery.fn.bigList = function(options) {
                 onNoneChecked.call($this);
             }
         };
-        $checkboxes.change(this.checkboxChangedFunction);
+        $checkboxes.on('change', this.checkboxChangedFunction);
 
-        $selectAll.change(function(){
-            $checkboxes.attr("checked", this.checked);
+        $selectAll.on('change', function(){
+            var checked = $(this).is(':checked');
+            $checkboxes.prop('checked', checked);
             $checkboxes.each(function(){
                 onChange.call(jQuery(this));
             });
-            if (this.checked) {
+            if (checked) {
                 $this.data('checked','all');
                 onAllChecked.call($this);
             } else {
@@ -70,12 +70,12 @@ jQuery.fn.bigList = function(options) {
 		setupFunction.call($this);
 
         $(function(){
-            $checkboxes.change();
+            $checkboxes.trigger('change');
         });
 
         // Returns an array of IDs.
         var getCheckedFeedbacks = function() {
-            return $checkboxes.filter(":checked").map(function(i,input){ return input.value; });
+            return $checkboxes.filter(':checked').map(function(i,input){ return input.value; });
         };
     });
     return this;

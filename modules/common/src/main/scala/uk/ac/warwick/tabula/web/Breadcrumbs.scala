@@ -8,6 +8,7 @@ trait BreadCrumb {
 	val url: Option[String]
 	def linked: Boolean = url.isDefined
 	val tooltip: String = ""
+	val active: Boolean = false // ID7 navigation active
 }
 
 object BreadCrumb {
@@ -18,6 +19,23 @@ object BreadCrumb {
 }
 
 object Breadcrumbs {
-	abstract class Abstract extends BreadCrumb
-	case class Standard(val title: String, val url: Option[String], override val tooltip: String) extends Abstract
+	case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb {
+		def setActive(thisActive: Boolean): BreadCrumb = {
+			if (!this.active && thisActive) {
+				Active(this.title, this.url, this.tooltip)
+			} else {
+				this
+			}
+		}
+	}
+	case class Active(override val title: String, override val url: Option[String], override val tooltip: String) extends BreadCrumb {
+		override val active = true
+		def setActive(thisActive: Boolean): BreadCrumb = {
+			if (this.active && !thisActive) {
+				Standard(this.title, this.url, this.tooltip)
+			} else {
+				this
+			}
+		}
+	}
 }

@@ -57,7 +57,7 @@ class AttendanceNoteAttachmentController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable student: StudentMember, @PathVariable point: AttendanceMonitoringPoint) =
-		AttendanceNoteAttachmentCommand(student, point, user)
+		AttendanceNoteAttachmentCommand(mandatory(student), mandatory(point), user)
 
 	@RequestMapping
 	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])

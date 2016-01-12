@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
 class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
@@ -35,7 +34,7 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	@Test
 	def callsBothServicesAndAggregatesTheResult(){
-		Await.result(source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student), 1.second) should be (timetableEvents ++ groupEvents)
+		source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue should be (timetableEvents ++ groupEvents)
 	}
 
 

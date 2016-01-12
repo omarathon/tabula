@@ -1,20 +1,44 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.web.BreadCrumb
+import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
+import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 trait SysadminBreadcrumbs {
 	val Breadcrumbs = SysadminBreadcrumbs
 }
 
 object SysadminBreadcrumbs {
-	abstract class Abstract extends BreadCrumb
-	case class Standard(val title: String, val url: Option[String], override val tooltip: String) extends Abstract
+	case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
 
-	/**
-	 * A breadcrumb without a link, to represent the current page.
-	 * We don't currently include the current page in crumbs, but can use this for page titles
-	 */
-	case class Current(val title: String) extends Abstract {
-		val url = None
+	object Departments {
+		case object Home extends BreadCrumb {
+			val title = "Departments"
+			val url = Some(Routes.sysadmin.Departments.home)
+		}
+
+		case class Department(department: model.Department) extends BreadCrumb {
+			val title = department.name
+			val url = Some(Routes.sysadmin.Departments.department(department))
+		}
+	}
+
+	object AttendanceTemplates {
+		case object Home extends BreadCrumb {
+			val title = "Attendance monitoring templates"
+			val url = Some(Routes.sysadmin.AttendanceTemplates.home)
+		}
+
+		case class Edit(template: AttendanceMonitoringTemplate) extends BreadCrumb {
+			val title = "Edit"
+			val url = Some(Routes.sysadmin.AttendanceTemplates.edit(template))
+		}
+	}
+
+	object Relationships {
+		case object Home extends BreadCrumb {
+			val title = "Student relationship types"
+			val url = Some(Routes.sysadmin.Relationships.home)
+		}
 	}
 }

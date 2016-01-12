@@ -54,11 +54,11 @@
     height: @id7-masthead-logo-height-xs;
   }
 
-  .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-xs.svg", "@{id7-image-root-dir}/masthead-logo-bleed-xs.png");
+  .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-xs", "@{id7-image-root-dir}/masthead-logo-bleed-xs");
   background-size: 1680px 300px;
 
   @media (min-width: @grid-float-breakpoint) {
-    .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-sm.svg", "@{id7-image-root-dir}/masthead-logo-bleed-sm.png");
+    .svg-background-with-fallback("@{id7-image-root-dir}/masthead-logo-bleed-sm", "@{id7-image-root-dir}/masthead-logo-bleed-sm");
     background-size: @container-lg 300px;
 
     .id7-logo-row {
@@ -102,6 +102,7 @@
 
     h1 {
       font-size: @id7-header-h1-font-size-xs;
+      .text-overflow();
 
       @media (min-width: @grid-float-breakpoint) {
         font-size: @id7-header-h1-font-size-sm;
@@ -110,6 +111,8 @@
       line-height: @id7-header-h1-height;
       margin: 0;
       padding: @id7-header-h1-padding-vertical 0;
+
+      transform: translate3d(0, 0, 0); // ID-188
 
       &.affix {
         top: 0;
@@ -136,14 +139,12 @@
         }
         &.headroom--pinned {
           transform: translateY(0%);
+          transform: translate3d(0, 0, 0) translateY(0%);
         }
         &.headroom--unpinned {
           transform: translateY(-100%);
+          transform: translate3d(0, 0, 0) translateY(-100%);
         }
-      }
-
-      @media (max-width: (@grid-float-breakpoint - 1)) {
-        .text-overflow();
       }
     }
 
@@ -193,86 +194,11 @@
 
   .id7-logo-row:hover nav { .opacity(1); }
 
-  .id7-search {
-    .id7-search-box-container {
-      margin-top: @id7-masthead-search-offset-xs;
+  .id7-search-box-container {
+    margin-top: @id7-masthead-search-offset-xs;
 
-      @media (min-width: @grid-float-breakpoint) {
-        margin-top: (@id7-masthead-search-offset-sm + (@line-height-computed / 2));
-      }
-
-      position: relative;
-
-      .input-lg {
-        padding-right: (@padding-large-horizontal + @id7-masthead-search-button-width);
-      }
-    }
-
-    .form-group {
-      margin-bottom: 0;
-    }
-
-    .fa {
-      position: absolute;
-      top: 9px;
-      right: 9px;
-
-      color: @gray-light;
-      cursor: pointer;
-      .transition(color .15s linear);
-    }
-
-    .twitter-typeahead:hover + .fa, .fa:hover {
-      color: black;
-    }
-
-    .id7-search-box {
-      border-radius: 0;
-    }
-
-    .twitter-typeahead {
-      width: 100%;
-    }
-
-    .tt-menu {
-      margin-top: -1px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      .box-shadow(0 5px 10px rgba(0,0,0,.2));
-
-      left: auto !important;
-      right: 0px !important;
-      min-width: 100%;
-      width: (320px - (@grid-gutter-width * 2));
-
-      @media (min-width: @screen-md-min) {
-        left: 0px !important;
-        right: auto !important;
-        width: 100%;
-      }
-    }
-
-    .tt-suggestion {
-      padding: 8px 20px;
-      line-height: 18px;
-    }
-
-    .tt-suggestion + .tt-suggestion {
-      border-top: 1px solid #ccc;
-    }
-
-    .tt-suggestion .go-path {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .tt-suggestion .go-description {
-      margin: 0;
-    }
-
-    .twitter-typeahead .tt-suggestion.tt-cursor {
-      cursor: pointer;
+    @media (min-width: @grid-float-breakpoint) {
+      margin-top: (@id7-masthead-search-offset-sm + (@line-height-computed / 2));
     }
   }
 }
@@ -295,5 +221,11 @@
 
   .id7-search-box-container {
     margin-top: (@line-height-computed / 2) !important;
+  }
+
+  @media print {
+    .id7-main-content-area > header .id7-horizontal-divider {
+      display: none !important; // ID-189
+    }
   }
 }

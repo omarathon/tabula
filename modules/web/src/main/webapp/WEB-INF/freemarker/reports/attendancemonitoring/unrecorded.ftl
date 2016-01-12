@@ -1,27 +1,18 @@
 <#escape x as x?html>
 <#import "../reports_macros.ftl" as reports_macros />
 
-<h1>Unrecorded monitoring points</h1>
+<#function route_function dept>
+	<#local result><@routes.reports.unrecordedAttendance dept academicYear /></#local>
+	<#return result />
+</#function>
+<@fmt.id7_deptheader title="Unrecorded monitoring points for ${department.name}" route_function=route_function />
 
 <#assign reportUrl><@routes.reports.unrecordedAttendance department academicYear /></#assign>
 <@reports_macros.reportLoader reportUrl>
 	<ul class="dropdown-menu">
-
-		<li>
-			<a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadCsv department academicYear />">
-				<i class="icon-table fa fa-table"></i> CSV
-			</a>
-		</li>
-		<li>
-			<a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadXlsx department academicYear />">
-				<i class="icon-list-alt fa fa-list-alt"></i> Excel
-			</a>
-		</li>
-		<li>
-			<a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadXml department academicYear />">
-				<i class="icon-code fa fa-code"></i> XML
-			</a>
-		</li>
+		<li><a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadCsv department academicYear />">CSV</a></li>
+		<li><a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadXlsx department academicYear />">Excel</a></li>
+		<li><a href="#" data-href="<@routes.reports.unrecordedAttendanceDownloadXml department academicYear />">XML</a></li>
 	</ul>
 </@reports_macros.reportLoader>
 <@reports_macros.attendanceMonitoringReportScript />

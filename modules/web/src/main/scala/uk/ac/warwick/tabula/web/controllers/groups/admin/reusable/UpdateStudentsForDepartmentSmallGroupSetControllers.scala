@@ -51,7 +51,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		if (sitsCount == 0)
 			""
 		else
-			s"${sitsCount + addedCount} students on this scheme <span class='muted'>($sitsCount from SITS${removedCount match {
+			s"${sitsCount + addedCount} students on this scheme <span class='very-subtle'>($sitsCount from SITS${removedCount match {
 				case 0 => ""
 				case count => s" after $count removed manually"
 			}}${addedCount match {
@@ -78,7 +78,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 			"expandManual" -> expandManual,
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Department(set.department)
+			Breadcrumbs.Department(set.department),
+			Breadcrumbs.Reusable(set.department)
 		)
 	}
 
@@ -119,7 +120,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		Mav("groups/admin/groups/reusable/manuallyaddstudents",
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Department(set.department)
+			Breadcrumbs.Department(set.department),
+			Breadcrumbs.Reusable(set.department)
 		)
 	}
 

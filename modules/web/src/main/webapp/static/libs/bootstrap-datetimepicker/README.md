@@ -1,5 +1,7 @@
-bootstrap-datetimepicker
-========================
+# Project : bootstrap-datetimepicker
+======================================
+
+[![Build Status](https://travis-ci.org/smalot/bootstrap-datetimepicker.png?branch=master)](https://travis-ci.org/smalot/bootstrap-datetimepicker)
 
 [Homepage](http://www.malot.fr/bootstrap-datetimepicker/)
 
@@ -12,16 +14,16 @@ This project is a fork of [bootstrap-datepicker project](https://github.com/eter
 
 # Home
 
-As 'bootstrap-datetimepicker' is restricted to the date scope (day, month, year), this project aims to support too the time picking (hour, minutes).
+As 'bootstrap-datepicker' is restricted to the date scope (day, month, year), this project aims to support too the time picking (hour, minutes).
 
 
 # Screenshots
 
-## Month view
+## Decade year view
 
-![Datetimepicker month view](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_month.png)
+![Datetimepicker decade year view](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_decade.png)
 
-This view allows to select the year in a range of 10 years.
+This view allows to select the day in the selected month.
 
 ## Year view
 
@@ -29,11 +31,11 @@ This view allows to select the year in a range of 10 years.
 
 This view allows to select the month in the selected year.
 
-## Decade year view
+## Month view
 
-![Datetimepicker decade year view](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_decade.png)
+![Datetimepicker month view](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_month.png)
 
-This view allows to select the day in the selected month.
+This view allows to select the year in a range of 10 years.
 
 ## Day view
 
@@ -47,6 +49,17 @@ This view allows to select the hour in the selected day.
 
 This view allows to select the preset of minutes in the selected hour.
 The range of 5 minutes (by default) has been selected to restrict buttons quantity to an acceptable value, but it can be overrided by the <code>minuteStep</code> property.
+
+## Day view - meridian
+
+![Datetimepicker day view meridian](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_day_meridian.png)
+
+Meridian is supported in both the day and hour views.
+To use it, just enable the <code>showMeridian</code> property.
+
+## Hour view - meridian
+
+![Datetimepicker hour view meridian](https://raw.github.com/smalot/bootstrap-datetimepicker/master/screenshot/standard_hour_meridian.png)
 
 # Example
 
@@ -124,7 +137,26 @@ You can also specify an ISO-8601 valid datetime, despite of the given `format` :
 
 String.  Default: 'mm/dd/yyyy'
 
-The date format, combination of h, hh, i, ii, s, ss, d, dd, m, mm, M, MM, yy, yyyy.
+The date format, combination of p, P, h, hh, i, ii, s, ss, d, dd, m, mm, M, MM, yy, yyyy.
+
+ * p : meridian in lower case ('am' or 'pm') - according to locale file
+ * P : meridian in upper case ('AM' or 'PM') - according to locale file
+ * s : seconds without leading zeros
+ * ss : seconds, 2 digits with leading zeros
+ * i : minutes without leading zeros
+ * ii : minutes, 2 digits with leading zeros
+ * h : hour without leading zeros - 24-hour format
+ * hh : hour, 2 digits with leading zeros - 24-hour format
+ * H : hour without leading zeros - 12-hour format
+ * HH : hour, 2 digits with leading zeros - 12-hour format
+ * d : day of the month without leading zeros
+ * dd : day of the month, 2 digits with leading zeros
+ * m : numeric representation of month without leading zeros
+ * mm : numeric representation of the month, 2 digits with leading zeros
+ * M : short textual representation of a month, three letters
+ * MM : full textual representation of a month, such as January or March
+ * yy : two digit representation of a year
+ * yyyy : full numeric representation of a year, 4 digits
 
 ### weekStart
 
@@ -210,6 +242,12 @@ Boolean.  Default: true
 
 Whether or not to force parsing of the input value when the picker is closed.  That is, when an invalid date is left in the input field by the user, the picker will forcibly parse that value, and set the input's value to the new, valid date, conforming to the given `format`.
 
+### bootcssVer
+
+Number.
+
+You can override the auto-detect functionality of the different bootstrap versions (e.g., 2 or 3) by using this option.
+
 ### minuteStep
 
 Number.  Default: 5
@@ -224,9 +262,52 @@ The referer element to place the picker for the component implementation. If you
 
 ### pickerPosition
 
-String. Default: 'bottom-right' (other supported value : 'bottom-left')
+String. Default: 'bottom-right' (supported values are: 'bottom-right', 'bottom-left', 'top-right', 'top-left')
 
 This option allows to place the picker just under the input field for the component implementation instead of the default position which is at the bottom right of the button.
+
+### viewSelect
+
+Number or String. Default: <code>same as minView</code> (supported values are: 'decade', 'year', 'month', 'day', 'hour')
+
+With this option you can select the view from which the date will be selected. By default it's the last one, however you can choose the first one, so at each click the date will be updated.
+
+### showMeridian
+
+Boolean. Default: false
+
+This option will enable meridian views for day and hour views.
+
+### initialDate
+
+Date or String. Default: new Date()
+
+You can initialize the viewer with a date. By default it's now, so you can specify yesterday or today at midnight ...
+
+### zIndex
+
+Number. Default: undefined
+
+zIndex value is being automatically calculated based on the DOM tree, where we seek the highest value. To skip this process you can set the value manually.
+
+### onRender
+
+This event is fired when a day is rendered inside the datepicker. Should return a string. Return 'disabled' to disable the day from being selected.
+
+```javascript
+$('#date-end')
+    .datetimepicker({
+        onRender: function(date) {
+            return ev.date.valueOf() < date-start-display.valueOf() ? ' disabled' : '';
+        }
+    });
+```
+
+### fontAwesome
+
+Boolean. Default: false
+
+If true, [Font Awesome](http://fontawesome.io/) will be used.
 
 ## Markup
 
@@ -286,9 +367,17 @@ $('#datetimepicker').datetimepicker('hide');
 
 ### update
 
-Arguments: None
+Arguments:
 
-Update the datetimepicker with the current input value.
+* currentDate (Date).
+
+Update the datetimepicker with the specified date.
+
+```javascript
+$('#datetimepicker').datetimepicker('update', new Date());
+```
+
+Omit currentDate to update the datetimepicker with the current input value.
 
 ```javascript
 $('#datetimepicker').datetimepicker('update');
@@ -351,6 +440,44 @@ $('#datetimepicker').datetimepicker('setDaysOfWeekDisabled');
 $('#datetimepicker').datetimepicker('setDaysOfWeekDisabled', null);
 ```
 
+### setMinutesDisabled
+
+Arguments:
+
+* minutesDisabled (String|Array)
+
+Sets the minutes that should be disabled.
+
+```javascript
+$('#datetimepicker').datetimepicker('setMinutesDisabled', [25,59]);
+```
+
+Omit minutesDisabled (or provide an otherwise falsey value) to unset the disabled minutes.
+
+```javascript
+$('#datetimepicker').datetimepicker('setMinutesDisabled');
+$('#datetimepicker').datetimepicker('setMinutesDisabled', null);
+```
+
+### setHoursDisabled
+
+Arguments:
+
+* hoursDisabled (String|Array)
+
+Sets the hours that should be disabled.
+
+```javascript
+$('#datetimepicker').datetimepicker('setHoursDisabled', [12,19]);
+```
+
+Omit hoursDisabled (or provide an otherwise falsey value) to unset the disabled hours.
+
+```javascript
+$('#datetimepicker').datetimepicker('setHoursDisabled');
+$('#datetimepicker').datetimepicker('setHoursDisabled', null);
+```
+
 ## Events
 
 Datetimepicker class exposes a few events for manipulating the dates.
@@ -389,9 +516,15 @@ Fired when the *view* month is changed from year view.
 
 Fired when you pick a date before the *startDate* or after the *endDate* or when you specify a date via the method *setDate* or *setUTCDate*..
 
+### next:* / prev:*
+
+Fired when you click the *next* or *previous* arrows. Supports all the differnt view modes ('year', 'month', 'day', 'hour'). For example allows you to bind a callback to 'next:month' or 'prev:month' action.
+
 ## Keyboard support
 
 The datetimepicker includes some keyboard navigation:
+
+
 
 ### up, down, left, right arrow keys
 
@@ -411,6 +544,42 @@ The escape key can be used to hide and re-show the datetimepicker; this is neces
 
 When the picker is visible, enter will simply hide it.  When the picker is not visible, enter will have normal effects -- submitting the current form, etc.
 
+## Mouse Wheel View Navigation
+
+In order to make this plugin easier to set different part of date time, mouse wheel has been used to navigate through different views. Scroll up your mouse wheel to navigate to the decade year view. Scroll down will lead to the minute view.
+
+### Dependency
+
+To enalbe this feature. [jQuery Mouse Wheel Plugin](https://github.com/brandonaaron/jquery-mousewheel) must be included before using this feature.
+
+### Options
+
+#### wheelViewModeNavigation
+
+Boolean.  Default: false
+
+Whether or not to enable navigating through different view mode using mouse wheel.
+
+#### wheelViewModeNavigationInverseDirection
+
+Boolean.  Default: false
+
+Whether or not to reverse the direction of scrolling. Default is scroll up to the decade view.
+
+#### wheelViewModeNavigationDelay
+
+Integer.  Default: 100
+
+Time delays between the next respond to the wheel command, it controls the speed between switching in different views. Unit is in million seconds.
+
+#### About viewSelect option
+
+The recommended value for viewSelect option is 4 when this feature is enable. That means you can easily update any the value in every view. This option value is applied in the demo page.
+
+### Feature Demo
+
+A simple [Demo](http://lyonlai.github.io/bootstrap-datetimepicker/demo.html) page is given to show it's simple idea.
+
 ## I18N
 
 The plugin supports i18n for the month and weekday names and the `weekStart` option.  The default is English ('en'); other available translations are avilable in the `js/locales/` directory, simply include your desired locale after the plugin.  To add more languages, simply add a key to `$.fn.datetimepicker.dates`, before calling `.datetimepicker()`.  Example:
@@ -423,6 +592,15 @@ $.fn.datetimepicker.dates['en'] = {
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     today: "Today"
+};
+```
+
+You can override the default date format in the language configuration with `format` attribute.
+Example:
+
+```javascript
+$.fn.datetimepicker.dates['pt-BR'] = {
+    format: 'dd/mm/yyyy'
 };
 ```
 

@@ -6,7 +6,7 @@
 <#macro alerts commandName scope users="" role="">
 	<#local bindingError><@f.errors path="${commandName}.*" /></#local>
 	<#if bindingError?has_content>
-		<p class="alert alert-error">
+		<p class="alert alert-danger">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 			<i class="icon-warning-sign fa fa-exclamation-triangle"></i> <#noescape>${bindingError}</#noescape>
 		</p>
@@ -37,106 +37,76 @@
 </#macro>
 
 <#macro roleTable permsUrl cssClass scope roleDefinition roleName>
-<@manageRole scope=scope roleName=roleDefinition>
-	<table class="table table-bordered table-subtle table-condensed permission-list ${cssClass}">
-		<tbody>
-			<tr>
-				<td>
-					<div class="form-inline">
-						<@form.flexipicker cssClass="pickedUser" name="usercodes" />
-					</div>
-				</td>
-				<td class="actions">
-					<#if can_delegate>
-						<form action="${permsUrl}" method="post" class="add-permissions">
-							<input type="hidden" name="_command" value="add">
-							<input type="hidden" name="roleDefinition" value="${roleDefinition}">
-							<input type="hidden" name="usercodes">
-							<button class="btn btn-mini" type="submit"><i class="icon-plus fa fa-plus"></i></button>
-						</form>
-					<#else>
-						<#local popoverText>
-							<p>You can't add a new ${roleName} because you don't have permission to:</p>
-							<ul>
-								<#list denied_permissions as perm>
-									<li>${perm.description}</li>
-								</#list>
-							</ul>
-							<p>on ${scope.toString}.</p>
-						</#local>
+	<@manageRole scope=scope roleName=roleDefinition>
+		<div class="permission-list ${cssClass}">
+			<div class="row">
+				<div class="col-md-12">
+					<form action="${permsUrl}" method="post" class="add-permissions">
+						<input type="hidden" name="_command" value="add">
+						<input type="hidden" name="roleDefinition" value="${roleDefinition}">
 
-						<button class="btn btn-mini use-tooltip disabled" type="button"
-										data-html="true"
-										data-title="${popoverText}"><i class="icon-plus fa fa-plus"></i></button>
-					</#if>
-				</td>
-			</tr>
+						<@bs3form.flexipicker cssClass="pickedUser" name="usercodes" placeholder="Enter name or ID">
+							<span class="input-group-btn">
+								<#if can_delegate>
+									<button class="btn btn-default" type="submit"><i class="icon-plus fa fa-plus"></i></button>
+								<#else>
+									<#local popoverText>
+										<p>You can't add a new ${roleName} because you don't have permission to:</p>
+										<ul>
+											<#list denied_permissions as perm>
+												<li>${perm.description}</li>
+											</#list>
+										</ul>
+										<p>on ${scope.toString}.</p>
+									</#local>
 
+									<button class="btn btn-default use-tooltip disabled" type="button" data-html="true" data-title="${popoverText}" data-container="body"><i class="icon-plus fa fa-plus"></i></button>
+								</#if>
+							</span>
+						</@bs3form.flexipicker>
+					</form>
+				</div>
+			</div>
 			<#local users = usersWithRole('${roleDefinition}', scope) />
 			<#if users?size gt 0>
 				<#list users as u>
-					<tr>
-						<td class="user">
-							${u.fullName} <span class="muted">${u.userId}</span>
-						</td>
-						<td class="actions">
-							<#if can_delegate>
-								<form action="${permsUrl}" method="post" class="remove-permissions" onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
-									<input type="hidden" name="_command" value="remove">
-									<input type="hidden" name="roleDefinition" value="${roleDefinition}">
-									<input type="hidden" name="usercodes" value="${u.userId}">
-									<a class="btn btn-danger btn-mini removeUser"><i class="icon-white fa fa-white icon-remove fa fa-times"></i></a>
-								</form>
-							<#else>
-								<#local popoverText>
-									<p>You can't remove a ${roleName} because you don't have permission to:</p>
-									<ul>
-										<#list denied_permissions as perm>
-											<li>${perm.description}</li>
-										</#list>
-									</ul>
-									<p>on ${scope.toString}.</p>
-								</#local>
+					<div class="row">
+						<div class="col-md-12"><div class="col-md-12 <#if u_has_next>user</#if>">
+							<div class="pull-right">
+								<#if can_delegate>
+									<form action="${permsUrl}" method="post" class="remove-permissions" onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
+										<input type="hidden" name="_command" value="remove">
+										<input type="hidden" name="roleDefinition" value="${roleDefinition}">
+										<input type="hidden" name="usercodes" value="${u.userId}">
+										<button class="btn btn-danger btn-xs removeUser"><i class="fa fa-white icon-remove fa fa-times"></i></button>
+									</form>
+								<#else>
+									<#local popoverText>
+										<p>You can't remove a ${roleName} because you don't have permission to:</p>
+										<ul>
+											<#list denied_permissions as perm>
+												<li>${perm.description}</li>
+											</#list>
+										</ul>
+										<p>on ${scope.toString}.</p>
+									</#local>
 
-								<button class="btn btn-danger btn-mini use-tooltip disabled" type="button"
-												data-html="true"
-												data-title="${popoverText}"><i class="icon-white fa fa-white icon-remove fa fa-times"></i></button>
-							</#if>
-						</td>
-					</tr>
+									<button class="btn btn-danger btn-xs use-tooltip disabled" type="button"
+											data-html="true"
+											data-title="${popoverText}"><i class="fa fa-white icon-remove fa fa-times"></i></button>
+								</#if>
+							</div>
+							${u.fullName} <span class="very-subtle">${u.userId}</span>
+						</div></div>
+					</div>
 				</#list>
 			<#else>
-				<tr>
-					<td colspan="2" class="empty-list">
-						There is no ${roleName} yet.
-					</td>
-				</tr>
+				<div class="row"><div class="col-md-12">
+					There is no ${roleName} yet.
+				</div></div>
 			</#if>
-		</tbody>
-	</table>
-</@manageRole>
-</#macro>
-
-<#macro script>
-<script>
-	jQuery(function($) {
-		$('.removeUser').click(function() {
-			$(this).parent("form").submit();
-		});
-
-		// copy to hidden field to avoid breaking table/form DOM hierarchy
-		$('input.pickedUser').change(function() {
-			$(this).closest('table').find('.add-permissions input[name=usercodes]').val($(this).val());
-		});
-
-		$('.removeUser').hover(function() {
-				$(this).closest("tr").find("td").addClass("highlight");
-			}, function() {
-				$(this).closest("tr").find("td").removeClass("highlight");
-			}
-		);
-	});
-</script>
+		</div>
+	</@manageRole>
 </#macro>
 
 <#macro debugPermission permission scope={} showScopes=true>

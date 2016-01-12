@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.commands.sysadmin.attendancetemplates.DeleteAttendanceTemplateCommand
-import uk.ac.warwick.tabula.web.controllers.sysadmin.BaseSysadminController
+import uk.ac.warwick.tabula.web.controllers.sysadmin.{SysadminBreadcrumbs, BaseSysadminController}
 import uk.ac.warwick.tabula.sysadmin.web.Routes
 
 @Controller
@@ -26,7 +26,9 @@ class DeleteAttendanceTemplateController extends BaseSysadminController {
 	}
 
 	private def render = {
-		Mav("sysadmin/attendancetemplates/delete")
+		Mav("sysadmin/attendancetemplates/delete").crumbs(
+			SysadminBreadcrumbs.AttendanceTemplates.Home
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -38,7 +40,7 @@ class DeleteAttendanceTemplateController extends BaseSysadminController {
 			render
 		} else {
 			cmd.apply()
-			Redirect(Routes.AttendanceTemplates.list)
+			Redirect(Routes.AttendanceTemplates.home)
 		}
 	}
 

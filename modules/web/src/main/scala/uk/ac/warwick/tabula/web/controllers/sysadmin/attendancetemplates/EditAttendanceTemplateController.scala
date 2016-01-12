@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.commands.sysadmin.attendancetemplates.EditAttendanceTemplateCommand
-import uk.ac.warwick.tabula.web.controllers.sysadmin.BaseSysadminController
+import uk.ac.warwick.tabula.web.controllers.sysadmin.{SysadminBreadcrumbs, BaseSysadminController}
 import uk.ac.warwick.tabula.sysadmin.web.Routes
 
 @Controller
@@ -27,7 +27,9 @@ class EditAttendanceTemplateController extends BaseSysadminController {
 	}
 
 	private def render = {
-		Mav("sysadmin/attendancetemplates/edit")
+		Mav("sysadmin/attendancetemplates/edit").crumbs(
+			SysadminBreadcrumbs.AttendanceTemplates.Home
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -39,7 +41,7 @@ class EditAttendanceTemplateController extends BaseSysadminController {
 			render
 		} else {
 			cmd.apply()
-			Redirect(Routes.AttendanceTemplates.list)
+			Redirect(Routes.AttendanceTemplates.home)
 		}
 	}
 

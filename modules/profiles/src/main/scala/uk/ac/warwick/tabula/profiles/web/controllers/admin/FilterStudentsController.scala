@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.profiles.commands.{FilterStudentsCommand, FilterStudentsResults}
+import uk.ac.warwick.tabula.commands.profiles.{FilterStudentsCommand, FilterStudentsResults}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller

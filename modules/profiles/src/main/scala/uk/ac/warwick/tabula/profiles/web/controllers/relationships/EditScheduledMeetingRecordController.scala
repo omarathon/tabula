@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.profiles.commands.{ScheduledMeetingRecordResult, EditScheduledMeetingRecordCommand, ViewMeetingRecordCommand}
+import uk.ac.warwick.tabula.commands.profiles.{ScheduledMeetingRecordResult, EditScheduledMeetingRecordCommand, ViewMeetingRecordCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.{MeetingRecordAcademicYearFiltering, ProfilesController}
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}

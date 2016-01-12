@@ -18,7 +18,7 @@ class ReorderAttendanceTemplatesController extends BaseSysadminController {
 	@RequestMapping
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringTemplate]]) = {
 		cmd.apply()
-		Redirect(Routes.AttendanceTemplates.list)
+		Redirect(Routes.AttendanceTemplates.home)
 	}
 
 }

@@ -1,0 +1,7 @@
+/* Fix alignment of checkboxes and radios */
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+	margin-top: 7px;
+}

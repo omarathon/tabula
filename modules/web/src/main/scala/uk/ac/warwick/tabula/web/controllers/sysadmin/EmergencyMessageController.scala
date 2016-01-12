@@ -5,56 +5,89 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, ReadOnly, SelfValidating, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{EmergencyMessage, EmergencyMessageService}
-import uk.ac.warwick.util.queue.Queue
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-class EmergencyMessageCommand(service: EmergencyMessageService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
+object EmergencyMessageCommand {
+	type Command = Appliable[EmergencyMessage] with SelfValidating with PopulateOnForm
 
-	PermissionCheck(Permissions.ManageEmergencyMessage)
+	def apply(): Command =
+		new EmergencyMessageCommandInternal
+			with ComposableCommand[EmergencyMessage]
+			with EmergencyMessageCommandPopulation
+			with EmergencyMessageCommandValidation
+			with ManageEmergencyMessagePermissions
+			with AutowiringEmergencyMessageServiceComponent
+			with AutowiringSettingsSyncQueueComponent
+			with ReadOnly with Unaudited
+}
 
-	val DefaultMaintenanceMinutes = 30
+trait EmergencyMessageCommandRequest {
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var enable: Boolean = _
+	var message: String = _
 
-	var enable: Boolean = service.enabled
-	var message: String = service.message.orNull
+}
 
-	def applyInternal() {
+class EmergencyMessageCommandInternal extends CommandInternal[EmergencyMessage] with EmergencyMessageCommandRequest {
+	self: EmergencyMessageServiceComponent with SettingsSyncQueueComponent =>
+
+	override def applyInternal(): EmergencyMessage = {
 		if (!enable) {
 			message = null
 		}
-		service.message = Option(message)
-		if (enable) service.enable
-		else service.disable
+		emergencyMessageService.message = Option(message)
+		if (enable) emergencyMessageService.enable
+		else emergencyMessageService.disable
 
-		queue.send(new EmergencyMessage(service))
+		val msg = new EmergencyMessage(enable, Option(message))
+
+		settingsSyncQueue.send(msg)
+
+		msg
 	}
 
-	def validate(errors: Errors) {
+}
 
+trait EmergencyMessageCommandPopulation extends PopulateOnForm {
+	self: EmergencyMessageCommandRequest with EmergencyMessageServiceComponent =>
+
+	override def populate(): Unit = {
+		enable = emergencyMessageService.enabled
+		message = emergencyMessageService.message.orNull
 	}
+}
+
+trait EmergencyMessageCommandValidation extends SelfValidating {
+
+	override def validate(errors: Errors): Unit = {}
+
+}
+
+trait ManageEmergencyMessagePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		p.PermissionCheck(Permissions.ManageEmergencyMessage)
+	}
+
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/emergencymessage"))
 class EmergencyMessageController extends BaseSysadminController {
 
-	var service = Wire.auto[EmergencyMessageService]
+	validatesSelf[SelfValidating]
 
-	validatesSelf[MaintenanceModeCommand]
-
-	@ModelAttribute def cmd = new EmergencyMessageCommand(service)
+	@ModelAttribute("command") def cmd: EmergencyMessageCommand.Command = EmergencyMessageCommand()
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(form: EmergencyMessageCommand, errors: Errors) =
-		Mav("sysadmin/emergency-message").crumbs(Breadcrumbs.Current("Sysadmin emergency message"))
-			.noLayoutIf(ajax)
+	def showForm(@ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors) =
+		Mav("sysadmin/emergency-message").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: EmergencyMessageCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {

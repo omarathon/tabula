@@ -1,10 +1,7 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
-	<div id="profile-modal" class="modal fade profile-subset"></div>
 
-	<h1>
-		Attendance for ${set.module.code?upper_case} <span class="hide-smallscreen">${set.nameWithoutModulePrefix}</span>
-	</h1>
+	<h1>Attendance for ${set.module.code?upper_case} ${set.nameWithoutModulePrefix}</h1>
 
 	<@components.single_groupset_attendance set groups />
 

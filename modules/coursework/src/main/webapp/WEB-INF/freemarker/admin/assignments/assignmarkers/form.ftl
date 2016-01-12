@@ -112,11 +112,7 @@
 
 
 <#escape x as x?html>
-	<#if isExam>
-		<#assign assignMarkersSmallGroups><@routes.examAssignMarkersSmallGroups assessment/></#assign>
-	<#else>
-		<#assign assignMarkersSmallGroups><@routes.assignMarkersSmallGroups assessment/></#assign>
-	</#if>
+	<#assign assignMarkersSmallGroups><@routes.assignMarkersSmallGroups assessment/></#assign>
 
 	<h1>Assign students to markers</h1>
 	<h4><span class="muted">for</span>
