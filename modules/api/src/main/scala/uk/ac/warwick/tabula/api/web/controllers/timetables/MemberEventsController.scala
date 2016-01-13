@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.api.web.controllers.timetables
 
 import javax.validation.Valid
 
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, RequestFailedException}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
@@ -40,7 +41,17 @@ trait GetMemberEventsApi {
 		ViewMemberEventsCommand(member, currentUser)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberEventsCommand, errors: Errors) = {
+	def showModuleTimetable(
+		@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberEventsCommand,
+		errors: Errors,
+		@RequestParam(required = false) start: LocalDate,
+		@RequestParam(required = false) end: LocalDate
+	) = {
+		for (from <- Option(start); to <- Option(end)) {
+			command.from = from
+			command.to = to
+		}
+
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else command.apply() match {
