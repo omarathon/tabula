@@ -14,7 +14,7 @@ abstract class ViewProfilePhotoCommand(val member: Member)
 
 	this: MemberPhotoUrlGeneratorComponent =>
 
-	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
+	PermissionCheck(Permissions.Profiles.Read.Photo, mandatory(member))
 
 	override def applyInternal() = {
 		Mav(s"redirect:${photoUrl(Option(member))}")
