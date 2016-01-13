@@ -93,13 +93,28 @@
 			</div>
 		</div>
 	</div>
-
 	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
 				/> Total CATs</label>
+			</div>
+		</div>
+	</div>
+
+	<h3>Administration</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+		</div>
+		<div class="col-md-3">
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="comments"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("comments")>checked</#if>
+				/> Comments</label>
 			</div>
 		</div>
 	</div>
