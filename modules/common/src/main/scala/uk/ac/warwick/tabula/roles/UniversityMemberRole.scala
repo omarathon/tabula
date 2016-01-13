@@ -20,6 +20,7 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 	)
 
 	GrantsScopedPermission(
+		Profiles.Read.Photo,
     Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
 	)
