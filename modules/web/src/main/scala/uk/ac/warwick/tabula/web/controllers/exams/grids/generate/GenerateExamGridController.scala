@@ -38,7 +38,7 @@ class GenerateExamGridController extends ExamsController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent {
 
-	type SelectCourseCommand = Appliable[Seq[StudentCourseYearDetails]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
+	type SelectCourseCommand = Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])]
 
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
@@ -91,7 +91,7 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, department, academicYear)
 			} else {
-				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.studentCourseDetails.student.universityId)), user.apparentUser)
+				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.universityId)), user.apparentUser)
 				gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 			}
 		}
@@ -193,7 +193,7 @@ class GenerateExamGridController extends ExamsController
 	): Mav = {
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
-			val studentLastImportDates = selectCourseCommand.apply().map(_.studentCourseDetails.student).distinct.map(s =>
+			val studentLastImportDates = selectCourseCommand.apply().map(_.studentCourseYearDetails.get.studentCourseDetails.student).distinct.map(s =>
 				(s.fullName, Option(s.lastImportDate).getOrElse(new DateTime(0)))
 			).sortBy(_._2)
 			commonCrumbs(
@@ -284,8 +284,8 @@ class GenerateExamGridController extends ExamsController
 	private def gridData(
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand
-	): (Seq[StudentCourseYearDetails], Seq[ExamGridColumn]) = {
-		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseDetails.scjCode)
+	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn]) = {
+		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
 
 		val gridOptions = gridOptionsCommand.apply()
 		val predefinedColumnIDs = gridOptions._1

@@ -18,7 +18,7 @@ object GenerateExamGridExporter {
 	case object Fail extends Style
 	case object Overcat extends Style
 
-	def apply(scyds: Seq[StudentCourseYearDetails], columns: Seq[ExamGridColumn], academicYear: AcademicYear): XSSFWorkbook = {
+	def apply(scyds: Seq[GenerateExamGridEntity], columns: Seq[ExamGridColumn], academicYear: AcademicYear): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 
 		// Styles

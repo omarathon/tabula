@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, StudentCourseDetails}
+import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
@@ -30,6 +31,9 @@ trait ModuleRegistrationService {
 		* @return The weighted mean mark, if all the provided registration has an agreed mark
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration]): Option[BigDecimal]
+
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity): Seq[(BigDecimal, Seq[ModuleRegistration])]
+
 }
 
 abstract class AbstractModuleRegistrationService extends ModuleRegistrationService {
@@ -59,6 +63,22 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		} else {
 			None
 		}
+	}
+
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+		val coreAndCoreReqModules = entity.moduleRegistrations.filter(mr =>
+			mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.CoreRequired
+		)
+		val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
+		val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
+			// CATS total of at least the normal load
+			modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
+			// Contains all the core and core required modules
+			coreAndCoreReqModules.forall(modRegs.contains) &&
+			// All the registrations have agreed marks
+			modRegs.forall(_.agreedMark != null)
+		)
+		validSubsets.map(modRegs => (weightedMeanYearMark(modRegs.toSeq).get, modRegs.toSeq.sortBy(_.module.code))).sortBy(_._1).reverse
 	}
 
 }

@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridExporter
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
@@ -15,44 +14,40 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	override val sortOrder: Int = 9
 
-	case class Column(scyds: Seq[StudentCourseYearDetails])
-		extends ExamGridColumn(scyds) with HasExamGridColumnCategory {
+	case class Column(entities: Seq[GenerateExamGridEntity])
+		extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 
 		override val title: String = "Mean Module Mark"
 
 		override val category: String = "Year Marks"
 
 		override def render: Map[String, String] =
-			scyds.map(scyd => scyd.id -> result(scyd).map(_.toString).getOrElse("")).toMap
+			entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
 			index: Int,
-			scyd: StudentCourseYearDetails,
+			entity: GenerateExamGridEntity,
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			val cell = row.createCell(index)
-			result(scyd).foreach(mark =>
+			result(entity).foreach(mark =>
 				cell.setCellValue(mark.doubleValue())
 			)
 		}
 
-		private def result(scyd: StudentCourseYearDetails): Option[BigDecimal] = {
-			val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-			if (cats > scyd.normalCATLoad) {
-				if (scyd.overcattingModules.isDefined) {
-					// If the student has overcatted and a subset of modules has been chosen for the overcatted mark, show the mark for _all_ the modules
-					moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations)
-				} else {
-					None
-				}
+		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
+			val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+			if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity).size > 1 && entity.overcattingModules.isEmpty) {
+				// If the student has overcatted, has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
+				None
 			} else {
-				moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations)
+				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations)
 			}
 		}
 
 	}
 
-	override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] = Seq(Column(scyds))
+	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
 
 }

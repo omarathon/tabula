@@ -18,6 +18,9 @@
 		transform: rotateZ(-90deg);
 		white-space: nowrap;
 		left: 50%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 300px;
 	}
 }
 
@@ -101,18 +104,24 @@
 	.id7-table-wrapper-popout {
 		float: right;
 	}
-	.exam-grid-fail {
-		color: @brand-danger;
-		text-decoration: underline;
-		border-bottom: 1px solid @brand-danger;
-	}
 	.exam-grid-overcat {
 		color: @brand-success;
 		&:after {
 			content: "*";
 		}
 	}
+	.exam-grid-fail {
+		color: @brand-danger;
+		text-decoration: underline;
+		border-bottom: 1px solid @brand-danger;
+	}
 	.grid {
+		tr.student:hover {
+			background-color: darken(@table-bg-hover, 5%);
+		}
+		tr.clickable {
+			cursor: pointer;
+		}
 		th, td {
 			border: 1px solid @table-border-color;
 			&.borderless {
@@ -124,6 +133,15 @@
 		}
 		td {
 			white-space: nowrap;
+		}
+		thead {
+			th, td {
+				border-left: 0;
+				border-right: 0;
+				border-top: 0;
+				background: white;
+				text-align: center;
+			}
 		}
 		.title-in-category th, th.section-secondary-label, th.section-value-label {
 			text-align: center;

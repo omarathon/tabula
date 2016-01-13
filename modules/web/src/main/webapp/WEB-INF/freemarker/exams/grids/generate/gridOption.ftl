@@ -111,6 +111,20 @@
 		</div>
 	</div>
 
+	<h3>Administration</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="recommendedactions"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("recommendedactions")>checked</#if>
+				/> Recommended Actions</label>
+			</div>
+		</div>
+	</div>
+
 	<h3>Additional columns</h3>
 
 	<div class="customColumnTitles">

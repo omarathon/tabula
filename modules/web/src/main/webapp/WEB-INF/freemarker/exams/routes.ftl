@@ -54,3 +54,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro gridsDepartmentHomeForYear department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}" /></#macro>
 <#macro generateGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate" /></#macro>
 <#macro generateGridProgress department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/progress" /></#macro>
+<#macro generateGridOvercatting department academicYear scyd><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/overcatting/${scyd.id}" /></#macro>
