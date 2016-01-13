@@ -39,7 +39,7 @@ class AdminHomeController extends AdminController with DepartmentScopedControlle
 
 	@ModelAttribute("departmentsWithPermission")
 	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)
 
 		val result = ownedDepartmentsModulesAndRoutes(user)
 		(result.departments ++ result.modules.map(_.adminDepartment) ++ result.routes.map(_.adminDepartment))
