@@ -5,11 +5,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module, ScheduledNotification}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -24,6 +24,7 @@ object CopySmallGroupSetsCommand {
 			with CopySmallGroupSetsDescription
 			with CopySmallGroupSetsValidation
 			with AutowiringSmallGroupServiceComponent
+			with AutowiringTermServiceComponent
 			with CopySmallGroupSetsScheduledNotifications
 			with PopulateCopySmallGroupSetsRequestDefaults {
 				override lazy val eventName = "CopySmallGroupSetsFromPrevious"
@@ -140,12 +141,35 @@ trait CopySmallGroupSetsCommandState {
 }
 
 trait CopySmallGroupSetsValidation extends SelfValidating {
-	self: CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState =>
+	self: CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState with TermServiceComponent =>
 
 	override def validate(errors: Errors): Unit = {
 		if (sourceAcademicYear == null) errors.rejectValue("sourceAcademicYear", "NotEmpty")
 		else if (targetAcademicYear == null) errors.rejectValue("targetAcademicYear", "NotEmpty")
 		else if (sourceAcademicYear == targetAcademicYear) errors.rejectValue("targetAcademicYear", "smallGroupSet.copy.sameYear")
+		else {
+			lazy val targetAcademicYearWeeks: Seq[WeekRange.Week] =
+				termService.getAcademicWeeksForYear(targetAcademicYear.dateInTermOne)
+					.map { case (week, _) => week.toInt }
+
+			// TAB-3974 Prevent exception when copying an event with a week number that doesn't exist in the target year
+			smallGroupSets.asScala.zipWithIndex
+				// Only sets where we've set to copy events
+				.filter { case (state, _) => state.copy && state.copyGroups && state.copyEvents }
+				// Only where there is an event with a week number that doesn't exist in the target year
+				.filterNot { case (state, _) =>
+					val allWeeks: Seq[WeekRange.Week] =
+						state.smallGroupSet.groups.asScala
+							.flatMap { _.events }
+							.flatMap { _.allWeeks }
+							.distinct
+
+					allWeeks.forall(targetAcademicYearWeeks.contains)
+				}
+				.foreach { case (_, index) =>
+					errors.rejectValue(s"smallGroupSets[$index].copyEvents", "smallGroupSet.copy.weekNotInTargetYear")
+				}
+		}
 	}
 }
 
