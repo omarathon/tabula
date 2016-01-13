@@ -17,7 +17,7 @@
 	</p>
 <#elseif featureFilteredDepartments?size == 0 && user.staff>
 	<p>
-		Exam board grids enabled for your department. Please email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a> for more information.
+		Exam board grids are not enabled for your department. Please email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a> for more information.
 	</p>
 </#if>
 
