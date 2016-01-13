@@ -19,18 +19,10 @@ abstract class AbstractViewDepartmentAttendanceController extends GroupsControll
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with GroupsDepartmentsAndModulesWithPermission {
 
-	override val departmentPermission: Permission = null
+	override val departmentPermission: Permission = ViewDepartmentAttendanceCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
-
-	@ModelAttribute("departmentsWithPermission")
-	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
-
-		allDepartmentsForPermission(user, Permissions.SmallGroupEvents.ViewRegister)
-			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
-	}
 
 	hideDeletedItems
 

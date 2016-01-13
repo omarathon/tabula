@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object CopySmallGroupSetsCommand {
+	val RequiredPermission = Permissions.SmallGroups.Create
+
 	def apply(department: Department, modules: Seq[Module]) =
 		new CopySmallGroupSetsCommandInternal(department, modules)
 			with ComposableCommand[Seq[SmallGroupSet]]
@@ -159,8 +161,10 @@ trait CopySmallGroupSetsDescription extends Describable[Seq[SmallGroupSet]] {
 trait CopySmallGroupSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CopySmallGroupSetsCommandState =>
 
+	import CopySmallGroupSetsCommand._
+
 	override def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
+		if (modules.isEmpty) p.PermissionCheck(RequiredPermission, mandatory(department))
 		else modules.foreach { module =>
 			mustBeLinked(mandatory(module), mandatory(department))
 			p.PermissionCheck(Permissions.SmallGroups.Read, module)

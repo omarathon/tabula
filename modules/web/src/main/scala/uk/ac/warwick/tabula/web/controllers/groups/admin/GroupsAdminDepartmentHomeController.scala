@@ -8,13 +8,11 @@ import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, 
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet, SmallGroupSetFilters}
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-
-import scala.collection.JavaConverters._
 
 abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController with AutowiringTermServiceComponent
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringMaintenanceModeServiceComponent
@@ -22,18 +20,10 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 
 	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
-	override val departmentPermission: Permission = null
+	override val departmentPermission: Permission = AdminSmallGroupsHomeCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
-
-	@ModelAttribute("departmentsWithPermission")
-	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
-
-		allDepartmentsForPermission(user, Permissions.Module.ManageSmallGroups)
-			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
-	}
 
 	hideDeletedItems
 
@@ -95,7 +85,7 @@ class GroupsAdminDepartmentController extends AbstractGroupsAdminDepartmentHomeC
 @Controller
 @RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}"))
 class GroupsAdminDepartmentForYearController extends AbstractGroupsAdminDepartmentHomeController
-	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent {
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
