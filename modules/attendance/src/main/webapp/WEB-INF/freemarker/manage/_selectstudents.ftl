@@ -224,12 +224,22 @@
 			</@filter>
 
 			<div class="btn-group">
+				<@f.hidden path="findCommand.filterChanged" class="student-filter-change" />
 				<button class="btn btn-mini btn-primary search" type="submit" name="${ManageSchemeMappingParameters.findStudents}" value="true">
 					<i class="icon-search"></i> Find
 				</button>
 			</div>
 
 		</div>
+
+		<#if findCommand.filterChanged>
+			<div class="well well-small student-filter-changed-box" >
+				<span class="legend">Filter Update</span>
+				<div>
+					You have changed the filters for this search, to keep these results for the next time you sign in you must select Save at the bottom of the page. If you do not select Save the last filter will still apply next time you sign in.
+				</div>
+			</div>
+		</#if>
 
 		<#if (findCommandResult.membershipItems?size > 0)>
 			<div class="pull-right">

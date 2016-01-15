@@ -561,6 +561,7 @@ $(function(){
 				var $input = $(this);
 				if ($input.is('.prevent-reload')) return;
 				updateFilter($input);
+				$('.student-filter-change').val(true);
 			});
 
 			// Re-order elements inside the dropdown when opened

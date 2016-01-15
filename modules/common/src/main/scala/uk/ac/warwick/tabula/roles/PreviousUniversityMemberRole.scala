@@ -13,6 +13,7 @@ case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRo
 
 	GrantsScopedPermission(
 		Profiles.Read.Core,
+		Profiles.Read.Photo,
 		Profiles.Read.NextOfKin,
 		Profiles.Read.HomeAndTermTimeAddresses,
 		Profiles.Read.TelephoneNumber,

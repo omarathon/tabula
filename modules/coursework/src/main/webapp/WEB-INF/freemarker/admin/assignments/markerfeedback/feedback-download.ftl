@@ -32,8 +32,10 @@
 		<#if viewableFeedback??>
 		<div class="alert">
 			<p>
-				<strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark. The
-				mark shown above will contribute to your final module mark.
+				<strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark.
+				<#if feedback.assignment.summative>
+					The mark shown above will contribute to your final module mark.
+				</#if>
 			</p>
 			<#if viewableFeedback.comments??><p>${viewableFeedback.comments}</p></#if>
 			<p>Your marks before adjustment were:</p>

@@ -244,6 +244,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment, moduleAndDepartmentService)
 
+		// Exam grids stuff
+		department.uploadMarksToSits = true
+		department.examGridsEnabled = true
+
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
 		transactional() {

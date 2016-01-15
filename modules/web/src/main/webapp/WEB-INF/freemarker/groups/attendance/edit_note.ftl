@@ -9,7 +9,7 @@
 		></div>
 	</#if>
 
-	<@modal.wrapper cssClass="modal-lg" enabled=(isModal && !isIframe)>
+	<@modal.wrapper cssClass="modal-lg" enabled=(isModal!false && !isIframe)>
 
 		<#if !isIframe>
 			<@modal.header enabled=isModal!false>
@@ -22,7 +22,7 @@
 		</#if>
 
 
-		<@modal.body enabled=isModal />
+		<@modal.body enabled=isModal!false />
 
 		<#if isModal!false>
 			<@modal.footer>

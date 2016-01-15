@@ -5,7 +5,7 @@ import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{Http, thread, url}
+import dispatch.classic._
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.params.HttpConnectionParams
 import org.apache.lucene.analysis._
@@ -612,7 +612,7 @@ trait HttpSearching {
 
 			def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
 				req >- { (json) =>
-					JSON.parseFull(json) match {
+					toRichSearchResults(JSON.parseFull(json) match {
 						case Some(json: Map[String, Any]@unchecked) =>
 							json.get("results") match {
 								case Some(docs: Seq[Map[String, Any]]@unchecked) =>
@@ -633,7 +633,7 @@ trait HttpSearching {
 								case _ => Nil
 							}
 						case _ => Nil
-					}
+					})
 				}
 			}
 
@@ -648,6 +648,9 @@ trait HttpSearching {
 				url(endpoint) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) << objectMapper.writeValueAsBytes(requestMap)
 
 			httpExecutor.when(_ == 200)(req >:+ handler)
+		}.recover { case e: StatusCode => // Recover from status code exceptions
+			logger.warn(s"Couldn't perform search over HTTP", e)
+			toRichSearchResults(Nil)
 		}
 	}
 }

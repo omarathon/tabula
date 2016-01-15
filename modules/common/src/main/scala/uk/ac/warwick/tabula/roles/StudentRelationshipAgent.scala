@@ -10,6 +10,7 @@ object StudentRelationshipAgent {
 
 	final def profileReadOnlyPermissions(relationshipType: PermissionsSelector[StudentRelationshipType]) = Seq(
 		Profiles.Read.Core,
+		Profiles.Read.Photo,
 		Profiles.Read.Usercode,
 		Profiles.Read.Timetable,
 
