@@ -210,7 +210,13 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
 
-		set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
+		if (allocationMethod == SmallGroupAllocationMethod.Linked) {
+			set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
+		} else if (set.linkedDepartmentSmallGroupSet != null) {
+			// TAB-4032 Unset linked state
+			set.linkedDepartmentSmallGroupSet = null
+			set.groups.asScala.foreach { _.linkedDepartmentSmallGroup = null }
+		}
 	}
 }
 
