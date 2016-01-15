@@ -6,7 +6,6 @@ import org.apache.poi.ss.usermodel.{FontUnderline, HorizontalAlignment, Vertical
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFWorkbook}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, HasExamGridColumnCategory, HasExamGridColumnSecondaryValue, HasExamGridColumnSection}
 
 object GenerateExamGridExporter {
@@ -17,8 +16,9 @@ object GenerateExamGridExporter {
 	case object Rotated extends Style
 	case object Fail extends Style
 	case object Overcat extends Style
+	case object Overridden extends Style
 
-	def apply(scyds: Seq[StudentCourseYearDetails], columns: Seq[ExamGridColumn], academicYear: AcademicYear): XSSFWorkbook = {
+	def apply(scyds: Seq[GenerateExamGridEntity], columns: Seq[ExamGridColumn], academicYear: AcademicYear): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 
 		// Styles
@@ -189,11 +189,31 @@ object GenerateExamGridExporter {
 			cs
 		}
 
+		val overcatStyle = {
+			val cs = workbook.createCellStyle()
+			val greenFont = workbook.createFont()
+			greenFont.setFontHeight(10)
+			greenFont.setColor(new XSSFColor(new Color(89, 110, 49)))
+			cs.setFont(greenFont)
+			cs
+		}
+
+		val overriddenStyle = {
+			val cs = workbook.createCellStyle()
+			val blueFont = workbook.createFont()
+			blueFont.setFontHeight(10)
+			blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
+			cs.setFont(blueFont)
+			cs
+		}
+
 		Map(
 			Header -> headerStyle,
 			HeaderRotated -> headerRotatedStyle,
 			Rotated -> rotatedStyle,
-			Fail -> failStyle
+			Fail -> failStyle,
+			Overcat -> overcatStyle,
+			Overridden -> overriddenStyle
 		)
 	}
 

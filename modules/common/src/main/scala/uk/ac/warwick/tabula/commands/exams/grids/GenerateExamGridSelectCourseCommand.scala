@@ -4,7 +4,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Course, Department, Route}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, CourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -15,7 +15,7 @@ object GenerateExamGridSelectCourseCommand {
 		new GenerateExamGridSelectCourseCommandInternal(department, academicYear)
 			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
-			with ComposableCommand[Seq[StudentCourseYearDetails]]
+			with ComposableCommand[Seq[GenerateExamGridEntity]]
 			with GenerateExamGridSelectCourseValidation
 			with GenerateExamGridSelectCoursePermissions
 			with GenerateExamGridSelectCourseCommandState
@@ -23,14 +23,24 @@ object GenerateExamGridSelectCourseCommand {
 			with ReadOnly with Unaudited
 }
 
+case class GenerateExamGridEntity(
+	id: String,
+	name: String,
+	universityId: String,
+	moduleRegistrations: Seq[ModuleRegistration],
+	normalCATLoad: Int,
+	overcattingModules: Option[Seq[Module]],
+	markOverrides: Option[Map[Module, BigDecimal]],
+	studentCourseYearDetails: Option[StudentCourseYearDetails]
+)
 
 class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear) 
-	extends CommandInternal[Seq[StudentCourseYearDetails]] {
+	extends CommandInternal[Seq[GenerateExamGridEntity]] {
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal() = {
-		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy, eagerLoad = true)
+		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy, eagerLoad = true).map(scyd => scyd.toGenerateExamGridEntity())
 	}
 
 }

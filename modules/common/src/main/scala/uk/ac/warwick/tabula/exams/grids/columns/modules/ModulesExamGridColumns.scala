@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridExporter
-import uk.ac.warwick.tabula.data.model.{Module, ModuleSelectionStatus, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, Module, ModuleSelectionStatus}
 import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns._
 
@@ -21,23 +21,25 @@ trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 
 }
 
-abstract class ModuleExamGridColumn(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal)
-	extends ExamGridColumn(scyds) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal)
+	extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 	override val title: String = s"${module.code.toUpperCase} ${module.name}"
 
 	override def render: Map[String, String] =
-		scyds.map(scyd => scyd.id -> {
-			val modreg = scyd.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
+		entities.map(entity => entity.id -> {
+			val modreg = entity.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
 			modreg.map(mr => {
-				if (mr.agreedMark != null) {
-					if (mr.agreedGrade == "F") {
-						s"<span class='exam-grid-fail'>${mr.agreedMark.toPlainString}</span>"
-					} else if (mr.agreedMark.toPlainString == "0") {
-						s"${mr.agreedMark.toPlainString}(${mr.agreedGrade})"
-					}	else {
-						mr.agreedMark.toPlainString
-					}
+				val mark = markWithOverride(entity, mr)
+				if (mark != null) {
+					// entity.studentCourseYearDetails.isDefined checks if this is a real SCYD or just an entity for showing overcatting options
+					// If the latter we don't want to highlight if it's used (because in that case they all are)
+					val usedInOvercattingClass = if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) "exam-grid-overcat" else ""
+					val failedClass = if (mr.agreedGrade == "F") "exam-grid-fail" else ""
+					val overriddenClass = if (entity.markOverrides.flatMap(_.get(module)).isDefined) "exam-grid-override" else ""
+					val append = if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+
+					"<span class=\"%s\">%s%s</span>".format(Seq(usedInOvercattingClass, failedClass, overriddenClass).mkString(" "), mark.toString, append)
 				} else {
 					"?"
 				}
@@ -47,25 +49,46 @@ abstract class ModuleExamGridColumn(scyds: Seq[StudentCourseYearDetails], module
 	override def renderExcelCell(
 		row: XSSFRow,
 		index: Int,
-		scyd: StudentCourseYearDetails,
+		entity: GenerateExamGridEntity,
 		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 	): Unit = {
 		val cell = row.createCell(index)
-		val modreg = scyd.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
+		val modreg = entity.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
 		modreg.foreach(mr => {
-			if (mr.agreedMark != null) {
-				if (mr.agreedGrade == "F") {
-					cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Fail))
-					cell.setCellValue(mr.agreedMark.doubleValue)
-				} else if (mr.agreedMark.toPlainString == "0") {
-					cell.setCellValue(s"${mr.agreedMark.toPlainString}(${mr.agreedGrade})")
-				}	else {
-					cell.setCellValue(mr.agreedMark.doubleValue)
+			val mark = markWithOverride(entity, mr)
+			if (mark != null) {
+				val usedInOvercatting = entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))
+				val isFailed = mr.agreedGrade == "F"
+				val isOverridden = entity.markOverrides.flatMap(_.get(module)).isDefined
+				val append = if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+
+				if (usedInOvercatting || isOverridden || append.length > 0) {
+					if (isOverridden) {
+						cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Overridden))
+					} else if (usedInOvercatting) {
+						cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Overcat))
+					}
+					cell.setCellValue("%s%s%s%s%s".format(
+						if (isOverridden) "{" else "",
+						mark.toString,
+						append,
+						if (isOverridden) "}" else "",
+						if (usedInOvercatting) "*" else ""
+					))
+				} else {
+					if (isFailed) {
+						cell.setCellStyle(cellStyleMap(GenerateExamGridExporter.Fail))
+					}
+					cell.setCellValue(mark.doubleValue)
 				}
 			} else {
 				cell.setCellValue("?")
 			}
 		})
+	}
+
+	private def markWithOverride(entity: GenerateExamGridEntity, moduleRegistration: ModuleRegistration): BigDecimal = {
+		entity.markOverrides.getOrElse(Map()).getOrElse(module, Option(moduleRegistration.agreedMark).map(m => BigDecimal(m)).orNull)
 	}
 
 	override val renderSecondaryValue: String = cats.toPlainString
@@ -74,8 +97,8 @@ abstract class ModuleExamGridColumn(scyds: Seq[StudentCourseYearDetails], module
 
 trait ModulesColumnOption extends columns.ExamGridColumnOption {
 
-	final override def getColumns(scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-	def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn]
+	final override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
+	def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
 
 }
 
@@ -86,19 +109,19 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = 4
 
-	case class Column(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(scyds, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Modules"
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
-		scyds.flatMap(_.moduleRegistrations)
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+		entities.flatMap(_.moduleRegistrations)
 			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(scyds, module, cats)}
+			.map{case(module, cats) => Column(entities, module, cats)}
 
 }
 
@@ -109,19 +132,19 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = 5
 
-	case class Column(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(scyds, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Required Modules"
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
-		scyds.flatMap(_.moduleRegistrations)
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+		entities.flatMap(_.moduleRegistrations)
 			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.CoreRequired || departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(scyds, module, cats)}
+			.map{case(module, cats) => Column(entities, module, cats)}
 
 }
 
@@ -132,19 +155,19 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = 6
 
-	case class Column(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(scyds, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Optional Modules"
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
-		scyds.flatMap(_.moduleRegistrations)
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+		entities.flatMap(_.moduleRegistrations)
 			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(scyds, module, cats)}
+			.map{case(module, cats) => Column(entities, module, cats)}
 
 }
 
@@ -155,18 +178,18 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = 6
 
-	case class Column(scyds: Seq[StudentCourseYearDetails], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(scyds, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Optional Modules"
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], scyds: Seq[StudentCourseYearDetails]): Seq[ExamGridColumn] =
-		scyds.flatMap(_.moduleRegistrations)
+	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+		entities.flatMap(_.moduleRegistrations)
 			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !departmentCoreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(scyds, module, cats)}
+			.map{case(module, cats) => Column(entities, module, cats)}
 
 }

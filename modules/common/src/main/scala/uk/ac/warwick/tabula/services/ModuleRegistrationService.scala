@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, StudentCourseDetails}
+import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
@@ -29,7 +30,10 @@ trait ModuleRegistrationService {
 		* @param moduleRegistrations The module registrations to use
 		* @return The weighted mean mark, if all the provided registration has an agreed mark
 		*/
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration]): Option[BigDecimal]
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
+
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])]
+
 }
 
 abstract class AbstractModuleRegistrationService extends ModuleRegistrationService {
@@ -50,15 +54,36 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
 
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration]): Option[BigDecimal] = {
-		if (moduleRegistrations.nonEmpty && moduleRegistrations.forall(_.agreedMark != null)) {
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal] = {
+		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
+			val mark: BigDecimal = markOverrides.getOrElse(mr.module, Option(mr.agreedMark).map(agreedMark => BigDecimal(agreedMark)).orNull)
+			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
+			(mark, cats)
+		}).filter{case(mark, cats) => mark != null & cats != null}
+		if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.size) {
 			Some(
-				(moduleRegistrations.map(mr => BigDecimal(mr.agreedMark) * BigDecimal(mr.cats)).sum / moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum)
+				(nonNullReplacedMarksAndCats.map{case(mark, cats) => mark * cats}.sum / nonNullReplacedMarksAndCats.map{case(_, cats) => cats}.sum)
 					.setScale(1, RoundingMode.HALF_UP)
 			)
 		} else {
 			None
 		}
+	}
+
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+		val coreAndCoreReqModules = entity.moduleRegistrations.filter(mr =>
+			mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.CoreRequired
+		)
+		val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
+		val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
+			// CATS total of at least the normal load
+			modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
+			// Contains all the core and core required modules
+			coreAndCoreReqModules.forall(modRegs.contains) &&
+			// All the registrations have agreed marks
+			modRegs.forall(mr => mr.agreedMark != null || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
+		)
+		validSubsets.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))).sortBy(_._1).reverse
 	}
 
 }

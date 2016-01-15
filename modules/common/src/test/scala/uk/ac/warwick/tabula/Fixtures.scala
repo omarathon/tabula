@@ -332,13 +332,18 @@ object Fixtures extends Mockito {
 		checkpoint
 	}
 
-	def moduleRegistration(scd: StudentCourseDetails, mod: Module, cats: java.math.BigDecimal, year: AcademicYear, occurrence: String) = {
-		new ModuleRegistration(scd, mod, cats, year, occurrence)
-	}
-
-	def moduleRegistration(cats: BigDecimal, agreedMark: BigDecimal) = {
-		val mr = new ModuleRegistration(null, null, cats.underlying, null, null)
+	def moduleRegistration(
+		scd: StudentCourseDetails,
+		mod: Module,
+		cats: java.math.BigDecimal,
+		year: AcademicYear,
+		occurrence: String = "",
+		agreedMark: BigDecimal = BigDecimal(0),
+		status: ModuleSelectionStatus = ModuleSelectionStatus.Core
+	) = {
+		val mr = new ModuleRegistration(scd, mod, cats, year, occurrence)
 		mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+		mr.selectionStatus = status
 		mr
 	}
 

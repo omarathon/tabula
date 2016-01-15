@@ -1,4 +1,5 @@
 <#escape x as x?html>
+<#import "grid_macros.ftl" as grid />
 
 <#function route_function dept>
 	<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
@@ -76,6 +77,10 @@
 					<td><span class="exam-grid-overcat">#</span></td>
 					<td>Used in overcatting calculation</td>
 				</tr>
+				<tr>
+					<td><span class="exam-grid-override">#</span></td>
+					<td>Manually adjusted and not stored in SITS</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -84,90 +89,19 @@
 		<tbody>
 			<#if categories?keys?has_content>
 				<tr class="category">
-					<#assign currentSection = "" />
-					<#assign currentCategory = "" />
-					<#list columns as column>
-						<#if column.sectionIdentifier?has_content && currentSection != column.sectionIdentifier>
-							<#assign currentSection = column.sectionIdentifier />
-							<td class="borderless"></td>
-						</#if>
-						<#if column.category?has_content>
-							<#if currentCategory != column.category>
-								<#assign currentCategory = column.category />
-								<th class="rotated first-in-category" colspan="${categories[column.category]?size}"><div class="rotate">${column.category}</div></th>
-							</#if>
-						<#else>
-							<td class="borderless"></td>
-						</#if>
-					</#list>
+					<@grid.categoryRow categories columns />
 				</tr>
 				<tr class="title-in-category">
-					<#assign currentSection = "" />
-					<#assign currentCategory = "" />
-					<#list columns as column>
-						<#if column.sectionTitleLabel?has_content>
-							<#if currentSection != column.sectionIdentifier>
-								<#assign currentSection = column.sectionIdentifier />
-								<th>${column.sectionTitleLabel}</th>
-							</#if>
-						</#if>
-						<#if column.category?has_content>
-							<#if currentCategory != column.category>
-								<#assign firstInCategory = true />
-								<#assign currentCategory = column.category />
-							<#else>
-								<#assign firstInCategory = false />
-							</#if>
-							<td class="rotated <#if firstInCategory!false>first-in-category</#if>"><div class="rotate">${column.title}</div></td>
-						<#else>
-							<td class="borderless"></td>
-						</#if>
-					</#list>
+					<@grid.titleInCategoryRow categories columns />
 				</tr>
 			</#if>
 			<tr>
-				<#assign currentSection = "" />
-				<#assign currentCategory = "" />
-				<#list columns as column>
-					<#if column.sectionSecondaryValueLabel?has_content && currentSection != column.sectionIdentifier>
-						<#assign currentSection = column.sectionIdentifier />
-						<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
-					</#if>
-					<#if column.category?has_content && currentCategory != column.category>
-						<#assign firstInCategory = true />
-						<#assign currentCategory = column.category />
-					<#else>
-						<#assign firstInCategory = false />
-					</#if>
-					<#if !column.category?has_content>
-						<th>${column.title}</th>
-					<#elseif column.renderSecondaryValue?has_content>
-						<td <#if firstInCategory!false>class="first-in-category"</#if>><#noescape>${column.renderSecondaryValue}</#noescape></td>
-					<#else>
-						<td <#if firstInCategory!false>class="first-in-category"</#if>></td>
-					</#if>
-				</#list>
+				<@grid.headerRow columns />
 			</tr>
 			<#list scyds as scyd>
 				<tr class="student">
-					<#assign currentSection = "" />
-					<#assign currentCategory = "" />
-					<#list columnValues as columnValue>
-						<#assign column = columns[columnValue_index] />
-						<#if column.sectionValueLabel?has_content && currentSection != column.sectionIdentifier && scyd_index == 0>
-							<#assign currentSection = column.sectionIdentifier />
-							<th rowspan="${scyds?size}" class="section-value-label">${column.sectionValueLabel}</th>
-						</#if>
-						<#if column.category?has_content && currentCategory != column.category>
-							<#assign firstInCategory = true />
-							<#assign currentCategory = column.category />
-						<#else>
-							<#assign firstInCategory = false />
-						</#if>
-						<td <#if firstInCategory!false>class="first-in-category"</#if>>
-							<#if columnValue[scyd.id]?has_content><#noescape>${columnValue[scyd.id]}</#noescape></#if>
-						</td>
-					</#list>
+					<#assign isFirstSCYD = scyd_index == 0 />
+					<@grid.entityRows scyd isFirstSCYD scyds?size columns columnValues />
 				</tr>
 			</#list>
 		</tbody>
@@ -175,6 +109,8 @@
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
 </form>
+
+<div class="modal fade" id="edit-overcatting-modal"></div>
 
 <script>
 	jQuery(function($){
@@ -187,6 +123,12 @@
 				'margin-left': height / 2
 			});
 		});
+
+		$('button.edit-overcatting').each(function(){
+			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student'))
+				.data('target', '#edit-overcatting-modal');
+
+		}).ajaxModalLink();
 	});
 </script>
 

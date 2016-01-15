@@ -18,6 +18,9 @@
 		transform: rotateZ(-90deg);
 		white-space: nowrap;
 		left: 50%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 300px;
 	}
 }
 
@@ -89,6 +92,12 @@
 		position: absolute;
 		background: white;
 		z-index: 1;
+
+	}
+	.overcat-key {
+		float: right;
+	}
+	.key, .overcat-key {
 		.table {
 			margin-bottom: 0;
 			border: 1px solid @table-border-color;
@@ -98,13 +107,11 @@
 			background: @table-bg-hover;
 		}
 	}
+	h3 {
+		margin-top: 0;
+	}
 	.id7-table-wrapper-popout {
 		float: right;
-	}
-	.exam-grid-fail {
-		color: @brand-danger;
-		text-decoration: underline;
-		border-bottom: 1px solid @brand-danger;
 	}
 	.exam-grid-overcat {
 		color: @brand-success;
@@ -112,7 +119,34 @@
 			content: "*";
 		}
 	}
+	.exam-grid-override {
+		color: @brand-info;
+		&:before {
+			content: "{";
+		}
+		&:after {
+			content: "}";
+
+		}
+		&.exam-grid-overcat:after {
+			content: "}*";
+		}
+	}
+	.exam-grid-fail {
+		color: @brand-danger;
+		text-decoration: underline;
+		border-bottom: 1px solid @brand-danger;
+	}
 	.grid {
+		&.overcat {
+			margin-bottom: 0;
+		}
+		tr.student:hover {
+			background-color: darken(@table-bg-hover, 5%);
+		}
+		tr.clickable {
+			cursor: pointer;
+		}
 		th, td {
 			border: 1px solid @table-border-color;
 			&.borderless {
@@ -125,6 +159,15 @@
 		td {
 			white-space: nowrap;
 		}
+		thead {
+			th, td {
+				border-left: 0;
+				border-right: 0;
+				border-top: 0;
+				background: white;
+				text-align: center;
+			}
+		}
 		.title-in-category th, th.section-secondary-label, th.section-value-label {
 			text-align: center;
 			vertical-align: middle;
@@ -134,6 +177,10 @@
 		}
 		.first-in-category {
 			border-left-width: 2px;
+		}
+		input[type="text"] {
+			width: 42px;
+			padding: 6px;
 		}
 	}
 }
