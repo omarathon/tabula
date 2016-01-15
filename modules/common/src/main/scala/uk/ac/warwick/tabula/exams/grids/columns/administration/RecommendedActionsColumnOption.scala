@@ -24,7 +24,7 @@ class RecommendedActionsColumnOption extends columns.ExamGridColumnOption with A
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> {
 				val hasOvercatted = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum > entity.normalCATLoad
-				val hasMoreThanOneSubset = moduleRegistrationService.overcattedModuleSubsets(entity).size > 1
+				val hasMoreThanOneSubset = moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1
 				if (hasOvercatted && hasMoreThanOneSubset) {
 					"<button class=\"btn btn-default edit-overcatting\" type=\"button\" data-student=\"%s\">Edit</button>".format(entity.id)
 				} else {

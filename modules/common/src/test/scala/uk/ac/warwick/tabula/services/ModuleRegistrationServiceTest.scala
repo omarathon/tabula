@@ -16,31 +16,49 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 
 	@Test
 	def weightedMeanYearMark(): Unit = {
-		val module = Fixtures.module("xx101") // Doesn't matter if they're all for the same module
+		val module1 = Fixtures.module("xx101")
+		val module2 = Fixtures.module("xx102")
+		val module3 = Fixtures.module("xx103")
+		val module4 = Fixtures.module("xx104")
+		val module5 = Fixtures.module("xx105")
+		val module6 = Fixtures.module("xx106")
 		new Fixture {
 			val moduleRegistrations = Seq(
-				Fixtures.moduleRegistration(null, module, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(0)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+				Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
+				Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
+				Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
+				Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(0)),
+				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
+				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val result = service.weightedMeanYearMark(moduleRegistrations)
+			val result = service.weightedMeanYearMark(moduleRegistrations, Map())
 			result.isDefined should be {true}
 			result.get.scale should be (1)
 			result.get.doubleValue() should be (64.6)
 
 			val moduleRegistrationsWithMissingAgreedMark = Seq(
-				Fixtures.moduleRegistration(null, module, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(7.5).underlying, null, agreedMark = null),
-				Fixtures.moduleRegistration(null, module, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
-				Fixtures.moduleRegistration(null, module, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+				Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
+				Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
+				Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
+				Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = null),
+				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
+				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val noResult = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark)
+			val noResult = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map())
 			noResult.isDefined should be {false}
+
+			val moduleRegistrationsWithOverriddenMark = Seq(
+				Fixtures.moduleRegistration(null, module1, BigDecimal(30).underlying, null, agreedMark = BigDecimal(100)),
+				Fixtures.moduleRegistration(null, module2, BigDecimal(45).underlying, null, agreedMark = BigDecimal(58)),
+				Fixtures.moduleRegistration(null, module3, BigDecimal(15).underlying, null, agreedMark = BigDecimal(30)),
+				Fixtures.moduleRegistration(null, module4, BigDecimal(7.5).underlying, null, agreedMark = null),
+				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
+				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
+			)
+			val overriddenResult = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0))
+			overriddenResult.isDefined should be {true}
+			overriddenResult.get.scale should be (1)
+			overriddenResult.get.doubleValue() should be (64.6)
 		}
 	}
 
@@ -61,7 +79,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Option)
 			)
 			moduleRegistrations.foreach(scd.addModuleRegistration)
-			val result = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toGenerateExamGridEntity())
+			val result = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toGenerateExamGridEntity(), Map())
 			// There are 81 CATS of core modules, leaving 39 to reach the normal load of 120
 			// All the options are 15 CATS, so there are 5 combinations of modules that are valid (4 with 3 in each and 1 with 4)
 			result.size should be (5)

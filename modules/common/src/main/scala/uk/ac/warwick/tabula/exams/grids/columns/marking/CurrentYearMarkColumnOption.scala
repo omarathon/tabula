@@ -14,8 +14,7 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	override val sortOrder: Int = 9
 
-	case class Column(entities: Seq[GenerateExamGridEntity])
-		extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 
 		override val title: String = "Mean Module Mark"
 
@@ -38,16 +37,16 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
 			val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-			if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity).size > 1 && entity.overcattingModules.isEmpty) {
+			if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1 && entity.overcattingModules.isEmpty) {
 				// If the student has overcatted, has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
 				None
 			} else {
-				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations)
+				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
 			}
 		}
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =	Seq(Column(entities))
 
 }

@@ -3,17 +3,20 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.marking.{CurrentYearMarkColumnOption, OvercattedYearMarkColumnOption}
-import uk.ac.warwick.tabula.exams.grids.columns.modules._
-import uk.ac.warwick.tabula.exams.grids.columns.{HasExamGridColumnCategory, ExamGridColumn, ExamGridColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption}
+import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
+import scala.collection.JavaConverters._
 
 object GenerateExamGridOvercatCommand {
 	def overcatIdentifier(modules: Seq[ModuleRegistration]) = modules.map(_.module.code).mkString("-")
@@ -42,7 +45,7 @@ class GenerateExamGridOvercatCommandInternal(val department: Department, val aca
 		scyd.overcattingModules = modules
 		scyd.overcattingChosenBy = user.apparentUser
 		scyd.overcattingChosenDate = DateTime.now
-		scyd.overcattingModules
+		scyd.overcattingMarkOverrides = overwrittenMarks
 		studentCourseYearDetailsDao.saveOrUpdate(scyd)
 		modules
 	}
@@ -59,6 +62,9 @@ trait PopulateGenerateExamGridOvercatCommand extends PopulateOnForm {
 				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
 			)
 		).getOrElse("")
+		scyd.overcattingMarkOverrides.foreach(overcattingMarkOverrides =>
+			overcattingMarkOverrides.foreach{case(module, mark) => newModuleMarks.put(module, mark.toString) }
+		)
 	}
 }
 
@@ -109,119 +115,22 @@ trait GenerateExamGridOvercatCommandState {
 	def scyd: StudentCourseYearDetails
 	def user: CurrentUser
 
-	private lazy val departmentCoreRequiredModules = department.getCoreRequiredModules(
-		academicYear,
-		scyd.studentCourseDetails.course,
-		scyd.studentCourseDetails.route,
-		scyd.yearOfStudy
-	).getOrElse(Seq())
-
-	protected lazy val overcattedMarks: Seq[(BigDecimal, Seq[ModuleRegistration])] =
-		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity())
-
-	protected lazy val overcattedEntities = overcattedMarks.map{case(mark, overcattedModules) => GenerateExamGridEntity(
-		GenerateExamGridOvercatCommand.overcatIdentifier(overcattedModules),
-		null,
-		null,
-		overcattedModules,
-		scyd.normalCATLoad,
-		Some(overcattedModules.map(_.module)),
-		None
-	)}
-
-	lazy val previousYearsSCYDs: Seq[StudentCourseYearDetails] = scyd.studentCourseDetails.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails)
-		.groupBy(_.academicYear)
-		.filterKeys(academicYear > _)
-		.mapValues(_.sortBy(s => (s.studentCourseDetails.scjCode, s.sceSequenceNumber)).reverse.head)
-		.values.toSeq.sortBy(_.academicYear.startYear).reverse
-
-	private lazy val allModulesEntities = overcattedMarks.map{case(mark, overcattedModules) => GenerateExamGridEntity(
-		GenerateExamGridOvercatCommand.overcatIdentifier(overcattedModules),
-		null,
-		null,
-		scyd.moduleRegistrations,
-		scyd.normalCATLoad,
-		Some(scyd.moduleRegistrations.map(_.module)),
-		None
-	)}
-
-	lazy val optionsColumns: Seq[ExamGridColumn] = Seq(
-		new ChooseOvercatColumnOption().getColumns(overcattedEntities, Option(overcatChoice).getOrElse("")),
-		new OvercattedYearMarkColumnOption().getColumns(overcattedEntities),
-		new CurrentYearMarkColumnOption().getColumns(allModulesEntities)
-	).flatten
-
-	lazy val optionsColumnsCategories: Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]] =
-		optionsColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
-
-	lazy val optionsColumnValues: Seq[Map[String, String]] = optionsColumns.map(_.render)
-
-	lazy val columnsBySCYD: Map[StudentCourseYearDetails, Seq[ExamGridColumn]] = Map(
-		scyd -> Seq(
-			new CoreModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new CoreRequiredModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new CoreOptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new OptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities)
-		).flatten
-	) ++ previousYearsSCYDs.map(thisSCYD => {
-		// We need to show the same row in previous years for each of the overcatted entities, but with the identifier of each overcatted entity
-		val entityList = overcattedEntities.map(overcattedEntity => thisSCYD.toGenerateExamGridEntity(Some(overcattedEntity.id)))
-		thisSCYD -> Seq(
-			new CoreModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new CoreRequiredModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new CoreOptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new OptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList)
-		).flatten
-	}).toMap
-
-	lazy val columnsBySCYDCategories: Map[StudentCourseYearDetails, Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]]] =
-		columnsBySCYD.mapValues(columns => columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
-
-	lazy val columnsBySCYDValues: Map[StudentCourseYearDetails, Seq[Map[String, String]]] =
-		columnsBySCYD.mapValues(columns => columns.map(_.render))
-
 }
 
 trait GenerateExamGridOvercatCommandRequest {
 
-	self: GenerateExamGridOvercatCommandState =>
+	self: GenerateExamGridOvercatCommandState with ModuleRegistrationServiceComponent =>
 
 	var overcatChoice: String = _
 
 	def chosenModuleSubset: Option[(BigDecimal, Seq[ModuleRegistration])] =
-		overcattedMarks.find{case(_, modules) => GenerateExamGridOvercatCommand.overcatIdentifier(modules) == Option(overcatChoice).getOrElse("")}
+		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(), overwrittenMarks)
+			.find{case(_, modules) => GenerateExamGridOvercatCommand.overcatIdentifier(modules) == overcatChoice.maybeText.getOrElse("")}
 
-}
+	var newModuleMarks: JMap[Module, String] = LazyMaps.create { module: Module => null: String }.asJava
 
-class ChooseOvercatColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
-
-	override val identifier: ExamGridColumnOption.Identifier = "chooseovercat"
-
-	override val sortOrder: Int = 0
-
-	case class Column(entities: Seq[GenerateExamGridEntity], selectedEntityId: String) extends ExamGridColumn(entities) {
-
-		override val title: String = ""
-
-		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> "<input type=\"radio\" name=\"overcatChoice\" value=\"%s\" %s />".format(
-				entity.id,
-				if (selectedEntityId == entity.id) "checked" else ""
-			)).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			row.createCell(index)
-		}
-
-	}
-
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-
-	def getColumns(entities: Seq[GenerateExamGridEntity], selectedEntityId: String): Seq[ExamGridColumn] = Seq(Column(entities, selectedEntityId))
+	def overwrittenMarks: Map[Module, BigDecimal] = newModuleMarks.asScala.map{case(module, markString) =>
+		module -> markString.maybeText.map(mark => BigDecimal.apply(mark))
+	}.filter(_._2.isDefined).mapValues(_.get).toMap
 
 }

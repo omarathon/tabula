@@ -39,13 +39,16 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
 			val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
 			if (cats > entity.normalCATLoad) {
-				if (moduleRegistrationService.overcattedModuleSubsets(entity).size <= 1) {
+				if (moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size <= 1) {
 					// If the student has overcatted, but there's only one valid subset, just show the mean mark
-					moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations)
+					moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
 				} else if (entity.overcattingModules.isDefined) {
 					// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
 					// calculate the overcatted mark from that subset
-					moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations.filter(mr => entity.overcattingModules.get.contains(mr.module)))
+					moduleRegistrationService.weightedMeanYearMark(
+						entity.moduleRegistrations.filter(mr => entity.overcattingModules.get.contains(mr.module)),
+						entity.markOverrides.getOrElse(Map())
+					)
 				} else {
 					None
 				}
@@ -56,6 +59,6 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
 
 }

@@ -77,6 +77,10 @@
 					<td><span class="exam-grid-overcat">#</span></td>
 					<td>Used in overcatting calculation</td>
 				</tr>
+				<tr>
+					<td><span class="exam-grid-override">#</span></td>
+					<td>Manually adjusted and not stored in SITS</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>

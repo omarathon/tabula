@@ -92,6 +92,12 @@
 		position: absolute;
 		background: white;
 		z-index: 1;
+
+	}
+	.overcat-key {
+		float: right;
+	}
+	.key, .overcat-key {
 		.table {
 			margin-bottom: 0;
 			border: 1px solid @table-border-color;
@@ -100,6 +106,9 @@
 			text-align: center;
 			background: @table-bg-hover;
 		}
+	}
+	h3 {
+		margin-top: 0;
 	}
 	.id7-table-wrapper-popout {
 		float: right;
@@ -110,12 +119,28 @@
 			content: "*";
 		}
 	}
+	.exam-grid-override {
+		color: @brand-info;
+		&:before {
+			content: "{";
+		}
+		&:after {
+			content: "}";
+
+		}
+		&.exam-grid-overcat:after {
+			content: "}*";
+		}
+	}
 	.exam-grid-fail {
 		color: @brand-danger;
 		text-decoration: underline;
 		border-bottom: 1px solid @brand-danger;
 	}
 	.grid {
+		&.overcat {
+			margin-bottom: 0;
+		}
 		tr.student:hover {
 			background-color: darken(@table-bg-hover, 5%);
 		}
@@ -152,6 +177,10 @@
 		}
 		.first-in-category {
 			border-left-width: 2px;
+		}
+		input[type="text"] {
+			width: 42px;
+			padding: 6px;
 		}
 	}
 }

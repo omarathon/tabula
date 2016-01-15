@@ -30,6 +30,7 @@ case class GenerateExamGridEntity(
 	moduleRegistrations: Seq[ModuleRegistration],
 	normalCATLoad: Int,
 	overcattingModules: Option[Seq[Module]],
+	markOverrides: Option[Map[Module, BigDecimal]],
 	studentCourseYearDetails: Option[StudentCourseYearDetails]
 )
 

@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.TermNotFoundException
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.beans.BeanProperty
 
@@ -25,6 +26,7 @@ object StudentCourseYearDetails {
 		final val Modules = "modules"
 		final val ChosenBy = "chosenBy"
 		final val ChosenDate = "chosenDate"
+		final val MarkOverrides = "markOverrides"
 	}
 }
 
@@ -164,6 +166,22 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 	def overcattingChosenDate_= (chosenDate: DateTime) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
 
+	def overcattingMarkOverrides: Option[Map[Module, BigDecimal]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.MarkOverrides)) match {
+		case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
+		case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
+		case _ => None
+	}).map(_.toSeq.flatMap{case(moduleCode, markString) =>
+		val moduleOption = moduleAndDepartmentService.getModuleByCode(moduleCode)
+		val markOption = markString.maybeText.map(mark => BigDecimal(mark))
+		if (moduleOption.isDefined && markOption.isDefined) {
+			Option((moduleOption.get, markOption.get))
+		} else {
+			None
+		}
+	}.toMap)
+	def overcattingMarkOverrides_= (markOverrides: Map[Module, BigDecimal]) = overcatting +=
+		(StudentCourseYearDetails.Overcatting.MarkOverrides -> markOverrides.map{case(module, mark) => module.code -> mark.toString})
+
 	def toGenerateExamGridEntity(identifier: Option[String] = None) = GenerateExamGridEntity(
 		identifier.getOrElse(id),
 		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
@@ -171,6 +189,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		moduleRegistrations,
 		normalCATLoad,
 		overcattingModules,
+		overcattingMarkOverrides,
 		Some(this)
 	)
 

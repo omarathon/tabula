@@ -10,9 +10,10 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Module, Department, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModulesColumnOption}
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, BlankColumnOption, HasExamGridColumnCategory, ExamGridColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -21,7 +22,6 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -129,7 +129,7 @@ class GenerateExamGridController extends ExamsController
 		if (errors.hasErrors) {
 			gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 		} else {
-			val scyds = selectCourseCommand.apply()
+			val entities = selectCourseCommand.apply()
 			val columnIDs = gridOptionsCommand.apply()
 			val coreRequiredModules = selectCourseCommand.department.getCoreRequiredModules(
 				selectCourseCommand.academicYear,
@@ -141,7 +141,7 @@ class GenerateExamGridController extends ExamsController
 				commonCrumbs(
 					Mav("exams/grids/generate/coreRequiredModules",
 						"jobId" -> jobId,
-						"modules" -> scyds.flatMap(_.moduleRegistrations.map(_.module)).distinct.sortBy(_.code)
+						"modules" -> entities.flatMap(_.moduleRegistrations.map(_.module)).distinct.sortBy(_.code)
 					),
 					department,
 					academicYear
@@ -244,7 +244,7 @@ class GenerateExamGridController extends ExamsController
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
-		val (scyds, columns) = gridData(selectCourseCommand, gridOptionsCommand)
+		val (entities, columns) = gridData(selectCourseCommand, gridOptionsCommand)
 		val columnValues = columns.map(_.render)
 		val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 
@@ -253,7 +253,7 @@ class GenerateExamGridController extends ExamsController
 				"columns" -> columns,
 				"columnValues" -> columnValues,
 				"categories" -> categories,
-				"scyds" -> scyds,
+				"scyds" -> entities,
 				"generatedDate" -> DateTime.now
 			),
 			department,
@@ -273,11 +273,11 @@ class GenerateExamGridController extends ExamsController
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
 		}
-		val (scyds, columns) = gridData(selectCourseCommand, gridOptionsCommand)
+		val (entities, columns) = gridData(selectCourseCommand, gridOptionsCommand)
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
-			GenerateExamGridExporter(scyds, columns, academicYear)
+			GenerateExamGridExporter(entities, columns, academicYear)
 		)
 	}
 
@@ -285,7 +285,7 @@ class GenerateExamGridController extends ExamsController
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand
 	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn]) = {
-		val scyds = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
+		val entities = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
 
 		val gridOptions = gridOptionsCommand.apply()
 		val predefinedColumnIDs = gridOptions._1
@@ -293,16 +293,18 @@ class GenerateExamGridController extends ExamsController
 
 		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
 		val predefinedColumns = allExamGridsColumns.filter(c => predefinedColumnIDs.contains(c.identifier)).flatMap{
-			case coreRequiredColumn: ModulesColumnOption => coreRequiredColumn.getColumns(
-				selectCourseCommand.department.getCoreRequiredModules(selectCourseCommand.academicYear, selectCourseCommand.course, selectCourseCommand.route, selectCourseCommand.yearOfStudy).getOrElse(Seq()),
-				scyds
-			)
-			case column => column.getColumns(scyds)
+			case modulesColumn: ModulesColumnOption =>
+				modulesColumn.getColumns(
+					selectCourseCommand.department.getCoreRequiredModules(selectCourseCommand.academicYear, selectCourseCommand.course, selectCourseCommand.route, selectCourseCommand.yearOfStudy).getOrElse(Seq()),
+					entities
+				)
+			case column =>
+				column.getColumns(entities)
 		}
 		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val columns = predefinedColumns ++ customColumns
 
-		(scyds, columns)
+		(entities, columns)
 	}
 
 }
