@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
+import java.util.concurrent.{ScheduledExecutorService, TimeoutException}
+
 import org.hibernate.{FlushMode, SessionFactory}
 import org.springframework.orm.hibernate4.{SessionFactoryUtils, SessionHolder}
 import org.springframework.transaction.support.TransactionSynchronizationManager
@@ -25,14 +27,29 @@ trait Futures {
 	}
 
 	/**
-		* Constructs a Future that contains the passed result after a duration. Useful for the pattern where you
-		* have a Future with a result that you want to try for, but timeout after a period of time, you can then use
-		* Future.firstCompletedOf to get either the timeout as a default or timeout value.
+		* Constructs a Future that will return the result (or failure) of the passed Future if it completes within
+		* the specified Duration, else will return a failure with a TimeoutException.
 		*/
-	def timeout[A](result: => A, duration: Duration)(implicit executor: ExecutionContext): Future[A] = Future {
-		Thread.sleep(duration.toMillis)
-		result
+	def withTimeout[A](f: Future[A], duration: Duration)(implicit executor: ExecutionContext, scheduler: ScheduledExecutorService): Future[A] = {
+		val p = scala.concurrent.Promise[A]
+
+		// After the specified time, fail the promise
+		scheduler.schedule(Runnable {
+			p.tryFailure(new TimeoutException)
+		}, duration.length, duration.unit)
+
+		p.tryCompleteWith(f)
+
+		p.future
 	}
+
+	/**
+		* Returns a Future that recovers from a timeout by returning an empty Option, or a non-empty option if it completes
+		* successfully within the specified timeout.
+		*/
+	def optionalTimeout[A](f: Future[A], duration: Duration)(implicit executor: ExecutionContext, scheduler: ScheduledExecutorService): Future[Option[A]] =
+		withTimeout(f, duration).map { Some(_) }
+			  .recover { case _: TimeoutException => None }
 
 }
 

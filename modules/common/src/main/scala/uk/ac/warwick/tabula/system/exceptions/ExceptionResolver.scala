@@ -1,30 +1,32 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import java.io.IOException
+import javax.servlet.ServletException
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Required
+import org.springframework.beans.TypeMismatchException
+import org.springframework.beans.factory.annotation.{Autowired, Required}
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.web.servlet.HandlerExceptionResolver
-import org.springframework.web.servlet.ModelAndView
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.ServletException
+import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.accept.ContentNegotiationManager
+import org.springframework.web.bind.MissingServletRequestParameterException
+import org.springframework.web.context.request.ServletWebRequest
+import org.springframework.web.multipart.MultipartException
+import org.springframework.web.servlet.{HandlerExceptionResolver, ModelAndView}
+import org.springframework.web.servlet.view.RedirectView
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Ordered
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.profiles.DefaultPhoto
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
+import uk.ac.warwick.tabula.helpers.{Logging, Ordered}
+import uk.ac.warwick.tabula.system.{RenderableFileView, CurrentUserInterceptor, RequestInfoInterceptor}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.util.core.ExceptionUtils
-import org.springframework.beans.TypeMismatchException
-import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RequestInfoInterceptor}
-import org.springframework.web.multipart.MultipartException
-import org.springframework.web.bind.MissingServletRequestParameterException
-import org.springframework.web.HttpRequestMethodNotSupportedException
 import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.util.core.ExceptionUtils
+
+import scala.collection.JavaConverters._
 
 /**
  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
@@ -41,6 +43,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 	@Autowired var userInterceptor: CurrentUserInterceptor = _
 	@Autowired var infoInterceptor: RequestInfoInterceptor = _
+
+	@Autowired var contentNegotiationManager: ContentNegotiationManager = _
 
 	/**
 	 * If the interesting exception matches one of these exceptions then
@@ -158,6 +162,12 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 					"status" -> statusReason.toLowerCase.replace(' ', '_'),
 					"errors" -> Array(Map("message" -> interestingException.getMessage))
 				))
+			} else if (request.requestedUri.getPath.startsWith("/profiles/view/photo") && contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request)).asScala.exists(_.getType == "image")) {
+				// FIXME this is a bit general, and would be confusing if you were downloading jpg of someone's submission
+				response.foreach(_.addHeader("X-Error", interestingException.getMessage))
+
+				mav.viewName = null
+				mav.view = new RenderableFileView(DefaultPhoto)
 			}
 		}
 

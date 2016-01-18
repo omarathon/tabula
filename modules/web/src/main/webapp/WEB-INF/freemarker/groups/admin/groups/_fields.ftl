@@ -40,7 +40,7 @@
 						<@f.radiobutton path="allocationMethod" value="Linked" selector=".linked-options" />
 						Linked to
 						<span class="linked-options" style="display: inline-block;">
-							<@f.select path="linkedDepartmentSmallGroupSet" id="academicYear" cssClass="form-control">
+							<@f.select path="linkedDepartmentSmallGroupSet" id="linkedDepartmentSmallGroupSet" cssClass="form-control">
 								<@f.options items=departmentSmallGroupSets itemLabel="name" itemValue="id" />
 							</@f.select>
 						</span>
