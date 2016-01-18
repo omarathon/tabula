@@ -94,7 +94,7 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 		val target = targetFile(file.id)
 		val directory = target.getParentFile
 		directory.mkdirs()
-		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
+		if (!directory.exists) throw new IllegalStateException(s"Couldn't create directory to store file: $directory")
 		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
 
 		file.hash = fileHasher.hash(new FileInputStream(target))
