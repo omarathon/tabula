@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.spring.Wire
@@ -17,9 +18,10 @@ class PhotoController extends ProfilesController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = ViewProfilePhotoCommand(member)
+	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) =
+		ViewProfilePhotoCommand(member)
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
 	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)
 		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
 		command.apply()
@@ -45,7 +47,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 					relationshipService.getAllPastAndPresentRelationships(student)
 						.filter { rel => rel.relationshipType == mandatory(relationshipType) && rel.agent == agent }
 
-				val relationship = relationships.find { _.isCurrent }.headOption.orElse(relationships.headOption)
+				val relationship = relationships.find { _.isCurrent }.orElse(relationships.headOption)
 
 				new ViewStudentRelationshipPhotoCommand(student, relationship.getOrElse { throw new ItemNotFoundException })
 			case _ =>
@@ -53,7 +55,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 		}
 	}
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
 	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)
 		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
 		command.apply()

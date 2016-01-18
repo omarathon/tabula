@@ -17,16 +17,19 @@ import HttpServletRequestUtils._
  */
 trait HttpServletRequestUtils {
 	class SuperHttpServletRequest(request: HttpServletRequest) {
+		private def isResponseType(mediaTypes: MediaType*) =
+			new ProducesRequestCondition((MediaType.TEXT_HTML +: mediaTypes).map(_.toString): _*).getMatchingCondition(request) match {
+				case null => false
+				case condition if condition.getExpressions.asScala.exists(_.getMediaType == MediaType.TEXT_HTML) => false
+				case _ => true
+			}
+
 		def isJsonRequest = {
 			// Assume yes for the API
 			if (requestedUri.getPath.startsWith("/api")) true
 			else {
 				if (new ConsumesRequestCondition("application/json").getMatchingCondition(request) != null) true
-				else new ProducesRequestCondition("text/html", "application/json", "text/json").getMatchingCondition(request) match {
-					case null => false
-					case condition if condition.getExpressions.asScala.exists(_.getMediaType == MediaType.TEXT_HTML) => false
-					case _ => true
-				}
+				else isResponseType(MediaType.APPLICATION_JSON, MediaType.parseMediaType("text/json"))
 			}
 		}
 
