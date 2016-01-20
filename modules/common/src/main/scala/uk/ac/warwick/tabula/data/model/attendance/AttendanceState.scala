@@ -10,7 +10,7 @@ object AttendanceState {
 	case object Attended extends AttendanceState("attended", "Attended")
 	case object MissedAuthorised extends AttendanceState("authorised", "Missed (authorised)")
 	case object MissedUnauthorised extends AttendanceState("unauthorised", "Missed (unauthorised)")
-	case object NotRecorded extends AttendanceState("not-recorded", "Not recorded") // Equivalent to null
+	case object NotRecorded extends AttendanceState("not-recorded", "Unrecorded") // Equivalent to null
 
 	def fromCode(code: String) = code match {
 	  	case Attended.dbValue => Attended
