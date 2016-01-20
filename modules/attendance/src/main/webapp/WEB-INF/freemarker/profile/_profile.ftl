@@ -124,28 +124,30 @@
 			${student.firstName} has ${allNotes?size} attendance notes.
 			</#if>
 		</div>
+			<div class="striped-section-contents">
+				<div class="row-fluid">
+					<#if (allNotes?size > 0)>
+						<h4>Filter Options</h4>
+						<!--As part of ID7 migration checkbox inline should be replaced by checkbox-inline -->
+						<div class= "checkbox  inline checkpointState-checkbox checkpointState-all">
+							<input class ="form-control" type="checkbox" name="all" value="all"   checked />All
+						</div>
 
-		<div class="striped-section-contents">
-			<div class="row-fluid">
-				<h4>Filter Options</h4>
-				<!--As part of ID7 migration checkbox inline should be replaced by checkbox-inline -->
-				<div class= "checkbox  inline checkpointState-checkbox checkpointState-all">
-					<input class ="form-control" type="checkbox" name="all" value="all"   checked />All
+						<#list allCheckpointStates as state>
+							<div class= "checkbox inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
+								<input  class ="form-control" type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}
+							</div>
+						</#list>
+						<@attendance_note_macros.allNotes notes=allNotes  />
+						<#list checkPointNotesMap?keys as state>
+							<@attendance_note_macros.checkpointNotes  checkpointNoteList=checkPointNotesMap[state] type=state />
+						</#list>
+						<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=unrecordedNotes  />
+					<#else>
+						<div class="span12"><em>There are no notes.</em></div>
+					</#if>
 				</div>
-
-				<#list allCheckpointStates as state>
-					<div class= "checkbox inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
-						<input  class ="form-control" type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}
-					</div>
-				</#list>
-				<@attendance_note_macros.allNotes notes=allNotes  />
-				<#list checkPointNotesMap?keys as state>
-					<@attendance_note_macros.checkpointNotes  checkpointNoteList=checkPointNotesMap[state] type=state />
-				</#list>
-				<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=unrecordedNotes  />
-
 			</div>
-		</div>
 	</div>
 </#if>
 <script type="text/javascript">
