@@ -114,7 +114,8 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def recipients = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
-		if (hasSubmitted || !shouldSend) {
+		// Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
+		if (hasSubmitted || (!extension.approved || extension.expiryDate.isEmpty) || !shouldSend) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByWarwickUniId(extension.universityId))

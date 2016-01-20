@@ -26,7 +26,7 @@ class ViewAgentsController extends AttendanceController {
 		val agents = cmd.apply()
 		Mav("view/agents",
 			"agents" -> agents,
-			"agentsEmails" -> agents.flatMap(a => Option(a.agentMember)).map(_.email)
+			"agentsEmails" -> agents.flatMap(a => Option(a.agentMember)).flatMap(_.email.maybeText)
 		).crumbs(
 			Breadcrumbs.View.Home,
 			Breadcrumbs.View.Department(department),

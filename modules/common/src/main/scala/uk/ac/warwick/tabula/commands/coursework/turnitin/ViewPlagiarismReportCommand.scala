@@ -70,6 +70,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 			val response = turnitinLtiService.getOriginalityReportUrl(
 				assignment = assignment,
 				attachment = attachment,
+				userId = viewer.getUserId,
 				email = viewer.getEmail,
 				firstName = viewer.getFirstName,
 				lastName = viewer.getLastName

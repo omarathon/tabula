@@ -151,7 +151,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 			def submit() = {
 				Thread.sleep(WaitingRequestsToTurnitinSubmitPaperSleep)
-				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl,
+				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl, submission.userId,
 					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.universityId, "Student")
 			}
 
