@@ -47,7 +47,7 @@ class ProfileController extends AttendanceController with HasMonthNames {
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("command") cmd:  Appliable[AttendanceProfileCommandResult],
+		@ModelAttribute("command") cmd: Appliable[AttendanceProfileCommandResult],
 		@PathVariable student: StudentMember,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="expand", required=false) expand: JBoolean
@@ -57,8 +57,8 @@ class ProfileController extends AttendanceController with HasMonthNames {
 
 
 		val allNotes = commandResult.allNotesWithSomeCheckPoints;
-		val checkPointNotesMap= commandResult.checkPointNotes;
-		val unrecordedNotes= commandResult.notesWithoutCheckPoints;
+		val checkPointNotesMap = commandResult.checkPointNotes;
+		val unrecordedNotes = commandResult.notesWithoutCheckPoints;
 		val missedPointCountByTerm = groupedPointMap.map{ case(period, pointCheckpointPairs) =>
 			period -> pointCheckpointPairs.count{ case(point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised}
 		}
