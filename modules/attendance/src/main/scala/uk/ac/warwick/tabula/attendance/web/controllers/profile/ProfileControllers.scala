@@ -52,8 +52,9 @@ class ProfileController extends AttendanceController with HasMonthNames {
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="expand", required=false) expand: JBoolean
 	) = {
-		val groupedPointMap = cmd.apply()
+		val commandResult = cmd.apply()
 		val groupedPointMap = commandResult.attendanceMonitoringPointWithCheckPoint
+
 
 		val allNotes = commandResult.allNotesWithSomeCheckPoints;
 		val checkPointNotesMap= commandResult.checkPointNotes;

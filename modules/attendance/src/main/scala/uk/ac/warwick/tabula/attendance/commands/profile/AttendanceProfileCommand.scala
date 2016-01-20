@@ -45,14 +45,14 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
 		val groupedPoints = groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
 		//notes corresponding to this student-  this may contain notes that have no checkpoints
-		val sortedNotes: Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = ListMap(attendanceMonitoringService.getAttendanceNoteMap(student).toSeq.sortBy(_._2.updatedDate): _*)
-		val notesWithCheckPoints: Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = sortedNotes.filter { case (amp, amn) => checkpointMap.contains(amp) }
-		val notesWithoutCheckPoints: Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = sortedNotes.filterNot { case (amp, amn) => checkpointMap.contains(amp) }
-		val checkPointNotesInfo: Seq[(AttendanceMonitoringNote, AttendanceMonitoringCheckpoint)] = notesWithCheckPoints.map { case (amp, amn) => (amn -> checkpointMap.get(amp).get) }.toSeq
-		val checkPointNotesGroupedByStateMap: Map[String, Seq[(AttendanceMonitoringNote, AttendanceMonitoringCheckpoint)]] = checkPointNotesInfo.groupBy { case (amn, amcp) => amcp.state.dbValue }
-		val sortedCheckPointNotesGroupedByStateMap: Map[String, Seq[(AttendanceMonitoringNote, AttendanceMonitoringCheckpoint)]] = ListMap(checkPointNotesGroupedByStateMap.toSeq.sortBy(_._1): _*)
-		val allSortedNotesWithSomeCheckpoints: Map[AttendanceMonitoringPoint, (AttendanceMonitoringNote, AttendanceMonitoringCheckpoint)] = sortedNotes.map { case (aMonitoringPoint, aMonitoringNote) =>
-			aMonitoringPoint ->(aMonitoringNote, checkPointNotesInfo.toMap.getOrElse(aMonitoringNote, null))
+		val sortedNotes = ListMap(attendanceMonitoringService.getAttendanceNoteMap(student).toSeq.sortBy(_._2.updatedDate): _*)
+		val notesWithCheckPoints = sortedNotes.filter { case (amp, amn) => checkpointMap.contains(amp) }
+		val notesWithoutCheckPoints = sortedNotes.filterNot { case (amp, amn) => checkpointMap.contains(amp) }
+		val notesWithcheckPointInfo = notesWithCheckPoints.map { case (amp, amn) => (amn -> checkpointMap.get(amp).get) }.toSeq
+		val notesWithcheckPointInfoGroupedByStateMap = notesWithcheckPointInfo.groupBy { case (amn, amcp) => amcp.state.dbValue }
+		val sortedNotesWithcheckPointInfoGroupedByStateMap  = ListMap(notesWithcheckPointInfoGroupedByStateMap.toSeq.sortBy(_._1): _*)
+		val allSortedNotesWithSomeCheckpointInfo = sortedNotes.map { case (aMonitoringPoint, aMonitoringNote) =>
+			aMonitoringPoint ->(aMonitoringNote, notesWithcheckPointInfo.toMap.getOrElse(aMonitoringNote, null))
 		}
 		AttendanceProfileCommandResult(
 			groupedPoints.map { case (period, thesePoints) =>
@@ -60,8 +60,8 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 					groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
 				}
 			},
-			sortedCheckPointNotesGroupedByStateMap,
-			allSortedNotesWithSomeCheckpoints,
+			sortedNotesWithcheckPointInfoGroupedByStateMap,
+			allSortedNotesWithSomeCheckpointInfo,
 			notesWithoutCheckPoints.toSeq
 		)
 
