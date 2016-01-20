@@ -1,6 +1,7 @@
 <#escape x as x?html>
 <#import "../attendance_variables.ftl" as attendance_variables />
 <#import "../attendance_macros.ftl" as attendance_macros />
+<#import "../attendance_note_macros.ftl" as attendance_note_macros />
 
 <#if groupedPointMap?keys?size == 0>
 	<p><em>No monitoring points found for this academic year.</em></p>
@@ -113,6 +114,100 @@
 			</#list>
 		</div>
 	</div>
+
+	<div class="monitoring-points-profile striped-section collapsible <#if expand!true>expanded</#if>">
+		<h3 class="section-title">Attendance notes</h3>
+		<div class="attendance-note-info">
+			<#if is_the_student>
+				You have ${allNotes?size} attendance notes.
+			<#else>
+			${student.firstName} has ${allNotes?size} attendance notes.
+			</#if>
+		</div>
+
+		<div class="striped-section-contents">
+			<div class="row-fluid">
+				<h4>Filter Options</h4>
+				<!--As part of ID7 migration checkbox inline should be replaced by checkbox-inline -->
+				<div class= "checkbox  inline checkpointState-checkbox checkpointState-all">
+					<input class ="form-control" type="checkbox" name="all" value="all"   checked />All
+				</div>
+
+				<#list allCheckpointStates as state>
+					<div class= "checkbox inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
+						<input  class ="form-control" type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}
+					</div>
+				</#list>
+				<@attendance_note_macros.allNotes notes=allNotes  />
+				<#list checkPointNotesMap?keys as state>
+					<@attendance_note_macros.checkpointNotes  checkpointNoteList=checkPointNotesMap[state] type=state />
+				</#list>
+				<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=unrecordedNotes  />
+
+			</div>
+		</div>
+	</div>
 </#if>
+<script type="text/javascript">
+
+	jQuery(function($) {
+		$('.checkpointState-checkbox input').on('change', function() {
+			var checkboxInput = $(this);
+			//if event is for change of all checkbox
+			//if all is checked, show all notes and hide individual categories
+			if (checkboxInput.prop('name') == 'all' && checkboxInput.prop('checked')){
+				$('.allNotes').show();
+				//mark all others as checked when you select all
+				var filterCheckboxes = $('.checkpointState-checkbox input')
+				$.each(filterCheckboxes, function(element) {
+					$(this).prop('checked','checked')
+				});
+				hideNoteStates()
+
+			} else if (checkboxInput.prop('name') == 'all'){
+				//if all deselected,  hide all notes and show/hide individual categories based on checkboxes
+				$('.allNotes').hide();
+				// check all checkboxes and show/hide based on that
+				var filterCheckboxes = $('.checkpointState-checkbox input')
+				$.each(filterCheckboxes, function(element) {
+					var elmnt = $(this);
+					var elmntClass = ".note-state." +  elmnt.prop('name');
+					if( elmnt.prop('checked')) {
+						$(elmntClass).show();
+					} else {
+						$(elmntClass).hide();
+					}
+
+				});
+
+			} else {
+				//if event is for change of other checkboxes (other than all)
+				var checkboxInputClass = "." + checkboxInput.prop('name');
+				var container = $(checkboxInputClass);
+				var allCheckboxInput = $('.checkpointState-checkbox.checkpointState-all input');
+				// case for other checkboxes
+				if (checkboxInput.prop('checked') && !allCheckboxInput.prop('checked')){
+					container.show();
+				} else {
+					container.hide();
+				}
+			}
+
+		});
+
+		function hideNoteStates() {
+			var elements = $('.note-state');
+			$.each(elements, function(element) {
+				$(this).hide();
+			});
+		};
+		// hide all individual category notes at start
+		hideNoteStates();
+
+	});
+
+
+</script>
+
 
 </#escape>
