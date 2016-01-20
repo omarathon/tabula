@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.GroupsPoints
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote,AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
@@ -27,8 +27,8 @@ object AttendanceProfileCommand {
 
 case class AttendanceProfileCommandResult(
 	attendanceMonitoringPointWithCheckPoint: Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]],
-	checkPointNotes:  Map[String, Seq[(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)]],
-	allNotesWithSomeCheckPoints:  Map[AttendanceMonitoringPoint,(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)],
+	checkPointNotes: Map[String, Seq[(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)]],
+	allNotesWithSomeCheckPoints: Map[AttendanceMonitoringPoint,(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)],
 	notesWithoutCheckPoints: Seq[(AttendanceMonitoringPoint, AttendanceMonitoringNote)]
 	)
 
@@ -64,9 +64,6 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 			allSortedNotesWithSomeCheckpointInfo,
 			notesWithoutCheckPoints.toSeq
 		)
-
-
-
 	}
 }
 
