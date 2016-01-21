@@ -65,3 +65,37 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
 
 }
+
+@Component
+class StartYearColumnOption extends columns.ExamGridColumnOption {
+
+	override val identifier: ExamGridColumnOption.Identifier = "startyear"
+
+	override val sortOrder: Int = 3
+
+	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+
+		override val title: String = "Start Year"
+
+		override def render: Map[String, String] =
+			entities.map(entity => entity.id -> entity.studentCourseYearDetails.flatMap(scyd =>
+				Option(scyd.studentCourseDetails.sprStartAcademicYear).map(_.toString)
+			).getOrElse("[Unknown]")).toMap
+
+		override def renderExcelCell(
+			row: XSSFRow,
+			index: Int,
+			entity: GenerateExamGridEntity,
+			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
+		): Unit = {
+			val cell = row.createCell(index)
+			cell.setCellValue(entity.studentCourseYearDetails.flatMap(scyd =>
+				Option(scyd.studentCourseDetails.sprStartAcademicYear).map(_.toString)
+			).getOrElse("[Unknown]"))
+		}
+
+	}
+
+	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+
+}

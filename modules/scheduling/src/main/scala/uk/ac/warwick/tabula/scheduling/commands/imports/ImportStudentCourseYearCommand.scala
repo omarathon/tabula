@@ -117,31 +117,6 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		else false
 	}
 
-	private def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case value: AcademicYear => value
-			case _ => null
-		}
-
-		val newValue = AcademicYear.parse(acYearString)
-
-		if (oldValue == null && acYearString == null) false
-		else if (oldValue == null) {
-			// From no academic year to having an academic year
-			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
-			true
-		} else if (acYearString == null) {
-			// Record had an academic year but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else if (oldValue == newValue) {
-			false
-		} else {
-			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
-			true
-		}
-	}
-
 	private def copyEnrolledOrCompleted(property: String, reasonForTransferCode: String, enrolmentStatusCode: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property)
 

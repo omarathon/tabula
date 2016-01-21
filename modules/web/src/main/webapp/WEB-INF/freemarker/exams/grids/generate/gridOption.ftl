@@ -34,12 +34,18 @@
 				/> University ID</label>
 			</div>
 		</div>
-
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="name"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("name")>checked</#if>
 				/> Official name</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="startyear"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("startyear")>checked</#if>
+				/> Start Year</label>
 			</div>
 		</div>
 	</div>
