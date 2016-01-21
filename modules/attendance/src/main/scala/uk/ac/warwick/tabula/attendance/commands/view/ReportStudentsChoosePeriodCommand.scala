@@ -103,16 +103,18 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 	lazy val studentReportCounts = {
 		val relevantPoints = termPoints(period).intersect(studentPointMap.values.flatten.toSeq)
 		val checkpoints = attendanceMonitoringService.getCheckpoints(relevantPoints, allStudents)
+
 		allStudents.map { student => {
 			// Points the student is taking that are in the given period
 			val studentPoints = termPoints(period).intersect(studentPointMap(student))
 			val unrecorded = studentPoints.count(point =>
 				checkpoints.get(student).flatMap(_.get(point)).isEmpty
 			)
-			val missed = studentPoints.count(point =>
+			val missedAndUnreported = studentPoints.count(point =>
 				checkpoints.get(student).flatMap(_.get(point)).exists(_.state == AttendanceState.MissedUnauthorised)
+					&& !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
 			)
-			StudentReportCount(student, missed, unrecorded)
+			StudentReportCount(student, missedAndUnreported, unrecorded)
 		}}.filter(_.missed > 0)
 	}
 

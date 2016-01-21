@@ -86,6 +86,50 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
+	def studentReportCounts() { new Fixture {
+		state.period = autumnTerm.getTermTypeAsString
+		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
+		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
+		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
+		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
+
+		val student1point1missed = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
+		val student2point1missed = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
+		state.attendanceMonitoringService.getCheckpoints(Seq(point1), state.allStudents) returns
+			Map(student1 -> Map(point1 -> student1point1missed),
+			    student2 -> Map(point1 -> student2point1missed))
+
+		val result = state.studentReportCounts
+		result.size should be (2)
+	}}
+
+	@Test
+	def studentReportCountsUnreportedOnly() { new Fixture {
+		state.period = autumnTerm.getTermTypeAsString
+		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
+		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
+		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
+		state.termService.getTermFromDateIncludingVacations(point1.startDate.toDateTimeAtStartOfDay) returns autumnTerm
+		state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(autumnTerm.getTermTypeAsString)
+		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
+
+		val student1point1missed = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.MissedUnauthorised)
+		val student2point1missed = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.MissedUnauthorised)
+		state.attendanceMonitoringService.getCheckpoints(Seq(point1), state.allStudents) returns
+			Map(student1 -> Map(point1 -> student1point1missed),
+				student2 -> Map(point1 -> student2point1missed))
+
+		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student1, point1) returns (true)
+		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student2, point1) returns (false)
+
+		val result = state.studentReportCounts
+		result.size should be (1)
+		result.head.student should be (student2)
+	}}
+
+	@Test
 	def availablePeriods() { new Fixture { withFakeTime(fakeNow) {
 		state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
