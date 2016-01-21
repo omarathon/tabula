@@ -38,7 +38,8 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 
 		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
 			val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-			if (cats > entity.normalCATLoad) {
+			// Show an overcatted mark when the CATS is equal to the normal load _only_ when this is a generated entity i.e. the SCYD is None
+			if (cats > entity.normalCATLoad || cats == entity.normalCATLoad && entity.studentCourseYearDetails.isEmpty) {
 				if (moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size <= 1) {
 					// If the student has overcatted, but there's only one valid subset, just show the mean mark
 					moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
