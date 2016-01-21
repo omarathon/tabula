@@ -36,12 +36,17 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 		}
 
 		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
-			val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-			if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1 && entity.overcattingModules.isEmpty) {
-				// If the student has overcatted, has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
-				None
-			} else {
+			// If the entity isn't based on an SCYD i.e. when we're showing the overcatting options, just show the mean mark for this student
+			if (entity.studentCourseYearDetails.isEmpty) {
 				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
+			} else {
+				val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
+				if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1 && entity.overcattingModules.isEmpty) {
+					// If the student has overcatted, has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
+					None
+				} else {
+					moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
+				}
 			}
 		}
 
