@@ -130,12 +130,12 @@
 						<h4>Filter Options</h4>
 						<!--As part of ID7 migration checkbox inline should be replaced by checkbox-inline -->
 						<div class= "checkbox  inline checkpointState-checkbox checkpointState-all">
-							<input class ="form-control" type="checkbox" name="all" value="all"   checked />All
+							<label><input class ="form-control" type="checkbox" name="all" value="all"   checked />All</label>
 						</div>
 
 						<#list allCheckpointStates as state>
 							<div class= "checkbox inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
-								<input  class ="form-control" type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}
+								<label><input  class ="form-control" type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}</label>
 							</div>
 						</#list>
 						<@attendance_note_macros.allNotes notes=allNotes  />

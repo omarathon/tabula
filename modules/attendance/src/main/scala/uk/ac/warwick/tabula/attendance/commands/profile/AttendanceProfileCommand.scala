@@ -10,8 +10,6 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceM
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import scala.collection.immutable.ListMap
-// do not remove; import needed for sorting
-// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 object AttendanceProfileCommand {
@@ -45,14 +43,14 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
 		val groupedPoints = groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
 		//notes corresponding to this student-  this may contain notes that have no checkpoints
-		val sortedNotes = ListMap(attendanceMonitoringService.getAttendanceNoteMap(student).toSeq.sortBy(_._2.updatedDate): _*)
-		val notesWithCheckPoints = sortedNotes.filter { case (amp, amn) => checkpointMap.contains(amp) }
-		val notesWithoutCheckPoints = sortedNotes.filterNot { case (amp, amn) => checkpointMap.contains(amp) }
-		val notesWithcheckPointInfo = notesWithCheckPoints.map { case (amp, amn) => (amn -> checkpointMap.get(amp).get) }.toSeq
-		val notesWithcheckPointInfoGroupedByStateMap = notesWithcheckPointInfo.groupBy { case (amn, amcp) => amcp.state.dbValue }
-		val sortedNotesWithcheckPointInfoGroupedByStateMap  = ListMap(notesWithcheckPointInfoGroupedByStateMap.toSeq.sortBy(_._1): _*)
-		val allSortedNotesWithSomeCheckpointInfo = sortedNotes.map { case (aMonitoringPoint, aMonitoringNote) =>
-			aMonitoringPoint ->(aMonitoringNote, notesWithcheckPointInfo.toMap.getOrElse(aMonitoringNote, null))
+		val sortedNotes = ListMap(attendanceMonitoringService.getAttendanceNoteMap(student).toSeq.sortBy { case (_, note) => note.updatedDate }: _*)
+		val notesWithCheckPoints = sortedNotes.filter { case (point, _) => checkpointMap.contains(point) }
+		val notesWithoutCheckPoints = sortedNotes.filterNot { case (point, _) => checkpointMap.contains(point) }
+		val notesWithcheckPointInfo = notesWithCheckPoints.map { case (point, note) => (note -> checkpointMap.get(point).get) }.toSeq
+		val notesWithcheckPointInfoGroupedByStateMap = notesWithcheckPointInfo.groupBy { case (_, checkpoint) => checkpoint.state.dbValue }
+		val sortedNotesWithcheckPointInfoGroupedByStateMap  = ListMap(notesWithcheckPointInfoGroupedByStateMap.toSeq.sortBy { case (state, _) => state }: _*)
+		val allSortedNotesWithSomeCheckpointInfo = sortedNotes.map { case (point, note) =>
+			point ->(note, notesWithcheckPointInfo.toMap.getOrElse(note, null))
 		}
 		AttendanceProfileCommandResult(
 			groupedPoints.map { case (period, thesePoints) =>
