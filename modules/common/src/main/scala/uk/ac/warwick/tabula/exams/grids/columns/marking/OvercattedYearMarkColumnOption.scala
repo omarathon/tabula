@@ -13,7 +13,7 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 
 	override val identifier: ExamGridColumnOption.Identifier = "overcatted"
 
-	override val sortOrder: Int = 10
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OvercattedYearMark
 
 	case class Column(entities: Seq[GenerateExamGridEntity])
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory with Logging {

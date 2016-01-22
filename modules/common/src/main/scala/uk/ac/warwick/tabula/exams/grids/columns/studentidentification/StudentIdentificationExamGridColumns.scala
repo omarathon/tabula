@@ -11,7 +11,7 @@ class NameColumnOption extends columns.ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "name"
 
-	override val sortOrder: Int = 1
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Name
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
@@ -41,7 +41,7 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "universityId"
 
-	override val sortOrder: Int = 2
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.UniversityId
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
@@ -58,6 +58,40 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 		): Unit = {
 			val cell = row.createCell(index)
 			cell.setCellValue(entity.universityId)
+		}
+
+	}
+
+	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+
+}
+
+@Component
+class StartYearColumnOption extends columns.ExamGridColumnOption {
+
+	override val identifier: ExamGridColumnOption.Identifier = "startyear"
+
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.StartYear
+
+	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+
+		override val title: String = "Start Year"
+
+		override def render: Map[String, String] =
+			entities.map(entity => entity.id -> entity.studentCourseYearDetails.flatMap(scyd =>
+				Option(scyd.studentCourseDetails.sprStartAcademicYear).map(_.toString)
+			).getOrElse("[Unknown]")).toMap
+
+		override def renderExcelCell(
+			row: XSSFRow,
+			index: Int,
+			entity: GenerateExamGridEntity,
+			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
+		): Unit = {
+			val cell = row.createCell(index)
+			cell.setCellValue(entity.studentCourseYearDetails.flatMap(scyd =>
+				Option(scyd.studentCourseDetails.sprStartAcademicYear).map(_.toString)
+			).getOrElse("[Unknown]"))
 		}
 
 	}

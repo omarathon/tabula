@@ -4,10 +4,26 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.exams.grids.columns
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
 
 object ExamGridColumnOption {
 	type Identifier = String
 	implicit val defaultOrdering = Ordering.by { columnOption: ExamGridColumnOption => columnOption.sortOrder }
+
+	object SortOrders {
+		val Name = 1
+		val UniversityId = 2
+		val StartYear = 3
+		val CoreModules = 4
+		val CoreRequiredModules = 5
+		val CoreOptionalModules = 6
+		val OptionalModules = 7
+		val TotalCATs = 8
+		val CurrentYear = 9
+		val OvercattedYearMark = 10
+		val RecommendedActions = 12
+		val Comments = 20
+	}
 }
 
 @Component

@@ -130,6 +130,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		ssoUser.setWarwickId(member.universityId)
 
 		val route = SandboxData.route(member.universityId.toLong)
+		val yearOfStudy = ((member.universityId.toLong % 3) + 1).toInt
 
 		val rs = new MapResultSet(Map(
 			"university_id" -> member.universityId,
@@ -154,8 +155,9 @@ class SandboxProfileImporter extends ProfileImporter {
 			"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
 			"spr_status_code" -> "C",
 			"scj_status_code" -> "C",
-			"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
+			"level_code" -> yearOfStudy.toString,
 			"spr_tutor1" -> null,
+			"spr_academic_year_start" -> (AcademicYear.guessSITSAcademicYearByDate(DateTime.now) - yearOfStudy + 1).toString,
 			"scj_tutor1" -> null,
 			"scj_transfer_reason_code" -> null,
 			"scj_code" -> "%s/1".format(member.universityId),
@@ -165,7 +167,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"most_signif_indicator" -> "Y",
 			"funding_source" -> null,
 			"enrolment_status_code" -> "C",
-			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
+			"year_of_study" -> yearOfStudy,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
@@ -352,6 +354,7 @@ object ProfileImporter extends Logging {
 			spr.sts_code as spr_status_code,
 			spr.spr_levc as level_code,
 			prs.prs_udf1 as spr_tutor1,
+	 		spr.spr_ayrs as spr_academic_year_start,
 
 			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,

@@ -10,7 +10,7 @@ class CommentsColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "comments"
 
-	override val sortOrder: Int = 20
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Comments
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 
