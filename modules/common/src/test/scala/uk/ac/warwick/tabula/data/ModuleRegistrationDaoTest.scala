@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentMember
 
 class ModuleRegistrationDaoTest extends PersistenceTestBase {
-	val memDao = new MemberDaoImpl
+	val memDao = new AutowiringMemberDaoImpl
 	val modRegDao = new ModuleRegistrationDaoImpl
 	val moduleDao = new ModuleDaoImpl
 	val scdDao = new StudentCourseDetailsDaoImpl

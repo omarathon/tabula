@@ -40,7 +40,7 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	type SmallGroupsByModuleReportProcessor = Appliable[SmallGroupsByModuleReportProcessorResult] with SmallGroupsByModuleReportProcessorState
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		SmallGroupsByModuleReportCommand(department, academicYear)
 
 	@ModelAttribute("processor")

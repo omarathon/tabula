@@ -29,8 +29,11 @@
 		<scala.major.version>2.11</scala.major.version>
 		<org.springframework.version>4.1.4.RELEASE</org.springframework.version>
 		<org.hibernate.version>4.3.8.Final</org.hibernate.version>
-		<com.fasterxml.jackson.version>2.5.0</com.fasterxml.jackson.version>
-		<org.apache.lucene.version>5.0.0</org.apache.lucene.version>
+		<com.fasterxml.jackson.version>2.6.3</com.fasterxml.jackson.version>
+
+		<!-- This must match the version that ElasticSearch uses. For ES 2.1.1, that's Lucene 5.3.1 -->
+		<org.apache.lucene.version>5.3.1</org.apache.lucene.version>
+		<org.elasticsearch.version>2.1.1</org.elasticsearch.version>
 		<net.databinder.dispatch.version>0.8.10</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>

@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand, StudentCourseworkFullScreenCommand}
-import CourseworkHomepageCommand.CourseworkHomepageInformation
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
+import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand.CourseworkHomepageInformation
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand}
+import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 
 @Controller class HomeController extends CourseworkController {
 
@@ -38,26 +37,23 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 
 	@ModelAttribute("command") def command(
 		user: CurrentUser,
-		@PathVariable("doc") doc: Int,
-		@PathVariable("field") field: Long,
-		@PathVariable("token") token: Long) =
-			CourseworkHomepageActivityPageletCommand(user, doc, field, token)
+		@PathVariable lastId: Long) =
+			CourseworkHomepageActivityPageletCommand(user, lastId)
 
-	@RequestMapping(Array("/api/activity/pagelet/{doc}/{field}/{token}"))
+	@RequestMapping(Array("/api/activity/pagelet/{lastId}"))
 	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
 		try {
 			cmd.apply() match {
 				case Some(pagedActivities) =>
 					Mav("home/activities",
 						"activities" -> pagedActivities,
-						"async" -> true).noLayout
-				case _ => Mav("home/empty").noLayout
+						"async" -> true).noLayout()
+				case _ => Mav("home/empty").noLayout()
 			}
 		} catch {
-			case e: IllegalStateException => {
+			case e: IllegalStateException =>
 				Mav("home/activities",
-				"expired" -> true).noLayout
-			}
+				"expired" -> true).noLayout()
 		}
 	}
 }

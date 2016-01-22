@@ -20,8 +20,8 @@ class ReleaseForMarkingController extends CourseworkController {
 	type ReleaseForMarkingCommand = Appliable[List[Feedback]] with ReleaseForMarkingState
 
 	@ModelAttribute("releaseForMarkingCommand")
-	def command(@PathVariable("module") module: Module,
-				@PathVariable("assignment") assignment: Assignment,
+	def command(@PathVariable module: Module,
+				@PathVariable assignment: Assignment,
 				user: CurrentUser
 				): ReleaseForMarkingCommand = ReleaseForMarkingCommand(module, assignment, user.apparentUser)
 
@@ -35,7 +35,7 @@ class ReleaseForMarkingController extends CourseworkController {
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
+	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {

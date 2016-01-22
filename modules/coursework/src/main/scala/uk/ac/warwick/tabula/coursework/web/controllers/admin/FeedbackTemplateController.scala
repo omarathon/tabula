@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates"))
 class FeedbackTemplateController extends CourseworkController {
 
-	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable("dept") dept:Department)
+	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable dept:Department)
 		= new BulkFeedbackTemplateCommand(dept)
 
 	// Add the common breadcrumbs to the model.
@@ -46,7 +46,7 @@ class FeedbackTemplateController extends CourseworkController {
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
 class EditFeedbackTemplateController extends CourseworkController {
 
-	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
+	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new EditFeedbackTemplateCommand(dept, template)
 
 	@RequestMapping(method=Array(GET))
@@ -83,7 +83,7 @@ class EditFeedbackTemplateController extends CourseworkController {
 @RequestMapping(Array("/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
 class DeleteFeedbackTemplateController extends CourseworkController {
 
-	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable("dept") dept:Department, @PathVariable("template") template:FeedbackTemplate)
+	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new DeleteFeedbackTemplateCommand(dept, template)
 
 	@RequestMapping(method=Array(GET))

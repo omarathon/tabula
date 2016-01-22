@@ -39,18 +39,6 @@ public class LuceneQuerySerializerTest {
 		queryTest(new SpanPositionRangeQuery(new SpanTermQuery(new Term("foo", "bar")), 1, 5));
 		queryTest(new SpanPositionRangeQuery(new SpanTermQuery(new Term("foo", "bar")), 5, 9));
 
-		queryTest(new SpanPayloadCheckQuery(new SpanTermQuery(new Term("foo", "bar")), Arrays.asList(new byte[][]{
-				new byte[]{1},
-				new byte[]{2, 3},
-				new byte[]{3, 4, 5},
-		})));
-
-		queryTest(new SpanNearPayloadCheckQuery(new SpanNearQuery(spanNearClauses, 10, false, true), Arrays.asList(new byte[][]{
-				new byte[]{1},
-				new byte[]{2, 3},
-				new byte[]{3, 4, 5},
-		})));
-
 		List<Query> disjunctions = new ArrayList<>();
 		disjunctions.add(new TermQuery(new Term("foo", "bar")));
 		disjunctions.add(new TermQuery(new Term("bar", "foo")));
@@ -144,72 +132,7 @@ public class LuceneQuerySerializerTest {
 		Query deserializedQuery = serializer.readQuery(ois);
 		ois.close();
 
-		// perhaps implement a more complex equals in SpanPayloadCheckQuery and SpanNearPayloadCheckQuery that use Arrays.equals?
-		if (query instanceof SpanNearPayloadCheckQuery) {
-			SpanNearPayloadCheckQuery a = (SpanNearPayloadCheckQuery) query;
-			SpanNearPayloadCheckQuery b = (SpanNearPayloadCheckQuery) deserializedQuery;
-			assertEquals(a.getBoost(), b.getBoost(), 0.1d);
-			assertEquals(a.getMatch(), b.getMatch());
-
-			// private field
-			try {
-				Field payloadToMatchField = SpanNearPayloadCheckQuery.class.getDeclaredField("payloadToMatch");
-				payloadToMatchField.setAccessible(true);
-
-				Collection<byte[]> ac = (Collection<byte[]>) payloadToMatchField.get(a);
-				Collection<byte[]> bc = (Collection<byte[]>) payloadToMatchField.get(b);
-
-				assertEquals(ac.size(), bc.size());
-				Iterator<byte[]> ai = ac.iterator();
-				Iterator<byte[]> bi = bc.iterator();
-				while (ai.hasNext()) {
-					byte[] aa = ai.next();
-					byte[] ba = bi.next();
-					assertTrue(Arrays.equals(aa, ba));
-				}
-
-			} catch (IllegalAccessException iae) {
-				throw new RuntimeException(iae);
-			} catch (NoSuchFieldException nsfe) {
-				throw new RuntimeException(nsfe);
-			}
-
-
-		} else if (query instanceof SpanPayloadCheckQuery) {
-
-			SpanPayloadCheckQuery a = (SpanPayloadCheckQuery) query;
-			SpanPayloadCheckQuery b = (SpanPayloadCheckQuery) deserializedQuery;
-			assertEquals(a.getBoost(), b.getBoost(), 0.1d);
-			assertEquals(a.getMatch(), b.getMatch());
-
-			// private field
-			try {
-				Field payloadToMatchField = SpanPayloadCheckQuery.class.getDeclaredField("payloadToMatch");
-				payloadToMatchField.setAccessible(true);
-
-				Collection<byte[]> ac = (Collection<byte[]>) payloadToMatchField.get(a);
-				Collection<byte[]> bc = (Collection<byte[]>) payloadToMatchField.get(b);
-
-				assertEquals(ac.size(), bc.size());
-				Iterator<byte[]> ai = ac.iterator();
-				Iterator<byte[]> bi = bc.iterator();
-				while (ai.hasNext()) {
-					byte[] aa = ai.next();
-					byte[] ba = bi.next();
-					assertTrue(Arrays.equals(aa, ba));
-				}
-
-			} catch (IllegalAccessException iae) {
-				throw new RuntimeException(iae);
-			} catch (NoSuchFieldException nsfe) {
-				throw new RuntimeException(nsfe);
-			}
-
-
-		} else {
-			assertEquals(query, deserializedQuery);
-		}
-
+		assertEquals(query, deserializedQuery);
 	}
 
 }

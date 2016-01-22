@@ -26,7 +26,7 @@ class ListDepartmentSmallGroupSetsController extends GroupsController
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department) =
+	@ModelAttribute("command") def command(@PathVariable department: Department) =
 		ListDepartmentSmallGroupSetsCommand(department)
 
 	@RequestMapping def list(@ModelAttribute("command") command: ListDepartmentSmallGroupSetsCommand) = {

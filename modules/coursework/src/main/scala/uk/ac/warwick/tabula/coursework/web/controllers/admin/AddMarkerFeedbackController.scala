@@ -15,16 +15,16 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable("module") module: Module,
-															@PathVariable("assignment") assignment: Assignment,
-															@PathVariable("marker") marker: User,
+	@ModelAttribute def command(@PathVariable module: Module,
+															@PathVariable assignment: Assignment,
+															@PathVariable marker: User,
 															user: CurrentUser) =
 		new AddMarkerFeedbackCommand(module, assignment, marker, user)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def uploadForm(@PathVariable("module") module: Module,
-								 @PathVariable("assignment") assignment: Assignment,
-								 @PathVariable("marker") marker: User,
+	def uploadForm(@PathVariable module: Module,
+								 @PathVariable assignment: Assignment,
+								 @PathVariable marker: User,
 								 @ModelAttribute cmd: AddMarkerFeedbackCommand): Mav = {
 		Mav("admin/assignments/markerfeedback/form",
 			"isProxying" -> cmd.isProxying,
@@ -35,9 +35,9 @@ class AddMarkerFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmUpload(@PathVariable("module") module: Module,
-										@PathVariable("assignment") assignment: Assignment,
-										@PathVariable("marker") marker: User,
+	def confirmUpload(@PathVariable module: Module,
+										@PathVariable assignment: Assignment,
+										@PathVariable marker: User,
 										@ModelAttribute cmd: AddMarkerFeedbackCommand,
 										errors: Errors): Mav = {
 		cmd.preExtractValidation(errors)
@@ -56,9 +56,9 @@ class AddMarkerFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@PathVariable("module") module: Module,
-							 @PathVariable("assignment") assignment: Assignment,
-							 @PathVariable("marker") marker: User,
+	def doUpload(@PathVariable module: Module,
+							 @PathVariable assignment: Assignment,
+							 @PathVariable marker: User,
 							 @ModelAttribute cmd: AddMarkerFeedbackCommand,
 							 errors: Errors): Mav = {
 

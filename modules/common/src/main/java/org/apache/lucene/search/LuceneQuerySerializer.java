@@ -1,6 +1,8 @@
 package org.apache.lucene.search;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.payloads.SpanNearPayloadCheckQuery;
+import org.apache.lucene.search.payloads.SpanPayloadCheckQuery;
 import org.apache.lucene.search.spans.*;
 import org.apache.lucene.util.BytesRef;
 
@@ -34,9 +36,6 @@ import java.util.*;
  * {@link org.apache.lucene.search.spans.SpanFirstQuery}
  * {@link org.apache.lucene.search.spans.SpanPositionRangeQuery}
  * <p/>
- * {@link SpanPayloadCheckQuery}
- * {@link SpanNearPayloadCheckQuery}
- * <p/>
  * <p/>
  * I.e. it does not support
  * <p/>
@@ -66,9 +65,6 @@ public class LuceneQuerySerializer {
 
 		registerStrategy(new SpanFirstQueryStrategy());
 		registerStrategy(new SpanPositionRangeQueryStrategy());
-
-		registerStrategy(new SpanPayloadCheckQueryStrategy());
-		registerStrategy(new SpanNearPayloadCheckQueryStrategy());
 
 
 		registerStrategy(new DisjunctionMaxQueryStrategy());
@@ -751,80 +747,6 @@ public class LuceneQuerySerializer {
 			}
 
 			SpanNearQuery query = new SpanNearQuery(clauses, in.readInt(), in.readBoolean(), in.readBoolean());
-			query.setBoost(in.readFloat());
-			return query;
-		}
-	}
-
-
-	public static class SpanNearPayloadCheckQueryStrategy extends QueryStrategy<SpanNearPayloadCheckQuery> {
-		@Override
-		public Class<SpanNearPayloadCheckQuery> getQueryClass() {
-			return SpanNearPayloadCheckQuery.class;
-		}
-
-		@Override
-		public void serialize(LuceneQuerySerializer serializer, ObjectOutputStream out, SpanNearPayloadCheckQuery query) throws IOException {
-			out.writeUTF(getQueryClass().getName());
-
-			serializer.writeQuery(out, query.getMatch());
-
-
-			// private field
-			try {
-				Field payloadToMatchField = SpanNearPayloadCheckQuery.class.getDeclaredField("payloadToMatch");
-				payloadToMatchField.setAccessible(true);
-				out.writeObject(payloadToMatchField.get(query));
-			} catch (IllegalAccessException iae) {
-				throw new RuntimeException(iae);
-			} catch (NoSuchFieldException nsfe) {
-				throw new RuntimeException(nsfe);
-			}
-
-			out.writeFloat(query.getBoost());
-		}
-
-		@Override
-		public SpanNearPayloadCheckQuery deserialize(LuceneQuerySerializer serializer, ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-			SpanNearPayloadCheckQuery query = new SpanNearPayloadCheckQuery((SpanNearQuery) serializer.readQuery(in), (Collection<byte[]>) in.readObject());
-			query.setBoost(in.readFloat());
-			return query;
-		}
-	}
-
-
-	public static class SpanPayloadCheckQueryStrategy extends QueryStrategy<SpanPayloadCheckQuery> {
-		@Override
-		public Class<SpanPayloadCheckQuery> getQueryClass() {
-			return SpanPayloadCheckQuery.class;
-		}
-
-		@Override
-		public void serialize(LuceneQuerySerializer serializer, ObjectOutputStream out, SpanPayloadCheckQuery query) throws IOException {
-			out.writeUTF(getQueryClass().getName());
-
-			serializer.writeQuery(out, query.getMatch());
-
-
-			// private field
-			try {
-				Field payloadToMatchField = SpanPayloadCheckQuery.class.getDeclaredField("payloadToMatch");
-				payloadToMatchField.setAccessible(true);
-				out.writeObject(payloadToMatchField.get(query));
-			} catch (IllegalAccessException iae) {
-				throw new RuntimeException(iae);
-			} catch (NoSuchFieldException nsfe) {
-				throw new RuntimeException(nsfe);
-			}
-
-			out.writeFloat(query.getBoost());
-		}
-
-		@Override
-		public SpanPayloadCheckQuery deserialize(LuceneQuerySerializer serializer, ObjectInputStream in) throws IOException, ClassNotFoundException {
-
-			SpanPayloadCheckQuery query = new SpanPayloadCheckQuery((SpanQuery) serializer.readQuery(in), (Collection<byte[]>) in.readObject());
 			query.setBoost(in.readFloat());
 			return query;
 		}

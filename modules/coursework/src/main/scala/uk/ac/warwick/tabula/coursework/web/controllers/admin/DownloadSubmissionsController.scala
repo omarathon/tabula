@@ -28,11 +28,11 @@ import uk.ac.warwick.userlookup.User
 class DownloadSubmissionsController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def getSingleSubmissionCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	def getSingleSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new DownloadSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
-	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable("assignment") assignment: Assignment)
+	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable assignment: Assignment)
 		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
 		command.apply() match {
 			case Left(renderable) =>
@@ -49,9 +49,9 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def getMarkersSubmissionCommand(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("marker") marker: User,
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable marker: User,
 			submitter: CurrentUser
 	) =	DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
 
@@ -76,9 +76,9 @@ class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkControlle
 class DownloadAllSubmissionsController extends CourseworkController {
 
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("filename") filename: String) =
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable filename: String) =
 		new DownloadAllSubmissionsCommand(module, assignment, filename)
 
 	@RequestMapping
@@ -94,9 +94,9 @@ class DownloadSingleSubmissionController extends CourseworkController {
 	var userLookup = Wire[UserLookupService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("submission") submission: Submission) =
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable submission: Submission) =
 		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submission))
 
 	@RequestMapping
@@ -110,9 +110,9 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("submission") submission: Submission ) = {
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable submission: Submission ) = {
 		val student = profileService.getMemberByUser(userLookup.getUserByUserId(mandatory(submission).userId))
 		new DownloadAttachmentCommand(module, assignment, mandatory(submission), student)
 	}
@@ -131,7 +131,7 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 
 	var userLookup = Wire.auto[UserLookupService]
 
-	@ModelAttribute def feedbackSheetsCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	@ModelAttribute def feedbackSheetsCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new DownloadFeedbackSheetsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/feedback-templates.zip"))

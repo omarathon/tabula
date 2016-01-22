@@ -21,7 +21,7 @@ class ExamsDeleteMarkingWorkflowController extends ExamsController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("department") department: Department, @PathVariable("markingWorkflow") markingWorkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
+	def cmd(@PathVariable department: Department, @PathVariable markingWorkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
 		DeleteMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))

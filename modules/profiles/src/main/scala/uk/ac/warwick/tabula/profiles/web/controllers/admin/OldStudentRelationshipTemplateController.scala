@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 @Controller
 @RequestMapping(value = Array("/department/{department}/{relationshipType}/allocate-old/template"))
 class OldStudentRelationshipTemplateController extends ProfilesController {
-	@ModelAttribute def command(@PathVariable("department") department: Department, @PathVariable("relationshipType") relationshipType: StudentRelationshipType) =
+	@ModelAttribute def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
 		new OldStudentRelationshipTemplateCommand(department, relationshipType)
 
 	@RequestMapping(method = Array(HEAD, GET))

@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 class PlagiarismInvestigationController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("assignment") assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
+	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
 
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
@@ -31,20 +31,20 @@ class PlagiarismInvestigationController extends CourseworkController {
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
+	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
 			@ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
 		formView(assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
 			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
 		if (errors.hasErrors) {
 			formView(assignment)

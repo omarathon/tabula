@@ -18,7 +18,7 @@ class DownloadMeetingRecordFilesController extends BaseController {
 
 	@Autowired var fileServer: FileServer = _
 
-	@ModelAttribute def command(@PathVariable("meetingRecord") meetingRecord: AbstractMeetingRecord)
+	@ModelAttribute def command(@PathVariable meetingRecord: AbstractMeetingRecord)
 		= new DownloadMeetingRecordFilesCommand(meetingRecord)
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
@@ -29,7 +29,7 @@ class DownloadMeetingRecordFilesController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/*/meeting/{meetingRecord}/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getOne(command: DownloadMeetingRecordFilesCommand, @PathVariable("filename") filename: String)
+	def getOne(command: DownloadMeetingRecordFilesCommand, @PathVariable filename: String)
 		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.callback = { (renderable) => fileServer.serve(renderable) }

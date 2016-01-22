@@ -22,7 +22,7 @@ class AssignmentMarksTemplateController extends CourseworkController {
 	var assignmentMembershipService = Wire[AssessmentMembershipService]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		GenerateMarksTemplateCommand(
 			mandatory(module),
 			mandatory(assignment),
@@ -30,7 +30,7 @@ class AssignmentMarksTemplateController extends CourseworkController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment) = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }
@@ -42,9 +42,9 @@ class AssignmentMarkerMarksTemplateController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User
 	) =
 		GenerateOwnMarksTemplateCommand(
 			mandatory(module),
@@ -53,7 +53,7 @@ class AssignmentMarkerMarksTemplateController extends CourseworkController {
 		)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable("assignment") assignment: Assignment) = {
+	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[XSSFWorkbook], @PathVariable assignment: Assignment) = {
 		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
 	}
 }

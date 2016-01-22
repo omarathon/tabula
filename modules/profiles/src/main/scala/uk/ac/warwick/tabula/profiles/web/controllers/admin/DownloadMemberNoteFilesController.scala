@@ -18,7 +18,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 
 		@Autowired var fileServer: FileServer = _
 
-		@ModelAttribute def command(@PathVariable("memberNote") memberNote: MemberNote)
+		@ModelAttribute def command(@PathVariable memberNote: MemberNote)
 		= new DownloadMemberNoteFilesCommand(memberNote)
 
 		// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
@@ -29,7 +29,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.admin
 		}
 
 		@RequestMapping(value = Array("/notes/{memberNote}/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-		def getOne(command: DownloadMemberNoteFilesCommand, @PathVariable("filename") filename: String)
+		def getOne(command: DownloadMemberNoteFilesCommand, @PathVariable filename: String)
 							(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 			// specify callback so that audit logging happens around file serving
 			command.callback = { (renderable) => fileServer.serve(renderable) }

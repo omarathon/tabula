@@ -36,7 +36,7 @@ class BulkModerationApprovalController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-							@PathVariable("assignment") assignment: Assignment,
+							@PathVariable assignment: Assignment,
 							@ModelAttribute("command") @Valid command: Appliable[Unit] with BulkModerationApprovalState,
 							errors: Errors): Mav =
 	{

@@ -24,8 +24,8 @@ class ExtensionRequestController extends CourseworkController{
 
 	@ModelAttribute("command")
 	def cmd(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment:Assignment,
+		@PathVariable module: Module,
+		@PathVariable assignment:Assignment,
 		@RequestParam(defaultValue = "")
 		action: String,
 		user:CurrentUser

@@ -14,12 +14,16 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportAcademicInformati
 import uk.ac.warwick.tabula.scheduling.commands.{CleanupUnreferencedFilesCommand, SanityCheckFilesystemCommand, SyncReplicaFilesystemCommand}
 import uk.ac.warwick.tabula.scheduling.jobs.ImportMembersJob
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -28,9 +32,9 @@ import uk.ac.warwick.userlookup.UserLookupInterface
  */
 
 abstract class BaseSysadminController extends BaseController {
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var userLookup = Wire.auto[UserLookupInterface]
-	var urlRewriter = Wire.auto[UrlMethodModel]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var userLookup = Wire[UserLookupInterface]
+	var urlRewriter = Wire[UrlMethodModel]
 
 	def redirectToHome = {
 		// Redirect cross-context
@@ -43,25 +47,32 @@ class HomeController extends BaseSysadminController {
 	@RequestMapping(Array("/")) def home = redirectToHome
 }
 
-class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
+class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire.auto[AuditEventIndexService]
+	var indexer = Wire[AuditEventIndexService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 
 	def applyInternal() = {
-		indexer.indexFrom(from)
+		Await.result(indexer.indexFrom(from), Duration.Inf)
 	}
 
-	def describe(d: Description) = d.property("from" -> from)
+	override def describe(d: Description) = d.property("from" -> from)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+		d.properties(
+			"successful" -> result.successful,
+			"failed" -> result.failed,
+			"timeTaken" -> result.timeTaken,
+			"maxUpdatedDate" -> result.maxUpdatedDate
+		)
 }
 
 class ReindexNotificationsCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire.auto[NotificationIndexService]
+	var indexer = Wire[NotificationIndexService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
@@ -73,24 +84,34 @@ class ReindexNotificationsCommand extends Command[Unit] with ReadOnly {
 	def describe(d: Description) = d.property("from" -> from)
 }
 
-class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
+class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer = Wire.auto[ProfileIndexService]
-	var mdService = Wire.auto[ModuleAndDepartmentService]
+	var indexer = Wire[ProfileIndexService]
+	var mdService = Wire[ModuleAndDepartmentService]
 
 	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
 
 	def applyInternal() = {
-		mdService.getDepartmentByCode(deptCode) match {
-			case None => indexer.indexFrom(from)
-			case Some(department) => indexer.indexByDateAndDepartment(from, department)
-		}
+		Await.result(
+			mdService.getDepartmentByCode(deptCode) match {
+				case None => indexer.indexFrom(from)
+				case Some(department) => indexer.indexByDateAndDepartment(from, department)
+			},
+			Duration.Inf
+		)
 	}
 
 	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+		d.properties(
+			"successful" -> result.successful,
+			"failed" -> result.failed,
+			"timeTaken" -> result.timeTaken,
+			"maxUpdatedDate" -> result.maxUpdatedDate
+		)
 }
 
 class CompleteScheduledNotificationsCommand extends Command[Unit] with ReadOnly {
@@ -204,7 +225,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 	@RequestMapping def form = "sysadmin/reindexprofile"
 
 	@RequestMapping(method = Array(POST))
-	def importProfile(@PathVariable("universityId") universityId: String) = {
+	def importProfile(@PathVariable universityId: String) = {
 		val command = new ImportProfilesCommand
 
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId) match {

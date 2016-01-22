@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
+import uk.ac.warwick.tabula.data.model.{Identifiable, NotificationPriority, Notification}
 import java.io.File
 import org.apache.lucene.analysis.Analyzer
 import org.joda.time.DateTime
@@ -18,7 +18,7 @@ import org.apache.lucene.search._
 import org.apache.lucene.index.{SortingMergePolicy, IndexWriterConfig, Term}
 import uk.ac.warwick.tabula.JavaImports._
 
-class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
+class RecipientNotification(val notification: Notification[_,_], val recipient: User) extends Identifiable {
 	def id = s"${notification.id}-${recipient.getUserId}"
 }
 

@@ -4,6 +4,7 @@ import org.hibernate.FetchMode
 import org.hibernate.criterion.{Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, Notification, ToEntityReference}
 
@@ -103,4 +104,12 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.add(is("items.entity", targetEntity))
 			.seq
 	}
+}
+
+trait NotificationDaoComponent {
+	def notificationDao: NotificationDao
+}
+
+trait AutowiringNotificationDaoComponent extends NotificationDaoComponent {
+	var notificationDao = Wire[NotificationDao]
 }

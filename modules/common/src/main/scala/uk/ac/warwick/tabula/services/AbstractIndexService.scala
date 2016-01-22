@@ -197,7 +197,7 @@ abstract class AbstractIndexService[A]
 	def incrementalIndex() = transactional(readOnly = true) {
 		guardMultipleIndexes {
 			val stopWatch = StopWatch()
-			stopWatch.record("Incremental index") {
+			stopWatch.record("Incremental indentex") {
 				val startDate = Await.result(latestIndexItem, 5.seconds)
 				val newItems = listNewerThan(startDate, IncrementalBatchSize)
 				if (newItems.isEmpty) {

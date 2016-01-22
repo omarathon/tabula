@@ -22,7 +22,7 @@ trait SyllabusPlusEventCountForModule {
 	self: ModuleTimetableFetchingServiceComponent =>
 
 	@ModelAttribute("syllabusPlusEventCount")
-	def syllabusPlusEventCount(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+	def syllabusPlusEventCount(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
 			.recover { case _: TimeoutException | _: TimetableEmptyException => Nil }.get
 			.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
@@ -38,7 +38,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupEventsCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupEventsCommand =
 		EditSmallGroupEventsCommand(module, set)
 
 	protected def renderPath: String

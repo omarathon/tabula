@@ -27,8 +27,8 @@ class FeedbackRatingController extends CourseworkController {
 	hideDeletedItems
 
 	@ModelAttribute def cmd(
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("module") module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable module: Module,
 		user: CurrentUser) =
 		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)))
 

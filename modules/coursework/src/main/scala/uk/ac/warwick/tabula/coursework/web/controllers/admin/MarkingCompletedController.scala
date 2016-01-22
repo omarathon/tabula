@@ -26,9 +26,9 @@ class MarkingCompletedController extends CourseworkController {
 
 	@ModelAttribute("markingCompletedCommand")
 	def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		submitter: CurrentUser
 	): MarkingCompletedCommand = MarkingCompletedCommand(mandatory(module), mandatory(assignment), marker, submitter)
 
@@ -47,9 +47,9 @@ class MarkingCompletedController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		@ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
 	) = {
@@ -84,9 +84,9 @@ class MarkingCompletedController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		@Valid @ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
 	) = {

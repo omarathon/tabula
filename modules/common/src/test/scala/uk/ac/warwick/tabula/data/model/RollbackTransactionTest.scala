@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, AppContextTestBase}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, MemberDao}
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, MemberDaoImpl, MemberDao}
 import org.junit.Before
 
 /**
@@ -12,9 +12,7 @@ import org.junit.Before
  */
 class RollbackTransactionTest  extends PersistenceTestBase{
 
-
-
-	val dao = new MemberDaoImpl
+	val dao = new AutowiringMemberDaoImpl
 
 	@Before
 	def setup() {

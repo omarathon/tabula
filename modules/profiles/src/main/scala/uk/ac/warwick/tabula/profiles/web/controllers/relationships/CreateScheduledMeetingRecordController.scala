@@ -25,23 +25,23 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("allRelationships")
-	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-											 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
+	def allRelationships(@PathVariable studentCourseDetails: StudentCourseDetails,
+											 @PathVariable relationshipType: StudentRelationshipType) = {
 
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}
 
 	@ModelAttribute("command")
-	def getCommand(@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+	def getCommand(@PathVariable relationshipType: StudentRelationshipType,
+				   @PathVariable studentCourseDetails: StudentCourseDetails,
 				   @RequestParam(value="relationship", required = false) relationship: StudentRelationship) =  {
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails)) match {
 			case Nil => throw new ItemNotFoundException
@@ -61,7 +61,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
 	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails
+		@PathVariable studentCourseDetails: StudentCourseDetails
  	) = {
 		form(cmd, studentCourseDetails, iframe = true)
 	}
@@ -69,7 +69,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
 	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
-	 @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails
+	 @PathVariable studentCourseDetails: StudentCourseDetails
  	) = {
 		form(cmd, studentCourseDetails)
 	}
@@ -98,7 +98,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 		@Valid @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		errors: Errors,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
+		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]]
 	) = {
 		if (errors.hasErrors) {

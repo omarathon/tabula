@@ -1,33 +1,31 @@
 package uk.ac.warwick.tabula.api.web.controllers.index
 
-import java.io.{ObjectInputStream, ByteArrayInputStream}
+import java.io.{ByteArrayInputStream, ObjectInputStream}
 import javax.servlet.http.HttpServletResponse
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.apache.lucene.queryparser.classic.ParseException
-import org.apache.lucene.search.{LuceneQuerySerializer, SortField, Sort, Query}
+import org.apache.lucene.search.{LuceneQuerySerializer, Query, Sort, SortField}
 import org.bouncycastle.util.encoders.Base64
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{RequestBody, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestBody, RequestMapping}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
+import uk.ac.warwick.tabula.api.web.controllers.index.IndexController._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{AuditEvent, Member}
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-
-import IndexController._
-
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -80,21 +78,9 @@ trait SearchLuceneIndexApi {
 }
 
 @Controller
-@RequestMapping(Array("/v1/index/audit"))
-class AuditEventIndexController extends IndexController[AuditEvent] {
-	val indexService = Wire[AuditEventIndexService]
-}
-
-@Controller
 @RequestMapping(Array("/v1/index/notification"))
 class NotificationIndexController extends IndexController[RecipientNotification] {
 	val indexService = Wire[NotificationIndexServiceImpl]
-}
-
-@Controller
-@RequestMapping(Array("/v1/index/profile"))
-class ProfileIndexController extends IndexController[Member] {
-	val indexService = Wire[ProfileIndexService]
 }
 
 object SearchLuceneIndexCommand {
@@ -170,7 +156,7 @@ class SearchIndexRequest[A <: SearchLuceneIndexState] extends JsonApiRequest[A] 
 			val bis: ByteArrayInputStream = new ByteArrayInputStream(Base64.decode(querySerialized))
 			val ois: ObjectInputStream = new ObjectInputStream(bis)
 			state.query = serializer.readQuery(ois)
-			ois.close
+			ois.close()
 		}
 
 		if (max >= 0) {

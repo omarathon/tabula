@@ -14,13 +14,13 @@ class ViewStudentRelationshipsController extends ProfilesController {
 
 	@ModelAttribute("viewStudentRelationshipsCommand")
 	def viewStudentRelationshipsCommand(
-		@PathVariable("department") department: Department,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = new ViewStudentRelationshipsCommand(department, relationshipType)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def view(
-		@PathVariable("department") department: Department,
+		@PathVariable department: Department,
 		@ModelAttribute("viewStudentRelationshipsCommand") command: ViewStudentRelationshipsCommand
 	): Mav = {
 		val agentGraph = command.apply()
@@ -41,13 +41,13 @@ class MissingStudentRelationshipController extends ProfilesController {
 
 	@ModelAttribute("missingStudentRelationshipCommand")
 	def missingStudentRelationshipCommand(
-		@PathVariable("department") department: Department,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType
 	) =	new MissingStudentRelationshipCommand(department, relationshipType)
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def view(
-		@PathVariable("department") department: Department,
+		@PathVariable department: Department,
 		@ModelAttribute("missingStudentRelationshipCommand") missing: MissingStudentRelationshipCommand
 	): Mav = {
 		val (studentCount, missingStudents) = missing.apply()
@@ -62,7 +62,7 @@ class MissingStudentRelationshipController extends ProfilesController {
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/students"))
 class ViewStudentRelationshipStudentsController extends ProfilesController {
-	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable("relationshipType") relationshipType: StudentRelationshipType) =
+	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
 		ViewRelatedStudentsCommand(currentMember, relationshipType)
 
 	@RequestMapping

@@ -21,7 +21,7 @@ class ResendSubmissionEmail extends CourseworkController {
 
 	hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new SendSubmissionReceiptCommand(
 			module, assignment,
 			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)),

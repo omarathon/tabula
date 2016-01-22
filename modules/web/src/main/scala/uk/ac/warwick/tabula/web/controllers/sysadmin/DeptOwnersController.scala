@@ -23,7 +23,7 @@ class SysadminDeptDetailsController extends BaseSysadminController {
 		Mav("sysadmin/departments/list", "departments" -> moduleService.allDepartments.sortBy{ _.name })
 
 	@RequestMapping(Array("/{dept}/"))
-	def department(@PathVariable("dept") dept: Department) = {
+	def department(@PathVariable dept: Department) = {
 		mandatory(dept)
 		Mav("sysadmin/departments/single","department" -> dept).crumbs(SysadminBreadcrumbs.Departments.Home)
 	}
@@ -34,13 +34,13 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 	type GrantRoleCommand = Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department]
 	type RevokeRoleCommand = Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department]
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department): GrantRoleCommand =
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable department: Department): GrantRoleCommand =
 		GrantRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) =
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable department: Department) =
 		RevokeRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
-	def form(@PathVariable("department") department: Department): Mav = {
+	def form(@PathVariable department: Department): Mav = {
 		Mav("sysadmin/departments/permissions", "department" -> department).crumbs(
 			SysadminBreadcrumbs.Departments.Home,
 			SysadminBreadcrumbs.Departments.Department(department)
@@ -64,7 +64,7 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
 class SysadminDepartmentPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 	@RequestMapping
-	def permissionsForm(@PathVariable("department") department: Department): Mav =
+	def permissionsForm(@PathVariable department: Department): Mav =
 		form(mandatory(department))
 }
 
