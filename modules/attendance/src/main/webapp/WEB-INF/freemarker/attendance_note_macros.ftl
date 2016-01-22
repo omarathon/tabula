@@ -61,7 +61,8 @@
 
 
 <#macro attendancenote  point note checkpoint="">
-	${point.name}<div>(<@fmt.interval point.startDate point.endDate />)</div><div>"${note.note}"</div>
+	${point.name}<div>(<@fmt.interval point.startDate point.endDate />)</div>
+	<#if note.note?has_content><div>"${note.note}"</div></#if>
 	<#if checkpoint?has_content>
 		<div class="attendance-note-record"> <p>Recorded as ${checkpoint.state.description} by
 			<@userlookup  id=checkpoint.updatedBy>
