@@ -107,7 +107,7 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "core"
 
-	override val sortOrder: Int = 4
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreModules
 
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
@@ -130,7 +130,7 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "corerequired"
 
-	override val sortOrder: Int = 5
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreRequiredModules
 
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
@@ -153,7 +153,7 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "coreoptional"
 
-	override val sortOrder: Int = 6
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreOptionalModules
 
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
@@ -176,7 +176,7 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "optional"
 
-	override val sortOrder: Int = 6
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OptionalModules
 
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 

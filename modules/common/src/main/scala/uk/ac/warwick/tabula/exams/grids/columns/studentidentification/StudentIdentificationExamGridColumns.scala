@@ -11,7 +11,7 @@ class NameColumnOption extends columns.ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "name"
 
-	override val sortOrder: Int = 1
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Name
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
@@ -41,7 +41,7 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "universityId"
 
-	override val sortOrder: Int = 2
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.UniversityId
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
@@ -71,7 +71,7 @@ class StartYearColumnOption extends columns.ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "startyear"
 
-	override val sortOrder: Int = 3
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.StartYear
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 

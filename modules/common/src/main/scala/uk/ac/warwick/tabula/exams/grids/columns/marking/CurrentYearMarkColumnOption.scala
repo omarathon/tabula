@@ -12,7 +12,7 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
-	override val sortOrder: Int = 9
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 

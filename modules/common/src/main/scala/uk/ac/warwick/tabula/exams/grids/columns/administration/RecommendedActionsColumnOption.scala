@@ -12,7 +12,7 @@ class RecommendedActionsColumnOption extends columns.ExamGridColumnOption with A
 
 	override val identifier: ExamGridColumnOption.Identifier = "recommendedactions"
 
-	override val sortOrder: Int = 12
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.RecommendedActions
 
 	case class Column(entities: Seq[GenerateExamGridEntity])
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory {
