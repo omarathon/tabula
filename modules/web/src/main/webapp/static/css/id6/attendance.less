@@ -68,14 +68,21 @@
 
 .monitoring-points-profile {
 	.pull-right .form-inline { margin-bottom: 0px; }
-	h3, .missed-info { display: inline-block; }
+	h3, .missed-info, .attendance-note-info  { display: inline-block; }
 	h3 { margin-right: 20px; }
-	.missed-info {
+	.missed-info, .attendance-note-info {
 		color: @successText;
 		vertical-align: middle;
 		.missed {
 			color: @errorText;
 		}
+	}
+	.checkbox.checkpointState-all {
+		margin-left: 10px;
+	}
+
+	.attendance-note-record {
+		margin-top: 20px;
 	}
 	table {
 		td { width: 1px; }
@@ -342,3 +349,4 @@ details.find-students div.sb-wide-table-wrapper {clear: both}
 	background-color: #FDF5E6;
 	color: #c99024;
 }
+
