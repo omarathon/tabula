@@ -4,7 +4,6 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -21,7 +20,8 @@ object ExamGridColumnOption {
 		val TotalCATs = 8
 		val CurrentYear = 9
 		val OvercattedYearMark = 10
-		val RecommendedActions = 12
+		val MitigatingCircumstances = 12
+		val RecommendedActions = 13
 		val Comments = 20
 	}
 }

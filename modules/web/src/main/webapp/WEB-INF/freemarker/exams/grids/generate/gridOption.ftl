@@ -121,6 +121,11 @@
 
 	<div class="row">
 		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="mitigating"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("mitigating")>checked</#if>
+				/> Mitigating Circumstances</label>
+			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
