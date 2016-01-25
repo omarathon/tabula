@@ -1,9 +1,13 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.TestBase
 
 class ElasticsearchIndexInitialisationTest extends TestBase with ElasticSugar with IndexMatchers {
+
+	override implicit val patienceConfig =
+		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	private trait ElasticsearchIndexSupport extends ElasticsearchClientComponent {
 		override val client = ElasticsearchIndexInitialisationTest.this.client
