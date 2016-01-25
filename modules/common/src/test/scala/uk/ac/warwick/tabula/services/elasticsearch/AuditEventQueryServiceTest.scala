@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import javax.annotation.concurrent.NotThreadSafe
+
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
 import org.hibernate.dialect.HSQLDialect
@@ -17,6 +19,7 @@ import uk.ac.warwick.util.core.StopWatch
 
 import scala.collection.JavaConverters._
 
+@NotThreadSafe
 class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
 
 	override implicit val patienceConfig =
