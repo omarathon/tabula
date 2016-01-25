@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{SearchMatchers, IndexMatchers, ElasticSugar}
+import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
 import org.joda.time.DateTime
 import org.junit.{After, Before}
-import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model._
@@ -13,9 +12,6 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
 
-	override implicit val patienceConfig =
-		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
 	val indexName = "notifications"
 
 	private trait Fixture {
@@ -23,9 +19,6 @@ class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSug
 		queryService.notificationDao = smartMock[NotificationDao]
 		queryService.client = NotificationQueryServiceTest.this.client
 		queryService.indexName = NotificationQueryServiceTest.this.indexName
-
-		// default behaviour, we add individual expectations later
-//		queryService.notificationDao.getById(any[String]) returns None
 
 		implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
 	}
@@ -109,21 +102,21 @@ class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSug
 
 	@Test def ignoreDismissed(): Unit = new IndexedDataFixture {
 		val request = ActivityStreamRequest(user = recipient, max = 100, lastUpdatedDate = None)
-		queryService.userStream(request).futureValue.items.size should be (50)
+		queryService.userStream(request).items.size should be (50)
 
 		val includeDismissed = ActivityStreamRequest(user = recipient, includeDismissed = true, max = 100, lastUpdatedDate = None)
-		queryService.userStream(includeDismissed).futureValue.items.size should be (51)
+		queryService.userStream(includeDismissed).items.size should be (51)
 	}
 
 	@Test
 	def userStream(): Unit = new IndexedDataFixture {
 		val request = ActivityStreamRequest(user = recipient, max = 20, lastUpdatedDate = None)
-		val page1 = queryService.userStream(request).futureValue
+		val page1 = queryService.userStream(request)
 		page1.items.size should be (20)
 
 		page1.items.map { _.id } should be (expectedIds.reverse.slice(0, 20))
 
-		val page2 = queryService.userStream(request.copy(lastUpdatedDate = page1.lastUpdatedDate)).futureValue
+		val page2 = queryService.userStream(request.copy(lastUpdatedDate = page1.lastUpdatedDate))
 		page2.items.size should be (20)
 
 		page2.items.map { _.id } should be (expectedIds.reverse.slice(20, 40))
@@ -132,30 +125,30 @@ class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSug
 	@Test
 	def typeFilteredUserStreamEmpty(): Unit = new IndexedDataFixture {
 		val request = ActivityStreamRequest(user = recipient, types = Some(Set("Nonexistent")), lastUpdatedDate = None)
-		queryService.userStream(request).futureValue.items.size should be (0)
+		queryService.userStream(request).items.size should be (0)
 	}
 
 	@Test
 	def typeFilteredUserStream(): Unit = new IndexedDataFixture {
 		val request = ActivityStreamRequest(user = otherRecipient, types = Some(Set("HeronDefeat")), lastUpdatedDate = None)
-		queryService.userStream(request).futureValue.items.size should be (50)
+		queryService.userStream(request).items.size should be (50)
 	}
 
 	@Test
 	def priorityFilteredUserStream(): Unit = new IndexedDataFixture {
 		// show critical items only - should be 10 items
 		val criticalRequest = ActivityStreamRequest(user = recipient, priority = 0.75, max = 20, lastUpdatedDate = None)
-		val page = queryService.userStream(criticalRequest).futureValue
+		val page = queryService.userStream(criticalRequest)
 		page.items.size should be (10)
 		page.items.map { _.id } should be (criticalIds.reverse)
 
 		// show >= warning items only - should be 30 items
 		val warningRequest = ActivityStreamRequest(user = recipient, priority = 0.5, max = 20, lastUpdatedDate = None)
-		val page1 = queryService.userStream(warningRequest).futureValue
+		val page1 = queryService.userStream(warningRequest)
 		page1.items.size should be (20)
 		page1.items.map { _.id } should be (warningIds.reverse.slice(0, 20))
 
-		val page2 = queryService.userStream(warningRequest.copy(lastUpdatedDate = page1.lastUpdatedDate)).futureValue
+		val page2 = queryService.userStream(warningRequest.copy(lastUpdatedDate = page1.lastUpdatedDate))
 		page2.items.size should be (10)
 		page2.items.map { _.id } should be (warningIds.reverse.slice(20, 30))
 	}

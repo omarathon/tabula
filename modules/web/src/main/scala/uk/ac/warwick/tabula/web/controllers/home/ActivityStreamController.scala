@@ -24,9 +24,9 @@ class ActivityStreamController extends BaseController with ActivityJsonMav with 
 			@RequestParam(required=false) types: JList[String],
 			@RequestParam(defaultValue="0") minPriority: Double, // minPriority of zero means we show all by default
 			@RequestParam(defaultValue="false") includeDismissed: Boolean,
-			@RequestParam(required=false) lastCreated: DateTime) = {
+			@RequestParam(required=false) lastCreated: JLong) = {
 		val typeSet = if (types == null || types.isEmpty) None else Some(types.asScala.toSet)
-		val request = ActivityStreamRequest(user.apparentUser, max, minPriority, includeDismissed, typeSet, Option(lastCreated))
+		val request = ActivityStreamRequest(user.apparentUser, max, minPriority, includeDismissed, typeSet, Option(lastCreated).map(new DateTime(_)))
 		ActivityStreamCommand(request)
 	}
 

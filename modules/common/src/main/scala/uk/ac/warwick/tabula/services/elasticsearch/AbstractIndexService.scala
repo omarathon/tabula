@@ -198,12 +198,13 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		} else {
 			logger.debug(s"Writing to the $indexName index")
 
-			val items = in.toSeq
-			val maxDate = items.map(indexable.lastUpdatedDate).max
+			// ID to item
+			val items = in.map { i => i.id -> i }.toMap
+			val maxDate = items.values.map(indexable.lastUpdatedDate).max
 
 			val upserts =
-				items.map { item =>
-					update(item.id) in s"$indexName/$indexName" docAsUpsert true doc item
+				items.map { case (id, item) =>
+					update(id) in s"$indexName/$indexName" docAsUpsert true doc item
 				}
 
 			val future =

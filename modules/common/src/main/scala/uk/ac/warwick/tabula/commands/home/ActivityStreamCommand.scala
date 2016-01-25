@@ -7,9 +7,6 @@ import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
 object ActivityStreamCommand {
 	def apply(request: ActivityStreamRequest) =
 		new ActivityStreamCommandInternal(request)
@@ -27,7 +24,7 @@ abstract class ActivityStreamCommandInternal(
 	with NotificationServiceComponent {
 
 	def applyInternal() = transactional(readOnly = true) {
-		val results = Await.result(notificationService.stream(request), 10.seconds)
+		val results = notificationService.stream(request)
 		PagedActivities(
 			results.items,
 			results.lastUpdatedDate,

@@ -9,10 +9,9 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.{NotificationDao, NotificationDaoComponent}
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.services.ActivityStreamRequest
 
-import scala.concurrent.Future
+import scala.concurrent.duration._
 
 case class PagedNotifications(items: Seq[Notification[_, _]], lastUpdatedDate: Option[DateTime], totalHits: Long)
 
@@ -20,7 +19,7 @@ trait NotificationQueryService
 	extends NotificationQueryMethods
 
 trait NotificationQueryMethods {
-	def userStream(req: ActivityStreamRequest): Future[PagedNotifications]
+	def userStream(req: ActivityStreamRequest): PagedNotifications
 }
 
 @Service
@@ -49,7 +48,7 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 			notificationDao.getById(hit.sourceAsMap("notification").toString)
 		}.toSeq
 
-	override def userStream(req: ActivityStreamRequest): Future[PagedNotifications] = {
+	override def userStream(req: ActivityStreamRequest): PagedNotifications = {
 		val recipientQuery = Some(termQuery("recipient", req.user.getUserId))
 		val priorityQuery = Some(rangeQuery("priority") from req.priority to 1.0)
 
@@ -68,16 +67,17 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 
 		val query = bool { must(Seq(recipientQuery, priorityQuery, dismissedQuery, typesQuery, pagingQuery).flatten) }
 
-		client.execute {
-			searchFor query query sort (field sort "created" order SortOrder.DESC) limit req.max
-		}.map { results =>
-			val items = toNotifications(results.hits)
+		// Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread
+		val results =
+			client.execute { searchFor query query sort (field sort "created" order SortOrder.DESC) limit req.max }
+				.await(10.seconds)
 
-			PagedNotifications(
-				items = items,
-				lastUpdatedDate = items.lastOption.map { _.created },
-				totalHits = results.totalHits
-			)
-		}
+		val items = toNotifications(results.hits)
+
+		PagedNotifications(
+			items = items,
+			lastUpdatedDate = items.lastOption.map { _.created },
+			totalHits = results.totalHits
+		)
 	}
 }

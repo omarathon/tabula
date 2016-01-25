@@ -8,13 +8,11 @@ import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.elasticsearch.NotificationQueryService
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
-import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(
@@ -62,16 +60,16 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		indexManager.createIndexMessage(notifications, user)
 	}
 
-	def stream(req: ActivityStreamRequest): Future[ActivityStream] =
-		index.userStream(req).map { notifications =>
-			val activities = notifications.items.flatMap(toActivity)
+	def stream(req: ActivityStreamRequest): ActivityStream = {
+		val notifications = index.userStream(req)
+		val activities = notifications.items.flatMap(toActivity)
 
-			ActivityStream(
-				items = activities,
-				lastUpdatedDate = notifications.lastUpdatedDate,
-				totalHits = notifications.totalHits
-			)
-		}
+		ActivityStream(
+			items = activities,
+			lastUpdatedDate = notifications.lastUpdatedDate,
+			totalHits = notifications.totalHits
+		)
+	}
 
 	def toActivity(notification: Notification[_,_]) : Option[Activity[Any]] = {
 		try {

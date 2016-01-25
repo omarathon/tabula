@@ -135,7 +135,7 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 			client.execute { searchFor query bool { must(queries) } }
 				.map { response => response.hits.map { _.id }.toSeq }
 				.recover { case _ => Nil } // ignore any error
-				.await(15.seconds)
+				.await(15.seconds) // Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread
 				.flatMap(profileService.getMemberByUniversityId(_))
 		} catch {
 			case _: TimeoutException => Seq() // Invalid query string or timeout
