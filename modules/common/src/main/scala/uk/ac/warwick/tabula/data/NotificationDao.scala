@@ -19,7 +19,7 @@ trait NotificationDao {
 	def getById(id: String): Option[Notification[_  >: Null <: ToEntityReference, _]]
 	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification]
 
-	def recent(start: DateTime): Scrollable[Notification[_,_]]
+	def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference,_]]
 	def unemailedRecipientCount: Number
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo]
@@ -32,8 +32,8 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 
 	/** A Scrollable of all notifications since this date, sorted date ascending.
 		*/
-	def recent(start: DateTime): Scrollable[Notification[_,_]] = {
-		val scrollable = session.newCriteria[Notification[_,_]]
+	def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference,_]] = {
+		val scrollable = session.newCriteria[Notification[_ >: Null <: ToEntityReference,_]]
 			.add(Restrictions.ge("created", start))
 			.addOrder(Order.asc("created"))
 			.scroll()

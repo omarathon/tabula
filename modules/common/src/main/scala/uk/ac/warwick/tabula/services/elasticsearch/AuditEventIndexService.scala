@@ -24,10 +24,9 @@ object AuditEventIndexService {
 			var fields = mutable.Map[String, Any]()
 
 			fields += (
-				"id" -> item.id,
 				"eventType" -> item.eventType,
 				"eventDate" -> DateFormats.IsoDateTime.print(item.eventDate)
-				)
+			)
 
 			if (item.eventId != null) { // null for old events
 				fields += ("eventId" -> item.eventId)
@@ -66,16 +65,6 @@ class AuditEventIndexService
 	// largest batch of event items we'll load in at once during scheduled incremental index.
 	final override val IncrementalBatchSize = 1000
 
-	// Fields that are a space-separated list of tokens.
-	// A list of IDs needs to be in here or else the whole thing
-	// will be treated as one value.
-	val tokenListFields = Set(
-		"students",
-		"feedbacks",
-		"submissions",
-		"attachments"
-	)
-
 	override val UpdatedDateField = "eventDate"
 
 	override def listNewerThan(startDate: DateTime, batchSize: Int) =
@@ -84,7 +73,6 @@ class AuditEventIndexService
 
 trait AuditEventElasticsearchConfig extends ElasticsearchConfig {
 	override val fields: Seq[TypedFieldDefinition] = Seq(
-		longField("id"), // For efficient range queries
 		stringField("students") analyzer WhitespaceAnalyzer,
 		stringField("feedbacks") analyzer WhitespaceAnalyzer,
 		stringField("submissions") analyzer WhitespaceAnalyzer,

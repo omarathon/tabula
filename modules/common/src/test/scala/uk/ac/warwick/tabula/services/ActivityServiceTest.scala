@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import org.apache.lucene.search.FieldDoc
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{Activity, AuditEvent}
@@ -59,8 +58,7 @@ class ActivityServiceTest extends TestBase with Mockito {
 		submissionService.getSubmission("submissionId1") returns Some(submission1)
 		submissionService.getSubmission("submissionId2") returns Some(submission2)
 
-		val fieldDoc = new FieldDoc(100, 0.5f, Array())
-		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(80L), 30)
+		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(ae2.eventDate), 30)
 
 		auditQueryService.noteworthySubmissionsForModules(Seq(om1, om2, am1, am2), None, 8) returns Future.successful(pae)
 
@@ -80,7 +78,7 @@ class ActivityServiceTest extends TestBase with Mockito {
 		activities.items(1).agent.getUserId() should be ("cuscav")
 		activities.items(1).entity should be (submission2)
 
-		activities.lastId should be (Some(80L))
+		activities.lastUpdatedDate should be (Some(ae2.eventDate))
 		activities.totalHits should be (30)
 	}
 
@@ -115,12 +113,11 @@ class ActivityServiceTest extends TestBase with Mockito {
 		submissionService.getSubmission("submissionId1") returns Some(submission1)
 		submissionService.getSubmission("submissionId2") returns Some(submission2)
 
-		val fieldDoc = new FieldDoc(100, 0.5f, Array())
-		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(80L), 30)
+		val pae = PagedAuditEvents(Seq(ae1, ae2), Some(ae2.eventDate), 30)
 
-		auditQueryService.noteworthySubmissionsForModules(Seq(om1, om2, am1, am2), Some(80L), 8) returns Future.successful(pae)
+		auditQueryService.noteworthySubmissionsForModules(Seq(om1, om2, am1, am2), Some(ae2.eventDate), 8) returns Future.successful(pae)
 
-		val activities = service.getNoteworthySubmissions(currentUser, 80L).futureValue
+		val activities = service.getNoteworthySubmissions(currentUser, ae2.eventDate).futureValue
 		activities.items.size should be (2)
 		activities.items(0) should not be (null)
 		activities.items(0).title should be ("New submission")
@@ -136,7 +133,7 @@ class ActivityServiceTest extends TestBase with Mockito {
 		activities.items(1).agent.getUserId() should be ("cuscav")
 		activities.items(1).entity should be (submission2)
 
-		activities.lastId should be (Some(80L))
+		activities.lastUpdatedDate should be (Some(ae2.eventDate))
 		activities.totalHits should be (30)
 	}
 

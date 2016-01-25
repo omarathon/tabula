@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.CurrentUser
@@ -37,10 +38,10 @@ import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 
 	@ModelAttribute("command") def command(
 		user: CurrentUser,
-		@PathVariable lastId: Long) =
-			CourseworkHomepageActivityPageletCommand(user, lastId)
+		@PathVariable lastUpdatedDate: Long) =
+			CourseworkHomepageActivityPageletCommand(user, new DateTime(lastUpdatedDate))
 
-	@RequestMapping(Array("/api/activity/pagelet/{lastId}"))
+	@RequestMapping(Array("/api/activity/pagelet/{lastUpdatedDate}"))
 	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
 		try {
 			cmd.apply() match {

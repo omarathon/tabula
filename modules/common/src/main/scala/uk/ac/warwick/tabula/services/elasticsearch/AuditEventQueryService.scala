@@ -24,13 +24,13 @@ import scala.concurrent.Future
 trait AuditEventQueryService
 	extends AuditEventQueryMethods
 
-case class PagedAuditEvents(items: Seq[AuditEvent], lastId: Option[Long], totalHits: Long)
+case class PagedAuditEvents(items: Seq[AuditEvent], lastUpdatedDate: Option[DateTime], totalHits: Long)
 
 trait AuditEventNoteworthySubmissionsService {
 	final val DefaultMaxEvents = 50
 
-	def submissionsForModules(modules: Seq[Module], lastId: Option[Long], max: Int = DefaultMaxEvents): Future[PagedAuditEvents]
-	def noteworthySubmissionsForModules(modules: Seq[Module], lastId: Option[Long], max: Int = DefaultMaxEvents): Future[PagedAuditEvents]
+	def submissionsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int = DefaultMaxEvents): Future[PagedAuditEvents]
+	def noteworthySubmissionsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int = DefaultMaxEvents): Future[PagedAuditEvents]
 }
 
 trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
@@ -265,10 +265,10 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 			events.sortBy(_.eventDate).reverse
 		}
 
-	private def submissionEventsForModules(modules: Seq[Module], lastId: Option[Long], max: Int, restrictions: QueryDefinition*): Future[PagedAuditEvents] = {
+	private def submissionEventsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int, restrictions: QueryDefinition*): Future[PagedAuditEvents] = {
 		val eventTypeQuery = termQuery("eventType", "SubmitAssignment")
 
-		val queries: Seq[QueryDefinition] = lastId match {
+		val queries: Seq[QueryDefinition] = lastUpdatedDate match {
 			case None => restrictions :+ eventTypeQuery
 			case Some(id) => Seq(eventTypeQuery, rangeQuery("id") to id.toString includeUpper false) ++ restrictions
 		}
@@ -282,18 +282,18 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 			PagedAuditEvents(
 				items = items,
-				lastId = items.lastOption.map { _.id },
+				lastUpdatedDate = items.lastOption.map { _.eventDate },
 				totalHits = results.totalHits
 			)
 		}
 	}
 
 
-	def submissionsForModules(modules: Seq[Module], lastId: Option[Long], max: Int = DefaultMaxEvents): Future[PagedAuditEvents] =
-		submissionEventsForModules(modules, lastId, max)
+	def submissionsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int = DefaultMaxEvents): Future[PagedAuditEvents] =
+		submissionEventsForModules(modules, lastUpdatedDate, max)
 
-	def noteworthySubmissionsForModules(modules: Seq[Module], lastId: Option[Long], max: Int = DefaultMaxEvents): Future[PagedAuditEvents] =
-		submissionEventsForModules(modules, lastId, max, termQuery("submissionIsNoteworthy", true))
+	def noteworthySubmissionsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int = DefaultMaxEvents): Future[PagedAuditEvents] =
+		submissionEventsForModules(modules, lastUpdatedDate, max, termQuery("submissionIsNoteworthy", true))
 
 }
 

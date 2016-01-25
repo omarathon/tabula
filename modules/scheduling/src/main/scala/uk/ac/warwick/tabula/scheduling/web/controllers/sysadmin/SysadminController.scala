@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportAcademicInformati
 import uk.ac.warwick.tabula.scheduling.commands.{CleanupUnreferencedFilesCommand, SanityCheckFilesystemCommand, SyncReplicaFilesystemCommand}
 import uk.ac.warwick.tabula.scheduling.jobs.ImportMembersJob
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, ProfileIndexService}
+import uk.ac.warwick.tabula.services.elasticsearch.{NotificationIndexService, AuditEventIndexService, ElasticsearchIndexingResult, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
@@ -69,7 +69,7 @@ class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] wit
 		)
 }
 
-class ReindexNotificationsCommand extends Command[Unit] with ReadOnly {
+class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var indexer = Wire[NotificationIndexService]
@@ -78,10 +78,17 @@ class ReindexNotificationsCommand extends Command[Unit] with ReadOnly {
 	var from: DateTime = _
 
 	def applyInternal() = {
-		indexer.indexFrom(from)
+		Await.result(indexer.indexFrom(from), Duration.Inf)
 	}
 
 	def describe(d: Description) = d.property("from" -> from)
+	override def describeResult(d: Description, result: ElasticsearchIndexingResult) =
+		d.properties(
+			"successful" -> result.successful,
+			"failed" -> result.failed,
+			"timeTaken" -> result.timeTaken,
+			"maxUpdatedDate" -> result.maxUpdatedDate
+		)
 }
 
 class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {

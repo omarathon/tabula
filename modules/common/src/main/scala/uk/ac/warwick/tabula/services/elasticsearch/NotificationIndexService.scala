@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.elasticsearch
 import javax.persistence.DiscriminatorValue
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
+import com.sksamuel.elastic4s.analyzers.{WhitespaceAnalyzer, KeywordAnalyzer, AnalyzerDefinition}
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
@@ -11,11 +11,17 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.AutowiringNotificationDaoComponent
-import uk.ac.warwick.tabula.services.RecipientNotification
+import uk.ac.warwick.tabula.data.model.{ToEntityReference, Identifiable, Notification}
+import uk.ac.warwick.userlookup.User
+import scala.language.existentials
+
+case class IndexedNotification(notification: Notification[_ >: Null <: ToEntityReference, _], recipient: User) extends Identifiable {
+	def id = s"${notification.id}-${recipient.getUserId}"
+}
 
 object NotificationIndexService {
-	implicit object RecipientNotificationIndexable extends ElasticsearchIndexable[RecipientNotification] {
-		override def fields(item: RecipientNotification): Map[String, Any] = {
+	implicit object IndexedNotificationIndexable extends ElasticsearchIndexable[IndexedNotification] {
+		override def fields(item: IndexedNotification): Map[String, Any] = {
 			val recipient = item.recipient
 			val notification = item.notification
 
@@ -32,17 +38,17 @@ object NotificationIndexService {
 			)
 		}
 
-		override def lastUpdatedDate(item: RecipientNotification): DateTime = item.notification.created
+		override def lastUpdatedDate(item: IndexedNotification): DateTime = item.notification.created
 	}
 }
 
 @Service
 class NotificationIndexService
-	extends AbstractIndexService[RecipientNotification]
+	extends AbstractIndexService[IndexedNotification]
 		with AutowiringNotificationDaoComponent
 		with NotificationElasticsearchConfig {
 
-	override implicit val indexable = NotificationIndexService.RecipientNotificationIndexable
+	override implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
 
 	/**
 		* The name of the index that this service writes to
@@ -56,7 +62,7 @@ class NotificationIndexService
 	override protected def listNewerThan(startDate: DateTime, batchSize: Int) =
 		notificationDao.recent(startDate).take(batchSize).flatMap { notification =>
 			try {
-				notification.recipients.toList.map { user => new RecipientNotification(notification, user) }
+				notification.recipients.toList.map { user => IndexedNotification(notification, user) }
 			} catch {
 				// Can happen if reference to an entity has since been deleted, e.g.
 				// a submission is resubmitted and the old submission is removed. Skip this notification.
@@ -74,6 +80,7 @@ trait NotificationElasticsearchConfig extends ElasticsearchConfig {
 	override def fields: Seq[TypedFieldDefinition] = Seq(
 		doubleField("priority"),
 		booleanField("dismissed"),
+		stringField("notificationType") index "not_analyzed",
 		dateField("created") format "strict_date_time_no_millis"
 	)
 

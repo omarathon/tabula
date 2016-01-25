@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -12,11 +13,11 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object ActivityService {
-	case class PagedActivities(items: Seq[Activity[_]], lastId: Option[Long], totalHits: Long)
+	case class PagedActivities(items: Seq[Activity[_]], lastUpdatedDate: Option[DateTime], totalHits: Long)
 
 	implicit def pagedAuditEventsToActivities(in: Future[PagedAuditEvents]): Future[PagedActivities] =
 		in.map { pagedEvents =>
-			PagedActivities(pagedEvents.items.flatMap(Activity.apply), pagedEvents.lastId, pagedEvents.totalHits)
+			PagedActivities(pagedEvents.items.flatMap(Activity.apply), pagedEvents.lastUpdatedDate, pagedEvents.totalHits)
 		}
 }
 
@@ -41,8 +42,8 @@ class ActivityService {
 		auditQueryService.noteworthySubmissionsForModules(getModules(user), None, StreamSize)
 
 	// following pages
-	def getNoteworthySubmissions(user: CurrentUser, lastId: Long): Future[PagedActivities] =
-		auditQueryService.noteworthySubmissionsForModules(getModules(user), Some(lastId), StreamSize)
+	def getNoteworthySubmissions(user: CurrentUser, lastUpdatedDate: DateTime): Future[PagedActivities] =
+		auditQueryService.noteworthySubmissionsForModules(getModules(user), Some(lastUpdatedDate), StreamSize)
 
 	private def getModules(user: CurrentUser): Seq[Module] = {
 		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)

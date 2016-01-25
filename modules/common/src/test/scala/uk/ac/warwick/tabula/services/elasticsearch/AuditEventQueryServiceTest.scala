@@ -233,10 +233,10 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		paged0.items.length should be (100)
 		paged0.totalHits should be (140)
 
-		val paged1 = queryService.submissionsForModules(Seq(module), paged0.lastId, 100).futureValue
+		val paged1 = queryService.submissionsForModules(Seq(module), paged0.lastUpdatedDate, 100).futureValue
 		// asked to batch in 100s, but only 40 left
 		paged1.items.length should be (40)
-		paged1.totalHits should be (40) // This excludes anything before lastId, which may be confusing.
+		paged1.totalHits should be (40) // This excludes anything before lastUpdatedDate, which may be confusing.
 
 		// check pager for noteworthy submissions
 		val paged2 = queryService.noteworthySubmissionsForModules(Seq(module), None, 100).futureValue

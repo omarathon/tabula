@@ -1,39 +1,42 @@
 package uk.ac.warwick.tabula.services
 
-import org.apache.lucene.search.FieldDoc
 import org.hibernate.ObjectNotFoundException
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.services.elasticsearch.NotificationQueryService
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(
-		user: User,
-		max: Int = 100,
-		priority: Double = 0,
-		includeDismissed: Boolean = false,
-		types: Option[Set[String]] = None,
-		pagination: Option[SearchPagination]
+	user: User,
+	max: Int = 100,
+	priority: Double = 0,
+	includeDismissed: Boolean = false,
+	types: Option[Set[String]] = None,
+	lastUpdatedDate: Option[DateTime]
 )
 
-case class SearchPagination(lastDoc: Int, lastField: Long, token: Long) {
-	def this(last: FieldDoc, token: Long) {
-		this(last.doc, last.fields(0).asInstanceOf[Long], token)
-	}
-}
+case class ActivityStream(
+	items: Seq[Activity[Any]],
+	lastUpdatedDate: Option[DateTime],
+	totalHits: Long
+)
 
 @Service
 class NotificationService extends Logging with FreemarkerTextRenderer {
 
 	var dao = Wire[NotificationDao]
-	var index = Wire[NotificationIndexService]
+	var index = Wire[NotificationQueryService]
 	var indexManager = Wire[IndexManager]
 	var userLookup = Wire[UserLookupService]
 
@@ -59,11 +62,16 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		indexManager.createIndexMessage(notifications, user)
 	}
 
-	def stream(req: ActivityStreamRequest): PagingSearchResultItems[Activity[Any]] = {
-		val notifications = index.userStream(req)
-		val activities = notifications.items.flatMap(toActivity)
-		notifications.copy(items = activities)
-	}
+	def stream(req: ActivityStreamRequest): Future[ActivityStream] =
+		index.userStream(req).map { notifications =>
+			val activities = notifications.items.flatMap(toActivity)
+
+			ActivityStream(
+				items = activities,
+				lastUpdatedDate = notifications.lastUpdatedDate,
+				totalHits = notifications.totalHits
+			)
+		}
 
 	def toActivity(notification: Notification[_,_]) : Option[Activity[Any]] = {
 		try {

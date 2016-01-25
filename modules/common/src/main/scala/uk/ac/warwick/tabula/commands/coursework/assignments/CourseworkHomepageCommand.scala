@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand._
@@ -94,17 +95,17 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 }
 
 object CourseworkHomepageActivityPageletCommand {
-	def apply(user: CurrentUser, lastId: Long) =
-		new CourseworkHomepageActivityPageletCommandInternal(user, lastId)
+	def apply(user: CurrentUser, lastUpdatedDate: DateTime) =
+		new CourseworkHomepageActivityPageletCommandInternal(user, lastUpdatedDate)
 			with ComposableCommand[Option[PagedActivities]]
 			with AutowiringActivityServiceComponent
 			with PubliclyVisiblePermissions with ReadOnly with Unaudited
 }
 
-class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, lastId: Long) extends CommandInternal[Option[PagedActivities]] {
+class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, lastUpdatedDate: DateTime) extends CommandInternal[Option[PagedActivities]] {
 	self: ActivityServiceComponent =>
 
 	def applyInternal() =
-		if (user.loggedIn) Some(Await.result(activityService.getNoteworthySubmissions(user, lastId), 10.seconds))
+		if (user.loggedIn) Some(Await.result(activityService.getNoteworthySubmissions(user, lastUpdatedDate), 10.seconds))
 		else None
 }
