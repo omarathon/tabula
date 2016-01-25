@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
 
 	val indexName = "notifications"
+	val indexType = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new NotificationQueryServiceImpl
@@ -68,14 +69,14 @@ class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSug
 
 		(items :+ dismissedItem).foreach { item =>
 			queryService.notificationDao.getById(item.notification.id) returns Some(item.notification)
-			client.execute { index into indexName -> indexName source item id item.id }
+			client.execute { index into indexName / indexType source item id item.id }
 		}
-		blockUntilExactCount(101, indexName, indexName)
+		blockUntilExactCount(101, indexName, indexType)
 
 		// Sanity test
-		search in indexName / indexName limit 200 should containResult("nid1-xyo")
-		search in indexName / indexName limit 200 should containResult("nid101-xyz")
-		search in indexName / indexName term("notificationType", "HeronDefeat") should haveTotalHits(50)
+		search in indexName / indexType limit 200 should containResult("nid1-xyo")
+		search in indexName / indexType limit 200 should containResult("nid101-xyz")
+		search in indexName / indexType term("notificationType", "HeronDefeat") should haveTotalHits(50)
 
 		// The IDs of notifications we expect our recipient to get.
 		lazy val recipientNotifications = items.filter { _.recipient == recipient }
@@ -89,7 +90,7 @@ class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSug
 	@Before def setUp(): Unit = {
 		new NotificationElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexName) fields fields) analysis analysers
+				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
 			}.await.isAcknowledged should be(true)
 		}
 		blockUntilIndexExists(indexName)

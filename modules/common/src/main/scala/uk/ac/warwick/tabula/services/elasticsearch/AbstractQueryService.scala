@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 abstract class AbstractQueryService
 	extends ElasticsearchClientComponent
 		with ElasticsearchIndexName
+		with ElasticsearchIndexType
 		with ElasticsearchSearching {
 
 	@Autowired var client: ElasticClient = _
@@ -14,8 +15,10 @@ abstract class AbstractQueryService
 }
 
 trait ElasticsearchSearching {
-	self: ElasticsearchClientComponent with ElasticsearchIndexName =>
+	self: ElasticsearchClientComponent
+		with ElasticsearchIndexName
+		with ElasticsearchIndexType =>
 
-	protected def searchFor: SearchDefinition = search in indexName -> indexName
+	protected def searchFor: SearchDefinition = search in indexName / indexType
 
 }

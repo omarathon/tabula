@@ -49,11 +49,16 @@ object AuditEventIndexService {
 	}
 }
 
+trait AuditEventIndexType extends ElasticsearchIndexType {
+	final val indexType = "auditEvent"
+}
+
 @Service
 class AuditEventIndexService
 	extends AbstractIndexService[AuditEvent]
 		with AuditEventServiceComponent
-		with AuditEventElasticsearchConfig {
+		with AuditEventElasticsearchConfig
+		with AuditEventIndexType {
 
 	override implicit lazy val indexable = AuditEventIndexService.auditEventIndexable(auditEventService)
 

@@ -24,14 +24,15 @@ trait NotificationQueryMethods {
 
 @Service
 class NotificationQueryServiceImpl extends AbstractQueryService
+	with NotificationIndexType
 	with NotificationQueryService
 	with NotificationQueryMethodsImpl
 	with NotificationDaoComponent {
 
 	/**
-		* The name of the index that this service reads from
+		* The name of the index alias that this service reads from
 		*/
-	@Value("${elasticsearch.index.notifications.name}") var indexName: String = _
+	@Value("${elasticsearch.index.notifications.alias}") var indexName: String = _
 
 	@Autowired var notificationDao: NotificationDao = _
 
@@ -39,7 +40,6 @@ class NotificationQueryServiceImpl extends AbstractQueryService
 
 trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 	self: ElasticsearchClientComponent
-		with ElasticsearchIndexName
 		with ElasticsearchSearching
 		with NotificationDaoComponent =>
 

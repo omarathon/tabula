@@ -84,15 +84,16 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
 
 @Service
 class AuditEventQueryServiceImpl extends AbstractQueryService
+	with AuditEventIndexType
 	with AuditEventQueryService
 	with AuditEventQueryMethodsImpl
 	with AuditEventServiceComponent
 	with UserLookupComponent {
 
 	/**
-		* The name of the index that this service reads from
+		* The name of the index alias that this service reads from
 		*/
-	@Value("${elasticsearch.index.audit.name}") var indexName: String = _
+	@Value("${elasticsearch.index.audit.alias}") var indexName: String = _
 
 	@Autowired var auditEventService: AuditEventService = _
 	@Autowired var userLookup: UserLookupService = _
@@ -101,7 +102,6 @@ class AuditEventQueryServiceImpl extends AbstractQueryService
 
 trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	self: ElasticsearchClientComponent
-		with ElasticsearchIndexName
 		with ElasticsearchSearching
 		with AuditEventServiceComponent
 		with UserLookupComponent =>

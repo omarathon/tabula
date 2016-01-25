@@ -11,9 +11,11 @@ class ElasticsearchIndexInitialisationTest extends TestBase with ElasticSugar wi
 
 	private trait Fixture {
 		val indexName = "mock"
+		val indexType = "wibble"
 
-		val service = new ElasticsearchIndexInitialisation with ElasticsearchIndexName with ElasticsearchIndexSupport with AuditEventElasticsearchConfig {
+		val service = new ElasticsearchIndexInitialisation with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexSupport with AuditEventElasticsearchConfig {
 			override val indexName = Fixture.this.indexName
+			override val indexType = Fixture.this.indexType
 		}
 	}
 

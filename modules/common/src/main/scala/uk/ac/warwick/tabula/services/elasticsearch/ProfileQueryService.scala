@@ -38,14 +38,15 @@ trait ProfileQueryMethods {
 
 @Service
 class ProfileQueryServiceImpl extends AbstractQueryService
+	with ProfileIndexType
 	with ProfileQueryService
 	with ProfileQueryMethodsImpl
 	with ProfileServiceComponent {
 
 	/**
-		* The name of the index that this service reads from
+		* The name of the index alias that this service reads from
 		*/
-	@Value("${elasticsearch.index.profiles.name}") var indexName: String = _
+	@Value("${elasticsearch.index.profiles.alias}") var indexName: String = _
 
 	@Autowired var profileService: ProfileService = _
 
@@ -76,7 +77,6 @@ object ProfileQuerySanitisation extends ProfileQuerySanitisation
 
 trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 	self: ElasticsearchClientComponent
-		with ElasticsearchIndexName
 		with ElasticsearchSearching
 		with ProfileServiceComponent =>
 

@@ -23,6 +23,7 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "audit"
+	val indexType = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
 		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
@@ -42,7 +43,7 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 	@Before def setUp(): Unit = {
 		new AuditEventElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexName) fields fields) analysis analysers
+				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
 			}.await.isAcknowledged should be(true)
 		}
 		blockUntilIndexExists(indexName)
@@ -89,8 +90,8 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 
 		// Index the audit event
-		client.execute { index into indexName -> indexName source auditEvent id auditEvent.id }
-		blockUntilCount(1, indexName, indexName)
+		client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
+		blockUntilCount(1, indexName, indexType)
 
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
 	}}
@@ -130,8 +131,8 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 
 		// Index the audit event
-		client.execute { index into indexName -> indexName source auditEvent id auditEvent.id }
-		blockUntilCount(1, indexName, indexName)
+		client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
+		blockUntilCount(1, indexName, indexType)
 
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
 	}}
@@ -222,10 +223,10 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 
 		// Index the audit event
 		service.listNewerThan(new DateTime(2009,12,1,0,0,0), 500).foreach { auditEvent =>
-			client.execute { index into indexName -> indexName source auditEvent id auditEvent.id }
+			client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
 		}
 
-		blockUntilExactCount(140, indexName, indexName)
+		blockUntilExactCount(140, indexName, indexType)
 
 		stopwatch.stop()
 

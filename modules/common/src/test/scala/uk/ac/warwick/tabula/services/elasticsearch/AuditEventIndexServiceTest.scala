@@ -23,6 +23,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "audit"
+	val indexType = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
 		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
@@ -55,10 +56,10 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		event.related = Seq(event)
 
 		indexer.indexItems(Seq(event)).await
-		blockUntilCount(1, indexName, indexName)
+		blockUntilCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id event.id from indexName / indexName }.futureValue
+		val doc = client.execute { get id event.id from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"eventId" -> "eventId",
@@ -113,13 +114,13 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		// we only index 1000 at a time, so index twice to get all the latest stuff.
 		indexer.incrementalIndex().await
 
-		blockUntilCount(1000, indexName, indexName)
-		client.execute { search in indexName -> indexName }.await.totalHits should be (1000)
+		blockUntilCount(1000, indexName, indexType)
+		client.execute { search in indexName / indexType }.await.totalHits should be (1000)
 
 		indexer.incrementalIndex().await
 
-		blockUntilCount(1020, indexName, indexName)
-		client.execute { search in indexName -> indexName }.await.totalHits should be (1020)
+		blockUntilCount(1020, indexName, indexType)
+		client.execute { search in indexName / indexType }.await.totalHits should be (1020)
 
 		stopwatch.stop()
 
@@ -127,10 +128,10 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		user.setWarwickId("0123456")
 
 		def listRecent(max: Int) =
-			client.execute { search in indexName -> indexName sort ( field sort "eventDate" order SortOrder.DESC ) limit max }
+			client.execute { search in indexName / indexType sort ( field sort "eventDate" order SortOrder.DESC ) limit max }
 
 		def resultsForStudent(user: User) =
-			client.execute { search in indexName -> indexName query termQuery("students", user.getWarwickId) }
+			client.execute { search in indexName / indexType query termQuery("students", user.getWarwickId) }
 
 		listRecent(1000).futureValue.hits.length should be (1000)
 
@@ -147,14 +148,14 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		}
 		indexer.indexItems(moreEvents)
 
-		blockUntilCount(1021, indexName, indexName)
+		blockUntilCount(1021, indexName, indexType)
 
 		resultsForStudent(user).futureValue.totalHits should be (21)
 
 		listRecent(13).futureValue.hits.length should be (13)
 
 		val publishFeedback =
-			client.execute { search in indexName -> indexName query queryStringQuery("eventType:PublishFeedback") limit 100 }
+			client.execute { search in indexName / indexType query queryStringQuery("eventType:PublishFeedback") limit 100 }
 
 		publishFeedback.futureValue.totalHits should be (21)
 
@@ -163,7 +164,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt " + i)
 			val newest =
-				client.execute { search in indexName -> indexName sort ( field sort "eventDate" order SortOrder.DESC ) limit 1 }
+				client.execute { search in indexName / indexType sort ( field sort "eventDate" order SortOrder.DESC ) limit 1 }
 
 			newest.futureValue.hits.head.sourceAsMap("eventId") should be ("d1000")
 			stopwatch.stop()

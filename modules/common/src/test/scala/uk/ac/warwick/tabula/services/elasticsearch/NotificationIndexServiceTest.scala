@@ -21,6 +21,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito with ElasticSug
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "notification"
+	val indexType = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
 		val dao = smartMock[NotificationDao]
@@ -95,10 +96,10 @@ class NotificationIndexServiceTest extends TestBase with Mockito with ElasticSug
 		val item = IndexedNotification(notification, recipient)
 
 		indexer.indexItems(Seq(item)).await
-		blockUntilExactCount(1, indexName, indexName)
+		blockUntilExactCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id item.id from indexName / indexName }.futureValue
+		val doc = client.execute { get id item.id from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"notification" -> "defeat",
@@ -112,10 +113,10 @@ class NotificationIndexServiceTest extends TestBase with Mockito with ElasticSug
 
 	@Test def indexItems(): Unit = new DataFixture {
 		indexer.indexItems(items)
-		blockUntilExactCount(100, indexName, indexName)
+		blockUntilExactCount(100, indexName, indexType)
 
 		val dates = client.execute {
-			search in indexName / indexName query termQuery("recipient", "xyz") sort(field sort "created" order SortOrder.DESC ) limit 100
+			search in indexName / indexType query termQuery("recipient", "xyz") sort(field sort "created" order SortOrder.DESC ) limit 100
 		}.map { _.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq }
 		  .futureValue
 

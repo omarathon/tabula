@@ -16,6 +16,7 @@ class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar wi
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "profiles"
+	val indexType = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new ProfileQueryServiceImpl
@@ -29,7 +30,7 @@ class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar wi
 	@Before def setUp(): Unit = {
 		new ProfileElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexName) fields fields) analysis analysers
+				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
 			}.await.isAcknowledged should be(true)
 		}
 		blockUntilIndexExists(indexName)
@@ -55,14 +56,14 @@ class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar wi
 		queryService.profileService.getMemberByUniversityId("0672089") returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName -> indexName source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexName)
+		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
+		blockUntilCount(1, indexName, indexType)
 
 		// General sanity that this is working before we go into the tests of the query service
-		search in indexName / indexName should containResult(m.universityId)
-		search in indexName / indexName query queryStringQuery("Mathew") should containResult(m.universityId)
-		search in indexName / indexName query queryStringQuery("mat*") should containResult(m.universityId)
-		search in indexName / indexName query termQuery("userType", "S") should containResult(m.universityId)
+		search in indexName / indexType should containResult(m.universityId)
+		search in indexName / indexType query queryStringQuery("Mathew") should containResult(m.universityId)
+		search in indexName / indexType query queryStringQuery("mat*") should containResult(m.universityId)
+		search in indexName / indexType query termQuery("userType", "S") should containResult(m.universityId)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
 		queryService.find("Mathew", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
@@ -94,8 +95,8 @@ class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar wi
 		queryService.profileService.getMemberByUniversityId(m.universityId) returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName -> indexName source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexName)
+		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
+		blockUntilCount(1, indexName, indexType)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
 		queryService.find("joconnell", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
@@ -124,11 +125,11 @@ class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar wi
 		queryService.profileService.getMemberByUniversityId(m.universityId) returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName -> indexName source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexName)
+		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
+		blockUntilCount(1, indexName, indexType)
 
 		// General sanity that this is working before we go into the tests of the query service
-		search in indexName / indexName should containResult(m.universityId)
+		search in indexName / indexType should containResult(m.universityId)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
 		queryService.find("Aist\u0117", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)

@@ -28,6 +28,7 @@ import scala.concurrent.duration._
 abstract class AbstractIndexService[A <: Identifiable]
 	extends ElasticsearchClientComponent
 		with ElasticsearchIndexName
+		with ElasticsearchIndexType
 		with ElasticsearchIndexInitialisation
 		with ElasticsearchConfig
 		with ElasticsearchIndexing[A] {
@@ -43,6 +44,13 @@ trait ElasticsearchIndexName {
 	def indexName: String
 }
 
+trait ElasticsearchIndexType {
+	/**
+		* The object type that this service writes
+		*/
+	def indexType: String
+}
+
 trait ElasticsearchIndexable[A] extends Indexable[A] {
 	var json = JsonObjectMapperFactory.instance
 
@@ -55,12 +63,13 @@ trait ElasticsearchIndexable[A] extends Indexable[A] {
 trait ElasticsearchIndexInitialisation extends InitializingBean {
 	self: ElasticsearchClientComponent
 		with ElasticsearchIndexName
+		with ElasticsearchIndexType
 		with ElasticsearchConfig =>
 
 	override def afterPropertiesSet(): Unit = {
 		// Initialise the index if it doesn't already exist
 		def exists() = client.execute { indexExists(indexName) }.map(_.isExists)
-		def create() = client.execute { createIndex(indexName) mappings(mapping(indexName) fields fields) analysis analysers }.map(_.isAcknowledged)
+		def create() = client.execute { createIndex(indexName) mappings(mapping(indexType) fields fields) analysis analysers }.map(_.isAcknowledged)
 		def createAlias() = client.execute { add alias s"$indexName-alias" on indexName }.map(_.isAcknowledged)
 
 		if (!exists().await) {
@@ -86,7 +95,8 @@ case class ElasticsearchIndexingResult(successful: Int, failed: Int, timeTaken: 
 
 trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 	self: ElasticsearchClientComponent
-		with ElasticsearchIndexName =>
+		with ElasticsearchIndexName
+		with ElasticsearchIndexType =>
 
 	implicit val indexable: ElasticsearchIndexable[A]
 
@@ -153,7 +163,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 	}
 
 	def newestItemInIndexDate: Future[Option[DateTime]] = client.execute {
-		search in indexName -> indexName sourceInclude UpdatedDateField sort ( field sort UpdatedDateField order SortOrder.DESC ) limit 1
+		search in indexName / indexType sourceInclude UpdatedDateField sort ( field sort UpdatedDateField order SortOrder.DESC ) limit 1
 	}.map { response =>
 		response.hits.headOption.map { hit =>
 			DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap(UpdatedDateField).toString)
@@ -196,7 +206,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		if (in.isEmpty) {
 			Future.successful(ElasticsearchIndexingResult.empty)
 		} else {
-			logger.debug(s"Writing to the $indexName index")
+			logger.debug(s"Writing to the $indexName/$indexType index")
 
 			// ID to item
 			val items = in.map { i => i.id -> i }.toMap
@@ -204,7 +214,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 
 			val upserts =
 				items.map { case (id, item) =>
-					update(id) in s"$indexName/$indexName" docAsUpsert true doc item
+					update(id) in s"$indexName/$indexType" docAsUpsert true doc item
 				}
 
 			val future =

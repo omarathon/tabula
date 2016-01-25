@@ -47,7 +47,8 @@ object NotificationIndexService {
 class NotificationIndexService
 	extends AbstractIndexService[IndexedNotification]
 		with NotificationDaoComponent
-		with NotificationElasticsearchConfig {
+		with NotificationElasticsearchConfig
+		with NotificationIndexType {
 
 	override implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
 
@@ -77,6 +78,10 @@ class NotificationIndexService
 			val recipient = notification.recipient
 			recipient.isFoundUser && recipient.getUserId != null
 		}
+}
+
+trait NotificationIndexType extends ElasticsearchIndexType {
+	final val indexType = "notification"
 }
 
 trait NotificationElasticsearchConfig extends ElasticsearchConfig {

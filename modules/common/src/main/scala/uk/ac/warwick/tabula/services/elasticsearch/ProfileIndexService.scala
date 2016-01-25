@@ -206,7 +206,8 @@ object ProfileIndexService {
 class ProfileIndexService
 	extends AbstractIndexService[Member]
 		with MemberDaoComponent
-		with ProfileElasticsearchConfig {
+		with ProfileElasticsearchConfig
+		with ProfileIndexType {
 
 	override implicit val indexable = ProfileIndexService.MemberIndexable
 
@@ -231,6 +232,10 @@ class ProfileIndexService
 	// Note batch size is ignored - we use a Scrollable and it will go through all newer items
 	override protected def listNewerThan(startDate: DateTime, batchSize: Int) =
 		memberDao.listUpdatedSince(startDate).all
+}
+
+trait ProfileIndexType extends ElasticsearchIndexType {
+	final val indexType = "profile"
 }
 
 trait ProfileElasticsearchConfig extends ElasticsearchConfig {

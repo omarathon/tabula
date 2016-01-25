@@ -21,6 +21,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "profile"
+	val indexType = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
 		val dao: MemberDaoImpl = new MemberDaoImpl with SessionComponent {
@@ -56,10 +57,10 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 		m.inUseFlag = "Active"
 
 		indexer.indexItems(Seq(m)).await
-		blockUntilCount(1, indexName, indexName)
+		blockUntilCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id m.universityId from indexName / indexName }.futureValue
+		val doc = client.execute { get id m.universityId from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"userId" -> "cuscav",
@@ -105,19 +106,19 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 
 		indexer.incrementalIndex().await
 
-		blockUntilCount(100, indexName, indexName)
-		client.execute { search in indexName -> indexName }.await.totalHits should be (100)
+		blockUntilCount(100, indexName, indexType)
+		client.execute { search in indexName / indexType }.await.totalHits should be (100)
 
 		// This is a no-op
 		indexer.incrementalIndex().await
 
-		blockUntilCount(100, indexName, indexName)
-		client.execute { search in indexName -> indexName }.await.totalHits should be (100)
+		blockUntilCount(100, indexName, indexType)
+		client.execute { search in indexName / indexType }.await.totalHits should be (100)
 
 		stopwatch.stop()
 
 		def listRecent(max: Int) =
-			client.execute { search in indexName -> indexName sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit max }
+			client.execute { search in indexName / indexType sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit max }
 
 		listRecent(100).futureValue.hits.length should be (100)
 
@@ -136,7 +137,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 		}
 		indexer.indexItems(moreItems)
 
-		blockUntilCount(101, indexName, indexName)
+		blockUntilCount(101, indexName, indexType)
 
 		listRecent(13).futureValue.hits.length should be (13)
 
@@ -145,7 +146,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt " + i)
 			val newest =
-				client.execute { search in indexName -> indexName sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit 1 }
+				client.execute { search in indexName / indexType sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit 1 }
 
 			newest.futureValue.hits.head.sourceAsMap("userId") should be ("100")
 			stopwatch.stop()

@@ -25,6 +25,7 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 	}
 
 	val indexName = "mock"
+	val indexType = "wibble"
 
 	private trait ElasticsearchIndexingSupport extends ElasticsearchClientComponent {
 		override val client = ElasticsearchIndexingTest.this.client
@@ -33,8 +34,9 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 	private trait Fixture {
 		val fakeItems = for (i <- 1 to 100) yield Item(i, s"item$i", new DateTime().plusMinutes(i))
 
-		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexingSupport {
+		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexingSupport {
 			override val indexName = ElasticsearchIndexingTest.this.indexName
+			override val indexType = ElasticsearchIndexingTest.this.indexType
 			override val UpdatedDateField = "date"
 			override val IncrementalBatchSize: Int = 1000
 			override implicit val indexable = IndexableItem
@@ -45,7 +47,7 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 
 	@Before def setup(): Unit = {
 		client.execute { create index indexName mappings (
-			mapping(indexName) fields (
+			mapping(indexType) fields (
 				stringField("name") analyzer SimpleAnalyzer,
 				dateField("date") format "strict_date_time_no_millis"
 			)
@@ -64,11 +66,11 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 		result.failed should be (0)
 
 		// We block because ElasticSearch accepts items but they may not be returned until a refresh happens internally
-		blockUntilCount(100, indexName, indexName)
+		blockUntilCount(100, indexName, indexType)
 
 		// Get the most recent item from a sort
 		val searchResponse =
-			client.execute { search in indexName -> indexName sort ( field sort "date" order SortOrder.DESC ) limit 1 }.await
+			client.execute { search in indexName / indexType sort ( field sort "date" order SortOrder.DESC ) limit 1 }.await
 
 		searchResponse.hits.length should be (1)
 		searchResponse.totalHits should be (100)
