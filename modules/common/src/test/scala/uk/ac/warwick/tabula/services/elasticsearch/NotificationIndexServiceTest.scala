@@ -35,7 +35,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito with ElasticSug
 		indexer.notificationDao = dao
 
 		// Creates the index
-		indexer.afterPropertiesSet()
+		indexer.ensureIndexExists().await should be (true)
 
 		implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
 	}

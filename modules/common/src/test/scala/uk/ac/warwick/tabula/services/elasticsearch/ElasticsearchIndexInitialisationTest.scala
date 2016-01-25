@@ -23,11 +23,11 @@ class ElasticsearchIndexInitialisationTest extends TestBase with ElasticSugar wi
 	def indexCreatedOnPropertiesSet(): Unit = new Fixture {
 		indexName should not(beCreated)
 
-		service.afterPropertiesSet()
+		service.ensureIndexExists().futureValue should be (true)
 		indexName should beCreated
 
 		// Ensure that future runs of afterPropertiesSet don't affect this
-		service.afterPropertiesSet()
+		service.ensureIndexExists().futureValue should be (true)
 		indexName should beCreated
 	}
 

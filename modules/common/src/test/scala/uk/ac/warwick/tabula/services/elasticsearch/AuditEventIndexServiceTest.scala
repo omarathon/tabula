@@ -37,7 +37,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with E
 		indexer.auditEventService = service
 
 		// Creates the index
-		indexer.afterPropertiesSet()
+		indexer.ensureIndexExists().await should be (true)
 
 		implicit val indexable = AuditEventIndexService.auditEventIndexable(service)
 	}

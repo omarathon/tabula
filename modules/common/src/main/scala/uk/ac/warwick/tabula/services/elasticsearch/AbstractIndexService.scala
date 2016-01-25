@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services.elasticsearch
 
 import java.io.Closeable
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
@@ -10,17 +9,14 @@ import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import com.sksamuel.elastic4s.source.Indexable
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.util.Assert
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{JsonObjectMapperFactory, DateFormats}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Identifiable
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Stopwatches._
+import uk.ac.warwick.tabula.{DateFormats, JsonObjectMapperFactory}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -60,22 +56,24 @@ trait ElasticsearchIndexable[A] extends Indexable[A] {
 	override final def json(item: A): String = json.writeValueAsString(fields(item))
 }
 
-trait ElasticsearchIndexInitialisation extends InitializingBean {
+trait ElasticsearchIndexInitialisation {
 	self: ElasticsearchClientComponent
 		with ElasticsearchIndexName
 		with ElasticsearchIndexType
 		with ElasticsearchConfig =>
 
-	override def afterPropertiesSet(): Unit = {
+	def ensureIndexExists(): Future[Boolean] = {
 		// Initialise the index if it doesn't already exist
 		def exists() = client.execute { indexExists(indexName) }.map(_.isExists)
 		def create() = client.execute { createIndex(indexName) mappings(mapping(indexType) fields fields) analysis analysers }.map(_.isAcknowledged)
 		def createAlias() = client.execute { add alias s"$indexName-alias" on indexName }.map(_.isAcknowledged)
 
-		if (!exists().await) {
-			Assert.isTrue(create().await, "Index creation failed")
-			Assert.isTrue(createAlias().await, "Index creation failed")
-		}
+		exists().flatMap {
+			case true => Future.successful(true)
+			case false =>
+				create().filter { b => b }
+					.flatMap { _ => createAlias() }
+		}.filter { existsOrCreated => existsOrCreated } // throw an exception if it didn't work
 	}
 }
 
@@ -94,7 +92,8 @@ case class ElasticsearchIndexingResult(successful: Int, failed: Int, timeTaken: 
 }
 
 trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
-	self: ElasticsearchClientComponent
+	self: ElasticsearchIndexInitialisation
+		with ElasticsearchClientComponent
 		with ElasticsearchIndexName
 		with ElasticsearchIndexType =>
 
@@ -134,7 +133,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		* up as soon as it reached a quiet time.
 		*/
 	def incrementalIndex(): Future[ElasticsearchIndexingResult] = transactional(readOnly = true) {
-		guardMultipleIndexes {
+		guardMultipleIndexes { ensureIndexExists().flatMap { _ =>
 			val stopWatch = StopWatch()
 			stopWatch.record("Incremental index") {
 				// Get the latest item out of the index
@@ -159,7 +158,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 						}
 					}
 			}
-		}
+		}}
 	}
 
 	def newestItemInIndexDate: Future[Option[DateTime]] = client.execute {
@@ -170,8 +169,8 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		}
 	}
 
-	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
-		guardMultipleIndexes {
+	def indexFrom(startDate: DateTime): Future[ElasticsearchIndexingResult] = transactional(readOnly = true) {
+		guardMultipleIndexes { ensureIndexExists().flatMap { _ =>
 			// Keep going until we run out
 
 			/**
@@ -200,7 +199,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 			// Recursion, playa
 			indexBatch(startDate, ElasticsearchIndexingResult.empty)
 		}
-	}
+	}}
 
 	protected def doIndexItems(in: TraversableOnce[A]): Future[ElasticsearchIndexingResult] = {
 		if (in.isEmpty) {

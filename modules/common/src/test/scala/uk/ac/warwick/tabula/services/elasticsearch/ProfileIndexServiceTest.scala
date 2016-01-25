@@ -34,7 +34,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Elas
 		indexer.memberDao = dao
 
 		// Creates the index
-		indexer.afterPropertiesSet()
+		indexer.ensureIndexExists().await should be (true)
 
 		implicit val indexable = ProfileIndexService.MemberIndexable
 	}
