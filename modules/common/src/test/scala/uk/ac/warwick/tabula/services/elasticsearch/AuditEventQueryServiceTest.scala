@@ -1,26 +1,24 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import java.util.UUID
 import javax.annotation.concurrent.NotThreadSafe
 
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
-import org.hibernate.dialect.HSQLDialect
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.commands.{Description, NullCommand}
-import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.events.Event
-import uk.ac.warwick.tabula.services.AuditEventServiceImpl
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, PersistenceTestBase}
-import uk.ac.warwick.util.core.StopWatch
+import uk.ac.warwick.tabula.helpers.Stopwatches._
+import uk.ac.warwick.tabula.services.AuditEventService
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
 @NotThreadSafe
-class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
+class AuditEventQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
@@ -29,18 +27,21 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 	val indexType = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
-		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
-			val session = sessionFactory.getCurrentSession
-		}
-		service.dialect = new HSQLDialect()
-
 		val queryService = new AuditEventQueryServiceImpl
 		queryService.userLookup = new MockUserLookup()
-		queryService.auditEventService = service
+		queryService.auditEventService = smartMock[AuditEventService]
 		queryService.client = AuditEventQueryServiceTest.this.client
 		queryService.indexName = AuditEventQueryServiceTest.this.indexName
 
-		implicit val indexable = AuditEventIndexService.auditEventIndexable(service)
+		queryService.auditEventService.parseData(any[String]) answers { data =>
+			try {
+				Option(data.asInstanceOf[String]).map { json.readValue(_, classOf[Map[String, Any]]) }
+			} catch {
+				case e @ (_: JsonParseException | _: JsonMappingException) => None
+			}
+		}
+
+		implicit val indexable = AuditEventIndexService.auditEventIndexable(queryService.auditEventService)
 	}
 
 	@Before def setUp(): Unit = {
@@ -61,7 +62,6 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		* Check that when you download submissions, they are shown
 		* by adminDownloadedSubmissions(Assignment).
 		*/
-	@Transactional
 	@Test def downloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
 		val assignment = {
 			val a = newDeepAssignment()
@@ -73,22 +73,25 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 			a
 		}
 
-		val command = new NullCommand {
-			override lazy val eventName = "DownloadAllSubmissions"
+		val data = Map(
+			"assignment" -> assignment.id,
+			"submissions" -> Seq("submissionId1"),
+			"students" -> Seq("1234567"),
+			"submissionCount" -> 1
+		)
 
-			override def describe(d: Description) = d
-				.assignment(assignment)
-				.submissions(assignment.submissions.asScala)
-				.studentIds(assignment.submissions.asScala.map(_.universityId))
-				.properties(
-					"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
-		}
+		val auditEvent = AuditEvent(
+			id = 1,
+			eventId = UUID.randomUUID.toString,
+			eventDate = DateTime.now(),
+			eventType = "DownloadAllSubmissions",
+			eventStage = "before",
+			data = json.writeValueAsString(data),
+			parsedData = Some(data)
+		)
+		auditEvent.related = Seq(auditEvent)
 
-		val auditEvent = {
-			val event = Event.fromDescribable(command)
-			service.save(event, "before")
-			service.getByEventId(event.id)
-		}.head
+		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 
@@ -99,7 +102,6 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
 	}}
 
-	@Transactional
 	@Test def individuallyDownloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
 		val assignment = {
 			val a = newDeepAssignment()
@@ -113,23 +115,25 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 			a
 		}
 
-		val command = new NullCommand {
-			override lazy val eventName = "AdminGetSingleSubmission"
+		val data = Map(
+			"assignment" -> assignment.id,
+			"submission" -> "321",
+			"student" -> "1234567",
+			"attachmentCount" -> 0
+		)
 
-			override def describe(d: Description) = {
-				def submission = assignment.submissions.asScala.head
+		val auditEvent = AuditEvent(
+			id = 1,
+			eventId = UUID.randomUUID.toString,
+			eventDate = DateTime.now(),
+			eventType = "AdminGetSingleSubmission",
+			eventStage = "before",
+			data = json.writeValueAsString(data),
+			parsedData = Some(data)
+		)
+		auditEvent.related = Seq(auditEvent)
 
-				d.submission(submission).properties(
-					"studentId" -> submission.universityId,
-					"attachmentCount" -> submission.allAttachments.size)
-			}
-		}
-
-		val auditEvent = {
-			val event = Event.fromDescribable(command)
-			service.save(event, "before")
-			service.getByEventId(event.id)
-		}.head
+		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
 
@@ -140,9 +144,8 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
 	}}
 
-	@Transactional
 	@Test def noteworthySubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
-		val stopwatch = new StopWatch
+		val stopwatch = StopWatch()
 
 		val dept = new Department
 		dept.code = "zx"
@@ -212,20 +215,24 @@ class AuditEventQueryServiceTest extends PersistenceTestBase with Mockito with E
 
 		val events = submitBefore ++ submitAfter ++ submitBeforeLate ++ submitAfterLate
 		events.foreach { event =>
-			event.parsedData = service.parseData(event.data)
-			service.save(event)
+			event.parsedData = Option(event.data).map { json.readValue(_, classOf[Map[String, Any]]) }
 		}
 
-		// 140 total distinct events
-		service.listNewerThan(new DateTime(2009,12,1,0,0,0), 500).size should be (140)
+		val beforeEvents = events.filter { _.eventStage == "before" }
 
-		// 70 new ones, since Christmas
-		service.listNewerThan(new DateTime(2009,12,25,0,0,0), 500).size should be (70)
+		beforeEvents.zipWithIndex.foreach { case (auditEvent, i) =>
+			auditEvent.id = i
+			auditEvent.related = events.filter { _.eventId == auditEvent.eventId }
+		}
+
+		queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
+			ids.asInstanceOf[Seq[Long]].flatMap { id => beforeEvents.find { _.id == id } }
+		}
 
 		stopwatch.start("indexing")
 
 		// Index the audit event
-		service.listNewerThan(new DateTime(2009,12,1,0,0,0), 500).foreach { auditEvent =>
+		beforeEvents.foreach { auditEvent =>
 			client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
 		}
 

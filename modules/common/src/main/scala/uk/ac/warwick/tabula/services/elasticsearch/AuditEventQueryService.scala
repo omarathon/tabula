@@ -113,30 +113,33 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		* an event went missing and we'd like to see the data.
 		*/
 	private def toAuditEvents(hits: Iterable[RichSearchHit]): Seq[AuditEvent] = {
-		val databaseResults: Map[Long, AuditEvent] =
-			auditEventService.getByIds(hits.map { _.id.toLong }.toSeq)
-				.map { event => event.id -> event }
-				.toMap
+		if (hits.isEmpty) Seq()
+		else {
+			val databaseResults: Map[Long, AuditEvent] =
+				auditEventService.getByIds(hits.map { _.id.toLong }.toSeq)
+					.map { event => event.id -> event }
+					.toMap
 
-		/** A placeholder AuditEvent to display if a hit has no matching event in the DB. */
-		def placeholderEvent(hit: RichSearchHit) = {
-			val event = AuditEvent()
-			event.eventStage = "before"
-			event.data = "{}" // We can't restore this if it's not from the db
-			event.id = hit.id.toLong
+			/** A placeholder AuditEvent to display if a hit has no matching event in the DB. */
+			def placeholderEvent(hit: RichSearchHit) = {
+				val event = AuditEvent()
+				event.eventStage = "before"
+				event.data = "{}" // We can't restore this if it's not from the db
+				event.id = hit.id.toLong
 
-			hit.sourceAsMap.get("eventId").foreach { v => event.eventId = v.toString }
-			hit.sourceAsMap.get("userId").foreach { v => event.userId = v.toString }
-			hit.sourceAsMap.get("masqueradeUserId").foreach { v => event.masqueradeUserId = v.toString }
-			hit.sourceAsMap.get("eventType").foreach { v => event.eventType = v.toString }
-			hit.sourceAsMap.get("eventDate").foreach { v => event.eventDate = DateFormats.IsoDateTime.parseDateTime(v.toString) }
+				hit.sourceAsMap.get("eventId").foreach { v => event.eventId = v.toString }
+				hit.sourceAsMap.get("userId").foreach { v => event.userId = v.toString }
+				hit.sourceAsMap.get("masqueradeUserId").foreach { v => event.masqueradeUserId = v.toString }
+				hit.sourceAsMap.get("eventType").foreach { v => event.eventType = v.toString }
+				hit.sourceAsMap.get("eventDate").foreach { v => event.eventDate = DateFormats.IsoDateTime.parseDateTime(v.toString) }
 
-			event
+				event
+			}
+
+			hits.map { hit =>
+				databaseResults.getOrElse(hit.id.toLong, placeholderEvent(hit))
+			}.toSeq
 		}
-
-		hits.map { hit =>
-			databaseResults.getOrElse(hit.id.toLong, placeholderEvent(hit))
-		}.toSeq
 	}
 
 	private def parse(event: AuditEvent): AuditEvent = {

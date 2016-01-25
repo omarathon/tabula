@@ -45,7 +45,7 @@ case class AuditEvent(
 	var parsedData: Option[DataType] = None,
 
 	// list of other related events (with same eventId) manually set by DAO
-	var related: Seq[AuditEvent] = Nil) extends Identifiable {
+	@transient var related: Seq[AuditEvent] = Nil) extends Identifiable {
 
 	/** Collects up all the parsed data maps for all related events. */
 	def relatedParsedData: Seq[DataType] = related.flatMap { _.parsedData }
@@ -102,5 +102,7 @@ case class AuditEvent(
 		userId,
 		parsedData.getOrElse(Map.empty),
 		eventDate)
+
+	override def toString() = s"AuditEvent[id=$id, eventId=$eventId, eventDate=$eventDate, eventType=$eventType, eventStage=$eventStage, userId=$userId, masqueradeUserId=$masqueradeUserId, data=$data]"
 
 }
