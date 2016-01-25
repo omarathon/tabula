@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
+import java.io.File
+
 import com.sksamuel.elastic4s.{ElasticClient, ElasticsearchClientUri}
 import org.elasticsearch.common.settings.Settings
 import org.springframework.beans.factory.annotation.Value
@@ -14,14 +16,40 @@ class ElasticsearchClientFactoryBean extends ScalaFactoryBean[ElasticClient] {
 	@Value("${elasticsearch.cluster.nodes}") var nodes: Array[String] = _
 	@Value("${elasticsearch.cluster.detect_other_nodes}") var detectOtherNodes: Boolean = _
 
-	override def createInstance(): ElasticClient = {
-		val settings =
-			Settings.settingsBuilder()
-			  .put("cluster.name", clusterName)
-				.put("client.transport.sniff", detectOtherNodes)
-				.build()
+	// Should only really be used for unit tests
+	@Value("${elasticsearch.cluster.local_jvm}") var localJvmCluster: Boolean = _
+	@Value("${filesystem.index.dir}") var localIndexDirectory: File = _
 
-		ElasticClient.transport(settings, ElasticsearchClientUri(s"elasticsearch://${nodes.mkString(",")}"))
+	override def createInstance(): ElasticClient = {
+		if (localJvmCluster) {
+			localIndexDirectory.mkdirs()
+
+			val conf = new File(localIndexDirectory, "config")
+			conf.mkdirs()
+
+			ElasticClient.local(
+				Settings.settingsBuilder()
+					.put("path.home", localIndexDirectory.getAbsolutePath)
+					.put("path.repo", localIndexDirectory.getAbsolutePath)
+					.put("path.conf", conf.getAbsolutePath)
+					.put("node.http.enabled", false)
+					.put("http.enabled", false)
+					.put("index.number_of_shards", 1)
+					.put("index.number_of_replicas", 0)
+					.put("discovery.zen.ping.multicast.enabled", false)
+					.put("script.groovy.indy", false)
+					.put("cluster.name", clusterName)
+				  .build()
+			)
+		} else {
+			val settings =
+				Settings.settingsBuilder()
+					.put("cluster.name", clusterName)
+					.put("client.transport.sniff", detectOtherNodes)
+					.build()
+
+			ElasticClient.transport(settings, ElasticsearchClientUri(s"elasticsearch://${nodes.mkString(",")}"))
+		}
 	}
 
 	override def destroyInstance(instance: ElasticClient): Unit = instance.close()

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -74,7 +75,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		with StudentCourseDetailsDaoComponent
 		with StaffAssistantsHelpers =>
 
-	var profileQueryService = Wire[ProfileQueryService]
+	@Autowired var profileQueryService: ProfileQueryService = _
 
 	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId, disableFilter, eagerLoad)

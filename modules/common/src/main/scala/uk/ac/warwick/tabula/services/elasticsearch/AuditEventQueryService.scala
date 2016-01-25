@@ -270,7 +270,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 		val queries: Seq[QueryDefinition] = lastUpdatedDate match {
 			case None => restrictions :+ eventTypeQuery
-			case Some(id) => Seq(eventTypeQuery, rangeQuery("id") to id.toString includeUpper false) ++ restrictions
+			case Some(date) => Seq(eventTypeQuery, rangeQuery("eventDate") lte DateFormats.IsoDateTime.print(date) includeUpper false) ++ restrictions
 		}
 
 		client.execute {

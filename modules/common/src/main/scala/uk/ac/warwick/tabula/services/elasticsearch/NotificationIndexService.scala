@@ -3,16 +3,17 @@ package uk.ac.warwick.tabula.services.elasticsearch
 import javax.persistence.DiscriminatorValue
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.analyzers.{WhitespaceAnalyzer, KeywordAnalyzer, AnalyzerDefinition}
+import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.AutowiringNotificationDaoComponent
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, Identifiable, Notification}
+import uk.ac.warwick.tabula.data.model.{Identifiable, Notification, ToEntityReference}
+import uk.ac.warwick.tabula.data.{NotificationDao, NotificationDaoComponent}
 import uk.ac.warwick.userlookup.User
+
 import scala.language.existentials
 
 case class IndexedNotification(notification: Notification[_ >: Null <: ToEntityReference, _], recipient: User) extends Identifiable {
@@ -45,7 +46,7 @@ object NotificationIndexService {
 @Service
 class NotificationIndexService
 	extends AbstractIndexService[IndexedNotification]
-		with AutowiringNotificationDaoComponent
+		with NotificationDaoComponent
 		with NotificationElasticsearchConfig {
 
 	override implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
@@ -54,6 +55,8 @@ class NotificationIndexService
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.notifications.name}") var indexName: String = _
+
+	@Autowired var notificationDao: NotificationDao = _
 
 	final override val IncrementalBatchSize: Int = 5000
 

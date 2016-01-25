@@ -4,10 +4,10 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers._
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.AutowiringMemberDaoComponent
+import uk.ac.warwick.tabula.data.{MemberDao, MemberDaoComponent, AutowiringMemberDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
 
 import scala.collection.mutable
@@ -205,7 +205,7 @@ object ProfileIndexService {
 @Service
 class ProfileIndexService
 	extends AbstractIndexService[Member]
-		with AutowiringMemberDaoComponent
+		with MemberDaoComponent
 		with ProfileElasticsearchConfig {
 
 	override implicit val indexable = ProfileIndexService.MemberIndexable
@@ -214,6 +214,8 @@ class ProfileIndexService
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.profiles.name}") var indexName: String = _
+
+	@Autowired var memberDao: MemberDao = _
 
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	final override val IncrementalBatchSize = 1500

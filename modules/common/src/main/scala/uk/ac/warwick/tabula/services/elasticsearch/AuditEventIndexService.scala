@@ -5,11 +5,11 @@ import com.sksamuel.elastic4s.analyzers.{AnalyzerDefinition, WhitespaceAnalyzer}
 import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
 import org.elasticsearch.common.xcontent.XContentBuilder
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.services.{AuditEventService, AutowiringAuditEventServiceComponent}
+import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent}
 
 import scala.collection.mutable
 
@@ -52,15 +52,17 @@ object AuditEventIndexService {
 @Service
 class AuditEventIndexService
 	extends AbstractIndexService[AuditEvent]
-		with AutowiringAuditEventServiceComponent
+		with AuditEventServiceComponent
 		with AuditEventElasticsearchConfig {
 
-	override implicit val indexable = AuditEventIndexService.auditEventIndexable(auditEventService)
+	override implicit lazy val indexable = AuditEventIndexService.auditEventIndexable(auditEventService)
 
 	/**
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.audit.name}") var indexName: String = _
+
+	@Autowired var auditEventService: AuditEventService = _
 
 	// largest batch of event items we'll load in at once during scheduled incremental index.
 	final override val IncrementalBatchSize = 1000
