@@ -15,7 +15,9 @@ import scala.collection.mutable
 object ProfileIndexService {
 	implicit object MemberIndexable extends ElasticsearchIndexable[Member] {
 
-		private val FarAwayDateTime = DateTime.now.plusYears(100)
+		// Having this as a def doesn't really have any significant performance change, but allows the value of DateTime.now
+		// to change for tests
+		private def farAwayDateTime = DateTime.now.plusYears(100)
 
 		override def fields(item: Member): Map[String, Any] = {
 			var fields = mutable.Map[String, Any]()
@@ -45,13 +47,13 @@ object ProfileIndexService {
 						fields += "courseEndDate" -> DateFormats.IsoDate.print(student.mostSignificantCourseDetails.get.endDate)
 					} else {
 						// Index a date in the future so range queries work
-						fields += "courseEndDate" -> DateFormats.IsoDate.print(FarAwayDateTime)
+						fields += "courseEndDate" -> DateFormats.IsoDate.print(farAwayDateTime)
 					}
 				case _ =>
 					Option(item.inUseFlag).foreach { fields += "inUseFlag" -> _ }
 
 					// Index a date in the future so range queries work
-					fields += "courseEndDate" -> DateFormats.IsoDate.print(FarAwayDateTime)
+					fields += "courseEndDate" -> DateFormats.IsoDate.print(farAwayDateTime)
 			}
 
 			fields.toMap
