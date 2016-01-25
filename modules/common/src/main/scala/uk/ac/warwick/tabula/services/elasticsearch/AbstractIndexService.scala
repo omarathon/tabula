@@ -56,7 +56,11 @@ trait ElasticsearchIndexable[A] extends Indexable[A] {
 	override final def json(item: A): String = json.writeValueAsString(fields(item))
 }
 
-trait ElasticsearchIndexInitialisation {
+trait ElasticsearchIndexEnsure {
+	def ensureIndexExists(): Future[Boolean]
+}
+
+trait ElasticsearchIndexInitialisation extends ElasticsearchIndexEnsure {
 	self: ElasticsearchClientComponent
 		with ElasticsearchIndexName
 		with ElasticsearchIndexType
@@ -92,7 +96,7 @@ case class ElasticsearchIndexingResult(successful: Int, failed: Int, timeTaken: 
 }
 
 trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
-	self: ElasticsearchIndexInitialisation
+	self: ElasticsearchIndexEnsure
 		with ElasticsearchClientComponent
 		with ElasticsearchIndexName
 		with ElasticsearchIndexType =>

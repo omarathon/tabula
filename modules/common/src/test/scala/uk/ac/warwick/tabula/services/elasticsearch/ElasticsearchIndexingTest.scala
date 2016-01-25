@@ -9,6 +9,7 @@ import org.junit.{Before, After}
 import uk.ac.warwick.tabula.{DateFormats, TestBase}
 import uk.ac.warwick.tabula.data.model.Identifiable
 
+import scala.concurrent.Future
 import scala.util.Random
 
 class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMatchers {
@@ -34,7 +35,7 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 	private trait Fixture {
 		val fakeItems = for (i <- 1 to 100) yield Item(i, s"item$i", new DateTime().plusMinutes(i))
 
-		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexingSupport {
+		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexingSupport with ElasticsearchIndexEnsure {
 			override val indexName = ElasticsearchIndexingTest.this.indexName
 			override val indexType = ElasticsearchIndexingTest.this.indexType
 			override val UpdatedDateField = "date"
@@ -42,6 +43,7 @@ class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMat
 			override implicit val indexable = IndexableItem
 
 			override protected def listNewerThan(startDate: DateTime, batchSize: Int): TraversableOnce[Item] = ???
+			override def ensureIndexExists(): Future[Boolean] = Future.successful(true) // we do this in setup()
 		}
 	}
 
