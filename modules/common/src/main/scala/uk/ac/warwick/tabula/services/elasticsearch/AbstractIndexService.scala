@@ -152,14 +152,13 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 
 						// List newer items to index, up to the incremental batch size
 						val itemsToIndex = listNewerThan(indexStartDate, IncrementalBatchSize)
-						try {
-							doIndexItems(itemsToIndex)
-						} finally {
-							itemsToIndex match {
-								case c: Closeable => c.close()
-								case _ =>
+						doIndexItems(itemsToIndex)
+							.andThen { case _ => // basically what you'd expect a finally block to do
+								itemsToIndex match {
+									case c: Closeable => c.close()
+									case _ =>
+								}
 							}
-						}
 					}
 			}
 		}}
@@ -182,22 +181,22 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 			 */
 			def indexBatch(newerThan: DateTime, acc: ElasticsearchIndexingResult): Future[ElasticsearchIndexingResult] = {
 				val itemsToIndex = listNewerThan(newerThan, IncrementalBatchSize)
-				try {
-					doIndexItems(itemsToIndex)
-						.flatMap { result => result.maxUpdatedDate match {
-							case None => Future.successful(acc)
-							/*
-							 * FIXME This will fail if we have multiple events in the same second and they've appeared halfway through a batch
-							 * but I'm struggling to find a way to do this where it doesn't include the same item again in the next batch.
-							 */
-							case Some(updatedDate) => indexBatch(updatedDate.plusSeconds(1), acc + result)
-						}}
-				} finally {
-					itemsToIndex match {
-						case c: Closeable => c.close()
-						case _ =>
+
+				doIndexItems(itemsToIndex)
+					.andThen { case _ => // basically what you'd expect a finally block to do
+						itemsToIndex match {
+							case c: Closeable => c.close()
+							case _ =>
+						}
 					}
-				}
+					.flatMap { result => result.maxUpdatedDate match {
+						case None => Future.successful(acc)
+						/*
+						 * FIXME This will fail if we have multiple events in the same second and they've appeared halfway through a batch
+						 * but I'm struggling to find a way to do this where it doesn't include the same item again in the next batch.
+						 */
+						case Some(updatedDate) => indexBatch(updatedDate.plusSeconds(1), acc + result)
+					}}
 			}
 
 			// Recursion, playa

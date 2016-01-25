@@ -10,6 +10,7 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Identifiable, Notification, ToEntityReference}
 import uk.ac.warwick.tabula.data.{NotificationDao, NotificationDaoComponent}
 import uk.ac.warwick.userlookup.User
@@ -63,7 +64,7 @@ class NotificationIndexService
 
 	override val UpdatedDateField: String = "created"
 
-	override protected def listNewerThan(startDate: DateTime, batchSize: Int) =
+	override protected def listNewerThan(startDate: DateTime, batchSize: Int) = transactional(readOnly = true) {
 		notificationDao.recent(startDate).take(batchSize).flatMap { notification =>
 			try {
 				notification.recipients.toList.map { user => IndexedNotification(notification, user) }
@@ -77,7 +78,9 @@ class NotificationIndexService
 		}.filter { notification =>
 			val recipient = notification.recipient
 			recipient.isFoundUser && recipient.getUserId != null
-		}
+		}.toList
+	}
+
 }
 
 trait NotificationIndexType extends ElasticsearchIndexType {

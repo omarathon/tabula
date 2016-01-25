@@ -5,13 +5,13 @@ This is Tabula, the MyDepartment system including a number of modules. It has a 
 
 Currently, the modules that are in Tabula are:
 
-- coursework - Coursework Submission, the Assignment Management project that used to be [Horses for Courses](https://bugs.elab.warwick.ac.uk/browse/HFC)
-- profiles - Student Profiles
-- groups - Small Group Teaching management
-- attendance - Monitoring point management and recording
-- admin - Administration & Permissions functions
-- home - Static content and homepage
-- reports - Report generation for other modules
+- web - Static content and homepage
+  - coursework - Coursework Submission, the Assignment Management project that used to be [Horses for Courses](https://bugs.elab.warwick.ac.uk/browse/HFC)
+  - profiles - Student Profiles
+  - groups - Small Group Teaching management
+  - attendance - Monitoring point management and recording
+  - admin - Administration & Permissions functions
+  - reports - Report generation for other modules
 - api - API-specific details
 
 Note: This is likely to change to being 3 modules: web, reports and api (possibly with common? commands? who knows).
@@ -36,7 +36,7 @@ tabula/
 │   └── web.xml
 ├── lib/
 │   ├── logback.xml
-│   ├── ojdbc6.jar
+│   ├── ojdbc7.jar
 │   ├── tabula.properties
 │   └── tabula-sso-config.xml
 ├── logs/
@@ -71,9 +71,9 @@ There is a sample `server.xml` in `config/servers/augustus/conf`
 
 This is just copied from the `conf` directory in the Tomcat 8 install. I couldn't get Tomcat to run without it being copied, which sucks a bit.
 
-### `lib/ojdbc6.jar`
+### `lib/ojdbc7.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc6.jar
+You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc7.jar
 
 ### `lib/logback.xml`
 
@@ -114,6 +114,40 @@ Set the following in your `tabula.properties`:
 ```
 activemq.broker=tcp://localhost:61616
 ```
+
+### Elasticsearch
+
+To run this locally, you have a few options:
+
+#### Run an ElasticSearch cluster in the JVM
+
+You should be able to set `elasticsearch.cluster.local_jvm=true` in your `tabula.properties` and just start the app as normal, it'll store in whatever you have `filesystem.index.dir` set as (you'll already have this set as this is where it stores the fs indexes at the moment)
+
+#### Install ElasticSearch locally
+
+For Ubuntu:
+
+```
+wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee -a /etc/apt/sources.list.d/elasticsearch-2.x.list
+sudo apt-get update && sudo apt-get install elasticsearch -y
+```
+
+You'll need to edit `/etc/elasticsearch/elasticsearch.yml` to set `cluster.name: tabula` (or set `elasticsearch.cluster.name=elasticsearch` in `tabula.properties`.
+
+When I ran it locally, it wouldn't start on boot by default, but I could start it with `sudo systemctl start elasticsearch`
+
+#### Connect to the tabula-dev Elasticsearch cluster
+
+Set the following properties in your `tabula.properties`:
+
+```
+elasticsearch.cluster.nodes=lamso-tabula-dev-es.lnx.warwick.ac.uk:9300,lamvi-tabula-dev-es.lnx.warwick.ac.uk:9300,lanlo-tabula-dev-es.lnx.warwick.ac.uk:9300
+elasticsearch.cluster.name=tabula-dev
+elasticsearch.index.prefix=mmannion
+```
+
+*Please* make sure you change your `elasticsearch.index.prefix` or you might end up overwriting someone else's index. If you run into firewall problems, shout in #ops
 
 ### Java 8 JDK
 
