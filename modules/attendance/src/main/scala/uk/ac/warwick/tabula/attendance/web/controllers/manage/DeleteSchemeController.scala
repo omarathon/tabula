@@ -18,7 +18,7 @@ class DeleteSchemeController extends AttendanceController {
 	type DeleteSchemeCommand = Appliable[AttendanceMonitoringScheme] with DeleteSchemeCommandState
 
 	@ModelAttribute("command")
-	def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme): DeleteSchemeCommand =
+	def command(@PathVariable scheme: AttendanceMonitoringScheme): DeleteSchemeCommand =
 		DeleteSchemeCommand(mandatory(scheme))
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -45,7 +45,7 @@ class DeleteSchemeController extends AttendanceController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) = {
+	def cancel(@PathVariable scheme: AttendanceMonitoringScheme) = {
 		Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
 	}
 

@@ -20,7 +20,11 @@ trait GeneratedId extends IdEquality {
 	def isTransient = id == null
 }
 
-trait StringId {
+trait Identifiable {
+	def id: Any
+}
+
+trait StringId extends Identifiable {
 	def id: String
 }
 

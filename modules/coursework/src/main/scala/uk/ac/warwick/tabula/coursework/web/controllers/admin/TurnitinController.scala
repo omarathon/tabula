@@ -32,11 +32,11 @@ class TurnitinController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def model(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+	def model(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		SubmitToTurnitinCommand(module, assignment, user)
 
 	@ModelAttribute("incompatibleFiles")
-	def incompatibleFiles(@PathVariable("assignment") assignment: Assignment) = {
+	def incompatibleFiles(@PathVariable assignment: Assignment) = {
 		val allAttachments = mandatory(assignment).submissions.asScala.flatMap{ _.allAttachments }
 		allAttachments.filterNot(a =>
 			if (features.turnitinLTI) TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)

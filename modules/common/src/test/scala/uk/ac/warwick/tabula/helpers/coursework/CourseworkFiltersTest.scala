@@ -1,23 +1,22 @@
 package uk.ac.warwick.tabula.helpers.coursework
 
+import org.joda.time.{DateTime, DateTimeConstants}
+import org.mockito.Mockito._
+import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.{Extension, MarkerSelectField, SavedFormValue, WordCountField}
+import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, Fixtures, TestBase}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
-import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
-import org.joda.time.DateTimeConstants
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.JavaImports._
-import org.mockito.Mockito._
-import uk.ac.warwick.tabula.services.SubmissionService
-import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
-import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackListItem
 
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {

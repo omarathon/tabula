@@ -21,7 +21,7 @@ class DownloadFeedbackController extends CourseworkController {
 	var feedbackService = Wire[FeedbackService]
 	var fileServer = Wire[FileServer]
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser)
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser)
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)), optionalCurrentMember)
 
 	@RequestMapping(value = Array("/all/feedback.zip"))

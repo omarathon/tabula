@@ -15,10 +15,10 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 class CopyModuleAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable("module") module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
+	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable("module") module: Module, cmd: CopyAssignmentsCommand) = {
+	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand) = {
 
 		Mav("admin/modules/copy_assignments",
 			"title" -> module.name,
@@ -28,7 +28,7 @@ class CopyModuleAssignmentsController extends CourseworkController with Unarchiv
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable("module") module: Module, errors: Errors, user: CurrentUser) = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser) = {
 		cmd.apply()
 		Redirect(Routes.admin.module(module))
 	}
@@ -40,13 +40,13 @@ class CopyModuleAssignmentsController extends CourseworkController with Unarchiv
 class CopyDepartmentAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable("department") department: Department) = {
+	def copyAssignmentsCommand(@PathVariable department: Department) = {
 		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy { _.code }
 		CopyAssignmentsCommand(department, modules)
 	}
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable("department") department: Department, cmd: CopyAssignmentsCommand) = {
+	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand) = {
 
 		Mav("admin/modules/copy_assignments",
 			"title" -> department.name,
@@ -57,7 +57,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable("department") department: Department, errors: Errors, user: CurrentUser) = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser) = {
 		cmd.apply()
 		Redirect(Routes.admin.department(department))
 	}

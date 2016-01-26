@@ -15,7 +15,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	var profileService: ProfileService = _
 
 	@Before def setup(): Unit = transactional { tx =>
-		val thisMemberDao = new MemberDaoImpl
+		val thisMemberDao = new AutowiringMemberDaoImpl
 		thisMemberDao.sessionFactory = sessionFactory
 		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 		thisStudentCourseDetailsDao.sessionFactory = sessionFactory

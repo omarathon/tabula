@@ -15,7 +15,7 @@ class ViewProfileByStudentController
 	with AutowiringMeetingRecordServiceComponent {
 
 	@ModelAttribute("viewProfileCommand")
-	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
+	def viewProfileCommand(@PathVariable member: Member) = member match {
 		case student: StudentMember => new ViewProfileCommand(user, student)
 		case staff: StaffMember => new ViewProfileCommand(user, staff)
 		case _ => throw new ItemNotFoundException
@@ -23,7 +23,7 @@ class ViewProfileByStudentController
 
 	@RequestMapping(Array("/view/{member}"))
 	def viewProfile(
-		@PathVariable("member") member: Member,
+		@PathVariable member: Member,
 		@ModelAttribute("viewProfileCommand") profileCmd: Appliable[Member],
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {

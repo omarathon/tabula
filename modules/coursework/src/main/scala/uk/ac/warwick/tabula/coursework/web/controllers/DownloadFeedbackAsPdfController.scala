@@ -27,9 +27,9 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	var feedbackService = Wire[FeedbackService]
 
 	@ModelAttribute def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("student") student: Member): DownloadFeedbackAsPdfCommand = {
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable student: Member): DownloadFeedbackAsPdfCommand = {
 
 		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
@@ -40,7 +40,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	}
 
 	@RequestMapping
-	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable("student") student: Member) = {
+	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: Member) = {
 		new PDFView(
 			"feedback.pdf",
 			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",

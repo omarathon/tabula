@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -9,6 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.services.elasticsearch.ProfileQueryService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import java.util.UUID
@@ -73,7 +75,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		with StudentCourseDetailsDaoComponent
 		with StaffAssistantsHelpers =>
 
-	var profileIndexService = Wire.auto[ProfileIndexService]
+	@Autowired var profileQueryService: ProfileQueryService = _
 
 	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId, disableFilter, eagerLoad)
@@ -121,11 +123,11 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def regenerateTimetableHash(member: Member) = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
 
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
-		profileIndexService.find(query, departments, userTypes, isGod)
+		profileQueryService.find(query, departments, userTypes, isGod)
 	}
 
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
-		profileIndexService.find(department, includeTouched, userTypes)
+		profileQueryService.find(department, includeTouched, userTypes)
 	}
 
 	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {

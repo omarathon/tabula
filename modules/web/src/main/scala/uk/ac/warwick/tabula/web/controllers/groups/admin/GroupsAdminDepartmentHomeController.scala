@@ -61,11 +61,11 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 	}
 
 	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser) =
 		process(cmd, department, "groups/admin/department")
 
 	@RequestMapping
-	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable("department") department: Department, user: CurrentUser) =
+	def loadSets(@ModelAttribute("adminCommand") cmd: AdminSmallGroupsHomeCommand, @PathVariable department: Department, user: CurrentUser) =
 		process(cmd, department, "groups/admin/department-noLayout").noLayout()
 }
 
@@ -91,7 +91,7 @@ class GroupsAdminDepartmentForYearController extends AbstractGroupsAdminDepartme
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@ModelAttribute("adminCommand")
-	def command(@PathVariable("department") dept: Department, @PathVariable("academicYear") academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
+	def command(@PathVariable("department") dept: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand =
 		AdminSmallGroupsHomeCommand(mandatory(dept), mandatory(academicYear), user, calculateProgress = ajax)
 
 }

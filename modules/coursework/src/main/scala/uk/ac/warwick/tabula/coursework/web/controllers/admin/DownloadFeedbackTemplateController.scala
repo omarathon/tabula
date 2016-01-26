@@ -21,9 +21,9 @@ class DownloadFeedbackTemplateController extends CourseworkController {
 	@Autowired var fileServer:FileServer =_
 
 	@ModelAttribute def command(
-		@PathVariable("department") department: Department,
-		@PathVariable("template") template: FeedbackTemplate,
-		@PathVariable("filename") filename: String,
+		@PathVariable department: Department,
+		@PathVariable template: FeedbackTemplate,
+		@PathVariable filename: String,
 		user:CurrentUser) =
 			new DownloadFeedbackTemplateCommand(department, template, filename, user)
 

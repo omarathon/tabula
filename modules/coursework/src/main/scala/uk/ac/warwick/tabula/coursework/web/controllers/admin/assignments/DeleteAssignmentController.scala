@@ -21,7 +21,7 @@ class DeleteAssignmentController extends CourseworkController with AutowiringFea
 	validatesSelf[DeleteAssignmentCommand]
 
 	@ModelAttribute
-	def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new DeleteAssignmentCommand(module, mandatory(assignment))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))

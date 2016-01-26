@@ -22,7 +22,7 @@ class EditExamController extends ExamsController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable("exam") exam : Exam) = EditExamCommand(mandatory(exam))
+		@PathVariable exam : Exam) = EditExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@ModelAttribute("command") cmd: EditExamCommand) = {

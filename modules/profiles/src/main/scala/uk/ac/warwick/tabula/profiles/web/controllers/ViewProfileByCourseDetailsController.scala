@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.Mav
 class ViewProfileByCourseDetailsController extends ViewProfileController {
 
 	@ModelAttribute("viewProfileCommandForStudentCourseDetails")
-	def viewProfileCommandForStudentCourseDetails(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails)
+	def viewProfileCommandForStudentCourseDetails(@PathVariable studentCourseDetails: StudentCourseDetails)
 		=  {
 			mandatory(studentCourseDetails).student match {
 				case student: StudentMember => new ViewProfileCommand(user, student)
@@ -25,7 +25,7 @@ class ViewProfileByCourseDetailsController extends ViewProfileController {
 	// get the profile for the latest year
 	@RequestMapping(Array("/view/course/{studentCourseDetails}"))
 	def viewProfileForStudentCourseDetails(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@ModelAttribute("viewProfileCommandForStudentCourseDetails") profileCmd: Appliable[StudentMember],
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {
@@ -37,8 +37,8 @@ class ViewProfileByCourseDetailsController extends ViewProfileController {
 	// get the profile for the chosen year
 	@RequestMapping(Array("/view/course/{studentCourseDetails}/{year}"))
 	def viewProfileForStudentCourseDetailsAndYear(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("year") year: AcademicYear,
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable year: AcademicYear,
 		@ModelAttribute("viewProfileCommandForStudentCourseDetails") profileCmd: Appliable[StudentMember],
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {

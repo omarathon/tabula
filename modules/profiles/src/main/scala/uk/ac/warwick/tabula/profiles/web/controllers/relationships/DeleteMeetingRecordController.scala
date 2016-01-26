@@ -35,7 +35,7 @@ class DeleteMeetingRecordController extends AbstractRemoveMeetingRecordControlle
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("deleteMeetingRecordCommand")
-	def getDeleteCommand(@PathVariable("meetingRecord") meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getDeleteCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
 		DeleteMeetingRecordCommand(meetingRecord, currentUser)
 	}
 
@@ -56,7 +56,7 @@ class RestoreMeetingRecordController extends AbstractRemoveMeetingRecordControll
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("restoreMeetingRecordCommand")
-	def getRestoreCommand(@PathVariable("meetingRecord") meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getRestoreCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
 		RestoreMeetingRecordCommand(meetingRecord, currentUser)
 	}
 
@@ -76,7 +76,7 @@ class PurgeMeetingRecordController extends AbstractRemoveMeetingRecordController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("purgeMeetingRecordCommand")
-	def getPurgeCommand(@PathVariable("meetingRecord") meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getPurgeCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
 		PurgeMeetingRecordCommand(meetingRecord, currentUser)
 	}
 

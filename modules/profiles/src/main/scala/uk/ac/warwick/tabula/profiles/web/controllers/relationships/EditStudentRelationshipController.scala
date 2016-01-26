@@ -28,8 +28,8 @@ class EditStudentRelationshipController extends BaseController {
 
 	@ModelAttribute("editStudentRelationshipCommand")
 	def editStudentRelationshipCommand(
-			@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-			@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+			@PathVariable relationshipType: StudentRelationshipType,
+			@PathVariable studentCourseDetails: StudentCourseDetails,
 			@RequestParam(value="currentAgent", required=false) currentAgent: Member,
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser

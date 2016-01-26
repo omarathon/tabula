@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 class ExamListMarkingWorkflowController extends ExamsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department) = ListMarkingWorkflowCommand(department, isExam = true)
+	def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = true)
 
 	@RequestMapping
 	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]]): Mav = {

@@ -24,7 +24,7 @@ class EditAssignmentController extends CourseworkController with AutowiringFeatu
 
 	validatesSelf[EditAssignmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
+	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = {
 		new EditAssignmentCommand(module, mandatory(assignment), user)
 	}
 

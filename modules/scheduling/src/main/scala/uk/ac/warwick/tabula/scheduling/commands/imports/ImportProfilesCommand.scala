@@ -11,7 +11,8 @@ import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
 import uk.ac.warwick.tabula.scheduling.services.{AccreditedPriorLearningImporter, MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
+import uk.ac.warwick.tabula.services.elasticsearch.ProfileIndexService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -22,18 +23,18 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var madService = Wire.auto[ModuleAndDepartmentService]
-	var profileImporter = Wire.auto[ProfileImporter]
-	var profileService = Wire.auto[ProfileService]
-	var userLookup = Wire.auto[UserLookupService]
-	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
-	var accreditedPriorLearningImporter = Wire.auto[AccreditedPriorLearningImporter]
-	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
-	var smallGroupService = Wire.auto[SmallGroupService]
-	var profileIndexService = Wire.auto[ProfileIndexService]
-	var memberDao = Wire.auto[MemberDao]
-	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
-	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
+	var madService = Wire[ModuleAndDepartmentService]
+	var profileImporter = Wire[ProfileImporter]
+	var profileService = Wire[ProfileService]
+	var userLookup = Wire[UserLookupService]
+	var moduleRegistrationImporter = Wire[ModuleRegistrationImporter]
+	var accreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
+	var moduleRegistrationDao = Wire[ModuleRegistrationDaoImpl]
+	var smallGroupService = Wire[SmallGroupService]
+	var profileIndexService = Wire[ProfileIndexService]
+	var memberDao = Wire[MemberDao]
+	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 
 	var deptCode: String = _
 
@@ -277,6 +278,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					rationaliseRelationships(importMemberCommands)
 
 					val freshMembers = members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) }
+
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(freshMembers)
 

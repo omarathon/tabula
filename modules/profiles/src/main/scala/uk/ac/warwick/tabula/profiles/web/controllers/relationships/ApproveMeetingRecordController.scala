@@ -19,7 +19,7 @@ class ApproveMeetingRecordController  extends ProfilesController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("approveMeetingRecordCommand")
-	def getCommand(@PathVariable("meetingRecord") meetingRecord: MeetingRecord) =
+	def getCommand(@PathVariable meetingRecord: MeetingRecord) =
 		ApproveMeetingRecordCommand(mandatory(meetingRecord), user)
 
 
@@ -27,7 +27,7 @@ class ApproveMeetingRecordController  extends ProfilesController {
 	def approveMeetingRecord(
 		@Valid @ModelAttribute("approveMeetingRecordCommand") command: Appliable[MeetingRecordApproval],
 		errors: Errors,
-		@PathVariable("meetingRecord") meetingRecord: MeetingRecord
+		@PathVariable meetingRecord: MeetingRecord
 	): Mav = {
 
 		val meetingRecordId = meetingRecord.id

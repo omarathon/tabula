@@ -22,8 +22,8 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
 	@ModelAttribute
 	def command(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
 		user: CurrentUser
 	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, currentMember)
 
@@ -50,9 +50,9 @@ class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkContr
 
 	@ModelAttribute
 	def command(
-		 @PathVariable("module") module: Module,
-		 @PathVariable("assignment") assignment: Assignment,
-		 @PathVariable("studentMember") studentMember: Member,
+		 @PathVariable module: Module,
+		 @PathVariable assignment: Assignment,
+		 @PathVariable studentMember: Member,
 		 user: CurrentUser
 	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, studentMember)
 

@@ -22,13 +22,13 @@ class DownloadFeedbackInProfileController extends CourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("student") student: Member)
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, student.universityId).filter(_.released)), Some(student))
 
 	@Autowired var fileServer: FileServer = _
 
 	@RequestMapping(value = Array("/all/feedback.zip"))
-	def getAll(command: DownloadFeedbackCommand, @PathVariable("student") student: Member)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.filename = null
 		getOne(command)
 	}

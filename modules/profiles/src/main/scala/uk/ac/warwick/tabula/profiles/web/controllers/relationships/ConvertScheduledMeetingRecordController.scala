@@ -29,8 +29,8 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}

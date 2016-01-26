@@ -18,9 +18,9 @@ import uk.ac.warwick.tabula.data.model.Assignment
 class DownloadSupportingFilesController extends CourseworkController{
 
 	@ModelAttribute def command(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("filename") filename: String,
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable filename: String,
 			user:CurrentUser) =
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(user.universityId)), filename)
 
@@ -40,10 +40,10 @@ class DownloadSupportingFilesController extends CourseworkController{
 class AdminDownloadSupportingFilesController extends CourseworkController{
 
 	@ModelAttribute def command(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("filename") filename: String,
-			@PathVariable("universityId") universityId: String) =
+			@PathVariable module: Module,
+			@PathVariable assignment: Assignment,
+			@PathVariable filename: String,
+			@PathVariable universityId: String) =
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(universityId)), filename)
 
 	@Autowired var fileServer:FileServer =_

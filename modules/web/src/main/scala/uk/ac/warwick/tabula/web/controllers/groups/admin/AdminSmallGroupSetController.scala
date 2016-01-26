@@ -18,7 +18,7 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 
 	hideDeletedItems
 
-	@ModelAttribute("adminCommand") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+	@ModelAttribute("adminCommand") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
 		mustBeLinked(mandatory(set), mandatory(module))
 		new ViewViewableCommand(Permissions.Module.ManageSmallGroups, set)
 	}

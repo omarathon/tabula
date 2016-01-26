@@ -21,7 +21,7 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupsCommand =
+	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupsCommand =
 		EditDepartmentSmallGroupsCommand(department, set)
 
 	protected def render(set: DepartmentSmallGroupSet) =

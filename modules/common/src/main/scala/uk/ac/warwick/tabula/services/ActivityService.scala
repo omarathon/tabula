@@ -1,16 +1,24 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.Activity
-import uk.ac.warwick.tabula.data.model.Module
-import org.apache.lucene.search.FieldDoc
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{Activity, Module}
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventNoteworthySubmissionsService, PagedAuditEvents}
+
+import scala.concurrent.Future
+import scala.language.implicitConversions
 
 object ActivityService {
-	type PagedActivities = PagingSearchResultItems[Activity[_]]
+	case class PagedActivities(items: Seq[Activity[_]], lastUpdatedDate: Option[DateTime], totalHits: Long)
+
+	implicit def pagedAuditEventsToActivities(in: Future[PagedAuditEvents]): Future[PagedActivities] =
+		in.map { pagedEvents =>
+			PagedActivities(pagedEvents.items.flatMap(Activity.apply), pagedEvents.lastUpdatedDate, pagedEvents.totalHits)
+		}
 }
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
@@ -25,25 +33,17 @@ class ActivityService {
 
 	private val StreamSize = 8
 
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var assignmentService = Wire.auto[AssessmentService]
-	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var assignmentService = Wire[AssessmentService]
+	var auditQueryService = Wire[AuditEventNoteworthySubmissionsService]
 
 	// first page
-	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
-		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, StreamSize)
-
-		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
-	}
+	def getNoteworthySubmissions(user: CurrentUser): Future[PagedActivities] =
+		auditQueryService.noteworthySubmissionsForModules(getModules(user), None, StreamSize)
 
 	// following pages
-	def getNoteworthySubmissions(user: CurrentUser, doc: Int, field: Long, token: Long): PagedActivities = {
-		// slightly ugly implicit cast required, as we need a FieldDoc whose constructor expects a java Object[]
-		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:JLong))
-		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
-
-		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
-	}
+	def getNoteworthySubmissions(user: CurrentUser, lastUpdatedDate: DateTime): Future[PagedActivities] =
+		auditQueryService.noteworthySubmissionsForModules(getModules(user), Some(lastUpdatedDate), StreamSize)
 
 	private def getModules(user: CurrentUser): Seq[Module] = {
 		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)

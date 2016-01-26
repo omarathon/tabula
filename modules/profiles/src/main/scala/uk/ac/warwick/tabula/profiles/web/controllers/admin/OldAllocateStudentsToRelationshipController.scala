@@ -42,7 +42,7 @@ class OldAllocateStudentsToRelationshipController extends ProfilesController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("doPreviewSpreadsheetUpload", "action!=refresh"))
-	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: OldAllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
+	def previewFileUpload(@PathVariable department: Department, @Valid cmd: OldAllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
 		if (errors.hasErrors && errors.getFieldErrors.asScala.exists { _.getCode == "file.wrongtype.one" }) {
 			form(cmd)
 		} else {

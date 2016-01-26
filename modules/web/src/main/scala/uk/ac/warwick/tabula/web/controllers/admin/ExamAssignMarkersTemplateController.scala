@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 class ExamAssignMarkersTemplateController extends ExamsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("exam") exam: Exam) = AssignMarkersTemplateCommand(exam)
+	def command(@PathVariable exam: Exam) = AssignMarkersTemplateCommand(exam)
 
 	@RequestMapping
 	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]) = {
