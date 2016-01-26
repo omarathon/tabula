@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -10,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.{Staff, Student}
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.services.ProfileService
 
-class ProfileQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
+class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

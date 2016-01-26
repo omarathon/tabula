@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
 import org.scalatest.time.{Millis, Seconds, Span}
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.ElasticsearchTestBase
 
-class ElasticsearchIndexInitialisationTest extends TestBase with ElasticSugar with IndexMatchers {
+class ElasticsearchIndexInitialisationTest extends ElasticsearchTestBase {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
+import com.sksamuel.elastic4s.testkit.IndexMatchers
 import org.elasticsearch.search.sort.SortOrder
 import org.hibernate.dialect.HSQLDialect
 import org.joda.time.DateTime
@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.AuditEventServiceImpl
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StopWatch
 
 import scala.collection.JavaConverters._
 
-class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with ElasticSugar with IndexMatchers {
+class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient with IndexMatchers {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

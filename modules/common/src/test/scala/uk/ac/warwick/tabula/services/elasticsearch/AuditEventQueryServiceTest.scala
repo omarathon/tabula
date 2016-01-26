@@ -1,24 +1,21 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import java.util.UUID
-import javax.annotation.concurrent.NotThreadSafe
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.services.AuditEventService
-import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.tabula.{ElasticsearchTestBase, MockUserLookup, Mockito}
 
 import scala.collection.JavaConverters._
 
-@NotThreadSafe
-class AuditEventQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
+class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

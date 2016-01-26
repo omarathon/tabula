@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers, SearchMatchers}
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.ActivityStreamRequest
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{ElasticsearchTestBase, Fixtures, Mockito}
 
-class NotificationQueryServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers with SearchMatchers {
+class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 	val indexName = "notifications"
 	val indexType = new NotificationIndexType {}.indexType

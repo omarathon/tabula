@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
 import org.junit.After
@@ -10,12 +9,12 @@ import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, SessionComponent}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.util.core.StopWatch
 
 import scala.collection.JavaConverters._
 
-class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with ElasticSugar with IndexMatchers {
+class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))

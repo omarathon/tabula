@@ -2,17 +2,16 @@ package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers.SimpleAnalyzer
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
-import org.junit.{Before, After}
-import uk.ac.warwick.tabula.{DateFormats, TestBase}
+import org.junit.{After, Before}
 import uk.ac.warwick.tabula.data.model.Identifiable
+import uk.ac.warwick.tabula.{DateFormats, ElasticsearchTestBase}
 
 import scala.concurrent.Future
 import scala.util.Random
 
-class ElasticsearchIndexingTest extends TestBase with ElasticSugar with IndexMatchers {
+class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 
 	case class Item(id: Int, name: String, date: DateTime) extends Identifiable
 

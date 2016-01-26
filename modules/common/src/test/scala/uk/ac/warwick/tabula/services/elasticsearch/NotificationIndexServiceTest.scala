@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.testkit.{ElasticSugar, IndexMatchers}
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.Futures._
-import uk.ac.warwick.tabula.{DateFormats, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 import scala.collection.JavaConverters._
 
-class NotificationIndexServiceTest extends TestBase with Mockito with ElasticSugar with IndexMatchers {
+class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
