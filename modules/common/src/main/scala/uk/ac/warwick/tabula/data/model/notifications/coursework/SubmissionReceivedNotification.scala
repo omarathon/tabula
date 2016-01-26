@@ -84,8 +84,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		val feedback = assignment.findFeedback(submission.universityId)
 		val currentMarker = if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
 			feedback.flatMap { f => f.getCurrentWorkflowFeedback }
-				.filter { _.getMarkerUsercode.isDefined }
-				.map { _.getMarkerUser }
+				.flatMap { _.getMarkerUser }
 				.toSeq
 		} else {
 			Seq()
