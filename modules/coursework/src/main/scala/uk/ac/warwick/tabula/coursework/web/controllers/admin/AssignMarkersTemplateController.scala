@@ -14,7 +14,7 @@ class AssignMarkersTemplateController {
 
 
 	@ModelAttribute("command")
-	def command(@PathVariable("assignment") assignment: Assignment) = AssignMarkersTemplateCommand(assignment)
+	def command(@PathVariable assignment: Assignment) = AssignMarkersTemplateCommand(assignment)
 
 	@RequestMapping
 	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]) = {

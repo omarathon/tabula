@@ -26,9 +26,9 @@ trait DepartmentPermissionControllerMethods extends AdminController
 	type RevokeRoleCommand = Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department]
 
 	@ModelAttribute("addCommand")
-	def addCommandModel(@PathVariable("department") department: Department): GrantRoleCommand = GrantRoleCommand(department)
+	def addCommandModel(@PathVariable department: Department): GrantRoleCommand = GrantRoleCommand(department)
 	@ModelAttribute("removeCommand")
-	def removeCommandModel(@PathVariable("department") department: Department): RevokeRoleCommand = RevokeRoleCommand(department)
+	def removeCommandModel(@PathVariable department: Department): RevokeRoleCommand = RevokeRoleCommand(department)
 
 	// Should really be a RolesAndPermissions one, but they're not ganted to any role, so just allow dept admins
 	override val departmentPermission: Permission = Permissions.Department.ArrangeRoutesAndModules
@@ -59,7 +59,7 @@ trait DepartmentPermissionControllerMethods extends AdminController
 class DepartmentPermissionController extends AdminController with DepartmentPermissionControllerMethods {
 
 	@RequestMapping
-	def permissionsForm(@PathVariable("department") department: Department, @RequestParam(defaultValue="") usercodes: Array[String],
+	def permissionsForm(@PathVariable department: Department, @RequestParam(defaultValue="") usercodes: Array[String],
 		@RequestParam(value="role", required=false) role: RoleDefinition, @RequestParam(value="action", required=false) action: String): Mav =
 		form(department, usercodes, Some(role), action)
 

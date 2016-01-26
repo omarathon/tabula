@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import java.io.StringWriter
 import scala.collection.JavaConversions.asScalaSet
 import scala.collection.JavaConversions.seqAsJavaList
-import org.joda.time.{DateTime, ReadableInstant}
+import org.joda.time.ReadableInstant
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.DateFormats
@@ -34,15 +34,14 @@ class SubmissionsInfoController extends CourseworkController {
 
 	var checkIndex = true
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new ListSubmissionsCommand(module, assignment)
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable assignment: Assignment): ListSubmissionsCommand.CommandType =
+		ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
-	def xml(command: ListSubmissionsCommand) = {
+	def xml(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType, @PathVariable assignment: Assignment) = {
 		command.checkIndex = checkIndex
 
-		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
-		val assignment = command.assignment
+		val items = command.apply().sortBy { _.submission.submittedDate }.reverse
 
 		<submissions>
 			{ assignmentElement(assignment) }
@@ -78,11 +77,10 @@ class SubmissionsInfoController extends CourseworkController {
 
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
-	def csv(command: ListSubmissionsCommand) = {
+	def csv(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType) = {
 		command.checkIndex = checkIndex
 
-		val items = command.apply.sortBy { _.submission.submittedDate }.reverse
-		val assignment = command.assignment
+		val items = command.apply().sortBy { _.submission.submittedDate }.reverse
 		val writer = new StringWriter
 		val csvBuilder = new SubmissionsCSVBuilder(items)
 		val doc = new GoodCsvDocument(csvBuilder, null)
@@ -103,13 +101,13 @@ class SubmissionsInfoController extends CourseworkController {
 			items foreach ( item => extraFields = extraFields ++ extraFieldData(item).keySet )
 
 			// return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
-			(coreFields ++ extraFields.toList.sorted)
+			coreFields ++ extraFields.toList.sorted
 		}
 
 		def getNoOfColumns(item:SubmissionListItem) = headers.size
 
 		def getColumn(item:SubmissionListItem, i:Int) = {
-			itemData(item).get(headers.get(i)) getOrElse ""
+			itemData(item).getOrElse(headers.get(i), "")
 		}
 	}
 

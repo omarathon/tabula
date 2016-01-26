@@ -20,7 +20,7 @@ class ScheduledMeetingRecordMissedController extends ProfilesController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def getCommand(@PathVariable("meetingRecord") meetingRecord: ScheduledMeetingRecord) =
+	def getCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =
 		ScheduledMeetingRecordMissedCommand(mandatory(meetingRecord))
 
 
@@ -28,7 +28,7 @@ class ScheduledMeetingRecordMissedController extends ProfilesController {
 	def submit(
 		@Valid @ModelAttribute("command") command: Appliable[ScheduledMeetingRecord],
 		errors: Errors,
-		@PathVariable("meetingRecord") meetingRecord: ScheduledMeetingRecord
+		@PathVariable meetingRecord: ScheduledMeetingRecord
 	) = {
 
 		if (!errors.hasErrors) {

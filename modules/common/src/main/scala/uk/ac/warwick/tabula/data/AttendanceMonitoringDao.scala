@@ -3,12 +3,14 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{ProjectionList, Order, Projections, Restrictions}
+import org.hibernate.criterion.{Order, ProjectionList, Projections, Restrictions}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.Daoisms._
+import uk.ac.warwick.tabula.data.HibernateHelpers._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.TermService
@@ -115,9 +117,11 @@ trait AttendanceMonitoringDao {
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 }
 
-
 @Repository
-class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms with AttendanceMonitoringStudentDataFetcher {
+class AutowiringAttendanceMonitoringDao extends AttendanceMonitoringDaoImpl with Daoisms
+
+class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with AttendanceMonitoringStudentDataFetcher {
+	self: ExtendedSessionComponent =>
 
 	def flush() = session.flush()
 
@@ -405,7 +409,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Daoisms w
 			.add(is("student", student))
 			.add(is("scheme.academicYear", academicYear))
 		if (activeCheckpoints.nonEmpty)
-		// TODO Is there a way to do not-in with multiple queries?
+			// TODO Is there a way to do not-in with multiple queries?
 			c.add(Restrictions.not(safeIn("id", activeCheckpoints.map(_.id))))
 		departmentOption match {
 			case Some(department: Department) => c.add(is("scheme.department", department))
@@ -566,7 +570,7 @@ case class AttendanceMonitoringStudentData(
 }
 
 trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
-	self: Daoisms =>
+	self: SessionComponent =>
 
 	import org.hibernate.criterion.Projections._
 

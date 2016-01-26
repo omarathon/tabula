@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.userlookup.User
@@ -73,12 +74,6 @@ trait ReportWorld extends TestBase with Mockito {
 	createPublishEvent(assignmentEight, 31, studentData(1, 50))	// late (same details as assignmentSeven, just not a dissertation)
 
 	var auditEventQueryMethods = mock[AuditEventQueryMethods]
-	auditEventQueryMethods.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {
-		val args = argsObj.asInstanceOf[Array[_]]
-		val assignment = args(0).asInstanceOf[Assignment]
-		val user = args(1).asInstanceOf[User]
-		Future.successful(auditEvents.filter(event => {event.userId == user.getUserId && event.assignmentId.get == assignment.id}))
-	}}
 
 	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String]) answers {argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]

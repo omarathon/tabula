@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 @Controller
 class ReleaseSmallGroupSetController extends GroupsController {
 
-	@ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable("set") set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
+	@ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
 		new ReleaseGroupSetCommandImpl(Seq(set), user.apparentUser)
 	}
 

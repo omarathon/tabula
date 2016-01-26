@@ -13,7 +13,7 @@ import scala.collection.mutable.HashSet
 
 class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with Mockito {
 
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 
 	@Before def setup() {

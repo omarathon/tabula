@@ -25,7 +25,7 @@ class NotificationSettingsController extends AdminController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department): NotificationSettingsCommand = NotificationSettingsCommand(mandatory(department))
+	def command(@PathVariable department: Department): NotificationSettingsCommand = NotificationSettingsCommand(mandatory(department))
 
 	override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
 
@@ -33,7 +33,7 @@ class NotificationSettingsController extends AdminController
 	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@PathVariable("department") department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand) = {
+	def form(@PathVariable department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand) = {
 		Mav("admin/notification-settings", "returnTo" -> getReturnTo("")).crumbs(
 			Breadcrumbs.Department(department)
 		)
@@ -43,7 +43,7 @@ class NotificationSettingsController extends AdminController
 	def saveSettings(
 		@Valid @ModelAttribute("command") cmd: NotificationSettingsCommand,
 		errors: Errors,
-		@PathVariable("department") department: Department
+		@PathVariable department: Department
 	) = {
 		if (errors.hasErrors) {
 			form(department, cmd)

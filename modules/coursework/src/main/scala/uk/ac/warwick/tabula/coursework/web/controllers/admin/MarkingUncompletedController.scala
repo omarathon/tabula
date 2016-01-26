@@ -22,9 +22,9 @@ class MarkingUncompletedController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("markingUncompletedCommand")
-	def command(@PathVariable("module") module: Module,
-							@PathVariable("assignment") assignment: Assignment,
-							@PathVariable("marker") marker: User,
+	def command(@PathVariable module: Module,
+							@PathVariable assignment: Assignment,
+							@PathVariable marker: User,
 							submitter: CurrentUser) =
 		MarkingUncompletedCommand(module, assignment, marker, submitter)
 
@@ -38,9 +38,9 @@ class MarkingUncompletedController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		@ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
 		errors: Errors
 	) = {
@@ -63,9 +63,9 @@ class MarkingUncompletedController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
 	def submit(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("marker") marker: User,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable marker: User,
 		@Valid @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
 		errors: Errors
 	) = transactional() {

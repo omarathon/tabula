@@ -22,7 +22,7 @@ class EditDepartmentController extends AdminController {
 	def allFilterRules = Department.FilterRule.allFilterRules
 
 	@ModelAttribute("editDepartmentCommand")
-	def command(@PathVariable("department") department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))
+	def command(@PathVariable department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm() = Mav("admin/department/edit/form")

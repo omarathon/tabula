@@ -1,38 +1,44 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.{WorkflowStages, WorkflowStage}
+import javax.validation.constraints.NotNull
+
+import org.joda.time.DateTime
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand
+import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.coursework.{AutowiringCourseworkWorkflowServiceComponent, CourseworkWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{WorkflowStage, WorkflowStages}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
-import org.joda.time.DateTime
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
-import uk.ac.warwick.tabula.services.coursework.CourseworkWorkflowService
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services._
-
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.commands.SelfValidating
-import org.springframework.validation.Errors
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand
-import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackListItem
-
-import ListSubmissionsCommand.SubmissionListItem
-import SubmissionAndFeedbackCommand._
 
 object SubmissionAndFeedbackCommand {
+	type CommandType = Appliable[SubmissionAndFeedbackResults]
+
 	def apply(module: Module, assignment: Assignment) =
-		new SubmissionAndFeedbackCommand(module, assignment)
-		with AutowiringAssessmentMembershipServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringFeedbackForSitsServiceComponent
-		with AutowiringProfileServiceComponent
+		new SubmissionAndFeedbackCommandInternal(module, assignment)
+			with ComposableCommand[SubmissionAndFeedbackResults]
+			with SubmissionAndFeedbackRequest
+			with SubmissionAndFeedbackPermissions
+			with SubmissionAndFeedbackValidation
+			with CommandSubmissionAndFeedbackEnhancer
+			with AutowiringAssessmentMembershipServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringFeedbackForSitsServiceComponent
+			with AutowiringProfileServiceComponent
+			with AutowiringCourseworkWorkflowServiceComponent
+			with Unaudited with ReadOnly
 
 	case class SubmissionAndFeedbackResults (
 		students:Seq[Student],
@@ -73,28 +79,65 @@ object SubmissionAndFeedbackCommand {
 	)
 }
 
-abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignment)
-	extends Command[SubmissionAndFeedbackResults] with Unaudited with ReadOnly with SelfValidating {
+trait SubmissionAndFeedbackState {
+	def module: Module
+	def assignment: Assignment
+}
 
-	self: AssessmentMembershipServiceComponent with UserLookupComponent with FeedbackForSitsServiceComponent with ProfileServiceComponent =>
-
-	mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
-	PermissionCheck(Permissions.Submission.Read, assignment)
-
-	var courseworkWorkflowService = Wire.auto[CourseworkWorkflowService]
-
-	val enhancedSubmissionsCommand = new ListSubmissionsCommand(module, assignment)
-	val enhancedFeedbacksCommand = new ListFeedbackCommand(module, assignment)
-
+trait SubmissionAndFeedbackRequest extends SubmissionAndFeedbackState {
 	@NotNull var filter: CourseworkFilter = CourseworkFilters.AllStudents
 	var filterParameters: JMap[String, String] = JHashMap()
+
 	// When we call export commands, we may want to further filter by a subset of student IDs
 	var students: JList[String] = JArrayList()
+}
 
-	def applyInternal() = {
+trait SubmissionAndFeedbackEnhancer {
+	def enhanceSubmissions(): Seq[SubmissionListItem]
+	def enhanceFeedback(): ListFeedbackResult
+}
+
+trait CommandSubmissionAndFeedbackEnhancer extends SubmissionAndFeedbackEnhancer {
+	self: SubmissionAndFeedbackState =>
+
+	val enhancedSubmissionsCommand = ListSubmissionsCommand(module, assignment)
+	val enhancedFeedbacksCommand = ListFeedbackCommand(module, assignment)
+
+	override def enhanceSubmissions(): Seq[SubmissionListItem] = enhancedSubmissionsCommand.apply()
+	override def enhanceFeedback(): ListFeedbackResult = enhancedFeedbacksCommand.apply()
+}
+
+trait SubmissionAndFeedbackValidation extends SelfValidating {
+	self: SubmissionAndFeedbackRequest =>
+
+	override def validate(errors: Errors): Unit = {
+		Option(filter) foreach { _.validate(filterParameters.asScala.toMap)(errors) }
+	}
+}
+
+trait SubmissionAndFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: SubmissionAndFeedbackState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
+		p.PermissionCheck(Permissions.Submission.Read, assignment)
+	}
+}
+
+abstract class SubmissionAndFeedbackCommandInternal(val module: Module, val assignment: Assignment)
+	extends CommandInternal[SubmissionAndFeedbackResults] with SubmissionAndFeedbackState with TaskBenchmarking {
+	self: SubmissionAndFeedbackRequest
+		with AssessmentMembershipServiceComponent
+		with UserLookupComponent
+		with FeedbackForSitsServiceComponent
+		with ProfileServiceComponent
+		with SubmissionAndFeedbackEnhancer
+		with CourseworkWorkflowServiceComponent =>
+
+	override def applyInternal(): SubmissionAndFeedbackResults = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
-		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
-		val enhancedFeedbacks = enhancedFeedbacksCommand.apply()
+		val enhancedSubmissions = enhanceSubmissions()
+		val enhancedFeedbacks = enhanceFeedback()
 		val latestModifiedOnlineFeedback = enhancedFeedbacks.latestOnlineAdded
 		val whoDownloaded = enhancedFeedbacks.downloads
 		val whoViewed = enhancedFeedbacks.latestOnlineViews
@@ -237,16 +280,12 @@ abstract class SubmissionAndFeedbackCommand(val module: Module, val assignment: 
 		}
 
 		SubmissionAndFeedbackResults(
-			students=studentsFiltered,
-			whoDownloaded=whoDownloaded,
-			stillToDownload=stillToDownload,
-			hasPublishedFeedback=hasPublishedFeedback,
-			hasOriginalityReport=hasOriginalityReport,
-			mustReleaseForMarking=assignment.mustReleaseForMarking
+			students = studentsFiltered,
+			whoDownloaded = whoDownloaded,
+			stillToDownload = stillToDownload,
+			hasPublishedFeedback = hasPublishedFeedback,
+			hasOriginalityReport = hasOriginalityReport,
+			mustReleaseForMarking = assignment.mustReleaseForMarking
 		)
-	}
-
-	def validate(errors: Errors) {
-		Option(filter) foreach { _.validate(filterParameters.asScala.toMap)(errors) }
 	}
 }

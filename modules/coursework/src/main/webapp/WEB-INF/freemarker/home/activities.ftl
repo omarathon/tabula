@@ -59,7 +59,7 @@
 
 	<script type="text/javascript">
 		(function ($) {
-			$("#activities").data("url", "<@url context="/coursework" page="/api/activity/pagelet/${activities.tokens}" />");
+			$("#activities").data("url", "<@url context="/coursework" page="/api/activity/pagelet/${activities.lastUpdatedDate.millis?c}" />");
 		})(jQuery);
 	</script>
 </#if>

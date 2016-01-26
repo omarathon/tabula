@@ -14,9 +14,9 @@ class AssignmentInformationForStudentController extends CourseworkController {
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module,
-							@PathVariable("assignment") assignment: Assignment,
-							@PathVariable("studentMember") studentMember: Member): StudentSubmissionAndFeedbackCommand =
+	def command(@PathVariable module: Module,
+							@PathVariable assignment: Assignment,
+							@PathVariable studentMember: Member): StudentSubmissionAndFeedbackCommand =
 		StudentSubmissionAndFeedbackCommand(module, assignment, studentMember, user)
 
 	@RequestMapping

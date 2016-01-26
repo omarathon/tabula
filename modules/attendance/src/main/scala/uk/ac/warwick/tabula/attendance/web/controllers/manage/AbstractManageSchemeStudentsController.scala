@@ -19,7 +19,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("persistanceCommand")
-	def persistanceCommand(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
+	def persistanceCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
 		AddStudentsToSchemeCommand(mandatory(scheme), user)
 
 	@ModelAttribute("findCommand")

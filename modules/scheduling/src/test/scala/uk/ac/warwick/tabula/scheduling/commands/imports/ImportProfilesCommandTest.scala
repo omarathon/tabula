@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, ModuleRegistrationDaoImpl, StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
@@ -65,7 +65,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		mrDao.sessionFactory = sessionFactory
 		mrDao.getByUsercodesAndYear(Seq("abcde"), year) returns Seq(existingMr)
 
-		val memberDao = new MemberDaoImpl
+		val memberDao = new AutowiringMemberDaoImpl
 		memberDao.sessionFactory = sessionFactory
 
 		val scdDao = new StudentCourseDetailsDaoImpl

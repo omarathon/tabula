@@ -13,10 +13,10 @@ import uk.ac.warwick.tabula.web.Mav
 class ListMarkingWorkflowController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department) = ListMarkingWorkflowCommand(department, isExam = false)
+	def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = false)
 
 	@RequestMapping
-	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable("department") department: Department): Mav = {
+	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable department: Department): Mav = {
 		Mav("admin/markingworkflows/list",
 		    "markingWorkflowInfo" -> cmd.apply(),
 				"isExams" -> false

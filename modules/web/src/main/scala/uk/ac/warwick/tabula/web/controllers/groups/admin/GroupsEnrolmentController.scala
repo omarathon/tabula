@@ -21,7 +21,7 @@ class GroupsEnrolmentController extends GroupsController {
 	validatesSelf[SelfValidating]
 	type EditSmallGroupSetMembershipCommand = Appliable[SmallGroupSet] with ModifiesSmallGroupSetMembership
 
-	@ModelAttribute("command") def formObject(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+	@ModelAttribute("command") def formObject(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
 		val cmd = EditSmallGroupSetMembershipCommand.stub(mandatory(module), mandatory(set))
 		cmd.upstreamGroups.clear()
 		cmd

@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
-
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 object ActivityStreamCommand {
 	def apply(request: ActivityStreamRequest) =
@@ -18,19 +17,18 @@ object ActivityStreamCommand {
 }
 
 abstract class ActivityStreamCommandInternal(
-		val request: ActivityStreamRequest
-	) extends CommandInternal[PagedActivities]
-		with ActivityStreamCommandState
-		with ReadOnly
-		with NotificationServiceComponent {
+	val request: ActivityStreamRequest
+) extends CommandInternal[PagedActivities]
+	with ActivityStreamCommandState
+	with ReadOnly
+	with NotificationServiceComponent {
 
-	def applyInternal() = transactional(readOnly=true) {
+	def applyInternal() = transactional(readOnly = true) {
 		val results = notificationService.stream(request)
-		new PagedActivities(
+		PagedActivities(
 			results.items,
-			results.last,
-			results.token,
-			results.total
+			results.lastUpdatedDate,
+			results.totalHits
 		)
 	}
 }
@@ -44,11 +42,4 @@ trait ActivityStreamCommandValidation extends SelfValidating {
 
 trait ActivityStreamCommandState {
 	def request: ActivityStreamRequest
-}
-
-trait ActivityStreamCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-		self: ActivityStreamCommandState =>
-	override def permissionsCheck(p: PermissionsChecking) {
-
-	}
 }

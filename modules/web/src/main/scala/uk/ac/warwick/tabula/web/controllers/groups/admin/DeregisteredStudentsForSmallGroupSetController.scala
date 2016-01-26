@@ -21,7 +21,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 
 	type DeregisteredStudentsForSmallGroupSetCommand = Appliable[Seq[StudentNotInMembership]] with PopulateOnForm
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
 		DeregisteredStudentsForSmallGroupSetCommand(module, set)
 
 	@ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet) =

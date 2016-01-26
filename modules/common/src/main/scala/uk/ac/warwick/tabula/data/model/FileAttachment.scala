@@ -114,7 +114,7 @@ class FileAttachment extends GeneratedId {
 		newFile
 	}
 
-	def originalityReportReceived(): Boolean = {
+	def originalityReportReceived: Boolean = {
 		originalityReport != null && originalityReport.reportReceived
 	}
 

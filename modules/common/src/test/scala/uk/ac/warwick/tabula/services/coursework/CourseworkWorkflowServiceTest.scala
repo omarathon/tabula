@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.services.coursework
 
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
-import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackListItem
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Submission}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.immutable.ListMap
-import uk.ac.warwick.tabula.data.model.FileAttachment
 
 // scalastyle:off magic.number
 class CourseworkWorkflowServiceTest extends TestBase {
@@ -103,8 +102,8 @@ class CourseworkWorkflowServiceTest extends TestBase {
 
 		// lines were getting a bit long...
 		import CourseworkWorkflowStages._
-		import WorkflowStages._
 		import WorkflowStageHealth._
+		import WorkflowStages._
 
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=None))

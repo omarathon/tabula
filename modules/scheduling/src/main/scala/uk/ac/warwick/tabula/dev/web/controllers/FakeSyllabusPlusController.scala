@@ -38,7 +38,7 @@ class FakeSyllabusPlusController extends Logging {
 	}
 
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("StudentXML"))
-	def getStudent(@RequestParam("p0") studentId: String, @PathVariable("year") year:String) = {
+	def getStudent(@RequestParam("p0") studentId: String, @PathVariable year:String) = {
 		val xml = studentTimetables.getOrElseUpdate(StudentYearKey(studentId, year) , {
 			val req = url(studentUri(year)) <<? Map("p0" -> studentId)
 			import scala.language.postfixOps
@@ -70,7 +70,7 @@ class FakeSyllabusPlusController extends Logging {
 	}
 
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("ModuleXML"))
-	def getModule(@RequestParam("p0") moduleCode: String, @PathVariable("year") year:String) = {
+	def getModule(@RequestParam("p0") moduleCode: String, @PathVariable year:String) = {
 		val xml = moduleTimetables.getOrElseUpdate(ModuleYearKey(moduleCode, year) , {
 			val req = url(moduleUri(year)) <<? Map("p0" -> moduleCode)
 			import scala.language.postfixOps

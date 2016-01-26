@@ -36,8 +36,8 @@ class Activity[A](
  *  drawing its data from other types.
  */
 object Activity {
-	var userLookup = Wire.auto[UserLookupService]
-	var submissionService = Wire.auto[SubmissionService]
+	var userLookup = Wire[UserLookupService]
+	var submissionService = Wire[SubmissionService]
 
 	// given an AuditEvent...
 	def apply(event: AuditEvent): Option[Activity[Any]] = {
@@ -59,10 +59,4 @@ object Activity {
 				None
 		}
 	}
-
-//	private def splitCamelCase(src: String): String = src.replaceAll(
-//		String.format("%s|%s|%s",
-//			"(?<=[A-Z])(?=[A-Z][a-z])",
-//			"(?<=[^A-Z])(?=[A-Z])",
-//			"(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
 }

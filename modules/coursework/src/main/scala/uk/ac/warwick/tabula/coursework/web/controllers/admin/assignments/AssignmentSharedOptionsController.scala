@@ -24,18 +24,18 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 class AssignmentSharedOptionsController extends CourseworkController with AutowiringFeaturesComponent {
 
 	@RequestMapping(method = Array(GET))
-	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
+	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department) = {
 		mav(form, department)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable("department") department: Department) = {
+	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department) = {
 		mav(form, department).addObjects(
 			"submitted" -> true,
 			"hasErrors" -> errors.hasErrors)
 	}
 
-	def mav(form: SharedAssignmentPropertiesForm, @PathVariable("department") department: Department) = {
+	def mav(form: SharedAssignmentPropertiesForm, @PathVariable department: Department) = {
 		Mav("admin/assignments/shared_options",
 			"department" -> department,
 			"maxWordCount" -> Assignment.MaximumWordCount,

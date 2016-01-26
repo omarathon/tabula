@@ -19,7 +19,7 @@ class ExtensionSettingsController extends CourseworkController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 
-	@ModelAttribute def extensionSettingsCommand(@PathVariable("dept") dept:Department) = new ExtensionSettingsCommand(mandatory(dept))
+	@ModelAttribute def extensionSettingsCommand(@PathVariable dept:Department) = new ExtensionSettingsCommand(mandatory(dept))
 
 	validatesSelf[ExtensionSettingsCommand]
 
@@ -27,7 +27,7 @@ class ExtensionSettingsController extends CourseworkController {
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable("dept") dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) =
+	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) =
 		crumbed(Mav("admin/extension-settings",
 			"department" -> dept
 		), dept)

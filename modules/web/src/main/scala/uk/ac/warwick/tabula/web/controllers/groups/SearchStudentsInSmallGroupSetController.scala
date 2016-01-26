@@ -21,7 +21,7 @@ class SearchStudentsInSmallGroupSetController extends GroupsController {
 	type SearchStudentsInSmallGroupSetCommand = Appliable[Seq[Member]]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): SearchStudentsInSmallGroupSetCommand =
+	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): SearchStudentsInSmallGroupSetCommand =
 		SearchStudentsInSmallGroupSetCommand(module, set)
 
 	@RequestMapping def search(@Valid @ModelAttribute("command") cmd: SearchStudentsInSmallGroupSetCommand, errors: Errors) = {

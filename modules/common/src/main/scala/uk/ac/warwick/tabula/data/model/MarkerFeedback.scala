@@ -49,7 +49,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 
 	}
 
-	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)
+	def getMarkerUser: Option[User] = getMarkerUsercode.map(userLookup.getUserByUserId)
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id", nullable = false)
