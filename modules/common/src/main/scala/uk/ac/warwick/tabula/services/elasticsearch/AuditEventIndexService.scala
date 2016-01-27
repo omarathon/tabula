@@ -14,6 +14,21 @@ import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceCompon
 import scala.collection.mutable
 
 object AuditEventIndexService {
+	/**
+		* We maintain a list of keys that we index that we guarantee will have a consistent format.
+		*/
+	private val keysToIndex: Seq[String] = Seq(
+		"submission",
+		"feedback",
+		"assignment",
+		"module",
+		"department",
+		"studentId",
+		"submissionIsNoteworthy",
+		"students",
+		"attachments"
+	)
+
 	def auditEventIndexable(auditEventService: AuditEventService) = new ElasticsearchIndexable[AuditEvent] {
 		override def fields(item: AuditEvent): Map[String, Any] = {
 			if (item.related == null || item.related.isEmpty) {
@@ -40,7 +55,9 @@ object AuditEventIndexService {
 
 			// add data from all stages of the event, before and after.
 			item.related.flatMap { related => auditEventService.parseData(related.data) }
-				.foreach { relatedData => fields ++= relatedData }
+				.flatten
+				.filter { case (key, _) => keysToIndex.contains(key) }
+				.foreach { case (key, value) => fields += (key -> value) }
 
 			fields.toMap
 		}

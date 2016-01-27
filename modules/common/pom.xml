@@ -565,6 +565,17 @@
 			<version>${org.elasticsearch.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.jclouds</groupId>
+			<artifactId>jclouds-all</artifactId>
+			<version>${org.apache.jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.api</groupId>
+			<artifactId>filesystem</artifactId>
+			<version>${org.apache.jclouds.version}</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
