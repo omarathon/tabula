@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.mock.web.MockMultipartFile
@@ -16,8 +17,11 @@ import uk.ac.warwick.tabula.Mockito
 // scalastyle:off magic.number
 class AddFeedbackCommandTest extends TestBase with Mockito {
 
-	var dao: FileDao = mock[FileDao]
-	dao.getData(null) returns (None)
+	var objectStorageService = smartMock[ObjectStorageService]
+
+	// Start from the basis that the store is empty
+	objectStorageService.fetch(any[String]) returns None
+	objectStorageService.metadata(any[String]) returns None
 
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
@@ -32,20 +36,20 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 	@Test def duplicateFileNames = withUser("cuscav") {
 		val cmd = new AddFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
 		cmd.userLookup = userLookup
-		cmd.fileDao = dao
+		cmd.fileDao = smartMock[FileDao]
 		cmd.uniNumber = "1010101"
 
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
 		a.uploadedDataLength = 300
-		a.fileDao = dao
+		a.objectStorageService = objectStorageService
 		file.attached.add(a)
 
 		val b = new FileAttachment
 		b.name = "file2.txt"
 		b.uploadedDataLength = 300
-		b.fileDao = dao
+		b.objectStorageService = objectStorageService
 		file.attached.add(b)
 
 		val item = new FeedbackItem("1010101")
@@ -60,7 +64,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		val b2 = new FileAttachment
 		b2.name = "file2.txt"
 		b2.uploadedDataLength = 305
-		b2.fileDao = dao
+		b2.objectStorageService = objectStorageService
 		feedback.addAttachment(b2)
 
 		assignment.feedbacks.add(feedback)

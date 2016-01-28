@@ -1,35 +1,109 @@
 package uk.ac.warwick.tabula.services.objectstore
 
-import java.io.{InputStream, File}
+import java.io.{File, InputStream}
+import java.util.Properties
 
-import com.google.common.io.Files
-import com.google.common.net.MediaType
-import org.jclouds.blobstore.BlobStore
-import org.jclouds.blobstore.domain.Blob
+import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.StorageMetadata
 import org.jclouds.blobstore.options.ListContainerOptions
+import org.jclouds.blobstore.{BlobStore, BlobStoreContext}
+import org.jclouds.filesystem.reference.FilesystemConstants
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import org.springframework.util.Assert
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
+
+object ObjectStorageService {
+	case class Metadata(
+		contentLength: Long,
+		contentType: String,
+		fileHash: Option[String]
+	)
+}
 
 trait ObjectStorageService {
 	def keyExists(key: String): Boolean
 
-	def push(key: String, file: File): Unit
-
-	def pushBlob(blob: Blob): Unit
-
 	def fetch(key: String): Option[InputStream]
 
-	def fetchBlob(key: String): Option[Blob]
+	def metadata(key: String): Option[ObjectStorageService.Metadata]
+
+	def push(key: String, in: InputStream, metadata: ObjectStorageService.Metadata): Unit
 
 	def listKeys(): Stream[String]
+}
+
+@Service
+class ObjectStorageServiceFactoryBean extends ScalaFactoryBean[ObjectStorageService] {
+
+	// As this a singleton, this reference will be retained by the bean factory,
+	// so don't need to worry about it going away
+	@transient private var blobStoreContext: BlobStoreContext = _
+
+	@Value("${objectstore.container}") var containerName: String = _
+	@Value("${objectstore.provider}") var providerType: String = _
+
+	// To be removed once everything's been transferred over
+	@Value("${filesystem.attachment.dir}") var legacyAttachmentsDirectory: File = _
+
+	private def createFilesystemBlobContext(): BlobStoreContext = {
+		val properties = {
+			val p = new Properties
+			p.setProperty(FilesystemConstants.PROPERTY_BASEDIR, Wire.property("${objectstore.filesystem.baseDir}"))
+			p
+		}
+
+		ContextBuilder.newBuilder("filesystem")
+			.overrides(properties)
+			.buildView(classOf[BlobStoreContext])
+	}
+
+	private def createSwiftBlobContext(): BlobStoreContext = {
+		val endpoint = Wire.property("${objectstore.swift.endpoint}")
+		val username = Wire.property("${objectstore.swift.username}")
+		val password = Wire.property("${objectstore.swift.password}")
+
+		ContextBuilder.newBuilder("openstack-swift")
+			.endpoint(endpoint)
+			.credentials(s"LDAP_$username:$username", password)
+			.buildView(classOf[BlobStoreContext])
+	}
+
+	override def createInstance(): ObjectStorageService = {
+		blobStoreContext = providerType match {
+			case "filesystem" => createFilesystemBlobContext()
+			case "swift" => createSwiftBlobContext()
+			case "transient" => ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
+			case _ => throw new IllegalArgumentException(s"Invalid provider type $providerType")
+		}
+
+		new LegacyAwareObjectStorageService(
+			defaultService = new BlobStoreObjectStorageService(blobStoreContext.getBlobStore, containerName),
+			legacyService = new LegacyFilesystemObjectStorageService(legacyAttachmentsDirectory)
+		)
+	}
+
+	override def destroy(): Unit = blobStoreContext.close()
+
+}
+
+trait ObjectStorageServiceComponent {
+	def objectStorageService: ObjectStorageService
+}
+
+trait AutowiringObjectStorageServiceComponent extends ObjectStorageServiceComponent {
+	var objectStorageService = Wire[ObjectStorageService]
 }
 
 /**
 	* Implementation uses the Apache jclouds library to push and pull data to the cloud store
 	*/
-class JCloudsObjectStorageServiceImpl(blobStore: BlobStore, objectContainerName: String)
+class BlobStoreObjectStorageService(blobStore: BlobStore, objectContainerName: String)
 	extends ObjectStorageService with Logging {
 
 	// Create the container if it doesn't exist
@@ -37,30 +111,37 @@ class JCloudsObjectStorageServiceImpl(blobStore: BlobStore, objectContainerName:
 
 	override def keyExists(key: String) = blobStore.blobExists(objectContainerName, key)
 
-	override def push(key: String, file: File): Unit = benchmark(s"Push file ${file.getAbsolutePath} (size: ${file.length()} bytes) for key $key", level = Logging.Level.Debug) {
-		val payload = Files.asByteSource(file)
+	private def blob(key: String) = key.maybeText.flatMap { k => Option(blobStore.getBlob(objectContainerName, k)) }
+
+	override def push(key: String, in: InputStream, metadata: ObjectStorageService.Metadata): Unit = benchmark(s"Push file for key $key", level = Logging.Level.Debug) {
+		Assert.notNull(key, "Key must be defined")
+
 		val blob = blobStore.blobBuilder(key)
-			.payload(payload)
+			.payload(in)
 			.contentDisposition(key)
-			.contentLength(payload.size())
-			.contentType(MediaType.OCTET_STREAM.toString)
-			.build()
+			.contentType(metadata.contentType)
+			.contentLength(metadata.contentLength)
+			.userMetadata(metadata.fileHash.map { h => "shahex" -> h }.toMap.asJava)
+		  .build()
 
-		blobStore.putBlob(objectContainerName, blob)
-	}
-
-	override def pushBlob(blob: Blob): Unit = benchmark(s"Push blob (size: ${blob.getMetadata.getSize} bytes) for key ${blob.getMetadata.getName}", level = Logging.Level.Debug) {
 		blobStore.putBlob(objectContainerName, blob)
 	}
 
 	override def fetch(key: String): Option[InputStream] = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
-		val blob = Option(blobStore.getBlob(objectContainerName, key))
-		val payload = blob.map(_.getPayload)
-		payload.map(p => p.openStream)
+		blob(key).map { _.getPayload.openStream() }
 	}
 
-	override def fetchBlob(key: String): Option[Blob] = benchmark(s"Fetch blob $key", level = Logging.Level.Debug) {
-		Option(blobStore.getBlob(objectContainerName, key))
+	override def metadata(key: String): Option[ObjectStorageService.Metadata] = benchmark(s"Metadata key $key", level = Logging.Level.Debug) {
+		blob(key).map { blob =>
+			val contentMetadata = blob.getPayload.getContentMetadata
+			val metadata = blob.getMetadata
+
+			ObjectStorageService.Metadata(
+				contentLength = contentMetadata.getContentLength,
+				contentType = contentMetadata.getContentType,
+				fileHash = metadata.getUserMetadata.get("shahex").maybeText
+			)
+		}
 	}
 
 	override def listKeys(): Stream[String] = benchmark("List keys", level = Logging.Level.Debug) {

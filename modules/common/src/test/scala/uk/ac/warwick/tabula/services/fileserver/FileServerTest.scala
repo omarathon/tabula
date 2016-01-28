@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.services.fileserver
 
+import com.google.common.net.MediaType
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{FeaturesImpl, TestBase, Mockito}
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.FileDao
-import org.mockito.Matchers._
-import java.io.File
+import java.io.{FileInputStream, InputStream, File}
 import org.springframework.util.FileCopyUtils
 import org.joda.time.{Hours, DateTime}
 import org.junit.Before
@@ -29,18 +29,19 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
 
-		val dao = mock[FileDao]
-		dao.getData(anyString) returns (None)
-
 		val a = new FileAttachment
-		a.fileDao = dao
+		a.id = "123"
+		a.objectStorageService = smartMock[ObjectStorageService]
+
+		a.objectStorageService.fetch("123") returns None
+		a.objectStorageService.metadata("123") returns None
 
 		val file = new RenderableAttachment(a)
 
 		server.stream(file)
 
 		res.getContentLength() should be (0)
-		res.getContentType() should be ("application/octet-stream")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getContentAsByteArray().length should be (0)
 	}
 
@@ -48,11 +49,12 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
 
-		val dao = mock[FileDao]
-		dao.getData(anyString) returns (Some(tmpFile))
-
 		val a = new FileAttachment
-		a.fileDao = dao
+		a.id = "123"
+		a.objectStorageService = smartMock[ObjectStorageService]
+
+		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
+		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))
 
 		val file = new RenderableAttachment(a)
 
@@ -60,7 +62,7 @@ class FileServerTest extends TestBase with Mockito {
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/octet-stream")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getHeader("Content-Disposition") should be (null)
 		res.getContentAsString() should be (content)
 	}
@@ -71,19 +73,19 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
 
-		val dao = mock[FileDao]
-		dao.getData(anyString) returns (Some(tmpFile))
-
-		val a = new FileAttachment
-		a.fileDao = dao
-
-		val file = new RenderableAttachment(a)
+		val file = new RenderableFile {
+			override def inputStream: InputStream = new FileInputStream(tmpFile)
+			override def file: Option[File] = Some(tmpFile)
+			override def filename: String = tmpFile.getName
+			override def contentLength: Option[Long] = Some(tmpFile.length())
+			override def contentType: String = MediaType.OCTET_STREAM.toString
+		}
 
 		server.stream(file)
 
 		res.getHeader("Content-Length") should be (null)
 		res.getHeader("Content-Disposition") should be (null)
-		res.getContentType() should be ("application/octet-stream")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getContentAsString() should be ('empty)
 
 		res.getHeader("X-Sendfile") should be (tmpFile.getAbsolutePath)
@@ -108,11 +110,12 @@ class FileServerTest extends TestBase with Mockito {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
 
-		val dao = mock[FileDao]
-		dao.getData(anyString) returns (Some(tmpFile))
-
 		val a = new FileAttachment
-		a.fileDao = dao
+		a.id = "123"
+		a.objectStorageService = smartMock[ObjectStorageService]
+
+		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
+		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))
 
 		val file = new RenderableAttachment(a)
 
@@ -120,7 +123,7 @@ class FileServerTest extends TestBase with Mockito {
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/octet-stream")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getHeader("Content-Disposition") should be ("attachment")
 		res.getContentAsString() should be (content)
 	}

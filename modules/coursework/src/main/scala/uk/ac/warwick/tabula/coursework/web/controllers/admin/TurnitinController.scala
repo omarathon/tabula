@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import javax.validation.Valid
+
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.services.jobs.JobService
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.{Features, CurrentUser}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentService
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
-import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.{CurrentUser, Features}
 
 import scala.collection.JavaConverters._
 
@@ -39,8 +38,7 @@ class TurnitinController extends CourseworkController {
 	def incompatibleFiles(@PathVariable assignment: Assignment) = {
 		val allAttachments = mandatory(assignment).submissions.asScala.flatMap{ _.allAttachments }
 		allAttachments.filterNot(a =>
-			if (features.turnitinLTI) TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
-			else Turnitin.validFileType(a) && Turnitin.validFileSize(a)
+			TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
 		)
 	}
 

@@ -1,5 +1,9 @@
 package uk.ac.warwick.tabula.services
 
+import java.io.FileInputStream
+
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
@@ -67,7 +71,12 @@ class ZipServiceTest extends TestBase with Mockito {
 
 		val attachment = new FileAttachment
 		attachment.name = "garble.doc"
-		attachment.file = createTemporaryFile
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module
@@ -97,7 +106,12 @@ class ZipServiceTest extends TestBase with Mockito {
 
 		val attachment = new FileAttachment
 		attachment.name = "garble.doc"
-		attachment.file = createTemporaryFile
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module
@@ -129,7 +143,12 @@ class ZipServiceTest extends TestBase with Mockito {
 
 		val attachment = new FileAttachment
 		attachment.name = "garble.doc"
-		attachment.file = createTemporaryFile
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
 		assignment.module = module

@@ -8,6 +8,7 @@ import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.commands.coursework.feedback.{AdminGetSingleMarkerFeedbackCommand, DownloadMarkersFeedbackForPositionCommand}
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, FirstFeedback}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, Zips}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
@@ -18,11 +19,15 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 	@Before
 	def setup() {
 		val attachment = new FileAttachment
+		attachment.id = "123"
 
 		val file = createTemporaryFile()
 		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
 
-		attachment.file = file
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(file.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(file)) }
 
 		assignment.feedbacks.foreach{feedback =>
 			feedback.firstMarkerFeedback.attachments = List(attachment)

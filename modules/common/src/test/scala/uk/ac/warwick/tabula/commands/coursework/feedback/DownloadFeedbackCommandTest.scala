@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
+import java.io.{FileInputStream, InputStream}
+
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-
 
 class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
@@ -31,10 +32,13 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		assignment.module = module
 		assignment.addFeedback(feedback)
 
+		val backingFile = createTemporaryFile()
+
 		val attachment = new FileAttachment
 		attachment.id = "123"
-		attachment.fileDao = smartMock[FileDao]
-		attachment.fileDao.getData(attachment.id) returns Option(createTemporaryFile())
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.fetch(attachment.id) returns Some(new FileInputStream(backingFile))
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))
 		attachment.name = "0123456-feedback.doc"
 		feedback.attachments.add(attachment)
 	}

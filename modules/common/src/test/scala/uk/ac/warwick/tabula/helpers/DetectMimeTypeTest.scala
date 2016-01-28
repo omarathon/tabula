@@ -7,9 +7,10 @@ class DetectMimeTypeTest extends TestBase {
 
 	@Test
 	def detect() {
-		val file = new ClassPathResource("/feedback1.zip").getFile
-		val mimeType = DetectMimeType.detectMimeType(file)
-		mimeType should be ("application/zip")
+		Closeables.closeThis(new ClassPathResource("/feedback1.zip").getInputStream) { is =>
+			val mimeType = DetectMimeType.detectMimeType(is)
+			mimeType should be("application/zip")
+		}
 	}
 
 }

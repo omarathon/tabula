@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.commands.coursework.turnitin
 
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent, CurrentUser}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinJob
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.jobs.{JobServiceComponent, AutowiringJobServiceComponent, JobInstance}
 import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinLtiJob
-import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.userlookup.User
 
 /**
@@ -59,8 +58,7 @@ abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignmen
 	}
 
 	override def applyInternal() = {
-		if (features.turnitinLTI) jobService.add(submitter, SubmitToTurnitinLtiJob(assignment))
-		else jobService.add(submitter, SubmitToTurnitinJob(assignment))
+		jobService.add(submitter, SubmitToTurnitinLtiJob(assignment))
 	}
 
 }
