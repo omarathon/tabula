@@ -57,8 +57,8 @@ class ListExtensionsForAssignmentController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
-		@PathVariable("module") module:Module,
-		@PathVariable("assignment") assignment:Assignment
+		@PathVariable module:Module,
+		@PathVariable assignment:Assignment
 		) = new ListExtensionsForAssignmentCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
@@ -88,7 +88,7 @@ class ListAllExtensionsController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
-		@PathVariable("department") department:Department
+		@PathVariable department:Department
 		) = new ListAllExtensionsCommand(department)
 
 	@RequestMapping(method=Array(HEAD,GET))
@@ -115,9 +115,9 @@ class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("universityId") universityId: String,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable universityId: String,
 		user: CurrentUser,
 		@RequestParam(defaultValue = "") action: String
 	) = EditExtensionCommand(module, assignment, universityId, user, action)
@@ -184,9 +184,9 @@ class DeleteExtensionController extends ExtensionController {
 
 	@ModelAttribute("deleteExtensionCommand")
 	def deleteCommand(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("universityId") universityId: String,
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable universityId: String,
 		user: CurrentUser
 	) = DeleteExtensionCommand(module, assignment, universityId, user)
 

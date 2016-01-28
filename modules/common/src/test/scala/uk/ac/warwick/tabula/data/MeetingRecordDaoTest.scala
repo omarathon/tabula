@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
 class MeetingRecordDaoTest extends PersistenceTestBase {
 
 	// This test for memberdao maybe shouldn't be involving meetingrecorddao.
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val relationshipDao = new RelationshipDaoImpl
 	val meetingDao = new MeetingRecordDaoImpl
 

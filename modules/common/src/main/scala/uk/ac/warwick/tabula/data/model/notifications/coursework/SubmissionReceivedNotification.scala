@@ -82,8 +82,10 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 		// Contact the current marker, if there is one, and the submission has already been released
 		val feedback = assignment.findFeedback(submission.universityId)
-		val currentMarker = if (assignment.hasWorkflow && feedback.isDefined && feedback.exists(_.isPlaceholder)) {
-			feedback.get.getCurrentWorkflowFeedback.map(mf => Seq(mf.getMarkerUser)).getOrElse(Seq())
+		val currentMarker = if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
+			feedback.flatMap { f => f.getCurrentWorkflowFeedback }
+				.flatMap { _.getMarkerUser }
+				.toSeq
 		} else {
 			Seq()
 		}

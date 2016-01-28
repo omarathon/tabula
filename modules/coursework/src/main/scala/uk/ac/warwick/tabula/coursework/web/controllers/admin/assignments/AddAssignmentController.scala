@@ -36,7 +36,7 @@ class AddAssignmentController extends CourseworkController {
 
 	validatesSelf[AddAssignmentCommand]
 
-	@ModelAttribute def addAssignmentForm(@PathVariable("module") module: Module) =
+	@ModelAttribute def addAssignmentForm(@PathVariable module: Module) =
 		new AddAssignmentCommand(mandatory(module))
 
 	// Used for initial load and for prefilling from a chosen assignment

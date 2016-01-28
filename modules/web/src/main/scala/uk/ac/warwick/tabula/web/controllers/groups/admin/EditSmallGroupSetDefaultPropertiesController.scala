@@ -15,7 +15,7 @@ abstract class AbstractEditSmallGroupSetDefaultPropertiesController extends Smal
 
 	type EditSmallGroupSetDefaultPropertiesCommand = Appliable[SmallGroupSet]
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupSetDefaultPropertiesCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupSetDefaultPropertiesCommand =
 		EditSmallGroupSetDefaultPropertiesCommand(module, set)
 
 	protected def render(set: SmallGroupSet) = {

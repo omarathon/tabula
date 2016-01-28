@@ -3,17 +3,14 @@ package uk.ac.warwick.tabula.scheduling.helpers
 import scala.collection.mutable.HashSet
 import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
-import uk.ac.warwick.tabula.data.MemberDaoImpl
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
+import uk.ac.warwick.tabula.data._
 
 class ImportRowTrackerTest extends PersistenceTestBase {
 
 
 	@Test
 	def importRowTrackerTest  = transactional { tx =>
-		val memberDao = new MemberDaoImpl
+		val memberDao = new AutowiringMemberDaoImpl
 		memberDao.sessionFactory = sessionFactory
 
 		val scdDao = new StudentCourseDetailsDaoImpl

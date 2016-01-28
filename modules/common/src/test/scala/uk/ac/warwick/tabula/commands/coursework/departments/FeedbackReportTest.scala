@@ -16,14 +16,6 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	import FeedbackReport._
 
 	@Test
-	def simpleGetSubmissionTest() {
-		val userOne = new User(idFormat(1))
-		userOne.setWarwickId(idFormat(1))
-		val submissions = auditEventQueryMethods.submissionForStudent(assignmentOne, userOne)
-		submissions.futureValue.size should be (1)
-	}
-
-	@Test
 	def simpleGetFeedbackTest() {
 		val publishes = auditEventQueryMethods.publishFeedbackForStudent(assignmentOne, idFormat(1))
 		publishes.futureValue.size should be (1)

@@ -30,7 +30,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 
 	hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable("dept") dept: Department, user: CurrentUser) =
+	@ModelAttribute def command(@PathVariable dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
 
 	@RequestMapping
@@ -44,7 +44,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/assignments.xml"))
-	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable("dept") dept: Department) = {
+	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable dept: Department) = {
 		val info = cmd.apply()
 
 		new AdminHomeExports.XMLBuilder(dept, DepartmentHomeInformation(info, cmd.gatherNotices(info))).toXML
@@ -57,7 +57,7 @@ class AdminModuleHomeController extends CourseworkController {
 
 	hideDeletedItems
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, user: CurrentUser) =
+	@ModelAttribute("command") def command(@PathVariable module: Module, user: CurrentUser) =
 		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
 	@RequestMapping

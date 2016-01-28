@@ -22,7 +22,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupSetMembershipCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupSetMembershipCommand =
 		EditSmallGroupSetMembershipCommand(module, set)
 
 	protected def renderPath: String

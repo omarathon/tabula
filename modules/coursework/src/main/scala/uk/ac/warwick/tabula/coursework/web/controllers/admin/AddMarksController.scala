@@ -31,7 +31,7 @@ class AddMarksController extends CourseworkController {
 
 	type AdminAddMarksCommand = Appliable[Seq[Feedback]] with PostExtractValidation
 
-	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
+	@ModelAttribute("adminAddMarksCommand") def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): AdminAddMarksCommand =
 		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.

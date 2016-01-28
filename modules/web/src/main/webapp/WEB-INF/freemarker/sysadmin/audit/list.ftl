@@ -3,15 +3,6 @@
 
 <h1>All audit events</h1>
 
-<div style="float:right" class="very-subtle">
-<#if lastIndexTime??>
-<div>Last index ran at <@warwick.formatDate value=lastIndexTime pattern="d MMMM yyyy HH:mm" /></div>
-</#if>
-<#if lastIndexDuration??>
-<div>Last index ran for ${lastIndexDuration.getStandardSeconds()} seconds.</div>
-</#if>
-</div>
-
 <#if fromIndex>
 	<#assign helpText>
 		<p>Use <a href="http://lucene.apache.org/core/4_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Terms">Lucene query syntax</a> to search, for example:</p>

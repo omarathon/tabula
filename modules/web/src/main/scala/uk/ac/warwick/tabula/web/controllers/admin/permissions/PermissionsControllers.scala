@@ -35,11 +35,11 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	type GrantPermissionsCommand = Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A]
 	type RevokePermissionsCommand = Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A]
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("target") target: A): GrantRoleCommand = GrantRoleCommand(target)
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("target") target: A): RevokeRoleCommand = RevokeRoleCommand(target)
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable target: A): GrantRoleCommand = GrantRoleCommand(target)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable target: A): RevokeRoleCommand = RevokeRoleCommand(target)
 
-	@ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable("target") target: A): GrantPermissionsCommand = GrantPermissionsCommand(target)
-	@ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable("target") target: A): RevokePermissionsCommand = RevokePermissionsCommand(target)
+	@ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand = GrantPermissionsCommand(target)
+	@ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand = RevokePermissionsCommand(target)
 
 	var userLookup = Wire[UserLookupService]
 	var permissionsService = Wire[PermissionsService]
@@ -67,7 +67,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	}
 
 	@RequestMapping
-	def permissionsForm(@PathVariable("target") target: A, @RequestParam(defaultValue="") usercodes: Array[String],
+	def permissionsForm(@PathVariable target: A, @RequestParam(defaultValue="") usercodes: Array[String],
 											@RequestParam(value="role", required=false) role: RoleDefinition, @RequestParam(value="action", required=false) action: String): Mav =
 		form(target, usercodes, Some(role), action)
 
@@ -124,7 +124,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	implicit val defaultOrderingForRoleDefinition = Ordering.by[RoleDefinition, String] ( _.getName )
 
 //	@ModelAttribute("existingRoleDefinitions") // Not a ModelAttribute because this changes after a change
-	def existingRoleDefinitions(@PathVariable("target") target: A) = {
+	def existingRoleDefinitions(@PathVariable target: A) = {
 		SortedMap(
 			permissionsService.getAllGrantedRolesFor(target)
 				.groupBy { _.roleDefinition }
@@ -140,7 +140,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	}
 
 //	@ModelAttribute("grantableRoleDefinitions") // Not a ModelAttribute because this changes after a change
-	def grantableRoleDefinitions(@PathVariable("target") target: A, user: CurrentUser) = transactional(readOnly = true) {
+	def grantableRoleDefinitions(@PathVariable target: A, user: CurrentUser) = transactional(readOnly = true) {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
 		val allDepartments = parentDepartments(target)
@@ -177,11 +177,11 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	}
 
 //	@ModelAttribute("existingPermissions") // Not a ModelAttribute because this changes after a change
-	def existingPermissions(@PathVariable("target") target: A) = {
+	def existingPermissions(@PathVariable target: A) = {
 		permissionsService.getAllGrantedPermissionsFor(target).filter(!_.users.isEmpty)
 	}
 
-	@ModelAttribute("allPermissions") def allPermissions(@PathVariable("target") target: A) = {
+	@ModelAttribute("allPermissions") def allPermissions(@PathVariable target: A) = {
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
 

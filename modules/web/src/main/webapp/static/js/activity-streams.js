@@ -57,7 +57,7 @@ jQuery(function($) {
 	}
 
 	function toTimestamp(now, then) {
-		var yesterday = now.clone().subtract('days', 1)
+		var yesterday = now.clone().subtract(1, 'day');
 		if (now.diff(then) < 60000) { // less than a minute ago
 			return then.from(now);
 		} else if (now.isSame(then, 'day')) {
@@ -121,13 +121,11 @@ jQuery(function($) {
 			$activities.filter(':not(.priority-complete)').find('.content').collapsible();
 		}
 
-		function loadPage(pagination, first) {
+		function loadPage(lastCreated, first) {
 			var data = jQuery.extend({}, options);
 			var url = '/activity/@me';
-			if (pagination) {
-				data.token = pagination.token;
-				data.last = pagination.field;
-				data.lastDoc = pagination.doc;
+			if (lastCreated) {
+				data.lastCreated = lastCreated;
 			}
 			jQuery.get(url, data).then(function(data) {
 				if (first) {
@@ -142,18 +140,18 @@ jQuery(function($) {
 				});
 
 				$container.append($moreLink);
-				if (data.pagination && data.pagination.token) {
+				if (data.lastCreated) {
 					if (data.items.length) {
 						$moreLink.off('click');
 						$moreLink.on('click', 'a', function() {
-							loadPage(data.pagination);
+							loadPage(data.lastCreated);
 							return false;
 						})
 					} else {
 						// this page was empty but there's another page, so
 						// get that straight away. (can happen if all notifications related
 						// to obsolete objects so aren't returned)
-						loadPage(data.pagination, first);
+						loadPage(data.lastCreated, first);
 					}
 				} else {
 					var noMoreMsg = first ? '<span class="hint">No recent activity to display.</span>' : '<span class="hint">No more activity to display.</span>';

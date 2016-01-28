@@ -37,11 +37,11 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
 	def afterCommand(event: Event, returnValue: Any) = save(event, "after")
 	def onException(event: Event, exception: Throwable) = save(event, "error")
 
-	def startLoggingToFile {
+	def startLoggingToFile(): Unit = {
 		// nothing to be done, save() will log to file when necessary.
 	}
 
-	def stopLoggingToFile {
+	def stopLoggingToFile(): Unit = {
 		// persist files back to database
 		logger.info("Writing file based events to database...")
 		for (file <- auditDirectory.listFiles(withSuffix("logentry"))) {
@@ -57,15 +57,15 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
 		}
 	}
 
-	def afterPropertiesSet {
+	def afterPropertiesSet(): Unit = {
 		if (!auditDirectory.isDirectory) {
 			if (createMissingDirs) auditDirectory.mkdirs()
 			else throw new IllegalArgumentException("Audit directory " + auditDirectory + " is not a directory")
 		}
 		// listen for maintenance mode changes
 		maintenanceModeService.changingState.observe { enabled =>
-			if (enabled) startLoggingToFile
-			else stopLoggingToFile
+			if (enabled) startLoggingToFile()
+			else stopLoggingToFile()
 		}
 	}
 

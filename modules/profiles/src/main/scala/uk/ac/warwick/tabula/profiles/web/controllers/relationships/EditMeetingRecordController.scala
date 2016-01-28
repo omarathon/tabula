@@ -19,6 +19,6 @@ class EditMeetingRecordController extends ProfilesController
 	validatesSelf[EditMeetingRecordCommand]
 
 	@ModelAttribute("command")
-	def getCommand(@PathVariable("meetingRecord") meetingRecord: MeetingRecord) =
+	def getCommand(@PathVariable meetingRecord: MeetingRecord) =
 		new EditMeetingRecordCommand(mandatory(meetingRecord))
 }

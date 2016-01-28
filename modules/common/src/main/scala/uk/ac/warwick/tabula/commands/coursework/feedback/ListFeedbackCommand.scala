@@ -1,40 +1,79 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import java.util.concurrent.ScheduledExecutorService
-
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.Futures
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{FeedbackForSits, Assignment, Module, Feedback}
-import uk.ac.warwick.tabula.helpers.Futures._
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.services.UserLookupService
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, FeedbackForSits, Module}
+import uk.ac.warwick.tabula.helpers.Futures
+import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class ListFeedbackCommand(val module: Module, val assignment: Assignment)
-	extends Command[ListFeedbackResult] with ReadOnly with Unaudited {
+object ListFeedbackCommand {
+	case class ListFeedbackResult(
+		downloads: Seq[(User, DateTime)],
+		latestOnlineViews: Map[User, DateTime],
+		latestOnlineAdded: Map[User, DateTime],
+		latestGenericFeedback: Option[DateTime]
+	)
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+	case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
 
-	var auditIndexService = Wire[AuditEventIndexService]
-	var userLookup = Wire[UserLookupService]
-	implicit val taskSchedulerService = Wire[ScheduledExecutorService]
+	def apply(module: Module, assignment: Assignment) =
+		new ListFeedbackCommandInternal(module, assignment)
+			with ComposableCommand[ListFeedbackResult]
+			with ListFeedbackRequest
+			with ListFeedbackPermissions
+			with UserConversion
+			with AutowiringAuditEventQueryServiceComponent
+			with AutowiringUserLookupComponent
+			with AutowiringTaskSchedulerServiceComponent
+			with Unaudited with ReadOnly
+}
 
-	override def applyInternal() = {
+trait ListFeedbackState {
+	def module: Module
+	def assignment: Assignment
+}
+
+trait ListFeedbackRequest extends ListFeedbackState {
+	// Empty for now
+}
+
+trait UserConversion {
+	self: UserLookupComponent =>
+
+	protected def userIdToUser(tuple: (String, DateTime)) = tuple match {
+		case (id, date) => (userLookup.getUserByUserId(id), date)
+	}
+
+	protected def warwickIdToUser(tuple: (String, DateTime)) = tuple match {
+		case (id, date) => (userLookup.getUserByWarwickUniId(id), date)
+	}
+}
+
+abstract class ListFeedbackCommandInternal(val module: Module, val assignment: Assignment)
+	extends CommandInternal[ListFeedbackResult]
+		with ListFeedbackState {
+	self: ListFeedbackRequest with UserConversion
+		with AuditEventQueryServiceComponent
+		with TaskSchedulerServiceComponent =>
+
+	override def applyInternal(): ListFeedbackResult = {
 		// The time to wait for a query to complete
 		val timeout = 15.seconds
 
 		// Wrap each future in Future.optionalTimeout, which will return None if it times out early
-		val downloads = Futures.optionalTimeout(auditIndexService.feedbackDownloads(assignment).map(_.map(userIdToUser)), timeout)
-		val latestOnlineViews = Futures.optionalTimeout(auditIndexService.latestOnlineFeedbackViews(assignment).map(_.map(userIdToUser)), timeout)
-		val latestOnlineAdded = Futures.optionalTimeout(auditIndexService.latestOnlineFeedbackAdded(assignment).map(_.map(warwickIdToUser)), timeout)
-		val latestGenericFeedback = Futures.optionalTimeout(auditIndexService.latestGenericFeedbackAdded(assignment), timeout)
+		val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment), timeout)
+		val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment), timeout)
+		val latestOnlineAdded = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackAdded(assignment), timeout)
+		val latestGenericFeedback = Futures.optionalTimeout(auditEventQueryService.latestGenericFeedbackAdded(assignment), timeout)
 
 		val result = for {
 			downloads <- downloads
@@ -43,8 +82,8 @@ class ListFeedbackCommand(val module: Module, val assignment: Assignment)
 			latestGenericFeedback <- latestGenericFeedback
 		} yield ListFeedbackResult(
 			downloads.getOrElse(Nil),
-			latestOnlineViews.getOrElse(Nil),
-			latestOnlineAdded.getOrElse(Nil),
+			latestOnlineViews.getOrElse(Map.empty),
+			latestOnlineAdded.getOrElse(Map.empty),
 			latestGenericFeedback.getOrElse(None)
 		)
 
@@ -52,23 +91,13 @@ class ListFeedbackCommand(val module: Module, val assignment: Assignment)
 		// time then we've messed up.
 		Await.result(result, timeout * 2)
 	}
-
-	def userIdToUser(tuple: (String, DateTime)) = tuple match {
-		case (id, date) => (userLookup.getUserByUserId(id), date)
-	}
-
-	def warwickIdToUser(tuple: (String, DateTime)) = tuple match {
-		case (id, date) => (userLookup.getUserByWarwickUniId(id), date)
-	}
-
-	override def describe(d: Description) =	d.assignment(assignment)
 }
 
-case class ListFeedbackResult(
-	downloads: Seq[(User, DateTime)],
-	latestOnlineViews: Seq[(User, DateTime)],
-	latestOnlineAdded: Seq[(User, DateTime)],
-  latestGenericFeedback: Option[DateTime]
-)
+trait ListFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ListFeedbackState =>
 
-case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: FeedbackForSits)
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+	}
+}

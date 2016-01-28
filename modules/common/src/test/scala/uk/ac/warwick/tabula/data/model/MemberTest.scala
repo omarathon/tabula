@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.junit.Before
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl}
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, MemberDaoImpl, StudentCourseDetailsDaoImpl}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
 import uk.ac.warwick.tabula._
 
@@ -231,7 +231,7 @@ class MemberTest extends TestBase with Mockito {
 
 class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 
 	@Before def setup() {

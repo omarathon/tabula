@@ -19,7 +19,7 @@ class EditSchemeController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("scheme") scheme: AttendanceMonitoringScheme) =
+	def command(@PathVariable scheme: AttendanceMonitoringScheme) =
 		EditSchemeCommand(mandatory(scheme), user)
 
 	private def render(scheme: AttendanceMonitoringScheme) = {
@@ -59,7 +59,7 @@ class EditSchemeController extends AttendanceController {
 	def saveAndEditStudents(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
-		@PathVariable("scheme") scheme: AttendanceMonitoringScheme
+		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
 			render(scheme)
@@ -73,7 +73,7 @@ class EditSchemeController extends AttendanceController {
 	def saveAndEditPoints(
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
-		@PathVariable("scheme") scheme: AttendanceMonitoringScheme
+		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {
 		if (errors.hasErrors) {
 			render(scheme)

@@ -21,7 +21,7 @@ class AssignmentEnrolmentController extends CourseworkController with Logging{
 
 	validatesSelf[EditAssignmentEnrolmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("academicYear") academicYear: AcademicYear) = {
+	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) = {
 		val cmd = new EditAssignmentEnrolmentCommand(mandatory(module), academicYear)
 		cmd.upstreamGroups.clear()
 		cmd

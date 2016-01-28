@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.services.elasticsearch.{NotificationIndexService, IndexedNotification}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.conversion.ItemType
@@ -47,7 +48,7 @@ class IndexManagerImpl extends IndexManager {
 		val notifications = message.notificationIds.asScala.flatMap(notificationDao.getById).toSeq
 		val user = userLookup.getUserByUserId(message.userId)
 
-		val recipientNotifications = notifications.map(new RecipientNotification(_, user))
+		val recipientNotifications = notifications.map(IndexedNotification(_, user))
 		notificationIndexService.indexItems(recipientNotifications)
 	}
 

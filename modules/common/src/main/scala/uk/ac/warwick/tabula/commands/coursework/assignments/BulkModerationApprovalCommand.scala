@@ -37,7 +37,7 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
-		markerFeedback = markerFeedback.filter(_.getMarkerUser == marker)
+		markerFeedback = markerFeedback.filter(_.getMarkerUser.exists { _ == marker })
 	}
 
 	def validate(errors: Errors) {

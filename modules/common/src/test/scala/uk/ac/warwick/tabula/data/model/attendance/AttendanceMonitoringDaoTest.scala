@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.attendance
 import org.joda.time.{DateTime, LocalDate}
 import org.junit.Before
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.data.AttendanceMonitoringDaoImpl
+import uk.ac.warwick.tabula.data.{AutowiringAttendanceMonitoringDao, AttendanceMonitoringDaoImpl}
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula._
 
@@ -34,7 +34,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		MemberOrUser(student2).asUser
 	)
 
-	val attendanceMonitoringDao = new AttendanceMonitoringDaoImpl {
+	val attendanceMonitoringDao = new AutowiringAttendanceMonitoringDao {
 		// Force the multi-query IN() clauses for 3 or more items
 		override val maxInClause = 2
 	}

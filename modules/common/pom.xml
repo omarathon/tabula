@@ -430,34 +430,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-			<version>${org.apache.lucene.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-queryparser</artifactId>
-			<version>${org.apache.lucene.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-			<version>${org.apache.lucene.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-misc</artifactId>
-			<version>${org.apache.lucene.version}</version>
-		</dependency>
-
-		<!-- Only needed when reading Lucene 4 indexes -->
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-backward-codecs</artifactId>
-			<version>${org.apache.lucene.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-api</artifactId>
 			<version>${org.apache.tiles.version}</version>
@@ -582,6 +554,28 @@
 			<version>2.3.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.elasticsearch</groupId>
+			<artifactId>elasticsearch</artifactId>
+			<version>${org.elasticsearch.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sksamuel.elastic4s</groupId>
+			<artifactId>elastic4s-core_${scala.major.version}</artifactId>
+			<version>${org.elasticsearch.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jclouds</groupId>
+			<artifactId>jclouds-all</artifactId>
+			<version>${org.apache.jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.api</groupId>
+			<artifactId>filesystem</artifactId>
+			<version>${org.apache.jclouds.version}</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -598,9 +592,16 @@
 			<!--<scope>test</scope>-->
 		</dependency>
 		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-test-framework</artifactId>
-			<version>${org.apache.lucene.version}</version>
+			<groupId>org.elasticsearch</groupId>
+			<artifactId>elasticsearch</artifactId>
+			<version>${org.elasticsearch.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sksamuel.elastic4s</groupId>
+			<artifactId>elastic4s-testkit_${scala.major.version}</artifactId>
+			<version>${org.elasticsearch.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

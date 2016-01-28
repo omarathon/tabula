@@ -1,52 +1,43 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import java.io.StringWriter
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
+import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import java.io.StringWriter
-import uk.ac.warwick.util.csv.GoodCsvDocument
-import uk.ac.warwick.tabula.web.views.CSVView
-import uk.ac.warwick.tabula.web.views.ExcelView
-import org.springframework.web.bind.WebDataBinder
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.Features
-import javax.validation.Valid
-import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
+import uk.ac.warwick.util.csv.GoodCsvDocument
+import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
 class SubmissionAndFeedbackController extends CourseworkController {
 
-	var auditIndexService = Wire[AuditEventIndexService]
-	var assignmentService = Wire[AssessmentService]
-	var userLookup = Wire[UserLookupService]
 	var features = Wire[Features]
 
-	validatesSelf[SubmissionAndFeedbackCommand]
-
-	@ModelAttribute("assignment")
-	def assignment(@PathVariable("assignment") assignment: Assignment) = assignment
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("submissionAndFeedbackCommand")
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@ModelAttribute("allFilters")
-	def allFilters(@PathVariable("assignment") assignment: Assignment) =
+	def allFilters(@PathVariable assignment: Assignment) =
 		CourseworkFilters.AllFilters.filter(_.applies(assignment))
 
 	@RequestMapping(Array("/list"))
-	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
-		val (assignment, module) = (command.assignment, command.module)
-
+	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		module.adminDepartment.assignmentInfoView match {
 			case Assignment.Settings.InfoViewType.Summary =>
 				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
@@ -61,9 +52,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/summary"))
-	def summary(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
-		val (assignment, module) = (command.assignment, command.module)
-
+	def summary(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
@@ -80,9 +69,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/table"))
-	def table(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
-		val (assignment, module) = (command.assignment, command.module)
-
+	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		if (errors.hasErrors) {
 			Mav("admin/assignments/submissionsandfeedback/list")
 				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
@@ -105,8 +92,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/export.csv"))
-	def csv(@Valid command: SubmissionAndFeedbackCommand) = {
-		val (assignment, module) = (command.assignment, command.module)
+	def csv(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		val results = command.apply()
 
 		val items = results.students
@@ -124,8 +110,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/export.xml"))
-	def xml(@Valid command: SubmissionAndFeedbackCommand) = {
-		val (assignment, module) = (command.assignment, command.module)
+	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		val results = command.apply()
 
 		val items = results.students
@@ -134,8 +119,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping(Array("/export.xlsx"))
-	def xlsx(@Valid command: SubmissionAndFeedbackCommand) = {
-		val (assignment, module) = (command.assignment, command.module)
+	def xlsx(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		val results = command.apply()
 
 		val items = results.students

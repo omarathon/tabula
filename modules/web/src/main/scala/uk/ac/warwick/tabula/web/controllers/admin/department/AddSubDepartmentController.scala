@@ -20,7 +20,7 @@ class AddSubDepartmentController extends AdminController {
 	def allFilterRules = Department.FilterRule.allFilterRules
 
 	@ModelAttribute("addSubDepartmentCommand")
-	def command(@PathVariable("department") department: Department) = AddSubDepartmentCommand(mandatory(department))
+	def command(@PathVariable department: Department) = AddSubDepartmentCommand(mandatory(department))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm() = Mav("admin/department/add/form")

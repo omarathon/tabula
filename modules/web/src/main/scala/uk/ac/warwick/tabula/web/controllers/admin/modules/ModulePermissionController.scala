@@ -21,8 +21,8 @@ trait ModulePermissionControllerMethods extends AdminController {
 	type GrantRoleCommand = Appliable[GrantedRole[Module]] with GrantRoleCommandState[Module]
 	type RevokeRoleCommand = Appliable[GrantedRole[Module]] with RevokeRoleCommandState[Module]
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("module") module: Module): GrantRoleCommand = GrantRoleCommand(module)
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("module") module: Module): RevokeRoleCommand = RevokeRoleCommand(module)
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable module: Module): GrantRoleCommand = GrantRoleCommand(module)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable module: Module): RevokeRoleCommand = RevokeRoleCommand(module)
 
 	var userLookup = Wire.auto[UserLookupService]
 
@@ -46,7 +46,7 @@ trait ModulePermissionControllerMethods extends AdminController {
 class ModulePermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	@RequestMapping
-	def permissionsForm(@PathVariable("module") module: Module, @RequestParam(defaultValue="") usercodes: Array[String],
+	def permissionsForm(@PathVariable module: Module, @RequestParam(defaultValue="") usercodes: Array[String],
 		@RequestParam(value="role", required=false) role: RoleDefinition, @RequestParam(value="action", required=false) action: String): Mav =
 		form(module, usercodes, Some(role), action)
 }

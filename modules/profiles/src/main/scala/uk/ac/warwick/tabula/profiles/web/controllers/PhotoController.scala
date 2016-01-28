@@ -18,7 +18,7 @@ class PhotoController extends ProfilesController {
 
 	var fileServer = Wire.auto[FileServer]
 
-	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) =
+	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable member: Member) =
 		ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
@@ -37,9 +37,9 @@ class StudentRelationshipPhotoController extends ProfilesController {
 
 	@ModelAttribute("viewStudentRelationshipPhotoCommand")
 	def command(
-		@PathVariable("member") member: Member,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-		@PathVariable("agent") agent: String
+		@PathVariable member: Member,
+		@PathVariable relationshipType: StudentRelationshipType,
+		@PathVariable agent: String
 	) = {
 		mandatory(member) match {
 			case student: StudentMember =>

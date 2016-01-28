@@ -26,8 +26,8 @@ class EditScheduledMeetingRecordController extends ProfilesController
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}
@@ -40,7 +40,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
 	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecordResult] with PopulateOnForm,
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails
+		@PathVariable studentCourseDetails: StudentCourseDetails
  	) = {
 		cmd.populate()
 		form(cmd, studentCourseDetails, iframe = true)
@@ -49,7 +49,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 	@RequestMapping(method=Array(GET, HEAD))
 	def get(
 	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecordResult] with PopulateOnForm,
-	 @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails
+	 @PathVariable studentCourseDetails: StudentCourseDetails
  	) = {
 		cmd.populate()
 		form(cmd, studentCourseDetails)
@@ -80,7 +80,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 		@Valid @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecordResult] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
+		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]]
 	) = {
 		if (errors.hasErrors) {

@@ -36,23 +36,23 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	 *
 	 * validatesSelf[CreateMeetingRecordCommand]
 	 * 	\@ModelAttribute("command")
-	 *	def getCommand(@PathVariable("meeting") meetingRecord: MeetingRecord) = new EditMeetingRecordCommand(meetingRecord)
+	 *	def getCommand(@PathVariable meetingRecord: MeetingRecord) = new EditMeetingRecordCommand(meetingRecord)
 	 *
 	 */
 
 
 	@ModelAttribute("allRelationships")
 	def allRelationships(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}
@@ -61,8 +61,8 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	@RequestMapping(method = Array(GET, HEAD), params = Array("modal"))
 	def showModalChrome(
 		@ModelAttribute("command") command: ModifyMeetingRecordCommand,
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 
 		Mav("related_students/meeting/edit",
@@ -78,8 +78,8 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
 	def showIframeForm(
 		@ModelAttribute("command") command: ModifyMeetingRecordCommand,
-		@PathVariable("studentCourseDetails") studentCourseDetails:StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails:StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		val formats = MeetingFormat.members
 
@@ -100,8 +100,8 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 		@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 		errors: Errors,
 		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]],
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = transactional() {
 		if (errors.hasErrors) {
 			showIframeForm(command, studentCourseDetails, relationshipType)
@@ -133,8 +133,8 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(
 		@ModelAttribute("command") command: ModifyMeetingRecordCommand,
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = {
 		val formats = MeetingFormat.members
 
@@ -151,7 +151,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 
 	// cancel sync
 	@RequestMapping(method = Array(POST), params = Array("!submit", "!modal"))
-	def cancel(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) = {
+	def cancel(@PathVariable studentCourseDetails: StudentCourseDetails) = {
 		Redirect(Routes.profile.view(studentCourseDetails.student))
 	}
 
@@ -160,8 +160,8 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	def saveMeetingRecord(
 		@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 		errors: Errors,
-		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
-		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
 	) = transactional() {
 		if (errors.hasErrors) {
 			showForm(command, studentCourseDetails, relationshipType)

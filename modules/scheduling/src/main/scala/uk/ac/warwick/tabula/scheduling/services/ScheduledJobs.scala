@@ -8,6 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.{NotificationIndexService, AuditEventIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._

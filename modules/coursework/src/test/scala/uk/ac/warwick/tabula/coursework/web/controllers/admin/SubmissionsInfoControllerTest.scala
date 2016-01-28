@@ -1,10 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
+import uk.ac.warwick.tabula.commands.{CommandInternal, Appliable}
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryService, AuditEventQueryServiceComponent}
+
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Ignore
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.{ListSubmissionsRequest, ListSubmissionsCommandInternal}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -15,13 +18,22 @@ import org.joda.time.DateTimeConstants
 
 // scalastyle:off magic.number
 class SubmissionsInfoControllerTest extends TestBase with Mockito {
+
+	private trait CommandTestSupport extends Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest with AuditEventQueryServiceComponent {
+		self: CommandInternal[Seq[SubmissionListItem]] =>
+
+		val auditEventQueryService = mock[AuditEventQueryService]
+
+		override def apply(): Seq[SubmissionListItem] = applyInternal()
+	}
+
 	/**
 	 * Check the dates are formatted correctly in the XML.
 	 * The date format is defined in DateFormats so we're not really
 	 * testing much about the controller itself here, just that it uses
 	 * the correct thing.
 	 */
-	@Test def isoTimeFormat = {
+	@Test def isoTimeFormat(): Unit = {
 		val controller = new SubmissionsInfoController()
 
 		/**
@@ -39,7 +51,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		controller.isoFormat(winterDate) should be ("2012-11-15T11:20:00Z")
 	}
 
-	@Test def csvTimeFormat = {
+	@Test def csvTimeFormat(): Unit = {
 		val controller = new SubmissionsInfoController()
 
 		/**
@@ -50,13 +62,13 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		controller.csvFormat(validDate) should be ("15/08/2012 16:20")
 	}
 
-	@Test def getXml {
+	@Test def xml(): Unit = {
 		val controller = new SubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
 
 		val assignment = newDeepAssignment()
-		val command = new ListSubmissionsCommand(assignment.module, assignment)
+		val command = new ListSubmissionsCommandInternal(assignment.module, assignment) with CommandTestSupport
 
 		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 10, 44)
 		command.assignment.submissions.addAll(Seq(
@@ -64,18 +76,18 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		))
 
 		withUser("cusebr") {
-			val result = controller.xml(command)
+			val result = controller.xml(command, assignment)
 			(result\"submission"\"field"\"file"\"@zip-path").text should be ("IN101 - 0123456 - Interesting helicopter.jpg")
 		}
 	}
 
-	@Test def getCsv {
+	@Test def csv(): Unit = {
 		val controller = new SubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
 
 		val assignment = newDeepAssignment()
-		val command = new ListSubmissionsCommand(assignment.module, assignment)
+		val command = new ListSubmissionsCommandInternal(assignment.module, assignment) with CommandTestSupport
 
 		val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 15, 44)
 		assignment.id = "fakeassid"
@@ -99,7 +111,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 		s.universityId = uniId
 		s.submittedDate = submittedDate
 		s.id = "fakesubid"
-		if (!attachmentNames.isEmpty) {
+		if (attachmentNames.nonEmpty) {
 			val attachments = (attachmentNames map toAttachment).toSet
 			s.values.add(SavedFormValue.withAttachments(s, Assignment.defaultUploadName, attachments ))
 		}

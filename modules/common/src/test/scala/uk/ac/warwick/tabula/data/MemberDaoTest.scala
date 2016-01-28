@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val relationshipDao = new RelationshipDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
 	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl

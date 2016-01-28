@@ -24,13 +24,13 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 
 	@ModelAttribute
 	def singleFeedbackCommand(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("feedbackId") feedbackId: String
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable feedbackId: String
 	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable("filename") filename: String): Mav = {
+	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
 		Mav(new RenderableFileView(cmd.apply()))
 	}
 }
@@ -42,14 +42,14 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def singleFeedbackCommand(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		@PathVariable("feedbackId") feedbackId: String
+		@PathVariable module: Module,
+		@PathVariable assignment: Assignment,
+		@PathVariable feedbackId: String
 	) =
 		new AdminGetSingleFeedbackFileCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable("filename") filename: String): Mav = {
+	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
 		val renderable = cmd.apply().getOrElse{ throw new ItemNotFoundException() }
 		Mav(new RenderableFileView(renderable))
 	}
@@ -60,11 +60,11 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 class DownloadAllFeedbackController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def selectedFeedbacksCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new DownloadSelectedFeedbackCommand(module, assignment, user)
 
 	@RequestMapping
-	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable("assignment") assignment: Assignment): Mav = {
+	def getSelected(@ModelAttribute("command") command: DownloadSelectedFeedbackCommand, @PathVariable assignment: Assignment): Mav = {
 		command.apply() match {
 			case Left(renderable) =>
 				Mav(new RenderableFileView(renderable))
@@ -129,13 +129,13 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
-	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable("filename") filename: String): Mav = {
+	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable filename: String): Mav = {
 		val renderable = command.apply().getOrElse{ throw new ItemNotFoundException() }
 		Mav(new RenderableFileView(renderable))
 	}
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
-	def redirectOne(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User, @PathVariable("filename") filename: String) {
+	def redirectOne(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User, @PathVariable filename: String) {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.one(assignment, marker, markerFeedback, filename))
 	}
 }
@@ -169,11 +169,11 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
 class DownloadAllFeedback extends CourseworkController {
 
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
+	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new AdminGetAllFeedbackCommand(module, assignment)
 
 	@RequestMapping
-	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable("filename") filename: String): Mav = {
+	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable filename: String): Mav = {
 		Mav(new RenderableFileView(cmd.apply()))
 	}
 }
@@ -184,7 +184,7 @@ class DownloadAllFeedback extends CourseworkController {
 class FeedbackSummaryController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)
 		= FeedbackSummaryCommand(assignment, student)
 
 	@RequestMapping(method = Array(GET, HEAD))

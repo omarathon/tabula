@@ -6,7 +6,7 @@ import net.fortuna.ical4j.model.property._
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
+import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}

@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.criterion.Projections
+import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
-import org.hibernate.criterion.Projections
 
 trait StudentCourseDetailsDaoComponent {
 	val studentCourseDetailsDao: StudentCourseDetailsDao
@@ -71,7 +72,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.add(isNull("missingFromImportSince"))
 				.seq
 
-		if (scdList.size > 0) Some(scdList.head.student)
+		if (scdList.nonEmpty) Some(scdList.head.student)
 		else None
 	}
 
@@ -82,7 +83,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.seq
 	}
 
-	def getFreshScjCodes() =
+	def getFreshScjCodes =
 		session.newCriteria[StudentCourseDetails]
 			.add(isNull("missingFromImportSince"))
 			.project[String](Projections.property("scjCode"))
@@ -102,7 +103,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleScjCodes", newStaleCodes)
-					.executeUpdate
+					.executeUpdate()
 			}
 	}
 }

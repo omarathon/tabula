@@ -88,7 +88,7 @@ object CourseworkWorkflowStages {
 		def actionCode = "workflow.Submission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
-			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined =>
+			case None if coursework.enhancedFeedback.exists(!_.feedback.isPlaceholder) =>
 				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
 			case Some(submission) if submission.submission.isLate =>
 				StageProgress(Submission, started = true, messageCode = "workflow.Submission.late", health = Warning, completed = true)
@@ -313,4 +313,12 @@ object CourseworkWorkflowStages {
 			}
 		override def preconditions = Seq(Seq(ReleaseFeedback, ViewOnlineFeedback), Seq(ReleaseFeedback))
 	}
+}
+
+trait CourseworkWorkflowServiceComponent {
+	def courseworkWorkflowService: CourseworkWorkflowService
+}
+
+trait AutowiringCourseworkWorkflowServiceComponent extends CourseworkWorkflowServiceComponent {
+	var courseworkWorkflowService = Wire[CourseworkWorkflowService]
 }

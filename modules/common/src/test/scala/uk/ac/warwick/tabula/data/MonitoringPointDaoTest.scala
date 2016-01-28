@@ -15,7 +15,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 
 	val monitoringPointDao = new MonitoringPointDaoImpl
 	val routeDao = new RouteDaoImpl
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 
 	val route1 = Fixtures.route("g553")
 	val route2 = Fixtures.route("h553")

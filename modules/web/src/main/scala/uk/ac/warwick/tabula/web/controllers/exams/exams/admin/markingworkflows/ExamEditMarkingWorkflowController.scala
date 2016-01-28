@@ -19,7 +19,7 @@ class ExamEditMarkingWorkflowController extends ExamsController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("department") department: Department, @PathVariable("markingWorkflow") markingWorkflow: MarkingWorkflow) =
+	def cmd(@PathVariable department: Department, @PathVariable markingWorkflow: MarkingWorkflow) =
 		EditMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))

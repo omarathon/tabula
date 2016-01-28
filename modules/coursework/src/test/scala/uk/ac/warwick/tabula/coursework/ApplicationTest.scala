@@ -17,7 +17,7 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
 
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_
 
-    @Value("${filesystem.index.audit.dir}") var auditIndexDir:String =_
+    @Value("${filesystem.index.dir}") var indexDir:String =_
 
     @Test def handlerMappings = {
     	annotationMapper.getHandlerMethods.size should not be (0)
@@ -36,7 +36,7 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
      * the root directory for many other directory locations.
      */
     @Test def defaultProperties = {
-    	auditIndexDir should fullyMatch regex ("target/test-[A-Z0-9]+-tmp/index/audit")
+			indexDir should fullyMatch regex ("target/test-[A-Z0-9]+-tmp/index")
     }
 
     @Transactional @Test def hibernatePersistence = {

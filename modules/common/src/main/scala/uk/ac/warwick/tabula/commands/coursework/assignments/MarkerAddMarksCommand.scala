@@ -105,7 +105,7 @@ trait MarkerAddMarksCommandValidation extends ValidatesMarkItem {
 					case true => feedback.retrieveFirstMarkerFeedback
 					case false => feedback.retrieveSecondMarkerFeedback
 				}
-				if (markerFeedback.getMarkerUsercode.isEmpty || markerFeedback.getMarkerUsercode.get != marker.getUserId) {
+				if (!markerFeedback.getMarkerUsercode.exists { _ == marker.getUserId }) {
 					errors.rejectValue("universityId", "uniNumber.wrong.marker")
 					hasErrors = true
 				}
