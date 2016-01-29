@@ -28,7 +28,7 @@ class ZipCreatorTest extends TestBase {
 		zip.inputStream should not be null
 		zip.contentType should be ("application/zip")
 
-		creator.invalidate(zip.filename.substring(ZipCreator.ObjectKeyPrefix.length)) // Strip off the zips/ at the start of the key
+		creator.invalidate(zip.filename)
 		zip.inputStream should be (null)
 
 		val name = "myzip/under/a/folder"
