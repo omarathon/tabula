@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.scheduling.commands
 import java.io.InputStream
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.data.{FileHasherComponent, SHAFileHasherComponent}
+import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent, FileHasherComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageServiceComponent, LegacyAwareObjectStorageService, ObjectStorageService}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.util.files.hash.FileHasher
@@ -11,14 +11,15 @@ import uk.ac.warwick.util.files.hash.FileHasher
 class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 
 	@Test def noLegacyStore(): Unit = {
-		val command = new ObjectStorageMigrationCommandInternal with SHAFileHasherComponent with ObjectStorageServiceComponent {
+		val command = new ObjectStorageMigrationCommandInternal with SHAFileHasherComponent with ObjectStorageServiceComponent with FileDaoComponent {
 			val objectStorageService = smartMock[ObjectStorageService]
+			val fileDao = smartMock[FileDao]
 		}
 
 		command.applyInternal() should be ('empty)
 	}
 
-	private trait CommandTestSupport extends FileHasherComponent with ObjectStorageServiceComponent {
+	private trait CommandTestSupport extends FileHasherComponent with ObjectStorageServiceComponent with FileDaoComponent {
 		val defaultStoreService = smartMock[ObjectStorageService]
 		val legacyStoreService = smartMock[ObjectStorageService]
 
@@ -27,13 +28,14 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 			legacyService = legacyStoreService
 		)
 
+		val fileDao = smartMock[FileDao]
 		val fileHasher = smartMock[FileHasher]
 	}
 
 	@Test def transfer(): Unit = {
 		val command = new ObjectStorageMigrationCommandInternal with CommandTestSupport
 
-		when(command.legacyStoreService.listKeys()) thenReturn Stream("1", "2", "3", "4", "5", "6", "7", "8", "9")
+		when(command.fileDao.getAllFileIds(None)) thenReturn Set("1", "2", "3", "4", "5", "6", "7", "8", "9")
 		when(command.defaultStoreService.keyExists("1")) thenReturn {true}
 		when(command.defaultStoreService.keyExists("2")) thenReturn {true}
 		when(command.defaultStoreService.keyExists("3")) thenReturn {false}
@@ -74,7 +76,7 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 		when(command.fileHasher.hash(blob8data)) thenReturn "hash8"
 		when(command.fileHasher.hash(blob9data)) thenReturn "hash9"
 
-		command.applyInternal() should be (Seq("3", "5", "6", "8", "9"))
+		command.applyInternal() should be (Set("3", "5", "6", "8", "9"))
 
 		verify(command.defaultStoreService, times(1)).push("3", blob3data, metadata3.copy(fileHash = Some("hash3")))
 		verify(command.defaultStoreService, times(1)).push("5", blob5data, metadata5.copy(fileHash = Some("hash5")))
