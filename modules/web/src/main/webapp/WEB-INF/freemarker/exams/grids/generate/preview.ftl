@@ -48,8 +48,16 @@
 					<td>${selectCourseCommand.course.code}</td>
 				</tr>
 				<tr>
+					<th>Route:</th>
+					<td>${selectCourseCommand.route.code?upper_case}</td>
+				</tr>
+				<tr>
 					<th>Year of study:</th>
 					<td>${selectCourseCommand.yearOfStudy}</td>
+				</tr>
+				<tr>
+					<th>Year weightings:</th>
+					<td>NOT YET IMPLEMENTED</td>
 				</tr>
 				<tr>
 					<th>Student Count:</th>
@@ -114,13 +122,19 @@
 
 <script>
 	jQuery(function($){
+		$('th.first-in-category, td.first-in-category').each(function(){
+			$(this).prev().addClass('last-in-category');
+		});
 		$('th.rotated, td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();
 			var height = $(this).find('.rotate').height();
-			$(this).css('height', width + 15).css('width', height + 5);
+			$(this).css('height', width + 15).css('min-width', height + 5);
 			$(this).find('.rotate').css({
-				'margin-top': -(height),
 				'margin-left': height / 2
+			}).not('.nomargin').css({
+				'margin-top': -(height)
+			}).end().filter('.middle').not('.nomargin').css({
+				'margin-top': width / 4
 			});
 		});
 

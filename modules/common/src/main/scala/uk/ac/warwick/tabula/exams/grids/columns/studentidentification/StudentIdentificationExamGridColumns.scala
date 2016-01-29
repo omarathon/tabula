@@ -43,6 +43,8 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.UniversityId
 
+	override val mandatory = true
+
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
 		override val title: String = "ID"

@@ -49,6 +49,9 @@ class OvercattingOptionsController extends ExamsController with AutowiringModule
 				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
 			)
 		).getOrElse("")
+		scyd.overcattingMarkOverrides.foreach(overcattingMarkOverrides =>
+			overcattingMarkOverrides.foreach{ case(module, mark) => overcatView.newModuleMarks.put(module, mark.toString) }
+		)
 		Mav("exams/grids/generate/overcat").noLayoutIf(ajax)
 	}
 

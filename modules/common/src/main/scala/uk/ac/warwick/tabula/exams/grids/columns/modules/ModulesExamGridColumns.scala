@@ -109,6 +109,8 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreModules
 
+	override val mandatory = true
+
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Modules"

@@ -6,11 +6,11 @@
 	.rotate {
 		float: left;
 		position: absolute;
-		-webkit-transform-origin: 0% 100%;
-		-moz-transform-origin: 0% 100%;
-		-ms-transform-origin: 0% 100%;
-		-o-transform-origin: 0% 100%;
-		transform-origin: 0% 100%;
+		-webkit-transform-origin: left bottom;
+		-moz-transform-origin: left bottom;
+		-ms-transform-origin: left bottom;
+		-o-transform-origin: left bottom;
+		transform-origin: left bottom;
 		-webkit-transform: rotateZ(-90deg);
 		-moz-transform: rotateZ(-90deg);
 		-ms-transform: rotateZ(-90deg);
@@ -111,7 +111,7 @@
 		margin-top: 0;
 	}
 	.id7-table-wrapper-popout {
-		float: right;
+		display: none;
 	}
 	.exam-grid-overcat {
 		color: @brand-success;
@@ -150,8 +150,9 @@
 		th, td {
 			border: 1px solid @table-border-color;
 			&.borderless {
-				border: 0;
+				border-width: 0;
 			}
+			min-width: 30px;
 		}
 		th {
 			background: @table-bg-hover;
@@ -172,11 +173,15 @@
 			text-align: center;
 			vertical-align: middle;
 		}
+		th.section-secondary-label .rotate {
+			white-space: pre-wrap;
+			line-height: 1em;
+		}
 		.student:nth-of-type(odd) {
 			background: @table-bg-accent;
 		}
-		.first-in-category {
-			border-left-width: 2px;
+		td.last-in-category, th.last-in-category {
+			border-right: 1px solid darken(@table-border-color, 25%);
 		}
 		input[type="text"] {
 			width: 42px;

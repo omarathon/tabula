@@ -7,11 +7,15 @@
 			<div class="overcat-key">
 				<table class="table table-condensed">
 					<thead>
-					<tr>
-						<th colspan="2">Key</th>
-					</tr>
+						<tr>
+							<th colspan="2">Key</th>
+						</tr>
 					</thead>
 					<tbody>
+						<tr>
+							<td><span class="exam-grid-fail">#</span></td>
+							<td>Failed module</td>
+						</tr>
 						<tr>
 							<td><span class="exam-grid-override">#</span></td>
 							<td>Manually adjusted and not stored in SITS</td>
@@ -42,7 +46,7 @@
 							<@grid.categoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -50,7 +54,7 @@
 							<@grid.titleInCategoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -58,7 +62,7 @@
 							<@grid.headerRow columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -82,7 +86,7 @@
 									showSectionLabels=true
 								/>
 								<#list overcatView.previousYearsSCYDs as thisSCYD>
-									<td></td>
+									<td class="first-in-category"></td>
 									<@grid.entityRows
 										entity=entity
 										isFirstEntity=isFirstEntity
@@ -124,15 +128,22 @@
 
 <script>
 	jQuery(function($){
+		$('.modal-body th.first-in-category, .modal-body td.first-in-category').each(function(){
+			$(this).prev().addClass('last-in-category');
+		});
 		$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();
 			var height = $(this).find('.rotate').height();
-			$(this).css('height', width + 15).css('width', height + 5);
+			$(this).css('height', width + 15).css('min-width', height + 5);
 			$(this).find('.rotate').css({
-				'margin-top': -(height),
 				'margin-left': height / 2
+			}).not('.nomargin').css({
+				'margin-top': -(height)
+			}).end().filter('.middle').not('.nomargin').css({
+				'margin-top': width / 4
 			});
 		});
+		$('.modal-body').wideTables();
 
 		var updateButtons = function(){
 			if ($('.modal-body input:checked').length > 0) {

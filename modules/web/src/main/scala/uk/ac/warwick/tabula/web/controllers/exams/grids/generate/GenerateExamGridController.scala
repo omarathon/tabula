@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import collection.JavaConverters._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -39,7 +40,7 @@ class GenerateExamGridController extends ExamsController
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent {
 
 	type SelectCourseCommand = Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
-	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])]
+	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
 
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
@@ -48,6 +49,8 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+
+	private lazy val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
 
 	validatesSelf[SelfValidating]
 
@@ -92,6 +95,9 @@ class GenerateExamGridController extends ExamsController
 				selectCourseRender(selectCourseCommand, department, academicYear)
 			} else {
 				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.universityId)), user.apparentUser)
+				if (gridOptionsCommand.predefinedColumnIdentifiers.isEmpty) {
+					gridOptionsCommand.predefinedColumnIdentifiers.addAll(allExamGridsColumns.map(_.identifier).asJava)
+				}
 				gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
 			}
 		}
@@ -291,8 +297,7 @@ class GenerateExamGridController extends ExamsController
 		val predefinedColumnIDs = gridOptions._1
 		val customColumnTitles = gridOptions._2
 
-		val allExamGridsColumns: Seq[ExamGridColumnOption] = Wire.all[ExamGridColumnOption].sorted
-		val predefinedColumns = allExamGridsColumns.filter(c => predefinedColumnIDs.contains(c.identifier)).flatMap{
+		val predefinedColumns = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier)).flatMap{
 			case modulesColumn: ModulesColumnOption =>
 				modulesColumn.getColumns(
 					selectCourseCommand.department.getCoreRequiredModules(selectCourseCommand.academicYear, selectCourseCommand.course, selectCourseCommand.route, selectCourseCommand.yearOfStudy).getOrElse(Seq()),

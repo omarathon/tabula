@@ -14,6 +14,8 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CurrentYear
 
+	override val mandatory = true
+
 	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 
 		override val title: String = "Mean Module Mark"

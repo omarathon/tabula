@@ -31,6 +31,7 @@ trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
 	val sortOrder: Int
+	val mandatory: Boolean = false
 	def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
 
 }

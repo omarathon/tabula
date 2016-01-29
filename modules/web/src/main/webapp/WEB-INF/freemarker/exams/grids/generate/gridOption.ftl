@@ -29,16 +29,15 @@
 	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="universityId"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("universityId")>checked</#if>
-				/> University ID</label>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="name"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("name")>checked</#if>
+				/> Official name</label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="name"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("name")>checked</#if>
-				/> Official name</label>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="universityId" checked disabled
+				/> University ID</label>
 			</div>
 		</div>
 		<div class="col-md-3">
@@ -55,8 +54,7 @@
 	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("core")>checked</#if>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core" checked disabled
 				/> Core Modules</label>
 			</div>
 		</div>
@@ -93,15 +91,13 @@
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="currentyear"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("currentyear")>checked</#if>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="currentyear" checked disabled
 				/> Current year mean mark</label>
 			</div>
 		</div>
 		<div class="col-md-3">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("overcatted")>checked</#if>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="overcatted" checked disabled
 				/> Overcatted year mark</label>
 			</div>
 		</div>
