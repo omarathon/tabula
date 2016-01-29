@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.apache.poi.xssf.usermodel.{XSSFWorkbook, XSSFSheet, XSSFCellStyle, XSSFRow}
+import org.apache.poi.xssf.usermodel._
 import org.apache.poi.ss.usermodel.{Font, Cell}
 import uk.ac.warwick.tabula.DateFormats
 import org.apache.poi.ss.util.WorkbookUtil
@@ -154,11 +154,11 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 	}
 
 	// implement SheetContentsHandler
-	def headerFooter(text: String, isHeader: Boolean, tagName: String) = {
+	override def headerFooter(text: String, isHeader: Boolean, tagName: String) = {
 		// don't care about handling this, but required for interface
 	}
 
-	def startRow(row: Int) = {
+	override def startRow(row: Int) = {
 		logger.debug("startRow: " + row.toString)
 		isParsingHeader = row == 0
 		currentRow = scala.collection.mutable.Map[String, String]()
@@ -169,14 +169,14 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 		else rawValue
 	}
 
-	def cell(cellReference: String, formattedValue: String) = {
+	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment) = {
 		val col = new CellReference(cellReference).getCol
 
 		if (isParsingHeader) columnMap(col) = formatHeader(formattedValue)
 		else if (columnMap.contains(col)) currentRow(columnMap(col)) = formattedValue
 	}
 
-	def endRow() = {
+	override def endRow(row: Int) = {
 		if (!isParsingHeader && currentRow.nonEmpty)
 			rows += currentRow.toMap
 	}
