@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -50,7 +50,9 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
-		val renderable = cmd.apply().getOrElse{ throw new ItemNotFoundException() }
+		val renderable = cmd.apply().getOrElse {
+			throw new ItemNotFoundException()
+		}
 		Mav(new RenderableFileView(renderable))
 	}
 }
@@ -75,7 +77,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping( value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
 class DownloadMarkerFeedbackController extends CourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
@@ -130,7 +132,9 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable filename: String): Mav = {
-		val renderable = command.apply().getOrElse{ throw new ItemNotFoundException() }
+		val renderable = command.apply().getOrElse {
+			throw new ItemNotFoundException()
+		}
 		Mav(new RenderableFileView(renderable))
 	}
 
@@ -160,7 +164,7 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 	}
 
 	@RequestMapping
-	def getSelected(@ModelAttribute("command") command: Appliable[RenderableZip]): Mav = {
+	def getSelected(@ModelAttribute("command") command: Appliable[RenderableFile]): Mav = {
 		Mav(new RenderableFileView(command.apply()))
 	}
 }
@@ -185,7 +189,7 @@ class FeedbackSummaryController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)
-		= FeedbackSummaryCommand(assignment, student)
+	= FeedbackSummaryCommand(assignment, student)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Appliable[Option[Feedback]]): Mav = {

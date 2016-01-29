@@ -61,6 +61,10 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
 		FileCopyUtils.copy(in, new FileOutputStream(target))
 	}
 
+	override def delete(key: String): Unit = {
+		targetFile(key).delete()
+	}
+
 	override def listKeys(): Stream[String] = {
 		def toKey(file: File): String = {
 			val stripped =

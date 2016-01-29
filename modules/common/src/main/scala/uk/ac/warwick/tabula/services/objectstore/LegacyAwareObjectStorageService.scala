@@ -20,6 +20,8 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
 
 	override def push(key: String, in: InputStream, metadata: ObjectStorageService.Metadata): Unit  = services.head.push(key, in, metadata)
 
+	override def delete(key: String): Unit  = services.foreach(_.delete(key))
+
   /**
     * Not guaranteed to be distinct (unless you call distinct on it) but shouldn't be used anyway.
     */

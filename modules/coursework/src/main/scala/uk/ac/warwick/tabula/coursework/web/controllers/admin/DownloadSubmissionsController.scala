@@ -1,25 +1,18 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.commands.coursework.assignments.{DownloadFeedbackSheetsCommand, DownloadAllSubmissionsCommand, DownloadSubmissionsCommand}
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, RenderableZip}
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminGetSingleSubmissionCommand, DownloadAllSubmissionsCommand, DownloadAttachmentCommand, DownloadFeedbackSheetsCommand, DownloadMarkersSubmissionsCommand, DownloadSubmissionsCommand}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.{Submission, Module, Assignment}
-import uk.ac.warwick.tabula.commands.coursework.assignments.AdminGetSingleSubmissionCommand
-import javax.servlet.http.HttpServletRequest
-import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadMarkersSubmissionsCommand
-import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadAttachmentCommand
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.userlookup.User
 
 
@@ -32,8 +25,7 @@ class DownloadSubmissionsController extends CourseworkController {
 		new DownloadSubmissionsCommand(module, assignment, user)
 
 	@RequestMapping
-	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable assignment: Assignment)
-		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable assignment: Assignment): Mav = {
 		command.apply() match {
 			case Left(renderable) =>
 				Mav(new RenderableFileView(renderable))
@@ -56,7 +48,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 	) =	DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
 
 	@RequestMapping
-	def downloadMarkersSubmissions(@ModelAttribute("command") command: Appliable[RenderableZip]): RenderableFile = {
+	def downloadMarkersSubmissions(@ModelAttribute("command") command: Appliable[RenderableFile]): RenderableFile = {
 		command.apply()
 	}
 

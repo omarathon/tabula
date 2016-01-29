@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import java.io.{ByteArrayInputStream, FileInputStream, FileOutputStream}
+import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 
 import org.junit.Before
-import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -21,13 +20,8 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
     val attachment = new FileAttachment
 		attachment.id = "123"
 
-    val file = createTemporaryFile()
-    FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
-
-		attachment.objectStorageService = smartMock[ObjectStorageService]
-		attachment.objectStorageService.keyExists(attachment.id) returns true
-		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(file.length(), "application/octet-stream", None))
-		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(file)) }
+		attachment.objectStorageService = zipService.objectStorageService
+		attachment.objectStorageService.push(attachment.id, new ByteArrayInputStream("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
     assignment.submissions.foreach {
       submission =>
@@ -46,7 +40,7 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
 		val zipService = new ZipService
 		zipService.userLookup = mockUserLookup
 		zipService.features = Features.empty
-		zipService.zipDir = createTemporaryDirectory()
+		zipService.objectStorageService = createTransientObjectStore()
 	}
 
   @Test
@@ -54,7 +48,7 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
     withUser("cuslaj", "1111111") {
       val command = new DownloadMarkersSubmissionsCommand(assignment.module, assignment, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val zip = command.applyInternal()
-      val stream = new ZipInputStream(new FileInputStream(zip.file.get))
+      val stream = new ZipInputStream(zip.inputStream)
       val items = Zips.map(stream) {
         item => item.getName
       }

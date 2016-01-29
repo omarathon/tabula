@@ -61,7 +61,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	val zipService = new ZipService
 	zipService.userLookup = mockUserLookup
 	zipService.features = Features.empty
-	zipService.zipDir = createTemporaryDirectory()
+	zipService.objectStorageService = createTransientObjectStore()
 
 	def addFeedback(assignment:Assignment){
 		val feedback = assignment.submissions.asScala.map{ s =>

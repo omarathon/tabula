@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.modules
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import javax.servlet.http.HttpServletResponse
-import uk.ac.warwick.tabula.commands.coursework.feedback.DownloadFeedbackCommand
-import uk.ac.warwick.tabula.services.fileserver.FileServer
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.ItemNotFoundException
-import javax.servlet.http.HttpServletRequest
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.{Module, Assignment, Member}
-import uk.ac.warwick.tabula.data.FeedbackDao
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.commands.coursework.feedback.DownloadFeedbackCommand
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Controller
 @RequestMapping(value = Array("/module/{module}/{assignment}/{student}"))
@@ -25,21 +19,15 @@ class DownloadFeedbackInProfileController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, student.universityId).filter(_.released)), Some(student))
 
-	@Autowired var fileServer: FileServer = _
-
 	@RequestMapping(value = Array("/all/feedback.zip"))
-	def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member): RenderableFile = {
 		command.filename = null
 		getOne(command)
 	}
 
 	@RequestMapping(value = Array("/get/{filename}"))
-	def getOne(command: DownloadFeedbackCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		// specify callback so that audit logging happens around file serving
-		command.callback = {
-			(renderable) => fileServer.serve(renderable)
-		}
-		command.apply().orElse { throw new ItemNotFoundException() }
+	def getOne(command: DownloadFeedbackCommand): RenderableFile = {
+		command.apply().getOrElse { throw new ItemNotFoundException() }
 	}
 
 }

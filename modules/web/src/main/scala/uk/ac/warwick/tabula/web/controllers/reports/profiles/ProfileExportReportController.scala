@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.reports.profiles
 
-import java.io.File
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
@@ -12,17 +11,19 @@ import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportReportCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.jobs.reports.ProfileExportJob
-import uk.ac.warwick.tabula.services.fileserver.{RenderableZip, FileServer}
+import uk.ac.warwick.tabula.services.ZipCreator
+import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance}
+import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/profiles/export/report"))
-class ProfileExportReportController extends ReportsController with AutowiringJobServiceComponent {
+class ProfileExportReportController extends ReportsController with AutowiringJobServiceComponent with AutowiringObjectStorageServiceComponent {
 
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 
 	validatesSelf[SelfValidating]
 
@@ -69,9 +70,10 @@ class ProfileExportReportController extends ReportsController with AutowiringJob
 	def serveZip(@RequestParam jobId: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		jobService.getInstance(jobId) match {
 			case Some(job: JobInstance) =>
-				new File(job.getString(ProfileExportJob.ZipFilePathKey)) match {
-					case zipFile if zipFile.exists() =>
-						fileServer.serve(new RenderableZip(zipFile), Some(s"profile-export.zip"))
+				val objectStoreKey = ZipCreator.objectKey(job.getString(ProfileExportJob.ZipFilePathKey))
+
+				objectStorageService.renderable(objectStoreKey) match {
+					case Some(f) => fileServer.serve(f, Some("profile-export.zip"))
 					case _ => throw new ItemNotFoundException()
 				}
 			case _ => throw new ItemNotFoundException()

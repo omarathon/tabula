@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import java.io.{FileInputStream, InputStream}
+import java.io.FileInputStream
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
@@ -50,7 +50,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		command.zip = new ZipService
 		command.zip.userLookup = userLookup
 		command.zip.features = Features.empty
-		command.zip.zipDir = createTemporaryDirectory()
+		command.zip.objectStorageService = createTransientObjectStore()
 
 		command.filename = attachment.name
 
@@ -60,7 +60,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		command.applyInternal().get.filename should be (attachment.name)
 
 		command.filename = null
-		command.applyInternal().get.file.isDefined should be {true}
+		command.applyInternal().get.inputStream should not be null
 	}}}
 
 }

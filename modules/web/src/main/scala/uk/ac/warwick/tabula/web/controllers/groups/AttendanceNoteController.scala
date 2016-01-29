@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.groups
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.validation.Valid
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,13 +7,13 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.groups.{EditAttendanceNoteCommand, AttendanceNoteAttachmentCommand}
-import uk.ac.warwick.tabula.commands.{Appliable, ApplyWithCallback, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.commands.groups.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, Member}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{ProfileService, SmallGroupService}
 
 @Controller
@@ -30,7 +29,7 @@ class AttendanceNoteController extends GroupsController {
 		@PathVariable occurrence: SmallGroupEventOccurrence
 	) = {
 		val attendanceNote = smallGroupService.getAttendanceNote(member.universityId, occurrence).getOrElse(throw new ItemNotFoundException())
-		val attendance = smallGroupService.getAttendance(member.universityId, occurrence).getOrElse(null)
+		val attendance = smallGroupService.getAttendance(member.universityId, occurrence).orNull
 		Mav("groups/attendance/view_note",
 			"attendanceNote" -> attendanceNote,
 			"attendance" -> attendance,
@@ -46,18 +45,13 @@ class AttendanceNoteController extends GroupsController {
 @RequestMapping(Array("/groups/note/{student}/{occurrence}/attachment/{fileName}"))
 class AttendanceNoteAttachmentController extends GroupsController {
 
-	@Autowired var fileServer: FileServer = _
-
 	@ModelAttribute("command")
-	def command(@PathVariable("student") member: Member, @PathVariable occurrence: SmallGroupEventOccurrence) =
+	def command(@PathVariable("student") member: Member, @PathVariable occurrence: SmallGroupEventOccurrence): Appliable[Option[RenderableFile]] =
 		AttendanceNoteAttachmentCommand(mandatory(member), mandatory(occurrence), user)
 
 	@RequestMapping
-	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])
-		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		// specify callback so that audit logging happens around file serving
-		cmd.callback = { (renderable) => renderable.foreach { fileServer.serve(_) } }
-		cmd.apply().orElse { throw new ItemNotFoundException() }
+	def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile = {
+		cmd.apply().getOrElse { throw new ItemNotFoundException() }
 	}
 
 }
@@ -117,7 +111,7 @@ class EditAttendanceNoteController extends GroupsController {
 		errors: Errors
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, true)
+			form(cmd, isIframe = true)
 		} else {
 			cmd.apply()
 			Mav("groups/attendance/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)

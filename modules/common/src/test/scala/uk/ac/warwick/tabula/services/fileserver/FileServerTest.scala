@@ -91,21 +91,6 @@ class FileServerTest extends TestBase with Mockito {
 		res.getHeader("X-Sendfile") should be (tmpFile.getAbsolutePath)
 	}
 
-	@Test def streamZip {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
-
-		val file = new RenderableZip(tmpFile)
-
-		server.stream(file)
-
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be (null)
-		res.getContentAsString() should be (content)
-	}
-
 	@Test def serveAttachment {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
@@ -128,34 +113,26 @@ class FileServerTest extends TestBase with Mockito {
 		res.getContentAsString() should be (content)
 	}
 
-	@Test def serveZip {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
-
-		val file = new RenderableZip(tmpFile)
-
-		server.serve(file)
-
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be ("attachment")
-		res.getContentAsString() should be (content)
-	}
-
 	@Test def streamHead {
 		implicit val req = new MockHttpServletRequest
 		req.setMethod("HEAD")
 
 		implicit val res = new MockHttpServletResponse
 
-		val file = new RenderableZip(tmpFile)
+		val a = new FileAttachment
+		a.id = "123"
+		a.objectStorageService = smartMock[ObjectStorageService]
+
+		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
+		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))
+
+		val file = new RenderableAttachment(a)
 
 		server.stream(file)
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getHeader("Content-Disposition") should be (null)
 		res.getContentAsByteArray().length should be (0)
 	}
@@ -166,13 +143,20 @@ class FileServerTest extends TestBase with Mockito {
 
 		implicit val res = new MockHttpServletResponse
 
-		val file = new RenderableZip(tmpFile)
+		val a = new FileAttachment
+		a.id = "123"
+		a.objectStorageService = smartMock[ObjectStorageService]
+
+		a.objectStorageService.fetch("123") returns Some(new FileInputStream(tmpFile))
+		a.objectStorageService.metadata("123") returns Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))
+
+		val file = new RenderableAttachment(a)
 
 		server.serve(file)
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
+		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getHeader("Content-Disposition") should be ("attachment")
 		res.getContentAsByteArray().length should be (0)
 	}

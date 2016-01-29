@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.objectstore
 import java.io.{File, InputStream}
 import java.util.Properties
 
+import com.google.common.net.MediaType
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.StorageMetadata
 import org.jclouds.blobstore.options.ListContainerOptions
@@ -15,6 +16,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 import scala.collection.JavaConverters._
 
@@ -33,7 +35,28 @@ trait ObjectStorageService {
 
 	def metadata(key: String): Option[ObjectStorageService.Metadata]
 
+	/**
+		* Combines calls to fetch() and metadata()
+		*/
+	def renderable(key: String): Option[RenderableFile] =
+		if (keyExists(key)) {
+			Some(new RenderableFile {
+				override val file: Option[File] = None
+				override val filename: String = key
+
+				private lazy val fileMetadata = metadata(key)
+
+				override lazy val contentLength: Option[Long] = fileMetadata.map(_.contentLength)
+
+				override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
+
+				override def inputStream: InputStream = fetch(key).orNull
+			})
+		} else None
+
 	def push(key: String, in: InputStream, metadata: ObjectStorageService.Metadata): Unit
+
+	def delete(key: String): Unit
 
 	def listKeys(): Stream[String]
 }
@@ -142,6 +165,10 @@ class BlobStoreObjectStorageService(blobStore: BlobStore, objectContainerName: S
 				fileHash = metadata.getUserMetadata.get("shahex").maybeText
 			)
 		}
+	}
+
+	def delete(key: String): Unit = benchmark(s"Deleting key $key", level = Logging.Level.Debug) {
+		blobStore.removeBlob(objectContainerName, key)
 	}
 
 	override def listKeys(): Stream[String] = benchmark("List keys", level = Logging.Level.Debug) {

@@ -2,8 +2,11 @@ package uk.ac.warwick.tabula
 
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
+import org.jclouds.ContextBuilder
+import org.jclouds.blobstore.BlobStoreContext
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 
 import scala.collection.JavaConversions._
 import scala.collection.GenSeq
@@ -131,6 +134,8 @@ trait TestHelpers extends TestFixtures {
 
 	var temporaryFiles: Set[File] = Set.empty
 
+	var blobStoreContext: BlobStoreContext = _
+
 	// Location of /tmp - best to create a subdir below it.
 	lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
 	val random = new scala.util.Random
@@ -139,6 +144,13 @@ trait TestHelpers extends TestFixtures {
 
 	@Before def setupAspects = {
 
+	}
+
+	def createTransientObjectStore(): ObjectStorageService = {
+		if (blobStoreContext == null)
+			blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
+
+		new BlobStoreObjectStorageService(blobStoreContext.getBlobStore, "JavaTestTmp-" + random.nextLong())
 	}
 
 	/** Returns a new temporary directory that will get cleaned up
@@ -172,7 +184,10 @@ trait TestHelpers extends TestFixtures {
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */
-	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
+	@After def deleteTemporaryDirs = try{
+		temporaryFiles.par foreach FileUtils.recursiveDelete
+		if (blobStoreContext != null) blobStoreContext.close()
+	} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
 	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
 		try {

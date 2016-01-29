@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{StudentMember, AbsenceType}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
-import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.helpers.DateBuilder
-import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.attendance.web.Routes
 import javax.validation.Valid
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.note.{BulkAttendanceNoteCommand, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
-import uk.ac.warwick.tabula.services.fileserver.{RenderableFile, FileServer}
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.attendance.commands.note.{AttendanceNoteAttachmentCommand, BulkAttendanceNoteCommand, EditAttendanceNoteCommand}
+import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
+import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 @Controller
 @RequestMapping(Array("/note/{academicYear}/{student}/{point}"))
@@ -53,18 +53,13 @@ class AttendanceNoteController extends AttendanceController {
 @RequestMapping(Array("/note/{academicYear}/{student}/{point}/attachment/{fileName}"))
 class AttendanceNoteAttachmentController extends AttendanceController {
 
-	@Autowired var fileServer: FileServer = _
-
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable point: AttendanceMonitoringPoint) =
+	def command(@PathVariable student: StudentMember, @PathVariable point: AttendanceMonitoringPoint): Appliable[Option[RenderableFile]] =
 		AttendanceNoteAttachmentCommand(mandatory(student), mandatory(point), user)
 
 	@RequestMapping
-	def get(@ModelAttribute("command") cmd: ApplyWithCallback[Option[RenderableFile]])
-		(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		// specify callback so that audit logging happens around file serving
-		cmd.callback = { (renderable) => renderable.foreach { fileServer.serve(_) } }
-		cmd.apply().orElse { throw new ItemNotFoundException() }
+	def get(@ModelAttribute("command") cmd: Appliable[Option[RenderableFile]]): RenderableFile = {
+		cmd.apply().getOrElse { throw new ItemNotFoundException() }
 	}
 
 }

@@ -13,7 +13,6 @@ object AttendanceNoteAttachmentCommand {
 	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser) =
 		new AttendanceNoteAttachmentCommand(student, monitoringPoint, user)
 		with ComposableCommand[Option[RenderableFile]]
-		with ApplyWithCallback[Option[RenderableFile]]
 		with AutowiringMonitoringPointServiceComponent
 		with ReadOnly
 		with AttendanceNoteAttachmentPermissions
@@ -22,18 +21,16 @@ object AttendanceNoteAttachmentCommand {
 }
 
 class AttendanceNoteAttachmentCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[Option[RenderableFile]] with HasCallback[Option[RenderableFile]] {
+	extends CommandInternal[Option[RenderableFile]] {
 
 	self: MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
-		val result = monitoringPointService.getAttendanceNote(student, monitoringPoint).flatMap{ note =>
+		monitoringPointService.getAttendanceNote(student, monitoringPoint).flatMap{ note =>
 			Option(note.attachment).map{ attachment =>
 				new RenderableAttachment(attachment)
 			}
 		}
-		callback(result)
-		result
 	}
 
 }

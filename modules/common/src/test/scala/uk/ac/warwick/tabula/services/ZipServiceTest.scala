@@ -56,7 +56,7 @@ class ZipServiceTest extends TestBase with Mockito {
 
 	@Test def generateSubmissionDownload() {
 		val service = new ZipService
-		service.zipDir = createTemporaryDirectory
+		service.objectStorageService = createTransientObjectStore()
 		service.features = emptyFeatures
 		service.userLookup = userLookup
 
@@ -87,7 +87,7 @@ class ZipServiceTest extends TestBase with Mockito {
 
 	@Test def generateSubmissionDownloadFullNamePrefix() {
 		val service = new ZipService
-		service.zipDir = createTemporaryDirectory
+		service.objectStorageService = createTransientObjectStore()
 		service.features = emptyFeatures
 		service.userLookup = userLookup
 
@@ -124,11 +124,11 @@ class ZipServiceTest extends TestBase with Mockito {
 
 	@Test def generateSubmissionDownloadUserLookupFail() {
 		val service = new ZipService
-		service.zipDir = createTemporaryDirectory
+		service.objectStorageService = createTransientObjectStore()
 		service.features = emptyFeatures
 		service.userLookup = userLookup
 
-		var department = new Department
+		val department = new Department
 		department.showStudentName = true
 
 		val module = new Module(code="ph105", adminDepartment=department)
