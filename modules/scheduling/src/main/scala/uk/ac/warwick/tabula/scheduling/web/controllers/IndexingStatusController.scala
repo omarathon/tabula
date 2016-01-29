@@ -24,7 +24,7 @@ class IndexingStatusController extends BaseController {
 	@RequestMapping(Array("/status"))
 	def lastrun(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val latestDb = auditEventService.latest
-		val latestIndex = Await.result(auditEventIndexService.newestItemInIndexDate, 1.second).getOrElse(new DateTime(0L))
+		val latestIndex = Await.result(auditEventIndexService.newestItemInIndexDate, 10.seconds).getOrElse(new DateTime(0L))
 		val latestIndexMinutesAgo = (latestDb.getMillis - latestIndex.getMillis) / MillisInAMinute
 
 		val allDetails = s"latestDatabase,${latestDb.getMillis},latestIndex,${latestIndex.getMillis},latestIndexMinutesAgo,$latestIndexMinutesAgo"
