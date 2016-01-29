@@ -138,7 +138,6 @@ class FileAttachment extends GeneratedId {
 		case that: FileAttachment =>
 			if (this.id != null && that.id != null && this.id == that.id) true
 			else if (this.actualDataLength != that.actualDataLength) false
-			else if (this.hash != null && that.hash != null) this.hash == that.hash
 			else {
 				val thisData = this.dataStream
 				val thatData = that.dataStream
