@@ -21,10 +21,6 @@ class FileServerTest extends TestBase with Mockito {
 	val tmpFile = File.createTempFile("fileservertest", ".txt")
 	FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
 
-	@Before def disableXSendfile {
-		server.features.xSendfile = false
-	}
-
 	@Test def streamEmptyAttachment {
 		implicit val req = new MockHttpServletRequest
 		implicit val res = new MockHttpServletResponse
@@ -65,30 +61,6 @@ class FileServerTest extends TestBase with Mockito {
 		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
 		res.getHeader("Content-Disposition") should be (null)
 		res.getContentAsString() should be (content)
-	}
-
-	@Test def xSendfile {
-		server.features.xSendfile = true
-
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
-
-		val file = new RenderableFile {
-			override def inputStream: InputStream = new FileInputStream(tmpFile)
-			override def file: Option[File] = Some(tmpFile)
-			override def filename: String = tmpFile.getName
-			override def contentLength: Option[Long] = Some(tmpFile.length())
-			override def contentType: String = MediaType.OCTET_STREAM.toString
-		}
-
-		server.stream(file)
-
-		res.getHeader("Content-Length") should be (null)
-		res.getHeader("Content-Disposition") should be (null)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getContentAsString() should be ('empty)
-
-		res.getHeader("X-Sendfile") should be (tmpFile.getAbsolutePath)
 	}
 
 	@Test def serveAttachment {
@@ -171,7 +143,6 @@ class FileServerTest extends TestBase with Mockito {
 		val file = mock[RenderableFile]
 		file.cachePolicy returns (CachePolicy(expires = Some(period)))
 		file.contentLength returns None
-		file.file returns None
 
 		withFakeTime(time) {
 			server.serve(file)(req, res)

@@ -72,7 +72,7 @@ class ProfileExportReportController extends ReportsController with AutowiringJob
 			case Some(job: JobInstance) =>
 				val objectStoreKey = ZipCreator.objectKey(job.getString(ProfileExportJob.ZipFilePathKey))
 
-				objectStorageService.renderable(objectStoreKey) match {
+				objectStorageService.renderable(objectStoreKey, Some("profile-export.zip")) match {
 					case Some(f) => fileServer.serve(f, Some("profile-export.zip"))
 					case _ => throw new ItemNotFoundException()
 				}

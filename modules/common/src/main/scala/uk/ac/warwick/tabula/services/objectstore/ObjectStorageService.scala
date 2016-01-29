@@ -38,11 +38,10 @@ trait ObjectStorageService {
 	/**
 		* Combines calls to fetch() and metadata()
 		*/
-	def renderable(key: String): Option[RenderableFile] =
+	def renderable(key: String, fileName: Option[String]): Option[RenderableFile] =
 		if (keyExists(key)) {
 			Some(new RenderableFile {
-				override val file: Option[File] = None
-				override val filename: String = key
+				override val filename: String = fileName.getOrElse(key)
 
 				private lazy val fileMetadata = metadata(key)
 

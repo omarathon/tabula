@@ -91,7 +91,6 @@ abstract class Features {
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.disability.rendering.submissions:false}") var disabilityOnSubmission = defaults.disabilityOnSubmission
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
@@ -176,7 +175,6 @@ class FeaturesMessage {
 	@BeanProperty var academicYear2018 = false
 
 	@BeanProperty var emailStudents = false
-	@BeanProperty var xSendfile = true
 	@BeanProperty var activityStreams = true
 	@BeanProperty var masqueradersCanWrite = false
 	@BeanProperty var masqueradeElevatedPermissions = false

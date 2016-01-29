@@ -66,7 +66,7 @@ trait ZipCreator extends Logging {
 	 */
 	@throws[ZipRequestTooLargeError]("if the file doesn't exist and the items are too large to be zipped")
 	def getZip(name: String, items: Seq[ZipItem]): RenderableFile = {
-		objectStorageService.renderable(objectKey(name)).getOrElse {
+		objectStorageService.renderable(objectKey(name), Some(name)).getOrElse {
 			writeZip(name, items)
 		}
 	}
@@ -106,7 +106,7 @@ trait ZipCreator extends Logging {
 				objectStorageService.push(objectKey(name), is, ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
 			}
 
-			objectStorageService.renderable(objectKey(name)).get
+			objectStorageService.renderable(objectKey(name), Some(name)).get
 		} finally {
 			if (!file.delete()) file.deleteOnExit()
 		}

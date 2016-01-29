@@ -8,11 +8,5 @@ trait RenderableFile {
 	def contentType: String
 	def contentLength: Option[Long]
 
-	/**
-	 * Optional property - if present, fileserver may use it instead of
-	 * inputStream to serve the content. (i.e. for SendFile support)
-	 */
-	def file: Option[File]
-
 	def cachePolicy = CachePolicy()
 }

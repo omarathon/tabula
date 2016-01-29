@@ -8,5 +8,4 @@ class RenderableAttachment(attachment: FileAttachment) extends RenderableFile {
 	override def filename = attachment.name
 	override def contentType = MediaType.OCTET_STREAM.toString // TODO mime type.
 	override def contentLength = attachment.length
-	override def file = None
 }
