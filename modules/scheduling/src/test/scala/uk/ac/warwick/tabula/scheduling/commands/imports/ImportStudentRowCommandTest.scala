@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
+import java.math.BigDecimal
 import java.sql.{Date, ResultSet, ResultSetMetaData}
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
@@ -134,6 +135,7 @@ trait MockedResultSet extends Mockito {
 	rs.getString("course_code") returns "UESA-H612"
 	rs.getString("disability") returns "Q"
 	rs.getString("award_code") returns "BA"
+	rs.getBigDecimal("sce_agreed_mark") returns new BigDecimal(66.666666)
 }
 
 // scalastyle:off magic.number
@@ -239,6 +241,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseYearDetails.lastUpdatedDate should not be null
 			studentCourseYearDetails.modeOfAttendance.code should be ("P")
 			studentCourseYearDetails.yearOfStudy should be (3)
+			studentCourseYearDetails.agreedMark.toPlainString should be ("66.7") // Should be rounded up
 
 			verify(importCommandFactory.studentCourseYearDetailsDao, times(1)).saveOrUpdate(any[StudentCourseYearDetails])
 		}
@@ -374,6 +377,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("mod_reg_status") returns null
 		rs.getString("course_code") returns null
 		rs.getString("disability") returns null
+		rs.getBigDecimal("sce_agreed_mark") returns null
 	}
 
 	trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet

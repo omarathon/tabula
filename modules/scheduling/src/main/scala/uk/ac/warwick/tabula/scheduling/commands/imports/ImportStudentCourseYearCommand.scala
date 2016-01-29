@@ -63,7 +63,8 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 	}
 
 	private val basicStudentCourseYearProperties = Set(
-		"yearOfStudy"
+		"yearOfStudy",
+		"agreedMark"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {

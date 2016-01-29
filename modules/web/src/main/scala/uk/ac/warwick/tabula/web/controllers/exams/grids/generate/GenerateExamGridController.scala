@@ -11,6 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.exams.grids.columns.marking.YearColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -303,6 +304,8 @@ class GenerateExamGridController extends ExamsController
 					selectCourseCommand.department.getCoreRequiredModules(selectCourseCommand.academicYear, selectCourseCommand.course, selectCourseCommand.route, selectCourseCommand.yearOfStudy).getOrElse(Seq()),
 					entities
 				)
+			case yearColumn: YearColumnOption =>
+				yearColumn.getColumns(selectCourseCommand.yearOfStudy, entities)
 			case column =>
 				column.getColumns(entities)
 		}

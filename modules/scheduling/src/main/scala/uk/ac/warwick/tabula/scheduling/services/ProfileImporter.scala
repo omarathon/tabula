@@ -174,7 +174,8 @@ class SandboxProfileImporter extends ProfileImporter {
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON",
 			"disability" -> "A",
-			"mst_type" -> "L"
+			"mst_type" -> "L",
+			"sce_agreed_mark" -> null
 		))
 		ImportStudentRowCommand(
 			mac,
@@ -372,6 +373,7 @@ object ProfileImporter extends Logging {
 			sce.sce_ayrc as sce_academic_year,
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,
+			sce.sce_udfj as sce_agreed_mark,
 
 			ssn.ssn_mrgs as mod_reg_status,
 

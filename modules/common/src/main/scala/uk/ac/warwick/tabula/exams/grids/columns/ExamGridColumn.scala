@@ -18,8 +18,9 @@ object ExamGridColumnOption {
 		val CoreOptionalModules = 6
 		val OptionalModules = 7
 		val TotalCATs = 8
-		val CurrentYear = 9
-		val OvercattedYearMark = 10
+		val PreviousYears = 9
+		val CurrentYear = 10
+		val OvercattedYearMark = 11
 		val MitigatingCircumstances = 12
 		val RecommendedActions = 13
 		val Comments = 20
