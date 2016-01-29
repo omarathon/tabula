@@ -36,15 +36,7 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 		val command = new ObjectStorageMigrationCommandInternal with CommandTestSupport
 
 		when(command.fileDao.getAllFileIds(None)) thenReturn Set("1", "2", "3", "4", "5", "6", "7", "8", "9")
-		when(command.defaultStoreService.keyExists("1")) thenReturn {true}
-		when(command.defaultStoreService.keyExists("2")) thenReturn {true}
-		when(command.defaultStoreService.keyExists("3")) thenReturn {false}
-		when(command.defaultStoreService.keyExists("4")) thenReturn {true}
-		when(command.defaultStoreService.keyExists("5")) thenReturn {false}
-		when(command.defaultStoreService.keyExists("6")) thenReturn {false}
-		when(command.defaultStoreService.keyExists("7")) thenReturn {true}
-		when(command.defaultStoreService.keyExists("8")) thenReturn {false}
-		when(command.defaultStoreService.keyExists("9")) thenReturn {false}
+		when(command.defaultStoreService.listKeys()) thenReturn Set("1", "2", "13", "4", "15", "16", "7", "18", "19").toStream
 
 		val blob3data = mock[InputStream]
 		val blob5data = mock[InputStream]
