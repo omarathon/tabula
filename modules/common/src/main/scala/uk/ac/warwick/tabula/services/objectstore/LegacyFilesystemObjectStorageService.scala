@@ -77,7 +77,11 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
 
 		def files(base: File): Stream[String] =
 			if (base.isFile) Stream(toKey(base))
-			else base.listFiles().sortBy(_.getName).toStream.flatMap(files)
+			else
+				base.listFiles().sortBy(_.getName)
+					// This is a bit of a kludgy hack but it stops the object migration job transferring object store files to itself
+					.filterNot(_.getName == "objectstore")
+					.toStream.flatMap(files)
 
 		files(attachmentDir)
 	}
