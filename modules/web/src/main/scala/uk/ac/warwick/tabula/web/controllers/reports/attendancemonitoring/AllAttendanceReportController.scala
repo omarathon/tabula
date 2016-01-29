@@ -7,13 +7,12 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
 import uk.ac.warwick.tabula.reports.web.Routes
 
-
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/attendance/all"))
 class AllAttendanceReportController extends AbstractAttendanceReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.identity)
 
 	val pageRenderPath = "allattendance"
@@ -26,7 +25,7 @@ class AllAttendanceReportController extends AbstractAttendanceReportController {
 class UnrecordedAttendanceReportController extends AbstractAttendanceReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.unrecorded)
 
 	val pageRenderPath = "unrecorded"
@@ -40,7 +39,7 @@ class UnrecordedAttendanceReportController extends AbstractAttendanceReportContr
 class MissedAttendanceReportController extends AbstractAttendanceReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.missedUnauthorised)
 
 	val pageRenderPath = "missed"

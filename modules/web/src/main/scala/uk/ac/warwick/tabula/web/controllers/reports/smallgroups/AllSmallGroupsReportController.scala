@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.reports.web.Routes
 class AllSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.identity)
 
 	val pageRenderPath = "allsmallgroups"
@@ -27,7 +27,7 @@ class AllSmallGroupsReportController extends AbstractSmallGroupsReportController
 class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.unrecorded(academicYear))
 
 	val pageRenderPath = "unrecorded"
@@ -41,7 +41,7 @@ class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportCon
 class MissedSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.missed)
 
 	val pageRenderPath = "missed"
