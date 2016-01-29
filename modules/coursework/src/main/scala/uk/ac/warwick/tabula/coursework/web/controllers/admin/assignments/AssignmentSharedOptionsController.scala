@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 
-import uk.ac.warwick.tabula.AutowiringFeaturesComponent
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
-import uk.ac.warwick.tabula.commands.coursework.assignments.SharedAssignmentPropertiesForm
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
 import javax.validation.Valid
-import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.turnitin.Turnitin
+
+import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.coursework.assignments.SharedAssignmentPropertiesForm
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 /**
@@ -21,7 +18,7 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
  */
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/shared-options"))
-class AssignmentSharedOptionsController extends CourseworkController with AutowiringFeaturesComponent {
+class AssignmentSharedOptionsController extends CourseworkController {
 
 	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department) = {
@@ -39,7 +36,7 @@ class AssignmentSharedOptionsController extends CourseworkController with Autowi
 		Mav("admin/assignments/shared_options",
 			"department" -> department,
 			"maxWordCount" -> Assignment.MaximumWordCount,
-			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
+			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
 		).noLayout()
 	}
 

@@ -1,29 +1,22 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.profiles.{ViewProfilePhotoCommand, ViewStudentRelationshipPhotoCommand}
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
 
-	var fileServer = Wire.auto[FileServer]
-
 	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable member: Member) =
 		ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
-	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)
-		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand): Mav = {
 		command.apply()
 	}
 
@@ -32,8 +25,6 @@ class PhotoController extends ProfilesController {
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}/{relationshipType}/{agent}.jpg"))
 class StudentRelationshipPhotoController extends ProfilesController {
-
-	var fileServer = Wire[FileServer]
 
 	@ModelAttribute("viewStudentRelationshipPhotoCommand")
 	def command(
@@ -56,8 +47,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
-	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)
-		(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
+	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand): Mav = {
 		command.apply()
 	}
 

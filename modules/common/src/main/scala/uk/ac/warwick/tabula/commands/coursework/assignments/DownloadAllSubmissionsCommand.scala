@@ -1,31 +1,26 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.services.ZipService
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.{Description, _}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
+import scala.collection.JavaConversions._
 
 class DownloadAllSubmissionsCommand(
 		val module: Module,
 		val assignment: Assignment,
 		val filename: String)
-		extends Command[RenderableZip] with ReadOnly {
+		extends Command[RenderableFile] with ReadOnly {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
 	var zipService = Wire.auto[ZipService]
 
-	override def applyInternal() = {
-		val zip = zipService.getAllSubmissionsZip(assignment)
-		new RenderableZip(zip)
-	}
+	override def applyInternal() = zipService.getAllSubmissionsZip(assignment)
 
 	override def describe(d: Description) = d
 		.assignment(assignment)

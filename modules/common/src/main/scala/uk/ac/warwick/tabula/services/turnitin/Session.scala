@@ -3,10 +3,7 @@ package uk.ac.warwick.tabula.services.turnitin
 import java.io.IOException
 
 import dispatch.classic._
-import dispatch.classic.mime.Mime._
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.content.FileBody
 import org.xml.sax.SAXParseException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.Products._
@@ -53,10 +50,9 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 */
 	def doRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
-		pdata: Option[FileData], // optional file to put in "pdata" parameter
 		params: (String, String)*): TurnitinResponse = {
 
-		val req = getRequest(functionId, pdata, params:_*)
+		val req = getRequest(functionId, params:_*)
 
 		val request: Handler[TurnitinResponse] =
 			req >:+ { (headers, req) =>
@@ -82,12 +78,10 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 
 	def getRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
-		pdata: Option[FileData], // optional file to put in "pdata" parameter
 		params: (String, String)*) = {
 
 		val fullParameters = calculateParameters(functionId, params:_*)
-		val postWithParams = turnitin.endpoint.POST << fullParameters
-		val req = addPdata(pdata, postWithParams)
+		val req = turnitin.endpoint.POST << fullParameters
 		logger.debug("doRequest: " + fullParameters)
 		req
 	}
@@ -108,8 +102,7 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 		(transform: Request => Handler[TurnitinResponse]): TurnitinResponse = {
 
 		val parameters = Map("fid" -> functionId) ++ commonParameters ++ params
-		val postWithParams = turnitin.endpoint.POST << (parameters + md5hexparam(parameters))
-		val req = addPdata(pdata, postWithParams)
+		val req = turnitin.endpoint.POST << (parameters + md5hexparam(parameters))
 
 		logger.debug("doRequest: " + parameters)
 
@@ -122,17 +115,6 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 				logger.error("Exception contacting Turnitin", e)
 				new TurnitinResponse(code = 9000, diagnostic = Some(e.getMessage))
 		}
-	}
-
-	/**
-	 * Returns either the request with a file added on, or the original
-	 * request if there's no file to add.
-	 * It's important to pass in the file and not a stream of the file because the production Turnitin
-	 * server will explode with a confusing error if you don't provide a Content-Length header.
-	 */
-	def addPdata(file: Option[FileData], req: Request) = file match {
-		case Some(data) if data.file != null => req.add("pdata", new FileBody(data.file, ContentType.APPLICATION_OCTET_STREAM, data.name))
-		case _ => req
 	}
 
 	/**

@@ -379,7 +379,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			"department" -> "in",
 			"monitoringPeriod" -> "Autumn",
 			"academicYear" -> command.academicYear,
-			"students" -> Map("1234567" -> 3, "9283845" -> 2)
+			"missedPoints" -> Map("1234567" -> 3, "9283845" -> 2)
 		))
 	}
 

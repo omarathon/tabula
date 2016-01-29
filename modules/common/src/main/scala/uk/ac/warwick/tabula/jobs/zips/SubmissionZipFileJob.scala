@@ -38,7 +38,7 @@ class SubmissionZipFileJob extends ZipFileJob with AutowiringZipServiceComponent
 				updateStatus("Initialising")
 
 				val zipFile = zipService.getSomeSubmissionsZip(submissions, updateZipProgress)
-				job.setString(ZipFileJob.ZipFilePathKey, zipFile.getPath)
+				job.setString(ZipFileJob.ZipFilePathKey, zipFile.filename)
 
 				updateProgress(100)
 				job.succeeded = true

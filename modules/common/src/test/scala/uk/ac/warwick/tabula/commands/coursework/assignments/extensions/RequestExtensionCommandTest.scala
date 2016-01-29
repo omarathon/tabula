@@ -151,7 +151,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				file.deleteOnExit()
 
 				FileCopyUtils.copy(new ByteArrayInputStream("".getBytes), new FileOutputStream(file))
-				attachment.file = file
+//				attachment.file = file
 
 				newExtension.addAttachment(attachment)
 				assignment.extensions.add(newExtension)

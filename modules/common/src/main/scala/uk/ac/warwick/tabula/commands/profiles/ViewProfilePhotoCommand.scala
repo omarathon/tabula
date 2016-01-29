@@ -57,7 +57,6 @@ object DefaultPhoto extends RenderableFile {
 	override def filename = "no-photo.jpg"
 	override def contentType = "image/jpg"
 	override def contentLength = Some(NoPhoto.length)
-	override def file = None
 
 	override def cachePolicy = CachePolicy(expires = Some(Days.ONE))
 }

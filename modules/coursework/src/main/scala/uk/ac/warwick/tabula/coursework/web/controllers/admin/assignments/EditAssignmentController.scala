@@ -3,24 +3,20 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
 import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
-import org.springframework.validation.BeanPropertyBindingResult
-import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation._
+import org.springframework.validation.{BeanPropertyBindingResult, Errors}
 import org.springframework.web.bind.WebDataBinder
-
+import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.commands.coursework.assignments._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.commands.UpstreamGroup
-import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
-import uk.ac.warwick.tabula.services.turnitin.Turnitin
+import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
-class EditAssignmentController extends CourseworkController with AutowiringFeaturesComponent {
+class EditAssignmentController extends CourseworkController {
 
 	validatesSelf[EditAssignmentCommand]
 
@@ -47,7 +43,7 @@ class EditAssignmentController extends CourseworkController with AutowiringFeatu
 			"assessmentGroups" -> form.assessmentGroups,
 			"maxWordCount" -> Assignment.MaximumWordCount,
 			"openDetails" -> openDetails,
-			"turnitinFileSizeLimit" -> (if (features.turnitinLTI) TurnitinLtiService.maxFileSizeInMegabytes else Turnitin.maxFileSizeInMegabytes)
+			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
 		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 	}
 

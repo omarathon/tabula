@@ -5,9 +5,9 @@ import uk.ac.warwick.tabula.commands.{Description, _}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.jobs.zips.SubmissionZipFileJob
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{SubmissionService, ZipService}
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.jobs.{JobInstance, JobService}
+import uk.ac.warwick.tabula.services.{SubmissionService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
  * Download one or more submissions from an assignment, as a Zip.
  */
 class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
-	extends Command[Either[RenderableZip, JobInstance]] with ReadOnly {
+	extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
@@ -30,7 +30,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 	var submissions: JList[Submission] = JArrayList()
 	var students: JList[String] = JArrayList()
 
-	override def applyInternal(): Either[RenderableZip, JobInstance] = {
+	override def applyInternal(): Either[RenderableFile, JobInstance] = {
 		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
 		else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
 		else if (!students.isEmpty && submissions.isEmpty) {
@@ -46,8 +46,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
 
 		if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
 			val zip = zipService.getSomeSubmissionsZip(submissions.asScala)
-			val renderable = new RenderableZip(zip)
-			Left(renderable)
+			Left(zip)
 		} else {
 			Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id).toSeq)))
 		}

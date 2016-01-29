@@ -1,11 +1,7 @@
 package uk.ac.warwick.tabula.services.turnitin
 
-import java.io.File
-
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.services.turnitin.TurnitinDates._
 import uk.ac.warwick.tabula.services.turnitin.TurnitinMethods._
-import uk.ac.warwick.util.web._
+import uk.ac.warwick.util.web.{Uri, UriBuilder}
 
 abstract class Response(val message: String) {
 	def successful: Boolean
@@ -78,63 +74,19 @@ trait TurnitinMethods { self: Session =>
 	}
 
 	/**
-	 * Returns a URL to the Turnitin home page that initiates a session as this user.
-	 *
-	 * The Session ID is contained within the URL so it is unique to the user and shouldn't
-	 * be shared.
-	 *
-	 * Note that Session uses the same session so calling logout() will invalidate any
-	 * link generated using this.
-	 */
-	def getLoginLink(): Option[Uri] = {
-		 doRequest(LoginFunction, None,
-			"fcmd" -> "1",
-			"utp" -> "2",
-			"uem" -> userEmail,
-			"ufn" -> userFirstName,
-			"session-id" -> null, // don't provide session-id; force a new session, as it seems to fail otherwise.
-			"uln" -> userLastName)
-			.redirectUrl.map { path =>
-
-			UriBuilder.parse(apiEndpoint).setPath(path).toUri
-		 }
+		* Ensures that the session has a userid for the user who is logged in.
+		*/
+	def acquireUserId() {
+		if (userId == "") {
+			userId = getUserId().getOrElse(throw new IllegalStateException("Failed to get userid"))
+		}
 	}
-
 	/**
-	 * There is an API call fid=6 to get a report link, but at the moment it doesn't
-	 * work, so this generates a link to the originality report viewer for a document.
-	 */
-	def getDocumentViewerLink(document: DocumentId): Uri = {
-		UriBuilder.parse(apiEndpoint)
-    		.setPath("/dv")
-    		.setQuery("")
-    		.addQueryParameter("o", document.value)
-    		.addQueryParameter("session-id", sessionId)
-    		.addQueryParameter("s", "1") // s=1 -> Originality report
-    		.toUri
-	}
-
-	/**
-	 * Ends this session in Turnitin. getLoginLink generates a link for the same session
-	 *
-	 */
-	def logout() = {
-		val response = doRequest(LogoutFunction, None,
-			"utp" -> "2",
-			"fcmd" -> "2",
-			"uem" -> userEmail,
-			"ufn" -> userFirstName,
-			"uln" -> userLastName,
-			"create_session" -> "1")
-		logger.debug(response.toString)
-	}
-
-	/**
-	 * Gets/creates this user and returns the userid
-	 * if successful.
-	 */
+		* Gets/creates this user and returns the userid
+		* if successful.
+		*/
 	def getUserId(): Option[String] = {
-		doRequest(LoginFunction, None,
+		doRequest(LoginFunction,
 			"fcmd" -> "2",
 			"utp" -> "2",
 			"uem" -> userEmail,
@@ -144,204 +96,13 @@ trait TurnitinMethods { self: Session =>
 	}
 
 	/**
-	 * Ensures that the session has a userid for the user who is logged in.
-	 */
-	def acquireUserId() {
-		if (userId == "") {
-		    userId = getUserId().getOrElse(throw new IllegalStateException("Failed to get userid"))
-		}
-	}
-
-	/**
-	 * Adds the current user as a tutor on the class with this ID.
-	 *
-	 * If the person is already enrolled on this class, it still returns success,
-	 * so it's fine to call this eagerly.
-	 *
-	 * If the class doesn't exist, it is created with the given external ID.
-	 *
-	 * The className is not used to find the class, but it is required in the
-	 * request - the class's name in Turnitin will be updated with this name.
-	 */
-	def addTutor(classId: ClassId, className: ClassName): Response = {
-		val response = doRequest(CreateClassFunction, None,
-			"utp" -> "2",
-			"fcmd" -> "2",
-			"cid" -> classId.value,
-			"ctl" -> className.value)
-		for (d <- response.diagnostic) logger.debug(d)
-		if (response.success) Done()
-		else if (response.code == 220) DuplicateClass() // shouldn't happen as we're using IDs.
-		else Failed(response.code, response.message)
-	}
-
-	/**
-	 * Create a new Class with this external ID and name. If successful, it returns
-	 * Created() with the internal ID of the class (which will be different to the external ID you provided,
-	 * but you can later refer to the class using either as ClassId). The classId returned from responses
-	 * is always the internally-generated ID, even if you specified your own ID (though that is stored, invisibly).
-	 *
-	 * If the given ClassId already exists, that class is returned and no new class is created.
-	 *
-	 * Classes are set to expire in 5 years.
-	 */
-	def createClass(classId: ClassId, className: ClassName): Response = {
-		val response = doRequest(CreateClassFunction, None,
-			"cid" -> classId.value,
-			"ctl" -> className.value,
-			"ced" -> yearsFromNow(5))
-
-		if (response.success && response.classId.isDefined) Created(response.classId.get)
-		else Failed(response.code, response.message)
-	}
-
-	/**
-	 * Create a new Assignment in this class, using the given AssignmentId as the externally-provided ID.
-	 *
-	 * You can pass in a ClassId that doesn't exist, and it will create the class (and add the current user
-	 * as a class instructor).
-	 *
-	 * If the requested AssignmentId already exists, AlreadyExists() is returned.
-	 */
-	def createAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName, department: Department): Response = {
-		val commonParams = commonAssignmentParams(classId, className, assignmentId, assignmentName)
-		val departmentParams = departmentSpecificAssignmentParams(department)
-		val params = commonParams ++ departmentParams
-		val response = doRequest(CreateAssignmentFunction, None, params: _*)
-		resolveAssignmentResponse(response)
-	}
-
-	/**
-	 * Update an existing assignment in this class.
-	 */
-	def updateAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName, department: Department): Response = {
-		val commonParams = commonAssignmentParams(classId, className, assignmentId, assignmentName) ++ Seq("fcmd" -> "3")
-		val departmentParams = departmentSpecificAssignmentParams(department)
-		val params = commonParams ++ departmentParams
-		val response = doRequest(CreateAssignmentFunction, None, params: _*)
-		resolveAssignmentResponse(response)
-	}
-
-	private def commonAssignmentParams(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName) = List(
-		"cid" -> classId.value,
-		"ctl" -> className.value, // used if class doesn't exist, to create the class.
-		"assignid" -> assignmentId.value,
-		"assign" -> assignmentName.value, // used if the assignment doesn't exist, to name the assignment.
-		"dtstart" -> monthsFromNow(0), //The start date for this assignment must occur on or after today.
-		"dtdue" -> monthsFromNow(6))
-
-	private def departmentSpecificAssignmentParams(department: Department): List[(String, String)] = {
-
-		def booleanToString(boolean: Boolean) = boolean match {
-			case true => "1"
-			case _ => "0"
-		}
-
-		val excludeBibliography = booleanToString(department.turnitinExcludeBibliography)
-		val excludeQuotations = booleanToString(department.turnitinExcludeQuotations)
-
-		val excludeTypeAndValue =
-			if(department.turnitinSmallMatchWordLimit == 0 && department.turnitinSmallMatchPercentageLimit == 0) {
-				("0", "0")
-			} else if (department.turnitinSmallMatchWordLimit > 0) {
-				("1", department.turnitinSmallMatchWordLimit.toString)
-			} else {
-				("2", department.turnitinSmallMatchPercentageLimit.toString)
-			}
-
-		List(
-			"exclude_biblio" -> excludeBibliography,
-			"exclude_quoted" -> excludeQuotations,
-			"exclude_type" -> excludeTypeAndValue._1,
-			"exclude_value" -> excludeTypeAndValue._2
-		)
-	}
-
-	private def resolveAssignmentResponse(response: TurnitinResponse) = {
-		if (response.code == 419) AlreadyExists()
-		else if (response.code == 206) ClassNotFound()
-		else if (response.success) Created(response.assignmentId getOrElse "")
-		else Failed(response.code, response.message)
-	}
-
-	def deleteAssignment(classId: ClassId, assignmentId: AssignmentId): Response = {
-		val response = doRequest(CreateAssignmentFunction, None,
-			"cid" -> classId.value,
-			"assignid" -> assignmentId.value,
-			"fcmd" -> "6")
-		Failed(response.code, response.message)
-		// 411 -> it didn't exist
-	}
-
-	/**
-	 * Submit a paper to this ClassId and AssignmentId.
-	 *
-	 * If this AssignmentId doesn't exist, the assignment is created using the
-	 * given name.
-	 */
-	def submitPaper(
-			classId: ClassId, // what
-			className: ClassName, // a
-			assignmentId: AssignmentId, // lot
-			assignmentName:AssignmentName, // of
-			paperTitle: String, // arguments.
-			filename: String,
-			file: File,
-			authorFirstName: String,
-			authorLastName: String): Response = {
-
-		val response = doRequest(SubmitPaperFunction, Some(FileData(file, filename)),
-			"cid" -> classId.value,
-			"ctl" -> className.value,
-			"assignid" -> assignmentId.value,
-			"assign" -> assignmentName.value,
-			"ptl" -> paperTitle,
-			"ptype" -> "2",
-			"pfn" -> authorFirstName,
-			"pln" -> authorLastName)
-
-		if (response.success) Created(response.objectId getOrElse "")
-		else resolveError(response)
-	}
-
-	/**
-	 * Delete a submission document from Turnitin.
-	 *
-	 * Doesn't remove it from any central repository, so you will still get plagiarism matches from deleted documents.
-	 */
-	def deleteSubmission(classId: ClassId, assignmentId: AssignmentId, oid: DocumentId): Response = {
-		val response = doRequest(DeletePaperFunction, None,
-			"cid" -> classId.value,
-			"assignid" -> assignmentId.value,
-			"oid" -> oid.value)
-		if (response.success) Deleted()
-		else Failed(response.code, response.message)
-	}
-
-	/**
-	 * fcmd 1 should generate a redirect to a URL to view the report for
-	 * this document. At the moment it throws an error so am using a hacky method (see getDocumentViewerLink)
-	 */
-	def getReport(paperId: DocumentId) = {
-		val response = doRequest(GenerateReportFunction, None,
-			"oid" -> paperId.value,
-			"fcmd" -> "1")
-		response
-//		val params = calculateParameters(GenerateReportFunction,
-//			"oid" -> paperId.value,
-//			"fcmd" -> "1")
-//		UriBuilder.parse(apiEndpoint).addQueryParameters(params.toMap.asJava).toUri()
-//		Failed(response.code, response.message)
-	}
-
-	/**
-	 * List the submissions made to this assignment in this class.
-	 *
-	 * This command <em>may</em> throw ClassNotFound or AssignmentNotFound in some circumstances,
-	 * but the intended behaviour is that it will create the class or assignment implicitly.
-	 */
+		* List the submissions made to this assignment in this class.
+		*
+		* This command <em>may</em> throw ClassNotFound or AssignmentNotFound in some circumstances,
+		* but the intended behaviour is that it will create the class or assignment implicitly.
+		*/
 	def listSubmissions(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName): Response = {
-		val response = doRequest(ListSubmissionsFunction, None,
+		val response = doRequest(ListSubmissionsFunction,
 			"cid" -> classId.value,
 			"ctl" -> className.value,
 			"assignid" -> assignmentId.value,
@@ -350,6 +111,20 @@ trait TurnitinMethods { self: Session =>
 			"fcmd" -> "2")
 		if (response.success) GotSubmissions(response.submissionsList)
 		else resolveError(response)
+	}
+
+	/**
+		* There is an API call fid=6 to get a report link, but at the moment it doesn't
+		* work, so this generates a link to the originality report viewer for a document.
+		*/
+	def getDocumentViewerLink(document: DocumentId): Uri = {
+		UriBuilder.parse(apiEndpoint)
+			.setPath("/dv")
+			.setQuery("")
+			.addQueryParameter("o", document.value)
+			.addQueryParameter("session-id", sessionId)
+			.addQueryParameter("s", "1") // s=1 -> Originality report
+			.toUri
 	}
 
 	// scalastyle:off magic.number

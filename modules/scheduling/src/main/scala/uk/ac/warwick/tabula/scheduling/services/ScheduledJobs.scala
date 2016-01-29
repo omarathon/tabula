@@ -14,6 +14,9 @@ import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 /**
  * The scheduled jobs don't particularly have to all be in one class,
  * but I decided it's better to have them all together than it is to have
@@ -76,17 +79,17 @@ class ScheduledJobs {
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def indexAuditEvents(): Unit =
 		if (features.schedulingAuditIndex)
-			exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex() }
+			exceptionResolver.reportExceptions { Await.result(auditIndexingService.incrementalIndex(), Duration.Inf) }
 
 	@Scheduled(cron = "0 0-59/5 3-23 * * *") // every 5 minutes, except between midnight and 3am (when the member import happens)
 	def indexProfiles(): Unit =
 		if (features.schedulingProfilesIndex)
-			exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex() }
+			exceptionResolver.reportExceptions { Await.result(profileIndexingService.incrementalIndex(), Duration.Inf) }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def indexNotifications(): Unit =
 		if (features.schedulingNotificationsIndex)
-			exceptionResolver.reportExceptions { notificationIndexService.incrementalIndex() }
+			exceptionResolver.reportExceptions { Await.result(notificationIndexService.incrementalIndex(), Duration.Inf) }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def resolveScheduledNotifications(): Unit =
@@ -124,22 +127,6 @@ class ScheduledJobs {
 			exceptionResolver.reportExceptions { ExportAttendanceToSitsCommand().apply() }
 		}
 
-	/* Filesystem syncing jobs, should only run on standby */
-	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def fileSync(): Unit =
-		if (features.schedulingFileSync) syncGuard {
-			exceptionResolver.reportExceptions {
-				new SyncReplicaFilesystemCommand().apply()
-			}
-		}
-
-	@Scheduled(cron = "0 0 19 * * *") // 7pm
-	def cleanupUnreferencedFilesAndSanityCheck(): Unit =
-		exceptionResolver.reportExceptions {
-			if (features.schedulingCleanupUnreferencedFiles) new CleanupUnreferencedFilesCommand().apply()
-			if (features.schedulingSanityCheckFilesystem) new SanityCheckFilesystemCommand().apply()
-		}
-
 	@Scheduled(cron = "0 0 4 * * *") // 4am
 	def updateAttendanceMonitoringSchemeMembership(): Unit =
 		if (features.schedulingAttendanceUpdateSchemes) maintenanceGuard {
@@ -158,6 +145,13 @@ class ScheduledJobs {
 	def exportFeedbackToSits(): Unit =
 		if (features.schedulingExportFeedbackToSits) maintenanceGuard {
 			exceptionResolver.reportExceptions { ExportFeedbackToSitsCommand().apply() }
+		}
+
+	@Scheduled(fixedDelay = 1 * 60 * 1000) // every minute, non-concurrent
+	def objectStorageMigration(): Unit =
+		// We don't really need a maintenance guard here, but it stops it running on the standby
+		if (features.schedulingObjectStorageMigration) maintenanceGuard {
+			exceptionResolver.reportExceptions { ObjectStorageMigrationCommand().apply() }
 		}
 
 }

@@ -1,43 +1,34 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMethod, RequestMapping, PathVariable}
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.fileserver.FileServer
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadSupportingFilesCommand
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.ItemNotFoundException
-import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Controller
 @RequestMapping(value=Array("/module/{module}/{assignment}/extension"))
-class DownloadSupportingFilesController extends CourseworkController{
+class DownloadSupportingFilesController extends CourseworkController {
 
 	@ModelAttribute def command(
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable filename: String,
-			user:CurrentUser) =
+			user: CurrentUser) =
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(user.universityId)), filename)
 
-	@Autowired var fileServer:FileServer =_
-
 	@RequestMapping(value=Array("/supporting-file/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable)	}
-		command.apply().orElse{ throw new ItemNotFoundException() }
+	def getAttachment(command: DownloadSupportingFilesCommand, user: CurrentUser): RenderableFile = {
+		command.apply().getOrElse { throw new ItemNotFoundException() }
 	}
 
 }
 
 @Controller
 @RequestMapping(value=Array("/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
-class AdminDownloadSupportingFilesController extends CourseworkController{
+class AdminDownloadSupportingFilesController extends CourseworkController {
 
 	@ModelAttribute def command(
 			@PathVariable module: Module,
@@ -46,13 +37,9 @@ class AdminDownloadSupportingFilesController extends CourseworkController{
 			@PathVariable universityId: String) =
 		new DownloadSupportingFilesCommand(module, assignment, mandatory(assignment.findExtension(universityId)), filename)
 
-	@Autowired var fileServer:FileServer =_
-
 	@RequestMapping(value=Array("/supporting-file/{filename}"), method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser, @PathVariable filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		// specify callback so that audit logging happens around file serving
-		command.callback = { (renderable) => fileServer.serve(renderable, Some(filename))	}
-		command.apply().orElse{ throw new ItemNotFoundException() }
+	def getAttachment(command:DownloadSupportingFilesCommand, user:CurrentUser, @PathVariable filename: String): RenderableFile = {
+		command.apply().getOrElse{ throw new ItemNotFoundException() }
 	}
 
 }

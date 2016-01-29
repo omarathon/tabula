@@ -13,7 +13,7 @@ object AttendanceNoteAttachmentCommand {
 	def apply(member: Member, occurrence: SmallGroupEventOccurrence, user: CurrentUser) =
 		new AttendanceNoteAttachmentCommand(member, occurrence, user)
 		with ComposableCommand[Option[RenderableFile]]
-		with ApplyWithCallback[Option[RenderableFile]]
+		with Appliable[Option[RenderableFile]]
 		with AutowiringSmallGroupServiceComponent
 		with ReadOnly
 		with AttendanceNoteAttachmentPermissions
@@ -22,18 +22,16 @@ object AttendanceNoteAttachmentCommand {
 }
 
 class AttendanceNoteAttachmentCommand(val member: Member, val occurrence: SmallGroupEventOccurrence, val user: CurrentUser)
-	extends CommandInternal[Option[RenderableFile]] with HasCallback[Option[RenderableFile]] {
+	extends CommandInternal[Option[RenderableFile]] {
 
 	self: SmallGroupServiceComponent =>
 
 	def applyInternal() = {
-		val result = smallGroupService.getAttendanceNote(member.universityId, occurrence).flatMap{ note =>
+		smallGroupService.getAttendanceNote(member.universityId, occurrence).flatMap{ note =>
 			Option(note.attachment).map{ attachment =>
 				new RenderableAttachment(attachment)
 			}
 		}
-		callback(result)
-		result
 	}
 
 }

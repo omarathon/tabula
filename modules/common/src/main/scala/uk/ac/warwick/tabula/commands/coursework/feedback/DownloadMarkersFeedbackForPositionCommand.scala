@@ -1,23 +1,22 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CanProxy
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object DownloadMarkersFeedbackForPositionCommand {
 
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser, position: FeedbackPosition) =
 		new DownloadMarkersFeedbackForPositionCommand(module, assignment, marker, submitter, position)
-		with ComposableCommand[RenderableZip]
-		with ApplyWithCallback[RenderableZip]
+		with ComposableCommand[RenderableFile]
 		with DownloadMarkersFeedbackForPositionDescription
 		with DownloadMarkersFeedbackForPositionPermissions
 		with DownloadMarkersFeedbackForPositionCommandState
@@ -31,7 +30,7 @@ class DownloadMarkersFeedbackForPositionCommand(
 	val marker:User,
 	val submitter: CurrentUser,
 	val position: FeedbackPosition
-) extends CommandInternal[RenderableZip] with CanProxy {
+) extends CommandInternal[RenderableFile] with CanProxy {
 
 	self: ZipServiceComponent =>
 
@@ -43,13 +42,11 @@ class DownloadMarkersFeedbackForPositionCommand(
 			case SecondFeedback => Option(f.secondMarkerFeedback)
 			case ThirdFeedback => Option(f.thirdMarkerFeedback)
 		}).filter(_.state == MarkingState.MarkingCompleted)
-		val zip = zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks)
-		val renderable = new RenderableZip(zip)
-		renderable
+		zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks)
 	}
 }
 
-trait DownloadMarkersFeedbackForPositionDescription extends Describable[RenderableZip] {
+trait DownloadMarkersFeedbackForPositionDescription extends Describable[RenderableFile] {
 	override def describe(d: Description) {}
 }
 

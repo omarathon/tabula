@@ -38,7 +38,7 @@ class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent w
 				updateStatus("Initialising")
 
 				val zipFile = zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress)
-				job.setString(ZipFileJob.ZipFilePathKey, zipFile.getPath)
+				job.setString(ZipFileJob.ZipFilePathKey, zipFile.filename)
 
 				updateProgress(100)
 				job.succeeded = true

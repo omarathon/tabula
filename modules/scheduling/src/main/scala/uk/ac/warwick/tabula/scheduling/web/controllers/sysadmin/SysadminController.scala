@@ -11,10 +11,9 @@ import uk.ac.warwick.tabula.commands.{Appliable, Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportAcademicInformationCommand, ImportAssignmentsCommand, ImportDepartmentsModulesCommand, ImportProfilesCommand}
-import uk.ac.warwick.tabula.scheduling.commands.{CleanupUnreferencedFilesCommand, SanityCheckFilesystemCommand, SyncReplicaFilesystemCommand}
 import uk.ac.warwick.tabula.scheduling.jobs.ImportMembersJob
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.elasticsearch.{NotificationIndexService, AuditEventIndexService, ElasticsearchIndexingResult, ProfileIndexService}
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
@@ -244,40 +243,6 @@ class ImportSingleProfileController extends BaseSysadminController {
 
 		// Redirect cross-context
 		Redirect(urlRewriter.exec(JArrayList("/view/" + universityId, "/profiles", true)).toString)
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/sync"))
-class SyncFilesystemController extends BaseSysadminController {
-	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
-
-	@RequestMapping
-	def sync() = {
-		if (!fileSyncEnabled) throw new IllegalStateException("File syncing not enabled")
-
-		new SyncReplicaFilesystemCommand().apply()
-		redirectToHome
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/filesystem-cleanup"))
-class CleanupFilesystemController extends BaseSysadminController {
-	@RequestMapping
-	def cleanup() = {
-		new CleanupUnreferencedFilesCommand().apply()
-		redirectToHome
-	}
-}
-
-@Controller
-@RequestMapping(Array("/sysadmin/filesystem-sanity"))
-class SanityCheckFilesystemController extends BaseSysadminController {
-	@RequestMapping
-	def sanityCheck() = {
-		new SanityCheckFilesystemCommand().apply()
-		redirectToHome
 	}
 }
 
