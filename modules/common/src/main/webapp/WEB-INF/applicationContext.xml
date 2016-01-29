@@ -485,7 +485,7 @@
 		</property>
 	</bean>
 
-	<!-- Expose EhCache properties as system properties -->
+	<!-- Expose local properties as system properties -->
 	<bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property
@@ -510,6 +510,11 @@
         </util:properties>
     </property>
 	</bean>
+
+	<!-- @Scheduled -->
+	<task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
+	<task:executor id="taskExecutor" pool-size="5"/>
+	<task:scheduler id="taskScheduler" pool-size="10"/>
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
@@ -543,13 +548,6 @@
 			<constructor-arg value="${activemq.user}" />
 			<constructor-arg value="${activemq.pass}" />
 		</bean>
-	</beans>
-
-	<beans profile="scheduling">
-		<!-- @Scheduled -->
-		<task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
-		<task:executor id="taskExecutor" pool-size="5"/>
-		<task:scheduler id="taskScheduler" pool-size="10"/>
 	</beans>
 
 	<beans profile="web">
