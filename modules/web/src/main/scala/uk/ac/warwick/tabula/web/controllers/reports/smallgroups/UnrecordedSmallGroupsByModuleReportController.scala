@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 class UnrecordedSmallGroupsByModuleReportController extends AbstractSmallGroupsByModuleReportController {
 
 	@ModelAttribute("filteredAttendanceCommand")
-	override def filteredAttendanceCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	override def filteredAttendanceCommand(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllSmallGroupsReportCommand(department, academicYear, SmallGroupsReportFilters.unrecorded(academicYear))
 
 	override val filePrefix: String = "unrecorded-small-groups-by-module"
@@ -22,8 +22,8 @@ class UnrecordedSmallGroupsByModuleReportController extends AbstractSmallGroupsB
 	@RequestMapping(method = Array(GET))
 	override def page(
 		@ModelAttribute("filteredAttendanceCommand") cmd: Appliable[AllSmallGroupsReportCommandResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable("department") department: Department,
+		@PathVariable("academicYear") academicYear: AcademicYear
 	) = {
 		Mav("reports/smallgroups/unrecordedByModule")
 			.crumbs(
