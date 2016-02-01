@@ -1,17 +1,15 @@
-package uk.ac.warwick.tabula.scheduling.services
+package uk.ac.warwick.tabula.scheduling.scheduler
 
 import org.joda.time.DateTime
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.commands._
 import uk.ac.warwick.tabula.scheduling.commands.imports._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.elasticsearch.{NotificationIndexService, AuditEventIndexService, ProfileIndexService}
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 
 import scala.concurrent.Await
@@ -25,7 +23,6 @@ import scala.concurrent.duration.Duration
 @Service
 class ScheduledJobs {
 
-	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 	var features = Wire[Features]
 
 	var exceptionResolver = Wire[ExceptionResolver]
@@ -41,8 +38,6 @@ class ScheduledJobs {
 	var triggerService = Wire[TriggerService]
 
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
-
-	def syncGuard[A](fn: => A) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData(): Unit =
