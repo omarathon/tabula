@@ -130,8 +130,8 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 
 	lazy val optionsColumns: Seq[ExamGridColumn] = Seq(
 		new ChooseOvercatColumnOption().getColumns(overcattedEntities, overcatChoice.maybeText.getOrElse("")),
-		new OvercattedYearMarkColumnOption().getColumns(overcattedEntities),
-		new CurrentYearMarkColumnOption().getColumns(allModulesEntities)
+		new OvercattedYearMarkColumnOption().getColumns(scyd.yearOfStudy, overcattedEntities),
+		new CurrentYearMarkColumnOption().getColumns(scyd.yearOfStudy, allModulesEntities)
 	).flatten
 
 	lazy val optionsColumnsCategories: Map[String, Seq[ExamGridColumn with HasExamGridColumnCategory]] =

@@ -7,8 +7,15 @@ import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
+trait YearColumnOption extends columns.ExamGridColumnOption {
+
+	final override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
+	def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
+
+}
+
 @Component
-class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
@@ -16,11 +23,11 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	case class Column(entities: Seq[GenerateExamGridEntity], yearOfStudy: Int) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
 
-		override val title: String = "Mean Module Mark"
+		override val title: String = "Weighted Mean Module Mark"
 
-		override val category: String = "Year Marks"
+		override val category: String = s"Year $yearOfStudy Marks"
 
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
@@ -54,6 +61,6 @@ class CurrentYearMarkColumnOption extends columns.ExamGridColumnOption with Auto
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =	Seq(Column(entities))
+	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =	Seq(Column(entities, yearOfStudy))
 
 }

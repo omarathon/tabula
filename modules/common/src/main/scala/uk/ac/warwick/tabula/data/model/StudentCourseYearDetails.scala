@@ -219,6 +219,8 @@ trait BasicStudentCourseYearProperties {
 	@transient
 	var normalCATLoad: Int = 120
 
+	var agreedMark: java.math.BigDecimal = null
+
 }
 
 trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {

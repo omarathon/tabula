@@ -3,13 +3,12 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class OvercattedYearMarkColumnOption extends YearColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "overcatted"
 
@@ -17,12 +16,12 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity])
+	case class Column(entities: Seq[GenerateExamGridEntity], yearOfStudy: Int)
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory with Logging {
 
 		override val title: String = "Over Catted Mark"
 
-		override val category: String = "Year Marks"
+		override val category: String = s"Year $yearOfStudy Marks"
 
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
@@ -67,6 +66,6 @@ class OvercattedYearMarkColumnOption extends columns.ExamGridColumnOption with A
 
 	}
 
-	def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities, yearOfStudy))
 
 }

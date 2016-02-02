@@ -82,4 +82,5 @@ trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties {
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
+	this.agreedMark = Option(rs.getBigDecimal("sce_agreed_mark")).map(_.setScale(1, java.math.RoundingMode.HALF_UP)).orNull
 }
