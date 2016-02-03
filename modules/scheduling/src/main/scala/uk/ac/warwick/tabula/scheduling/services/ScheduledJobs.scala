@@ -159,4 +159,10 @@ class ScheduledJobs {
 			exceptionResolver.reportExceptions { ExportFeedbackToSitsCommand().apply() }
 		}
 
+	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent
+	def exportYearMarksToSits(): Unit =
+		if (features.schedulingExportFeedbackToSits) maintenanceGuard {
+			exceptionResolver.reportExceptions { ExportYearMarksToSitsCommand().apply() }
+		}
+
 }

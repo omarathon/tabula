@@ -4,7 +4,7 @@ import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion._
 import org.hibernate.transform.Transformers
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -25,6 +25,9 @@ trait StudentCourseYearDetailsDao {
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 
 	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails]
+	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
+	def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
+	def listForYearMarkExport: Seq[StudentCourseYearDetails]
 }
 
 @Repository
@@ -113,17 +116,55 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
 			.add(is("scd.route", route))
-			.add(Restrictions.or(
-				Restrictions.isNull("scd.endDate"),
-				Restrictions.ge("scd.endDate", LocalDate.now)
-			))
+			.add(is("enrolledOrCompleted", true))
 
 		if (eagerLoad) {
 			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-				.setFetchMode("studentCourseDetails.studentMember", FetchMode.JOIN)
+				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
 		}
 
 		c.seq
+	}
+
+	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
+		// Get all the SCYDs for the given SCJ codes
+		val scyds = safeInSeq(() => {
+			session.newCriteria[StudentCourseYearDetails]
+				.createAlias("studentCourseDetails", "scd")
+				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+		}, "scd.scjCode", items.map(_._1))
+		// Group by SCJ code-acadmiec year pairs
+		scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
+			// Only use the pairs that were passed in
+			.filterKeys(items.contains)
+			// Sort take the last SCYD; SCYDs are sorted so the most relevant is last
+			.mapValues(_.sorted.lastOption)
+			.filter(_._2.isDefined).mapValues(_.get)
+	}
+
+	def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
+		// Get all the SCYDs for the given Uni IDs
+		val scyds = safeInSeq(() => {
+			session.newCriteria[StudentCourseYearDetails]
+				.createAlias("studentCourseDetails", "scd")
+				.createAlias("scd.student", "student")
+				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+		}, "student.universityId", items.map(_._1))
+		// Group by Uni ID-acadmiec year pairs
+		scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
+			// Only use the pairs that were passed in
+			.filterKeys(items.contains)
+			// Sort take the last SCYD; SCYDs are sorted so the most relevant is last
+			.mapValues(_.sorted.lastOption)
+			.filter(_._2.isDefined).mapValues(_.get)
+	}
+
+	def listForYearMarkExport: Seq[StudentCourseYearDetails] = {
+		session.newCriteria[StudentCourseYearDetails]
+			.add(isNull("agreedMarkUploadedDate"))
+			.add(isNotNull("agreedMark"))
+			.seq
 	}
 }
 

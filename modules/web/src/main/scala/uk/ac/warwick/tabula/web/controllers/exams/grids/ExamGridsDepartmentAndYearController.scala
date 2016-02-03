@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.exams.grids
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}"))
@@ -26,9 +27,10 @@ class ExamGridsDepartmentAndYearController extends ExamsController
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
-		Mav("exams/grids/departmentAndYear")
-			.crumbs(Breadcrumbs.Grids.Home)
+	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @RequestParam(value = "updatedMarks", required = false) updatedMarks: JInteger) = {
+		Mav("exams/grids/departmentAndYear",
+			"updatedMarks" -> updatedMarks
+		).crumbs(Breadcrumbs.Grids.Home)
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.departmentAcademicYear(department, year)): _*)
 	}
 

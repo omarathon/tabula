@@ -1,10 +1,10 @@
-package uk.ac.warwick.tabula.commands.coursework.exams
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.exams._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.commands.exams._
 import uk.ac.warwick.tabula.services._
 
 class EditExamCommandTest extends TestBase with Mockito {

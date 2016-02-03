@@ -182,6 +182,11 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def overcattingMarkOverrides_= (markOverrides: Map[Module, BigDecimal]) = overcatting +=
 		(StudentCourseYearDetails.Overcatting.MarkOverrides -> markOverrides.map{case(module, mark) => module.code -> mark.toString})
 
+	final var agreedMarkUploadedDate: DateTime = _
+
+	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
+	final var agreedMarkUploadedBy: User = null
+
 	def toGenerateExamGridEntity(identifier: Option[String] = None) = GenerateExamGridEntity(
 		identifier.getOrElse(id),
 		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
@@ -200,6 +205,11 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 trait BasicStudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
+
+	/**
+		* Sequence in SITS is stored as a 2-digit zer-padded number
+		*/
+	def sceSequenceNumberSitsFormat = f"${sceSequenceNumber.toInt}%02d"
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
