@@ -33,7 +33,7 @@ class ImportCourseCommand(info: CourseInfo)
 
 		logger.debug("Importing course " + code + " into " + courseExisting)
 
-		val isTransient = !courseExisting.isDefined
+		val isTransient = courseExisting.isEmpty
 
 		val course = courseExisting match {
 			case Some(crs: Course) => crs
