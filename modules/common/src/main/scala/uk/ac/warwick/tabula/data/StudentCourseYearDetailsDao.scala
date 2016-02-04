@@ -133,7 +133,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				.createAlias("studentCourseDetails", "scd")
 				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 		}, "scd.scjCode", items.map(_._1))
-		// Group by SCJ code-acadmiec year pairs
+		// Group by SCJ code-academic year pairs
 		scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
 			// Only use the pairs that were passed in
 			.filterKeys(items.contains)
@@ -151,7 +151,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
 		}, "student.universityId", items.map(_._1))
-		// Group by Uni ID-acadmiec year pairs
+		// Group by Uni ID-academic year pairs
 		scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
 			// Only use the pairs that were passed in
 			.filterKeys(items.contains)

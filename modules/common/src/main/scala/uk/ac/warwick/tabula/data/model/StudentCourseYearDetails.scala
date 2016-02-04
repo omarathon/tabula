@@ -207,7 +207,7 @@ trait BasicStudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
 
 	/**
-		* Sequence in SITS is stored as a 2-digit zer-padded number
+		* Sequence in SITS is stored as a 2-digit zero-padded number
 		*/
 	def sceSequenceNumberSitsFormat = f"${sceSequenceNumber.toInt}%02d"
 
