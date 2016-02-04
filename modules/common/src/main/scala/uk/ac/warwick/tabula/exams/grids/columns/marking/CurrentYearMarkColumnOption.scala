@@ -61,6 +61,7 @@ class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModule
 
 	}
 
-	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =	Seq(Column(entities, yearOfStudy))
+	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+		Seq(Column(entities, yearOfStudy))
 
 }

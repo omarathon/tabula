@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
@@ -38,10 +39,11 @@ class PreviousYearMarksColumnOption extends YearColumnOption with AutowiringModu
 		}
 
 		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
-			val allSCYDs: Seq[StudentCourseYearDetails] = entity.studentCourseYearDetails.map(scyd =>
-				scyd.studentCourseDetails.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails)
-			).getOrElse(Seq())
-			val scydsForThisYear = allSCYDs.filter(_.yearOfStudy == yearOfStudy)
+			val scydsFromThisAndOlderCourses: Seq[StudentCourseYearDetails] = entity.studentCourseYearDetails.map(scyd => {
+				val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
+				scds.flatMap(_.freshStudentCourseYearDetails)
+			}).getOrElse(Seq())
+			val scydsForThisYear = scydsFromThisAndOlderCourses.filter(scyd => scyd.yearOfStudy.toInt == yearOfStudy)
 			val latestSCYDForThisYear = scydsForThisYear.lastOption // SCDs and SCYDs are sorted collections
 			latestSCYDForThisYear.flatMap(scyd => Option(scyd.agreedMark).map(mark => BigDecimal(mark)))
 		}

@@ -361,6 +361,7 @@
 								<include>js/jquery-biglist.js</include>
 								<include>js/id7/jquery-expandingTable.js</include>
 								<include>js/jquery.form.js</include>
+								<include>js/id7/jquery-tableform.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
