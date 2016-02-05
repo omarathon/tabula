@@ -14,17 +14,17 @@ object ExamGridColumnOption {
 		val Name = 1
 		val UniversityId = 2
 		val StartYear = 3
-		val CoreModules = 4
-		val CoreRequiredModules = 5
-		val CoreOptionalModules = 6
-		val OptionalModules = 7
-		val TotalCATs = 8
-		val PreviousYears = 9
-		val CurrentYear = 10
-		val OvercattedYearMark = 11
-		val MitigatingCircumstances = 12
-		val RecommendedActions = 13
-		val Comments = 20
+		val CoreModules = 10
+		val CoreRequiredModules = 11
+		val CoreOptionalModules = 12
+		val OptionalModules = 13
+		val ModuleReports = 14
+		val TotalCATs = 20
+		val PreviousYears = 21
+		val CurrentYear = 22
+		val OvercattedYearMark = 23
+		val MitigatingCircumstances = 30
+		val Comments = 40
 	}
 }
 

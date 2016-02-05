@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{FilterStudentsOrRelationships, Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
 import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, Department, Module}
 import uk.ac.warwick.tabula.exams.grids.columns.marking.YearColumnOption
-import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModulesColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleReportsColumnOption, CoreRequiredModulesColumnOption, ModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -146,7 +146,7 @@ class GenerateExamGridController extends ExamsController
 				selectCourseCommand.route,
 				selectCourseCommand.yearOfStudy
 			)
-			if (columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) && coreRequiredModules.isEmpty) {
+			if ((columnIDs._1.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs._1.contains(new ModuleReportsColumnOption().identifier)) && coreRequiredModules.isEmpty) {
 				commonCrumbs(
 					Mav("exams/grids/generate/coreRequiredModules",
 						"jobId" -> jobId,
@@ -315,7 +315,7 @@ class GenerateExamGridController extends ExamsController
 		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val columns = predefinedColumns ++ customColumns
 
-		val weightings = (1 to selectCourseCommand.yearOfStudy).flatMap(year =>
+		val weightings = (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
 			courseDao.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
 		).sorted
 

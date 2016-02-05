@@ -78,8 +78,18 @@
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="optional"
-							  <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("optional")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("optional")>checked</#if>
 				/> Optional Modules</label>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="modulereports"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("modulereports")>checked</#if>
+				/> Module Reports</label>
 			</div>
 		</div>
 	</div>
