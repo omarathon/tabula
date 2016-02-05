@@ -98,7 +98,7 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 trait ModulesColumnOption extends columns.ExamGridColumnOption {
 
 	final override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-	def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
+	def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
 
 }
 
@@ -117,9 +117,9 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
 		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !departmentCoreRequiredModules.contains(mr.module))
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
@@ -140,9 +140,9 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
 		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.CoreRequired || departmentCoreRequiredModules.contains(mr.module))
+			.filter(mr => coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
@@ -163,9 +163,9 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
 		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !departmentCoreRequiredModules.contains(mr.module))
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
@@ -186,9 +186,9 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
+	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
 		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !departmentCoreRequiredModules.contains(mr.module))
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
