@@ -10,7 +10,8 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Department, Module}
+import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
+import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, Department, Module}
 import uk.ac.warwick.tabula.exams.grids.columns.marking.YearColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
@@ -38,7 +39,8 @@ object GenerateExamGridMappingParameters {
 class GenerateExamGridController extends ExamsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent {
+	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
+	with AutowiringCourseDaoComponent {
 
 	type SelectCourseCommand = Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
@@ -251,7 +253,7 @@ class GenerateExamGridController extends ExamsController
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
-		val (entities, columns) = gridData(selectCourseCommand, gridOptionsCommand)
+		val (entities, columns, weightings) = gridData(selectCourseCommand, gridOptionsCommand)
 		val columnValues = columns.map(_.render)
 		val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 
@@ -261,7 +263,8 @@ class GenerateExamGridController extends ExamsController
 				"columnValues" -> columnValues,
 				"categories" -> categories,
 				"scyds" -> entities,
-				"generatedDate" -> DateTime.now
+				"generatedDate" -> DateTime.now,
+				"weightings" -> weightings
 			),
 			department,
 			academicYear
@@ -280,7 +283,7 @@ class GenerateExamGridController extends ExamsController
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
 		}
-		val (entities, columns) = gridData(selectCourseCommand, gridOptionsCommand)
+		val (entities, columns, weightings) = gridData(selectCourseCommand, gridOptionsCommand)
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
@@ -291,7 +294,7 @@ class GenerateExamGridController extends ExamsController
 	private def gridData(
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand
-	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn]) = {
+	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn], Seq[CourseYearWeighting]) = {
 		val entities = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
 
 		val gridOptions = gridOptionsCommand.apply()
@@ -312,7 +315,11 @@ class GenerateExamGridController extends ExamsController
 		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val columns = predefinedColumns ++ customColumns
 
-		(entities, columns)
+		val weightings = (1 to selectCourseCommand.yearOfStudy).flatMap(year =>
+			courseDao.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
+		).sorted
+
+		(entities, columns, weightings)
 	}
 
 }

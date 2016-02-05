@@ -57,7 +57,11 @@
 				</tr>
 				<tr>
 					<th>Year weightings:</th>
-					<td>NOT YET IMPLEMENTED</td>
+					<td>
+						<#list weightings as weighting>
+							Year ${weighting.yearOfStudy} = ${weighting.weightingAsPercentage}<#if weighting_has_next>, </#if>
+						</#list>
+					</td>
 				</tr>
 				<tr>
 					<th>Student Count:</th>

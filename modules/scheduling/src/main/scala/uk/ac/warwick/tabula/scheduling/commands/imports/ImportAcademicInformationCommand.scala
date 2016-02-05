@@ -48,6 +48,7 @@ object ImportAcademicInformationCommand {
 		routes: ImportResult,
 		routeTeachingDepartments: ImportResult,
 		courses: ImportResult,
+		courseYearWeightings: ImportResult,
 		sitsStatuses: ImportResult,
 		modesOfAttendance: ImportResult,
 		awards: ImportResult,
@@ -140,6 +141,7 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 			routes = benchmarkTask("Import routes") { importRoutes() },
 			routeTeachingDepartments = benchmarkTask("Import route teaching departments") { importRouteTeachingDepartments() },
 			courses = benchmarkTask("Import courses") { importCourses() },
+			courseYearWeightings = benchmarkTask("Import course year weightings") { importCourseYearWeightings() },
 			sitsStatuses = benchmarkTask("Import SITS status codes") { importSitsStatuses() },
 			modesOfAttendance = benchmarkTask("Import modes of attendance") { importModesOfAttendance() },
 			awards = benchmarkTask("Import awards") { importAwards() },
@@ -157,16 +159,14 @@ trait ImportDepartments {
 
 		val results = for (dept <- moduleImporter.getDepartments()) yield {
 			moduleAndDepartmentService.getDepartmentByCode(dept.code) match {
-				case None => {
+				case None =>
 					moduleAndDepartmentService.save(newDepartmentFrom(dept, moduleAndDepartmentService))
 
 					ImportResult(added = 1)
-				}
-				case Some(dept) => {
-					debug("Skipping %s as it is already in the database", dept.code)
+				case Some(department) =>
+					debug("Skipping %s as it is already in the database", department.code)
 
 					ImportResult()
-				}
 			}
 		}
 
@@ -195,7 +195,7 @@ trait ImportModules {
 	}
 
 	def importModules(dept: Department): ImportResult = {
-		val (importResult: ImportResult, seenModules: Seq[String]) = importModules(moduleImporter.getModules(dept.code), dept)
+		val (importResult: ImportResult, _) = importModules(moduleImporter.getModules(dept.code), dept)
 		// don't stamp missing modules in this case since we we've only looked at one department and they could be in any
 		importResult
 	}
@@ -206,13 +206,12 @@ trait ImportModules {
 
 		val results = for (mod <- modules) yield {
 			moduleAndDepartmentService.getModuleByCode(mod.code) match {
-				case None => {
+				case None =>
 					debug("Mod code %s not found in database, so inserting", mod.code)
 					moduleAndDepartmentService.saveOrUpdate(newModuleFrom(mod, dept))
 
 					ImportResult(added = 1)
-				}
-				case Some(module) => {
+				case Some(module) =>
 
 					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
 
@@ -236,7 +235,6 @@ trait ImportModules {
 
 						ImportResult()
 					}
-				}
 			}
 		}
 
@@ -276,16 +274,15 @@ trait ImportModuleTeachingDepartments {
 		val additions =
 			moduleTeachingDepartments.map { info =>
 				moduleAndDepartmentService.getModuleTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
-					case None => {
+					case None =>
 						debug(s"Teaching info for ${info.departmentCode} on ${info.code} not found in database, so inserting")
 						moduleAndDepartmentService.saveOrUpdate(newModuleTeachingDepartmentFrom(info, moduleAndDepartmentService))
 
 						ImportResult(added = 1)
-					}
-					case Some(teachingInfo) => {
+					case Some(teachingInfo) =>
 						// Update percentage if it changes
 						if (teachingInfo.percentage != info.percentage) {
-							logger.info(s"Updating percentage of ${teachingInfo} to ${info.percentage}")
+							logger.info(s"Updating percentage of $teachingInfo to ${info.percentage}")
 							teachingInfo.percentage = info.percentage
 							moduleAndDepartmentService.saveOrUpdate(teachingInfo)
 
@@ -293,7 +290,6 @@ trait ImportModuleTeachingDepartments {
 						} else {
 							ImportResult()
 						}
-					}
 				}
 			}
 
@@ -316,13 +312,12 @@ trait ImportRoutes {
 	def importRoutes(routes: Seq[RouteInfo], dept: Department): ImportResult = {
 		val results = for (rot <- routes) yield {
 			courseAndRouteService.getRouteByCode(rot.code) match {
-				case None => {
+				case None =>
 					debug("Route code %s not found in database, so inserting", rot.code)
 					courseAndRouteService.save(newRouteFrom(rot, dept))
 
 					ImportResult(added = 1)
-				}
-				case Some(route) => {
+				case Some(route) =>
 					// HFC-354 Update route name if it changes.
 					if (rot.name != route.name) {
 						logger.info("Updating name of %s to %s".format(rot.code, rot.name))
@@ -333,7 +328,6 @@ trait ImportRoutes {
 					} else {
 						ImportResult()
 					}
-				}
 			}
 		}
 
@@ -374,16 +368,15 @@ trait ImportRouteTeachingDepartments {
 		val additions =
 			routeTeachingDepartments.map { info =>
 				courseAndRouteService.getRouteTeachingInformation(info.code.toLowerCase(), info.departmentCode.toLowerCase()) match {
-					case None => {
+					case None =>
 						debug(s"Teaching info for ${info.departmentCode} on ${info.code} not found in database, so inserting")
 						courseAndRouteService.saveOrUpdate(newRouteTeachingDepartmentFrom(info, courseAndRouteService, moduleAndDepartmentService))
 
 						ImportResult(added = 1)
-					}
-					case Some(teachingInfo) => {
+					case Some(teachingInfo) =>
 						// Update percentage if it changes
 						if (teachingInfo.percentage != info.percentage) {
-							logger.info(s"Updating percentage of ${teachingInfo} to ${info.percentage}")
+							logger.info(s"Updating percentage of $teachingInfo to ${info.percentage}")
 							teachingInfo.percentage = info.percentage
 							courseAndRouteService.saveOrUpdate(teachingInfo)
 
@@ -391,7 +384,6 @@ trait ImportRouteTeachingDepartments {
 						} else {
 							ImportResult()
 						}
-					}
 				}
 			}
 
@@ -405,6 +397,11 @@ trait ImportCourses {
 	def importCourses(): ImportResult = {
 		logger.info("Importing courses")
 		courseImporter.importCourses()
+	}
+
+	def importCourseYearWeightings(): ImportResult = {
+		logger.info("Importing course year weightings")
+		courseImporter.importCourseYearWeightings()
 	}
 }
 
@@ -515,7 +512,7 @@ class ImportDepartmentsModulesCommandInternal() extends CommandInternal[Unit]
 	def applyInternal() = transactional() {
 		benchmarkTask("Import modules") {
 			val codes = deptCode.split(",")
-			val departments = codes.flatMap(moduleAndDepartmentService.getDepartmentByCode(_))
+			val departments = codes.flatMap(moduleAndDepartmentService.getDepartmentByCode)
 			departments.foreach(dept => importModules(dept))
 		}
 	}

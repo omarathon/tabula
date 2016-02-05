@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{Department, Course}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, Department, Course}
 import uk.ac.warwick.spring.Wire
 
 trait CourseDaoComponent {
@@ -13,15 +14,21 @@ trait AutowiringCourseDaoComponent extends CourseDaoComponent {
 
 trait CourseDao {
 	def saveOrUpdate(course: Course)
+	def saveOrUpdate(courseYearWeighting: CourseYearWeighting)
+
 	def getByCode(code: String): Option[Course]
 	def getAllCourseCodes: Seq[String]
 	def findByDepartment(department: Department): Seq[Course]
+
+	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: Int): Option[CourseYearWeighting]
 }
 
 @Repository
 class CourseDaoImpl extends CourseDao with Daoisms {
 
 	def saveOrUpdate(course: Course) = session.saveOrUpdate(course)
+
+	def saveOrUpdate(courseYearWeighting: CourseYearWeighting) = session.saveOrUpdate(courseYearWeighting)
 
 	def getByCode(code: String) =
 		session.newQuery[Course]("from Course course where code = :code").setString("code", code).uniqueResult
@@ -36,5 +43,13 @@ class CourseDaoImpl extends CourseDao with Daoisms {
 	  	where scd.course = course and scd.department = :department
 		"""
 		).setParameter("department", department).seq
+
+	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: Int): Option[CourseYearWeighting] =
+		session.newCriteria[CourseYearWeighting]
+			.createAlias("course", "course")
+			.add(is("course.code", courseCode))
+			.add(is("academicYear", academicYear))
+			.add(is("yearOfStudy", yearOfStudy))
+			.uniqueResult
 
 }
