@@ -64,7 +64,11 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> {
 				val entityMarks = entity.moduleRegistrations.flatMap(mr => Option(mr.agreedMark)).map(mark => BigDecimal(mark))
-				(entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString
+				if (entityMarks.nonEmpty) {
+					(entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString
+				} else {
+					""
+				}
 			}).toMap
 
 		override def renderExcelCell(
@@ -75,7 +79,11 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		): Unit = {
 			val cell = row.createCell(index)
 			val entityMarks = entity.moduleRegistrations.flatMap(mr => Option(mr.agreedMark)).map(mark => BigDecimal(mark))
-			cell.setCellValue((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).doubleValue)
+			if (entityMarks.nonEmpty) {
+				cell.setCellValue((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)
+			} else {
+				cell.setCellValue("")
+			}
 		}
 
 	}
