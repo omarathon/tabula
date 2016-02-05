@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.exams.grids.columns.administration
+package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
@@ -8,18 +8,17 @@ import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnO
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class RecommendedActionsColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class PotentialMarkingOptionsColumnOption extends columns.ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
-	override val identifier: ExamGridColumnOption.Identifier = "recommendedactions"
+	override val identifier: ExamGridColumnOption.Identifier = "markingoptions"
 
-	override val sortOrder: Int = ExamGridColumnOption.SortOrders.RecommendedActions
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.PotentialMarkingOptions
 
-	case class Column(entities: Seq[GenerateExamGridEntity])
-		extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	override val mandatory = true
 
-		override val title: String = "Recommended Actions"
+	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
 
-		override val category: String = "Administration"
+		override val title: String = "Potential marking options"
 
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> {
@@ -28,7 +27,6 @@ class RecommendedActionsColumnOption extends columns.ExamGridColumnOption with A
 				if (hasOvercatted && hasMoreThanOneSubset) {
 					"<button class=\"btn btn-default edit-overcatting\" type=\"button\" data-student=\"%s\">Edit</button>".format(entity.id)
 				} else {
-					// TODO: Populate from SITS
 					""
 				}
 			}).toMap
@@ -40,7 +38,6 @@ class RecommendedActionsColumnOption extends columns.ExamGridColumnOption with A
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			row.createCell(index)
-			// TODO: Populate from SITS
 		}
 
 	}

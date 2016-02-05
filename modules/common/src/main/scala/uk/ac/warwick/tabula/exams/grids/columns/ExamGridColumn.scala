@@ -10,6 +10,7 @@ object ExamGridColumnOption {
 	implicit val defaultOrdering = Ordering.by { columnOption: ExamGridColumnOption => columnOption.sortOrder }
 
 	object SortOrders {
+		val PotentialMarkingOptions = 0
 		val Name = 1
 		val UniversityId = 2
 		val StartYear = 3
