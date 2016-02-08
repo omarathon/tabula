@@ -304,7 +304,7 @@
 	</bean>
 
 	<filter-stack id="commonFilters" abstract="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
-		<mapping name="allml">
+		<mapping name="all">
 			<filter ref="characterEncodingFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>

@@ -7,15 +7,6 @@ RewriteRule .? - [E=REQ_URI:%{ENV:SCRIPT_URI}?%{QUERY_STRING}]
 RequestHeader set X-Requested-URI "%{REQ_URI}e" env=!no-requested-uri
 ####
 
-RewriteRule ^/favicon\.ico - [G,L]
-RewriteRule \.php$ [G,L]
-
-# static content suffixes
-RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA]
-
-# TAB-46 Rewrite legacy /courses to /coursework
-RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301]
-
 # Add trailing slash because otherwise ensadness occurs
 RewriteRule ^/api$ /api/ [QSA,L,R=301]
 RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
@@ -24,9 +15,6 @@ RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
 RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
 RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
 RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
-
-# Remove legacy /web context
-RewriteRule ^/web(.*)$ $1 [QSA,L,R=301]
 
 # Rewrite everything for coursework into the courses module
 RewriteRule ^/coursework/(.*)$ http://127.0.0.1:${proxy:port}/courses/$1 [QSA,P,L]
