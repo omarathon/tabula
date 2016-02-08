@@ -23,6 +23,7 @@ object ExamGridColumnOption {
 		val PreviousYears = 21
 		val CurrentYear = 22
 		val OvercattedYearMark = 23
+		val BoardAgreedMark = 24
 		val MitigatingCircumstances = 30
 		val Comments = 40
 	}
