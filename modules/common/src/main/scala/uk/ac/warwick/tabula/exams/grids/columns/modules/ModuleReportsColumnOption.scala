@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridExporter, GenerateExamGridEntity}
-import uk.ac.warwick.tabula.data.model.{ModuleSelectionStatus, Module}
-import uk.ac.warwick.tabula.exams.grids.columns.{HasExamGridColumnSecondaryValue, HasExamGridColumnCategory, ExamGridColumn, ExamGridColumnOption}
+import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory, HasExamGridColumnSecondaryValue}
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -15,7 +15,7 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.ModuleReports
 
-	case class PassedCoreRequiredColumn(entities: Seq[GenerateExamGridEntity], departmentCoreRequiredModules: Seq[Module])
+	case class PassedCoreRequiredColumn(entities: Seq[GenerateExamGridEntity], coreRequiredModules: Seq[Module])
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 		override val category: String = "Module reports"
@@ -38,9 +38,9 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		}
 
 		private def getValue(entity: GenerateExamGridEntity): String = {
-			val coreRequiredModules = entity.moduleRegistrations.filter(mr => mr.selectionStatus == ModuleSelectionStatus.CoreRequired || departmentCoreRequiredModules.contains(mr.module))
+			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
 			if (coreRequiredModules.nonEmpty) {
-				if (coreRequiredModules.exists(_.agreedGrade == "F")) {
+				if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
 					"N"
 				} else {
 					"Y"
@@ -88,8 +88,8 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(departmentCoreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(
-		PassedCoreRequiredColumn(entities, departmentCoreRequiredModules),
+	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(
+		PassedCoreRequiredColumn(entities, coreRequiredModules),
 		MeanModuleMarkColumn(entities)
 	)
 }

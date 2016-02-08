@@ -21,6 +21,7 @@ trait ModuleDao {
 	def findModulesNamedLike(query: String): Seq[Module]
 	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module]
 	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
+	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module]
 }
 
 @Repository
@@ -150,6 +151,33 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 				.setParameter("academicYear", academicYear)
 				.seq
 		}
+	}
+
+	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] = {
+		session.newQuery[Module](
+			"""
+					select distinct module from
+						Module as module,
+						ModuleRegistration as registration,
+						StudentCourseDetails as scd,
+						Route as route,
+						StudentMember as student,
+						StudentCourseYearDetails as scyd
+					where
+						module.id = registration.module.id
+						and scd = registration.studentCourseDetails
+						and scd.route.id = route.id
+						and student.mostSignificantCourse = scd
+						and scyd.studentCourseDetails = scd
+						and route = :route
+						and registration.academicYear = :academicYear
+						and scyd.academicYear = :academicYear
+						and scyd.yearOfStudy = :yearOfStudy
+			""")
+			.setParameter("route", route)
+			.setParameter("yearOfStudy", yearOfStudy)
+			.setParameter("academicYear", academicYear)
+			.seq
 	}
 
 }

@@ -90,12 +90,11 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 
 	override val user: CurrentUser = null // Never used
 
-	private lazy val departmentCoreRequiredModules = department.getCoreRequiredModules(
-		academicYear,
-		scyd.studentCourseDetails.course,
+	private lazy val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
 		scyd.studentCourseDetails.route,
+		academicYear,
 		scyd.yearOfStudy
-	).getOrElse(Seq())
+	).map(_.module)
 
 	private lazy val overcattedMarks: Seq[(BigDecimal, Seq[ModuleRegistration])] =
 		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(), overwrittenMarks)
@@ -141,19 +140,19 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 
 	lazy val columnsBySCYD: Map[StudentCourseYearDetails, Seq[ExamGridColumn]] = Map(
 		scyd -> Seq(
-			new CoreModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new CoreRequiredModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new CoreOptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities),
-			new OptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, overcattedEntities)
+			new CoreModulesColumnOption().getColumns(coreRequiredModules, overcattedEntities),
+			new CoreRequiredModulesColumnOption().getColumns(coreRequiredModules, overcattedEntities),
+			new CoreOptionalModulesColumnOption().getColumns(coreRequiredModules, overcattedEntities),
+			new OptionalModulesColumnOption().getColumns(coreRequiredModules, overcattedEntities)
 		).flatten
 	) ++ previousYearsSCYDs.map(thisSCYD => {
 		// We need to show the same row in previous years for each of the overcatted entities, but with the identifier of each overcatted entity
 		val entityList = overcattedEntities.map(overcattedEntity => thisSCYD.toGenerateExamGridEntity(Some(overcattedEntity.id)))
 		thisSCYD -> Seq(
-			new CoreModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new CoreRequiredModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new CoreOptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList),
-			new OptionalModulesColumnOption().getColumns(departmentCoreRequiredModules, entityList)
+			new CoreModulesColumnOption().getColumns(coreRequiredModules, entityList),
+			new CoreRequiredModulesColumnOption().getColumns(coreRequiredModules, entityList),
+			new CoreOptionalModulesColumnOption().getColumns(coreRequiredModules, entityList),
+			new OptionalModulesColumnOption().getColumns(coreRequiredModules, entityList)
 		).flatten
 	}).toMap
 

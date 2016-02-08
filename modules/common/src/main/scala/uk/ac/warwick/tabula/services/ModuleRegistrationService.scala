@@ -12,6 +12,8 @@ import scala.math.BigDecimal.RoundingMode
 trait ModuleRegistrationService {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit
+	def delete(coreRequiredModule: CoreRequiredModule): Unit
 
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
@@ -34,6 +36,8 @@ trait ModuleRegistrationService {
 
 	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])]
 
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
+
 }
 
 abstract class AbstractModuleRegistrationService extends ModuleRegistrationService {
@@ -41,6 +45,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	self: ModuleRegistrationDaoComponent =>
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
+
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule) = moduleRegistrationDao.saveOrUpdate(coreRequiredModule)
+
+	def delete(coreRequiredModule: CoreRequiredModule): Unit = moduleRegistrationDao.delete(coreRequiredModule)
 
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
@@ -74,21 +82,22 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		if (entity.moduleRegistrations.exists(_.agreedMark == null)) {
 			Seq()
 		} else {
-			val coreAndCoreReqModules = entity.moduleRegistrations.filter(mr =>
-				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.CoreRequired
-			)
+			val coreModules = entity.moduleRegistrations.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core)
 			val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
 				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
-					// Contains all the core and core required modules
-					coreAndCoreReqModules.forall(modRegs.contains) &&
+					// Contains all the core modules
+					coreModules.forall(modRegs.contains) &&
 					// All the registrations have agreed marks
 					modRegs.forall(mr => mr.agreedMark != null || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
 			)
 			validSubsets.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))).sortBy(_._1).reverse
 		}
 	}
+
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] =
+		moduleRegistrationDao.findCoreRequiredModules(route, academicYear, yearOfStudy)
 
 }
 
