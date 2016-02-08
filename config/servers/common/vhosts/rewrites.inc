@@ -7,18 +7,6 @@ RewriteRule .? - [E=REQ_URI:%{ENV:SCRIPT_URI}?%{QUERY_STRING}]
 RequestHeader set X-Requested-URI "%{REQ_URI}e" env=!no-requested-uri
 ####
 
-# Add trailing slash because otherwise ensadness occurs
-RewriteRule ^/api$ /api/ [QSA,L,R=301]
-RewriteRule ^/exams$ /exams/ [QSA,L,R=301]
-RewriteRule ^/coursework$ /coursework/ [QSA,L,R=301]
-RewriteRule ^/groups$ /groups/ [QSA,L,R=301]
-RewriteRule ^/profiles$ /profiles/ [QSA,L,R=301]
-RewriteRule ^/scheduling$ /scheduling/ [QSA,L,R=301]
-RewriteRule ^/attendance$ /attendance/ [QSA,L,R=301]
-
-# Rewrite everything for coursework into the courses module
-RewriteRule ^/coursework/(.*)$ http://127.0.0.1:${proxy:port}/courses/$1 [QSA,P,L]
-
 # Rewrite scheduling directly to the scheduler instance
 RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
 RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
