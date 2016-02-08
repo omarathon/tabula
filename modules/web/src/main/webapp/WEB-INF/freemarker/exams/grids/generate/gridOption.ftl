@@ -22,7 +22,11 @@
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>
 
-	<p>Select the items to include in your grid</p>
+	<p>
+		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Route ${selectCourseCommand.route.code?upper_case} ${selectCourseCommand.route.name},
+		Year of Study: ${selectCourseCommand.yearOfStudy}
+	</p>
 
 	<h3>Student identification</h3>
 
@@ -48,6 +52,8 @@
 			</div>
 		</div>
 	</div>
+
+	<hr />
 
 	<h3>Modules</h3>
 
@@ -92,6 +98,8 @@
 		</div>
 	</div>
 
+	<hr />
+
 	<h3>Marking</h3>
 
 	<div class="row">
@@ -132,6 +140,8 @@
 		</div>
 	</div>
 
+	<hr />
+
 	<h3>Administration</h3>
 
 	<div class="row">
@@ -150,6 +160,8 @@
 			</div>
 		</div>
 	</div>
+
+	<hr />
 
 	<h3>Additional columns</h3>
 

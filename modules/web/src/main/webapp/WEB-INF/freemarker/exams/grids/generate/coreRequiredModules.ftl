@@ -36,6 +36,12 @@
 		<p><strong>Note:</strong> The chosen modules will apply to all students on route ${selectCourseCommand.route.code?upper_case} year of study ${selectCourseCommand.yearOfStudy} for ${academicYear.toString}</p>
 	</div>
 
+	<p>
+		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Route ${selectCourseCommand.route.code?upper_case} ${selectCourseCommand.route.name},
+		Year of Study: ${selectCourseCommand.yearOfStudy}
+	</p>
+
 	<h3>Identify Core Required Modules</h3>
 
 

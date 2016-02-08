@@ -114,20 +114,30 @@
 								</td>
 							</#list>
 						</tr>
+						<tr>
+							<td colspan="${overcatView.optionsColumns?size + 1}" class="borderless"></td>
+							<#-- 1000 just so it spans the whole rest of the row -->
+							<td colspan="1000" class="borderless">
+								<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
+								<button type="button" class="btn btn-default" name="reset">Reset</button>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</form>
 		</div>
 	</@modal.body>
 	<@modal.footer>
-		<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
-		<button type="button" class="btn btn-default" name="continue">Continue</button>
-		<button type="button" class="btn btn-default" name="cancel">Cancel</button>
+		<div class="pull-left">
+			<button type="button" class="btn btn-primary" name="continue">Continue</button>
+			<button type="button" class="btn btn-default" name="cancel">Cancel</button>
+		</div>
 	</@modal.footer>
 </@modal.wrapper>
 
 <script>
 	jQuery(function($){
+		var $modalBody = $('.modal-body');
 		$('.modal-body th.first-in-category, .modal-body td.first-in-category').each(function(){
 			$(this).prev().addClass('last-in-category');
 		});
@@ -143,13 +153,20 @@
 				'margin-top': width / 4
 			});
 		});
-		$('.modal-body').wideTables();
+		$modalBody.wideTables();
 
 		var updateButtons = function(){
 			if ($('.modal-body input:checked').length > 0) {
 				$('.modal-footer button[name=continue]').prop('disabled', false);
 			} else {
 				$('.modal-footer button[name=continue]').prop('disabled', true);
+			}
+			if ($('.modal-body tr.new-marks input').filter(function(){ return $(this).val().length > 0 }).length > 0) {
+				$('.modal-body button[name=recalculate]').prop('disabled', false);
+				$('.modal-body button[name=reset]').prop('disabled', false);
+			} else {
+				$('.modal-body button[name=recalculate]').prop('disabled', true);
+				$('.modal-body button[name=reset]').prop('disabled', true);
 			}
 		};
 		updateButtons();
@@ -158,8 +175,8 @@
 			updateButtons();
 		}).on('keyup', updateButtons);
 
-		$('.modal-footer').on('click', 'button[name=recalculate]', function(){
-			$('.modal-footer button').prop('disabled', true);
+		$modalBody.on('click', 'button[name=recalculate]', function(){
+			$('.modal button').prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
@@ -168,8 +185,19 @@
 			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
 				$('#edit-overcatting-modal').html(data);
 			});
-		}).on('click', 'button[name=continue]', function(){
-			$('.modal-footer button').prop('disabled', true);
+		}).on('click', 'button[name=reset]', function(){
+			$('.modal button').prop('disabled', true);
+			var $form = $('.modal-body form');
+			$form.append($('<input/>').attr({
+				'type': 'hidden',
+				'name': 'recalculate'
+			})).find('tr.new-marks input').each(function(){ $(this).val(''); });
+			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
+				$('#edit-overcatting-modal').html(data);
+			});
+		});
+		$('.modal-footer').on('click', 'button[name=continue]', function(){
+			$('.modal button').prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',

@@ -18,9 +18,9 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 	case class PassedCoreRequiredColumn(entities: Seq[GenerateExamGridEntity], coreRequiredModules: Seq[Module])
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
-		override val category: String = "Module reports"
+		override val category: String = "Modules Report"
 
-		override val title: String = "Passed required core modules"
+		override val title: String = "Passed Required Core Modules?"
 
 		override val renderSecondaryValue: String = ""
 
@@ -55,9 +55,9 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 	case class MeanModuleMarkColumn(entities: Seq[GenerateExamGridEntity])
 		extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
-		override val category: String = "Module reports"
+		override val category: String = "Modules Report"
 
-		override val title: String = "Mean module mark for this year"
+		override val title: String = "Mean Module Mark For This Year"
 
 		override val renderSecondaryValue: String = ""
 

@@ -55,7 +55,7 @@ class TotalCATsColumnOption extends columns.ExamGridColumnOption {
 
 	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
 		Seq(
-			Column(entities, new math.BigDecimal(40), isUpperBound = true),
+			Column(entities, new math.BigDecimal(30), isUpperBound = true),
 			Column(entities, new math.BigDecimal(40)),
 			Column(entities, new math.BigDecimal(50)),
 			Column(entities, new math.BigDecimal(60)),

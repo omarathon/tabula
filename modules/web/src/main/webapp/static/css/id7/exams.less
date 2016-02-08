@@ -88,24 +88,21 @@
 }
 
 .exam-grid-preview {
-	.key {
-		position: absolute;
-		background: white;
-		z-index: 1;
-
-	}
-	.overcat-key {
-		float: right;
-	}
 	.key, .overcat-key {
 		.table {
 			margin-bottom: 0;
 			border: 1px solid @table-border-color;
+			float: left;
+			width: auto;
+			margin-right: 32px;
 		}
 		thead th {
 			text-align: center;
 			background: @table-bg-hover;
 		}
+	}
+	.overcat-key {
+		float: right;
 	}
 	h3 {
 		margin-top: 0;
