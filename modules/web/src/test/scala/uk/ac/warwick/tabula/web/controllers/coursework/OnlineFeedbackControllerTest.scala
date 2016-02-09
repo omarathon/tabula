@@ -33,7 +33,7 @@ class OnlineFeedbackControllerTest extends TestBase with Mockito {
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
 			mav.map("studentFeedbackGraphs") should be(Seq())
-			mav.viewName should be ("admin/assignments/feedback/online_framework")
+			mav.viewName should be ("coursework/admin/assignments/feedback/online_framework")
 		}
 	}
 
@@ -63,7 +63,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 		new Fixture {
 			val mav = controller.showForm(command, null)
 			mav.map("command") should be(command)
-			mav.viewName should be ("admin/assignments/feedback/online_feedback")
+			mav.viewName should be ("coursework/admin/assignments/feedback/online_feedback")
 		}
 	}
 
@@ -73,7 +73,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 			when(errors.hasErrors) thenReturn true
 			val mav = controller.submit(command, errors)
 			mav.map("command") should be(command)
-			mav.viewName should be ("admin/assignments/feedback/online_feedback")
+			mav.viewName should be ("coursework/admin/assignments/feedback/online_feedback")
 		}
 	}
 

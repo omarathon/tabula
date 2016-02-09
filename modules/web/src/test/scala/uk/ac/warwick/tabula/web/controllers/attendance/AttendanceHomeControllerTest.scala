@@ -127,7 +127,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = controller.home(command, null)
-		mav.viewName should be("home")
+		mav.viewName should be("attendance/home")
 
 	}}
 
@@ -142,7 +142,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = controller.home(command, null)
-		mav.viewName should be("home")
+		mav.viewName should be("attendance/home")
 
 	}}
 
@@ -157,7 +157,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = controller.home(command, null)
-		mav.viewName should be("home")
+		mav.viewName should be("attendance/home")
 
 	}}
 
@@ -172,7 +172,7 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = controller.home(command, null)
-		mav.viewName should be("home")
+		mav.viewName should be("attendance/home")
 
 	}}
 

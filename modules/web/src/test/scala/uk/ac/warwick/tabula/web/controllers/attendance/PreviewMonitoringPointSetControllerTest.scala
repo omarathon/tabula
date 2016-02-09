@@ -13,7 +13,7 @@ class PreviewMonitoringPointSetControllerTest extends TestBase with Mockito {
 
 	@Test
 	def display() {
-		controller.display(command) should be (Mav("manage/set/preview", "set" -> set))
+		controller.display(command) should be (Mav("attendance/manage/set/preview", "set" -> set))
 	}
 }
 
@@ -25,6 +25,6 @@ class PreviewMonitoringPointSetTemplateControllerTest extends TestBase with Mock
 
 	@Test
 	def display() {
-		controller.display(command) should be (Mav("manage/set/preview", "set" -> set))
+		controller.display(command) should be (Mav("attendance/manage/set/preview", "set" -> set))
 	}
 }

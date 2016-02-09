@@ -24,7 +24,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 			val controller = new GenericFeedbackController
 			val mav = controller.showForm(assignment, command, null)
 			mav.map("command") should be(command)
-			mav.viewName should be ("admin/assignments/feedback/generic_feedback")
+			mav.viewName should be ("coursework/admin/assignments/feedback/generic_feedback")
 		}
 	}
 

@@ -72,7 +72,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
 		val mav = controller.showForm(command, assignment, thisStudent)
-		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))
 		mav.toModel("proposedAdjustment") should be (Some(40))
@@ -84,7 +84,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
 		val mav = controller.showForm(command, assignment, thisStudent)
-		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(6))
 		mav.toModel("proposedAdjustment") should be (Some(44))
@@ -96,7 +96,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		assignment.openEnded = true
 
 		val mav = controller.showForm(command, assignment, thisStudent)
-		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(0))
 		mav.toModel("marksSubtracted") should be (Some(0))
 		mav.toModel("proposedAdjustment") should be (None)
@@ -108,7 +108,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
 		val mav = controller.showForm(command, assignment, thisStudent)
-		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))
 		mav.toModel("proposedAdjustment") should be (Some(40))
@@ -120,7 +120,7 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 15, 0, 0, 0)
 
 		val mav = controller.showForm(command, assignment, thisStudent)
-		mav.viewName should be ("admin/assignments/feedback/adjustments")
+		mav.viewName should be ("coursework/admin/assignments/feedback/adjustments")
 		mav.toModel("daysLate") should be (Some(2))
 		mav.toModel("marksSubtracted") should be (Some(10))
 		mav.toModel("proposedAdjustment") should be (Some(40))
