@@ -11,8 +11,13 @@
 			<url-pattern>/reports/*</url-pattern>
 			<url-pattern>/zips/*</url-pattern>
 			<url-pattern>/groups/*</url-pattern>
+			<url-pattern>/attendance/*</url-pattern>
+			<url-pattern>/profiles/*</url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
+			<excluded-url-pattern>/service/*</excluded-url-pattern>
+			<excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
+			<excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
 		</mapping>
 	</filter-stack>
 

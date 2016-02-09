@@ -22,9 +22,14 @@
         <option value="$PROJECT_DIR$/modules/functional-test/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/modules/all/pom.xml" />
+      </set>
+    </option>
   </component>
   <component name="ProjectPlainTextFileTypeManager">
-    <file url="file://$PROJECT_DIR$/modules/coursework/src/main/webapp/WEB-INF/freemarker/admin/assignments/batch_new_select_js.ftl" />
+    <file url="file://$PROJECT_DIR$/modules/web/src/main/webapp/WEB-INF/freemarker/coursework/admin/assignments/batch_new_select_js.ftl" />
   </component>
   <component name="ProjectResources">
     <resource url="http://ehcache.org/ehcache.xsd" location="$PROJECT_DIR$/modules/common/src/main/resources/ehcache.xsd" />

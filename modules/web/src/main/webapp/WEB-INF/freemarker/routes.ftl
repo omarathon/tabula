@@ -18,3 +18,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#import "admin/routes.ftl" as admin />
 <#import "groups/routes.ftl" as groups />
 <#import "exams/routes.ftl" as exams />
+<#import "attendance/routes.ftl" as attendance />
+<#import "coursework/routes.ftl" as coursework />
+<#import "profiles/routes.ftl" as profiles />
