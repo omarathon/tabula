@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<@fmt.deptheader "View monitoring points" "for" command.department routes "viewDepartmentPoints" />
+<@fmt.deptheader "View monitoring points" "for" command.department routes.attendance "viewDepartmentPoints" />
 
 <#if updatedMonitoringPoint??>
 	<div class="alert alert-success">
@@ -14,6 +14,6 @@
 
 <#assign filterCommand = command />
 <#assign filterCommandName = "command" />
-<#assign filterResultsPath = "/WEB-INF/freemarker/home/view_points_results.ftl" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/attendance/home/view_points_results.ftl" />
 <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 </#escape>

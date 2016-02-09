@@ -1,6 +1,6 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<@fmt.deptheader "Manage monitoring points" "for" command.dept routes "manageDepartment" "with-settings" />
+<@fmt.deptheader "Manage monitoring points" "for" command.dept routes.attendance "manageDepartment" "with-settings" />
 
 <#if !dept.routes?has_content && dept.children?has_content>
 	<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't directly contain any routes. Check subdepartments.</p>

@@ -59,7 +59,7 @@
 									</div>
 								<#elseif info.submittable>
 									<#local textOnly = true />
-									<#include "/WEB-INF/freemarker/submit/_assignment_deadline.ftl" />
+									<#include "/WEB-INF/freemarker/coursework/submit/_assignment_deadline.ftl" />
 								</#if>
 							</#if>
 						</div>

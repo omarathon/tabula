@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<@fmt.deptheader "View and record attendance" "for" department routes "viewDepartment" />
+<@fmt.deptheader "View and record attendance" "for" department routes.attendance "viewDepartment" />
 
 <#if hasSets>
 	<h3><a href="<@routes.attendance.viewDepartmentStudents department />">View by student and report to SITS:eVision</a></h3>

@@ -2,7 +2,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#macro deptheaderroutemacro dept><@routes.profiles.relationship_allocate dept relationshipType /></#macro>
-<#assign deptheaderroute = deptheaderroutemacro in routes/>
+<#assign deptheaderroute = deptheaderroutemacro in routes />
 <#assign manualFormAction><@routes.profiles.relationship_allocate department relationshipType /></#assign>
 <#assign uploadFormAction><@routes.profiles.relationship_allocate_upload department relationshipType /></#assign>
 <#assign previewFormAction><@routes.profiles.relationship_allocate_preview department relationshipType /></#assign>

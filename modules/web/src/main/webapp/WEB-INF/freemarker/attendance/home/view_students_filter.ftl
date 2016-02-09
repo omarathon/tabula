@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<@fmt.deptheader "View students" "in" command.department routes "viewDepartmentStudents" />
+<@fmt.deptheader "View students" "in" command.department routes.attendance "viewDepartmentStudents" />
 
 <#assign filterQuery = command.serializeFilter />
 <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
@@ -29,7 +29,7 @@
 
 <#assign filterCommand = command />
 <#assign filterCommandName = "command" />
-<#assign filterResultsPath = "/WEB-INF/freemarker/home/view_students_results.ftl" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/attendance/home/view_students_results.ftl" />
 <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
 <script type="text/javascript">

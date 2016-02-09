@@ -8,7 +8,7 @@
 		<#assign submitUrl>/profiles/${relationshipType.urlPart}/students</#assign>
 		<#assign filterCommand = viewRelatedStudentsCommand />
 		<#assign filterCommandName = "viewRelatedStudentsCommand" />
-		<#assign filterResultsPath = "/WEB-INF/freemarker/relationships/student_view_results.ftl" />
+		<#assign filterResultsPath = "/WEB-INF/freemarker/profiles/relationships/student_view_results.ftl" />
 		<#include "/WEB-INF/freemarker/filter_bar.ftl" />
 	<#else>
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No ${relationshipType.studentRole}s are currently visible for you in Tabula.</p>

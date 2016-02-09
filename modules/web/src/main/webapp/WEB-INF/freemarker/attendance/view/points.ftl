@@ -18,6 +18,6 @@
 
 <#assign filterCommand = filterCommand />
 <#assign filterCommandName = "filterCommand" />
-<#assign filterResultsPath = "/WEB-INF/freemarker/view/_points_results.ftl" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/attendance/view/_points_results.ftl" />
 <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 </#escape>

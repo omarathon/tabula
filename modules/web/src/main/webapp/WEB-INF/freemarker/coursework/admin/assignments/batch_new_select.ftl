@@ -7,7 +7,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <#assign commandName="command"/>
 
-<@fmt.deptheader "Setup assignments" "for" department routes "setupSitsAssignments" "" />
+<@fmt.deptheader "Setup assignments" "for" department routes.coursework "setupSitsAssignments" "" />
 
 <#assign step=action!'select'/>
 

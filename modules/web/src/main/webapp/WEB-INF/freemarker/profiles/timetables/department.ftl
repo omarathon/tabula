@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<@fmt.deptheader "Timetables" "for" department routes "department_timetables" />
+<@fmt.deptheader "Timetables" "for" department routes.profiles "department_timetables" />
 
 <#assign submitUrl><@routes.profiles.department_timetables department /></#assign>
 <@f.form commandName="command" action=submitUrl method="POST" cssClass="form-inline">

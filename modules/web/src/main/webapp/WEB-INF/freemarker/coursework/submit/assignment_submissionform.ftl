@@ -63,13 +63,13 @@
 
 			<#list assignment.submissionFields as field>
 				<div class="submission-field">
-					<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
+					<#include "/WEB-INF/freemarker/coursework/submit/formfields/${field.template}.ftl" >
 				</div>
 			</#list>
 
 			<#if hasDisability>
 				<div class="submission-field">
-					<#include "/WEB-INF/freemarker/submit/formfields/disability.ftl" >
+					<#include "/WEB-INF/freemarker/coursework/submit/formfields/disability.ftl" >
 				</div>
 			</#if>
 

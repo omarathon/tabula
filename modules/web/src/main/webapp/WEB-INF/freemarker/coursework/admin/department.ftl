@@ -160,7 +160,7 @@
 	</div>
 </#if>
 
-<@fmt.deptheader "" "" department routes "departmenthome" "with-settings" />
+<@fmt.deptheader "" "" department routes.coursework "departmenthome" "with-settings" />
 
 <#if !modules?has_content>
 	<#if department.children?has_content>

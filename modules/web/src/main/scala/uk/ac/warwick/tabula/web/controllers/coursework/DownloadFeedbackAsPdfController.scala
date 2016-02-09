@@ -43,7 +43,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: Member) = {
 		new PDFView(
 			"feedback.pdf",
-			"/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl",
+			"/WEB-INF/freemarker/coursework/admin/assignments/markerfeedback/feedback-download.ftl",
 			Map("feedback" -> command.apply(), "user"-> student.asSsoUser)
 		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	}

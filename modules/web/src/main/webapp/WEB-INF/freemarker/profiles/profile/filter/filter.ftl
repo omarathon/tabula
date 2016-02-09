@@ -4,7 +4,7 @@
 
 	<#assign filterCommand = filterStudentsCommand />
 	<#assign filterCommandName = "filterStudentsCommand" />
-	<#assign filterResultsPath = "/WEB-INF/freemarker/profile/filter/results.ftl" />
+	<#assign filterResultsPath = "/WEB-INF/freemarker/profiles/profile/filter/results.ftl" />
 	<#assign submitUrl><@routes.profiles.filter_students department /></#assign>
 	<#include "/WEB-INF/freemarker/filter_bar.ftl" />
 </#escape>

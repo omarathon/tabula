@@ -26,7 +26,7 @@
 <#assign submitUrl><@routes.attendance.viewStudents department academicYear.startYear?c /></#assign>
 <#assign filterCommand = filterCommand />
 <#assign filterCommandName = "filterCommand" />
-<#assign filterResultsPath = "/WEB-INF/freemarker/view/_students_results.ftl" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/attendance/view/_students_results.ftl" />
 
 <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
