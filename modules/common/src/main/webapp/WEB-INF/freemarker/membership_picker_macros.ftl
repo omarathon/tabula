@@ -132,6 +132,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				   data-hash="${introHash("tier4-filtering", "anywhere")}"
 				   data-placement="bottom"
 				   data-html="true"
+				   data-container="#${classifier}EnrolmentFields"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 
