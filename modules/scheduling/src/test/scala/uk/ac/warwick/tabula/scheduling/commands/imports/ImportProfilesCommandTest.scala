@@ -3,9 +3,8 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl}
+import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{SitsAcademicYearAware, SitsAcademicYearService}
@@ -64,7 +63,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		val mrService = smartMock[ModuleRegistrationServiceImpl]
 		mrService.getByUsercodesAndYear(Seq("abcde"), year) returns Seq(existingMr)
 
-		val memberDao = new MemberDaoImpl
+		val memberDao = new AutowiringMemberDaoImpl
 		memberDao.sessionFactory = sessionFactory
 
 		val scdDao = new StudentCourseDetailsDaoImpl

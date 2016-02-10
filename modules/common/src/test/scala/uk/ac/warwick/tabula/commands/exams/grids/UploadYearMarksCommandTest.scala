@@ -1,22 +1,22 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.io.InputStream
+import java.io.{FileInputStream, InputStream}
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment}
-import uk.ac.warwick.tabula.data.{FileDao, StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
+import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.coursework.docconversion.{YearMarkItem, YearMarksExtractor, YearMarksExtractorComponent}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class UploadYearMarksCommandTest extends TestBase with Mockito {
 
-	val fileDao: FileDao = smartMock[FileDao]
-	fileDao.getData(null) returns Option(createTemporaryFile())
 	val maintenanceMode = smartMock[MaintenanceModeService]
 	maintenanceMode.enabled returns false
+	val objectStorageService = smartMock[ObjectStorageService]
 
 	trait BindFixture {
 		val thisDepartment = Fixtures.department("this")
@@ -55,8 +55,12 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 			val file = new UploadedFile
 			file.maintenanceMode = maintenanceMode
 			val attachment = new FileAttachment
-			attachment.fileDao = fileDao
+			attachment.id = "1234"
 			attachment.name = "file.xlsx"
+			attachment.objectStorageService = objectStorageService
+			attachment.objectStorageService.keyExists(attachment.id) returns {true}
+			val backingFile = createTemporaryFile()
+			attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 			file.attached.add(attachment)
 			command.file = file
 

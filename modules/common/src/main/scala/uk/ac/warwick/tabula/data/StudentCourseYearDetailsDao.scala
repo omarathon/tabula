@@ -32,6 +32,7 @@ trait StudentCourseYearDetailsDao {
 
 @Repository
 class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
+	import Restrictions._
 
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails) = {
 		session.saveOrUpdate(studentCourseYearDetails)
