@@ -142,6 +142,27 @@
 
 	<hr />
 
+	<h3>Suggested Actions</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="suggestedresult"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("suggestedresult")>checked</#if>
+				/> Suggested result</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="suggestedgrade"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("suggestedgrade")>checked</#if>
+				/> Suggested final year grade</label>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
 	<h3>Administration</h3>
 
 	<div class="row">
