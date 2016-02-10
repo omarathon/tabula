@@ -1,31 +1,24 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.web.multipart.MultipartFile
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
+import uk.ac.warwick.tabula.data.{Daoisms, FileDao}
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
+import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, Logging, NoUser}
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.core.spring.FileUtils
 
 import scala.collection.JavaConversions._
 import scala.util.matching.Regex
-import org.springframework.validation.{BindingResult, Errors}
-import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
-import uk.ac.warwick.tabula.helpers.FoundUser
-import uk.ac.warwick.tabula.helpers.LazyLists
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.NoUser
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.util.core.spring.FileUtils
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.system._
-import uk.ac.warwick.tabula.data.model.Module
-import org.apache.commons.codec.digest.DigestUtils
 
 class FeedbackItem {
 	var uniNumber: String = _
@@ -84,11 +77,11 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
 	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
-	var zipService = Wire.auto[ZipService]
-	var userLookup = Wire.auto[UserLookupService]
-	var fileDao = Wire.auto[FileDao]
-	var assignmentService = Wire.auto[AssessmentService]
-	var stateService = Wire.auto[StateService]
+	var zipService = Wire[ZipService]
+	var userLookup = Wire[UserLookupService]
+	var fileDao = Wire[FileDao]
+	var assignmentService = Wire[AssessmentService]
+	var stateService = Wire[StateService]
 
 	/* for single upload */
 	var uniNumber: String = _
@@ -148,10 +141,8 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
 			// TAB-489 - Check to see that this isn't a blank copy of the feedback template
-			else if (assignment.hasFeedbackTemplate && assignment.feedbackTemplate.attachment.actualDataLength == f.actualDataLength){
-				val fileHash = DigestUtils.shaHex(f.dataStream)
-				val templateHash = DigestUtils.shaHex(assignment.feedbackTemplate.attachment.dataStream)
-				if(fileHash == templateHash)
+			else if (assignment.hasFeedbackTemplate && assignment.feedbackTemplate.attachment.actualDataLength == f.actualDataLength) {
+				if (f.hash == assignment.feedbackTemplate.attachment.hash)
 					errors.rejectValue("file.attached[" + i + "]", "file.duplicate.template")
 			}
 			if ("url".equals(FileUtils.getLowerCaseExtension(f.getName))) {

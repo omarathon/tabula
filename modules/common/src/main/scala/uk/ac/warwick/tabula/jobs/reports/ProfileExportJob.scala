@@ -62,7 +62,7 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 				updateStatus(ProfileExportJob.BuildingZip)
 
 				val zipFile = zipService.getProfileExportZip(results)
-				job.setString(ProfileExportJob.ZipFilePathKey, zipFile.getPath)
+				job.setString(ProfileExportJob.ZipFilePathKey, zipFile.filename)
 
 				job.succeeded = true
 			}

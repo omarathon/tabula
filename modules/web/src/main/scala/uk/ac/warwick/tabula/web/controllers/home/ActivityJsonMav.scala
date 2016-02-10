@@ -11,7 +11,6 @@ trait ActivityJsonMav {
 	val DateFormat = ISODateTimeFormat.dateTimeNoMillis()
 
 	def toModel(activities: Seq[Activity[_]]) = Map("items" -> activities.map { item =>
-
 		val source = item.message
 		val html = renderMarkdown(source)
 

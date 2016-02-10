@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
@@ -12,14 +11,15 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.triggers.Trigger
 import uk.ac.warwick.tabula.events._
-import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, CannotPerformWriteOperationException, MaintenanceModeService}
+import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, CannotPerformWriteOperationException}
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{DateFormats, AutowiringFeaturesComponent, JavaImports, RequestInfo}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, DateFormats, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.Queue
-import collection.mutable.ArrayBuffer
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -206,25 +206,6 @@ object Command {
 		} else {
 			fn(currentStopwatch.get)
 		}
-	}
-}
-
-/** See ApplyWithCallback[A] */
-trait HasCallback[A] {
-	var callback: (A) => Unit = _
-}
-
-/**
- * Defines a function property to be used as a callback, plus a convenience
- * version of `apply` that provides the callback and runs the command
- * simultaneously.
- *
- * It doesn't actually call the callback - you do that in your `apply` implementation.
- */
-trait ApplyWithCallback[A] extends Command[A] with HasCallback[A] {
-	def apply(fn: (A) => Unit): A = {
-		callback = fn
-		apply()
 	}
 }
 

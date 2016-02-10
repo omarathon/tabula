@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl}
 import uk.ac.warwick.tabula.helpers.Logging

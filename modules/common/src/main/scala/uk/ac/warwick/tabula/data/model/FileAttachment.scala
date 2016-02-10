@@ -1,23 +1,29 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.language.postfixOps
 import java.io._
-import com.google.common.io.Files
-import org.joda.time.DateTime
+import javax.persistence.CascadeType._
 import javax.persistence._
+
+import com.google.common.net.MediaType
+import org.apache.commons.io.IOUtils
+import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension}
-import scala.util.matching.Regex
-import javax.persistence.CascadeType._
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.forms.{Extension, SavedFormValue}
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+
+import scala.language.postfixOps
+import scala.util.matching.Regex
 
 @Entity @Access(AccessType.FIELD)
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
-	@transient var fileDao = Wire.auto[FileDao]
+	@transient var fileDao = Wire[FileDao]
+	@transient var objectStorageService = Wire[ObjectStorageService]
 
 	@Column(name="file_hash")
 	var hash: String = _
@@ -71,13 +77,6 @@ class FileAttachment extends GeneratedId {
 	var dateUploaded: DateTime = DateTime.now
 	var uploadedBy: String = _
 
-	@transient private var _file: File = null
-	def file = {
-		if (_file == null) _file = fileDao.getData(id).orNull
-		_file
-	}
-	def file_=(f: File) { _file = f }
-
 	@Column(name = "name")
 	private var _name: String = _
 	def name = _name
@@ -92,10 +91,10 @@ class FileAttachment extends GeneratedId {
 		name = n
 	}
 
-	def length: Option[Long] = Option(file) map { _.length }
+	def length: Option[Long] = objectStorageService.metadata(id).map { _.contentLength }
 
 	// checks the length field first. If that is not populated use uploadedData instead
-	def actualDataLength = length getOrElse uploadedDataLength
+	def actualDataLength = length.getOrElse(uploadedDataLength)
 
 	def fileExt: String = {
 		if (name.lastIndexOf('.') > -1) {
@@ -104,6 +103,11 @@ class FileAttachment extends GeneratedId {
 			""
 		}
 	}
+
+	/**
+		* Returns null if no data to return
+		*/
+	def dataStream: InputStream = objectStorageService.fetch(id).orNull
 
 	def duplicate(): FileAttachment = {
 		val newFile = new FileAttachment(name)
@@ -114,7 +118,7 @@ class FileAttachment extends GeneratedId {
 		newFile
 	}
 
-	def originalityReportReceived(): Boolean = {
+	def originalityReportReceived: Boolean = {
 		originalityReport != null && originalityReport.reportReceived
 	}
 
@@ -125,28 +129,33 @@ class FileAttachment extends GeneratedId {
 		token
 	}
 
-	/**
-	 * A stream to read the entirety of the data Blob, or null
-	 * if there is no Blob.
-	 */
-	def dataStream: InputStream = Option(file) map { new FileInputStream(_) } orNull
-
-	def hasData = file != null
+	def hasData = id.hasText && objectStorageService.keyExists(id)
 
 	@transient var uploadedData: InputStream = null
 	@transient var uploadedDataLength: Long = 0
 
 	def isDataEqual(other: Any) = other match {
 		case that: FileAttachment =>
-			if (this.actualDataLength != that.actualDataLength) false
-			else if (this.file == null && that.file == null) true
-			else this.file != null && that.file != null && Files.equal(this.file, that.file)
+			if (this.id != null && that.id != null && this.id == that.id) true
+			else if (this.actualDataLength != that.actualDataLength) false
+			else {
+				val thisData = this.dataStream
+				val thatData = that.dataStream
+
+				if (thisData == null && thatData == null) true
+				else try {
+					thisData != null && thatData != null && IOUtils.contentEquals(thisData, thatData)
+				} finally {
+					IOUtils.closeQuietly(thisData)
+					IOUtils.closeQuietly(thatData)
+				}
+			}
 		case _ => false
 	}
 
-	@transient lazy val mimeType: String = file match {
-		case null => "application/octet-stream"
-		case f => detectMimeType(f)
+	@transient lazy val mimeType: String = objectStorageService.metadata(id) match {
+		case Some(metadata) if metadata.contentType != MediaType.OCTET_STREAM.toString => metadata.contentType
+		case _ => objectStorageService.fetch(id).map(detectMimeType).getOrElse(MediaType.OCTET_STREAM.toString)
 	}
 }
 
@@ -165,7 +174,7 @@ object FileAttachment {
 		dotSplit match {
 			case Nil => s"$DefaultFilename.$DefaultExtension"
 			case extension :: Nil if leadingDot => s"$DefaultFilename.$extension"
-			case filename :: Nil => s"$filename.$DefaultExtension"
+			case fn :: Nil => s"$fn.$DefaultExtension"
 			case filenameWithExtension => filenameWithExtension.mkString(".")
 		}
 	}

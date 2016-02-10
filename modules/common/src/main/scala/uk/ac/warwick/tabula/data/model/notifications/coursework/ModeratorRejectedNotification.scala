@@ -20,7 +20,6 @@ object ModeratorRejectedNotification {
 @DiscriminatorValue(value="ModeratorRejected")
 class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 	with SingleItemNotification[MarkerFeedback]
-	with SingleRecipientNotification
 	with AutowiringUserLookupComponent
 	with AllCompletedActionRequiredNotification {
 
@@ -48,10 +47,9 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 			"adjustedGrade" -> rejectionFeedback.grade
 		))
 
-	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
+	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipients.head)
 	def urlTitle = "update the feedback and submit it for moderation again"
 
 	// the recepient is the first marker
-	def recipient = rejectedFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId))
-		.getOrElse(throw new ItemNotFoundException(s"The recipient doesn't exist"))
+	def recipients = rejectedFeedback.getMarkerUser.toSeq
 }

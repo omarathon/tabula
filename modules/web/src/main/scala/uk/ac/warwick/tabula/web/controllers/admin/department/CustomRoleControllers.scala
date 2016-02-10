@@ -23,7 +23,7 @@ trait CustomRoleControllerMethods extends AdminController {
 	var permissionsService = Wire[PermissionsService]
 
 	@ModelAttribute("allRoleDefinitions")
-	def grantableRoleDefinitions(@PathVariable("department") department: Department, user: CurrentUser) = transactional(readOnly = true) {
+	def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser) = transactional(readOnly = true) {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
 		def parentDepartments[B <: PermissionsTarget](permissionsTarget: B): Seq[Department] = permissionsTarget match {
@@ -45,7 +45,7 @@ class ListCustomRolesController extends CustomRoleControllerMethods {
 
 	type ListCustomRolesCommand = Appliable[Seq[CustomRoleInfo]] with ListCustomRolesCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department) = ListCustomRolesCommand(department)
+	@ModelAttribute("command") def command(@PathVariable department: Department) = ListCustomRolesCommand(department)
 
 	@RequestMapping
 	def list(@ModelAttribute("command") command: ListCustomRolesCommand) = {
@@ -88,7 +88,7 @@ class EditCustomRoleDefinitionController extends CustomRoleControllerMethods {
 	type EditCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with EditCustomRoleDefinitionCommandState
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
 		EditCustomRoleDefinitionCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
@@ -113,7 +113,7 @@ class DeleteCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
 	type DeleteCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with DeleteCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
 		DeleteCustomRoleDefinitionCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
@@ -133,7 +133,7 @@ class DeleteCustomRoleDefinitionController extends CustomRoleControllerMethods {
 trait CustomRoleOverridesControllerMethods extends AdminController {
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("allPermissions") def allPermissions(@PathVariable("department") department: Department) = {
+	@ModelAttribute("allPermissions") def allPermissions(@PathVariable department: Department) = {
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
 
@@ -176,7 +176,7 @@ class ListCustomRoleDefinitionOverridesController extends CustomRoleOverridesCon
 
 	type ListCustomRoleOverridesCommand = Appliable[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
 		ListCustomRoleOverridesCommand(department, customRoleDefinition)
 
 	@RequestMapping
@@ -195,7 +195,7 @@ class AddCustomRoleOverrideController extends CustomRoleOverridesControllerMetho
 	type AddCustomRoleOverrideCommand = Appliable[RoleOverride] with AddCustomRoleOverrideCommandState
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition) =
+	def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
 		AddCustomRoleOverrideCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
@@ -220,7 +220,7 @@ class DeleteCustomRoleOverrideController extends CustomRoleOverridesControllerMe
 
 	type DeleteCustomRoleOverrideCommand = Appliable[RoleOverride] with DeleteCustomRoleOverrideCommandState
 
-	@ModelAttribute("command") def command(@PathVariable("department") department: Department, @PathVariable("customRoleDefinition") customRoleDefinition: CustomRoleDefinition, @PathVariable("roleOverride") roleOverride: RoleOverride) =
+	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition, @PathVariable roleOverride: RoleOverride) =
 		DeleteCustomRoleOverrideCommand(department, customRoleDefinition, roleOverride)
 
 	@RequestMapping(method=Array(GET, HEAD))

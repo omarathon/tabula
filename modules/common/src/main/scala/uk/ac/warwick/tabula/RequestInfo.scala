@@ -27,9 +27,9 @@ class RequestInfo(
 	val maintenance: Boolean = false,
 	val requestLevelCache: RequestLevelCache = new RequestLevelCache,
 	val hasEmergencyMessage: Boolean = false,
-	val emergencyMessage: String = ""
-	)
-	extends EarlyRequestInfo
+	val emergencyMessage: String = "",
+	val userAgent: String = ""
+) extends EarlyRequestInfo
 
 object RequestInfo {
 	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {

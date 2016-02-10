@@ -15,7 +15,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 	val scydDao = new StudentCourseYearDetailsDaoImpl
 	val scdDao = new StudentCourseDetailsDaoImpl
-	val memDao = new MemberDaoImpl
+	val memDao = new AutowiringMemberDaoImpl
 
 	@Before
 	def setup() {

@@ -36,13 +36,13 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 		cmd.zipService = new ZipService
 		cmd.zipService.userLookup = userLookup
 		cmd.zipService.features = Features.empty
-		cmd.zipService.zipDir = createTemporaryDirectory()
+		cmd.zipService.objectStorageService = createTransientObjectStore()
 
 		cmd.submissions = submissions
 
 		cmd.applyInternal().isLeft should be {true}
 		val zip = cmd.applyInternal().left.toOption.get
-		val stream = new ZipInputStream(new FileInputStream(zip.file.get))
+		val stream = new ZipInputStream(zip.inputStream)
 		val items = Zips.map(stream) { item =>
 			item.getName
 		}

@@ -86,7 +86,10 @@
 								<span class="h6 colour-h6"><@fmt.groupset_name state.smallGroupSet /></span>
 							</td>
 							<td><@f.checkbox path="copyGroups" /></td>
-							<td><@f.checkbox path="copyEvents" /></td>
+							<td>
+								<@f.checkbox path="copyEvents" />
+								<@bs3form.errors path="copyEvents" />
+							</td>
 						</@spring.nestedPath>
 					</tr>
 				</#list>

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 import uk.ac.warwick.tabula.{CurrentUser, SprCode, AcademicYear}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.attendance.commands.report.{CreateMonitoringPointReportCommand, CreateMonitoringPointReportCommandState, CreateMonitoringPointReportRequestState}
+import uk.ac.warwick.tabula.commands.attendance.report.{CreateMonitoringPointReportCommand, CreateMonitoringPointReportCommandState, CreateMonitoringPointReportRequestState}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.services.ProfileService
 

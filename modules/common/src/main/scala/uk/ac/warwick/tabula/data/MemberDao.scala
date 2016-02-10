@@ -6,6 +6,8 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.Daoisms._
+import uk.ac.warwick.tabula.data.HibernateHelpers._
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
@@ -13,11 +15,11 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import scala.collection.JavaConverters._
 
 trait MemberDaoComponent {
-	val memberDao: MemberDao
+	def memberDao: MemberDao
 }
 
 trait AutowiringMemberDaoComponent extends MemberDaoComponent {
-	val memberDao = Wire[MemberDao]
+	var memberDao = Wire[MemberDao]
 }
 
 trait MemberDao {
@@ -56,17 +58,17 @@ trait MemberDao {
 
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
 	def setTimetableHash(member: Member, timetableHash: String)
-
-
-
 }
 
 @Repository
-class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceMonitoringStudentDataFetcher {
+class AutowiringMemberDaoImpl extends MemberDaoImpl with Daoisms
+
+class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStudentDataFetcher {
+	self: SessionComponent =>
+
 	import org.hibernate.criterion.Order._
 	import org.hibernate.criterion.Projections._
 	import org.hibernate.criterion.Restrictions._
-
 
 	def saveOrUpdate(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
@@ -112,6 +114,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging with AttendanceM
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
 		}
+	}
+
+	private def sessionWithoutFreshFilters = {
+		val s = session
+		s.disableFilter(Member.FreshOnlyFilter)
+		s.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+		s.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+		s
 	}
 
 	def getByUniversityIdStaleOrFresh(universityId: String) = {

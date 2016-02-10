@@ -20,7 +20,6 @@ class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecor
 	var zipService = Wire.auto[ZipService]
 
 	private var fileFound: Boolean = _
-	var callback: (RenderableFile) => Unit = _
 
 	/**
 	 * If filename is unset, it returns a renderable Zip of all files.
@@ -37,13 +36,10 @@ class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecor
 			}
 
 		fileFound = result.isDefined
-		if (callback != null) {
-			result.map { callback(_) }
-		}
 		result
 	}
 
-	private def zipped(meetingRecord: AbstractMeetingRecord) = new RenderableZip(zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord))
+	private def zipped(meetingRecord: AbstractMeetingRecord) = zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord)
 
 	override def describe(d: Description) = {
 		d.meeting(meetingRecord)

@@ -357,7 +357,7 @@
 								<include>js/browser-info.js</include>
 								<include>js/id7/app-comments.js</include>
 								<include>js/combo-typeahead.js</include>
-								<include>js/map-popups.js</include>
+								<include>js/id7/map-popups.js</include>
 								<include>js/jquery-biglist.js</include>
 								<include>js/id7/jquery-expandingTable.js</include>
 								<include>js/jquery.form.js</include>

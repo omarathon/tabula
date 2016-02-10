@@ -458,7 +458,9 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro bulk_email emails title subject limit=500>
 	<#local separator = ";" />
-	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
+	<#if (info.userAgent!"")?matches('.*(iphone|ipod|ipad).*', 'i')>
+		<#local separator = "," /> <#-- TAB-3907 -->
+	<#elseif user?? && userSetting('bulkEmailSeparator')?has_content>
 		<#local separator = userSetting('bulkEmailSeparator') />
 	</#if>
 

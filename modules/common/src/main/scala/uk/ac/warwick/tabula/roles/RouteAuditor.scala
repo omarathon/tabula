@@ -19,6 +19,7 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		MonitoringPoints.View,
 
 		Profiles.Read.Core,
+		Profiles.Read.Photo,
 		Profiles.Read.NextOfKin,
 	  Profiles.Read.Timetable,
 		Profiles.Read.StudentCourseDetails.Core,

@@ -70,6 +70,7 @@
 				<entry key="uk.ac.warwick.tabula.services.CannotPerformWriteOperationException" value="errors/readOnlyMasquerade" />
 				<entry key="uk.ac.warwick.tabula.services.ZipRequestTooLargeError" value="errors/zipTooBig" />
 				<entry key="uk.ac.warwick.tabula.api.web.filters.APILoginMethodMissingException" value="errors/apiLoginMethodMissing" />
+				<entry key="uk.ac.warwick.tabula.SubmitPermissionDeniedException" value="coursework/submit/assignment_permissionDenied" />
 			</map>
 		</property>
 	</bean>
@@ -306,7 +307,7 @@
 	</bean>
 
 	<filter-stack id="commonFilters" abstract="true" xmlns="http://go.warwick.ac.uk/elab-schemas/filterstack">
-		<mapping name="allml">
+		<mapping name="all">
 			<filter ref="characterEncodingFilter" />
 			<url-pattern>/*</url-pattern>
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
@@ -322,10 +323,11 @@
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/*</excluded-url-pattern>
+			<excluded-url-pattern>/service/*</excluded-url-pattern>
 
-			<!-- FIXME These should really be in profiles' filters-context.xml, but that'd require XML trickery -->
-			<excluded-url-pattern>/timetable/ical</excluded-url-pattern>
-			<excluded-url-pattern>/timetable/ical/*</excluded-url-pattern>
+			<!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->
+			<excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
+			<excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
 		</mapping>
 		<mapping name="forceSysadmin">
 			<filter ref="forceLoginFilter" />
@@ -427,19 +429,6 @@
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
 
-	<bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.CachingImageResizer">
-		<constructor-arg>
-			<bean class="uk.ac.warwick.util.files.imageresize.SingleThreadedImageResizer">
-				<constructor-arg>
-					<bean class="uk.ac.warwick.util.files.imageresize.JAIImageResizer"
-						p:useSubsampleAveraging="true" />
-				</constructor-arg>
-			</bean>
-		</constructor-arg>
-		<constructor-arg value="${filesystem.resizer.dir}" />
-		<constructor-arg value="_" /> <!-- Don't use @ because X-Sendfile on Solaris doesn't work -->
-	</bean>
-
 	<!-- ActiveMQ -->
 	<bean id="abstractQueue" abstract="true" factory-bean="queueProvider" factory-method="getQueue" />
 
@@ -500,7 +489,7 @@
 		</property>
 	</bean>
 
-	<!-- Expose EhCache properties as system properties -->
+	<!-- Expose local properties as system properties -->
 	<bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property
@@ -525,6 +514,11 @@
         </util:properties>
     </property>
 	</bean>
+
+	<!-- @Scheduled -->
+	<task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
+	<task:executor id="taskExecutor" pool-size="5"/>
+	<task:scheduler id="taskScheduler" pool-size="10"/>
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
@@ -558,13 +552,6 @@
 			<constructor-arg value="${activemq.user}" />
 			<constructor-arg value="${activemq.pass}" />
 		</bean>
-	</beans>
-
-	<beans profile="scheduling">
-		<!-- @Scheduled -->
-		<task:annotation-driven executor="taskExecutor" scheduler="taskScheduler" />
-		<task:executor id="taskExecutor" pool-size="5"/>
-		<task:scheduler id="taskScheduler" pool-size="10"/>
 	</beans>
 
 	<beans profile="web">

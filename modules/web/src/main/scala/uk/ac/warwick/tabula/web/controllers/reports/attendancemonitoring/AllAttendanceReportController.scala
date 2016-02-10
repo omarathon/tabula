@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
 import uk.ac.warwick.tabula.reports.web.Routes
 
-
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/attendance/all"))
 class AllAttendanceReportController extends AbstractAttendanceReportController {

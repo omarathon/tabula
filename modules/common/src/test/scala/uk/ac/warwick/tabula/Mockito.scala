@@ -15,6 +15,7 @@ trait Mockito extends org.specs2.mock.Mockito {
 	def verify[A](mock: A, mode: VerificationMode) = org.mockito.Mockito.verify(mock, mode)
 	def verify[A](mock: A) = org.mockito.Mockito.verify(mock)
 	def times(arg: Int) = org.mockito.Mockito.times(arg)
+	def never() = org.mockito.Mockito.never()
 	def atLeast(arg: Int) = org.mockito.Mockito.atLeast(arg)
 	def atMost(arg: Int) = org.mockito.Mockito.atMost(arg)
 

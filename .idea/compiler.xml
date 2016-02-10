@@ -63,28 +63,24 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="attendance" />
       </profile>
       <profile default="false" name="Annotation profile for profiles" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="profiles" />
       </profile>
       <profile default="false" name="Annotation profile for courses" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="courses" />
       </profile>
       <profile default="false" name="Annotation profile for all" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="all" />
       </profile>
       <profile default="false" name="Annotation profile for api" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -108,8 +104,6 @@
       <module name="common" target="1.8" />
       <module name="courses" target="1.8" />
       <module name="functional-test" target="1.8" />
-      <module name="groups" target="1.8" />
-      <module name="home" target="1.8" />
       <module name="profiles" target="1.8" />
       <module name="scheduling" target="1.8" />
       <module name="tabula-project" target="1.8" />

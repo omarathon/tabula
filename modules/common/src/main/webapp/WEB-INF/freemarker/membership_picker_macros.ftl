@@ -132,6 +132,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				   data-hash="${introHash("tier4-filtering", "anywhere")}"
 				   data-placement="bottom"
 				   data-html="true"
+				   data-container="#${classifier}EnrolmentFields"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 
@@ -369,6 +370,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			<#-- preset to open -->
 			if ($enrolment.data('open')) {
 				$('.${classifier}Enrolment details').prop('open', 'open');
+				window.id6nav=window.id6nav||{};
 				$("html, body").delay(200).animate({
 					scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
 				}, 300);
@@ -456,6 +458,8 @@ Generates the bulk of the picker HTML, inside a fieldset element
 					success: function(data, status) {
 						$m.modal('hide');
 						$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
+						//TAB-3975 - to fix footer window positioning, trigger resize
+						$(window).trigger('resize');
 						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
 						$enrolment.find('.${classifier}Modals').html($(data).find('.${classifier}Modals').contents());
 						$enrolment.data('open', true);

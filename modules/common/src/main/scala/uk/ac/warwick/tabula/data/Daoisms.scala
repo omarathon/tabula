@@ -17,7 +17,7 @@ import scala.reflect._
 import scala.util.Try
 
 /** Trait for self-type annotation, declaring availability of a Session. */
-trait SessionComponent{
+trait SessionComponent {
   protected def session:Session
 }
 

@@ -24,8 +24,8 @@ class AddExamController extends ExamsController {
 
 	@ModelAttribute("command")
 	def command(
-		 @PathVariable("module") module: Module,
-		 @PathVariable("academicYear") academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
+		 @PathVariable module: Module,
+		 @PathVariable academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {

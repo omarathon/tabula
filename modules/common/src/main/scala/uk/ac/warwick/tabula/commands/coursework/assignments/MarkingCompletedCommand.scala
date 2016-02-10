@@ -38,7 +38,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
-		markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser == user).asJava
+		markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser.exists { _ == user }).asJava
 
 		// Pre-submit validation
 		noMarks = markerFeedback.asScala.filter(!_.hasMark)

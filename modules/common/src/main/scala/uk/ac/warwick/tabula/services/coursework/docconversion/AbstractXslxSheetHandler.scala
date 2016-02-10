@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.coursework.docconversion
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
+import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -38,7 +39,7 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
 		}
 	}
 
-	override def endRow() {
+	override def endRow(row: Int) {
 		if (!isFirstRow)
 			items.add(currentItem)
 	}

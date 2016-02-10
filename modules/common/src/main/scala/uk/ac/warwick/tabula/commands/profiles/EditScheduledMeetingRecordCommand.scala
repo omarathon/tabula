@@ -59,11 +59,11 @@ class EditScheduledMeetingRecordCommand (val editor: Member, val meetingRecord: 
 				fileAttachmentService.deleteAttachments(filesToRemove)
 			}
 
-			file.attached.asScala map(attachment => {
+			file.attached.asScala.foreach { attachment =>
 				attachment.meetingRecord = meeting
 				meeting.attachments.add(attachment)
 				attachment.temporary = false
-			})
+			}
 		}
 
 		meetingRecord.title = title
@@ -115,7 +115,8 @@ trait EditScheduledMeetingRecordPermissions extends RequiresPermissionsChecking 
 	self: EditScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationship.relationshipType), mandatory(meetingRecord))
+		mandatory(meetingRecord) // Otherwise we'll get an NPE evaluating relationship.relationshipType
+		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationship.relationshipType), meetingRecord)
 	}
 }
 

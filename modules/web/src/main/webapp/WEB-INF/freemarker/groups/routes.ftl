@@ -82,7 +82,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro signup_to_group set><@_u page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@_u page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
 <#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg" context="/profiles" /><#else><@_u resource="/static/images/no-photo.jpg" /></#if></#macro>
-<#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
+<#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.urlPart}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
 <#macro studentslist group><@_u page="/group/${group.id}/studentspopup" /></#macro>
 <#macro studentsinsetlist groupset><@_u page="/${groupset.id}/studentspopup" /></#macro>

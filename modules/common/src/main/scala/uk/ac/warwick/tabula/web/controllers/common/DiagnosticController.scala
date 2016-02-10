@@ -20,7 +20,7 @@ class DiagnosticController extends Logging {
 	@RequestMapping(Array("/up")) def test(out: Writer) =
 		out.write(String.valueOf(((System.currentTimeMillis - startTime) * 0.001).toLong))
 
-	@RequestMapping(Array("/feature/{name}")) def feature(@PathVariable("name") name: String, out: Writer) = {
+	@RequestMapping(Array("/feature/{name}")) def feature(@PathVariable name: String, out: Writer) = {
 		val values = new BeanWrapperImpl(features)
 		out.write(values.getPropertyValue(name).asInstanceOf[Boolean].toString)
 	}

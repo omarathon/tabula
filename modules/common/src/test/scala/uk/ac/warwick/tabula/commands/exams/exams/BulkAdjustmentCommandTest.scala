@@ -8,6 +8,9 @@ import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmen
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, FileAttachment, GradeBoundary}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.tabula.services.{MaintenanceModeService, GeneratesGradesFromMarks}
+import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
@@ -15,7 +18,12 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
 	trait BindFixture {
 		val mockFileDao = smartMock[FileDao]
-		mockFileDao.getData(any[String]) returns None
+		val objectStorageService = smartMock[ObjectStorageService]
+
+		// Start from the basis that the store is empty
+		objectStorageService.fetch(any[String]) returns None
+		objectStorageService.metadata(any[String]) returns None
+
 		val mockSpreadsheetHelper = smartMock[SpreadsheetHelpers]
 		val thisAssessment = new Assignment
 		val feedback = Fixtures.assignmentFeedback("1234")
@@ -34,6 +42,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 		bindListener.file = file
 		file.fileDao = mockFileDao
 		attachment.fileDao = mockFileDao
+		attachment.objectStorageService = objectStorageService
 	}
 
 	@Test

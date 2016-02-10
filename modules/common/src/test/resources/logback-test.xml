@@ -18,6 +18,7 @@
 	<logger name="org.hibernate.tool.hbm2ddl.SchemaExport" level="OFF"/>
 	<logger name="org.hibernate" level="WARN"/>
 	<logger name="uk.ac.warwick.tabula" level="WARN"/>
+	<logger name="org.elasticsearch.bootstrap" level="ERROR"/>
 	<root level="WARN">
 		<appender-ref ref="S"/>
 	</root>

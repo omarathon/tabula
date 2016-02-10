@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand._
@@ -10,6 +11,9 @@ import uk.ac.warwick.tabula.services.ActivityService._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.userlookup.Group
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object CourseworkHomepageCommand {
 	type AssignmentInfo = Map[String, Any]
@@ -77,7 +81,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				ownedDepartments = ownedDepartments,
 				ownedModules = ownedModules,
 
-				activities = pagedActivities
+				activities = Await.result(pagedActivities, 10.seconds)
 			))
 		} else {
 			None
@@ -91,17 +95,17 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 }
 
 object CourseworkHomepageActivityPageletCommand {
-	def apply(user: CurrentUser, doc: Int, field: Long, token: Long) =
-		new CourseworkHomepageActivityPageletCommandInternal(user, doc, field, token)
+	def apply(user: CurrentUser, lastUpdatedDate: DateTime) =
+		new CourseworkHomepageActivityPageletCommandInternal(user, lastUpdatedDate)
 			with ComposableCommand[Option[PagedActivities]]
 			with AutowiringActivityServiceComponent
 			with PubliclyVisiblePermissions with ReadOnly with Unaudited
 }
 
-class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, doc: Int, field: Long, token: Long) extends CommandInternal[Option[PagedActivities]] {
+class CourseworkHomepageActivityPageletCommandInternal(user: CurrentUser, lastUpdatedDate: DateTime) extends CommandInternal[Option[PagedActivities]] {
 	self: ActivityServiceComponent =>
 
 	def applyInternal() =
-		if (user.loggedIn) Some(activityService.getNoteworthySubmissions(user, doc, field, token))
+		if (user.loggedIn) Some(Await.result(activityService.getNoteworthySubmissions(user, lastUpdatedDate), 10.seconds))
 		else None
 }

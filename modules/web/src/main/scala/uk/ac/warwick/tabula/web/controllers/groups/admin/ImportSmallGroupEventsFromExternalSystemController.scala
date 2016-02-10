@@ -17,7 +17,7 @@ abstract class AbstractImportSmallGroupEventsFromExternalSystemController extend
 
 	type ImportSmallGroupEventsFromExternalSystemCommand = Appliable[Seq[SmallGroupEvent]] with PopulateOnForm
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ImportSmallGroupEventsFromExternalSystemCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ImportSmallGroupEventsFromExternalSystemCommand =
 		ImportSmallGroupEventsFromExternalSystemCommand(module, set)
 
 	protected def render(set: SmallGroupSet) = {

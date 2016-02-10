@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.groups.admin.{CopySmallGroupSetsCommand, Co
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{Department, Module}
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
@@ -71,15 +71,7 @@ class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsControlle
 	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with GroupsDepartmentsAndModulesWithPermission with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = null
-
-	@ModelAttribute("departmentsWithPermission")
-	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
-
-		allDepartmentsForPermission(user, Permissions.Module.ManageSmallGroups)
-			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
-	}
+	override val departmentPermission: Permission = CopySmallGroupSetsCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
 	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))

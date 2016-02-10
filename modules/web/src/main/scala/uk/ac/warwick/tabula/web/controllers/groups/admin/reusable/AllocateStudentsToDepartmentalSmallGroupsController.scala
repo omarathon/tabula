@@ -25,11 +25,11 @@ abstract class AllocateStudentsToDepartmentalSmallGroupsController extends Group
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") smallGroupSet: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsCommand =
+	def command(@PathVariable department: Department, @PathVariable smallGroupSet: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsCommand =
 		AllocateStudentsToDepartmentalSmallGroupsCommand(department, smallGroupSet, user)
 
 	@RequestMapping
-	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, @PathVariable("department") department: Department) = {
+	def showForm(@ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, @PathVariable department: Department) = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd, department)
@@ -41,7 +41,7 @@ abstract class AllocateStudentsToDepartmentalSmallGroupsController extends Group
 		Mav(renderPath).crumbs(Breadcrumbs.Department(department), Breadcrumbs.Reusable(department))
 
 	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, errors: Errors, @PathVariable("department") department: Department): Mav = {
+	def submit(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, errors: Errors, @PathVariable department: Department): Mav = {
 		cmd.sort()
 		if (errors.hasErrors) {
 			form(cmd, department)

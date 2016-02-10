@@ -21,8 +21,8 @@ trait RoutePermissionControllerMethods extends AdminController {
 	type GrantRoleCommand = Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route]
 	type RevokeRoleCommand = Appliable[GrantedRole[Route]] with RevokeRoleCommandState[Route]
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("route") route: Route): GrantRoleCommand = GrantRoleCommand(route)
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("route") route: Route): RevokeRoleCommand = RevokeRoleCommand(route)
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable route: Route): GrantRoleCommand = GrantRoleCommand(route)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable route: Route): RevokeRoleCommand = RevokeRoleCommand(route)
 
 	var userLookup = Wire.auto[UserLookupService]
 
@@ -46,7 +46,7 @@ trait RoutePermissionControllerMethods extends AdminController {
 class RoutePermissionController extends AdminController with RoutePermissionControllerMethods {
 
 	@RequestMapping
-	def permissionsForm(@PathVariable("route") route: Route, @RequestParam(defaultValue="") usercodes: Array[String],
+	def permissionsForm(@PathVariable route: Route, @RequestParam(defaultValue="") usercodes: Array[String],
 		@RequestParam(value="role", required=false) role: RoleDefinition, @RequestParam(value="action", required=false) action: String): Mav =
 		form(route, usercodes, Some(role), action)
 }

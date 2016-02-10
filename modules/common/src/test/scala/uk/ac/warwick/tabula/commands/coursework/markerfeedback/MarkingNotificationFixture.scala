@@ -47,6 +47,7 @@ trait MarkingNotificationFixture extends Mockito {
 		val feedback = new AssignmentFeedback
 		feedback.universityId = student.getWarwickId
 		val mf = new MarkerFeedback()
+		mf.userLookup = mockUserLookup
 		mf.feedback = feedback
 		feedback.assignment = testAssignment
 		testAssignment.feedbacks.add(feedback)
@@ -58,6 +59,7 @@ trait MarkingNotificationFixture extends Mockito {
 	def makeBothMarkerFeedback(student: User) : (Feedback, MarkerFeedback, MarkerFeedback) = {
 		val (f, mf1) = makeMarkerFeedback(student)(MarkingNotificationFixture.FirstMarkerLink)
 		val mf2 = new MarkerFeedback()
+		mf2.userLookup = mockUserLookup
 		f.secondMarkerFeedback = mf2
 		(f, mf1, mf2)
 	}

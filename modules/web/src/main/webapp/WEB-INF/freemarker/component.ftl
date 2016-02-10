@@ -35,6 +35,31 @@
 	<#assign context="/exams" />
 	<#assign nonav=false />
 	<#assign homeUrl><@routes.exams.home /></#assign>
+<#elseif requestPath == '/attendance' || requestPath?starts_with('/attendance/')>
+	<#assign bodyClass="attendance-page" />
+	<#assign siteHeader="Monitoring Points" />
+	<#assign subsite=true />
+	<#assign title="Monitoring Points" />
+	<#assign name="attendance" />
+	<#assign nonav=false />
+	<#assign homeUrl><@routes.attendance.home /></#assign>
+<#elseif requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
+	<#assign bodyClass="coursework-page" />
+	<#assign siteHeader="Coursework Management" />
+	<#assign subsite=true />
+	<#assign title="Coursework Management" />
+	<#assign name="courses" />
+	<#assign nonav=false />
+	<#assign homeUrl><@routes.coursework.home /></#assign>
+	<#assign context="/coursework" />
+<#elseif requestPath == '/profiles' || requestPath?starts_with('/profiles/')>
+	<#assign bodyClass="profiles-page" />
+	<#assign siteHeader="Profiles" />
+	<#assign subsite=true />
+	<#assign title="Profiles" />
+	<#assign name="profiles" />
+	<#assign nonav=false />
+	<#assign homeUrl><@routes.profiles.home /></#assign>
 <#else>
 	<#assign bodyClass="tabula-page" />
 	<#assign siteHeader="Tabula" />

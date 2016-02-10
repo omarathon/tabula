@@ -44,7 +44,7 @@ class FeedbackAdjustmentNotification
 	))
 
 	def url: String = recipients.headOption.map(recipient => Routes.admin.assignment.markerFeedback(assignment, recipient)).getOrElse("")
-	def urlTitle = s"Marking for this assignment"
+	def urlTitle = "mark these submissions"
 
 	priority = Info
 

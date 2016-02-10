@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 
 object ViewDepartmentAttendanceCommand {
+	val RequiredPermission = Permissions.SmallGroupEvents.ViewRegister
+
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
 		new ViewDepartmentAttendanceCommandInternal(department, academicYear, user)
 			with AutowiringSecurityServiceComponent
@@ -47,7 +49,7 @@ trait ViewDepartmentAttendancePermission extends RequiresPermissionsChecking wit
 
 	override def permissionsCheck(p:PermissionsChecking) = {
 		p.PermissionCheckAny(department.modules.asScala.map(
-			CheckablePermission(Permissions.SmallGroupEvents.ViewRegister, _)
+			CheckablePermission(ViewDepartmentAttendanceCommand.RequiredPermission, _)
 		))
 	}
 }

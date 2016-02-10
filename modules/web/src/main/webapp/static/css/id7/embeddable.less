@@ -99,7 +99,7 @@ h1.modal-title {
 
 .mac-cmd {
 	font-size: 140%;
-	vertical-align: bottom;
+	vertical-align: middle;
 }
 
 label.disabled {
@@ -254,6 +254,10 @@ summary {
 		.popover-content {
 			max-height: 450px;
 		}
+	}
+	.popover-content {
+		overflow-y: auto;
+		max-height: 450px;
 	}
 }
 
@@ -880,4 +884,9 @@ ul.profile-user-list {
 			}
 		}
 	}
+}
+
+// Handle rotated hedares when scrolling
+.id7-wide-table-wrapper-container .table-responsive {
+	position: relative;
 }

@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.commands.timetables
 
+import java.util.concurrent.TimeoutException
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService}
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
@@ -53,6 +55,7 @@ abstract class ViewModuleTimetableCommandInternal(val module: Module)
 
 	def applyInternal(): Try[Seq[TimetableEvent]] = {
 		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ViewModuleEventsCommand.Timeout))
+			.recover { case _: TimeoutException | _: TimetableEmptyException => Nil }
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
 }

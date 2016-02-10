@@ -47,12 +47,8 @@ trait StreamsFiles {
 		handleCaching(file, request, out)
 
 		if (request.getMethod.toUpperCase != "HEAD") {
-			if (file.file.isDefined && features.xSendfile) {
-				out.addHeader("X-Sendfile", file.file.get.getAbsolutePath)
-			} else {
-				file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
-				Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
-			}
+			file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
+			Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
 		} else {
 			file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }
 		}

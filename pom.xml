@@ -25,17 +25,18 @@
 	<inceptionYear>2012</inceptionYear>
 
 	<properties>
-		<scala.version>2.11.5</scala.version>
+		<scala.version>2.11.7</scala.version>
 		<scala.major.version>2.11</scala.major.version>
-		<org.springframework.version>4.1.4.RELEASE</org.springframework.version>
-		<org.hibernate.version>4.3.8.Final</org.hibernate.version>
-		<com.fasterxml.jackson.version>2.5.0</com.fasterxml.jackson.version>
-		<org.apache.lucene.version>5.0.0</org.apache.lucene.version>
+		<org.springframework.version>4.2.4.RELEASE</org.springframework.version>
+		<org.hibernate.version>4.3.11.Final</org.hibernate.version>
+		<com.fasterxml.jackson.version>2.6.3</com.fasterxml.jackson.version>
+		<org.elasticsearch.version>2.1.1</org.elasticsearch.version>
 		<net.databinder.dispatch.version>0.8.10</net.databinder.dispatch.version>
-		<org.apache.poi.version>3.8</org.apache.poi.version>
+		<org.apache.poi.version>3.13</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>
-		<warwickutils.version>20151214</warwickutils.version>
-		<surefire.version>2.18.1</surefire.version>
+		<org.apache.jclouds.version>1.9.2</org.apache.jclouds.version>
+		<warwickutils.version>20160128</warwickutils.version>
+		<surefire.version>2.19.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
@@ -69,14 +70,8 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/web</module>
-		<module>modules/attendance</module>
-		<module>modules/coursework</module>
-		<module>modules/profiles</module>
 		<module>modules/scheduling</module>
 		<module>modules/api</module>
-
-		<!-- Combined EAR -->
-		<module>modules/all</module>
 	</modules>
 
 	<profiles>
@@ -399,12 +394,6 @@
 					<version>${org.springframework.version}</version>
 					<scope>test</scope>
 				</dependency>
-				<dependency>
-					<groupId>org.apache.lucene</groupId>
-					<artifactId>lucene-test-framework</artifactId>
-					<version>${org.apache.lucene.version}</version>
-					<scope>test</scope>
-				</dependency>
 			</dependencies>
 		</profile>
 
@@ -482,7 +471,7 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.2.2</version>
 			</plugin>
 
 			<plugin>
@@ -575,6 +564,7 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<debug>true</debug>
 				</configuration>
 			</plugin>
 
@@ -677,7 +667,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.2.2</version>
 				</plugin>
 
 				<plugin>
@@ -745,180 +735,6 @@
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.3.2</version>
 				</plugin>
-
-				<!--This plugin's configuration is used to store Eclipse m2e settings
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											properties-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-alpha-2,)
-										</versionRange>
-										<goals>
-											<goal>
-												read-project-properties
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											net.alchim31.maven
-										</groupId>
-										<artifactId>
-											scala-maven-plugin
-										</artifactId>
-										<versionRange>
-											[3.2.0,)
-										</versionRange>
-										<goals>
-											<goal>add-source</goal>
-											<goal>compile</goal>
-											<goal>testCompile</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-dependency-plugin
-										</artifactId>
-										<versionRange>
-											[2.4,)
-										</versionRange>
-										<goals>
-											<goal>
-												unpack-dependencies
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-assembly-plugin
-										</artifactId>
-										<versionRange>
-											[2.2-beta-5,)
-										</versionRange>
-										<goals>
-											<goal>single</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-antrun-plugin
-										</artifactId>
-										<versionRange>
-											[1.6,)
-										</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											net.alchim31.maven
-										</groupId>
-										<artifactId>
-											yuicompressor-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.1,)
-										</versionRange>
-										<goals>
-											<goal>compress</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-ear-plugin
-										</artifactId>
-										<versionRange>
-											[2.8,)
-										</versionRange>
-										<goals>
-											<goal>
-												generate-application-xml
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											pl.project13.maven
-										</groupId>
-										<artifactId>
-											git-commit-id-plugin
-										</artifactId>
-										<versionRange>
-											[2.1.4,)
-										</versionRange>
-										<goals>
-											<goal>revision</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -935,7 +751,7 @@
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>javax.servlet.jsp-api</artifactId>
-			<version>2.2.1</version>
+			<version>2.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -945,12 +761,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.10</version>
+			<version>1.7.13</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.2</version>
+			<version>1.1.3</version>
 		</dependency>
 
 		<dependency>
@@ -1007,7 +823,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.6.2</version>
+			<version>1.7.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -1056,28 +872,7 @@
 
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>courses</artifactId>
-				<version>${project.version}</version>
-				<type>jar</type>
-				<classifier>jar</classifier>
-			</dependency>
-			<dependency>
-				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>profiles</artifactId>
-				<version>${project.version}</version>
-				<type>jar</type>
-				<classifier>jar</classifier>
-			</dependency>
-			<dependency>
-				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>web</artifactId>
-				<version>${project.version}</version>
-				<type>jar</type>
-				<classifier>jar</classifier>
-			</dependency>
-			<dependency>
-				<groupId>uk.ac.warwick.tabula</groupId>
-				<artifactId>attendance</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

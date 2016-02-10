@@ -156,9 +156,9 @@
 							   data-placement="bottom"
 							   data-container="body"
 							   data-content='${popoverContent}'
-							   data-html="true">
+							   data-html="true"><#compress>
 								<i class="fa fa-question-circle"></i>
-							</a>
+							</#compress></a>
 							</span>
 						<div class="btn-group">
 							<button type="button" class="btn btn-default">

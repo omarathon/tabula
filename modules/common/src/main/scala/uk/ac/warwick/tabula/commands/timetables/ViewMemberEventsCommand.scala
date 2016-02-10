@@ -123,9 +123,12 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 				.map(eventsToOccurrences)
 
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
+			.map(_.filterNot { event =>
+				event.end.toLocalDate.isBefore(start) || event.start.toLocalDate.isAfter(end)
+			})
 
 		Try(Await.result(
-			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
+			Futures.flatten(timetableOccurrences, meetingOccurrences), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 
@@ -145,7 +148,7 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
 
 		Try(Await.result(
-			Futures.flatten(Seq(timetableOccurrences, meetingOccurrences)), ViewMemberEventsCommand.Timeout
+			Futures.flatten(timetableOccurrences, meetingOccurrences), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 

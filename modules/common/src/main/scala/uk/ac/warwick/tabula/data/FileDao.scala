@@ -1,28 +1,24 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.data.model.{FileAttachmentToken, FileAttachment}
-import org.springframework.stereotype.Repository
+import com.google.common.net.MediaType
+import org.hibernate.`type`.StringType
+import org.hibernate.criterion.Order._
+import org.hibernate.criterion.{Projections, Restrictions => Is}
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
-import java.io.File
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.util.FileCopyUtils
-import java.io.FileOutputStream
-import java.io.InputStream
-import org.hibernate.criterion.{ Restrictions => Is }
-import org.hibernate.criterion.Order._
-import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.data.Transactions._
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation._
-import uk.ac.warwick.tabula.helpers.Logging
-import org.hibernate.criterion.Projections
-import org.hibernate.`type`.StringType
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.spring.Wire
-import java.io.FileInputStream
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{FileAttachment, FileAttachmentToken}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
+import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
+
+import scala.collection.JavaConversions._
 
 trait FileDaoComponent {
 	def fileDao: FileDao
@@ -40,36 +36,44 @@ trait SHAFileHasherComponent extends FileHasherComponent {
 	val fileHasher = new SHAFileHasher
 }
 
+
 @Repository
-class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHasherComponent {
+class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 
-	@Value("${filesystem.attachment.dir}") var attachmentDir: File = _
-	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
-
-	val idSplitSize = 2
-	val idSplitSizeCompat = 4 // for existing paths split by 4 chars
+	@Autowired var objectStorageService: ObjectStorageService = _
 
 	val TemporaryFileBatch = 1000 // query for this many each time
 	val TemporaryFileSubBatch = 50 // run a separate transaction for each one
 	val TemporaryFileMaxAgeInDays = 14 // TAB-2109
 
-	private def partition(id: String, splitSize: Int): String = id.replace("-", "").grouped(splitSize).mkString("/")
-	private def partition(id: String): String = partition(id, idSplitSize)
-	private def partitionCompat(id: String): String = partition(id, idSplitSizeCompat)
-
-	/**
-	 * Retrieves a File object where you can store data under this ID. It doesn't check
-	 * whether the File already exists. If you want to retrieve an existing file you must
-	 * use #getData which checks whether it exists and also knows to check the old-style path if needed.
-	 */
-	def targetFile(id: String): File = new File(attachmentDir, partition(id))
-	def targetFileCompat(id: String): File = new File(attachmentDir, partitionCompat(id))
-
 	private def saveAttachment(file: FileAttachment) = {
 		session.saveOrUpdate(file)
 
 		if (!file.hasData && file.uploadedData != null) {
-			persistFileData(file, file.uploadedData)
+			val hash =
+				if (file.uploadedData.markSupported()) {
+					try {
+						Some(fileHasher.hash(file.uploadedData))
+					} finally {
+						file.uploadedData.reset()
+					}
+				} else {
+					// TODO need a solution here, write to a temporary file, ensure temporary file is deleted once written
+					None
+				}
+
+			hash.foreach { computedHash =>
+				file.hash = computedHash
+				session.saveOrUpdate(file)
+			}
+
+			val metadata = ObjectStorageService.Metadata(
+				contentLength = file.uploadedDataLength,
+				contentType = MediaType.OCTET_STREAM.toString, // TODO start storing content types
+				fileHash = hash
+			)
+
+			objectStorageService.push(file.id, file.uploadedData, metadata)
 		}
 
 		file
@@ -90,17 +94,6 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 		file
 	}
 
-	def persistFileData(file: FileAttachment, inputStream: InputStream) {
-		val target = targetFile(file.id)
-		val directory = target.getParentFile
-		directory.mkdirs()
-		if (!directory.exists) throw new IllegalStateException("Couldn't create directory to store file")
-		FileCopyUtils.copy(inputStream, new FileOutputStream(target))
-
-		file.hash = fileHasher.hash(new FileInputStream(target))
-		session.saveOrUpdate(file)
-	}
-
 	def getFileById(id: String) = getById[FileAttachment](id)
 
 	def getFileByStrippedId(id: String) = transactional(readOnly = true) {
@@ -108,16 +101,6 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
 				.setMaxResults(1)
 				.uniqueResult
-	}
-
-	/** Only for use by FileAttachment to find its own backing file. */
-	def getData(id: String): Option[File] = targetFile(id) match {
-		case file: File if file.exists => Some(file)
-		// If no file found, check if it's stored under old 4-character path style
-		case _ => targetFileCompat(id) match {
-			case file: File if file.exists => Some(file)
-			case _ => None
-		}
 	}
 
 	def getFilesCreatedSince(createdSince: DateTime, maxResults: Int): Seq[FileAttachment] = transactional(readOnly = true) {
@@ -160,8 +143,9 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.
 	 */
-	def deleteOldTemporaryFiles = {
+	def deleteOldTemporaryFiles(): Int = {
 		val oldFiles = findOldTemporaryFiles
+
 		/*
 		 * This is a fun time for getting out of sync.
 		 * Trying to run a few at a time in a separate transaction so that if something
@@ -187,7 +171,7 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 			// WARNING isAttached isn't exhaustive so this won't protect you all the time.
 			val (dontDelete, okayToDelete) = files partition (_.isAttached)
 
-			if (dontDelete.size > 0) {
+			if (dontDelete.nonEmpty) {
 				// Somewhere else in the app is failing to set temporary=false
 				logger.error(
 					"%d fileAttachments are temporary but are attached to another entity! " +
@@ -198,31 +182,9 @@ class FileDao extends Daoisms with InitializingBean with Logging with SHAFileHas
 			session.newQuery[FileAttachment]("delete FileAttachment f where f.id in :ids")
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.run()
-			for (attachment <- okayToDelete; file <- getData(attachment.id)) {
-				logger.info(s"Deleting attachment: id=${
-					attachment.id
-				}, path=${
-					file.getAbsolutePath
-				}, name=${
-					attachment.name
-				}, uploadedDate=${
-					attachment.dateUploaded.toString()
-				}, uploadedBy=${
-					attachment.uploadedBy
-				}")
 
-				file.delete()
-			}
+			// TODO Should we be deleting from the Object Store? Maybe one day, if capacity becomes an issue
 		}
 	}
 
-	def afterPropertiesSet {
-		if (!attachmentDir.isDirectory) {
-			if (createMissingDirectories) {
-				attachmentDir.mkdirs()
-			} else {
-				throw new IllegalStateException("Attachment store '" + attachmentDir + "' must be an existing directory")
-			}
-		}
-	}
 }

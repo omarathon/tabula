@@ -1,35 +1,65 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
-import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import java.util.concurrent.TimeoutException
 
-import ListSubmissionsCommand._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConversions._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object ListSubmissionsCommand {
+	type CommandType = Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest
+
 	case class SubmissionListItem(submission: Submission, downloaded: Boolean)
+
+	def apply(module: Module, assignment: Assignment) =
+		new ListSubmissionsCommandInternal(module, assignment)
+			with ComposableCommand[Seq[SubmissionListItem]]
+			with ListSubmissionsRequest
+			with ListSubmissionsPermissions
+			with AutowiringAuditEventQueryServiceComponent
+			with Unaudited with ReadOnly
 }
 
-class ListSubmissionsCommand(val module: Module, val assignment: Assignment) extends Command[Seq[SubmissionListItem]] with Unaudited with ReadOnly {
+trait ListSubmissionsState {
+	def module: Module
+	def assignment: Assignment
+}
 
-	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Submission.Read, assignment)
+trait ListSubmissionsRequest extends ListSubmissionsState {
+	var checkIndex: Boolean = true
+}
 
-	var auditIndex = Wire.auto[AuditEventIndexService]
-	var checkIndex = true
+abstract class ListSubmissionsCommandInternal(val module: Module, val assignment: Assignment)
+	extends CommandInternal[Seq[SubmissionListItem]]
+		with ListSubmissionsState {
+	self: ListSubmissionsRequest with AuditEventQueryServiceComponent =>
 
-	def applyInternal() = {
+	override def applyInternal(): Seq[SubmissionListItem] = {
 		val submissions = assignment.submissions.sortBy(_.submittedDate).reverse
 		val downloads =
-			if (checkIndex) auditIndex.adminDownloadedSubmissions(assignment)
+			if (checkIndex) try {
+				Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment), 5.seconds)
+			} catch { case timeout: TimeoutException => Nil }
 			else Nil
-		submissions map { submission =>
+		submissions.map { submission =>
 			SubmissionListItem(submission, downloads.contains(submission))
 		}
 	}
+}
 
+trait ListSubmissionsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ListSubmissionsState =>
+
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
+		mustBeLinked(mandatory(assignment), mandatory(module))
+		p.PermissionCheck(Permissions.Submission.Read, assignment)
+	}
 }

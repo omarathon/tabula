@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentsChooseMarkerWorkflow}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, FileAttachment}
-import uk.ac.warwick.tabula.data.FileDao
 
 // scalastyle:off magic.number
 class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 
-	var dao: FileDao = mock[FileDao]
-	dao.getData(null) returns None
+	var objectStorageService = smartMock[ObjectStorageService]
+
+	// Start from the basis that the store is empty
+	objectStorageService.fetch(any[String]) returns None
+	objectStorageService.metadata(any[String]) returns None
 
 	val module = Fixtures.module("cs118")
 	val assignment = Fixtures.assignment("my assignment")
@@ -39,7 +39,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
-		a.fileDao = dao
+		a.objectStorageService = objectStorageService
 		a.uploadedDataLength = 300
 		file.attached.add(a)
 
@@ -74,7 +74,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
-		a.fileDao = dao
+		a.objectStorageService = objectStorageService
 		a.uploadedDataLength = 300
 		file.attached.add(a)
 

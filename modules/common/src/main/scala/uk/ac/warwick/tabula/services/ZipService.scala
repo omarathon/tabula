@@ -1,50 +1,33 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.File
-import java.io.InputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import java.io.{File, InputStream}
+import java.util.zip.{ZipEntry, ZipInputStream}
 
-import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
+import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream}
 import org.apache.commons.io.input.BoundedInputStream
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import uk.ac.warwick.tabula.helpers.Closeables._
-import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.userlookup.AnonymousUser
-import scala.collection.JavaConverters._
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.data.SHAFileHasherComponent
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Closeables._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-/**
- * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
- * 		 or if a feedback upload invalidates a zip while one is being generated/downloaded
- */
+import scala.collection.JavaConverters._
+
 @Service
-class ZipService extends InitializingBean with ZipCreator with Logging {
+class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent with Logging {
 
-	@Value("${filesystem.zip.dir}") var zipDir: File = _
-	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
 
 	val idSplitSize = 4
 
 	logger.info("Creating ZipService")
-
-	override def afterPropertiesSet() {
-		if (!zipDir.exists) {
-			if (createMissingDirectories) {
-				zipDir.mkdirs
-			} else {
-				throw new IllegalStateException("zip dir '%s' does not exist" format zipDir)
-			}
-		}
-	}
 
 	def partition(id: String): String = id.replace("-", "").grouped(idSplitSize).mkString("/")
 
@@ -59,10 +42,10 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
 	def invalidateIndividualFeedbackZip(feedback: Feedback) = invalidate(resolvePath(feedback))
 
-	def getFeedbackZip(feedback: Feedback): File =
+	def getFeedbackZip(feedback: Feedback): RenderableFile =
 		getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
 
-	def getSubmissionZip(submission: Submission): File =
+	def getSubmissionZip(submission: Submission): RenderableFile =
 		getZip(resolvePath(submission), getSubmissionZipItems(submission))
 
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
@@ -78,7 +61,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	/**
 	 * A zip of feedback with a folder for each student.
 	 */
-	def getAllFeedbackZips(assignment: Assignment): File =
+	def getAllFeedbackZips(assignment: Assignment): RenderableFile =
 		getZip(resolvePathForFeedback(assignment),
 			assignment.feedbacks.asScala flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
 		)
@@ -115,25 +98,25 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * Get a zip containing these submissions. If there is more than one submission
 	 * for a user, the zip _might_ work but look weird.
 	 */
-	def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = {(_,_) => }): File =
+	def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
 		createUnnamedZip(submissions flatMap getSubmissionZipItems, progressCallback)
 
 	/**
 		* Get a zip containing these feedbacks.
 	*/
-	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): File =
+	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
 		createUnnamedZip(feedbacks flatMap getFeedbackZipItems, progressCallback)
 
 	/**
 	 * Get a zip containing these marker feedbacks.
 	 */
-	def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): File =
+	def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): RenderableFile =
 		createUnnamedZip(markerFeedbacks flatMap getMarkerFeedbackZipItems)
 
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */
-	def getAllSubmissionsZip(assignment: Assignment): File =
+	def getAllSubmissionsZip(assignment: Assignment): RenderableFile =
 		getZip(resolvePathForSubmission(assignment),
 			assignment.submissions.asScala flatMap getSubmissionZipItems)
 
@@ -141,7 +124,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 * A zip of feedback templates for each student registered on the assignment
 	 * assumes a feedback template exists
 	 */
-	def getMemberFeedbackTemplates(users: Seq[User], assignment: Assignment): File = {
+	def getMemberFeedbackTemplates(users: Seq[User], assignment: Assignment): RenderableFile = {
 		val templateFile = assignment.feedbackTemplate.attachment
 		val zipItems:Seq[ZipItem] = for (user <- users) yield {
 			val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
@@ -162,7 +145,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		}
 	}
 
-	def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): File =
+	def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): RenderableFile =
 		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
 
 	private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
@@ -170,7 +153,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
-	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): File =
+	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): RenderableFile =
 		createUnnamedZip(getMemberNoteZipItems(memberNote))
 
 	private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
@@ -178,7 +161,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 			ZipFileItem(attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
 
-	def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): File = {
+	def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): RenderableFile = {
 		createUnnamedZip(results.map{case(uniId, files) =>
 			ZipFolderItem(uniId, files.zipWithIndex.map{case(file, index) =>
 				if (index == 0)

@@ -178,7 +178,7 @@ $(function() {
 			if ($this.data('lid') === undefined || $this.data('lid').length === 0)
 				return;
 
-			$this.closest('.controls').find('input[type="hidden"]').val($this.data('lid'));
+			$this.closest('.form-group').find('input[type="hidden"]').val($this.data('lid'));
 			$this.data('lid','');
 		})
 		.locationPicker();

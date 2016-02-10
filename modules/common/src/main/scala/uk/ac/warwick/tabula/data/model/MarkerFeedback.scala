@@ -37,19 +37,20 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 			case assignmentFeedback: AssignmentFeedback =>
 				val student = feedback.universityId
 				val assignment = assignmentFeedback.assignment
-				val workflow = assignment.markingWorkflow
-				getFeedbackPosition match {
-					case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
-					case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
-					case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
-					case _ => None
+				Option(assignment.markingWorkflow).flatMap { workflow =>
+					getFeedbackPosition match {
+						case FirstFeedback => workflow.getStudentsFirstMarker(assignment, student)
+						case SecondFeedback => workflow.getStudentsSecondMarker(assignment, student)
+						case ThirdFeedback => workflow.getStudentsFirstMarker(assignment, student)
+						case _ => None
+					}
 				}
 			case _ => None
 		}
 
 	}
 
-	def getMarkerUser: User = userLookup.getUserByUserId(getMarkerUsercode.get)
+	def getMarkerUser: Option[User] = getMarkerUsercode.map(userLookup.getUserByUserId)
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id", nullable = false)
