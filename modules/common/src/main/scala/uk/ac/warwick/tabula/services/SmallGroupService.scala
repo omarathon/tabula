@@ -51,7 +51,7 @@ trait SmallGroupService {
 	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet]
 
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
-	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
+	def findSmallGroupSetsByMember(user: User): Seq[SmallGroupSet]
 
 	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false): Unit
