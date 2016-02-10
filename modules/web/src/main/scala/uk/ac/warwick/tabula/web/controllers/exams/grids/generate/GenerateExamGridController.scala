@@ -280,7 +280,16 @@ class GenerateExamGridController extends ExamsController
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
-			GenerateExamGridExporter(entities, columns, academicYear)
+			GenerateExamGridExporter(
+				department,
+				academicYear,
+				selectCourseCommand.course,
+				selectCourseCommand.route,
+				selectCourseCommand.yearOfStudy,
+				weightings,
+				entities,
+				columns
+			)
 		)
 	}
 

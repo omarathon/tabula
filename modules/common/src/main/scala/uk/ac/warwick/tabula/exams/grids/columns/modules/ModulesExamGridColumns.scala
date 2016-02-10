@@ -24,12 +24,13 @@ trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal)
 	extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
+	def moduleSelectionStatus: Option[ModuleSelectionStatus]
+
 	override val title: String = s"${module.code.toUpperCase} ${module.name}"
 
 	override def render: Map[String, String] =
 		entities.map(entity => entity.id -> {
-			val modreg = entity.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
-			modreg.map(mr => {
+			getModuleRegistration(entity).map(mr => {
 				val mark = markWithOverride(entity, mr)
 				if (mark != null) {
 					// entity.studentCourseYearDetails.isDefined checks if this is a real SCYD or just an entity for showing overcatting options
@@ -53,8 +54,7 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 	): Unit = {
 		val cell = row.createCell(index)
-		val modreg = entity.moduleRegistrations.find(mr => mr.module == module && mr.cats == cats)
-		modreg.foreach(mr => {
+		getModuleRegistration(entity).foreach(mr => {
 			val mark = markWithOverride(entity, mr)
 			if (mark != null) {
 				val usedInOvercatting = entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))
@@ -87,6 +87,14 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 		})
 	}
 
+	private def getModuleRegistration(entity: GenerateExamGridEntity): Option[ModuleRegistration] = {
+		entity.moduleRegistrations.find(mr =>
+			mr.module == module &&
+				mr.cats == cats &&
+				(moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
+		)
+	}
+
 	private def markWithOverride(entity: GenerateExamGridEntity, moduleRegistration: ModuleRegistration): BigDecimal = {
 		entity.markOverrides.getOrElse(Map()).getOrElse(module, Option(moduleRegistration.agreedMark).map(m => BigDecimal(m)).orNull)
 	}
@@ -115,6 +123,8 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 		override val category: String = "Core Modules"
 
+		override val moduleSelectionStatus = Option(ModuleSelectionStatus.Core)
+
 	}
 
 	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
@@ -137,6 +147,8 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Required Modules"
+
+		override val moduleSelectionStatus = None
 
 	}
 
@@ -161,6 +173,8 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 		override val category: String = "Core Optional Modules"
 
+		override val moduleSelectionStatus = Option(ModuleSelectionStatus.OptionalCore)
+
 	}
 
 	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
@@ -183,6 +197,8 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Optional Modules"
+
+		override val moduleSelectionStatus = Option(ModuleSelectionStatus.Option)
 
 	}
 
