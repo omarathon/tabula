@@ -67,9 +67,8 @@ instances:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
-    excluded_war_names:
-    - scheduling
-    - api
+    war_names:
+    - ROOT
     test_path: /service/gtg
     requests:
        /service/gtg: 200
@@ -81,9 +80,8 @@ instances:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
-    excluded_war_names:
-    - scheduling
-    - api
+    war_names:
+    - ROOT
     test_path: /service/gtg
     requests:
        /service/gtg: 200
