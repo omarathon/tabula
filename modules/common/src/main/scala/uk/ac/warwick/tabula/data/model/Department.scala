@@ -294,7 +294,7 @@ class Department extends GeneratedId
 			}
 		}
 
-		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find { matches } match {
+		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find(matches) match {
 			case Some(role) => Option(role)
 			case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
 			case _ => None
