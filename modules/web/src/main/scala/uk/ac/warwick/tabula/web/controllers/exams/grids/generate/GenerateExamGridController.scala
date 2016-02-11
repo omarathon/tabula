@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.marking.YearColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleReportsColumnOption, CoreRequiredModulesColumnOption, ModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
@@ -119,11 +120,11 @@ class GenerateExamGridController extends ExamsController
 				errors.reject("examGrid.noStudents")
 				selectCourseRender(selectCourseCommand, department, academicYear)
 			} else {
-				val jobId = jobService.addSchedulerJob("import-members", Map("members" -> students.map(_.universityId)), user.apparentUser)
+				val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
 				if (gridOptionsCommand.predefinedColumnIdentifiers.isEmpty) {
 					gridOptionsCommand.predefinedColumnIdentifiers.addAll(allExamGridsColumns.map(_.identifier).asJava)
 				}
-				gridOptionsRender(jobId, selectCourseCommand, department, academicYear)
+				gridOptionsRender(jobInstance.id, selectCourseCommand, department, academicYear)
 			}
 		}
 	}
