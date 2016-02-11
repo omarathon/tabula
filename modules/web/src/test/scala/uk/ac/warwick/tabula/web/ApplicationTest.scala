@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.web
 
-import org.junit.Test
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.web.controllers.sysadmin.SysadminController

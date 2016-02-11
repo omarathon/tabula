@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.LoginDetails
 trait AdminFixtures extends BrowserTest {
 
 	before {
-		go to Path("/scheduling/fixtures/setup")
+		go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
 	}
 

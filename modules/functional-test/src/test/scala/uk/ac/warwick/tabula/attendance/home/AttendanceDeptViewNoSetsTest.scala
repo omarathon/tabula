@@ -12,7 +12,7 @@ class AttendanceDeptViewNoSetsTest  extends BrowserTest with FeaturesDriver with
 	val TEST_UNDERGRAD_COURSE_CODE="Ux123"
 
 	before {
-		go to Path("/scheduling/fixtures/setup")
+		go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
 
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	before {
-		go to Path("/scheduling/fixtures/setup")
+		go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
 
 		createStaffMember(P.Marker1.usercode, deptCode = "xxx")

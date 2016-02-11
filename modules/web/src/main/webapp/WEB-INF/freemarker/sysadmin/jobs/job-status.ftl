@@ -1,29 +1,34 @@
-<#if info.ajax>
+<h1>Job status</h1>
 
-	<#include "job-status-fragment.ftl" />
+<p>Job ID ${jobId}</p>
 
-<#else>
-
-	<h1>Job status</h1>
-
-	<p>Job ID ${jobId}</p>
-
-	<div id="job-status-fragment">
-	<#include "job-status-fragment.ftl" />
+<div id="job-status">
+	<div class="progress progress-striped active">
+		<div class="bar" style="width: 0;"></div>
 	</div>
+	<p class="status"></p>
+</div>
 
-	<script>
-	(function($){
-
-	var $fragment = $('#job-status-fragment');
+<script>
+(function($){
 	var updateFragment = function() {
-		$fragment.load('/sysadmin/jobs/job-status', {id: '${jobId}', ts: new Date().getTime()}, function(){
-			setTimeout(updateFragment, 2000);
+		$.get('${url('/sysadmin/jobs/job-status')}', {id: '${jobId}'}, function(data){
+			if (data.succeeded) {
+				$('.progress .bar').width("100%");
+				$('.progress').removeClass('active progress-striped');
+				if (data.status) {
+					$('#job-status').find('.status').html(data.status);
+				}
+			} else {
+				$('.progress .bar').width(data.progress + "%");
+				if (data.status) {
+					$('#job-status').find('.status').html(data.status);
+				}
+				setTimeout(updateFragment, 2000);
+			}
 		});
 	};
 	setTimeout(updateFragment, 2000);
 
-	})(jQuery);
-	</script>
-
-</#if>
+})(jQuery);
+</script>
