@@ -18,6 +18,8 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModuleRegistration
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+
 import scala.collection.immutable.HashMap
 
 /**
@@ -80,12 +82,12 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 			val row = ModuleRegistrationRow(
 				scjCode = "%s/1".format(universityId),
 				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
-				cats = new java.math.BigDecimal(15),
+				cats = new JBigDecimal(15),
 				assessmentGroup = "A",
 				selectionStatusCode = "C",
 				occurrence = "A",
 				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
-				agreedMark = Some(new java.math.BigDecimal("90.0")),
+				agreedMark = Some(new JBigDecimal("90.0")),
 				agreedGrade = "A"
 			)
 
@@ -232,11 +234,11 @@ object ModuleRegistrationImporter {
 case class ModuleRegistrationRow(
 	scjCode: String,
 	sitsModuleCode: String,
-	cats: java.math.BigDecimal,
+	cats: JBigDecimal,
 	assessmentGroup: String,
 	selectionStatusCode: String,
 	occurrence: String,
 	academicYear: String,
-	var agreedMark: Option[java.math.BigDecimal],
+	var agreedMark: Option[JBigDecimal],
 	agreedGrade: String
 )

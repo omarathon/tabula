@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAccreditedPriorLea
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import org.joda.time.DateTime
-import java.math.BigDecimal
 
 /**
  * Import accredited prior learning data from SITS.
@@ -78,7 +77,7 @@ class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImpo
 				awardCode = "BA",
 				sequenceNumber = 1,
 				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
-				cats = new java.math.BigDecimal(15),
+				cats = new JBigDecimal(15),
 				levelCode = "2",
 				reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"
 			)
@@ -151,6 +150,6 @@ case class AccreditedPriorLearningRow(
 	val awardCode: String,
 	val sequenceNumber: Int,
 	val academicYear: String,
-	val cats: java.math.BigDecimal,
+	val cats: JBigDecimal,
 	val levelCode: String,
 	val reason: String) {}

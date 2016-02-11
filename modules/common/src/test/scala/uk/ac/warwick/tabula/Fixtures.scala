@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -335,7 +336,7 @@ object Fixtures extends Mockito {
 	def moduleRegistration(
 		scd: StudentCourseDetails,
 		mod: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		year: AcademicYear,
 		occurrence: String = "",
 		agreedMark: BigDecimal = BigDecimal(0),

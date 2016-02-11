@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
-
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import scala.math.BigDecimal.RoundingMode
 
 trait ModuleRegistrationService {
@@ -18,7 +18,7 @@ trait ModuleRegistrationService {
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration]
@@ -53,7 +53,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration] =

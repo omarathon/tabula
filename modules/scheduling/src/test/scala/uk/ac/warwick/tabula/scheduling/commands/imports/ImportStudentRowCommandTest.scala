@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.math.BigDecimal
 import java.sql.{Date, ResultSet, ResultSetMetaData}
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
@@ -20,6 +19,7 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeServ
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 trait ComponentMixins extends Mockito
 		with ProfileServiceComponent
@@ -135,7 +135,7 @@ trait MockedResultSet extends Mockito {
 	rs.getString("course_code") returns "UESA-H612"
 	rs.getString("disability") returns "Q"
 	rs.getString("award_code") returns "BA"
-	rs.getBigDecimal("sce_agreed_mark") returns new BigDecimal(66.666666)
+	rs.getBigDecimal("sce_agreed_mark") returns new JBigDecimal(66.666666)
 }
 
 // scalastyle:off magic.number

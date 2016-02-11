@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, Genera
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, Module, ModuleSelectionStatus}
 import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 
@@ -21,7 +22,7 @@ trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 
 }
 
-abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal)
+abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal)
 	extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
@@ -119,7 +120,7 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Modules"
 
@@ -144,7 +145,7 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreRequiredModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Required Modules"
 
@@ -169,7 +170,7 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreOptionalModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Core Optional Modules"
 
@@ -194,7 +195,7 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OptionalModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: java.math.BigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
 
 		override val category: String = "Optional Modules"
 

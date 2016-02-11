@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
@@ -45,7 +46,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		// the given supervisor member.
 		def assertRelationshipIsValid(scd: StudentCourseDetails, expectedSupervisor: StaffMember) {
 			val supRels = scd.relationships(relationshipType)
-			withClue(s"should be 1 item in ${supRels}") { supRels.size should be (1) }
+			withClue(s"should be 1 item in $supRels") { supRels.size should be (1) }
 			val rel = supRels.head
 
 			rel.endDate should be (null)
@@ -87,7 +88,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	@Test def testCaptureValidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
-			val codes = Seq((supervisor.universityId, new java.math.BigDecimal("100")))
+			val codes = Seq((supervisor.universityId, new JBigDecimal("100")))
 			val importer = smartMock[SupervisorImporter]
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 

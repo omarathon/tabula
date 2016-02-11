@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.AcademicYear
 
@@ -23,10 +23,10 @@ class CourseYearWeighting extends GeneratedId with Ordered[CourseYearWeighting] 
 	var yearOfStudy: Int = _
 
 	@NotNull
-	var weighting: java.math.BigDecimal = _
+	var weighting: JBigDecimal = _
 
 	@transient
-	private val percentageMultiplier = new java.math.BigDecimal(100)
+	private val percentageMultiplier = new JBigDecimal(100)
 
 	def weightingAsPercentage = weighting.multiply(percentageMultiplier).stripTrailingZeros.toPlainString + "%"
 

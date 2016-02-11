@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{SitsAcademicYearAware, SitsAcademicYearService}
 import uk.ac.warwick.tabula.services.{ModuleRegistrationServiceImpl, SmallGroupService}
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
-import scala.collection.mutable.HashSet
-import scala.language.implicitConversions
+import scala.collection.mutable
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {
@@ -48,7 +48,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush()
 
 		// register the student on the module
-		val existingMr = new ModuleRegistration(scd, existingMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
+		val existingMr = new ModuleRegistration(scd, existingMod, new JBigDecimal(30), new AcademicYear(2013), "A")
 		session.saveOrUpdate(existingMr)
 		scd.addModuleRegistration(existingMr)
 		session.saveOrUpdate(scd)
@@ -103,7 +103,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.moduleRegistrations.contains(existingMr) should be (true)
 			session.flush()
 
-			val newMr = new ModuleRegistration(scd, newMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
+			val newMr = new ModuleRegistration(scd, newMod, new JBigDecimal(30), new AcademicYear(2013), "A")
 			session.saveOrUpdate(newMr)
 			session.flush()
 			scd.addModuleRegistration(newMr)
@@ -240,7 +240,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 	@Transactional
 	@Test
-	def testConvertKeysToIds {
+	def testConvertKeysToIds(): Unit = {
 		new Environment {
 
 			scyd = scydDao.getBySceKey(scyd.studentCourseDetails, scyd.sceSequenceNumber).get
@@ -249,7 +249,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scyd2 = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber).get
 			val idForScyd2 = scyd2.id
 
-			val keys = new HashSet[StudentCourseYearKey]
+			val keys = new mutable.HashSet[StudentCourseYearKey]
 
 			keys.add(key1)
 			keys.add(key2)

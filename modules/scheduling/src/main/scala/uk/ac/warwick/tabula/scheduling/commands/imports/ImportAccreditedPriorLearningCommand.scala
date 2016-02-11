@@ -29,7 +29,7 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 	val awardCode = accreditedPriorLearningRow.awardCode
 	val sequenceNumber = accreditedPriorLearningRow.sequenceNumber
 	val academicYear = AcademicYear.parse(accreditedPriorLearningRow.academicYear)
-	val cats: java.math.BigDecimal = accreditedPriorLearningRow.cats
+	val cats: JBigDecimal = accreditedPriorLearningRow.cats
 	val levelCode = accreditedPriorLearningRow.levelCode
 	val reason = accreditedPriorLearningRow.reason
 
@@ -40,28 +40,26 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 			case None =>
 				logger.warn("Can't record accredited prior learning - could not find a StudentCourseDetails for " + scjCode)
 				None
-			case Some(scd: StudentCourseDetails) => {
+			case Some(scd: StudentCourseDetails) =>
 				awardImporter.getAwardByCodeCached(awardCode) match {
 					case None =>
 						logger.warn("Can't record accredited prior learning - could not find award for award code " + awardCode)
 						None
-					case Some(award: Award) => {
+					case Some(award: Award) =>
 						levelImporter.getLevelByCodeCached(levelCode) match {
 							case None =>
 								logger.warn ("Can't record accredited prior learning - couldn't find level for level code " + levelCode)
 								None
 							case Some(level: Level) => storeAccreditedPriorLearning(scd, award, level)
 						}
-					}
 				}
-			}
 		}
 	})
 
 
 	def storeAccreditedPriorLearning(scd: StudentCourseDetails, award: Award, level: Level): Some[AccreditedPriorLearning] = {
 		val accreditedPriorLearningExisting: Option[AccreditedPriorLearning] = accreditedPriorLearningDao.getByNotionalKey(scd, award, sequenceNumber)
-		val isTransient = !accreditedPriorLearningExisting.isDefined
+		val isTransient = accreditedPriorLearningExisting.isEmpty
 
 		val accreditedPriorLearning = accreditedPriorLearningExisting match {
 			case Some(accreditedPriorLearning: AccreditedPriorLearning) => accreditedPriorLearning
@@ -90,20 +88,18 @@ class ImportAccreditedPriorLearningCommand(accreditedPriorLearningRow: Accredite
 
 		val level = levelImporter.getLevelByCodeCached(levelCode)
 		level match {
-			case Some(level: Level) => {
+			case Some(level: Level) =>
 				if (oldValue != level) {
 					destinationBean.setPropertyValue(property, level)
 					true
 				}
 				else false
-			}
-			case None => {
+			case None =>
 				if (oldValue != null) {
 					destinationBean.setPropertyValue(property, null)
 					true
 				}
 				else false
-			}
 		}
 	}
 

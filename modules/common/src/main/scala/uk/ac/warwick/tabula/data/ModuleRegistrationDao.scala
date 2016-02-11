@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 trait ModuleRegistrationDaoComponent {
 	val moduleRegistrationDao: ModuleRegistrationDao
@@ -20,7 +21,7 @@ trait ModuleRegistrationDao {
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration]
@@ -40,7 +41,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	) =
