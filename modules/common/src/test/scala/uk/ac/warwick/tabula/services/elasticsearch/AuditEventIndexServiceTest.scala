@@ -35,6 +35,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		indexer.indexName = AuditEventIndexServiceTest.this.indexName
 		indexer.client = AuditEventIndexServiceTest.this.client
 		indexer.auditEventService = service
+		service.auditEventIndexService = indexer
 
 		// Creates the index
 		indexer.ensureIndexExists().await should be (true)
@@ -109,14 +110,10 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 
 		service.listNewerThan(new DateTime(2000,1,1,0,0,0), 100).size should be (100)
 
-		stopwatch.start("indexing")
-
-		indexer.indexFrom(new DateTime(2000,1,1,0,0,0)).await
+		// Should have indexed as part of the save process
 
 		blockUntilCount(1020, indexName, indexType)
 		client.execute { search in indexName / indexType }.await.totalHits should be (1020)
-
-		stopwatch.stop()
 
 		val user = new User("jeb")
 		user.setWarwickId("0123456")

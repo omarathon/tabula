@@ -30,6 +30,7 @@ trait TestElasticsearchClient extends ElasticSugar {
 				.put("index.number_of_shards", 3)
 				.put("index.number_of_replicas", 0)
 				.put("index.refresh_interval", "1s")
+				.put("threadpool.bulk.queue_size", -1)
 				.put("discovery.zen.ping.multicast.enabled", "false")
 				.put("es.logger.level", "DEBUG")
 				.put("cluster.name", getClass.getSimpleName)
