@@ -256,12 +256,6 @@ Directory structure
       - `test`
       - `console`
 
-Creating a new module
----------
-
-When creating a new module, if it is a web app then you need to have an empty `.war-project` file in the WEB-INF directory.
-This tells the build to do certain stuff.
-
 Maven overlays
 ---------
 

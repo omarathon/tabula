@@ -4,8 +4,8 @@ import org.joda.time.DateTime
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.scheduling.commands._
-import uk.ac.warwick.tabula.scheduling.commands.imports._
+import uk.ac.warwick.tabula.commands.scheduling._
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAssignmentsCommand, ImportProfilesCommand, ImportAcademicInformationCommand}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService

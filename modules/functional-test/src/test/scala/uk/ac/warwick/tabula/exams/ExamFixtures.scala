@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 class ExamFixtures extends BrowserTest with FeaturesDriver with GivenWhenThen {
 
 	before {
-		go to Path("/scheduling/fixtures/setup")
+		go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
 
 		Given("The exams feature is enabled")

@@ -9,13 +9,13 @@ import org.joda.time.DateTime
 trait FixturesDriver extends SimpleHttpFetching {
 
 	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = "") = {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/update/extensionSettings"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/extensionSettings"
 		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "allow" -> allow.toString, "userId" -> managerUserId)
 		http.when(_==200)(req >| )
 	}
 
 	def createModule(departmentCode: String, code: String, name: String) {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/module"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/module"
 		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "code" -> code, "name" -> name)
 		http.when(_==200)(req >| )
 	}
@@ -29,7 +29,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 													maxGroupSize:Int = 0,
 													releasedToStudents:Boolean = true,
 													allowSelfGroupSwitching:Boolean  = true):String  = {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupset"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
 			"groupSetName" -> groupSetName,
@@ -48,14 +48,14 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createSmallGroupEvent(setId: String,title: String, weekRange:String="1") {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupEvent"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupEvent"
 		val req = url(uri).POST << Map("setId" -> setId, "title" -> title, "weekRange"->weekRange)
 		http.when(_==200)(req >| )
 	}
 
 
   def addStudentToGroupSet(studentUserId: String, setId:String){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupsetMembership"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupsetMembership"
 		val req = url(uri).POST << Map(
 			"groupSetId" -> setId,
 			"userId" -> studentUserId)
@@ -63,7 +63,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def addStudentToGroup(studentUserId: String, setId:String, groupName:String){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupMembership"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupMembership"
 		val req = url(uri).POST << Map(
 			"groupSetId" -> setId,
 			"userId" -> studentUserId,
@@ -78,7 +78,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 													courseCode:String="",
 													deptCode:String="",
 													academicYear:String = "2014"){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/studentMember"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
 			"genderCode"->genderCode,
@@ -92,7 +92,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createStaffMember(userId:String, genderCode:String = "M", deptCode:String=""){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/staffMember"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/staffMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
 			"genderCode"->genderCode,
@@ -107,7 +107,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 			case Some(d)=>Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
 		}).flatten
 		val params:Seq[(String,String)] = Seq("deptCode"->deptCode,"assignmentName"->assignmentName) ++ datesToUpdate
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/update/assignment"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/assignment"
 		val req = url(uri).POST << Map(
 			params :_*
 		)
@@ -115,7 +115,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createExtension(userId: String, assignmentId: String, approved: Boolean) {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/extension"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/extension"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
 			"assignmentId" -> assignmentId,
@@ -124,7 +124,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createRoute(routeCode:String, departmentCode:String, routeName:String, degreeType:String="UG" ){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/route"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/route"
 		val req = url(uri).POST << Map(
 			"routeCode" -> routeCode,
 			"departmentCode"->departmentCode,
@@ -135,7 +135,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 
 
 	def createCourse(courseCode:String, courseName:String ){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/course"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/course"
 		val req = url(uri).POST << Map(
 			"courseCode" -> courseCode,
 			"courseName"->courseName)
@@ -144,7 +144,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 
 	def registerStudentsOnModule(students:Seq[LoginDetails], moduleCode:String){
 		val uniIds = students.map(_.warwickId).mkString(",")
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/moduleRegistration"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/moduleRegistration"
 		val req = url(uri).POST << Map(
 			"universityIds" -> uniIds,
 			"moduleCode" -> moduleCode)
@@ -152,7 +152,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationshipType:String = "tutor"){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/relationship"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/relationship"
 		val req = url(uri).POST << Map(
 			"studentUniId" -> student.warwickId,
 			"agent"->agent.warwickId,
@@ -162,7 +162,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createMonitoringPointSet(routeCode:String, pointCount:Int, academicYear:String, yearOption:Option[Int]){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/monitoringPointSet"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/monitoringPointSet"
 		var args = Map(
 			"routeCode" -> routeCode,
 			"pointCount"-> pointCount.toString,
@@ -176,7 +176,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createAttendanceMonitoringScheme(deptCode:String, pointCount:Int, academicYear:String, warwickId:String ){
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/attendanceMonitoringScheme"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/attendanceMonitoringScheme"
 		val args = Map(
 			"deptCode" -> deptCode,
 			"pointCount"-> pointCount.toString,
@@ -189,7 +189,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createAssessmentComponent(departmentCode: String, moduleCode: String, name: String, assessmentGroup: String = "A", sequence: String = "A01") {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/assessmentComponent"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/assessmentComponent"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
 			"assessmentGroup" -> assessmentGroup,
@@ -201,7 +201,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createUpstreamAssessmentGroup(moduleCode: String, universityIds: Seq[String], assessmentGroup: String = "A", occurrence: String = "A") {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/upstreamAssessmentGroup"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/upstreamAssessmentGroup"
 
 		val universityIdArgs: Map[String, String] = universityIds.zipWithIndex.map { case (universityId, index) =>
 			s"universityIds[$index]" -> universityId
@@ -218,7 +218,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createPremarkedAssignment(moduleCode: String): Unit = {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/premarkedAssignment"
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/premarkedAssignment"
 		val args = Map("moduleCode" -> moduleCode)
 		val req = url(uri).POST << args
 		http.when(_==200)(req >|)

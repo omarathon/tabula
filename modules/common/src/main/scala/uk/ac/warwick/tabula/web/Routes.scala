@@ -17,7 +17,6 @@ object Routes {
 	val admin      = tabula.admin.web.Routes
 	val sysadmin   = tabula.sysadmin.web.Routes
 	val reports    = tabula.reports.web.Routes
-	val scheduling = tabula.scheduling.web.Routes
 	val api        = tabula.api.web.Routes
 
 }

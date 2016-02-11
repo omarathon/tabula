@@ -25,28 +25,6 @@
 	</scm>
 
 	<profiles>
-		<!-- Scheduling is NEVER skinny -->
-		<profile>
-			<id>skinny</id>
-
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-war-plugin</artifactId>
-						<configuration>
-							<packagingExcludes>##########################NOTHING-TO-EXCLUDE#############################</packagingExcludes>
-							<archive>
-								<manifest>
-									<addClasspath>false</addClasspath>
-									<classpathPrefix></classpathPrefix>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
 		<!-- deploy to container -->
 		<profile>
 			<id>deploy</id>
@@ -113,15 +91,6 @@
 								<include>WEB-INF/**/*</include>
 							</includes>
 						</overlay>
-						<overlay>
-							<groupId>uk.ac.warwick.tabula</groupId>
-							<artifactId>web</artifactId>
-							<type>zip</type>
-							<classifier>static-hashes</classifier>
-							<includes>
-								<include>WEB-INF/**/*</include>
-							</includes>
-						</overlay>
 					</overlays>
 				</configuration>
 			</plugin>
@@ -129,19 +98,9 @@
 	</build>
 
 	<dependencies>
-		<!-- Project dependencies - need a dependency on any module that runs a
-			job -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>web</artifactId>
-			<classifier>static-hashes</classifier>
-			<type>zip</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>web</artifactId>
-			<classifier>jar</classifier>
+			<artifactId>common</artifactId>
 		</dependency>
 
 		<dependency>
@@ -158,6 +117,19 @@
 					<artifactId>sso-client</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>common</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

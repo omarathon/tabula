@@ -463,27 +463,6 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>batchhash</id>
-						<phase>prepare-package</phase>
-						<configuration>
-							<target>
-								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
-									classpathref="maven.plugin.classpath" />
-
-								<batchhash
-									propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
-									maxhashlength="12" salt="a">
-									<fileset
-										dir="${project.build.directory}/${project.build.finalName}"
-										includes="static/**" excludes="**/*.less" />
-								</batchhash>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
 				</executions>
 				<dependencies>
 					<dependency>
@@ -510,17 +489,6 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<classifier>static-hashes</classifier>
-							<descriptor>src/main/assembly/static-hashes.xml</descriptor>
-						</configuration>
-					</execution>
-					<execution>
 						<id>make-errordocuments</id>
 						<phase>package</phase>
 						<goals>
@@ -537,4 +505,24 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>common</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

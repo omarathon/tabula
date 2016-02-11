@@ -123,11 +123,11 @@
 	</build>
 
 	<dependencies>
-		<!-- This isn't a war project, but it also kinda is. These would normally come from tabula-project, probably don't need them all -->
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>common</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>common</artifactId>

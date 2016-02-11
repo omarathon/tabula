@@ -14,7 +14,7 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 	val thisAcademicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
 	before {
-		go to Path("/scheduling/fixtures/setup")
+		go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
 
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")
