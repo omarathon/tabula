@@ -103,13 +103,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 
 		stopwatch.start("indexing")
 
-		indexer.incrementalIndex().await
-
-		blockUntilCount(100, indexName, indexType)
-		client.execute { search in indexName / indexType }.await.totalHits should be (100)
-
-		// This is a no-op
-		indexer.incrementalIndex().await
+		indexer.indexFrom(new DateTime(2000,1,1,0,0,0)).await
 
 		blockUntilCount(100, indexName, indexType)
 		client.execute { search in indexName / indexType }.await.totalHits should be (100)
@@ -152,7 +146,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		}
 
 		// index again to check that it doesn't do any once-only stuff
-		indexer.incrementalIndex().await
+		indexer.indexFrom(indexer.newestItemInIndexDate.await.get).await
 	}}
 
 }

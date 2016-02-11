@@ -277,6 +277,5 @@ object ModifyAssignmentCommandTest {
 		}
 		bean("dataSource"){mock[DataSource]}
 		bean(){mock[TriggerService]}
-		bean("indexTopic"){mock[Queue]}
 	}
 }

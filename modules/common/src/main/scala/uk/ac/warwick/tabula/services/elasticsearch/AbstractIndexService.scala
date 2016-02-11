@@ -129,41 +129,6 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		*/
 	private def guardMultipleIndexes[T](work: => T): T = this.synchronized(work)
 
-	/**
-		* Incremental index. Can be run often.
-		* Has a limit to how many items it will load at once, but subsequent indexes
-		* will get through those. There would have to be hundreds of items
-		* per minute in order for the index to lag behind, and even then it would catch
-		* up as soon as it reached a quiet time.
-		*/
-	def incrementalIndex(): Future[ElasticsearchIndexingResult] = transactional(readOnly = true) {
-		guardMultipleIndexes { ensureIndexExists().flatMap { _ =>
-			val stopWatch = StopWatch()
-			stopWatch.record("Incremental index") {
-				// Get the latest item out of the index
-				newestItemInIndexDate
-					.flatMap { newestDate =>
-						val indexStartDate =
-							newestDate.map { _.minusSeconds(30) }
-								.getOrElse {
-									logger.info("No recent document found, indexing since Tabula year zero")
-									new DateTime(yearZero, 1, 1, 0, 0)
-								}
-
-						// List newer items to index, up to the incremental batch size
-						val itemsToIndex = listNewerThan(indexStartDate, IncrementalBatchSize)
-						doIndexItems(itemsToIndex)
-							.andThen { case _ => // basically what you'd expect a finally block to do
-								itemsToIndex match {
-									case c: Closeable => c.close()
-									case _ =>
-								}
-							}
-					}
-			}
-		}}
-	}
-
 	def newestItemInIndexDate: Future[Option[DateTime]] = client.execute {
 		search in indexName / indexType sourceInclude UpdatedDateField sort ( field sort UpdatedDateField order SortOrder.DESC ) limit 1
 	}.map { response =>

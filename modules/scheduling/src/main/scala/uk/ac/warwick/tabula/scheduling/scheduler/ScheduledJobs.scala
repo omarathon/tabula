@@ -5,15 +5,11 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.scheduling._
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAssignmentsCommand, ImportProfilesCommand, ImportAcademicInformationCommand}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportAcademicInformationCommand, ImportAssignmentsCommand, ImportProfilesCommand}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.JobService
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.{AcademicYear, Features}
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 /**
  * The scheduled jobs don't particularly have to all be in one class,
@@ -28,10 +24,7 @@ class ScheduledJobs {
 	var exceptionResolver = Wire[ExceptionResolver]
 	var maintenanceModeService = Wire[MaintenanceModeService]
 
-	var auditIndexingService = Wire[AuditEventIndexService]
-	var profileIndexingService = Wire[ProfileIndexService]
 	var jobService = Wire[JobService]
-	var notificationIndexService = Wire[NotificationIndexService]
 	var notificationEmailService = Wire[EmailNotificationService]
 	var scheduledNotificationService = Wire[ScheduledNotificationService]
 	implicit var termService = Wire[TermService]
@@ -70,21 +63,6 @@ class ScheduledJobs {
 				new CleanupTemporaryFilesCommand().apply()
 			}
 		}
-
-	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexAuditEvents(): Unit =
-		if (features.schedulingAuditIndex)
-			exceptionResolver.reportExceptions { Await.result(auditIndexingService.incrementalIndex(), Duration.Inf) }
-
-	@Scheduled(cron = "0 0-59/5 3-23 * * *") // every 5 minutes, except between midnight and 3am (when the member import happens)
-	def indexProfiles(): Unit =
-		if (features.schedulingProfilesIndex)
-			exceptionResolver.reportExceptions { Await.result(profileIndexingService.incrementalIndex(), Duration.Inf) }
-
-	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexNotifications(): Unit =
-		if (features.schedulingNotificationsIndex)
-			exceptionResolver.reportExceptions { Await.result(notificationIndexService.incrementalIndex(), Duration.Inf) }
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
 	def resolveScheduledNotifications(): Unit =

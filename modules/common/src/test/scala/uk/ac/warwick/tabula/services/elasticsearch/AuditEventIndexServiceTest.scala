@@ -111,13 +111,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 
 		stopwatch.start("indexing")
 
-		// we only index 1000 at a time, so index twice to get all the latest stuff.
-		indexer.incrementalIndex().await
-
-		blockUntilCount(1000, indexName, indexType)
-		client.execute { search in indexName / indexType }.await.totalHits should be (1000)
-
-		indexer.incrementalIndex().await
+		indexer.indexFrom(new DateTime(2000,1,1,0,0,0)).await
 
 		blockUntilCount(1020, indexName, indexType)
 		client.execute { search in indexName / indexType }.await.totalHits should be (1020)
@@ -171,7 +165,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		}
 
 		// index again to check that it doesn't do any once-only stuff
-		indexer.incrementalIndex().await
+		indexer.indexFrom(indexer.newestItemInIndexDate.await.get).await
 	}}
 
 }

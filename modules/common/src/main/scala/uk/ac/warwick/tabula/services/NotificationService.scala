@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
-import uk.ac.warwick.tabula.services.elasticsearch.NotificationQueryService
+import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, NotificationIndexService, NotificationQueryService}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
@@ -34,9 +34,9 @@ case class ActivityStream(
 class NotificationService extends Logging with FreemarkerTextRenderer {
 
 	var dao = Wire[NotificationDao]
-	var index = Wire[NotificationQueryService]
-	var indexManager = Wire[IndexManager]
 	var userLookup = Wire[UserLookupService]
+	var queryService = Wire[NotificationQueryService]
+	var indexService = Wire[NotificationIndexService]
 
 	def getNotificationById(id: String) = dao.getById(id)
 
@@ -49,19 +49,14 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 	}
 
 	// update the notifications and rebuild their entries index
-	def update(notifications: Seq[Notification[_,_]], user: User) {
+	def update(notifications: Seq[Notification[_, _]], user: User) {
 		notifications.foreach(dao.update)
-		indexManager.indexNotificationRecipients(notifications, user)
-	}
 
-	// Update the notifications and return the index message, but don't index now
-	def updateWithDeferredIndex(notifications: Seq[Notification[_,_]], user: User): Object = {
-		notifications.foreach(dao.update)
-		indexManager.createIndexMessage(notifications, user)
+		indexService.indexItems(notifications.map { n => IndexedNotification(n.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
 	}
 
 	def stream(req: ActivityStreamRequest): ActivityStream = {
-		val notifications = index.userStream(req)
+		val notifications = queryService.userStream(req)
 		val activities = notifications.items.flatMap(toActivity)
 
 		ActivityStream(
@@ -71,28 +66,28 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		)
 	}
 
-	def toActivity(notification: Notification[_,_]) : Option[Activity[Any]] = {
+	def toActivity(notification: Notification[_, _]) : Option[Activity[Any]] = {
 		try {
 			val (message, priority) =
-			// TODO Tried pattern matching this but it wouldn't complile
-				if (notification.isInstanceOf[ActionRequiredNotification] && notification.asInstanceOf[ActionRequiredNotification].completed) {
-					val actionRequired = notification.asInstanceOf[ActionRequiredNotification]
-					val message = "Completed by %s on %s".format(
-						userLookup.getUserByUserId(actionRequired.completedBy) match {
-							case FoundUser(u) => u.getFullName
-							case _ => "Unknown user"
-						},
-						notification.dateTimeFormatter.print(actionRequired.completedOn)
-					)
-					val priority = NotificationPriority.Complete
-					(message, priority)
-				} else {
-					val content = notification.content
-					val message = renderTemplate(content.template, content.model)
-					val priority = notification.priorityOrDefault
-					(message, priority)
-				}
+				notification match {
+					case actionRequired: ActionRequiredNotification if actionRequired.completed =>
+						val actionRequired = notification.asInstanceOf[ActionRequiredNotification]
+						val message = "Completed by %s on %s".format(
+							userLookup.getUserByUserId(actionRequired.completedBy) match {
+								case FoundUser(u) => u.getFullName
+								case _ => "Unknown user"
+							},
+							notification.dateTimeFormatter.print(actionRequired.completedOn)
+						)
+						val priority = NotificationPriority.Complete
+						(message, priority)
 
+					case _ =>
+						val content = notification.content
+						val message = renderTemplate(content.template, content.model)
+						val priority = notification.priorityOrDefault
+						(message, priority)
+				}
 
 			Some(new Activity[Any](
 				id = notification.id,
