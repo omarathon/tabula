@@ -96,6 +96,16 @@
 	<build>
 		<finalName>ROOT</finalName>
 
+		<testResources>
+			<testResource>
+				<targetPath>WEB-INF</targetPath>
+				<directory>${basedir}/src/main/webapp/WEB-INF</directory>
+			</testResource>
+			<testResource>
+				<directory>${basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+
 		<plugins>
 			<!-- Build the war -->
 			<plugin>
