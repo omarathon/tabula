@@ -393,27 +393,6 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>copy-resource-dependencies</id>
-						<phase>process-test-resources</phase>
-						<configuration>
-							<target>
-								<!-- We need to touch first otherwise Ant will overwrite any files
-									that are older -->
-								<touch>
-									<fileset dir="${project.build.testOutputDirectory}" />
-								</touch>
-								<copy todir="${project.build.testOutputDirectory}/WEB-INF"
-									  overwrite="false">
-									<fileset
-											dir="${tabula.basedir}/modules/common/src/main/webapp/WEB-INF" />
-								</copy>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
 				</executions>
 			</plugin>
 
