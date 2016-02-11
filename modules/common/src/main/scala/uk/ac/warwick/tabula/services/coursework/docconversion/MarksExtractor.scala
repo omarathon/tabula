@@ -40,7 +40,7 @@ class MarksExtractor {
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 		val markItems: JList[MarkItem] = JArrayList()
-		val sheetHandler = new XslxSheetHandler(styles, sst, markItems)
+		val sheetHandler = new MarkItemXslxSheetHandler(styles, sst, markItems)
 		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData) {
 			val sheetSource = new InputSource(sheet)

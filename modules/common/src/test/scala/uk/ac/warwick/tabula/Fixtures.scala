@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -332,8 +333,19 @@ object Fixtures extends Mockito {
 		checkpoint
 	}
 
-	def moduleRegistration(scd: StudentCourseDetails, mod: Module, cats: java.math.BigDecimal, year: AcademicYear, occurrence: String) = {
-		new ModuleRegistration(scd, mod, cats, year, occurrence)
+	def moduleRegistration(
+		scd: StudentCourseDetails,
+		mod: Module,
+		cats: JBigDecimal,
+		year: AcademicYear,
+		occurrence: String = "",
+		agreedMark: BigDecimal = BigDecimal(0),
+		status: ModuleSelectionStatus = ModuleSelectionStatus.Core
+	) = {
+		val mr = new ModuleRegistration(scd, mod, cats, year, occurrence)
+		mr.agreedMark = Option(agreedMark).map(_.underlying).orNull
+		mr.selectionStatus = status
+		mr
 	}
 
 	def meetingRecordApproval(state: MeetingApprovalState) = {

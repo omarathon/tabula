@@ -3,19 +3,17 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Description}
-import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.commands.{Command, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{StudentMember, _}
+import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
 import uk.ac.warwick.tabula.scheduling.services.{AccreditedPriorLearningImporter, MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.ProfileIndexService
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.StudentMember
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
 
@@ -29,7 +27,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var userLookup = Wire[UserLookupService]
 	var moduleRegistrationImporter = Wire[ModuleRegistrationImporter]
 	var accreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
-	var moduleRegistrationDao = Wire[ModuleRegistrationDaoImpl]
+	var moduleRegistrationService = Wire[ModuleRegistrationService]
 	var smallGroupService = Wire[SmallGroupService]
 	var profileIndexService = Wire[ProfileIndexService]
 	var memberDao = Wire[MemberDao]
@@ -362,7 +360,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 	def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
-		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
+		val existingModuleRegistrations = moduleRegistrationService.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
 		for (existingMR <- existingModuleRegistrations.filterNot(mr => newModuleRegistrations.contains(mr))) {
 			existingMR.studentCourseDetails.removeModuleRegistration(existingMR)
 			session.delete(existingMR)

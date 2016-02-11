@@ -5,19 +5,17 @@ import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
+import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, ModuleRegistrationStatus, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey}
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, ModuleRegistrationStatus, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
-	import ImportMemberHelpers._
 
 	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
 	var profileService = Wire[ProfileService]
@@ -73,7 +71,8 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
 		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
 		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |
-		copyEnrolledOrCompleted("enrolledOrCompleted", row.reasonForTransferCode, row.enrolmentStatusCode, studentCourseYearBean)
+		copyEnrolledOrCompleted("enrolledOrCompleted", row.reasonForTransferCode, row.enrolmentStatusCode, studentCourseYearBean) |
+		copyAgreedMark(commandBean, studentCourseYearBean)
 	}
 
 	private def copyModeOfAttendance(code: String, studentCourseYearBean: BeanWrapper) = {
@@ -117,31 +116,6 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		else false
 	}
 
-	private def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
-			case value: AcademicYear => value
-			case _ => null
-		}
-
-		val newValue = AcademicYear.parse(acYearString)
-
-		if (oldValue == null && acYearString == null) false
-		else if (oldValue == null) {
-			// From no academic year to having an academic year
-			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
-			true
-		} else if (acYearString == null) {
-			// Record had an academic year but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else if (oldValue == newValue) {
-			false
-		} else {
-			memberBean.setPropertyValue(property, toAcademicYear(acYearString))
-			true
-		}
-	}
-
 	private def copyEnrolledOrCompleted(property: String, reasonForTransferCode: String, enrolmentStatusCode: String, memberBean: BeanWrapper) = {
 		val oldValue = memberBean.getPropertyValue(property)
 
@@ -154,6 +128,19 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 			memberBean.setPropertyValue(property, newValue)
 			true
 		} else false
+	}
+
+	// We only want to import an agreed mark from SITS if:
+	// * there isn't a mark waiting to be uploaded (agreedMarkUploadedDate is not null) or
+	// * there isn't currently a mark (agreedMark is null)
+	private def copyAgreedMark(commandBean: BeanWrapper, destinationBean: BeanWrapper): Boolean = {
+		val oldMark = destinationBean.getPropertyValue("agreedMark").asInstanceOf[JBigDecimal]
+		val oldMarkUploadedDate = destinationBean.getPropertyValue("agreedMarkUploadedDate").asInstanceOf[DateTime]
+		if (oldMarkUploadedDate != null || oldMark == null) {
+			copyBasicProperties(Set("agreedMark"), commandBean, destinationBean)
+		} else {
+			false
+		}
 	}
 
 	private def toModeOfAttendance(code: String) = {

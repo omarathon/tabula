@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import scala.collection.mutable.HashSet
-import scala.language.implicitConversions
-
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
+import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{SitsAcademicYearAware, SitsAcademicYearService}
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.services.{ModuleRegistrationServiceImpl, SmallGroupService}
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+
+import scala.collection.mutable
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {
@@ -49,7 +48,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush()
 
 		// register the student on the module
-		val existingMr = new ModuleRegistration(scd, existingMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
+		val existingMr = new ModuleRegistration(scd, existingMod, new JBigDecimal(30), new AcademicYear(2013), "A")
 		session.saveOrUpdate(existingMr)
 		scd.addModuleRegistration(existingMr)
 		session.saveOrUpdate(scd)
@@ -61,9 +60,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush()
 
 		// mock required services
-		val mrDao = smartMock[ModuleRegistrationDaoImpl]
-		mrDao.sessionFactory = sessionFactory
-		mrDao.getByUsercodesAndYear(Seq("abcde"), year) returns Seq(existingMr)
+		val mrService = smartMock[ModuleRegistrationServiceImpl]
+		mrService.getByUsercodesAndYear(Seq("abcde"), year) returns Seq(existingMr)
 
 		val memberDao = new AutowiringMemberDaoImpl
 		memberDao.sessionFactory = sessionFactory
@@ -88,7 +86,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		command.features = new FeaturesImpl
 		command.sessionFactory = sessionFactory
 		command.sitsAcademicYearService = sitsAcademicYearService
-		command.moduleRegistrationDao = mrDao
+		command.moduleRegistrationService = mrService
 		command.smallGroupService = smallGroupService
 		command.memberDao = memberDao
 		command.studentCourseDetailsDao = scdDao
@@ -105,7 +103,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.moduleRegistrations.contains(existingMr) should be (true)
 			session.flush()
 
-			val newMr = new ModuleRegistration(scd, newMod, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
+			val newMr = new ModuleRegistration(scd, newMod, new JBigDecimal(30), new AcademicYear(2013), "A")
 			session.saveOrUpdate(newMr)
 			session.flush()
 			scd.addModuleRegistration(newMr)
@@ -150,7 +148,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
-			stuMem.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
@@ -161,8 +159,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
 			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuMem.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
+			scd.missingFromImportSince should not be null
 			scyd.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key1)
@@ -174,9 +172,9 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
 			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuMem.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
+			scd.missingFromImportSince should not be null
+			scyd.missingFromImportSince should not be null
 
 		}
 	}
@@ -211,7 +209,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
 			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuMem.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
 
@@ -222,8 +220,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
 			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuMem.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
+			scd.missingFromImportSince should not be null
 			scyd.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key)
@@ -233,16 +231,16 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
 			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuMem.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be null
+			scd.missingFromImportSince should not be null
+			scyd.missingFromImportSince should not be null
 
 		}
 	}
 
 	@Transactional
 	@Test
-	def testConvertKeysToIds {
+	def testConvertKeysToIds(): Unit = {
 		new Environment {
 
 			scyd = scydDao.getBySceKey(scyd.studentCourseDetails, scyd.sceSequenceNumber).get
@@ -251,7 +249,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scyd2 = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber).get
 			val idForScyd2 = scyd2.id
 
-			val keys = new HashSet[StudentCourseYearKey]
+			val keys = new mutable.HashSet[StudentCourseYearKey]
 
 			keys.add(key1)
 			keys.add(key2)

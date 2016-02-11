@@ -124,8 +124,9 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		copyObjectProperty("route", row.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(row.routeCode)) |
 		copyObjectProperty("course", row.courseCode, studentCourseDetailsBean, courseImporter.getCourseByCodeCached(row.courseCode)) |
 		copyObjectProperty("award", row.awardCode, studentCourseDetailsBean, awardImporter.getAwardByCodeCached(row.awardCode)) |
-		copyObjectProperty("statusOnRoute", row.sprStatusCode, studentCourseDetailsBean, toSitsStatus(row.sprStatusCode))
-		copyObjectProperty("statusOnCourse", row.scjStatusCode, studentCourseDetailsBean, toSitsStatus(row.scjStatusCode))
+		copyObjectProperty("statusOnRoute", row.sprStatusCode, studentCourseDetailsBean, toSitsStatus(row.sprStatusCode)) |
+		copyObjectProperty("statusOnCourse", row.scjStatusCode, studentCourseDetailsBean, toSitsStatus(row.scjStatusCode)) |
+		copyAcademicYear("sprStartAcademicYear", row.sprStartAcademicYearString, studentCourseDetailsBean)
 	}
 
 	def captureTutor(studentCourseDetails: StudentCourseDetails) = {

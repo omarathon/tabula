@@ -21,7 +21,7 @@ class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with 
 		award: Award,
 		sequenceNumber: Int,
 		academicYear: AcademicYear,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		level: Level,
 		reason: String) {
 		this()
@@ -51,7 +51,7 @@ class AccreditedPriorLearning() extends GeneratedId	with PermissionsTarget with 
 	var academicYear: AcademicYear = null
 
 	@Restricted(Array("Profiles.Read.AccreditedPriorLearning"))
-	var cats: java.math.BigDecimal = null
+	var cats: JBigDecimal = null
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="levelCode", referencedColumnName="code")

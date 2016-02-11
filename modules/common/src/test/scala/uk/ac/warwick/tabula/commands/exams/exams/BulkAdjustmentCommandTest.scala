@@ -1,17 +1,18 @@
-package uk.ac.warwick.tabula.commands.coursework.exams
-
+package uk.ac.warwick.tabula.commands.exams.exams
 
 import java.io.InputStream
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentCommand, BulkAdjustmentCommandBindListener, BulkAdjustmentCommandState, BulkAdjustmentValidation}
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.{GradeBoundary, Assignment, FileAttachment, Assessment}
-import uk.ac.warwick.tabula.commands.exams.{BulkAdjustmentValidation, BulkAdjustmentCommand, BulkAdjustmentCommandState, BulkAdjustmentCommandBindListener}
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, FileAttachment, GradeBoundary}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{MaintenanceModeService, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {
 

@@ -36,8 +36,14 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	}
 
 	def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
-		ccode => courseDao.getByCode(ccode.toLowerCase)
+		ccode => courseDao.getByCode(ccode)
 	}
+
+	def findCoursesInDepartment(department: Department): Seq[Course] =
+		courseDao.findByDepartment(department)
+
+	def findRoutesInDepartment(department: Department): Seq[Route] =
+		routeDao.findByDepartment(department)
 
 	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = transactional() {
 		routeDao.saveOrUpdate(teachingInfo)

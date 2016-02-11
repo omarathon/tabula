@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import scala.collection.JavaConverters.asScalaBufferConverter
-
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
-import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, MemberDao, MemberDaoImpl, ModuleDao, ModuleDaoImpl, SessionComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentMember}
+import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, MemberDao, MemberDaoImpl, ModuleDao, ModuleDaoImpl, SessionComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import org.joda.time.DateTime
 
 class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistration]] with Logging {
 	this: SessionComponent with TransactionalComponent  =>
@@ -23,7 +22,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 	protected def applyInternal() =
 		transactional() {
 			val module = moduleDao.getByCode(moduleCode).get
-			val cats = new java.math.BigDecimal(12.0)
+			val cats = new JBigDecimal(12.0)
 
 			val regs: Seq[ModuleRegistration] =
 				for {
@@ -35,7 +34,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 					session.save(modReg)
 					scd.addModuleRegistration(modReg)
 					session.save(scd)
-					session.flush
+					session.flush()
 
 					modReg
 				}

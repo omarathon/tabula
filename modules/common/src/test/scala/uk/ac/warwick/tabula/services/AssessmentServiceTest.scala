@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, Wo
 import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
@@ -928,7 +929,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val currentAcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		// now register the student on a module:
-		val mr = Fixtures.moduleRegistration(scd, module1, new java.math.BigDecimal("12.0"), currentAcademicYear, "A")
+		val mr = Fixtures.moduleRegistration(scd, module1, new JBigDecimal("12.0"), currentAcademicYear, "A")
 
 		// this shouldn't affect anything if the assignment is not for that module:
 		scyd.academicYear = currentAcademicYear

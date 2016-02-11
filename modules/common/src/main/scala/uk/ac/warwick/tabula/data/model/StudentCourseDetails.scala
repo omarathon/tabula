@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{BatchSize, FilterDef, FilterDefs, Filter, Filters}
+import org.hibernate.annotations._
 import org.joda.time.LocalDate
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -265,6 +265,11 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 	@JoinColumn(name="scjStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var statusOnCourse: SitsStatus = _
+
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var sprStartAcademicYear: AcademicYear = _
 }
 
 sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] with Product with Serializable {

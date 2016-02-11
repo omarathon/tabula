@@ -35,6 +35,7 @@ trait SitsStudentRowCourseDetails
 	var scjStatusCode = rs.getString("scj_status_code")
 	var departmentCode = rs.getString("department_code")
 	var awardCode = rs.getString("award_code")
+	var sprStartAcademicYearString = rs.getString("spr_academic_year_start")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	//WMG uses a different table and column for their tutors
@@ -81,4 +82,5 @@ trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties {
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
+	this.agreedMark = Option(rs.getBigDecimal("sce_agreed_mark")).map(_.setScale(1, java.math.RoundingMode.HALF_UP)).orNull
 }

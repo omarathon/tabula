@@ -18,8 +18,8 @@ class EditDepartmentCommandTest extends TestBase  with FunctionalContextTesting 
 	trait CommandTestSupport extends EditDepartmentCommandState with ModuleAndDepartmentServiceComponent {
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 
-		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns (Some(Fixtures.department("in-pg", "IT Services Postgraduate")))
-		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns (None)
+		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns Some(Fixtures.department("in-pg", "IT Services Postgraduate"))
+		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns None
 	}
 
 	trait Fixture {
@@ -267,6 +267,7 @@ object EditDepartmentCommandTest {
 
 		bean(){mock[UserLookupService]}
 		bean(){mock[RelationshipService]}
+		bean(){mock[ModuleAndDepartmentService]}
 		bean(){
 			val sessionFactory = smartMock[SessionFactory]
 			val session = smartMock[Session]

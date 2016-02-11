@@ -142,6 +142,12 @@ class ScheduledJobs {
 			exceptionResolver.reportExceptions { ExportFeedbackToSitsCommand().apply() }
 		}
 
+	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent
+	def exportYearMarksToSits(): Unit =
+		if (features.schedulingExportFeedbackToSits) maintenanceGuard {
+			exceptionResolver.reportExceptions { ExportYearMarksToSitsCommand().apply() }
+		}
+
 	@Scheduled(fixedDelay = 1 * 60 * 1000) // every minute, non-concurrent
 	def objectStorageMigration(): Unit =
 		// We don't really need a maintenance guard here, but it stops it running on the standby

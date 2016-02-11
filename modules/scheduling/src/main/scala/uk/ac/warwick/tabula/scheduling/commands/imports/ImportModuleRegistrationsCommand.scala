@@ -31,7 +31,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 
 	val scjCode = modRegRow.scjCode
 	lazy val tabulaModule = moduleAndDepartmentService.getModuleBySitsCode(modRegRow.sitsModuleCode)
-	val cats: java.math.BigDecimal = modRegRow.cats
+	val cats: JBigDecimal = modRegRow.cats
 	val assessmentGroup = modRegRow.assessmentGroup
 	val selectionStatusCode = modRegRow.selectionStatusCode
 	val occurrence = modRegRow.occurrence
@@ -58,7 +58,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 						)
 						val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear, occurrence)
 
-						val isTransient = !moduleRegistrationExisting.isDefined
+						val isTransient = moduleRegistrationExisting.isEmpty
 
 						val moduleRegistration = moduleRegistrationExisting match {
 							case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
@@ -102,12 +102,12 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		else false
 	}
 
-	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[java.math.BigDecimal]) = {
+	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[JBigDecimal]) = {
 		val property = "agreedMark"
 		val oldValue = destinationBean.getPropertyValue(property)
 
 		agreedMark match {
-			case Some(mark: java.math.BigDecimal) =>
+			case Some(mark: JBigDecimal) =>
 				if (oldValue != mark) {
 					destinationBean.setPropertyValue(property, mark)
 					true

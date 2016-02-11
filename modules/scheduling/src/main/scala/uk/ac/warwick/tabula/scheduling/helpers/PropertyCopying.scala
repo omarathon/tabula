@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
 import org.springframework.beans.BeanWrapper
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberHelpers._
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusImporter
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model.Department
@@ -100,6 +102,32 @@ trait PropertyCopying extends Logging {
 			None
 		} else {
 			moduleAndDepartmentService.getDepartmentByCode(departmentCode)
+		}
+	}
+
+	def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
+		val oldValue = memberBean.getPropertyValue(property) match {
+			case value: AcademicYear => value
+			case _ => null
+		}
+
+		val newValue = toAcademicYear(acYearString)
+
+		if (oldValue == null && acYearString == null) {
+			false
+		}	else if (oldValue == null) {
+			// From no academic year to having an academic year
+			memberBean.setPropertyValue(property, newValue)
+			true
+		} else if (acYearString == null) {
+			// Record had an academic year but now doesn't
+			memberBean.setPropertyValue(property, null)
+			true
+		} else if (oldValue == newValue) {
+			false
+		} else {
+			memberBean.setPropertyValue(property, newValue)
+			true
 		}
 	}
 }

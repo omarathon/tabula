@@ -315,7 +315,7 @@ object AgentPointRecordCommandTest {
 		bean() { smartMock[ProfileService] }
 		bean() { smartMock[AssessmentService] }
 		bean() { smartMock[RelationshipService] }
-		bean() { smartMock[UserLookupService] }
+		bean("userLookup") { smartMock[UserLookupService] }
 		bean() { smartMock[ModuleAndDepartmentService] }
 		bean() { smartMock[SmallGroupService] }
 		bean() { smartMock[MonitoringPointService] }

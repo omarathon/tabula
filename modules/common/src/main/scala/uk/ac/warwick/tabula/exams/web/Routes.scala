@@ -124,6 +124,12 @@ object Routes {
 
 		def home = context + "/"
 
+		def departmentAcademicYear(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
+		def generate(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/generate" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
 	}
 
 }
