@@ -47,7 +47,7 @@ class StudentFeedbackAdjustmentNotification
 		))
 
 	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
-	def urlTitle = s"Marking for this assignment"
+	def urlTitle = "view your feedback"
 
 	priority = Info
 

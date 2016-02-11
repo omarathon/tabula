@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data
 
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import org.junit.{Before, After}
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.{InputStream, ByteArrayInputStream, File}
+import java.io.{FileInputStream, InputStream, ByteArrayInputStream, File}
 import org.joda.time.DateTime
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
@@ -16,21 +17,21 @@ import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 class FileDaoTest extends PersistenceTestBase with Mockito {
 
 	val dao = new FileDao
+	val objectStorageService = smartMock[ObjectStorageService]
 
 	@Before def setup() {
-		dao.attachmentDir = createTemporaryDirectory()
+		dao.objectStorageService = objectStorageService
 		dao.sessionFactory = sessionFactory
 	}
 
 	@Test def deletingTemporaryFiles = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {
 		transactional { transactionStatus =>
-			dao.attachmentDir = createTemporaryDirectory
-			dao.attachmentDir.list.size should be (0)
 			for (i <- 0 to 50) {
 				val attachment = new FileAttachment
 				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
 				attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
 				attachment.fileDao = dao
+				attachment.objectStorageService = objectStorageService
 				dao.saveTemporary(attachment)
 			}
 		}
@@ -44,13 +45,12 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 	}}
 
 	@Test def crud = transactional { tx =>
-		dao.attachmentDir = createTemporaryDirectory
-		dao.attachmentDir.list.size should be (0)
 		val attachments = for (i <- 1 to 10) yield {
 			val attachment = new FileAttachment
 			attachment.dateUploaded = new DateTime(2013, DateTimeConstants.FEBRUARY, i, 1, 0, 0, 0)
 			attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
 			attachment.fileDao = dao
+			attachment.objectStorageService = objectStorageService
 			dao.savePermanent(attachment)
 
 			attachment.hash should be ("f95a27f06df98ba26182c22e277af960c0be9be6")
@@ -73,39 +73,6 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 		dao.getAllFileIds(Some(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0))) should be ((attachments.slice(0, 4) map { _.id }).toSet)
 	}
 
-	/*
-	 * TAB-202 changes the storage to split the path every 2 characters
-	 * instead of every 4. This checks that we work with 2 characters for new
-	 * data but can still find existing data stored under the old location.
-	 */
-	@Test
-	def compatDirectorySplit() {
-		transactional { tx =>
-			dao.attachmentDir = createTemporaryDirectory
-
-			// Create some fake files, of new and old format
-			val paths = Seq(
-					"aaaa/bbbb/dddd/eeee",
-					"aaaa/bbbb/cccc/dddd",
-					"aa/aa/bb/bb/cc/cc/ef/ef")
-			for (path <- paths) {
-				val file = new File(dao.attachmentDir, path)
-				assert( file.getParentFile.exists || file.getParentFile.mkdirs() )
-				assert( file.createNewFile() )
-			}
-
-			def getRelativePath(file: File) = {
-				val prefix = dao.attachmentDir.getAbsolutePath()
-				file.getAbsolutePath().replace(prefix, "")
-			}
-
-			getRelativePath( dao.getData("aaaabbbbccccdddd").orNull ) should be (File.separator + "aaaa" + File.separator + "bbbb" + File.separator  + "cccc" + File.separator + "dddd")
-			getRelativePath( dao.getData("aaaabbbbddddeeee").orNull ) should be (File.separator + "aaaa" + File.separator + "bbbb" + File.separator + "dddd" + File.separator + "eeee")
-			getRelativePath( dao.getData("aaaabbbbccccefef").orNull ) should be (File.separator + "aa" + File.separator + "aa" + File.separator + "bb" + File.separator + "bb" + File.separator + "cc" + File.separator + "cc" + File.separator + "ef" + File.separator + "ef")
-
-		}
-	}
-
 	@Test
 	def save() {
 		transactional { tx =>
@@ -113,10 +80,12 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			val string = "Doe, a deer, a female deer"
 			val bytes = string.getBytes("UTF-8")
 			attachment.fileDao = dao
+			attachment.objectStorageService = objectStorageService
 			attachment.uploadedDataLength = bytes.length
 			attachment.uploadedData = new ByteArrayInputStream(bytes)
 
 			dao.saveTemporary(attachment)
+			verify(objectStorageService, times(1)).push(attachment.id, attachment.uploadedData, ObjectStorageService.Metadata(26, "application/octet-stream", Some("4931c07015e50baf297aae2ce8571da15c0f2380")))
 
 			attachment.id should not be (null)
 
@@ -127,6 +96,9 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 				case Some(loadedAttachment:FileAttachment) => {
 					//val blob = loadedAttachment.data
 					loadedAttachment.fileDao = dao
+					loadedAttachment.objectStorageService = objectStorageService
+					loadedAttachment.objectStorageService.fetch(attachment.id) returns Some(new ByteArrayInputStream(bytes))
+
 					val data = readStream(loadedAttachment.dataStream, "UTF-8")
 					data should be (string)
 				}

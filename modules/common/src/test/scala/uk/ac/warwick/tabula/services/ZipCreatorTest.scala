@@ -1,15 +1,17 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.TestBase
 import java.io.ByteArrayInputStream
-import uk.ac.warwick.util.core.spring.FileUtils
+
+import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.data.SHAFileHasherComponent
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageServiceComponent
 
 class ZipCreatorTest extends TestBase {
 
-	val tmpDir = createTemporaryDirectory
+	val transientObjectStore = createTransientObjectStore()
 
-	val creator = new ZipCreator() {
-		def zipDir = tmpDir
+	val creator = new ZipCreator() with SHAFileHasherComponent with ObjectStorageServiceComponent {
+		override val objectStorageService = transientObjectStore
 	}
 
 	@Test def itWorks {
@@ -23,22 +25,22 @@ class ZipCreatorTest extends TestBase {
 		)
 
 		val zip = creator.createUnnamedZip(items)
-		zip.exists() should be (true)
-		zip.getName() should endWith (".zip")
+		zip.inputStream should not be null
+		zip.contentType should be ("application/zip")
 
-		creator.invalidate(FileUtils.getFileNameWithoutExtension(zip.getName()))
-		zip.exists() should be (false)
+		creator.invalidate(zip.filename)
+		zip.inputStream should be (null)
 
 		val name = "myzip/under/a/folder"
 		val namedZip = creator.getZip(name, items)
-		namedZip.exists() should be (true)
-		namedZip.getName() should endWith (".zip")
+		namedZip.inputStream should not be null
+		namedZip.contentType should be ("application/zip")
 
 		// getting zip without any items should effectively be a no-op
-		creator.getZip(name, Seq()) should be (namedZip)
+		creator.getZip(name, Seq()).contentLength should be (namedZip.contentLength)
 
 		creator.invalidate(name)
-		zip.exists() should be (false)
+		zip.inputStream should be (null)
 	}
 
 	@Test def trunc {

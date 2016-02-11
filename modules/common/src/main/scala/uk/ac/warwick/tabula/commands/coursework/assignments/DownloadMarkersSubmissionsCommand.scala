@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.userlookup.User
-
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{Description, _}
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PermissionsCheckingMethods}
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
+import uk.ac.warwick.userlookup.User
 
 
 /**
@@ -19,7 +17,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 object DownloadMarkersSubmissionsCommand {
 	def apply(module: Module, assignment: Assignment, marker: User, submitter: CurrentUser) =
 		new DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
-		with ComposableCommand[RenderableZip]
+		with ComposableCommand[RenderableFile]
 		with AutowiringZipServiceComponent
 		with AutowiringAssessmentServiceComponent
 		with AutowiringStateServiceComponent
@@ -30,11 +28,11 @@ object DownloadMarkersSubmissionsCommand {
 }
 
 class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser)
-	extends CommandInternal[RenderableZip] with CanProxy {
+	extends CommandInternal[RenderableFile] with CanProxy {
 
 	self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
 
-	override def applyInternal(): RenderableZip = {
+	override def applyInternal(): RenderableFile = {
 		val submissions = assignment.getMarkersSubmissions(marker)
 
 		// TODO - Maybe we should do some validation here instead or disable the link if there are no submissions
@@ -46,13 +44,12 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
 			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
 
-		val zip = zipService.getSomeSubmissionsZip(filteredSubmissions)
-		new RenderableZip(zip)
+		zipService.getSomeSubmissionsZip(filteredSubmissions)
 	}
 
 }
 
-trait DownloadMarkersSubmissionsDescription extends Describable[RenderableZip] {
+trait DownloadMarkersSubmissionsDescription extends Describable[RenderableFile] {
 
 	self: DownloadMarkersSubmissionsCommandState =>
 

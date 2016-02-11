@@ -1,28 +1,19 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback}
-import uk.ac.warwick.tabula.services.fileserver.RenderableZip
-import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
-import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
-class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableZip] with ReadOnly {
+class AdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableFile] with ReadOnly {
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
 	var zipService = Wire.auto[ZipService]
 
-	override def applyInternal() = {
-		val zip = zipService.getFeedbackZip(feedback)
-		new RenderableZip(zip)
-	}
+	override def applyInternal() = zipService.getFeedbackZip(feedback)
 
 	override def describe(d: Description) = d.feedback(feedback).properties(
 		"studentId" -> feedback.universityId,
@@ -56,17 +47,14 @@ class AdminGetSingleFeedbackFileCommand(module: Module, assignment: Assignment, 
 
 
 
-class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableZip] with ReadOnly {
+class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment, markerFeedback: MarkerFeedback) extends Command[RenderableFile] with ReadOnly {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
 
 	var zipService = Wire.auto[ZipService]
 
-	override def applyInternal() = {
-		val zip = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
-		new RenderableZip(zip)
-	}
+	override def applyInternal() = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
 
 	override def describe(d: Description) = d.feedback(markerFeedback.feedback).properties(
 		"studentId" -> markerFeedback.feedback.universityId,

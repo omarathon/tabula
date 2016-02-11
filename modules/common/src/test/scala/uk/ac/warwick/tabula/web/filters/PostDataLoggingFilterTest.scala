@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.Future
 
 import ch.qos.logback.classic.Level
+import com.google.common.net.MediaType
 import org.junit.Ignore
 import org.springframework.mock.web._
 import org.springframework.util.FileCopyUtils
@@ -79,7 +80,7 @@ class PostDataLoggingFilterTest extends TestBase {
 		val request = new MockMultipartHttpServletRequest()
 		request.setMethod("POST")
 
-		val submissionBody = new MockMultipartFile("submission", "hello.pdf", "application/octet-stream", Array[Byte](32,33,34,35,36,37,38))
+		val submissionBody = new MockMultipartFile("submission", "hello.pdf", MediaType.OCTET_STREAM.toString, Array[Byte](32,33,34,35,36,37,38))
 		request.addFile(submissionBody)
 
 		request.addParameter("confirm", "yes")

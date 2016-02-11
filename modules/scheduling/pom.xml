@@ -138,12 +138,6 @@
 			<type>zip</type>
 			<scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>uk.ac.warwick.tabula</groupId>
-			<artifactId>profiles</artifactId>
-			<classifier>jar</classifier>
-		</dependency>
 		<dependency>
 			<groupId>uk.ac.warwick.tabula</groupId>
 			<artifactId>web</artifactId>

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.coursework.docconversion
 
 import org.apache.poi.xssf.model.StylesTable
+import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.helpers.XMLReaderFactory
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
@@ -39,7 +40,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 		}
 	}
 
-	override def cell(cellReference: String, formattedValue: String){
+	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment){
 		val col = new CellReference(cellReference).getCol
 		if (isFirstRow){
 			columnMap(col) = formattedValue
@@ -57,7 +58,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 		}
 	}
 
-	override def endRow() {
+	override def endRow(row: Int) {
 		if (!isFirstRow)
 			markItems.add(currentMarkItem)
 	}

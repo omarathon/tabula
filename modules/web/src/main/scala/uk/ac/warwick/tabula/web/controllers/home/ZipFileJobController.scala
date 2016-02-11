@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
-import java.io.File
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import org.springframework.stereotype.Controller
@@ -8,17 +7,19 @@ import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.jobs.zips.ZipFileJob
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableZip}
+import uk.ac.warwick.tabula.services.ZipCreator
+import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance}
+import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{ItemNotFoundException, PermissionDeniedException}
 
 @Controller
 @RequestMapping(Array("/zips/{jobId}"))
-class ZipFileJobController extends BaseController with AutowiringJobServiceComponent {
+class ZipFileJobController extends BaseController with AutowiringJobServiceComponent with AutowiringObjectStorageServiceComponent {
 
-	var fileServer = Wire.auto[FileServer]
+	var fileServer = Wire[FileServer]
 
 	private def jobAndInstance(jobId: String) = {
 		jobService.getInstance(jobId) match {
@@ -56,9 +57,10 @@ class ZipFileJobController extends BaseController with AutowiringJobServiceCompo
 	@RequestMapping(Array("/zip"))
 	def serveZip(@PathVariable jobId: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		val (job, jobInstance) = jobAndInstance(jobId)
-		new File(jobInstance.getString(ZipFileJob.ZipFilePathKey)) match {
-			case zipFile if zipFile.exists() =>
-				fileServer.serve(new RenderableZip(zipFile), Some(job.zipFileName))
+		val objectStoreKey = ZipCreator.objectKey(jobInstance.getString(ZipFileJob.ZipFilePathKey))
+
+		objectStorageService.renderable(objectStoreKey, Some(job.zipFileName)) match {
+			case Some(f) => fileServer.serve(f, Some(job.zipFileName))
 			case _ => throw new ItemNotFoundException()
 		}
 	}

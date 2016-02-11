@@ -147,12 +147,6 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				val newExtension = new Extension(currentUser.universityId)
 				val attachment = new FileAttachment
 
-			  val file = createTemporaryFile()
-				file.deleteOnExit()
-
-				FileCopyUtils.copy(new ByteArrayInputStream("".getBytes), new FileOutputStream(file))
-				attachment.file = file
-
 				newExtension.addAttachment(attachment)
 				assignment.extensions.add(newExtension)
 

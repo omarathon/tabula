@@ -9,12 +9,14 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.scheduling.services" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.scheduling.jobs" />
 
-	<context:component-scan base-package="uk.ac.warwick.tabula.profiles.services" />
-
 	<bean class="uk.ac.warwick.tabula.scheduling.IndexManagerMessageListener" />
 
 	<beans profile="dev">
 		<context:component-scan base-package="uk.ac.warwick.tabula.dev.web.controllers" />
+	</beans>
+
+	<beans profile="scheduling">
+		<context:component-scan base-package="uk.ac.warwick.tabula.scheduling.scheduler" />
 	</beans>
 
 </beans>

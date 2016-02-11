@@ -21,6 +21,8 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object ProfileExportSingleCommand {
+	type CommandType = Appliable[Seq[FileAttachment]]
+
 	val DateFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
 	val TimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
 
@@ -177,11 +179,13 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			tempOutputStream
 		)
 
+		val bytes = tempOutputStream.toByteArray
+
 		// Create file
 		val pdfFileAttachment = new FileAttachment
 		pdfFileAttachment.name = s"${student.universityId}-profile.pdf"
-		pdfFileAttachment.uploadedData = new ByteArrayInputStream(tempOutputStream.toByteArray)
-		pdfFileAttachment.uploadedDataLength = 0
+		pdfFileAttachment.uploadedData = new ByteArrayInputStream(bytes)
+		pdfFileAttachment.uploadedDataLength = bytes.length
 		fileDao.saveTemporary(pdfFileAttachment)
 
 		// Return results
