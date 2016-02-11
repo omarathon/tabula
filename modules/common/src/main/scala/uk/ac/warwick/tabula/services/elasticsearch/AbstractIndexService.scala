@@ -197,7 +197,8 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 					ElasticsearchIndexingResult(result.successes.length, result.failures.length, result.took, Some(maxDate))
 				}
 
-			future.onSuccess { case result => logger.info(s"Indexed ${result.successful} items in ${result.timeTaken}") }
+			if (logger.isDebugEnabled)
+				future.onSuccess { case result => logger.debug(s"Indexed ${result.successful} items in ${result.timeTaken}") }
 
 			future
 		}

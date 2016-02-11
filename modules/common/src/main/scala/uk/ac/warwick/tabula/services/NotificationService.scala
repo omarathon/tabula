@@ -45,6 +45,8 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		logger.info("Notification pushed - " + notification)
 		dao.save(notification)
 
+		indexService.indexItems(notification.recipients.toList.map { user => IndexedNotification(notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
+
 		// Individual listeners are responsible for pulling notifications
 	}
 
