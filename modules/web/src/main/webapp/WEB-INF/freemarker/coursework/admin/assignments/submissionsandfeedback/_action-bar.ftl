@@ -290,6 +290,7 @@
 								scope=assignment
 								action_descr='upload feedback to SITS'
 								tooltip='Upload mark and grade to SITS'
+								classes='form-post'
 								href=uploadToSitsUrl
 							>
 								<i class="icon-upload icon-fixed-width"></i> Upload to SITS

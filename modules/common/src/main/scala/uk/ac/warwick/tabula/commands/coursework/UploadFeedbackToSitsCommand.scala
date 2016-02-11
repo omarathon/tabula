@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.data.model.{Assessment, Feedback, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 object UploadFeedbackToSitsCommand {
 	def apply(module: Module, assessment: Assessment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -16,18 +18,19 @@ object UploadFeedbackToSitsCommand {
 			with UploadFeedbackToSitsDescription
 			with UploadFeedbackToSitsPermissions
 			with UploadFeedbackToSitsCommandState
+			with UploadFeedbackToSitsCommandRequest
 }
 
 
 class UploadFeedbackToSitsCommandInternal(val module: Module, val assessment: Assessment, currentUser: CurrentUser, gradeGenerator: GeneratesGradesFromMarks)
 	extends CommandInternal[Seq[Feedback]] {
 
-	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent =>
+	self: FeedbackServiceComponent with FeedbackForSitsServiceComponent with UploadFeedbackToSitsCommandState =>
 
-	lazy val gradeValidation = feedbackForSitsService.validateAndPopulateFeedback(assessment.fullFeedback, gradeGenerator)
+	lazy val gradeValidation = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, gradeGenerator)
 
 	override def applyInternal() = {
-		assessment.fullFeedback.flatMap(f => feedbackForSitsService.queueFeedback(f, currentUser, gradeGenerator)).map(_.feedback)
+		feedbacks.flatMap(f => feedbackForSitsService.queueFeedback(f, currentUser, gradeGenerator)).map(_.feedback)
 	}
 
 }
@@ -52,9 +55,21 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 	override def describe(d: Description) {
 		d.assessment(assessment)
 	}
+
+	override def describeResult(d: Description, result: Seq[Feedback]): Unit = {
+		d.property("students" -> result.map(_.universityId))
+	}
 }
 
 trait UploadFeedbackToSitsCommandState {
+
+	self: UploadFeedbackToSitsCommandRequest =>
+
 	def module: Module
 	def assessment: Assessment
+	lazy val feedbacks = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.universityId))
+}
+
+trait UploadFeedbackToSitsCommandRequest {
+	var students: JList[String] = JArrayList()
 }
