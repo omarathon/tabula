@@ -19,7 +19,7 @@ class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider {
 	val WarningThreshold = 10 // minutes
 	val ErrorThreshold = 15 // minutes
 
-	@Scheduled(fixedRate = 60 * 1000) // Every minute
+	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
 		val latestDb = Wire[AuditEventService].latest
 		val latestIndex = Try(Await.result(Wire[AuditEventIndexService].newestItemInIndexDate, 10.seconds).getOrElse(new DateTime(0L))).getOrElse(new DateTime(0L))

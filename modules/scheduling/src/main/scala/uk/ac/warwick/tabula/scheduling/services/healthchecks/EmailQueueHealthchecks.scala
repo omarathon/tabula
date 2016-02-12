@@ -15,7 +15,7 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 	val WarningThreshold = 1000
 	val ErrorThreshold = 10000
 
-	@Scheduled(fixedRate = 60 * 1000) // Every minute
+	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
 		// Number of unsent emails in queue
 		val unsentEmailCount = Wire[EmailNotificationService].unemailedRecipientCount.intValue()
@@ -44,7 +44,7 @@ class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 	val WarningThreshold = 20 // minutes
 	val ErrorThreshold = 30 // minutes
 
-	@Scheduled(fixedRate = 60 * 1000) // Every minute
+	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
 		// How old (in minutes) is the oldest item in the queue?
 		val oldestUnsentEmail =
