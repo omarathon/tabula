@@ -74,8 +74,10 @@ object SchedulingConfiguration {
 	}
 
 	/**
-		* Be very careful about changing the names of jobs here - make sure that Quartz clears the old job out. This
-		* WON'T happen automatically, you need to clear out the tables yourself.
+		* Be very careful about changing the names of jobs here. If a job with a name is no longer referenced,
+		* we will clear out ALL Quartz data the next time that the application starts, which may have unintended
+		* side-effects (but will probably be fine). Adding new jobs is fine, it's just dereferencing or renaming
+		* that's awkward.
 		*
 		* @see http://codrspace.com/Khovansa/spring-quartz-with-a-database/
 		*/
@@ -161,13 +163,6 @@ class SchedulingConfiguration {
 
 		factory
 	}
-
-}
-
-trait JobConfiguration {
-
-	def trigger(): FactoryBean[_ <: Trigger]
-	def jobDetail(): FactoryBean[JobDetail]
 
 }
 
