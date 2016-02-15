@@ -104,8 +104,11 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		}
 
 		val events = defendEvents ++ publishEvents
-		events.foreach { event =>
-			service.save(addParsedData(event))
+
+		// Do this 50 at a time to avoid saturating the internal Elasticsearch server's bulk indexing threadpool
+		events.grouped(50).zipWithIndex.foreach { case (e, groupNum) =>
+			e.foreach { event => service.save(addParsedData(event)) }
+			blockUntilCount((groupNum * 50) + e.size, indexName, indexType)
 		}
 
 		service.listNewerThan(new DateTime(2000,1,1,0,0,0), 100).size should be (100)
