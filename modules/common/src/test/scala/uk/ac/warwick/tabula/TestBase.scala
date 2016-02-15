@@ -6,6 +6,7 @@ import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 
 import scala.collection.JavaConversions._
@@ -63,6 +64,7 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
 	}
 
 	Transactions.enabled = false
+	EventHandling.enabled = false
 
 	// IntelliJ tests via JUnit only half-fill this property, so set it here.
 	if (System.getProperty("TestProcessId") == "F${surefire.forkNumber}") {
