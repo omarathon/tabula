@@ -119,10 +119,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					}
 
 					transactional() {
-						importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u)).foreach(member => {
+						val members = importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
+						members.foreach(member => {
 							member.lastImportDate = DateTime.now
 							memberDao.saveOrUpdate(member)
 						})
+
+						profileIndexService.indexItemsWithoutNewTransaction(members)
 					}
 				}
 			}

@@ -43,7 +43,6 @@ object RequestAssignmentAccessCommandTest {
 		bean(){mock[Configuration]}
 		bean(){mock[Features]}
 		bean(){mock[TriggerService]}
-		bean("indexTopic"){mock[Queue]}
 	}
 }
 

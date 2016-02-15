@@ -325,7 +325,6 @@ object AgentPointRecordCommandTest {
 		bean() { smartMock[ScheduledNotificationService] }
 		bean() { smartMock[MaintenanceModeService] }
 		bean() { smartMock[TriggerService] }
-		bean("indexTopic"){mock[Queue]}
 		bean() {
 			val permissionsService = mock[PermissionsService]
 			permissionsService.ensureUserGroupFor(anArgThat(anything), anArgThat(anything))(anArgThat(anything)) returns UserGroup.ofUsercodes

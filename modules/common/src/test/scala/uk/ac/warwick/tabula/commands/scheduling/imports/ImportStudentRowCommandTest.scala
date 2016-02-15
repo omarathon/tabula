@@ -137,7 +137,6 @@ trait MockedResultSet extends Mockito {
 
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
-	EventHandling.enabled = false
 
 	trait MemberSetup {
 		val mm = MembershipMember(

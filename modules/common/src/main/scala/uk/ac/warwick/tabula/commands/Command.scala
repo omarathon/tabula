@@ -94,36 +94,28 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		with JavaImports with EventHandling with NotificationHandling with TriggerHandling
 		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent with AutowiringMaintenanceModeServiceComponent {
 
-	val deferredMessages: ArrayBuffer[Object] = ArrayBuffer()
-	var messageQueue: Queue = Wire.named[Queue]("indexTopic")
-
-	final def apply(): A = {
-		val result = {
-			if (EventHandling.enabled) {
-				if (readOnlyCheck(this)) {
-					recordEvent(this) {
-						transactional() {
-							handleTriggers(this) {
-								notify(this) {
-									benchmark() {
-										applyInternal()
-									}
+	final def apply(): A =
+		if (EventHandling.enabled) {
+			if (readOnlyCheck(this)) {
+				recordEvent(this) {
+					transactional() {
+						handleTriggers(this) {
+							notify(this) {
+								benchmark() {
+									applyInternal()
 								}
 							}
 						}
 					}
-				} else if (maintenanceModeService.enabled) {
-					throw maintenanceModeService.exception(this)
-				} else {
-					throw new CannotPerformWriteOperationException(this)
 				}
+			} else if (maintenanceModeService.enabled) {
+				throw maintenanceModeService.exception(this)
 			} else {
-				handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
+				throw new CannotPerformWriteOperationException(this)
 			}
+		} else {
+			handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 		}
-		deferredMessages.foreach(messageQueue.send)
-		result
-	}
 
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
 
