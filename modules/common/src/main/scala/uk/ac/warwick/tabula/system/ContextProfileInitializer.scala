@@ -30,7 +30,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 		Wire.ignoreMissingContext = true
 
 		val profiles = resolve()
-		ctx.getEnvironment().setActiveProfiles(profiles: _*)
+		ctx.getEnvironment.setActiveProfiles(profiles: _*)
 	}
 
 	def resolve(): Seq[String] = {
@@ -45,8 +45,8 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
 	def extraProfiles = scheduler ++ web
 
-	def scheduler = extraProfile("scheduling.enabled", "scheduling", false)
-	def web = extraProfile("web.enabled", "web", true)
+	def scheduler = extraProfile("scheduling.enabled", "scheduling", default = false)
+	def web = extraProfile("web.enabled", "web", default = true)
 
 	/**
 	 * Function that checks a config property and returns an Option[String] of
@@ -91,7 +91,7 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, (
 		mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
 
 	def addOptionalSource(src: Option[PropertySource[_]]) = src match {
-		case Some(src) => mutableSources.addLast(src)
+		case Some(source) => mutableSources.addLast(source)
 		case None =>
 	}
 

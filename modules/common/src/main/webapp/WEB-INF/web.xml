@@ -21,7 +21,7 @@
 	<context-param>
 		<param-name>contextInitializerClasses</param-name>
 		<param-value>
-			uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer
+			uk.ac.warwick.tabula.system.ContextProfileInitializer
 		</param-value>
 	</context-param>
 
@@ -32,11 +32,7 @@
 		<load-on-startup>1</load-on-startup>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/*-context.xml</param-value>
-		</init-param>
-		<init-param>
-			<param-name>contextInitializerClasses</param-name>
-			<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer</param-value>
+			<param-value>/WEB-INF/servlet-context.xml</param-value>
 		</init-param>
 		<multipart-config></multipart-config>
 	</servlet>
