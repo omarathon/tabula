@@ -11,8 +11,6 @@ import scala.collection.JavaConverters._
 
 class OldAllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	trait Environment {
 		val relationshipService = smartMock[RelationshipService]
 		val profileService = smartMock[ProfileService]

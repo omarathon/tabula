@@ -90,7 +90,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	@Test
 	def testRemoveFromSmallGroups() {
 		new Environment {
-			EventHandling.enabled = false
 			mockUserLookup.getUserByUserId("cusdx") returns user
 
 			// try removing the user from the group, but pass in a different module from that associated with the group - this should fail:

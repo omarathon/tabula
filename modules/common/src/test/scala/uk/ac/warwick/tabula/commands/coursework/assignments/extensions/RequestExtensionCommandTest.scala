@@ -14,8 +14,6 @@ import java.io.{FileOutputStream, ByteArrayInputStream}
 // scalastyle:off magic.number
 class RequestExtensionCommandTest extends TestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	@Test
 	def itWorks() {
 		withUser("cuslat", "1171795") {

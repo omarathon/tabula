@@ -15,8 +15,6 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	trait Environment extends ImportCommandFactorySetup {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
