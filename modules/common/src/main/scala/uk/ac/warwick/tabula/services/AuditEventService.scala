@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
 import org.hibernate.dialect.Dialect
 import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
 import org.joda.time.{DateTime, DateTimeZone}
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation._
 import org.springframework.util.FileCopyUtils
@@ -19,6 +20,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.events.Event
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.JavaConverters._
@@ -40,13 +42,15 @@ trait AuditEventService {
 }
 
 @Service
-class AutowiringEventServiceImpl extends AuditEventServiceImpl with Daoisms
+class AutowiringEventServiceImpl extends AuditEventServiceImpl
+	with Daoisms
 
 class AuditEventServiceImpl extends AuditEventService {
 	self: SessionComponent =>
 
 	var json: ObjectMapper = JsonObjectMapperFactory.instance
 
+	@Autowired var auditEventIndexService: AuditEventIndexService = _
 	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
 
 	private val baseSelect = """select
@@ -185,6 +189,8 @@ class AuditEventServiceImpl extends AuditEventService {
 				query.setString("data", data.toString)
 			}
 			query.executeUpdate()
+
+			auditEventIndexService.indexItems(getByEventId(event.id).filter(_.eventStage == "before"))
 		}
 	}
 
