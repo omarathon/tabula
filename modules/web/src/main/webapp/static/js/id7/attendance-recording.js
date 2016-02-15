@@ -250,12 +250,9 @@ $(function(){
 				var $target = $search.find('input[type="hidden"]').first();
 
 				$search.on('tabula:selected', function(evt, name, universityId, userId, description) {
-					$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
-					$modalElement.modal({ remote: null });
-					$modalElement.load(formUrl + '&student=' + universityId);
-
 					$modalElement
-						.on('shown', function() {
+						.on('shown.bs.modal', function() {
+							var $form = $('form#recordAttendance');
 							var $eventInput = $modalElement.find('input[name="replacedEvent"]');
 							var $weekInput = $modalElement.find('input[name="replacedWeek"]');
 							var $replacementInput = $modalElement.find('select#replacementEventAndWeek');
@@ -269,8 +266,6 @@ $(function(){
 							var onSubmit = function(e) {
 								e.preventDefault();
 								e.stopPropagation();
-
-								var $form = $('form#recordAttendance');
 
 								$form.prepend($target.clone()).prepend(
 									$('<input />').attr({
@@ -294,6 +289,10 @@ $(function(){
 							$modalElement.html("");
 							$modalElement.removeData('modal');
 						});
+
+					$modalElement.html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3>Loading&hellip;</h3></div></div></div>');
+					$modalElement.modal({ remote: null });
+					$modalElement.load(formUrl + '&student=' + universityId);
 				});
 
 				var xhr = null;
