@@ -22,7 +22,7 @@ class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 
 		logger.debug("Importing staff member " + universityId + " into " + memberExisting)
 
-		val isTransient = !memberExisting.isDefined
+		val isTransient = memberExisting.nonEmpty
 		val member = memberExisting getOrElse {
 			if (this.userType == MemberUserType.Emeritus) new EmeritusMember(universityId)
 			else new StaffMember(universityId)
@@ -33,7 +33,6 @@ class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
 		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStaffProperties(commandBean, memberBean)
-
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)

@@ -47,7 +47,7 @@ with MemberProperties with Unaudited with PropertyCopying {
 		this.universityId = oneOf(Option(member.universityId), optString("university_id")).get
 
 		// TAB-2014
-		this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, optString("user_code")).get
+		this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, optString("user_code")).getOrElse(this.universityId)
 
 		this.userType = member.userType
 

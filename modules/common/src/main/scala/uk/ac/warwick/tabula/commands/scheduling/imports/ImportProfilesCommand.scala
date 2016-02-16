@@ -62,10 +62,17 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		departments.foreach { department =>
 			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.par.foreach { case (membershipInfos, batchNumber) =>
 				benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
-					logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-
 					val users: Map[UniversityId, User] =
-						benchmarkTask("Fetch user details") {
+						if (department.code == ProfileImporter.applicantDepartmentCode)
+							membershipInfos.map { m =>
+								val user = new AnonymousUser
+								user.setUserId(m.member.universityId)
+								user.setWarwickId(m.member.universityId)
+								m.member.universityId -> new AnonymousUser()
+							}.toMap
+						else benchmarkTask("Fetch user details") {
+							logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+
 							membershipInfos.map { m =>
 								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
@@ -78,7 +85,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							}.toMap
 						}
 
-					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
+					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members")
 					val importMemberCommands = benchmarkTask("Fetch member details") {
 						transactional() {
 							profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)

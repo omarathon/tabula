@@ -62,14 +62,20 @@ class ImportStudentRowCommandInternal(
 				logger.debug("Importing student member " + universityId + " into " + memberExisting)
 
 				val (isTransient, member) = memberExisting match {
-					case Some(member: StudentMember) => (false, member)
-					case Some(member: OtherMember) =>
+					case Some(m: StudentMember) => (false, m)
+					case Some(m: OtherMember) =>
 						// TAB-692 delete the existing member, then return a brand new one
 						// TAB-2188
-						logger.info(s"Deleting $member while importing $universityId")
-						memberDao.delete(member)
+						logger.info(s"Deleting $m while importing $universityId")
+						memberDao.delete(m)
 						(true, new StudentMember(universityId))
-					case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
+					case Some(m: ApplicantMember) =>
+						// TAB-692 delete the existing member, then return a brand new one
+						// TAB-2188
+						logger.info(s"Deleting $m while importing $universityId")
+						memberDao.delete(m)
+						(true, new StudentMember(universityId))
+					case Some(m) => throw new IllegalStateException("Tried to convert " + m + " into a student!")
 					case _ => (true, new StudentMember(universityId))
 				}
 
@@ -97,7 +103,7 @@ class ImportStudentRowCommandInternal(
 		val hasChanged = (copyMemberProperties(commandBean, memberBean)
 			| copyStudentProperties(commandBean, memberBean)
 			| markAsSeenInSits(memberBean)
-			|| (member.tier4VisaRequirement != tier4VisaRequirement))
+			|| (member.tier4VisaRequirement.booleanValue() != tier4VisaRequirement))
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)
