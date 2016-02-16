@@ -10,10 +10,7 @@ import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 
 import scala.collection.JavaConversions._
-import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
-import org.hamcrest.Matcher
-import org.hamcrest.Matchers.allOf
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant

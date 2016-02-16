@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
+import uk.ac.warwick.tabula.commands.profiles.ViewProfileCommand
 import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}

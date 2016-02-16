@@ -3,29 +3,12 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.profiles.SearchProfilesCommand
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
-
-
-class ViewProfileCommand(user: CurrentUser, profile: Member)
-	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
-
-	private val viewingOwnProfile = user.apparentUser.getWarwickId == profile.universityId
-	private val viewerInSameDepartment = Option(user.apparentUser.getDepartmentCode)
-		.map(_.toLowerCase)
-		.exists(deptCode => profile.touchedDepartments.map(_.code).contains(deptCode))
-
-	if (!user.god && !viewingOwnProfile && (user.isStudent || profile.isStaff && !viewerInSameDepartment)) {
-		logger.info("Denying access for user " + user + " to view profile " + profile)
-		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
-	}
-}
 
 @Controller
 abstract class ViewProfileController extends ProfilesController {

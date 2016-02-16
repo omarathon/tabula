@@ -217,6 +217,7 @@ object Fixtures extends Mockito {
 			case MemberUserType.Student => new StudentMember
 			case MemberUserType.Emeritus => new EmeritusMember
 			case MemberUserType.Staff => new StaffMember
+			case MemberUserType.Applicant => new ApplicantMember
 			case MemberUserType.Other => new OtherMember
 		}
 		member.firstName = universityId

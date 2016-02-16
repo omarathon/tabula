@@ -9,8 +9,9 @@ import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportStaffMemberCommand, ImportStudentRowCommand, ImportStudentRowCommandInternal, ImportMemberCommand}
-import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, Student}
+import uk.ac.warwick.tabula.commands.scheduling.imports._
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, MemberUserType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -48,6 +49,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
 
+	lazy val applicantQuery = new ApplicantQuery(sits)
+
 	def studentInformationQuery(member: MembershipInformation, ssoUser: User, importCommandFactory: ImportCommandFactory) = {
 
 		val sceYearClause =
@@ -69,7 +72,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student | Other => members.par.flatMap { info =>
+				case Student => members.par.flatMap { info =>
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
 
@@ -81,14 +84,33 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 					).toSeq
 				}.seq
+				case Applicant | Other => members.map { info =>
+					val ssoUser = users(info.member.universityId)
+					new ImportOtherMemberCommand(info, ssoUser)
+				}
 				case _ => Seq()
 			}
 		}.toSeq
 	}
 
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
-		membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
-			MembershipInformation(member)
+		// Magic student recruitment department - get membership information directly from SITS for applicants
+		if (department.code == applicantDepartmentCode) {
+			val members = applicantQuery.execute().toSeq
+			val universityIds = members.map { _.universityId }
+
+			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
+			val universityIdsInMembership =
+				universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala.toSeq
+						.map { _.universityId }
+				}
+
+			members.filterNot { m => universityIdsInMembership.contains(m.universityId) }.map { member => MembershipInformation(member) }
+		} else {
+			membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase)).toSeq map { member =>
+				MembershipInformation(member)
+			}
 		}
 
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
@@ -222,7 +244,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					name.givenName,
 					name.familyName,
 					groupName,
-					DateTime.now.minusYears(40).toLocalDate().withDayOfYear((uniId % 364) + 1),
+					DateTime.now.minusYears(40).toLocalDate.withDayOfYear((uniId % 364) + 1),
 					department.code + "s" + uniId.toString.takeRight(3),
 					DateTime.now.minusYears(10).toLocalDate,
 					null,
@@ -267,7 +289,7 @@ class SandboxProfileImporter extends ProfileImporter {
 						name.givenName,
 						name.familyName,
 						groupName,
-						DateTime.now.minusYears(19).toLocalDate().withDayOfYear((uniId % 364) + 1),
+						DateTime.now.minusYears(19).toLocalDate.withDayOfYear((uniId % 364) + 1),
 						department.code + uniId.toString.takeRight(4),
 						DateTime.now.minusYears(1).toLocalDate,
 						DateTime.now.plusYears(2).toLocalDate,
@@ -313,6 +335,7 @@ object ProfileImporter extends Logging {
 
 	type UniversityId = String
 
+	val applicantDepartmentCode: String = "sl"
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
 	val sceYearClause =
@@ -449,6 +472,36 @@ object ProfileImporter extends Logging {
 		)
 	}
 
+	val GetApplicantInformation = f"""
+		select
+			stu.stu_code as university_number,
+			'SL' as id_dept,
+			stu.stu_caem as email,
+			'Applicant' as desc_target_group,
+			stu.stu_titl as pref_title,
+			stu.stu_fusd as pref_forenames,
+			stu.stu_surn as pref_surname,
+			'Applicant' as desc_position,
+			stu.stu_dob as dob,
+			null as its_usercode,
+			stu.stu_begd as dt_start,
+			stu.stu_endd as dt_end,
+			stu.stu_updd as dt_modified,
+			null as tel_business,
+			stu.stu_gend as gender,
+			stu.stu_haem as external_email
+		from $sitsSchema.ins_stu stu
+		where
+			stu.stu_sta1 like '%%A' and -- applicant
+			stu.stu_sta2 is null and -- no student status
+			stu.stu_udf3 is null -- no IT account
+		"""
+
+	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false)
+	}
+
 	val GetMembershipByUniversityIdInformation = """
 		select * from cmsowner.uow_current_members where university_number in (:universityIds)
 		"""
@@ -469,7 +522,7 @@ object ProfileImporter extends Logging {
 		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
 
-	private def membershipToMember(rs: ResultSet) =
+	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true) =
 		MembershipMember(
 			universityId 						= rs.getString("university_number"),
 			departmentCode					= rs.getString("id_dept"),
@@ -480,7 +533,7 @@ object ProfileImporter extends Logging {
 			preferredSurname				= rs.getString("pref_surname"),
 			position								= rs.getString("desc_position"),
 			dateOfBirth							= sqlDateToLocalDate(rs.getDate("dob")),
-			usercode								= rs.getString("its_usercode").maybeText.getOrElse(s"u${rs.getString("university_number")}"),
+			usercode								= rs.getString("its_usercode").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("university_number")}" else null),
 			startDate								= sqlDateToLocalDate(rs.getDate("dt_start")),
 			endDate									= sqlDateToLocalDate(rs.getDate("dt_end")),
 			modified								= sqlDateToDateTime(rs.getDate("dt_modified")),
