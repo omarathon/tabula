@@ -28,7 +28,6 @@ class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
 
 		val status =
 			if (triggers.get(TriggerState.Error).exists(_.nonEmpty)) ServiceHealthcheck.Status.Error
-			else if (triggers.get(TriggerState.Blocked).exists(_.nonEmpty)) ServiceHealthcheck.Status.Warning
 			else ServiceHealthcheck.Status.Okay
 
 		val statusString =
