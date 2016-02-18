@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import org.jclouds.blobstore.options.PutOptions.Builder.multipart
 
 import scala.collection.JavaConverters._
 
@@ -146,7 +147,8 @@ class BlobStoreObjectStorageService(blobStore: BlobStore, objectContainerName: S
 			.userMetadata(metadata.fileHash.map { h => "shahex" -> h }.toMap.asJava)
 		  .build()
 
-		blobStore.putBlob(objectContainerName, blob)
+		// TAB-4144 Use large object support for anything over 50mb
+		blobStore.putBlob(objectContainerName, blob, multipart(metadata.contentLength > 50 * 1024 * 1024))
 	}
 
 	override def fetch(key: String): Option[InputStream] = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {

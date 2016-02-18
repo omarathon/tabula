@@ -34,7 +34,6 @@
 		<net.databinder.dispatch.version>0.8.10</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.13</org.apache.poi.version>
 		<org.apache.tiles.version>3.0.5</org.apache.tiles.version>
-		<org.apache.jclouds.version>1.9.2</org.apache.jclouds.version>
 		<warwickutils.version>20160128</warwickutils.version>
 		<surefire.version>2.19.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
@@ -197,6 +196,13 @@
 			<id>bintray.com.scalaz.releases</id>
 			<name>Scalaz Bintray Repo</name>
 			<url>http://dl.bintray.com/scalaz/releases</url>
+		</repository>
+		<repository>
+			<id>jclouds-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
