@@ -3,7 +3,9 @@ package uk.ac.warwick.tabula.services.groups
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStageHealth._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{WorkflowProgress, WorkflowStage, WorkflowStages}
 
@@ -63,7 +65,7 @@ sealed abstract class SmallGroupSetWorkflowStage extends WorkflowStage {
 	def progress(set: SmallGroupSet): WorkflowStages.StageProgress
 }
 
-object SmallGroupSetWorkflowStages {
+object SmallGroupSetWorkflowStages extends TaskBenchmarking with RequestLevelCaching[String, Int] {
 	import WorkflowStages._
 
 	case object AddGroups extends SmallGroupSetWorkflowStage {
@@ -95,12 +97,13 @@ object SmallGroupSetWorkflowStages {
 				else
 					StageProgress(AddStudents, started = true, messageCode = "workflow.smallGroupSet.AddStudents.hasUpstream", health = Warning, completed = true)
 			} else {
+				val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
 				// Linked to SITS, no students
-				if (!set.assessmentGroups.isEmpty && set.allStudentsCount == 0)
+				if (!set.assessmentGroups.isEmpty && setAllStudentsCount == 0)
 					StageProgress(AddStudents, started = true, messageCode = "workflow.smallGroupSet.AddStudents.linkedToSits.empty", health = Warning, completed = true)
 
 				// Not linked to SITS, no students
-				else if (set.assessmentGroups.isEmpty && set.allStudentsCount == 0)
+				else if (set.assessmentGroups.isEmpty && setAllStudentsCount == 0)
 					StageProgress(AddStudents, started = false, messageCode = "workflow.smallGroupSet.AddStudents.empty", health = Danger)
 
 				// Has students
@@ -122,13 +125,16 @@ object SmallGroupSetWorkflowStages {
 
 	case object AllocateStudents extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AllocateStudents.action"
-		def progress(set: SmallGroupSet) =
-			if (set.unallocatedStudentsCount == set.allStudentsCount)
+		def progress(set: SmallGroupSet) = {
+			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
+			val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
+			if (setUnallocatedStudentsCount == setAllStudentsCount)
 				StageProgress(AllocateStudents, started = false, messageCode = "workflow.smallGroupSet.AllocateStudents.none", health = Danger)
-			else if (set.unallocatedStudentsCount > 0)
+			else if (setUnallocatedStudentsCount > 0)
 				StageProgress(AllocateStudents, started = true, messageCode = "workflow.smallGroupSet.AllocateStudents.some", health = Warning)
 			else
 				StageProgress(AllocateStudents, started = true, messageCode = "workflow.smallGroupSet.AllocateStudents.all", health = Warning, completed = true)
+		}
 
 		override def preconditions = Seq(Seq(AddGroups, AddStudents))
 	}
@@ -138,23 +144,30 @@ object SmallGroupSetWorkflowStages {
 		def progress(set: SmallGroupSet) =
 			if (set.openForSignups)
 				StageProgress(OpenSignUp, started = true, messageCode = "workflow.smallGroupSet.OpenSignUp.open", health = Warning, completed = true)
-			else if (set.unallocatedStudentsCount == set.allStudentsCount)
-				StageProgress(OpenSignUp, started = false, messageCode = "workflow.smallGroupSet.OpenSignUp.notOpen", health = Warning)
-			else
-				StageProgress(OpenSignUp, started = true, messageCode = "workflow.smallGroupSet.OpenSignUp.partial", health = Warning, completed = true)
+			else {
+				val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
+				val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
+				if (setUnallocatedStudentsCount == setAllStudentsCount)
+					StageProgress(OpenSignUp, started = false, messageCode = "workflow.smallGroupSet.OpenSignUp.notOpen", health = Warning)
+				else
+					StageProgress(OpenSignUp, started = true, messageCode = "workflow.smallGroupSet.OpenSignUp.partial", health = Warning, completed = true)
+			}
 
 		override def preconditions = Seq(Seq(AddGroups, AddStudents))
 	}
 
 	case object CloseSignUp extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.CloseSignUp.action"
-		def progress(set: SmallGroupSet) =
-			if (!set.openForSignups && set.unallocatedStudentsCount < set.allStudentsCount)
+		def progress(set: SmallGroupSet) = {
+			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
+			val setAllStudentsCount = cachedBy(s"${set.id}-allStudentsCount") { set.allStudentsCount }
+			if (!set.openForSignups && setUnallocatedStudentsCount < setAllStudentsCount)
 				StageProgress(CloseSignUp, started = true, messageCode = "workflow.smallGroupSet.CloseSignUp.closed", health = Warning, completed = true)
 			else if (set.openForSignups)
 				StageProgress(CloseSignUp, started = false, messageCode = "workflow.smallGroupSet.CloseSignUp.notClosed", health = Warning)
 			else
 				StageProgress(CloseSignUp, started = false, messageCode = "workflow.smallGroupSet.OpenSignUp.notOpen", health = Warning)
+		}
 
 		override def preconditions = Seq(Seq(OpenSignUp))
 	}
@@ -176,11 +189,13 @@ object SmallGroupSetWorkflowStages {
 
 	case object AllocateAfterNotifications extends SmallGroupSetWorkflowStage {
 		def actionCode = "workflow.smallGroupSet.AllocateStudents.action"
-		def progress(set: SmallGroupSet) =
-			if (set.unallocatedStudentsCount == 0)
+		def progress(set: SmallGroupSet) = {
+			val setUnallocatedStudentsCount = cachedBy(s"${set.id}-unallocatedStudentsCount") { set.unallocatedStudentsCount }
+			if (setUnallocatedStudentsCount == 0)
 				StageProgress(AllocateAfterNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Good, completed = true)
 			else
 				StageProgress(AllocateAfterNotifications, started = true, messageCode = "workflow.smallGroupSet.SendNotifications.fullyReleased", health = Warning)
+		}
 
 		override def preconditions = Seq(Seq(SendNotifications))
 	}
