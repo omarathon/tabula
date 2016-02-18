@@ -1,20 +1,21 @@
-package uk.ac.warwick.tabula.scheduling.services.healthchecks
+package uk.ac.warwick.tabula.services.healthchecks
 
 import java.sql.ResultSet
 import javax.sql.DataSource
 
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.scheduling.services.healthchecks.QuartzJdbc.TriggerState
-import uk.ac.warwick.tabula.services.healthchecks.{ServiceHealthcheck, ServiceHealthcheckProvider}
+import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc._
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.duration._
 
 @Component
+@Profile(Array("scheduling"))
 class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
@@ -49,57 +50,6 @@ class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
 
 		update(ServiceHealthcheck(
 			name = "quartz-triggers",
-			status = status,
-			testedAt = DateTime.now,
-			message = statusString,
-			performanceData = perfData
-		))
-	}
-
-}
-
-@Component
-class QuartzSchedulerClusterHealthcheck extends ServiceHealthcheckProvider {
-
-	@Scheduled(fixedRate = 60 * 1000) // 1 minute
-	override def run(): Unit = {
-		val jdbcTemplate = new JdbcTemplate(Wire.named[DataSource]("dataSource"))
-		val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
-
-		val schedulers =
-			jdbcTemplate.queryAndMap("select * from qrtz_scheduler_state") {
-				case (resultSet, _) => QuartzJdbc.Scheduler(resultSet)
-			}.filter { _.clusterName == clusterName }
-
-		// A scheduler is out of contact if it hasn't contacted the database for 5 minutes
-		def stale(s: QuartzJdbc.Scheduler) =
-			s.lastCheckin.plusMinutes(5).isBeforeNow
-
-		/**
-			* Critical if there are fewer than 2 schedulers in the cluster or all schedulers are out of contact.
-			* Warning if there is one active scheduler in the cluster
-			*/
-		val status =
-			if (schedulers.length < 2) ServiceHealthcheck.Status.Error
-			else if (schedulers.forall(stale)) ServiceHealthcheck.Status.Error
-			else if (schedulers.filterNot(stale).length < 2) ServiceHealthcheck.Status.Warning
-			else ServiceHealthcheck.Status.Okay
-
-		val statusString =
-			if (schedulers.exists(stale)) {
-				val staleSchedulers = schedulers.filter(stale)
-				s"${schedulers.length} schedulers in cluster (${schedulers.map(_.instance).mkString(", ")}), ${staleSchedulers.length} stale (${staleSchedulers.map(_.instance).mkString(", ")})"
-			} else {
-				s"${schedulers.length} schedulers in cluster (${schedulers.map(_.instance).mkString(", ")})"
-			}
-
-		val perfData = Seq(
-			ServiceHealthcheck.PerformanceData("scheduler_count", schedulers.length, 1, 1),
-			ServiceHealthcheck.PerformanceData("active_scheduler_count", schedulers.filterNot(stale).length, 1, 0)
-		)
-
-		update(ServiceHealthcheck(
-			name = "quartz-cluster",
 			status = status,
 			testedAt = DateTime.now,
 			message = statusString,

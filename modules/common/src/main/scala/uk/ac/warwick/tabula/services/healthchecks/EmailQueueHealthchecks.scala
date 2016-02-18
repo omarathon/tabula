@@ -1,15 +1,16 @@
-package uk.ac.warwick.tabula.scheduling.services.healthchecks
+package uk.ac.warwick.tabula.services.healthchecks
 
 import org.joda.time.{DateTime, Minutes}
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.services.EmailNotificationService
-import uk.ac.warwick.tabula.services.healthchecks.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 @Component
+@Profile(Array("scheduling"))
 class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 
 	val WarningThreshold = 1000
@@ -39,6 +40,7 @@ class EmailUnsentEmailCountHealthcheck extends ServiceHealthcheckProvider {
 }
 
 @Component
+@Profile(Array("scheduling"))
 class EmailOldestUnsentItemHealthcheck extends ServiceHealthcheckProvider {
 
 	val WarningThreshold = 20 // minutes
