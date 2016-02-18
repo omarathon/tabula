@@ -64,11 +64,11 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 
 		val sets = benchmarkTask("Fetch, filter and sort sets") {
 			smallGroupService.getSmallGroupSets(department, academicYear)
-				.filter { set => securityService.can(user, RequiredPermission, set) }
 				.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
 				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
 				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
 				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
+				.filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
 				.sortBy(set => (set.archived, set.module.code, set.nameWithoutModulePrefix))
 		}
 
