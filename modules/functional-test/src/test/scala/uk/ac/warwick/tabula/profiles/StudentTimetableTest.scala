@@ -22,7 +22,7 @@ import scala.util.{Failure, Success, Try}
  * view timetable data for real production users.
  *
  */
-class StudentTimetableTest extends BrowserTest with TimetablingFixture with  GivenWhenThen{
+class StudentTimetableTest extends BrowserTest with TimetablingFixture with GivenWhenThen {
 
 	// The default HTMLUnit JS engine throws errors about
 	// "Unexpected call to method or property access" when trying to render the profiles page
@@ -54,15 +54,15 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		timetable should be('showingCalendar)
 
 	}
-	"A student" should "be able to request a JSON feed of timetable events" in {
 
+	"A student" should "be able to request a JSON feed of timetable events" in {
 		Given("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
 
-		addStudentToGroup(P.Student1.usercode,testGroupSetId, "Group 1")
-		createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
+		addStudentToGroup(P.Student1.usercode, testGroupSetId, "Group 1")
+		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "47")
 
 		When("I request the lecture API for the whole year, as that student")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1)
@@ -78,6 +78,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		val smallGroup = events.last
 		smallGroup("title") should be(s"XXX654 $TEST_MODULE_NAME Tutorial (Test Place)")
 	}
+
 	"A tutor" should "be able to request their tutees timetable" in {
 		Given("Marker 1 is tutor to Student 1")
 		createStudentRelationship(P.Student1,P.Marker1)

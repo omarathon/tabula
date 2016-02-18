@@ -32,7 +32,7 @@ trait TimetableDriver extends FixturesDriver  {
 			val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
 			val start = startOfYear.getMillis / 1000
 			val end = startOfYear.plusYears(2).getMillis / 1000
-			val req = (url(FunctionalTestProperties.SiteRoot + "/profiles/timetable/api") <<?
+			val req = (url(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar") <<?
 				Map(
 					"from" -> start.toString,
 					"to" -> end.toString,
