@@ -16,6 +16,10 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
 
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
+		if (memberExisting.collect { case m @ (_: StudentMember | _: StaffMember) => m }.nonEmpty) {
+			// Don't override existing students or staff
+			return memberExisting.get
+		}
 
 		logger.debug("Importing other member " + universityId + " into " + memberExisting)
 

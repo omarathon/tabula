@@ -8,6 +8,7 @@ import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
@@ -51,7 +52,8 @@ class SmallGroupSet
 		with HasSettings
 		with Serializable
 		with PostLoadBehaviour
-		with ToEntityReference {
+		with ToEntityReference
+		with TaskBenchmarking {
 	type Entity = SmallGroupSet
 
 	import SmallGroupSet.Settings
@@ -195,10 +197,10 @@ class SmallGroupSet
 			membershipService.determineMembershipIds(upstreamAssessmentGroups, Some(members))
 		}
 
-	def allStudentsCount =
+	def allStudentsCount = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
-		}
+		}}
 
 	def unallocatedStudents = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
@@ -208,7 +210,7 @@ class SmallGroupSet
 		}
 	}
 
-	def unallocatedStudentsCount = {
+	def unallocatedStudentsCount = benchmarkTask(s"${this.id} unallocatedStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
 				// Efficiency
