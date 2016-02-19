@@ -127,6 +127,14 @@
 						<td><span class="exam-grid-override">#</span></td>
 						<td>Manually adjusted and not stored in SITS</td>
 					</tr>
+					<tr>
+						<td>#?</td>
+						<td>Agreed mark missing (using actual mark)</td>
+					</tr>
+					<tr>
+						<td>?</td>
+						<td>Agreed mark and actual mark missing</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>

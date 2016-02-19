@@ -86,6 +86,8 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				selectionStatusCode = "C",
 				occurrence = "A",
 				academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
+				actualMark = Some(new JBigDecimal("90.0")),
+				actualGrade = "A",
 				agreedMark = Some(new JBigDecimal("90.0")),
 				agreedGrade = "A"
 			)
@@ -111,6 +113,8 @@ object ModuleRegistrationImporter {
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
 			sms.ses_code, -- e.g. C for core or O for option
 			sms.ayr_code, sms_occl as occurrence,
+			null as smr_actm, -- actual mark
+			null as smr_actg, -- actual grade
 			null as smr_agrm, -- agreed mark
 			null as smr_agrg -- agreed grade
 				from $sitsSchema.ins_stu stu -- student
@@ -131,6 +135,8 @@ object ModuleRegistrationImporter {
 	def ConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
+			smr_actm, -- actual overall module mark
+			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
 			smr_agrg -- agreed overall module grade
 				from $sitsSchema.ins_stu stu
@@ -158,7 +164,7 @@ object ModuleRegistrationImporter {
 	// but that column has a non-null constraint
 	def AutoUploadedConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
-			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_agrm, smr_agrg
+			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_actm, smr_actg, smr_agrm, smr_agrg
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
@@ -183,7 +189,7 @@ object ModuleRegistrationImporter {
 			"""
 
 	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
-		var row = ModuleRegistrationRow(
+		ModuleRegistrationRow(
 			resultSet.getString("scj_code"),
 			resultSet.getString("mod_code"),
 			resultSet.getBigDecimal("credit"),
@@ -191,21 +197,11 @@ object ModuleRegistrationImporter {
 			resultSet.getString("ses_code"),
 			resultSet.getString("occurrence"),
 			resultSet.getString("ayr_code"),
-			None,
+			Option(resultSet.getBigDecimal("smr_actm")),
+			resultSet.getString("smr_actg"),
+			Option(resultSet.getBigDecimal("smr_agrm")),
 			resultSet.getString("smr_agrg")
 		)
-		if (resultSet.getBigDecimal("smr_agrm") != null)
-			row = ModuleRegistrationRow(
-				resultSet.getString("scj_code"),
-				resultSet.getString("mod_code"),
-				resultSet.getBigDecimal("credit"),
-				resultSet.getString("assess_group"),
-				resultSet.getString("ses_code"),
-				resultSet.getString("occurrence"),
-				resultSet.getString("ayr_code"),
-				Some(resultSet.getBigDecimal("smr_agrm")),
-				resultSet.getString("smr_agrg"))
-		row
 	}
 
 	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
@@ -238,6 +234,8 @@ case class ModuleRegistrationRow(
 	selectionStatusCode: String,
 	occurrence: String,
 	academicYear: String,
-	var agreedMark: Option[JBigDecimal],
+	actualMark: Option[JBigDecimal],
+	actualGrade: String,
+	agreedMark: Option[JBigDecimal],
 	agreedGrade: String
 )

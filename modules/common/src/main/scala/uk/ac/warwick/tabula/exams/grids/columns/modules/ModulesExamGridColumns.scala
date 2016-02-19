@@ -32,14 +32,18 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 	override def render: Map[String, String] =
 		entities.map(entity => entity.id -> {
 			getModuleRegistration(entity).map(mr => {
-				val mark = markWithOverride(entity, mr)
+				val (mark, isAgreedMark) = markWithOverride(entity, mr)
 				if (mark != null) {
 					// entity.studentCourseYearDetails.isDefined checks if this is a real SCYD or just an entity for showing overcatting options
 					// If the latter we don't want to highlight if it's used (because in that case they all are)
 					val usedInOvercattingClass = if (entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))) "exam-grid-overcat" else ""
 					val failedClass = if (mr.agreedGrade == "F") "exam-grid-fail" else ""
 					val overriddenClass = if (entity.markOverrides.flatMap(_.get(module)).isDefined) "exam-grid-override" else ""
-					val append = if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+					val append = if (isAgreedMark) {
+						if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+					} else {
+						if (mark.toString == "0") s"(${mr.actualGrade})?" else "?"
+					}
 
 					"<span class=\"%s\">%s%s</span>".format(Seq(usedInOvercattingClass, failedClass, overriddenClass).mkString(" "), mark.toString, append)
 				} else {
@@ -56,12 +60,16 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 	): Unit = {
 		val cell = row.createCell(index)
 		getModuleRegistration(entity).foreach(mr => {
-			val mark = markWithOverride(entity, mr)
+			val (mark, isAgreedMark) = markWithOverride(entity, mr)
 			if (mark != null) {
 				val usedInOvercatting = entity.studentCourseYearDetails.isDefined && entity.overcattingModules.exists(_.contains(mr.module))
 				val isFailed = mr.agreedGrade == "F"
 				val isOverridden = entity.markOverrides.flatMap(_.get(module)).isDefined
-				val append = if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+				val append = if (isAgreedMark) {
+					if (mark.toString == "0") s"(${mr.agreedGrade})" else ""
+				} else {
+					if (mark.toString == "0") s"(${mr.actualGrade})?" else "?"
+				}
 
 				if (usedInOvercatting || isOverridden || append.length > 0) {
 					if (isOverridden) {
@@ -96,8 +104,13 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 		)
 	}
 
-	private def markWithOverride(entity: GenerateExamGridEntity, moduleRegistration: ModuleRegistration): BigDecimal = {
-		entity.markOverrides.getOrElse(Map()).getOrElse(module, Option(moduleRegistration.agreedMark).map(m => BigDecimal(m)).orNull)
+	private def markWithOverride(entity: GenerateExamGridEntity, moduleRegistration: ModuleRegistration): (BigDecimal, Boolean) = {
+		entity.markOverrides.getOrElse(Map()).get(module).map((_, true)).getOrElse(
+			moduleRegistration.agreedMark match {
+				case mark: JBigDecimal => (BigDecimal(mark), true)
+				case _ => Option(moduleRegistration.actualMark).map(m => (BigDecimal(m), false)).getOrElse(null, false)
+			}
+		)
 	}
 
 	override val renderSecondaryValue: String = cats.toPlainString

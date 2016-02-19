@@ -1,19 +1,20 @@
-package uk.ac.warwick.tabula.scheduling.services.healthchecks
+package uk.ac.warwick.tabula.services.healthchecks
 
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
-import uk.ac.warwick.tabula.services.healthchecks.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.Try
 
 @Component
+@Profile(Array("scheduling"))
 class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider {
 
 	val WarningThreshold = 10 // minutes

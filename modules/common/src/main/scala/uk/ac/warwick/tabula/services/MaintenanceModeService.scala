@@ -12,14 +12,16 @@ import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.events.{Event, EventDescription}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.exceptions.HandledException
-import uk.ac.warwick.util.queue.{Queue, QueueListener}
 import uk.ac.warwick.util.queue.conversion.ItemType
+import uk.ac.warwick.util.queue.{Queue, QueueListener}
 
 import scala.beans.BeanProperty
 
 trait MaintenanceStatus {
 	def enabled: Boolean
+
 	def until: Option[DateTime]
+
 	def message: Option[String]
 }
 
@@ -35,16 +37,16 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	def enabled: Boolean
 
 	/**
-	 * An EventSource to which you can attach a listener to find
-	 * out when maintenance mode goes on and off.
-	 */
+		* An EventSource to which you can attach a listener to find
+		* out when maintenance mode goes on and off.
+		*/
 	val changingState: Reactor.EventSource[Boolean]
 
 	/**
-	 * Returns an Exception object suitable for throwing when trying
-	 * to do an unsupported op while in maintenance mode. Only returns
-	 * it; you need to throw it yourself. Like a dog!
-	 */
+		* Returns an Exception object suitable for throwing when trying
+		* to do an unsupported op while in maintenance mode. Only returns
+		* it; you need to throw it yourself. Like a dog!
+		*/
 	def exception(callee: Describable[_]): Exception
 
 	var until: Option[DateTime]
@@ -69,6 +71,7 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	def enabled: Boolean = _enabled
+
 	var until: Option[DateTime] = None
 	var message: Option[String] = None
 
@@ -116,16 +119,16 @@ trait AutowiringSettingsSyncQueueComponent extends SettingsSyncQueueComponent {
 }
 
 /**
- * Exception thrown when a command tries to run during
- * maintenance mode, and it's not readonly. The view handler
- * should handle this exception specially, showing a nice message.
- *
- * Holds onto some info about the maintenance, since error views are
- * only provided with the thrown exception.
- */
+	* Exception thrown when a command tries to run during
+	* maintenance mode, and it's not readonly. The view handler
+	* should handle this exception specially, showing a nice message.
+	*
+	* Holds onto some info about the maintenance, since error views are
+	* only provided with the thrown exception.
+	*/
 class MaintenanceModeEnabledException(val until: Option[DateTime], val message: Option[String])
 	extends RuntimeException
-	with HandledException {
+		with HandledException {
 
 	def getMessageOrEmpty = message.getOrElse("")
 
@@ -142,7 +145,7 @@ class MaintenanceModeMessage {
 		val bean = new BeanWrapperImpl(this)
 
 		bean.setPropertyValue("enabled", enabled)
-		bean.setPropertyValue("until", until.map { _.getMillis }.getOrElse(-1))
+		bean.setPropertyValue("until", until.map(_.getMillis).getOrElse(-1))
 		bean.setPropertyValue("message", message.orNull)
 
 	}
@@ -154,18 +157,19 @@ class MaintenanceModeMessage {
 
 class MaintenanceModeListener extends QueueListener with InitializingBean with Logging with AutowiringMaintenanceModeServiceComponent {
 
-		var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue = Wire.named[Queue]("settingsSyncTopic")
 
-		override def isListeningToQueue = true
-		override def onReceive(item: Any) {
-				item match {
-						case copy: MaintenanceModeMessage => maintenanceModeService.update(copy)
-						case _ =>
-				}
-		}
+	override def isListeningToQueue = true
 
-		override def afterPropertiesSet = {
-				queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
+	override def onReceive(item: Any) {
+		item match {
+			case copy: MaintenanceModeMessage => maintenanceModeService.update(copy)
+			case _ =>
 		}
+	}
+
+	override def afterPropertiesSet = {
+		queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
+	}
 
 }

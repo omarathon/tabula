@@ -24,9 +24,7 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
 		logger.debug("Importing other member " + universityId + " into " + memberExisting)
 
 		val (isTransient, member) = memberExisting match {
-			case Some(m: ApplicantMember) => (false, m)
-			case Some(m: OtherMember) => (false, m)
-			case Some(m) => throw new IllegalStateException("Tried to convert " + m + " into an other!")
+			case Some(m) => (false, m)
 			case _ if this.userType == MemberUserType.Applicant => (true, new ApplicantMember(universityId))
 			case _ => (true, new OtherMember(universityId))
 		}

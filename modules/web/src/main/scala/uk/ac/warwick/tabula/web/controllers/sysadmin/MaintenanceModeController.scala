@@ -94,14 +94,14 @@ trait ManageMaintenanceModePermissions extends RequiresPermissionsChecking with 
 class MaintenanceModeController extends BaseSysadminController {
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("command") def cmd: MaintenanceModeCommand.Command = MaintenanceModeCommand()
+	@ModelAttribute("maintenanceModeCommand") def cmd: MaintenanceModeCommand.Command = MaintenanceModeCommand()
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") form: MaintenanceModeCommand.Command, errors: Errors) =
+	def showForm(@ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors) =
 		Mav("sysadmin/maintenance").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") form: MaintenanceModeCommand.Command, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("maintenanceModeCommand") form: MaintenanceModeCommand.Command, errors: Errors) = {
 		if (errors.hasErrors)
 			showForm(form, errors)
 		else {
