@@ -1,18 +1,21 @@
-package uk.ac.warwick.tabula.scheduling.scheduler
+package uk.ac.warwick.tabula.services.scheduling
 
 import javax.sql.DataSource
 
 import org.quartz._
-import org.springframework.beans.factory.FactoryBean
-import org.springframework.beans.factory.annotation.{Qualifier, Autowired, Value}
-import org.springframework.context.annotation.{Bean, Configuration, Profile}
+import org.springframework.beans.factory.{InitializingBean, FactoryBean}
+import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
+import org.springframework.context.annotation.{Profile, Bean, Configuration}
+import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
 import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.scheduling.quartz.{JobDetailFactoryBean, QuartzJobBean, SchedulerFactoryBean, SpringBeanJobFactory}
+import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
 import uk.ac.warwick.util.web.Uri
@@ -108,18 +111,20 @@ object SchedulingConfiguration {
 }
 
 @Configuration
-@Profile(Array("scheduling"))
 class JobFactoryConfiguration {
 	@Bean def jobFactory(): AutowiringSpringBeanJobFactory = new AutowiringSpringBeanJobFactory
 }
 
 @Configuration
-@Profile(Array("scheduling"))
+@Profile(Array("dev", "production", "scheduling"))
 class SchedulingConfiguration {
 
 	@Autowired var transactionManager: PlatformTransactionManager = _
 	@Qualifier("dataSource") @Autowired var dataSource: DataSource = _
 	@Autowired var jobFactory: SpringBeanJobFactory = _
+
+	@Autowired var env: Environment = _
+	@Autowired var maintenanceModeService: MaintenanceModeService = _
 
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 
@@ -154,7 +159,11 @@ class SchedulingConfiguration {
 		factory.setTransactionManager(transactionManager)
 		factory.setSchedulerName(Uri.parse(toplevelUrl).getAuthority)
 		factory.setOverwriteExistingJobs(true)
-		factory.setAutoStartup(true)
+
+		// We only auto-startup on the scheduler, and only if we're not in maintenance mode. This allows us
+		// to wire a scheduler on nodes that wouldn't normally get one and use it to schedule jobs. Neat!
+		factory.setAutoStartup(env.acceptsProfiles("scheduling") && !maintenanceModeService.enabled)
+
 		factory.setApplicationContextSchedulerContextKey("applicationContext")
 		factory.setJobFactory(jobFactory)
 
@@ -166,13 +175,33 @@ class SchedulingConfiguration {
 
 }
 
+@Configuration
+@Profile(Array("test"))
+class TestSchedulingConfiguration {
+	@Bean def scheduler(): FactoryBean[Scheduler] = {
+		new SchedulerFactoryBean
+	}
+}
+
+@Component
+@Profile(Array("scheduling"))
+class SchedulingMaintenanceModeObserver extends InitializingBean {
+
+	@Autowired var maintenanceModeService: MaintenanceModeService = _
+	@Autowired var scheduler: Scheduler = _
+
+	override def afterPropertiesSet(): Unit = {
+		// listen for maintenance mode changes
+		maintenanceModeService.changingState.observe { enabled =>
+			if (enabled) scheduler.standby()
+			else scheduler.start()
+		}
+	}
+}
+
 trait AutowiredJobBean extends QuartzJobBean {
 
 	protected var features = Wire[Features]
 	protected var exceptionResolver = Wire[ExceptionResolver]
-
-	protected var maintenanceModeService = Wire[MaintenanceModeService]
-
-	protected def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
 
 }

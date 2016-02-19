@@ -1,14 +1,14 @@
-package uk.ac.warwick.tabula.scheduling.services.healthchecks
+package uk.ac.warwick.tabula.services.healthchecks
 
 import humanize.Humanize._
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
-import uk.ac.warwick.tabula.services.healthchecks.{ServiceHealthcheck, ServiceHealthcheckProvider}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -81,6 +81,7 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 }
 
 @Component
+@Profile(Array("scheduling"))
 class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 1 day, critical if no import for past day and a half
@@ -96,6 +97,7 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 }
 
 @Component
+@Profile(Array("scheduling"))
 class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 1 and a half days, critical if no import for past 2 days
@@ -116,6 +118,7 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 }
 
 @Component
+@Profile(Array("scheduling"))
 class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	// Warn if no successful import for 1 and a half days, critical if no import for past 2 days

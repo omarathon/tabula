@@ -69,7 +69,6 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/web</module>
-		<module>modules/scheduling</module>
 		<module>modules/api</module>
 	</modules>
 

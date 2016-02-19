@@ -1,25 +1,26 @@
-package uk.ac.warwick.tabula.scheduling.scheduler
+package uk.ac.warwick.tabula.services.scheduling.jobs
 
 import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.context.annotation.Scope
+import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.services.ScheduledNotificationService
+import uk.ac.warwick.tabula.services.jobs.JobService
+import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 @Component
+@Profile(Array("scheduling"))
 @DisallowConcurrentExecution
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-class ProcessScheduledNotificationsJob extends AutowiredJobBean {
+class ProcessJobQueueJob extends AutowiredJobBean {
 
-	@Autowired var scheduledNotificationService: ScheduledNotificationService = _
+	@Autowired var jobService: JobService = _
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingProcessScheduledNotifications) maintenanceGuard {
+		if (features.schedulingJobService)
 			exceptionResolver.reportExceptions {
-				scheduledNotificationService.processNotifications()
+				jobService.run()
 			}
-		}
 	}
 
 }

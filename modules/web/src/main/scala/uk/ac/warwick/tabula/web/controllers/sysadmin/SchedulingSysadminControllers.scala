@@ -1,19 +1,22 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
 import org.joda.time.DateTime
+import org.quartz.Scheduler
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, RequestParam, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, ImportAssignmentsCommand, ImportDepartmentsModulesCommand, ImportAcademicInformationCommand}
-import uk.ac.warwick.tabula.commands.{Appliable, Description, ReadOnly, Command}
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
+import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ProfileService, ModuleAndDepartmentService}
-import uk.ac.warwick.tabula.services.elasticsearch.{ProfileIndexService, NotificationIndexService, AuditEventIndexService, ElasticsearchIndexingResult}
+import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
+import uk.ac.warwick.tabula.services.scheduling.jobs.{ProcessScheduledNotificationsJob, ImportAcademicDataJob, ImportAssignmentsJob, ImportProfilesJob}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
 
@@ -94,16 +97,6 @@ class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with R
 		)
 }
 
-class CompleteScheduledNotificationsCommand extends Command[Unit] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData)
-
-	def applyInternal() = {
-		scheduledNotificationService.processNotifications()
-	}
-
-	def describe(d: Description) = d.property("from" -> DateTime.now)
-}
-
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-notifications"))
 class SysadminNotificationsAuditController extends BaseSysadminController {
@@ -144,10 +137,12 @@ class SysadminIndexProfilesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import"))
 class SchedulingSysadminController extends BaseSysadminController {
 
+	var scheduler = Wire[Scheduler]
+
 	@RequestMapping(method = Array(POST))
 	def importModules = {
-		ImportAcademicInformationCommand().apply()
-		"sysadmin/importdone"
+		scheduler.scheduleNow[ImportAcademicDataJob]()
+		redirectToHome
 	}
 
 }
@@ -156,11 +151,11 @@ class SchedulingSysadminController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-department"))
 class ImportDeptModulesController extends BaseSysadminController {
 
-	@ModelAttribute("importDeptModulesCommand") def importProfilesCommand = ImportDepartmentsModulesCommand()
+	var scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
-	def importModules(@ModelAttribute("importDeptModulesCommand") command: Appliable[Unit]) = {
-		command.apply()
+	def importModules(@RequestParam deptCode: String) = {
+		scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)
 		redirectToHome
 	}
 }
@@ -168,10 +163,12 @@ class ImportDeptModulesController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
+
+	var scheduler = Wire[Scheduler]
+
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
-		val command = ImportAssignmentsCommand()
-		command.apply()
+		scheduler.scheduleNow[ImportAssignmentsJob]()
 		redirectToHome
 	}
 }
@@ -180,8 +177,7 @@ class ImportSitsController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController with AutowiringJobServiceComponent {
 
-	@ModelAttribute("importProfilesCommand")
-	def importProfilesCommand = new ImportProfilesCommand
+	var scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST), params = Array("members"))
 	def importSpecificProfiles(@RequestParam members: String) = {
@@ -190,8 +186,8 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 	}
 
 	@RequestMapping(method = Array(POST))
-	def importProfiles(@ModelAttribute("importProfilesCommand") command: ImportProfilesCommand) = {
-		command.apply()
+	def importProfiles(@RequestParam deptCode: String) = {
+		scheduler.scheduleNow[ImportProfilesJob]("departmentCode" -> deptCode)
 		redirectToHome
 	}
 }
@@ -223,9 +219,12 @@ class ImportSingleProfileController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/complete-scheduled-notification"))
 class CompleteScheduledNotificationsController extends BaseSysadminController {
+
+	var scheduler = Wire[Scheduler]
+
 	@RequestMapping
 	def complete() = {
-		new CompleteScheduledNotificationsCommand().apply()
+		scheduler.scheduleNow[ProcessScheduledNotificationsJob]()
 		redirectToHome
 	}
 }

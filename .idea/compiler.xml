@@ -49,7 +49,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="scheduling" />
       </profile>
       <profile default="false" name="Annotation profile for web" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
