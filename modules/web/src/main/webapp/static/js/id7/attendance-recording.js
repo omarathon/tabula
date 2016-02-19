@@ -75,56 +75,62 @@ var setArgOnUrl = function(url, argName, argValue){
 	}
 };
 
-exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
-	var checkForCheckpoints = function(){
-		var attendanceData = {}, $attendanceForm = $('form#recordAttendance');
-		$attendanceForm.find('select').each(function(){
-			attendanceData[$(this).data('universityid')] = $(this).val();
-		});
-		$.post('/attendance/check/smallgroup', {
-			'occurrence' : $attendanceForm.data('occurrence'),
-			'attendances' : attendanceData
-		}, function(data){
-			$attendanceForm.find('.checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
-			if (data.length === 0) {
-				$attendanceForm.find('.checkpoints-message').hide();
-			} else {
-				var popoverContent = $('<ul/>');
-				$.each(data, function(i, student){
-					popoverContent.append($('<li/>').html(student.name));
-				});
-				$attendanceForm.find('.checkpoints-message').show()
-					.find('.students').html(data.length + ' student' + ((data.length > 1)?'s':''))
-					.data('content', popoverContent.wrap('<div></div>').parent().html())
-					.tabulaPopover({
-						trigger: 'click'
-					});
-			}
-		});
-	};
+var updateAttendanceState = function(e, $this){
+	if ($this.is('.disabled')) {
+		e.stopPropagation();
+		e.preventDefault();
+		return false;
+	} else {
+		var state = $this.data('state');
+		$this.closest('div.pull-right').find('option').filter(function() {
+			return $(this).val() == state;
+		}).prop('selected', true);
+		var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
+		noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
+	}
+};
 
-	$('#recordAttendance').on('click', 'div.btn-group button', function(e, isBulkAction){
-		var $this = $(this);
-		if ($this.is('.disabled')) {
-			e.stopPropagation();
-			e.preventDefault();
-			return false;
+var checkForCheckpoints = function(){
+	var attendanceData = {}, $attendanceForm = $('form#recordAttendance');
+	$attendanceForm.find('select').each(function(){
+		attendanceData[$(this).data('universityid')] = $(this).val();
+	});
+	$.post('/attendance/check/smallgroup', {
+		'occurrence' : $attendanceForm.data('occurrence'),
+		'attendances' : attendanceData
+	}, function(data){
+		$attendanceForm.find('.checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
+		if (data.length === 0) {
+			$attendanceForm.find('.checkpoints-message').hide();
 		} else {
-			var state = $this.data('state');
-			$this.closest('div.pull-right').find('option').filter(function(){
-				return $(this).val() == state;
-			}).prop('selected', true);
-			var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
-			noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
-
-			// if the row has no note and authorised was clicked then open the attendance note popup
-			if(!isBulkAction && state === "authorised" && !noteButton.hasClass("edit")) {
-				noteButton.click();
-			}
+			var popoverContent = $('<ul/>');
+			$.each(data, function(i, student){
+				popoverContent.append($('<li/>').html(student.name));
+			});
+			$attendanceForm.find('.checkpoints-message').show()
+				.find('.students').html(data.length + ' student' + ((data.length > 1)?'s':''))
+				.data('content', popoverContent.wrap('<div></div>').parent().html())
+				.tabulaPopover({
+					trigger: 'click'
+				});
 		}
+	});
+};
+
+exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
+
+	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
+		var $this = $(this);
+		updateAttendanceState(e, $this);
 
 		if (enableCheckForCheckpoints) {
 			checkForCheckpoints();
+		}
+
+		var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
+		// if the row has no note and authorised was clicked then open the attendance note popup
+		if($this.data('state') === "authorised" && !noteButton.hasClass("edit")) {
+			noteButton.click();
 		}
     });
 
@@ -135,12 +141,6 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 	}
 };
 
-exports.enableCheckForCheckpoints = function() {
-	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
-		$('#recordAttendance')
-	});
-};
-
 $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
@@ -149,10 +149,15 @@ $(function(){
 		.find('div.pull-right').show()
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
-			$(this).on('click', function(){
+			$(this).on('click', function(e){
 				$('.attendees .row').each(function(){
-					$(this).find('button').eq(i).trigger('click', ['bulkAction']);
+					$(this).find('button').eq(i).each(function() {
+						$(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
+						$(this).addClass('active');
+						updateAttendanceState(e, $(this));
+					})
 				});
+				checkForCheckpoints();
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
