@@ -36,7 +36,10 @@ class SuggestedResultColumnOption extends columns.ExamGridColumnOption with Auto
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			val cell = row.createCell(index)
-			cell.setCellValue(progressionService.suggestedResult(entity.studentCourseYearDetails.get).description)
+			progressionService.suggestedResult(entity.studentCourseYearDetails.get) match {
+				case unknown: ProgressionResult.Unknown => cell.setCellValue(s"${unknown.description} ${unknown.details}")
+				case result => cell.setCellValue(result.description)
+			}
 		}
 
 	}

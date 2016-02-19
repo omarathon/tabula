@@ -19,6 +19,7 @@ object GenerateExamGridExporter {
 	case object Fail extends Style
 	case object Overcat extends Style
 	case object Overridden extends Style
+	case object ActualMark extends Style
 
 	def apply(
 		department: Department,
@@ -216,6 +217,20 @@ object GenerateExamGridExporter {
 			keyCell.setCellStyle(cellStyleMap(Overridden))
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Manually adjusted and not stored in SITS")
+		}
+		{
+			val row = sheet.createRow(11)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#?")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark missing (using actual mark)")
+		}
+		{
+			val row = sheet.createRow(12)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("?")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark and actual mark missing")
 		}
 	}
 

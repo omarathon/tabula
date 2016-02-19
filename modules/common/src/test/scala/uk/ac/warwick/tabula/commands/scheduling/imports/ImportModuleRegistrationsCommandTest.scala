@@ -35,9 +35,9 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
 		val modRegRow1 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
-			Some(new JBigDecimal("90.0")), "A")
+			Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A")
 		val modRegRow2 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
-			Some(new JBigDecimal("50.0")), "C")
+			Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C")
 
 		val scdDao = smartMock[StudentCourseDetailsDao]
 		scdDao.getByScjCode("0000001/1") returns Some(scd)

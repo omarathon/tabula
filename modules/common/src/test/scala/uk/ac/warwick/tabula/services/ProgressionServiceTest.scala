@@ -42,12 +42,29 @@ class ProgressionServiceTest extends TestBase with Mockito {
 	}
 
 	@Test
+	def suggestedResultNoModuleRegistrations(): Unit = {
+		new Fixture {
+			val result = service.suggestedResult(scyd3)
+			result.description should be (ProgressionResult.Unknown("").description)
+			result.asInstanceOf[ProgressionResult.Unknown].details.contains("No module registrations found") should be {true}
+		}
+	}
+
+	@Test
 	def suggestedResultFirstYear(): Unit = {
 		// Not satisfied overall mark
 		new Fixture {
 			scyd3.yearOfStudy = 1
 			service.moduleRegistrationService.findCoreRequiredModules(null, academicYear, 1) returns Seq()
 			service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]]) returns Option(BigDecimal(30))
+
+			student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+				student.mostSignificantCourse,
+				module1,
+				BigDecimal(30).underlying,
+				academicYear,
+				agreedMark = BigDecimal(100)
+			))
 
 			val result = service.suggestedResult(scyd3)
 			result.description should be (ProgressionResult.Resit.description)
@@ -122,6 +139,14 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			scyd3.yearOfStudy = 2
 			service.moduleRegistrationService.findCoreRequiredModules(null, academicYear, 2) returns Seq()
 			service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]]) returns Option(BigDecimal(30))
+
+			student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+				student.mostSignificantCourse,
+				module1,
+				BigDecimal(30).underlying,
+				academicYear,
+				agreedMark = BigDecimal(100)
+			))
 
 			val result = service.suggestedResult(scyd3)
 			result.description should be (ProgressionResult.Resit.description)

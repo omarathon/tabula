@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Course, Department, Route, SitsStatus}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
+import uk.ac.warwick.tabula.JavaImports._
 
 trait PropertyCopying extends Logging {
 	var sitsStatusImporter = Wire[SitsStatusImporter]
@@ -44,14 +45,13 @@ trait PropertyCopying extends Logging {
 		val oldValue = memberBean.getPropertyValue(property)
 
 		optionObj match {
-			case None => {
+			case None =>
 				if (oldValue == null) false // null before and still null - no change
 				else {
 					memberBean.setPropertyValue(property, null)  // change from non-null to null
 					true
 				}
-			}
-			case Some(obj) => {
+			case Some(obj) =>
 				if (oldValue == null) { // changed from null to non-null
 					memberBean.setPropertyValue(property, obj)
 					true
@@ -72,7 +72,6 @@ trait PropertyCopying extends Logging {
 						true
 					}
 				}
-			}
 		}
 	}
 
@@ -125,6 +124,25 @@ trait PropertyCopying extends Logging {
 		} else {
 			memberBean.setPropertyValue(property, newValue)
 			true
+		}
+	}
+
+	def copyBigDecimal(destinationBean: BeanWrapper, property: String, optionalBigDecimal: Option[JBigDecimal]) = {
+		val oldValue = destinationBean.getPropertyValue(property)
+
+		optionalBigDecimal match {
+			case Some(newValue: JBigDecimal) =>
+				if (oldValue != newValue) {
+					destinationBean.setPropertyValue(property, newValue)
+					true
+				}
+				else false
+			case None =>
+				if (oldValue != null) {
+					destinationBean.setPropertyValue(property, null)
+					true
+				}
+				else false
 		}
 	}
 }

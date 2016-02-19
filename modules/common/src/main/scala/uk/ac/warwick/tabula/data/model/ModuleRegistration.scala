@@ -54,10 +54,18 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	var occurrence: String = null
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
+	var actualMark: JBigDecimal = null
+
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
+	var actualGrade: String = null
+
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedMark: JBigDecimal = null
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedGrade: String = null
+
+	def firstDefinedMark: Option[JBigDecimal] = Seq(Option(agreedMark), Option(actualMark)).flatten.headOption
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")

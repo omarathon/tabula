@@ -40,9 +40,9 @@ class TotalCATsColumnOption extends columns.ExamGridColumnOption {
 				if (isTotal) {
 					entity.moduleRegistrations
 				} else if (isUpperBound) {
-					entity.moduleRegistrations.filter(mr => Option(mr.agreedMark).exists(mark => BigDecimal(mark) <= bound))
+					entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))
 				} else {
-					entity.moduleRegistrations.filter(mr => Option(mr.agreedMark).exists(mark => BigDecimal(mark) >= bound))
+					entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))
 				}
 
 			if (filteredRegistrations.nonEmpty)
