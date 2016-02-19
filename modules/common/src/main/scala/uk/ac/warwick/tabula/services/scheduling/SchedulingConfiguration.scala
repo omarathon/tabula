@@ -116,6 +116,7 @@ class JobFactoryConfiguration {
 }
 
 @Configuration
+@Profile(Array("dev", "production", "scheduling"))
 class SchedulingConfiguration {
 
 	@Autowired var transactionManager: PlatformTransactionManager = _
@@ -172,6 +173,14 @@ class SchedulingConfiguration {
 		factory
 	}
 
+}
+
+@Configuration
+@Profile(Array("test"))
+class TestSchedulingConfiguration {
+	@Bean def scheduler(): FactoryBean[Scheduler] = {
+		new SchedulerFactoryBean
+	}
 }
 
 @Component
