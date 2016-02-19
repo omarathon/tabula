@@ -30,6 +30,8 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	val occurrence = modRegRow.occurrence
 	val academicYear = AcademicYear.parse(modRegRow.academicYear)
 	val selectionStatus: ModuleSelectionStatus = null
+	val actualMark = modRegRow.actualMark
+	val actualGrade = modRegRow.actualGrade
 	val agreedMark = modRegRow.agreedMark
 	val agreedGrade = modRegRow.agreedGrade
 
@@ -64,7 +66,8 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 
 						val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
 							copySelectionStatus(moduleRegistrationBean, selectionStatusCode) |
-							copyAgreedMark(moduleRegistrationBean, agreedMark)
+							copyBigDecimal(moduleRegistrationBean, "actualMark", actualMark) |
+							copyBigDecimal(moduleRegistrationBean, "agreedMark", agreedMark)
 
 						if (isTransient || hasChanged) {
 							logger.debug("Saving changes for " + moduleRegistration)
@@ -95,28 +98,8 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		else false
 	}
 
-	def copyAgreedMark(destinationBean: BeanWrapper, agreedMark:Option[JBigDecimal]) = {
-		val property = "agreedMark"
-		val oldValue = destinationBean.getPropertyValue(property)
-
-		agreedMark match {
-			case Some(mark: JBigDecimal) =>
-				if (oldValue != mark) {
-					destinationBean.setPropertyValue(property, mark)
-					true
-				}
-				else false
-			case None =>
-				if (oldValue != null) {
-					destinationBean.setPropertyValue(property, null)
-					true
-				}
-				else false
-		}
-	}
-
 	private val properties = Set(
-		"assessmentGroup", "occurrence", "agreedGrade"
+		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade"
 	)
 
 	override def describe(d: Description) = d.properties("scjCode" -> scjCode)

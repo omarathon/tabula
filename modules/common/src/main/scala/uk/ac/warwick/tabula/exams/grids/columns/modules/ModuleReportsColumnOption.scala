@@ -63,7 +63,7 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 
 		override def render: Map[String, String] =
 			entities.map(entity => entity.id -> {
-				val entityMarks = entity.moduleRegistrations.flatMap(mr => Option(mr.agreedMark)).map(mark => BigDecimal(mark))
+				val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
 				if (entityMarks.nonEmpty) {
 					(entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString
 				} else {
@@ -78,7 +78,7 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			val cell = row.createCell(index)
-			val entityMarks = entity.moduleRegistrations.flatMap(mr => Option(mr.agreedMark)).map(mark => BigDecimal(mark))
+			val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
 			if (entityMarks.nonEmpty) {
 				cell.setCellValue((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)
 			} else {
