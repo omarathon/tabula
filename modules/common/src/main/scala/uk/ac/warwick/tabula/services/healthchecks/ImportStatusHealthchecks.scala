@@ -91,7 +91,7 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Try(Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 5.seconds)).getOrElse(Nil)
+		Try(Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 1.minute)).getOrElse(Nil)
 	}
 
 }
@@ -108,7 +108,7 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
 		Try(
-			Await.result(queryService.query("eventType:ImportProfiles", 0, 50), 5.seconds)
+			Await.result(queryService.query("eventType:ImportProfiles", 0, 50), 1.minute)
 				.filter { event =>
 					event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
 				}
@@ -128,7 +128,7 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Try(Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 5.seconds)).getOrElse(Nil)
+		Try(Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 1.minute)).getOrElse(Nil)
 	}
 
 }
