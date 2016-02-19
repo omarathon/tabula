@@ -82,13 +82,15 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		if (entity.moduleRegistrations.exists(_.agreedMark == null)) {
 			Seq()
 		} else {
-			val coreModules = entity.moduleRegistrations.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core)
+			val coreAndOptionalCoreModules = entity.moduleRegistrations.filter(mr =>
+				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.OptionalCore
+			)
 			val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
 				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
-					// Contains all the core modules
-					coreModules.forall(modRegs.contains) &&
+					// Contains all the core and optional core modules
+					coreAndOptionalCoreModules.forall(modRegs.contains) &&
 					// All the registrations have agreed marks
 					modRegs.forall(mr => mr.agreedMark != null || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
 			)
