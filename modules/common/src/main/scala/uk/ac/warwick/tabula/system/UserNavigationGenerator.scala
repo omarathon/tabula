@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.system
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{Features, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -32,8 +32,11 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 	var routeService = Wire[CourseAndRouteService]
 	var permissionsService = Wire[PermissionsService]
 	var userLookup = Wire[UserLookupInterface]
+	var features = Wire[Features]
 
 	private def render(user: CurrentUser): UserNavigation = {
+		val homeDepartment = moduleService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
+
 		val canDeptAdmin = user.loggedIn && moduleService.departmentsWithPermission(user, Permissions.Department.Reports).nonEmpty
 		val canAdmin = canDeptAdmin ||
 			// Avoid doing too much work by just returning the first one of these that's true
@@ -49,14 +52,16 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 				user.isStudent ||
 				permissionsService.getAllPermissionDefinitionsFor(user, Permissions.Profiles.ViewSearchResults).nonEmpty
 
-		val canViewExams = user.isStaff && moduleService.getDepartmentByCode(user.apparentUser.getDepartmentCode).exists(_.uploadMarksToSits)
+		val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadMarksToSits)
+		val examGridsEnabled = features.examGrids && user.isStaff && homeDepartment.exists(_.examGridsEnabled)
 
 		val modelMap = Map(
 			"user" -> user,
 			"canAdmin" -> canAdmin,
 			"canDeptAdmin" -> canDeptAdmin,
 			"canViewProfiles" -> canViewProfiles,
-			"canViewExams" -> canViewExams
+			"examsEnabled" -> examsEnabled,
+			"examGridsEnabled" -> examGridsEnabled
 		)
 		UserNavigation(
 			textRenderer.renderTemplate(NavigationTemplate, modelMap ++ Map("isCollapsed" -> true)),

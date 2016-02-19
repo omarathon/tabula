@@ -14,7 +14,7 @@
 
 		<li class="courses-active"><a href="<@url page="/" context="/coursework" />">Coursework Management</a></li>
 
-		<#if features.exams && canViewExams>
+		<#if examsEnabled || examGridsEnabled>
 			<li class="exams-active"><a href="<@url page="/" context="/exams" />">Exam Management</a></li>
 		</#if>
 
@@ -69,10 +69,16 @@
 			</#if>
 		</li>
 
-		<#if features.exams && canViewExams>
+		<#if examsEnabled || examGridsEnabled>
 			<li>
 				<h2><a href="<@url page="/" context="/exams" />">Exam Management</a></h2>
-				<span class="hint">Manage exam marks</span>
+				<#if examsEnabled && examGridsEnabled>
+					<span class="hint">Manage exam marks and exam board grids</span>
+				<#elseif examsEnabled>
+					<span class="hint">Manage exam marks</span>
+				<#else>
+					<span class="hint">Manage exam board grids</span>
+				</#if>
 			</li>
 		</#if>
 
