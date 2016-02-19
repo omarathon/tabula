@@ -1,22 +1,33 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{Basic, Column, Entity, FetchType, JoinColumn, ManyToOne}
+import javax.persistence._
 
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
 import org.hibernate.annotations.{Filter, FilterDef, FilterDefs, Filters, Type}
 import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.TermNotFoundException
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.beans.BeanProperty
 
 object StudentCourseYearDetails {
 	final val FreshCourseYearDetailsOnlyFilter = "freshStudentCourseYearDetailsOnly"
+
+	object Overcatting {
+		final val Modules = "modules"
+		final val ChosenBy = "chosenBy"
+		final val ChosenDate = "chosenDate"
+		final val MarkOverrides = "markOverrides"
+	}
 }
 
 @FilterDefs(Array(
@@ -28,7 +39,7 @@ object StudentCourseYearDetails {
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
-	with Ordered[StudentCourseYearDetails] {
+	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
 
 	@transient
 	var termService = Wire.auto[TermService]
@@ -122,10 +133,85 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 			case e: TermNotFoundException => collection.mutable.Set()
 		}
 	}
+
+	def isFinalYear = yearOfStudy.toString == studentCourseDetails.courseYearLength
+
+	@Lob
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
+	protected var overcatting: Map[String, Any] = Map()
+
+	protected def ensureOvercatting() {
+		if (overcatting == null) overcatting = Map()
+	}
+
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	def overcattingModules: Option[Seq[Module]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.Modules)) match {
+		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
+		case _ => None
+	}).map(moduleCodes => moduleCodes.flatMap(moduleAndDepartmentService.getModuleByCode))
+	def overcattingModules_= (modules: Seq[Module]) = overcatting += (StudentCourseYearDetails.Overcatting.Modules -> modules.map(_.code))
+
+	@transient
+	var userLookup = Wire[UserLookupService]("userLookup")
+
+	def overcattingChosenBy: Option[User] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenBy)) match {
+		case Some(value: String) => Some(value)
+		case _ => None
+	}).map(userId => userLookup.getUserByUserId(userId))
+	def overcattingChosenBy_= (chosenBy: User) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenBy -> chosenBy.getUserId)
+
+	def overcattingChosenDate: Option[DateTime] = Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.ChosenDate)) match {
+		case Some(value: DateTime) => Some(value)
+		case _ => None
+	}
+	def overcattingChosenDate_= (chosenDate: DateTime) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
+
+	def overcattingMarkOverrides: Option[Map[Module, BigDecimal]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.MarkOverrides)) match {
+		case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
+		case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
+		case _ => None
+	}).map(_.toSeq.flatMap{case(moduleCode, markString) =>
+		val moduleOption = moduleAndDepartmentService.getModuleByCode(moduleCode)
+		val markOption = markString.maybeText.map(mark => BigDecimal(mark))
+		if (moduleOption.isDefined && markOption.isDefined) {
+			Option((moduleOption.get, markOption.get))
+		} else {
+			None
+		}
+	}.toMap)
+	def overcattingMarkOverrides_= (markOverrides: Map[Module, BigDecimal]) = overcatting +=
+		(StudentCourseYearDetails.Overcatting.MarkOverrides -> markOverrides.map{case(module, mark) => module.code -> mark.toString})
+
+	final var agreedMarkUploadedDate: DateTime = _
+
+	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
+	final var agreedMarkUploadedBy: User = null
+
+	def toGenerateExamGridEntity(identifier: Option[String] = None) = GenerateExamGridEntity(
+		identifier.getOrElse(id),
+		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
+		studentCourseDetails.student.universityId,
+		moduleRegistrations,
+		normalCATLoad,
+		overcattingModules,
+		overcattingMarkOverrides,
+		Some(this)
+	)
+
+	override def postLoad {
+		ensureOvercatting()
+	}
 }
 
 trait BasicStudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
+
+	/**
+		* Sequence in SITS is stored as a 2-digit zero-padded number
+		*/
+	def sceSequenceNumberSitsFormat = f"${sceSequenceNumber.toInt}%02d"
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
@@ -137,6 +223,15 @@ trait BasicStudentCourseYearProperties {
 	@Column(name="tier4visa")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4Visa: JBoolean = _
+
+	/**
+		* Used for determining if the student has over-catted for this course.
+		* Really this should come from SITS, but until that data actually exists, let's just arbitrarily set it to 120
+		*/
+	@transient
+	var normalCATLoad: Int = 120
+
+	var agreedMark: JBigDecimal = null
 
 }
 

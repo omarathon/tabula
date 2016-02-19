@@ -201,7 +201,7 @@
 
 			<div class="id7-footer-utility">
 				<ul>
-					<li><a href="http://warwick.ac.uk/copyright">© MMXV</a></li>
+					<li><a href="http://warwick.ac.uk/copyright">© <@warwick.copyright /></a></li>
 					<li><a href="http://warwick.ac.uk/terms">Terms</a></li>
 					<li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
 					<li><a href="http://warwick.ac.uk/cookies">Cookies</a></li>

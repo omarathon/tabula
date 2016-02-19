@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data.model
+
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
@@ -43,8 +45,8 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		val mod1 = new Module("cs101")
 		val mod2 = new Module("cs102")
-		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
-		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		val modReg1 = new ModuleRegistration(scd1, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(scd1, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A")
 
 		scd1.addModuleRegistration(modReg1)
 		scd1.addModuleRegistration(modReg2)

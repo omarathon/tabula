@@ -10,6 +10,8 @@ trait ServiceHealthcheckProvider {
 	protected def update(results: ServiceHealthcheck): Unit = {
 		latest = Some(results)
 	}
+
+	def run(): Unit
 }
 
 object ServiceHealthcheck {

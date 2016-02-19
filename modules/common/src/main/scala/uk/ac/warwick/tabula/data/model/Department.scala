@@ -460,7 +460,6 @@ object Department {
 		val ExamGridsEnabled = "examGridsEnabled"
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
-
 	}
 }
 

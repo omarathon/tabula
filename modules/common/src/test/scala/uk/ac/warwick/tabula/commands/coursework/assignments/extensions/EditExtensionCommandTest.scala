@@ -12,10 +12,6 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off magic.number
 class EditExtensionCommandTest extends TestBase {
 
-	EventHandling.enabled = false
-
-
-
 	@Test
 	def addExtension() {
 		withUser("cuslat", "1171795") {

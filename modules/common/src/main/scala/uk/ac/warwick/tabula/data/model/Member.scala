@@ -181,6 +181,8 @@ abstract class Member
 			case MemberUserType.Student =>
 				u.setStudent(true)
 				u.setUserType("Student")
+			case MemberUserType.Applicant =>
+				u.setUserType("Applicant")
 			case _ => u.setUserType("External")
 		}
 
@@ -460,8 +462,19 @@ class EmeritusMember extends Member with StaffProperties {
 }
 
 @Entity
+@DiscriminatorValue("P")
+class ApplicantMember extends Member with RestrictedPhoneNumber {
+	this.userType = MemberUserType.Applicant
+
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}
+}
+
+@Entity
 @DiscriminatorValue("O")
-class OtherMember extends Member with AlumniProperties with RestrictedPhoneNumber {
+class OtherMember extends Member with RestrictedPhoneNumber {
 	this.userType = MemberUserType.Other
 
 	def this(id: String) = {
@@ -554,6 +567,8 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@Restricted(Array("Profiles.Read.Disability"))
 	private var _disability: Disability = _
 	def disability_=(d: Disability): Unit = { _disability = d }
+
+	@Restricted(Array("Profiles.Read.Disability"))
 	def disability: Option[Disability] = Option(_disability)
 
 	@Column(name="tier4_visa_requirement")
@@ -569,5 +584,3 @@ trait StaffProperties {
 	// Anyone can view staff phone number
 	def phoneNumberPermissions = Nil
 }
-
-trait AlumniProperties

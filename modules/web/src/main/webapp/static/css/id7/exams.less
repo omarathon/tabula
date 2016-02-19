@@ -1,5 +1,29 @@
 @import "embeddable";
 
+.table th.rotated, .table td.rotated {
+	vertical-align: bottom;
+	position: relative;
+	.rotate {
+		float: left;
+		position: absolute;
+		-webkit-transform-origin: left bottom;
+		-moz-transform-origin: left bottom;
+		-ms-transform-origin: left bottom;
+		-o-transform-origin: left bottom;
+		transform-origin: left bottom;
+		-webkit-transform: rotateZ(-90deg);
+		-moz-transform: rotateZ(-90deg);
+		-ms-transform: rotateZ(-90deg);
+		-o-transform: rotateZ(-90deg);
+		transform: rotateZ(-90deg);
+		white-space: nowrap;
+		left: 50%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 300px;
+	}
+}
+
 .simple-assessment-info {
 	.subtle-box-style;
 	padding: 4px;
@@ -60,5 +84,108 @@
 	.mark-header {
 		font-weight: bold;
 		border-bottom: 2px solid #ddd;
+	}
+}
+
+.exam-grid-preview {
+	.key, .overcat-key {
+		.table {
+			margin-bottom: 0;
+			border: 1px solid @table-border-color;
+			float: left;
+			width: auto;
+			margin-right: 32px;
+		}
+		thead th {
+			text-align: center;
+			background: @table-bg-hover;
+		}
+	}
+	.overcat-key {
+		float: right;
+	}
+	h3 {
+		margin-top: 0;
+	}
+	.id7-table-wrapper-popout {
+		display: none;
+	}
+	.exam-grid-overcat {
+		color: @brand-success;
+		&:after {
+			content: "*";
+		}
+	}
+	.exam-grid-override {
+		color: @brand-info;
+		&:before {
+			content: "{";
+		}
+		&:after {
+			content: "}";
+
+		}
+		&.exam-grid-overcat:after {
+			content: "}*";
+		}
+	}
+	.exam-grid-fail {
+		color: @brand-danger;
+		text-decoration: underline;
+		border-bottom: 1px solid @brand-danger;
+	}
+	.exam-grid-actual-mark {
+		font-style: italic;
+	}
+	.grid {
+		&.overcat {
+			margin-bottom: 0;
+		}
+		tr.student:hover {
+			background-color: darken(@table-bg-hover, 5%);
+		}
+		tr.clickable {
+			cursor: pointer;
+		}
+		th, td {
+			border: 1px solid @table-border-color;
+			&.borderless {
+				border-width: 0;
+			}
+			min-width: 30px;
+		}
+		th {
+			background: @table-bg-hover;
+		}
+		td {
+			white-space: nowrap;
+		}
+		thead {
+			th, td {
+				border-left: 0;
+				border-right: 0;
+				border-top: 0;
+				background: white;
+				text-align: center;
+			}
+		}
+		.title-in-category th, th.section-secondary-label, th.section-value-label {
+			text-align: center;
+			vertical-align: middle;
+		}
+		th.section-secondary-label .rotate {
+			white-space: pre-wrap;
+			line-height: 1em;
+		}
+		.student:nth-of-type(odd) {
+			background: @table-bg-accent;
+		}
+		td.last-in-category, th.last-in-category {
+			border-right: 1px solid darken(@table-border-color, 25%);
+		}
+		input[type="text"] {
+			width: 42px;
+			padding: 6px;
+		}
 	}
 }

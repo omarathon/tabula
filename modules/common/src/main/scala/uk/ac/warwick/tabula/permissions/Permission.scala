@@ -159,6 +159,7 @@ object Permissions {
 		case object ManageProfiles extends Permission("Manage student profiles")
 		case object Manage extends Permission("Manage sub-departments")
 		case object Reports extends Permission("Generate reports")
+		case object ExamGrids extends Permission("Generate exam grids")
 	}
 
 	object Module {

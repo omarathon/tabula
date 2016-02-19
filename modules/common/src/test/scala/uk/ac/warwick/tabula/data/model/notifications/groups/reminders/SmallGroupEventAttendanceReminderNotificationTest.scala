@@ -4,15 +4,13 @@ import javax.sql.DataSource
 
 import org.hamcrest.Matchers._
 import org.hibernate.{Session, SessionFactory}
-import uk.ac.warwick.tabula.data.model.{UserGroup, Notification}
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek, SmallGroupFormat, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventOccurrence, SmallGroupFormat, WeekRange}
+import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationTest._
+import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.AnonymousUser
-import SmallGroupEventAttendanceReminderNotificationTest._
 
 class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with FunctionalContextTesting {
 
@@ -70,6 +68,7 @@ object SmallGroupEventAttendanceReminderNotificationTest {
 		bean(){mock[AssessmentMembershipService]}
 		bean(){mock[UserSettingsService]}
 		bean(){mock[NotificationService]}
+		bean(){mock[ModuleAndDepartmentService]}
 		bean(){
 			val sessionFactory = smartMock[SessionFactory]
 			val session = smartMock[Session]

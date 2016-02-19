@@ -148,7 +148,7 @@ object Routes {
 
 			object turnitinlti {
 				def fileByToken(submission: Submission, attachment: FileAttachment, token: FileAttachmentToken) =
-					s"/scheduling/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=${token.id}"
+					s"/turnitin/submission/${submission.id}/attachment/${attachment.id}?token=${token.id}"
 			}
 
 			object extension {

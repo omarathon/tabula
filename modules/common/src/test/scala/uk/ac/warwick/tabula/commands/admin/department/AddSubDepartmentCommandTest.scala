@@ -18,8 +18,8 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 	trait CommandTestSupport extends AddSubDepartmentCommandState with ModuleAndDepartmentServiceComponent {
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 
-		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns (Some(Fixtures.department("in-pg", "IT Services Postgraduate")))
-		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns (None)
+		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns Some(Fixtures.department("in-pg", "IT Services Postgraduate"))
+		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns None
 	}
 
 	trait Fixture {
@@ -246,6 +246,7 @@ object AddSubDepartmentCommandTest {
 
 		bean(){mock[UserLookupService]}
 		bean(){mock[RelationshipService]}
+		bean(){mock[ModuleAndDepartmentService]}
 		bean(){
 			val sessionFactory = smartMock[SessionFactory]
 			val session = smartMock[Session]

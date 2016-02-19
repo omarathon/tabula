@@ -7,10 +7,6 @@ RewriteRule .? - [E=REQ_URI:%{ENV:SCRIPT_URI}?%{QUERY_STRING}]
 RequestHeader set X-Requested-URI "%{REQ_URI}e" env=!no-requested-uri
 ####
 
-# Rewrite scheduling directly to the scheduler instance
-RewriteCond %{REQUEST_URI} ^/scheduling/(.*)
-RewriteRule (.*) http://127.0.0.1:${scheduler:port}$1 [QSA,P,L]
-
 # Rewrite API to the API instances
 RewriteCond %{REQUEST_URI} ^/api/v1/(.*)
 RewriteRule (.*) http://127.0.0.1:${api:port}$1 [QSA,P,L]

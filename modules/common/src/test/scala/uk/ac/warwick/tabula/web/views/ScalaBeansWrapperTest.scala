@@ -62,9 +62,9 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
 		val wrapper = new ScalaBeansWrapper()
 		wrapper.wrap(World) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("Scotland") match {
-					case hash: wrapper.ScalaHashModel => {
+					case hash: ScalaHashModel => {
 						hash.get("plant").toString should be ("Thistle")
 					}
 				}
@@ -80,7 +80,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	@Test def defaultParameters {
 		val wrapper = new ScalaBeansWrapper()
 		wrapper.wrap(new MyObject) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("greeting").toString should be ("Hello you!")
 			}
 			case somethingElse => fail("unexpected match; expected hash:ScalaHashModel but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
@@ -90,7 +90,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	@Test def scalaGetter {
 		val wrapper = new ScalaBeansWrapper()
 		wrapper.wrap(new MyObject) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("name").toString should be("text")
 				hash.get("motto").toString should be("do be good, don't be bad")
 				hash.get("grotto").toString should be("Santa's")
@@ -111,7 +111,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		new ListHolder().list.size should be (2)
 
 		wrapper.wrap(new ListHolder()) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("list") match {
 					case listy:SimpleSequence => listy.size should be (2)
 					case somethingElse => fail("unexpected match; expected listy:SimpleSequence but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
@@ -126,7 +126,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		val wrapped = wrapper.wrap(new MyObject)
 
 		wrapped match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				(hash.get("name") eq hash.get("name")) should be (true)
 			}
 			case _ => fail()
@@ -147,7 +147,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
 		val obj = new MyObject
 		wrapper.wrap(obj) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("name").toString should be ("text")
 				hash.get("motto").toString should be ("do be good, don't be bad")
 				hash.get("grotto").toString should be ("Santa's")
@@ -177,7 +177,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
 		val wrapper = new ScalaBeansWrapper()
 		wrapper.wrap(new MyObject) match {
-			case hash: wrapper.ScalaHashModel => {
+			case hash: ScalaHashModel => {
 				hash.get("something").toString should be("steve")
 				hash.get("isSomething").asInstanceOf[SimpleMethodModel].exec(JList()) should be (TemplateBooleanModel.TRUE)
 			}
@@ -197,7 +197,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
 		wrapper.securityService = securityService
 		val target = new MyObject
-		var wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		var wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		// initially, there are no permissions set, so we can read the value
 		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
 		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
@@ -205,12 +205,12 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		// now change the object's state so that it applies permissions
 		// wrappers assume that objects are immutable, so we'll have to create a new one.
 		target.restrictAccess = true
-		wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("runtimeRestricted") should be(null)
 
 		// finally, give the current user permissions, and make sure he can see the value again.
 		securityService.can(currentUser, target.providePermission().head, target) returns (true)
-		wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
 
 	}
@@ -219,7 +219,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	def cachesResultsOfGettersByDefault(){
 		val wrapper = new ScalaBeansWrapper
 		val target = new MyObject
-		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		val wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("name").toString should be("text")
 		target.name="something different"
 		// method is not re-invoked
@@ -231,7 +231,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		val wrapper = new ScalaBeansWrapper
 		wrapper.useWrapperCache = false
 		val target = new MyObject
-		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		val wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("name").toString should be("text")
 		target.name="something different"
 		// method is not re-invoked

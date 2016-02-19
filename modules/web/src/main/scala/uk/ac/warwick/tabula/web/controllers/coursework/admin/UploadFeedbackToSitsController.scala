@@ -22,14 +22,14 @@ class UploadFeedbackToSitsController extends CourseworkController {
 			GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 		)
 
-	@RequestMapping(method = Array(GET))
-	def form(@PathVariable module: Module) = {
+	@RequestMapping(params = Array("!confirm"))
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable module: Module) = {
 		Mav("coursework/admin/assignments/publish/upload_to_sits",
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		)
 	}
 
-	@RequestMapping(method = Array(POST))
+	@RequestMapping(method = Array(POST), params = Array("confirm"))
 	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment) = {
 		cmd.apply()
 		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))

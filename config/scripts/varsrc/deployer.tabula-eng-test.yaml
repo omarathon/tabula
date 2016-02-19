@@ -18,7 +18,6 @@ apaches:
 build_status: starting
 app: "tabula"
 war_names:
-- scheduling
 - api
 - ROOT
 checkout_base: "/var/src/checkout"
@@ -38,10 +37,10 @@ scheduler_instance: !ruby/object:Tomcat
   mode: smf
   stop_command: "/usr/sbin/svcadm disable -s tomcat:"
   war_names:
-  - scheduling
-  test_path: /scheduling/service/gtg
+  - ROOT
+  test_path: /service/gtg
   requests:
-     /scheduling/service/gtg: 200
+     /service/gtg: 200
 instances:
   tabula-eng-test:
   - !ruby/object:Tomcat

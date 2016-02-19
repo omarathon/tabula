@@ -155,8 +155,11 @@
 	</div>
 
 	<form method="post" action="<@routes.coursework.uploadToSits assignment />">
+		<#list command.students as student>
+			<input type="hidden" name="students" value="${student}" />
+		</#list>
 		<div class="submit-buttons">
-			<input class="btn btn-primary" type="submit" value="Upload">
+			<button class="btn btn-primary" type="submit" name="confirm">Upload</button>
 		</div>
 	</form>
 

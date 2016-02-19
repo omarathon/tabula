@@ -307,13 +307,10 @@ trait SubmissionAndFeedbackExport {
 		}
 	}
 
-	protected def markerData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {
-		case Some(item) if item.submission.id.hasText => Map(
-			"first-marker" -> (item.submission.firstMarker map { _.getFullName } getOrElse ""),
-			"second-marker" -> (item.submission.secondMarker map { _.getFullName } getOrElse "")
-		)
-		case _ => Map()
-	}
+	protected def markerData(student: Student): Map[String, Any] = Map(
+		"first-marker" -> assignment.getStudentsFirstMarker(student.user.getWarwickId).map(_.getFullName).getOrElse(""),
+		"second-marker" -> assignment.getStudentsSecondMarker(student.user.getWarwickId).map(_.getFullName).getOrElse("")
+	)
 
 	protected def extraFieldData(student: Student): Map[String, Any] = {
 		var fieldDataMap = ListMap[String, String]()

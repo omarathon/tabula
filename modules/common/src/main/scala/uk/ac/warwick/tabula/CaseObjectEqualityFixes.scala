@@ -19,5 +19,5 @@ abstract class CaseObjectEqualityFixes[A <: CaseObjectEqualityFixes[A] : ClassTa
 		case _ => false
 	}
 	override def hashCode() = getName.hashCode()
-	override def toString() = getName
+	override def toString = getName
 }

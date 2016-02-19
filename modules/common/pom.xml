@@ -565,26 +565,49 @@
 			<version>${org.elasticsearch.version}</version>
 		</dependency>
 
+		<!-- Forgive me developer gods, for I have sinned -->
 		<dependency>
 			<groupId>org.apache.jclouds</groupId>
-			<artifactId>jclouds-all</artifactId>
-			<version>${org.apache.jclouds.version}</version>
+			<artifactId>jclouds-blobstore</artifactId>
+			<version>2.0.0-20160217.225949-610</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jclouds.driver</groupId>
 			<artifactId>jclouds-slf4j</artifactId>
-			<version>${org.apache.jclouds.version}</version>
+			<version>2.0.0-20160217.225211-614</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jclouds.api</groupId>
+			<artifactId>openstack-swift</artifactId>
+			<version>2.0.0-20160217.231043-523</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jclouds.api</groupId>
 			<artifactId>filesystem</artifactId>
-			<version>${org.apache.jclouds.version}</version>
+			<version>2.0.0-20160217.230104-607</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.tuckey</groupId>
 			<artifactId>urlrewritefilter</artifactId>
 			<version>4.0.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jobs</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.mfornos</groupId>
+			<artifactId>humanize-slim</artifactId>
+			<version>1.2.2</version>
 		</dependency>
 
 		<!-- Test dependencies -->

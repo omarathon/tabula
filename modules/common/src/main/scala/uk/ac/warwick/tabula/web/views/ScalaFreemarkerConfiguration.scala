@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web.views
 
+import uk.ac.warwick.spring.Wire
+
 import scala.collection.JavaConversions._
 
 import org.springframework.beans.factory.annotation.Required
@@ -7,9 +9,7 @@ import org.springframework.web.context.ServletContextAware
 import org.springframework.web.servlet.tags.form.FormTag
 
 import freemarker.ext.beans.BeansWrapper
-import freemarker.template.Configuration
-import freemarker.template.TemplateDateModel
-import freemarker.template.TemplateExceptionHandler
+import freemarker.template.{ObjectWrapper, Configuration, TemplateDateModel, TemplateExceptionHandler}
 import uk.ac.warwick.tabula.JavaImports._
 
 /**
@@ -29,7 +29,7 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 
 	this.setObjectWrapper(createWrapper(true))
 
-	private def createWrapper(useCache:Boolean) = {
+	private def createWrapper(useCache: Boolean) = {
 		val wrapper = new ScalaBeansWrapper
 		wrapper.setMethodsShadowItems(false) // do not lookup method first.
 		wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
@@ -37,13 +37,14 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 		// TAB-351 TAB-469 Don't enable caching
 		wrapper.setUseCache(false)
 		wrapper.useWrapperCache = false
-		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE);
+		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE)
 
 		wrapper
 	}
+
 	// Mainly for tests to run - if servlet context is never set, it will
 	// use the classloader to find templates.
-	setClassForTemplateLoading(getClass(), "/")
+	setClassForTemplateLoading(getClass, "/")
 
 	@Required
 	def setSharedVariables(vars: JMap[String, Any]) {
@@ -55,4 +56,12 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 	override def setServletContext(ctx: javax.servlet.ServletContext) = {
 		setServletContextForTemplateLoading(ctx, "/")
 	}
+}
+
+trait ScalaFreemarkerConfigurationComponent {
+	def freemarkerConfiguration: ScalaFreemarkerConfiguration
+}
+
+trait AutowiringScalaFreemarkerConfigurationComponent extends ScalaFreemarkerConfigurationComponent {
+	var freemarkerConfiguration = Wire[ScalaFreemarkerConfiguration]
 }

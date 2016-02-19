@@ -35,6 +35,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		indexer.indexName = AuditEventIndexServiceTest.this.indexName
 		indexer.client = AuditEventIndexServiceTest.this.client
 		indexer.auditEventService = service
+		service.auditEventIndexService = indexer
 
 		// Creates the index
 		indexer.ensureIndexExists().await should be (true)
@@ -103,26 +104,19 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		}
 
 		val events = defendEvents ++ publishEvents
-		events.foreach { event =>
-			service.save(addParsedData(event))
+
+		// Do this 50 at a time to avoid saturating the internal Elasticsearch server's bulk indexing threadpool
+		events.grouped(50).zipWithIndex.foreach { case (e, groupNum) =>
+			e.foreach { event => service.save(addParsedData(event)) }
+			blockUntilCount((groupNum * 50) + e.size, indexName, indexType)
 		}
 
 		service.listNewerThan(new DateTime(2000,1,1,0,0,0), 100).size should be (100)
 
-		stopwatch.start("indexing")
-
-		// we only index 1000 at a time, so index twice to get all the latest stuff.
-		indexer.incrementalIndex().await
-
-		blockUntilCount(1000, indexName, indexType)
-		client.execute { search in indexName / indexType }.await.totalHits should be (1000)
-
-		indexer.incrementalIndex().await
+		// Should have indexed as part of the save process
 
 		blockUntilCount(1020, indexName, indexType)
 		client.execute { search in indexName / indexType }.await.totalHits should be (1020)
-
-		stopwatch.stop()
 
 		val user = new User("jeb")
 		user.setWarwickId("0123456")
@@ -171,7 +165,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		}
 
 		// index again to check that it doesn't do any once-only stuff
-		indexer.incrementalIndex().await
+		indexer.indexFrom(indexer.newestItemInIndexDate.await.get).await
 	}}
 
 }

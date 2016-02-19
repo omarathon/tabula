@@ -40,6 +40,11 @@ object ExamsBreadcrumbs {
 			val url = Some(Routes.Grids.home)
 		}
 
+		case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = department.name
+			val url = Some(Routes.Grids.departmentAcademicYear(department, academicYear))
+		}
+
 	}
 
 }

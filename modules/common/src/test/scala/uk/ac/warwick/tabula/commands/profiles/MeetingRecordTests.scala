@@ -18,8 +18,6 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 
 	val ps = mock[ProfileService]
 
-	EventHandling.enabled = false
-
 	val meetingRecordDao = smartMock[MeetingRecordDao]
 	val maintenanceModeService = smartMock[MaintenanceModeService]
 	maintenanceModeService.enabled returns false

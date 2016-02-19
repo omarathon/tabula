@@ -60,7 +60,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		SmallGroups.Read,
 
-		Department.Reports
+		Department.Reports,
+		Department.ExamGrids
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
 

@@ -1,21 +1,32 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+
+trait ModuleRegistrationDaoComponent {
+	val moduleRegistrationDao: ModuleRegistrationDao
+}
+
+trait AutowiringModuleRegistrationDaoComponent extends ModuleRegistrationDaoComponent {
+	val moduleRegistrationDao = Wire[ModuleRegistrationDao]
+}
 
 trait ModuleRegistrationDao {
-	def saveOrUpdate(moduleRegistration: ModuleRegistration)
+	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit
+	def delete(coreRequiredModule: CoreRequiredModule): Unit
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 }
 
 @Repository
@@ -23,10 +34,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule) = session.saveOrUpdate(coreRequiredModule)
+
+	def delete(coreRequiredModule: CoreRequiredModule) = session.delete(coreRequiredModule)
+
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	) =
@@ -50,5 +65,13 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 		query.setParameterList("usercodes", userCodes)
 					.seq
+	}
+
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] = {
+		session.newCriteria[CoreRequiredModule]
+		  .add(is("route", route))
+			.add(is("academicYear", academicYear))
+			.add(is("yearOfStudy", yearOfStudy))
+		  .seq
 	}
 }

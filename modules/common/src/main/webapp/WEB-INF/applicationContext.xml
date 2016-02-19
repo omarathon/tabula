@@ -8,11 +8,11 @@
 	   xmlns:util="http://www.springframework.org/schema/util"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
-		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd
 
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd
 
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 
@@ -29,6 +29,7 @@
 	<context:component-scan base-package="uk.ac.warwick.tabula.data" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.jobs" />
 	<context:component-scan base-package="uk.ac.warwick.tabula.notifications" />
+	<context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns" />
 
 	<!-- For sub-modules to implement their own component scanning -->
 	<import resource="spring-component-scan-context.xml" />
@@ -139,6 +140,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.StudentCourseYearDetailsIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.CourseCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
@@ -264,7 +266,7 @@
 
 	<import resource="content-negotiation-context.xml" />
 
-	<util:properties id="staticHashes" location="/WEB-INF/static-hashes.properties" />
+	<bean id="features" class="uk.ac.warwick.tabula.FeaturesImpl" />
 
 	<!-- get app server to handle static content -->
 	<mvc:default-servlet-handler />
@@ -465,27 +467,6 @@
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService" />
 	<bean class="uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceListener" />
-
-	<bean id="indexTopic" parent="abstractQueue">
-		<constructor-arg value="LuceneIndexing" />
-
-		<!-- We don't need this to be persistent -->
-		<property name="persistent" value="false" />
-
-		<!-- This isn't a Queue, it's a Topic - we are effectively broadcasting -->
-		<property name="pubSub" value="true" />
-		<property name="pubSubNoLocal" value="true" />
-
-		<property name="messageConverter">
-			<bean class="uk.ac.warwick.util.queue.conversion.JsonMessageConverter">
-				<property name="annotatedClasses">
-					<list>
-						<value>uk.ac.warwick.tabula.services.IndexNotificationRecipientsMessage</value>
-					</list>
-				</property>
-			</bean>
-		</property>
-	</bean>
 
 	<!-- Expose local properties as system properties -->
 	<bean

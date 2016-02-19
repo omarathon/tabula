@@ -25,10 +25,7 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider with TaskB
 			val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
 
 			memberRole #:: (member.userType match {
-				case Staff => member.affiliatedDepartments.map { department =>
-					customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
-				}
-				case Emeritus => member.affiliatedDepartments.map { department =>
+				case Staff | Emeritus => member.affiliatedDepartments.map { department =>
 					customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department))
 				}
 				case _ => Stream.empty

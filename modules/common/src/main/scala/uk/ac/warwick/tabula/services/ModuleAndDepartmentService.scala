@@ -155,6 +155,9 @@ class ModuleAndDepartmentService extends Logging {
 
 	def findModulesByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] =
 		moduleDao.findByYearOfStudy(department, yearsOfStudy, academicYear)
+
+	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] =
+		moduleDao.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
 }
 
 trait ModuleAndDepartmentServiceComponent {

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class SmallGroupServiceTest extends TestBase with Mockito {
 	trait Environment {
@@ -44,8 +45,8 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		group2.groupSet = groupSet2
 		group2.students.add(user)
 
-		val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get, module, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
-		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new java.math.BigDecimal(30), new AcademicYear(2013), "A")
+		val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get, module, new JBigDecimal(30), new AcademicYear(2013), "A")
+		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new JBigDecimal(30), new AcademicYear(2013), "A")
 
 		val service = new AbstractSmallGroupService
 			with AutowiringAssessmentMembershipDaoComponent // don't need this component, so autowiring to null is fine
@@ -89,7 +90,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	@Test
 	def testRemoveFromSmallGroups() {
 		new Environment {
-			EventHandling.enabled = false
 			mockUserLookup.getUserByUserId("cusdx") returns user
 
 			// try removing the user from the group, but pass in a different module from that associated with the group - this should fail:
