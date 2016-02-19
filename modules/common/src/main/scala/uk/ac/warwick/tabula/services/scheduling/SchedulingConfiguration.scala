@@ -116,7 +116,7 @@ class JobFactoryConfiguration {
 }
 
 @Configuration
-@Profile(Array("dev", "production", "scheduling"))
+@Profile(Array("dev", "production", "scheduling", "sandbox"))
 class SchedulingConfiguration {
 
 	@Autowired var transactionManager: PlatformTransactionManager = _
