@@ -362,6 +362,9 @@
 						}
 					});
 
+					$('#feedback-modal').on('hidden.bs.modal', function() {
+						$(this).html('');
+					});
 				})(jQuery);
 			</script>
 		</div>
