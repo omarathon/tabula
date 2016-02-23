@@ -4,9 +4,7 @@ import uk.ac.warwick.tabula.helpers.StoppedClockComponent
 import uk.ac.warwick.tabula._
 
 
-/**
-	*
-	*/
+
 object ScientiaTests {
 	class ManualYears() extends PropertiesContext(Map(
 		"scientia.base.url" -> "https://test-timetable.example.com/xml",

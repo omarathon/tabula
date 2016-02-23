@@ -48,7 +48,7 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		def yearProperty: Option[Seq[AcademicYear]] =
 			Wire.optionProperty("${scientia.years}").map { _.split(",").map(AcademicYear.parse) }
 		lazy val perYearUris =	yearProperty
-			.getOrElse{Seq(prevAcademicYear, currentAcademicYear).flatten}
+			.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
 			.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/",year) }
 	}
 }
