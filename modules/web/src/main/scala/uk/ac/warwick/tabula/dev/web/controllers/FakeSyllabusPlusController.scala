@@ -27,7 +27,8 @@ class FakeSyllabusPlusController extends Logging {
 	val studentTimetables: mutable.Map[StudentYearKey, String] = mutable.Map.empty
 	val moduleTimetables: mutable.Map[ModuleYearKey, String] = mutable.Map.empty
 	val staffTimetables: mutable.Map[StaffYearKey, String] = mutable.Map.empty
-	val baseUri = "https://timetablingmanagement.warwick.ac.uk/xml"
+	val baseUri = Wire.optionProperty("${scientia.stubfallback.url}")
+		.getOrElse("https://timetablingmanagement.warwick.ac.uk/xml")
 	def studentUri(year:String) = baseUri + year + "/?StudentXML"
 	def moduleUri(year:String) = baseUri + year + "/?ModuleXML"
 	def staffUri(year:String) = baseUri + year + "/?StaffXML"
@@ -43,8 +44,7 @@ class FakeSyllabusPlusController extends Logging {
 	def getStudent(@RequestParam("p0") studentId: String, @PathVariable year:String) = {
 		val xml = studentTimetables.getOrElseUpdate(StudentYearKey(studentId, year) , {
 			val req = url(studentUri(year)) <<? Map("p0" -> studentId)
-			import scala.language.postfixOps
-			val xml = Try(http.when(_==200)(req as_str)) match {
+			val xml = Try(http.when(_==200)(req.as_str)) match {
 				case Success(s)=>s
 				// If we get an error back, just return then XML for an empty list immediately,
 				// otherwise the XML handler in ScientiaHttpTimetableFetchingService
