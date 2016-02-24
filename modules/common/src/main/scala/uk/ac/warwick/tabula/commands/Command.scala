@@ -218,7 +218,9 @@ trait SelfValidating {
  * which are handled separately). If it doesn't directly update or insert into the database,
  * it is safe.
  */
-trait ReadOnly
+trait ReadOnly { self: Command[_] =>
+  override def readOnlyTransaction = true
+}
 
 /**
  * A Describable (usually a Command) marked as Unaudited will not be recorded
