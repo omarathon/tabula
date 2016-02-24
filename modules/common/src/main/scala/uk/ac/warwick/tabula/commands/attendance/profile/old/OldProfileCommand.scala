@@ -33,6 +33,7 @@ object OldProfileCommand {
 abstract class OldProfileCommand(val student: StudentMember, val academicYear: AcademicYear)
 	extends CommandInternal[OldAttendanceProfileInformation] with TaskBenchmarking with BuildStudentPointsData with ProfileCommandState {
 
+
 	override def applyInternal() = {
 		val pointsData = benchmarkTask("Build data") { buildData(Seq(student), academicYear).head }
 
