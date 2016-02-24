@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
+import java.util.Properties
 import javax.sql.DataSource
 
 import org.quartz._
@@ -163,6 +164,12 @@ class SchedulingConfiguration {
 		// We only auto-startup on the scheduler, and only if we're not in maintenance mode. This allows us
 		// to wire a scheduler on nodes that wouldn't normally get one and use it to schedule jobs. Neat!
 		factory.setAutoStartup(env.acceptsProfiles("scheduling") && !maintenanceModeService.enabled)
+
+		if (!env.acceptsProfiles("scheduling")) {
+			factory.setQuartzProperties(new Properties() {{
+				setProperty("org.quartz.jobStore.isClustered", "false")
+			}})
+		}
 
 		factory.setApplicationContextSchedulerContextKey("applicationContext")
 		factory.setJobFactory(jobFactory)
