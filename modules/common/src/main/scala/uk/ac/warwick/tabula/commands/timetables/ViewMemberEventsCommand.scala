@@ -33,7 +33,7 @@ object ViewMemberEventsCommand extends Logging {
 				with AutowiringScheduledMeetingEventSourceComponent
 				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent {
-					override def readOnlyTransaction = false
+					override def readOnlyTransaction = true
 			}
 
 		case staff: StaffMember =>
@@ -46,7 +46,7 @@ object ViewMemberEventsCommand extends Logging {
 				with AutowiringScheduledMeetingEventSourceComponent
 				with AutowiringTermServiceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent {
-					override def readOnlyTransaction = false
+					override def readOnlyTransaction = true
 			}
 
 		case _ =>

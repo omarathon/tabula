@@ -27,7 +27,7 @@ object OldProfileCommand {
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringUserLookupComponent
 		with ReadOnly with Unaudited {
-			override def readOnlyTransaction = false
+			override def readOnlyTransaction = true
 		}
 }
 
