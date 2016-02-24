@@ -249,7 +249,9 @@ class FormFieldTest extends TestBase with Mockito {
 		value.file.attached = JArrayList()
 
 		// wrong type
-		attachment = new FileAttachment
+		attachment = new FileAttachment {
+			override def length = Some(10000000L)
+		}
 		attachment.name = "file.doc"
 		value.file.attached.add(attachment)
 
@@ -257,6 +259,13 @@ class FormFieldTest extends TestBase with Mockito {
 		field.validate(value, errors)
 
 		errors.hasErrors should be (false)
+
+		field.individualFileSizeLimit = 5
+
+		errors = new BindException(value, "value")
+		field.validate(value, errors)
+		errors.hasErrors should be (true)
+		errors.getFieldError("file").getCode should be ("file.toobig.one")
 	}
 
 	@Test def commentFieldFormatting() {
