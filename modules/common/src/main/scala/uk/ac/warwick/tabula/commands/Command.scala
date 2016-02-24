@@ -94,11 +94,13 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		with JavaImports with EventHandling with NotificationHandling with TriggerHandling
 		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent with AutowiringMaintenanceModeServiceComponent {
 
+	def readOnlyTransaction = false
+
 	final def apply(): A =
 		if (EventHandling.enabled) {
 			if (readOnlyCheck(this)) {
 				recordEvent(this) {
-					transactional() {
+					transactional(readOnlyTransaction) {
 						handleTriggers(this) {
 							notify(this) {
 								benchmark() {

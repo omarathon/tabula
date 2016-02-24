@@ -32,7 +32,9 @@ object ViewMemberEventsCommand extends Logging {
 				with AutowiringStudentTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
 				with AutowiringTermServiceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+				with AutowiringTermBasedEventOccurrenceServiceComponent {
+					override def readOnlyTransaction = false
+			}
 
 		case staff: StaffMember =>
 			new ViewStaffEventsCommandInternal(staff, currentUser)
@@ -43,7 +45,9 @@ object ViewMemberEventsCommand extends Logging {
 				with AutowiringStaffTimetableEventSourceComponent
 				with AutowiringScheduledMeetingEventSourceComponent
 				with AutowiringTermServiceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+				with AutowiringTermBasedEventOccurrenceServiceComponent {
+					override def readOnlyTransaction = false
+			}
 
 		case _ =>
 			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
