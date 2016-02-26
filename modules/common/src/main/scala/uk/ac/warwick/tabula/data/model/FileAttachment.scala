@@ -112,7 +112,7 @@ class FileAttachment extends GeneratedId {
 	def duplicate(): FileAttachment = {
 		val newFile = new FileAttachment(name)
 		newFile.uploadedData = dataStream
-		newFile.uploadedDataLength = uploadedDataLength
+		newFile.uploadedDataLength = actualDataLength
 		newFile.uploadedBy = uploadedBy
 		fileDao.savePermanent(newFile)
 		newFile
