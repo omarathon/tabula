@@ -93,7 +93,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 				.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
 				.addOrder(Order.asc("code"))
 				.setMaxResults(maxResults - modulesByCode.size).seq
-			modulesByCode ++ modulesByName
+			(modulesByCode ++ modulesByName).distinct
 		} else {
 			modulesByCode
 		}
