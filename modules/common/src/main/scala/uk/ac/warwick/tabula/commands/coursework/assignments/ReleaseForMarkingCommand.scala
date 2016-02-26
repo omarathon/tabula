@@ -37,15 +37,15 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 	self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
 
 	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
-	def studentsWithKnownMarkers:Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
-	def unreleasableSubmissions:Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
+	def studentsWithKnownMarkers: Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
+	def unreleasableSubmissions: Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
 	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers
-	def studentsAlreadyReleased = invalidFeedback.asScala.map(f=>f.universityId)
+	def studentsAlreadyReleased = invalidFeedback.asScala.map(f => f.universityId)
 
 	override def applyInternal() = {
 		// get the parent feedback or create one if none exist
-		val feedbacks = studentsWithKnownMarkers.toBuffer.map{ uniId:String =>
+		val feedbacks = studentsWithKnownMarkers.toBuffer.map { uniId: String =>
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
@@ -60,9 +60,9 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 			parentFeedback
 		}
 
-		val feedbackToUpdate:Seq[AssignmentFeedback] = feedbacks -- invalidFeedback
+		val feedbackToUpdate: Seq[AssignmentFeedback] = feedbacks -- invalidFeedback
 
-		newReleasedFeedback = feedbackToUpdate map(f => {
+		newReleasedFeedback = feedbackToUpdate.map(f => {
 			val markerFeedback = f.retrieveFirstMarkerFeedback
 			stateService.updateState(markerFeedback, MarkingState.ReleasedForMarking)
 			markerFeedback

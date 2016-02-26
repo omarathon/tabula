@@ -31,8 +31,12 @@ abstract class AbstractTriggerService extends TriggerService with Logging {
 	}
 
 	def processTriggers(): Unit = {
-		transactional() {
-			triggerDao.triggersToRun(RunBatchSize).foreach { trigger =>
+		val triggers = transactional(readOnly = true) {
+			triggerDao.triggersToRun(RunBatchSize)
+		}
+
+		triggers.foreach { trigger =>
+			transactional() {
 				logger.info(s"Processing trigger $trigger")
 
 				try {

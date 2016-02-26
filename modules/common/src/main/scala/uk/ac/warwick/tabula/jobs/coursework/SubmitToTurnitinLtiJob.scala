@@ -79,10 +79,14 @@ class SubmitToTurnitinLtiJob extends Job
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFile) }
 			val uploadsTotal = allAttachments.size
 
-			val failedUploads = submitPapers(assignmentWithTurnitinId, uploadsTotal)
+			val failedUploads =
+				if (uploadsTotal > 0) submitPapers(assignmentWithTurnitinId, uploadsTotal)
+				else Map.empty[FileAttachment, String]
 
 			updateStatus("Getting similarity reports from Turnitin")
-			val (originalityReports, noResults) = retrieveResults(uploadsTotal, failedUploads.keys.toSeq)
+			val (originalityReports, noResults) =
+				if (uploadsTotal > 0) retrieveResults(uploadsTotal, failedUploads.keys.toSeq)
+				else (Nil, Map.empty[String, String])
 
 			if (sendNotifications) {
 				debug("Sending an email to " + job.user.email)
