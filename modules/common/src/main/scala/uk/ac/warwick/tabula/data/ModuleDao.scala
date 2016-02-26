@@ -82,13 +82,21 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	}
 
 	def findModulesNamedLike(query: String): Seq[Module] = {
-		session.newCriteria[Module]
-			.add(disjunction()
+		val maxResults = 20
+		val modulesByCode = session.newCriteria[Module]
 			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
-			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
-			)
 			.addOrder(Order.asc("code"))
-			.setMaxResults(20).seq
+			.setMaxResults(maxResults).seq
+
+		if (modulesByCode.size < maxResults) {
+			val modulesByName = session.newCriteria[Module]
+				.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+				.addOrder(Order.asc("code"))
+				.setMaxResults(maxResults - modulesByCode.size).seq
+			modulesByCode ++ modulesByName
+		} else {
+			modulesByCode
+		}
 	}
 
 	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] = {
