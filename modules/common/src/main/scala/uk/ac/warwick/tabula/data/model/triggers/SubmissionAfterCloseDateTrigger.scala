@@ -18,7 +18,7 @@ object SubmissionAfterCloseDateTrigger {
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="SubmissionAfterCloseDate")
-class SubmissionAfterCloseDateTrigger	extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
+class SubmissionAfterCloseDateTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
 
 	def submission = target.entity
 	override def assignment = submission.assignment
@@ -27,6 +27,5 @@ class SubmissionAfterCloseDateTrigger	extends Trigger[Submission, Unit] with Han
 		if (assignment.isClosed && (submission.isLate || submission.isAuthorisedLate)) {
 			handleAssignment(Seq(submission.universityId))
 		}
-
 	}
 }

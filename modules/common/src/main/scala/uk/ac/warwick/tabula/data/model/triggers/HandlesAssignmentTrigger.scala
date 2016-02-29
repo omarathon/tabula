@@ -28,6 +28,7 @@ trait HandlesAssignmentTrigger extends Logging {
 			releaseToMarkersCommand.onBind(null)
 			releaseToMarkersCommand.apply()
 		}
+
 		if (assignment.automaticallySubmitToTurnitin && features.turnitinSubmissions) {
 			val user = {
 				if (assignment.module.managers.users.isEmpty) {
@@ -42,7 +43,6 @@ trait HandlesAssignmentTrigger extends Logging {
 			}).getOrElse(
 				logger.error(s"Could not submit to Turnitin for trigger $this as no module managers or dept admins found.")
 			)
-
 		}
 	}
 
