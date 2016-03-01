@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.attendance.profile.old
 
-import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.old.{BuildStudentPointsData, StudentPointsData}
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
@@ -64,6 +63,4 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 trait ProfileCommandState {
 	def student: StudentMember
 	def academicYear: AcademicYear
-
-	@Value("${tabula.yearZero}") var yearZero: Int = _
 }
