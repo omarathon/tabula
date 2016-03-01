@@ -73,6 +73,7 @@ class QuartzSchedulerTriggersHealthcheck extends ServiceHealthcheckProvider {
 }
 
 @Component
+@Profile(Array("scheduling"))
 class QuartzSchedulerClusterHealthcheck extends ServiceHealthcheckProvider {
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
