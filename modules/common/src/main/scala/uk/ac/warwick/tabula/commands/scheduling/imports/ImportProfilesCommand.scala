@@ -60,7 +60,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 
 		departments.foreach { department =>
-			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.par.foreach { case (membershipInfos, batchNumber) =>
+			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
 				benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
 					val users: Map[UniversityId, User] =
 						if (department.code == ProfileImporter.applicantDepartmentCode)
