@@ -72,7 +72,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student => members.par.flatMap { info =>
+				case Student => members.flatMap { info =>
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
 

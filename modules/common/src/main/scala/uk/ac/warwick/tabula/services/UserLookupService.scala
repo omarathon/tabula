@@ -116,7 +116,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 			if (skipMemberLookup) Map.empty
 			else profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
 
-		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id =>
+		val others = ids.diff(dbUsers.keys.toSeq).par.map { id =>
 			id -> getUserByWarwickUniIdFromUserLookup(id)
 		}.toMap
 
