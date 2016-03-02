@@ -71,11 +71,11 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 
 		command.applyInternal() should be (Set("3", "5", "6", "8", "9"))
 
-		verify(command.defaultStoreService, times(1)).push("3", any[ByteSource], metadata3.copy(fileHash = Some("hash3")))
-		verify(command.defaultStoreService, times(1)).push("5", any[ByteSource], metadata5.copy(fileHash = Some("hash5")))
-		verify(command.defaultStoreService, times(1)).push("6", any[ByteSource], metadata6.copy(fileHash = Some("hash6")))
-		verify(command.defaultStoreService, times(1)).push("8", any[ByteSource], metadata8.copy(fileHash = Some("hash8")))
-		verify(command.defaultStoreService, times(1)).push("9", any[ByteSource], metadata9.copy(fileHash = Some("hash9")))
+		verify(command.defaultStoreService, times(1)).push(isEq("3"), any[ByteSource], isEq(metadata3.copy(fileHash = Some("hash3"))))
+		verify(command.defaultStoreService, times(1)).push(isEq("5"), any[ByteSource], isEq(metadata5.copy(fileHash = Some("hash5"))))
+		verify(command.defaultStoreService, times(1)).push(isEq("6"), any[ByteSource], isEq(metadata6.copy(fileHash = Some("hash6"))))
+		verify(command.defaultStoreService, times(1)).push(isEq("8"), any[ByteSource], isEq(metadata8.copy(fileHash = Some("hash8"))))
+		verify(command.defaultStoreService, times(1)).push(isEq("9"), any[ByteSource], isEq(metadata9.copy(fileHash = Some("hash9"))))
 	}
 
 }

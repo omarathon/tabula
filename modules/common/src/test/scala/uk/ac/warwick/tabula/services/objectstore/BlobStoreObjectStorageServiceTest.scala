@@ -27,6 +27,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		when(blobStoreContext.getBlobStore) thenReturn blobStore
 
     val service = new BlobStoreObjectStorageService(blobStoreContext, containerName)
+		service.afterPropertiesSet()
 
     val metadata1 = new StorageMetadataImpl(StorageType.BLOB, "id1", "1", null, null, null, null, null, Map[String, String]().asJava, null)
     val metadata2 = new StorageMetadataImpl(StorageType.BLOB, "id2", "2", null, null, null, null, null, Map[String, String]().asJava, null)
@@ -68,6 +69,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		val blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
 
 		val service = new BlobStoreObjectStorageService(blobStoreContext, "tabula")
+		service.afterPropertiesSet()
 
 		val byteSource = new ByteSource {
 			override def openStream(): InputStream = getClass.getResourceAsStream("/attachment1.docx")
