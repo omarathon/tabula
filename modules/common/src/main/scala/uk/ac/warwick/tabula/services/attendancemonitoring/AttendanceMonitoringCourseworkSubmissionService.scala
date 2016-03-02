@@ -25,31 +25,27 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 	self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with AssessmentServiceComponent =>
 
 	def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
-		if (submission.isLate) {
-			Seq()
-		} else {
-			profileService.getMemberByUniversityId(submission.universityId).flatMap{
-				case studentMember: StudentMember =>
-						val relevantPoints = getRelevantPoints(
-							attendanceMonitoringService.listStudentsPoints(studentMember, None, submission.assignment.academicYear),
-							submission,
-							studentMember
-						)
-						val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
-							val checkpoint = new AttendanceMonitoringCheckpoint
-							checkpoint.autoCreated = true
-							checkpoint.point = point
-							checkpoint.attendanceMonitoringService = attendanceMonitoringService
-							checkpoint.student = studentMember
-							checkpoint.updatedBy = submission.userId
-							checkpoint.updatedDate = DateTime.now
-							checkpoint.state = AttendanceState.Attended
-							checkpoint
-						})
-						Option(checkpoints)
-				case _ => None
-			}.getOrElse(Seq())
-		}
+		profileService.getMemberByUniversityId(submission.universityId).flatMap{
+			case studentMember: StudentMember =>
+					val relevantPoints = getRelevantPoints(
+						attendanceMonitoringService.listStudentsPoints(studentMember, None, submission.assignment.academicYear),
+						submission,
+						studentMember
+					)
+					val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
+						val checkpoint = new AttendanceMonitoringCheckpoint
+						checkpoint.autoCreated = true
+						checkpoint.point = point
+						checkpoint.attendanceMonitoringService = attendanceMonitoringService
+						checkpoint.student = studentMember
+						checkpoint.updatedBy = submission.userId
+						checkpoint.updatedDate = DateTime.now
+						checkpoint.state = AttendanceState.Attended
+						checkpoint
+					})
+					Option(checkpoints)
+			case _ => None
+		}.getOrElse(Seq())
 	}
 
 	def updateCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
@@ -64,6 +60,8 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 			point.pointType == AttendanceMonitoringPointType.AssignmentSubmission
 				// Is the assignment's due date inside the point's weeks
 				&& point.isDateValidForPoint(submission.assignment.closeDate.toLocalDate)
+				// Is the submission on time or the submission time inside the point's weeks
+				&& (!submission.isLate || point.isDateValidForPoint(submission.submittedDate.toLocalDate))
 				// Is the submission's assignment or module valid
 				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
 				// Is there no existing checkpoint
@@ -124,6 +122,6 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 @Service("attendanceMonitoringCourseworkSubmissionService")
 class AttendanceMonitoringCourseworkSubmissionServiceImpl
 	extends AbstractAttendanceMonitoringCourseworkSubmissionService
-	with AutowiringAttendanceMonitoringServiceComponent
-	with AutowiringProfileServiceComponent
-	with AutowiringAssessmentServiceComponent
+		with AutowiringAttendanceMonitoringServiceComponent
+		with AutowiringProfileServiceComponent
+		with AutowiringAssessmentServiceComponent
