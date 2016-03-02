@@ -95,7 +95,7 @@ class FileAttachment extends GeneratedId {
 	def length: Option[Long] = objectStorageService.metadata(id).map { _.contentLength }
 
 	// checks the length field first. If that is not populated use uploadedData instead
-	def actualDataLength: Long = length.orElse(Option(uploadedData).map { _.size() }).getOrElse(-1)
+	def actualDataLength: Long = length.orElse(Option(uploadedData).map { _.size() }).getOrElse(0)
 
 	def fileExt: String = {
 		if (name.lastIndexOf('.') > -1) {

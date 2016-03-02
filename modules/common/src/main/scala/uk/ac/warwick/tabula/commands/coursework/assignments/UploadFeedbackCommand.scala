@@ -1,25 +1,26 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import java.io.InputStream
+import java.io.{File, FileOutputStream, InputStream}
 
 import com.google.common.io.ByteSource
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import org.apache.commons.compress.archivers.zip.ZipFile
+import org.springframework.util.FileCopyUtils
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands.{Command, Description, UploadedFile}
-import uk.ac.warwick.tabula.data.{Daoisms, FileDao}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
-import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists, Logging, NoUser}
+import uk.ac.warwick.tabula.data.{Daoisms, FileDao}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.matching.Regex
 
 class FeedbackItem {
@@ -33,7 +34,7 @@ class FeedbackItem {
 	var duplicateFileNames: Set[String] = Set()
 	var ignoredFileNames: Set[String] = Set()
 
-	def listAttachments() = file.attached.map(f => {
+	def listAttachments() = file.attached.asScala.map(f => {
 		val duplicate = duplicateFileNames.contains(f.name)
 		val ignore = ignoredFileNames.contains(f.name)
 		new AttachmentItem(f.name, duplicate, ignore)
@@ -92,10 +93,10 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	/* for multiple upload */
 	// use lazy list with factory as spring doesn't know how to dynamically create items
-	var items: JList[FeedbackItem] = LazyLists.create()
-	var unrecognisedFiles: JList[ProblemFile] = LazyLists.create()
-	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.create()
-	var invalidFiles: JList[ProblemFile] = LazyLists.create()
+	var items: JList[FeedbackItem] = LazyLists.create[FeedbackItem]()
+	var unrecognisedFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
+	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
+	var invalidFiles: JList[ProblemFile] = LazyLists.create[ProblemFile]()
 	var archive: MultipartFile = _
 	var batch: Boolean = false
 	var fromArchive: Boolean = false
@@ -120,8 +121,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	def postExtractValidation(errors: Errors) {
 		if (!invalidFiles.isEmpty) errors.rejectValue("invalidFiles", "invalidFiles")
 		if (items != null && !items.isEmpty) {
-			for (i <- 0 until items.length) {
-				val item = items.get(i)
+			items.asScala.zipWithIndex.foreach { case (item, i) =>
 				errors.pushNestedPath("items[" + i + "]")
 				validateUploadedFile(item, errors)
 				errors.popNestedPath()
@@ -138,7 +138,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		val uniNumber = item.uniNumber
 
 		if (file.isMissing) errors.rejectValue("file", "file.missing")
-		for((f, i) <- file.attached.zipWithIndex){
+		for((f, i) <- file.attached.asScala.zipWithIndex){
 			if (f.actualDataLength == 0) {
 				errors.rejectValue("file.attached[" + i + "]", "file.empty")
 			}
@@ -210,7 +210,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 			}
 
 		}
-		items = itemMap.values.toList
+		items = itemMap.values.toList.asJava
 	}
 
 	override def onBind(result: BindingResult) = transactional() {
@@ -218,46 +218,55 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 		// ZIP has been uploaded. unpack it
 		if (archive != null && !archive.isEmpty) {
-			val zip = new ZipArchiveInputStream(archive.getInputStream)
+			val tempFile = File.createTempFile("feedback", ".zip")
+			FileCopyUtils.copy(archive.getInputStream, new FileOutputStream(tempFile))
 
-			val bits = Zips.iterator(zip) { (iterator) =>
-				for (
-					entry <- iterator
+			val zip = new ZipFile(tempFile)
+
+			try {
+				val bits = for (
+					entry <- zip.getEntries().asScala.toSeq
 					if !entry.isDirectory
 					if !(disallowedFilenames contains entry.getName)
 					if !disallowedPrefixes.exists(filenameOf(entry.getName).startsWith)
 				) yield {
 					val f = new FileAttachment
+
 					// Funny char from Windows? We can't work out what it is so
 					// just turn it into an underscore.
 					val name = entry.getName.replace("\uFFFD", "_")
 					f.name = filenameOf(name)
+
 					f.uploadedData = new ByteSource {
-						override def openStream(): InputStream = new ZipEntryInputStream(zip, entry)
+						override def openStream(): InputStream = zip.getInputStream(entry)
+
 						override def size(): Long = entry.getSize
 					}
+
 					f.uploadedBy = marker.getUserId
 					fileDao.saveTemporary(f)
 					(name, f)
 				}
+
+				processFiles(bits)
+
+				// remember we got these items from a Zip, so we can tailor the text in the HTML.
+				fromArchive = true
+
+				// this do-nothing command is to generate an audit event to record the unzipping
+				new ExtractFeedbackZip(this).apply()
+			} finally {
+				zip.close()
+				if (!tempFile.delete()) tempFile.deleteOnExit()
 			}
-
-			processFiles(bits)
-
-			// remember we got these items from a Zip, so we can tailor the text in the HTML.
-			fromArchive = true
-
-			// this do-nothing command is to generate an audit event to record the unzipping
-			new ExtractFeedbackZip(this).apply()
-
 		} else {
 			if (batch && !file.attached.isEmpty) {
-				val bits = file.attached.map { (attachment) => attachment.name -> attachment }
+				val bits = file.attached.asScala.map { (attachment) => attachment.name -> attachment }
 				processFiles(bits)
 			}
 
 			if (items != null) {
-				for (item <- items if item.file != null) {
+				for (item <- items.asScala if item.file != null) {
 					item.file.onBind(result)
 				}
 			}
