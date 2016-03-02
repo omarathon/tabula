@@ -1,11 +1,8 @@
 package uk.ac.warwick.tabula.services.objectstore
 
-import java.io.{File, InputStream}
-import javax.inject.{Inject, Singleton}
+import java.io.InputStream
 
-import com.google.inject.name.Named
-import org.jclouds.blobstore.domain.Blob
-import uk.ac.warwick.spring.Wire
+import com.google.common.io.ByteSource
 
 class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, val legacyService: ObjectStorageService) extends ObjectStorageService {
 
@@ -18,7 +15,7 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
 
 	override def metadata(key: String): Option[ObjectStorageService.Metadata] = services.find(_.keyExists(key)).flatMap(_.metadata(key))
 
-	override def push(key: String, in: InputStream, metadata: ObjectStorageService.Metadata): Unit  = services.head.push(key, in, metadata)
+	override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit  = services.head.push(key, in, metadata)
 
 	override def delete(key: String): Unit  = services.foreach(_.delete(key))
 
@@ -26,4 +23,6 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
     * Not guaranteed to be distinct (unless you call distinct on it) but shouldn't be used anyway.
     */
   override def listKeys(): Stream[String] = services.toStream.flatMap { _.listKeys() }
+
+	override def afterPropertiesSet(): Unit = services.foreach(_.afterPropertiesSet())
 }

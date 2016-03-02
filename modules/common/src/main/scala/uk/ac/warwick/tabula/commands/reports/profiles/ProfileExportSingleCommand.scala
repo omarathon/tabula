@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.reports.profiles
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
+import com.google.common.io.ByteSource
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
@@ -184,8 +185,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		// Create file
 		val pdfFileAttachment = new FileAttachment
 		pdfFileAttachment.name = s"${student.universityId}-profile.pdf"
-		pdfFileAttachment.uploadedData = new ByteArrayInputStream(bytes)
-		pdfFileAttachment.uploadedDataLength = bytes.length
+		pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
 		fileDao.saveTemporary(pdfFileAttachment)
 
 		// Return results

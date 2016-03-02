@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.services.objectstore
 
+import java.io.InputStream
 import java.security.{DigestInputStream, MessageDigest}
 
+import com.google.common.io.ByteSource
 import org.apache.commons.io.IOUtils
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.internal.{PageSetImpl, StorageMetadataImpl}
@@ -18,9 +20,13 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 
 	private trait ListKeysFixture {
     val containerName = "tabula"
-    val blobStore = mock[BlobStore]
 
-    val service = new BlobStoreObjectStorageService(blobStore, containerName)
+		val blobStoreContext = mock[BlobStoreContext]
+		val blobStore = mock[BlobStore]
+
+		when(blobStoreContext.getBlobStore) thenReturn blobStore
+
+    val service = new BlobStoreObjectStorageService(blobStoreContext, containerName)
 
     val metadata1 = new StorageMetadataImpl(StorageType.BLOB, "id1", "1", null, null, null, null, null, Map[String, String]().asJava, null)
     val metadata2 = new StorageMetadataImpl(StorageType.BLOB, "id2", "2", null, null, null, null, null, Map[String, String]().asJava, null)
@@ -59,22 +65,24 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 
 	private trait TransientBlobStoreFixture {
 		val containerName = "tabula"
-		val blobStore = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext]).getBlobStore
+		val blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
 
-		val service = new BlobStoreObjectStorageService(blobStore, "tabula")
+		val service = new BlobStoreObjectStorageService(blobStoreContext, "tabula")
 
-		def inputStream() = getClass.getResourceAsStream("/attachment1.docx")
+		val byteSource = new ByteSource {
+			override def openStream(): InputStream = getClass.getResourceAsStream("/attachment1.docx")
+		}
 	}
 
 	@Test def pushAndFetch(): Unit = new TransientBlobStoreFixture {
 		val key = "my-lovely-file"
 
 		val md = MessageDigest.getInstance("MD5")
-		val dis = new DigestInputStream(inputStream(), md)
+		val dis = new DigestInputStream(byteSource.openStream(), md)
 		IOUtils.toByteArray(dis) // pass over the bytes for the DigestInputStream
 		val originalMd5 = md.digest()
 
-		service.push(key, inputStream(), ObjectStorageService.Metadata(
+		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			fileHash = None
@@ -91,10 +99,10 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		val key = "my-lovely-file"
 
 		service.metadata(key) should be (None)
-		service.push(key, inputStream(), ObjectStorageService.Metadata(
+		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = Some(new SHAFileHasher().hash(inputStream()))
+			fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
 		))
 
 		service.metadata(key) should be (Some(ObjectStorageService.Metadata(
@@ -108,7 +116,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		val key = "my-lovely-file"
 
 		service.keyExists(key) should be (false)
-		service.push(key, inputStream(), ObjectStorageService.Metadata(
+		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			fileHash = None
@@ -120,7 +128,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		val key = "my-lovely-file"
 
 		service.listKeys() should be ('empty)
-		service.push(key, inputStream(), ObjectStorageService.Metadata(
+		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
 			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			fileHash = None

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{File, InputStream}
+import java.io.InputStream
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream}

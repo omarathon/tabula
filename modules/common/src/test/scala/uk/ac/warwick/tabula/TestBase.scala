@@ -149,7 +149,7 @@ trait TestHelpers extends TestFixtures {
 		if (blobStoreContext == null)
 			blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
 
-		new BlobStoreObjectStorageService(blobStoreContext.getBlobStore, "JavaTestTmp-" + random.nextLong())
+		new BlobStoreObjectStorageService(blobStoreContext, "JavaTestTmp-" + random.nextLong())
 	}
 
 	/** Returns a new temporary directory that will get cleaned up

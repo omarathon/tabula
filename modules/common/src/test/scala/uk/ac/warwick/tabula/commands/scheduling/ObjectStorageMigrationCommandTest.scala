@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling
 
 import java.io.InputStream
 
+import com.google.common.io.ByteSource
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent, FileHasherComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.services.objectstore.{LegacyAwareObjectStorageService, ObjectStorageService, ObjectStorageServiceComponent}
@@ -70,11 +71,11 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 
 		command.applyInternal() should be (Set("3", "5", "6", "8", "9"))
 
-		verify(command.defaultStoreService, times(1)).push("3", blob3data, metadata3.copy(fileHash = Some("hash3")))
-		verify(command.defaultStoreService, times(1)).push("5", blob5data, metadata5.copy(fileHash = Some("hash5")))
-		verify(command.defaultStoreService, times(1)).push("6", blob6data, metadata6.copy(fileHash = Some("hash6")))
-		verify(command.defaultStoreService, times(1)).push("8", blob8data, metadata8.copy(fileHash = Some("hash8")))
-		verify(command.defaultStoreService, times(1)).push("9", blob9data, metadata9.copy(fileHash = Some("hash9")))
+		verify(command.defaultStoreService, times(1)).push("3", any[ByteSource], metadata3.copy(fileHash = Some("hash3")))
+		verify(command.defaultStoreService, times(1)).push("5", any[ByteSource], metadata5.copy(fileHash = Some("hash5")))
+		verify(command.defaultStoreService, times(1)).push("6", any[ByteSource], metadata6.copy(fileHash = Some("hash6")))
+		verify(command.defaultStoreService, times(1)).push("8", any[ByteSource], metadata8.copy(fileHash = Some("hash8")))
+		verify(command.defaultStoreService, times(1)).push("9", any[ByteSource], metadata9.copy(fileHash = Some("hash9")))
 	}
 
 }

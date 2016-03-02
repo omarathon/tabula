@@ -2,20 +2,13 @@ package uk.ac.warwick.tabula.services.objectstore
 
 import java.io.{File, FileInputStream, FileOutputStream, InputStream}
 
+import com.google.common.io.ByteSource
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 
 class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDirectories: Boolean = true)
 	extends ObjectStorageService with SHAFileHasherComponent {
-
-	if (!attachmentDir.isDirectory) {
-		if (createMissingDirectories) {
-			attachmentDir.mkdirs()
-		} else {
-			throw new IllegalStateException("Attachment store '" + attachmentDir + "' must be an existing directory")
-		}
-	}
 
 	private val idSplitSize = 2
 	private val idSplitSizeCompat = 4 // for existing paths split by 4 chars
@@ -51,14 +44,14 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
 		case _ => None
 	}
 
-	override def push(key: String, in: InputStream, /* ignored */ metadata: ObjectStorageService.Metadata): Unit = {
+	override def push(key: String, in: ByteSource, /* ignored */ metadata: ObjectStorageService.Metadata): Unit = {
 		val target = targetFile(key)
 		val directory = target.getParentFile
 
 		directory.mkdirs()
 		if (!directory.exists) throw new IllegalStateException(s"Couldn't create directory to store file: $directory")
 
-		FileCopyUtils.copy(in, new FileOutputStream(target))
+		FileCopyUtils.copy(in.openStream(), new FileOutputStream(target))
 	}
 
 	override def delete(key: String): Unit = {
@@ -80,6 +73,16 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
 			else base.listFiles().sortBy(_.getName).toStream.flatMap(files)
 
 		files(attachmentDir)
+	}
+
+	override def afterPropertiesSet(): Unit = {
+		if (!attachmentDir.isDirectory) {
+			if (createMissingDirectories) {
+				attachmentDir.mkdirs()
+			} else {
+				throw new IllegalStateException("Attachment store '" + attachmentDir + "' must be an existing directory")
+			}
+		}
 	}
 
 }

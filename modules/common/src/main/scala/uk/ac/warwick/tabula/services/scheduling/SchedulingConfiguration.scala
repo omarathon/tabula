@@ -105,9 +105,10 @@ object SchedulingConfiguration {
 		// SITS exports
 		SimpleTriggerJob[ExportAttendanceToSitsJob](repeatInterval = 5.minutes),
 		SimpleTriggerJob[ExportFeedbackToSitsJob](repeatInterval = 5.minutes),
-		SimpleTriggerJob[ExportYearMarksToSitsJob](repeatInterval = 5.minutes),
+		SimpleTriggerJob[ExportYearMarksToSitsJob](repeatInterval = 5.minutes)
 
-		SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)
+		// Migration now complete, don't need this any more
+		// SimpleTriggerJob[ObjectStorageMigrationJob](repeatInterval = 1.minute)
 	)
 }
 
