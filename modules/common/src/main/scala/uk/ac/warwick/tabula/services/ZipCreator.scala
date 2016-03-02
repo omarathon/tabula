@@ -130,11 +130,14 @@ trait ZipCreator extends Logging {
 
 	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }) {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
-			items.zipWithIndex.foreach{ case(item, index) => item match {
-				case file: ZipFileItem =>
+			items.zipWithIndex.foreach { case(item, index) => item match {
+				case file: ZipFileItem if Option(file.input).nonEmpty && file.length > 0 =>
 					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
 					copy(file.input, zip)
 					zip.closeArchiveEntry()
+					progressCallback(index, items.size)
+				case file: ZipFileItem =>
+					// do nothing
 					progressCallback(index, items.size)
 				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
 			}}
