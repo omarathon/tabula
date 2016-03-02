@@ -4,6 +4,7 @@ import java.io._
 import javax.persistence.CascadeType._
 import javax.persistence._
 
+import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
 import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
@@ -94,7 +95,7 @@ class FileAttachment extends GeneratedId {
 	def length: Option[Long] = objectStorageService.metadata(id).map { _.contentLength }
 
 	// checks the length field first. If that is not populated use uploadedData instead
-	def actualDataLength = length.getOrElse(uploadedDataLength)
+	def actualDataLength: Long = length.orElse(Option(uploadedData).map { _.size() }).getOrElse(-1)
 
 	def fileExt: String = {
 		if (name.lastIndexOf('.') > -1) {
@@ -111,8 +112,10 @@ class FileAttachment extends GeneratedId {
 
 	def duplicate(): FileAttachment = {
 		val newFile = new FileAttachment(name)
-		newFile.uploadedData = dataStream
-		newFile.uploadedDataLength = actualDataLength
+		newFile.uploadedData = new ByteSource {
+			override def openStream(): InputStream = dataStream
+			override def size(): Long = actualDataLength
+		}
 		newFile.uploadedBy = uploadedBy
 		fileDao.savePermanent(newFile)
 		newFile
@@ -131,8 +134,7 @@ class FileAttachment extends GeneratedId {
 
 	def hasData = id.hasText && objectStorageService.keyExists(id)
 
-	@transient var uploadedData: InputStream = null
-	@transient var uploadedDataLength: Long = 0
+	@transient var uploadedData: ByteSource = null
 
 	def isDataEqual(other: Any) = other match {
 		case that: FileAttachment =>

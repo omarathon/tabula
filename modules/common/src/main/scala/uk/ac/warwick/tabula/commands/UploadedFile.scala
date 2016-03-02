@@ -1,6 +1,9 @@
 package uk.ac.warwick.tabula.commands
 
-import java.io.File
+import java.io.{OutputStream, InputStream, File}
+import java.nio.charset.Charset
+import com.google.common.hash.{HashCode, HashFunction}
+import com.google.common.io.{CharSource, ByteSink, ByteProcessor, ByteSource}
 import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, MaintenanceModeService}
 
 import scala.collection.JavaConverters._
@@ -102,8 +105,7 @@ class UploadedFile extends BindListener {
 					val newAttachments = for (item <- permittedUploads.asScala) yield {
 						val a = new FileAttachment
 						a.name = new File(item.getOriginalFilename).getName
-						a.uploadedData = item.getInputStream
-						a.uploadedDataLength = item.getSize
+						a.uploadedData = new MultipartFileByteSource(item)
 						RequestInfo.fromThread.foreach { info => a.uploadedBy = info.user.userId }
 						fileDao.saveTemporary(a)
 						a
@@ -125,4 +127,10 @@ class UploadedFile extends BindListener {
 	private def commaSeparated(csv: String) =
 		if (csv == null) Nil
 		else csv.split(",").toList
+}
+
+class MultipartFileByteSource(file: MultipartFile) extends ByteSource {
+	override def openStream(): InputStream = file.getInputStream
+	override def size(): Long = file.getSize
+	override def isEmpty: Boolean = file.isEmpty
 }

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import com.google.common.io.ByteSource
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
@@ -42,13 +43,13 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		val file = new UploadedFile
 		val a = new FileAttachment
 		a.name = "file.txt"
-		a.uploadedDataLength = 300
+		a.uploadedData = ByteSource.wrap("one".getBytes)
 		a.objectStorageService = objectStorageService
 		file.attached.add(a)
 
 		val b = new FileAttachment
 		b.name = "file2.txt"
-		b.uploadedDataLength = 300
+		b.uploadedData = ByteSource.wrap("one".getBytes)
 		b.objectStorageService = objectStorageService
 		file.attached.add(b)
 
@@ -63,7 +64,7 @@ class AddFeedbackCommandTest extends TestBase with Mockito {
 		// Add an existing feedback with the same name but different content - will be overwritten
 		val b2 = new FileAttachment
 		b2.name = "file2.txt"
-		b2.uploadedDataLength = 305
+		b2.uploadedData = ByteSource.wrap("magic".getBytes)
 		b2.objectStorageService = objectStorageService
 		feedback.addAttachment(b2)
 

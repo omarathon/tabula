@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 import java.io.{ByteArrayInputStream, FileInputStream}
 import java.util.zip.ZipInputStream
 
+import com.google.common.io.ByteSource
 import org.junit.Before
 import uk.ac.warwick.tabula.commands.coursework.feedback.{AdminGetSingleMarkerFeedbackCommand, DownloadMarkersFeedbackForPositionCommand}
 import uk.ac.warwick.tabula.data.model.MarkingState._
@@ -21,7 +22,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		attachment.id = "123"
 
 		attachment.objectStorageService = zipService.objectStorageService
-		attachment.objectStorageService.push(attachment.id, new ByteArrayInputStream("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
+		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
 		assignment.feedbacks.foreach{feedback =>
 			feedback.firstMarkerFeedback.attachments = List(attachment)

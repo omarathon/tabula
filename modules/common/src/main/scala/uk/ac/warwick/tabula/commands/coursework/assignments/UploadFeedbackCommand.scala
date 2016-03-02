@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import org.apache.commons.codec.digest.DigestUtils
+import java.io.InputStream
+
+import com.google.common.io.ByteSource
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.springframework.validation.{BindingResult, Errors}
 import org.springframework.web.multipart.MultipartFile
@@ -211,7 +213,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		items = itemMap.values.toList
 	}
 
-	override def onBind(result:BindingResult) = transactional() {
+	override def onBind(result: BindingResult) = transactional() {
 		file.onBind(result)
 
 		// ZIP has been uploaded. unpack it
@@ -230,8 +232,10 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					// just turn it into an underscore.
 					val name = entry.getName.replace("\uFFFD", "_")
 					f.name = filenameOf(name)
-					f.uploadedData = new ZipEntryInputStream(zip, entry)
-					f.uploadedDataLength = entry.getSize
+					f.uploadedData = new ByteSource {
+						override def openStream(): InputStream = new ZipEntryInputStream(zip, entry)
+						override def size(): Long = entry.getSize
+					}
 					f.uploadedBy = marker.getUserId
 					fileDao.saveTemporary(f)
 					(name, f)
