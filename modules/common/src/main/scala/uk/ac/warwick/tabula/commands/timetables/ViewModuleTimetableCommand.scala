@@ -20,7 +20,7 @@ object ViewModuleTimetableCommand {
 			with ComposableCommand[Try[Seq[TimetableEvent]]]
 			with ViewModuleTimetablePermissions
 			with ViewModuleTimetableValidation
-			with Unaudited with ReadOnly
+			with ViewModuleTimetableDescription with ReadOnly
 			with AutowiringScientiaConfigurationComponent
 			with SystemClockComponent
 			with ModuleTimetableFetchingServiceComponent {
@@ -85,4 +85,13 @@ trait ViewModuleTimetableValidation extends SelfValidating {
 			errors.rejectValue("academicYear", "NotEmpty")
 		}
 	}
+}
+
+/**
+	* This won't be audited, but it is included in things like stopwatch task names
+	*/
+trait ViewModuleTimetableDescription extends Describable[Try[Seq[TimetableEvent]]] with Unaudited {
+	self: ViewModuleTimetableRequest =>
+
+	override def describe(d: Description): Unit = d.module(module).properties("academicYear" -> academicYear.toString)
 }
