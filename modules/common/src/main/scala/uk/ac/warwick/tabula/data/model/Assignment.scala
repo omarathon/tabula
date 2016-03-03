@@ -679,7 +679,7 @@ class Assignment
 	def mustReleaseForMarking = hasWorkflow
 
 	def needsFeedbackPublishing = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -687,7 +687,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingIgnoreExtensions = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !findExtension(s.universityId).exists(_.approved) && !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -695,7 +695,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingFor(universityId: String) = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))

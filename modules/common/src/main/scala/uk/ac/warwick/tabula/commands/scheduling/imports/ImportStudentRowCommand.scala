@@ -5,6 +5,7 @@ import java.sql.ResultSet
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -61,7 +62,7 @@ class ImportStudentRowCommandInternal(
 
 				logger.debug("Importing student member " + universityId + " into " + memberExisting)
 
-				val (isTransient, member) = memberExisting match {
+				val (isTransient, member) = memberExisting.map(HibernateHelpers.initialiseAndUnproxy) match {
 					case Some(m: StudentMember) => (false, m)
 					case Some(m: OtherMember) =>
 						// TAB-692 delete the existing member, then return a brand new one
