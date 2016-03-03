@@ -34,7 +34,10 @@ class DepartmentTimetablesController extends ProfilesController
 
 	@RequestMapping(method = Array(GET))
 	def form(@ModelAttribute("command") cmd: Appliable[(Seq[EventOccurrence], Seq[String])], @PathVariable department: Department) = {
-		Mav("profiles/timetables/department")
+		Mav("profiles/timetables/department",
+			"canFilterStudents" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department)),
+			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department))
+		)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -43,7 +46,7 @@ class DepartmentTimetablesController extends ProfilesController
 		@PathVariable department: Department
 	) = {
 		val result = cmd.apply()
-		val calendarEvents = result._1.map(FullCalendarEvent(_, userLookup))
+		val calendarEvents = FullCalendarEvent.colourEvents(result._1.map(FullCalendarEvent(_, userLookup)))
 		Mav(new JSONView(Map("events" -> calendarEvents, "errors" -> result._2)))
 	}
 

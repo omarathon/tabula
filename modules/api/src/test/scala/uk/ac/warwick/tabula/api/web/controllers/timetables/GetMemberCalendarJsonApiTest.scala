@@ -22,7 +22,7 @@ class GetMemberCalendarJsonApiTest extends TestBase with Mockito {
 			}
 
 		// Add a Busy event at the end
-		val coloured = api.colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","","Empty", "", "", ""))
+		val coloured = FullCalendarEvent.colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","","Empty", "", "", ""))
 
 		// every event should have a colour
 		coloured.find(_.backgroundColor=="") should not be 'defined

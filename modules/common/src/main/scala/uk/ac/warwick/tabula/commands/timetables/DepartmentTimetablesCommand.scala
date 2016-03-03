@@ -9,13 +9,19 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException, PermissionDeniedException}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.{Failure, Success}
 
+import DepartmentTimetablesCommand._
+
 object DepartmentTimetablesCommand {
+	val RequiredPermission = Permissions.Module.ViewTimetable
+	val FilterStudentPermission = Permissions.Profiles.Read.Timetable
+	val FilterStaffPermission = Permissions.Profiles.Read.Timetable
+
 	def apply(
 		department: Department,
 		academicYear: AcademicYear,
@@ -42,7 +48,6 @@ object DepartmentTimetablesCommand {
 
 }
 
-
 class DepartmentTimetablesCommandInternal(
 	val department: Department,
 	academicYear: AcademicYear,
@@ -51,8 +56,11 @@ class DepartmentTimetablesCommandInternal(
 	studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
 	staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
 )	extends CommandInternal[(Seq[EventOccurrence], Seq[String])] {
-
-	self: DepartmentTimetablesCommandRequest with EventOccurrenceServiceComponent with SecurityServiceComponent with ModuleAndDepartmentServiceComponent with DepartmentTimetablesCommandState =>
+	self: DepartmentTimetablesCommandRequest
+		with EventOccurrenceServiceComponent
+		with SecurityServiceComponent
+		with ModuleAndDepartmentServiceComponent
+		with DepartmentTimetablesCommandState =>
 
 	override def applyInternal() = {
 		val errors: mutable.Buffer[String] = mutable.Buffer()
@@ -63,7 +71,7 @@ class DepartmentTimetablesCommandInternal(
 				moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala, academicYear)
 			).distinct
 		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
-		val moduleEvents = moduleCommands.flatMap{case(module, cmd) => cmd.apply() match {
+		val moduleEvents = moduleCommands.flatMap { case(module, cmd) => cmd.apply() match {
 			case Success(events) =>
 				events
 			case Failure(t) =>
@@ -71,37 +79,33 @@ class DepartmentTimetablesCommandInternal(
 				Seq()
 		}}.distinct
 
-		errors.appendAll(students.asScala.filter(student => studentMembers.find(_.universityId == student).isEmpty).map(student =>
+		errors.appendAll(students.asScala.filter(student => !studentMembers.exists(_.universityId == student)).map(student =>
 			s"Could not find a student with a University ID of $student"
 		))
 		val studentCommands = studentMembers.map(student => student -> studentPersonalTimetableCommandFactory.apply(student))
-		val studentEvents = studentCommands.flatMap{case(student, cmd) =>
-			try {
-				permittedByChecks(securityService, user, cmd)
+		val studentEvents = studentCommands.flatMap { case (student, cmd) =>
+			if (securityService.can(user, FilterStudentPermission, student)) {
 				cmd.from = start
 				cmd.to = end
 				cmd.apply().toOption
-			} catch {
-				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
-					errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
-					None
+			} else {
+				errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
+				None
 			}
 		}.flatten.distinct
 
-		errors.appendAll(staff.asScala.filter(staffMember => staffMembers.find(_.universityId == staffMember).isEmpty).map(staffMember =>
+		errors.appendAll(staff.asScala.filter(staffMember => !staffMembers.exists(_.universityId == staffMember)).map(staffMember =>
 			s"Could not find a student with a University ID of $staffMember"
 		))
 		val staffCommands = staffMembers.map(staffMember => staffMember -> staffPersonalTimetableCommandFactory.apply(staffMember))
-		val staffEvents = staffCommands.flatMap{case(staffMember, cmd) =>
-			try {
-				permittedByChecks(securityService, user, cmd)
+		val staffEvents = staffCommands.flatMap { case (staffMember, cmd) =>
+			if (securityService.can(user, FilterStaffPermission, staffMember)) {
 				cmd.from = start
 				cmd.to = end
 				cmd.apply().toOption
-			} catch {
-				case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException) =>
-					errors.append(s"You do not have permission to view the timetable of ${staffMember.fullName.getOrElse("")} (${staffMember.universityId})")
-					None
+			} else {
+				errors.append(s"You do not have permission to view the timetable of ${staffMember.fullName.getOrElse("")} (${staffMember.universityId})")
+				None
 			}
 		}.flatten.distinct
 
@@ -118,13 +122,11 @@ class DepartmentTimetablesCommandInternal(
 }
 
 trait DepartmentTimetablesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
 	self: DepartmentTimetablesCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Search, department)
+		p.PermissionCheck(RequiredPermission, mandatory(department))
 	}
-
 }
 
 trait DepartmentTimetablesCommandState {
