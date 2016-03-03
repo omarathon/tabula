@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -31,8 +31,8 @@ object DepartmentTimetablesCommand {
 		staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
 	) =	new DepartmentTimetablesCommandInternal(
 		department,
-		academicYear,
 		user,
+		academicYear,
 		moduleTimetableCommandFactory,
 		studentPersonalTimetableCommandFactory,
 		staffPersonalTimetableCommandFactory
@@ -41,6 +41,7 @@ object DepartmentTimetablesCommand {
 		with AutowiringProfileServiceComponent
 		with AutowiringSecurityServiceComponent
 		with AutowiringModuleAndDepartmentServiceComponent
+		with AutowiringRelationshipServiceComponent
 		with ReadOnly with Unaudited
 		with DepartmentTimetablesPermissions
 		with DepartmentTimetablesCommandState
@@ -50,8 +51,8 @@ object DepartmentTimetablesCommand {
 
 class DepartmentTimetablesCommandInternal(
 	val department: Department,
+	val user: CurrentUser,
 	academicYear: AcademicYear,
-	user: CurrentUser,
 	moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
 	studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
 	staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
@@ -136,23 +137,23 @@ trait DepartmentTimetablesPermissions extends RequiresPermissionsChecking with P
 }
 
 trait DepartmentTimetablesCommandState {
+	def user: CurrentUser
 	def department: Department
 }
 
 trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
-
-	self: DepartmentTimetablesCommandState with ProfileServiceComponent =>
+	self: DepartmentTimetablesCommandState with ProfileServiceComponent with RelationshipServiceComponent =>
 
 	var modules: JList[Module] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var students: JList[String] = JArrayList()
-	lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala).flatMap{
+	lazy val studentMembers: Seq[StudentMember] = profileService.getAllMembersWithUniversityIds(students.asScala).flatMap {
 		case student: StudentMember => Option(student)
 		case _ => None
 	}
 	var staff: JList[String] = JArrayList()
-	lazy val staffMembers: Seq[StaffMember] = profileService.getAllMembersWithUniversityIds(staff.asScala).flatMap{
+	lazy val staffMembers: Seq[StaffMember] = profileService.getAllMembersWithUniversityIds(staff.asScala).flatMap {
 		case staffMember: StaffMember => Option(staffMember)
 		case _ => None
 	}
@@ -179,4 +180,19 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 	}) ++ routes.asScala).distinct.sorted(Route.DegreeTypeOrdering)
 
 	lazy val allYearsOfStudy: Seq[Int] = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
+
+	lazy val suggestedStaff: Seq[StaffMember] = (
+		staffMembers ++
+		user.profile.collect { case m: StaffMember => m }.toSeq
+	).distinct.sortBy { m => (m.lastName, m.firstName) }
+
+	lazy val personalTutorRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
+		throw new ItemNotFoundException("Could not find personal tutor relationship type")
+	)
+
+	lazy val suggestedStudents: Seq[StudentMember] = (
+		studentMembers ++
+		user.profile.collect { case m: StudentMember => m }.toSeq ++
+		relationshipService.listCurrentRelationshipsWithAgent(personalTutorRelationshipType, user.universityId).flatMap { _.studentMember }
+	).distinct.sortBy { m => (m.lastName, m.firstName) }
 }
