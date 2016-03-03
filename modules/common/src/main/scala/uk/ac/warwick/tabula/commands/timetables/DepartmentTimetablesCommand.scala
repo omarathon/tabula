@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence, TimetableEvent}
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
@@ -118,9 +118,13 @@ class DepartmentTimetablesCommandInternal(
 
 		val occurrences = moduleEvents.flatMap(eventsToOccurrences) ++ studentEvents ++ staffEvents
 
+		val filtered =
+			if (eventTypes.asScala.isEmpty) occurrences
+			else occurrences.filter { o => eventTypes.contains(o.eventType) }
+
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		(occurrences.sortBy(_.start), errors.toSeq)
+		(filtered.sortBy(_.start), errors.toSeq)
 	}
 
 	private def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
@@ -157,6 +161,7 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		case staffMember: StaffMember => Option(staffMember)
 		case _ => None
 	}
+	var eventTypes: JList[TimetableEventType] = JArrayList()
 
 	var from: JLong = LocalDate.now.minusMonths(1).toDateTimeAtStartOfDay.getMillis
 	var to: JLong = LocalDate.now.plusMonths(1).toDateTimeAtStartOfDay.getMillis
@@ -195,4 +200,6 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		user.profile.collect { case m: StudentMember => m }.toSeq ++
 		relationshipService.listCurrentRelationshipsWithAgent(personalTutorRelationshipType, user.universityId).flatMap { _.studentMember }
 	).distinct.sortBy { m => (m.lastName, m.firstName) }
+
+	lazy val allEventTypes: Seq[TimetableEventType] = TimetableEventType.members
 }
