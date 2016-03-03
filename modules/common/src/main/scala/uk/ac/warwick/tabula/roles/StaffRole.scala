@@ -43,15 +43,16 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		// TAB-1619
 		Profiles.Read.Usercode,
 		Profiles.Read.StudentCourseDetails.Core,
-		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType])
+		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
+
+		// TAB-4184
+		Profiles.Read.Timetable
 	)
 
 	GrantsScopedPermission(
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.ViewSearchResults,
 
-		// TAB-1619
-		Profiles.Read.Timetable,
 		Profiles.Read.SmallGroups
 	)
 
