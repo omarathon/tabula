@@ -28,48 +28,60 @@ so that they can be passed around between requests.
 	<#assign disabled = !(canUpdateMarkingWorkflow!true)>
 
 	<@form.labelled_row "markingWorkflow" "Marking workflow">
-		<@f.select path="markingWorkflow" disabled=disabled>
-			<@f.option value="" label="None"/>
-			<#list command.allMarkingWorkflows as markingWorkflow>
-				<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
-			</#list>
-		</@f.select>
-		<div class="help-block">
-			<#if disabled>
-				<span class="warning">You cannot change the marking workflow for this assignment as it already has submissions.</span>
-			<#else>
+		<#if !disabled>
+			<@f.select path="markingWorkflow">
+				<@f.option value="" label="None"/>
+				<#list command.allMarkingWorkflows as markingWorkflow>
+					<@f.option value="${markingWorkflow.id}" label="${markingWorkflow.name} (${markingWorkflow.markingMethod.description})"/>
+				</#list>
+			</@f.select>
+			<div class="help-block">
 				Marking workflows define how and by whom the assignment will be marked. They are set up for the department by a Departmental Administrator <#if can.do("MarkingWorkflow.Manage", department)><a href="<@routes.coursework.markingworkflowlist department />">here</a></#if>.
-			</#if>
-		</div>
-		<#if disabled && command.markingWorkflow??>
-			<label class="checkbox">
-				<input type="checkbox" id="removeWorkflowPreview" />
-				Remove marking workflow
-			</label>
-			<div class="alert alert-warning" id="removeWorkflowMessage" style="margin-bottom: 0; <#if !command.removeWorkflow>display: none;</#if>">
-				This cannot be undone. If you remove the marking workflow:
-				<ul>
-					<li>you will lose access to any existing marker feedback</li>
-					<li>you will not be able to add another workflow</li>
-					<li>you will not be able to re-apply the current workflow</li>
-				</ul>
-				<label class="checkbox">
-					<@f.checkbox path="removeWorkflow" id="removeWorkflow"/>
-					Confirm that you wish to remove the marking workflow
-				</label>
 			</div>
-			<script>
-				jQuery(function($){
-					$('#removeWorkflowPreview').on('change', function(){
-						if ($(this).is(':checked')) {
-							$('#removeWorkflowMessage').show();
-						} else {
-							$('#removeWorkflowMessage').hide();
-						}
+		<#else>
+			<span class="uneditable-value">
+				<#if command.markingWorkflow??>
+					${command.markingWorkflow.name}
+				<#else>
+					(none)
+				</#if>
+			</span>
+			<div class="help-block">
+				<span class="warning">You cannot change the marking workflow for this assignment as it already has submissions.</span>
+			</div>
+			<#if command.markingWorkflow??>
+				<label class="checkbox">
+					<input type="checkbox" id="removeWorkflowPreview" />
+					Remove marking workflow
+				</label>
+				<div class="alert alert-warning" id="removeWorkflowMessage" style="margin-bottom: 0; <#if !command.removeWorkflow>display: none;</#if>">
+					This cannot be undone. If you remove the marking workflow:
+					<ul>
+						<li>you will lose access to any existing marker feedback</li>
+						<li>you will not be able to add another workflow</li>
+						<li>you will not be able to re-apply the current workflow</li>
+					</ul>
+					<label class="checkbox">
+						<@f.checkbox path="removeWorkflow" id="removeWorkflow"/>
+						Confirm that you wish to remove the marking workflow
+					</label>
+				</div>
+				<script>
+					jQuery(function($){
+						$('#removeWorkflowPreview').on('change', function(){
+							if ($(this).is(':checked')) {
+								$('#removeWorkflowMessage').show();
+							} else {
+								$('#removeWorkflowMessage').hide();
+							}
+						})
 					})
-				})
-			</script>
+				</script>
+			</#if>
 		</#if>
+
+
+
 	</@form.labelled_row>
 
 	<#assign automaticallyReleaseToMarkersHelp>

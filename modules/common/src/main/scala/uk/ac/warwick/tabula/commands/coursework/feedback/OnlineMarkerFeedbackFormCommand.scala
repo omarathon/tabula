@@ -40,7 +40,6 @@ abstract class OnlineMarkerFeedbackFormCommand(
 	gradeGenerator: GeneratesGradesFromMarks
 )	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, marker, gradeGenerator)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
-
 	self: FeedbackServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
 
 	def markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(student.getWarwickId, marker)
@@ -49,7 +48,6 @@ abstract class OnlineMarkerFeedbackFormCommand(
 	if (markerFeedback.isDefined) copyState(markerFeedback)
 
 	def applyInternal(): MarkerFeedback = {
-
 		// find the parent feedback or make a new one
 		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
 			val newFeedback = new AssignmentFeedback
@@ -62,7 +60,7 @@ abstract class OnlineMarkerFeedbackFormCommand(
 		})
 
 		// see if marker feedback already exists - if not create one
-		val markerFeedback:MarkerFeedback = parentFeedback.getCurrentWorkflowFeedback match {
+		val markerFeedback: MarkerFeedback = parentFeedback.getCurrentWorkflowFeedback match {
 			case None => throw new IllegalArgumentException
 			case Some(mf) => mf
 		}

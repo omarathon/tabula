@@ -42,7 +42,7 @@ class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporte
 		Seq[ImportAccreditedPriorLearningCommand] = {
 
 		benchmarkTask("Fetch accredited prior learning") {
-			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
+			membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
 				val universityId = mac.member.universityId
 				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId)).toSeq.map(row => new ImportAccreditedPriorLearningCommand(row))
 			}.seq

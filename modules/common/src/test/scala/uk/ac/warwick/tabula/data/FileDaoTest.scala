@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data
 
+import java.io.{ByteArrayInputStream, InputStream}
+
+import com.google.common.io.ByteSource
+import org.joda.time.{DateTime, DateTimeConstants}
+import org.junit.{After, Before}
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
-import org.junit.{Before, After}
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.{FileInputStream, InputStream, ByteArrayInputStream, File}
-import org.joda.time.DateTime
-import org.springframework.util.FileCopyUtils
-import org.joda.time.DateTimeConstants
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.util.files.hash.FileHasher
-import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
 // scalastyle:off magic.number
 @Transactional
@@ -29,7 +28,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			for (i <- 0 to 50) {
 				val attachment = new FileAttachment
 				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
-				attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+				attachment.uploadedData = ByteSource.wrap("This is the best file ever".getBytes)
 				attachment.fileDao = dao
 				attachment.objectStorageService = objectStorageService
 				dao.saveTemporary(attachment)
@@ -48,7 +47,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 		val attachments = for (i <- 1 to 10) yield {
 			val attachment = new FileAttachment
 			attachment.dateUploaded = new DateTime(2013, DateTimeConstants.FEBRUARY, i, 1, 0, 0, 0)
-			attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+			attachment.uploadedData = ByteSource.wrap("This is the best file ever".getBytes)
 			attachment.fileDao = dao
 			attachment.objectStorageService = objectStorageService
 			dao.savePermanent(attachment)
@@ -81,8 +80,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 			val bytes = string.getBytes("UTF-8")
 			attachment.fileDao = dao
 			attachment.objectStorageService = objectStorageService
-			attachment.uploadedDataLength = bytes.length
-			attachment.uploadedData = new ByteArrayInputStream(bytes)
+			attachment.uploadedData = ByteSource.wrap(bytes)
 
 			dao.saveTemporary(attachment)
 			verify(objectStorageService, times(1)).push(attachment.id, attachment.uploadedData, ObjectStorageService.Metadata(26, "application/octet-stream", Some("4931c07015e50baf297aae2ce8571da15c0f2380")))

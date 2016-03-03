@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
 
+import com.google.common.io.ByteSource
 import org.junit.Before
 import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadMarkersSubmissionsCommand
 import uk.ac.warwick.tabula.data.model.FileAttachment
@@ -21,7 +21,7 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
 		attachment.id = "123"
 
 		attachment.objectStorageService = zipService.objectStorageService
-		attachment.objectStorageService.push(attachment.id, new ByteArrayInputStream("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
+		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
     assignment.submissions.foreach {
       submission =>

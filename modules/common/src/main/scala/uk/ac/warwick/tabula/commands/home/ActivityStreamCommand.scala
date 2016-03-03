@@ -14,13 +14,13 @@ object ActivityStreamCommand {
 			with Unaudited
 			with PubliclyVisiblePermissions
 			with ActivityStreamCommandValidation
+			with ReadOnly
 }
 
 abstract class ActivityStreamCommandInternal(
 	val request: ActivityStreamRequest
 ) extends CommandInternal[PagedActivities]
 	with ActivityStreamCommandState
-	with ReadOnly
 	with NotificationServiceComponent {
 
 	def applyInternal() = transactional(readOnly = true) {

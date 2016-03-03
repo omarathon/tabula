@@ -44,7 +44,7 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Tas
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
 		benchmarkTask("Fetch module registrations") {
-			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
+			membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
 				val universityId = mac.member.universityId
 				val params = HashMap(("universityId", universityId))
 				queries.flatMap { query =>

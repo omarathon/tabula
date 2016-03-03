@@ -50,27 +50,13 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		session.saveOrUpdate(file)
 
 		if (!file.hasData && file.uploadedData != null) {
-			val hash =
-				if (file.uploadedData.markSupported()) {
-					try {
-						Some(fileHasher.hash(file.uploadedData))
-					} finally {
-						file.uploadedData.reset()
-					}
-				} else {
-					// TODO need a solution here, write to a temporary file, ensure temporary file is deleted once written
-					None
-				}
-
-			hash.foreach { computedHash =>
-				file.hash = computedHash
-				session.saveOrUpdate(file)
-			}
+			file.hash = fileHasher.hash(file.uploadedData.openStream())
+			session.saveOrUpdate(file)
 
 			val metadata = ObjectStorageService.Metadata(
-				contentLength = file.uploadedDataLength,
+				contentLength = file.uploadedData.size(),
 				contentType = MediaType.OCTET_STREAM.toString, // TODO start storing content types
-				fileHash = hash
+				fileHash = Some(file.hash)
 			)
 
 			objectStorageService.push(file.id, file.uploadedData, metadata)

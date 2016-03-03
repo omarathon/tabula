@@ -143,7 +143,7 @@
 <div class="alert alert-error" style="display: none;"></div>
 
 <div class="calendar-outer">
-	<div class="calendar-loading">
+	<div class="calendar-loading hidden-print">
 		<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
 	</div>
 	<div class="calendar" data-viewname="month"></div>

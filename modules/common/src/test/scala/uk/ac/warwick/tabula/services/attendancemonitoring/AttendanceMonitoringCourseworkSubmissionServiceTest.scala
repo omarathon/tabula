@@ -99,8 +99,17 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 	}}
 
 	@Test
-	def lateSubmission() { new Fixture {
+	def lateSubmissionInPointPeriod() { new Fixture {
 		submission.submittedDate = assignment.closeDate.plusDays(1)
+		service.getCheckpoints(submission).size should be (1)
+
+		service.updateCheckpoints(submission)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true)
+	}}
+
+	@Test
+	def lateSubmissionOutsidePointPeriod() { new Fixture {
+		submission.submittedDate = assignmentPoint.endDate.plusDays(1).toDateTimeAtStartOfDay()
 		service.getCheckpoints(submission).size should be (0)
 	}}
 

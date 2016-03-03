@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.zip.Deflater
 
+import com.google.common.io.Files
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
 import org.springframework.http.HttpStatus
@@ -102,10 +103,7 @@ trait ZipCreator extends Logging {
 			val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
 
 			// Upload the zip to the object store
-			Closeables.closeThis(new FileInputStream(file)) { is =>
-				objectStorageService.push(objectKey(name), is, ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
-			}
-
+			objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
 			objectStorageService.renderable(objectKey(name), Some(name)).get
 		} finally {
 			if (!file.delete()) file.deleteOnExit()
@@ -132,11 +130,14 @@ trait ZipCreator extends Logging {
 
 	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }) {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
-			items.zipWithIndex.foreach{ case(item, index) => item match {
-				case file: ZipFileItem =>
+			items.zipWithIndex.foreach { case(item, index) => item match {
+				case file: ZipFileItem if Option(file.input).nonEmpty && file.length > 0 =>
 					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
 					copy(file.input, zip)
 					zip.closeArchiveEntry()
+					progressCallback(index, items.size)
+				case file: ZipFileItem =>
+					// do nothing
 					progressCallback(index, items.size)
 				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
 			}}

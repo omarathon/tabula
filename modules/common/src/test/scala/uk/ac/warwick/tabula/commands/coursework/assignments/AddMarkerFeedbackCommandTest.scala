@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
+import com.google.common.io.ByteSource
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.UploadedFile
@@ -40,7 +41,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val a = new FileAttachment
 		a.name = "file.txt"
 		a.objectStorageService = objectStorageService
-		a.uploadedDataLength = 300
+		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
 		val item = new FeedbackItem("1010101")
@@ -75,7 +76,7 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		val a = new FileAttachment
 		a.name = "file.txt"
 		a.objectStorageService = objectStorageService
-		a.uploadedDataLength = 300
+		a.uploadedData = ByteSource.wrap("content".getBytes)
 		file.attached.add(a)
 
 		val item = new FeedbackItem("1010101")

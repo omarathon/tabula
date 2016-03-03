@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.web.controllers.common
 
-import java.io.{IOException, Writer}
+import java.io._
 import javax.servlet.http.HttpServletResponse
 
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.NullCommand

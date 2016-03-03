@@ -1,8 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
+import javax.sql.DataSource
+
 import org.joda.time.DateTime
-import org.quartz.Scheduler
+import org.quartz.{Scheduler, TriggerKey}
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.scala.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
@@ -14,11 +18,14 @@ import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
+import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.scheduling.jobs.{ProcessScheduledNotificationsJob, ImportAcademicDataJob, ImportAssignmentsJob, ImportProfilesJob}
+import uk.ac.warwick.tabula.services.scheduling.jobs.{ImportAcademicDataJob, ImportAssignmentsJob, ImportProfilesJob, ProcessScheduledNotificationsJob}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -141,8 +148,7 @@ class SchedulingSysadminController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def importModules = {
-		scheduler.scheduleNow[ImportAcademicDataJob]()
-		redirectToHome
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]()))
 	}
 
 }
@@ -155,8 +161,7 @@ class ImportDeptModulesController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def importModules(@RequestParam deptCode: String) = {
-		scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)
-		redirectToHome
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)))
 	}
 }
 
@@ -168,8 +173,7 @@ class ImportSitsController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
-		scheduler.scheduleNow[ImportAssignmentsJob]()
-		redirectToHome
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsJob]()))
 	}
 }
 
@@ -187,8 +191,7 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 
 	@RequestMapping(method = Array(POST))
 	def importProfiles(@RequestParam deptCode: String) = {
-		scheduler.scheduleNow[ImportProfilesJob]("departmentCode" -> deptCode)
-		redirectToHome
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]("departmentCode" -> deptCode)))
 	}
 }
 
@@ -224,7 +227,57 @@ class CompleteScheduledNotificationsController extends BaseSysadminController {
 
 	@RequestMapping
 	def complete() = {
-		scheduler.scheduleNow[ProcessScheduledNotificationsJob]()
-		redirectToHome
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ProcessScheduledNotificationsJob]()))
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/jobs/quartz-status"))
+class QuartzJobStatusController extends BaseSysadminController {
+
+	@Value("${toplevel.url}") var toplevelUrl: String = _
+
+	@RequestMapping
+	def status(@RequestParam key: String) = {
+		if (ajax) {
+			val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
+			val jdbcTemplate = new JdbcTemplate(dataSource)
+
+			val trigger =
+				jdbcTemplate.queryAndMap("select * from qrtz_triggers") {
+					case (resultSet, _) => QuartzJdbc.Trigger(resultSet)
+				}.filter(_.clusterName == clusterName).find(_.name == key)
+
+			trigger match {
+				case Some(t) =>
+					// Is this a currently fired job?
+					val firedTrigger =
+						jdbcTemplate.queryAndMap("select * from qrtz_fired_triggers") {
+							case (resultSet, _) => QuartzJdbc.FiredTrigger(resultSet)
+						}.filter(_.clusterName == clusterName).find(_.name == t.name)
+
+					firedTrigger match {
+						case Some(fired) =>
+							Mav(new JSONView(Map(
+								"status" -> (if (fired.executing) "EXECUTING" else "ACQUIRED"),
+								"exists" -> true,
+								"job" -> t.jobName
+							))).noLayout()
+						case _ =>
+							Mav(new JSONView(Map(
+								"status" -> t.state,
+								"exists" -> true,
+								"job" -> t.jobName
+							))).noLayout()
+					}
+				case _ =>
+					Mav(new JSONView(Map(
+						"status" -> "NONE",
+						"exists" -> false
+					))).noLayout()
+			}
+		} else {
+			Mav("sysadmin/jobs/quartz-status", "key" -> key)
+		}
 	}
 }

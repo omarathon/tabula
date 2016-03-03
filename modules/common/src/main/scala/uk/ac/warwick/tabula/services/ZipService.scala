@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{File, InputStream}
 import java.util.zip.{ZipEntry, ZipInputStream}
 
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream}
-import org.apache.commons.io.input.BoundedInputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -181,27 +179,12 @@ trait AutowiringZipServiceComponent extends ZipServiceComponent {
 	var zipService = Wire[ZipService]
 }
 
-/**
- * InputStream to read a single zip entry from a parent input stream.
- */
-class ZipEntryInputStream(val zip: InputStream, val entry: ZipEntry)
-	extends BoundedInputStream(zip, entry.getSize) {
-	// don't close input stream - we'll close it when we're finished reading the whole file
-	setPropagateClose(false)
-}
-
 object Zips {
-
-	def each(zip: ZipInputStream)(fn: (ZipEntry) => Unit) { map(zip)(fn) }
 
 	/**
 	 * Provides an iterator for ZipEntry items which will be closed when you're done with them.
 	 * The object returned from the function is converted to a list to guarantee that it's evaluated before closing.
 	 */
-	//   def iterator[A](zip:ZipInputStream)(fn: (Iterator[ZipEntry])=>Iterator[A]): List[A] = ensureClose(zip) {
-	//	   fn( Iterator.continually{zip.getNextEntry}.takeWhile{_ != null} ).toList
-	//   }
-
 	def iterator[A](zip: ZipArchiveInputStream)(fn: (Iterator[ZipArchiveEntry]) => Iterator[A]): List[A] = ensureClose(zip) {
 		fn(Iterator.continually { zip.getNextZipEntry }.takeWhile { _ != null }).toList
 	}

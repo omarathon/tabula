@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.reports.ReportsBreadcrumbs
 class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByModuleReportController {
 
 	@ModelAttribute("filteredAttendanceCommand")
-	override def filteredAttendanceCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+	override def filteredAttendanceCommand(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
 		AllSmallGroupsReportCommand(department, academicYear, SmallGroupsReportFilters.missed)
 
 	override val filePrefix: String = "missed-small-groups-by-module"
@@ -22,8 +22,8 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 	@RequestMapping(method = Array(GET))
 	override def page(
 		@ModelAttribute("filteredAttendanceCommand") cmd: Appliable[AllSmallGroupsReportCommandResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable("department") department: Department,
+		@PathVariable("academicYear") academicYear: AcademicYear
 	) = {
 		Mav("reports/smallgroups/missedByModule")
 			.crumbs(

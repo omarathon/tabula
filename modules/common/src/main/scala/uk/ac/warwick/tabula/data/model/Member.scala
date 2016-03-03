@@ -198,10 +198,8 @@ abstract class Member
 	}
 
 	def toStringProps = Seq(
-		"universityId" -> universityId,
-		"userId" -> userId,
-		"name" -> (firstName + " " + lastName),
-		"email" -> email)
+		"universityId" -> universityId
+	)
 
 	def isStaff = userType == MemberUserType.Staff
 	def isStudent = userType == MemberUserType.Student

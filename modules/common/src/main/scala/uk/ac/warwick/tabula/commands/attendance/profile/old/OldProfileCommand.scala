@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.attendance.profile.old
 
-import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.old.{BuildStudentPointsData, StudentPointsData}
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
@@ -33,6 +32,7 @@ object OldProfileCommand {
 abstract class OldProfileCommand(val student: StudentMember, val academicYear: AcademicYear)
 	extends CommandInternal[OldAttendanceProfileInformation] with TaskBenchmarking with BuildStudentPointsData with ProfileCommandState {
 
+
 	override def applyInternal() = {
 		val pointsData = benchmarkTask("Build data") { buildData(Seq(student), academicYear).head }
 
@@ -63,6 +63,4 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 trait ProfileCommandState {
 	def student: StudentMember
 	def academicYear: AcademicYear
-
-	@Value("${tabula.yearZero}") var yearZero: Int = _
 }
