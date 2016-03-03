@@ -478,6 +478,10 @@
 		};
 
 		$('.coursework-progress-table').each(function() { $(this).expandingTable({ tableSorterOptions: options }); });
+
+		$('#feedback-modal').on('hidden.bs.modal', function() {
+			$(this).html('');
+		});
 	})(jQuery);
 	</script>
 	<#else>
