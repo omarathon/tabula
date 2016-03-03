@@ -43,7 +43,7 @@
 			</li>
 		<#elseif user.student>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
-				<span class="hint">View your student information</span>
+				<span class="hint">View your student information and timetable</span>
 			</li>
 		<#elseif canViewProfiles>
 			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
