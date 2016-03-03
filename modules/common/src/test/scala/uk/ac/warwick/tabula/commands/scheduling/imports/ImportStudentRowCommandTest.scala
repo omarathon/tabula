@@ -7,7 +7,6 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model._
@@ -271,6 +270,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 	@Test def testMarkAsSeenInSits() {
 		new Environment {
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
 			// first set up the studentCourseYearDetails as above
 			var studentCourseDetails = new StudentCourseDetails
@@ -298,6 +298,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNew() {
 		new Environment {
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
@@ -381,6 +383,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNulls() {
 		new EnvironmentWithNulls {
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
@@ -414,7 +418,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 					scyd.enrolmentStatus should be (null)
 					scyd.modeOfAttendance should be (null)
 					scyd.moduleRegistrationStatus should be (null)
-				case _ => false should be {true}
+				case _ => fail("Expected a student")
 			}
 
 			verify(memberDao, times(1)).saveOrUpdate(any[Member])
@@ -425,7 +429,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	def worksWithExistingMember() {
 		new Environment {
 			val existing = new StudentMember("0672089")
-			memberDao.getByUniversityId("0672089") returns Some(existing)
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
 
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -449,8 +453,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 
-			memberDao.getByUniversityId("0070790") returns Some(existingStaffMember)
-			memberDao.getByUniversityId("0672089") returns Some(existing)
+			memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
 
 			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
@@ -486,8 +490,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			// if personalTutorSource is "SITS", there *should* an update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
 
-			memberDao.getByUniversityId("0070790") returns Some(existingStaffMember)
-			memberDao.getByUniversityId("0672089") returns Some(existing)
+			memberDao.getByUniversityIdStaleOrFresh("0070790") returns Some(existingStaffMember)
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
 
 			importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
@@ -506,6 +510,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 	@Test def testDisabilityHandling() {
 		new Environment {
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
 			var student = rowCommand.applyInternal().asInstanceOf[StudentMember]
 			student.disability should be (Some(disabilityQ))
 

@@ -142,7 +142,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 				.foreach { relationshipType =>
 					// only save the personal tutor if we can match the ID with a staff member in Tabula
-					memberDao.getByUniversityId(row.tutorUniId) match {
+					memberDao.getByUniversityIdStaleOrFresh(row.tutorUniId) match {
 						case Some(mem: Member) =>
 							logger.info("Got a personal tutor from SITS! SprCode: " + row.sprCode + ", tutorUniId: " + row.tutorUniId)
 
