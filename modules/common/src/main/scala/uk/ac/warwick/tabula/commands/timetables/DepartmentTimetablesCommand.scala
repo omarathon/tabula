@@ -19,8 +19,8 @@ import DepartmentTimetablesCommand._
 
 object DepartmentTimetablesCommand {
 	val RequiredPermission = Permissions.Module.ViewTimetable
-	val FilterStudentPermission = Permissions.Profiles.Read.Timetable
-	val FilterStaffPermission = Permissions.Profiles.Read.Timetable
+	val FilterStudentPermission = ViewMemberEventsCommand.RequiredPermission
+	val FilterStaffPermission = ViewMemberEventsCommand.RequiredPermission
 
 	def apply(
 		department: Department,
