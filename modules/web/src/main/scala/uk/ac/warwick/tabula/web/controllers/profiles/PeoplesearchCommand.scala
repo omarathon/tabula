@@ -53,8 +53,10 @@ trait PeopleSearchData extends Logging with DisposableBean {
 				}
 			}
 		}
-		val endPointUrl = UriBuilder.parse(peoplesearchUrl).addQueryParameter("luceneQueryType", "true").
-			addQueryParameter("query", "membershipDetails.universityId:" + universityId + " AND sequenceNumber:0").
+		val queryPara = "membershipDetails.universityId:" + universityId + " AND sequenceNumber:0"
+		val luceneQueryPara = "true"
+		val endPointUrl = UriBuilder.parse(peoplesearchUrl).addQueryParameter("luceneQueryType", luceneQueryPara).
+			addQueryParameter("query", queryPara).
 			toString
 
 		val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
@@ -64,7 +66,7 @@ trait PeopleSearchData extends Logging with DisposableBean {
 		).asScala.map { header => header.getName -> header.getValue }.toMap
 
 		val req = url(peoplesearchUrl) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) <<?
-			(Map("luceneQueryType" -> "true") ++ Map("query" -> ("membershipDetails.universityId:" + universityId + " AND sequenceNumber:0")))
+			(Map("luceneQueryType" -> luceneQueryPara) ++ Map("query" -> queryPara))
 
 		Try(http.when(_ == 200)(req >:+ handler)) match {
 			case Success(jsonData) => jsonData
