@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.commands.timetables
 
 import org.joda.time.{DateTime, Interval, LocalDate}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
-import uk.ac.warwick.tabula.helpers.{Futures, Logging}
+import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand._
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.{PubliclyVisiblePermissions, PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -21,6 +22,7 @@ object ViewMemberEventsCommand extends Logging {
 	val Timeout = 15.seconds
 
 	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest with SelfValidating
+	val RequiredPermission = Permissions.Profiles.Read.Timetable
 
 	def apply(member: Member, currentUser: CurrentUser) = member match {
 		case student: StudentMember =>
@@ -172,7 +174,7 @@ trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with Permi
 	self: ViewMemberEventsState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Read.Timetable, mandatory(member))
+		p.PermissionCheck(RequiredPermission, mandatory(member))
 	}
 }
 

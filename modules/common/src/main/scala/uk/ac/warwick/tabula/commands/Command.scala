@@ -504,7 +504,7 @@ class DescriptionImpl extends Description {
  *  frameworky stuff that Command itself implements
  */
 trait CommandInternal[A] {
-	protected def applyInternal():A
+	protected def applyInternal(): A
 }
 
 trait PopulateOnForm {

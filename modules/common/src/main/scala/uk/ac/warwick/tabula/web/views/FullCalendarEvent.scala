@@ -92,4 +92,21 @@ object FullCalendarEvent {
 			comments = source.comments.getOrElse("")
 		)
 	}
+
+	def colourEvents(uncoloured: Seq[FullCalendarEvent]): Seq[FullCalendarEvent] = {
+		val colours = Seq("#239b92", "#a3b139", "#ec8d22", "#ef3e36", "#df4094", "#4daacc", "#167ec2", "#f1592a", "#818285")
+		// an infinitely repeating stream of colours
+		val colourStream = Stream.continually(colours.toStream).flatten
+		val contexts = uncoloured.map(_.parentShortName).distinct
+		val contextsWithColours = contexts.zip(colourStream)
+		uncoloured.map { event =>
+			if (event.title == "Busy") {
+				// FIXME hack
+				event.copy(backgroundColor = "#bbb", borderColor = "#bbb")
+			} else {
+				val colour = contextsWithColours.find(_._1 == event.parentShortName).get._2
+				event.copy(backgroundColor = colour, borderColor = colour)
+			}
+		}
+	}
 }
