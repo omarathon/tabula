@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.commands.timetables
 import org.joda.time.{DateTime, Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand._
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
@@ -174,7 +173,7 @@ trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with Permi
 	self: ViewMemberEventsState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(RequiredPermission, mandatory(member))
+		p.PermissionCheck(ViewMemberEventsCommand.RequiredPermission, mandatory(member))
 	}
 }
 
