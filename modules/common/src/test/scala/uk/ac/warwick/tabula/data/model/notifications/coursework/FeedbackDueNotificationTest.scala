@@ -164,6 +164,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		extension.assignment = assignment
 		extension.universityId = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
+		extension.feedbackDeadline should not be 'empty
 
 		val managers = UserGroup.ofUsercodes
 		userLookup.registerUsers("cuscav", "cusebr")
@@ -176,6 +178,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.submissions.add(Fixtures.submission("1234567"))
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
+		notification.deadline should not be 'empty
 		notification.recipients should not be 'empty
 	}
 
@@ -249,10 +252,13 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		extension.assignment = assignment
 		extension.universityId = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
+		extension.feedbackDeadline should not be 'empty
 
 		assignment.submissions.add(Fixtures.submission("1234567"))
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
+		notification.deadline should not be 'empty
 		notification.recipients should not be 'empty
 
 		// Feedback added
