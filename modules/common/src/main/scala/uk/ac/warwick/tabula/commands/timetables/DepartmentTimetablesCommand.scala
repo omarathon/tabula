@@ -65,11 +65,17 @@ class DepartmentTimetablesCommandInternal(
 	override def applyInternal() = {
 		val errors: mutable.Buffer[String] = mutable.Buffer()
 
+		val routesModules = moduleAndDepartmentService.findModulesByRoutes(routes.asScala, academicYear)
+		val yearOfStudyModules = moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala, academicYear)
+
 		val queryModules = (
-			modules.asScala ++
-				moduleAndDepartmentService.findModulesByRoutes(routes.asScala, academicYear) ++
-				moduleAndDepartmentService.findModulesByYearOfStudy(department, yearsOfStudy.asScala, academicYear)
-			).distinct
+			modules.asScala ++ routesModules ++ yearOfStudyModules
+		).distinct.filter { module =>
+			(modules.isEmpty || modules.contains(module)) &&
+			(routes.isEmpty || routesModules.contains(module)) &&
+			(yearsOfStudy.isEmpty || yearOfStudyModules.contains(module))
+		}
+
 		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
 		val moduleEvents = moduleCommands.flatMap { case(module, cmd) => cmd.apply() match {
 			case Success(events) =>
