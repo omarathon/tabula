@@ -94,7 +94,9 @@ object FullCalendarEvent {
 	}
 
 	def colourEvents(uncoloured: Seq[FullCalendarEvent]): Seq[FullCalendarEvent] = {
-		val colours = Seq("#239b92", "#a3b139", "#ec8d22", "#ef3e36", "#df4094", "#4daacc", "#167ec2", "#f1592a", "#818285")
+		// 30% tints of ID7 brand colours
+		val colours = Seq("#cec1d2", "#c5c6c8", "#e0d3b3", "#ffedc2", "#ebc6b6", "#fcd7bc", "#dcb7c0", "#fac6cb", "#d7d7b4", "#d8efe9", "#bccad7", "#b3e8f5")
+
 		// an infinitely repeating stream of colours
 		val colourStream = Stream.continually(colours.toStream).flatten
 		val contexts = uncoloured.map(_.parentShortName).distinct
