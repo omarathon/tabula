@@ -114,3 +114,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	</#if>
 	<@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/export${filterString}"/>
 </#macro>
+<#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>

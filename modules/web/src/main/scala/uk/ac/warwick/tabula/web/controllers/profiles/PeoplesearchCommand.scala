@@ -53,11 +53,10 @@ trait PeopleSearchData extends Logging with DisposableBean {
 				}
 			}
 		}
-		val queryPara = "membershipDetails.universityId:" + universityId + " AND sequenceNumber:0"
+		val queryPara = s"membershipDetails.universityId:${universityId} AND sequenceNumber:0"
 		val luceneQueryPara = "true"
-		val endPointUrl = UriBuilder.parse(peoplesearchUrl).addQueryParameter("luceneQueryType", luceneQueryPara).
-			addQueryParameter("query", queryPara).
-			toString
+		val endPointUrl = UriBuilder.parse(peoplesearchUrl).addQueryParameter("luceneQueryType", luceneQueryPara)
+			.addQueryParameter("query", queryPara).toString
 
 		val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
 			applicationManager.getCurrentApplication,
@@ -71,7 +70,7 @@ trait PeopleSearchData extends Logging with DisposableBean {
 		Try(http.when(_ == 200)(req >:+ handler)) match {
 			case Success(jsonData) => jsonData
 			case Failure(e) =>
-				logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+				logger.warn(s"Request for ${req.to_uri.toString} failed", e)
 				Map[String, String]()
 		}
 	}
@@ -97,7 +96,7 @@ class PeoplesearchCommandInternal(val member: Member, val user: CurrentUser) ext
 trait PeoplesearchPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: PeoplesearchCommandState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Read.Core, member)
+		p.PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
 	}
 }
 
