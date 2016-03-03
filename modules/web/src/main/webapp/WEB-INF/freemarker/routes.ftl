@@ -13,6 +13,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro photo profile><#if ((profile.universityId)!)?has_content><@url context="/profiles" page="/view/photo/${profile.universityId}.jpg" /><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@url context="/profiles" page="/view/photo/${profile.universityId}/${relationship.relationshipType.urlPart}/${relationship.agent}.jpg" /></#macro>
+<#macro peoplesearchData profile><@url page="/view/peoplesearch/${profile.universityId}" context= "/profiles" /></#macro>
 
 <#import "reports/routes.ftl" as reports />
 <#import "admin/routes.ftl" as admin />

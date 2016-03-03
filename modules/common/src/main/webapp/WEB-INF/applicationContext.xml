@@ -343,10 +343,6 @@
 
 	<import resource="filters-context.xml" />
 
-	<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
-		p:detectAnonymousOnCampusUsers="true"
-		p:userLookup-ref="userLookup"
-		p:configLocation="/tabula-sso-config.xml" />
 
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
 
@@ -504,6 +500,11 @@
 
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
+
+		<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
+			  p:detectAnonymousOnCampusUsers="true"
+			  p:userLookup-ref="userLookup"
+			  p:configLocation="/tabula-sso-config.xml" />
 	</beans>
 
 	<beans profile="sandbox">
@@ -530,6 +531,20 @@
 			<constructor-arg value="${activemq.broker}" />
 			<constructor-arg value="${activemq.user}" />
 			<constructor-arg value="${activemq.pass}" />
+		</bean>
+
+		<bean id="ssoConfigLoader" class="uk.ac.warwick.sso.client.SSOConfigLoader" />
+		<bean id="ssoConfiguration" factory-bean="ssoConfigLoader" factory-method="loadSSOConfig">
+			<constructor-arg value="/tabula-sso-config.xml"></constructor-arg>
+		</bean>
+
+		<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
+			  p:detectAnonymousOnCampusUsers="true"
+			  p:userLookup-ref="userLookup"
+			  p:config-ref="ssoConfiguration" />
+
+		<bean name="trustedApplicationsManager" class="uk.ac.warwick.sso.client.trusted.SSOConfigTrustedApplicationsManager">
+			<constructor-arg ref="ssoConfiguration" />
 		</bean>
 	</beans>
 
