@@ -90,6 +90,7 @@ object SchedulingConfiguration {
 		CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
 		CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
 		CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
+		CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
 
 		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 2 * * ?"), // 2am
 

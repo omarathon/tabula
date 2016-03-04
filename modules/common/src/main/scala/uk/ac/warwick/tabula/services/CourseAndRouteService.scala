@@ -35,6 +35,10 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 		rcode => transactional(readOnly = true) { routeDao.getByCode(rcode.toLowerCase) }
 	}
 
+	def getRoutesByCodes(codes: Seq[String]) = transactional(readOnly = true) {
+		routeDao.getAllByCodes(codes.map(_.toLowerCase))
+	}
+
 	def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
 		ccode => courseDao.getByCode(ccode)
 	}
