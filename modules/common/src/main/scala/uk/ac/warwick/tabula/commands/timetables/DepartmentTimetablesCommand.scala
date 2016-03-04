@@ -148,8 +148,6 @@ class DepartmentTimetablesCommandInternal(
 			}
 		}.flatten.distinct
 
-		println(moduleEvents)
-
 		val occurrences = moduleEvents.flatMap(eventsToOccurrences) ++ studentEvents ++ staffEvents
 
 		val filtered =
