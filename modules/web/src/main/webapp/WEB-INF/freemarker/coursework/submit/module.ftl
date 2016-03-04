@@ -8,9 +8,9 @@
 
 <#list assignments as assignment>
 
-	<div class="assignment ${assignment.active?string("active", "inactive")}">
+	<div class="assignment ${assignment.alive?string("active", "inactive")}">
 		<h2>
-		<#if assignment.active>
+		<#if assignment.alive>
 			<a href="${url('/coursework/module/${module.code}/${assignment.id}')}">${assignment.name}</a>
 		<#else>
 			${assignment.name}
@@ -20,7 +20,7 @@
 			<#if assignment.openEnded>
 				Open-ended submission
 			<#else>
-				Submission ${assignment.active?string("closes", "closed")}
+				Submission ${assignment.alive?string("closes", "closed")}
 				<@fmt.date date=assignment.closeDate seconds=true />
 			</#if>
 		</div>
