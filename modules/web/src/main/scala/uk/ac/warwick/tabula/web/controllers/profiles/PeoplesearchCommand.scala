@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.RoutesUtils
 import uk.ac.warwick.tabula.{CurrentUser, HttpClientDefaults}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{PhoneNumberFormatter, Logging}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.util.web.UriBuilder
@@ -89,7 +89,11 @@ object PeoplesearchCommand {
 
 class PeoplesearchCommandInternal(val member: Member, val user: CurrentUser) extends CommandInternal[Map[String, String]] with PeopleSearchData {
 	override def applyInternal() = {
-		getDataFromPeoplesearch(user.userId, member.id)
+		var data = getDataFromPeoplesearch(user.userId, member.id)
+		var transformedData = data.transform { (key, value) =>
+			if(key.equals("extensionNumberWithExternal")) PhoneNumberFormatter.format(value) else value
+		}
+		transformedData
 	}
 }
 
