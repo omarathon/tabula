@@ -189,7 +189,7 @@ trait ViewMemberEventsValidation extends SelfValidating {
 }
 
 trait ViewStaffPersonalTimetableCommandFactory {
-	def apply(staffMember: StaffMember): ComposableCommand[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
+	def apply(staffMember: StaffMember): Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
 }
 
 class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
@@ -203,7 +203,7 @@ class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
 }
 
 trait ViewStudentPersonalTimetableCommandFactory {
-	def apply(student: StudentMember): ComposableCommand[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
+	def apply(student: StudentMember): Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
 }
 
 class ViewStudentPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
