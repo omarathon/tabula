@@ -196,10 +196,10 @@
 											$.getJSON('${ajaxTargetUrl}', function(data) {
 												var extension = '';
 												var room = '';
-												if(data.extensionNumberWithExternal != undefined && data.extensionNumberWithExternal.length > 0 ) {
+												if (data.extensionNumberWithExternal) {
 													extension = 'Phone: ' + data.extensionNumberWithExternal + '<br/>'
 												}
-												if(data.room != undefined && data.room.length > 0 ) {
+												if (data.room) {
 													room = 'Room: ' + data.room
 												}
 												$('.ajaxPeoplesearchContents').html(extension + room);
