@@ -141,6 +141,15 @@
 				${staffMember.fullName} (${staffMember.universityId})
 			</@filter>
 		</#if>
+
+		<#assign placeholder = "Event types" />
+		<#assign currentfilter><@current_filter_value "eventTypes" placeholder; eventType>${eventType.displayName}</@current_filter_value></#assign>
+		<@filter path="eventTypes" placeholder=placeholder currentFilter=currentfilter allItems=command.allEventTypes; eventType>
+			<input type="checkbox" name="${status.expression}" value="${eventType.code}" data-short-value="${eventType.displayName}"
+			${contains_by_code(command.eventTypes, eventType)?string('checked','')}
+			>
+		${eventType.displayName}
+		</@filter>
 	</div>
 </@f.form>
 

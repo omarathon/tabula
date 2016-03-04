@@ -165,6 +165,7 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceMonitoringTemplatePointIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetFilterConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.JobInstanceIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.TimetableEventTypeConverter"/>
 	</util:list>
 
 	<bean id="typeConverter"
