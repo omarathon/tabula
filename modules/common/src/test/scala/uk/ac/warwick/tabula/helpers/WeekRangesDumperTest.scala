@@ -7,6 +7,7 @@ import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.termdates.Term
 import scala.util.parsing.json.JSON
 
 class WeekRangesDumperTest extends TestBase with Mockito {
@@ -29,6 +30,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		}
 
 		val singleWeek = Seq((AcademicYear(2012),1,new Interval(TEST_TIME.minusWeeks(1), TEST_TIME)))
+		val singleWeekTerm = mock[Term]
 	}
 
 	@Test
@@ -44,6 +46,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def usesUsersPreferredNumberingSystemIfAvailable(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
+		dumper.termService.getTermFromDateIncludingVacations(any[DateTime]) returns singleWeekTerm
+		singleWeekTerm.getWeekNumber(any[DateTime]) returns 95
 		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
@@ -62,6 +66,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		val user = new CurrentUser(u,u)
 		withCurrentUser(user) {
 			dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
+			dumper.termService.getTermFromDateIncludingVacations(any[DateTime]) returns singleWeekTerm
+			singleWeekTerm.getCumulativeWeekNumber(any[DateTime]) returns 95
 			dumper.userSettingsService.getByUserId("test") returns None
 			dumper.moduleAndDepartmentService.getDepartmentByCode(any[String]) returns Some(departmentWithNumberingSystem)
 
@@ -71,9 +77,12 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 			}
 			dumper.getWeekRangesAsJSON(formatter)
 	}}}
+
 	@Test
 	def passesYearAndWeekNumberToFormatter(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
+		dumper.termService.getTermFromDateIncludingVacations(any[DateTime]) returns singleWeekTerm
+		singleWeekTerm.getWeekNumber(any[DateTime]) returns 95
 		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
@@ -88,6 +97,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def outputsJSONArray(){new Fixture{ withUser("test") {
 		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
+		dumper.termService.getTermFromDateIncludingVacations(any[DateTime]) returns singleWeekTerm
+		singleWeekTerm.getWeekNumber(any[DateTime]) returns 95
 		dumper.userSettingsService.getByUserId("test") returns Some(settingsWithNumberingSystem)
 
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
