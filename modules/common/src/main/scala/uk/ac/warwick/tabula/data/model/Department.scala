@@ -217,6 +217,9 @@ class Department extends GeneratedId
 	def assignmentGradeValidation = getBooleanSetting(Settings.AssignmentGradeValidation) getOrElse false
 	def assignmentGradeValidation_= (validation: Boolean) = settings += (Settings.AssignmentGradeValidation -> validation)
 
+	def autoMarkMissedMonitoringPoints = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
+	def autoMarkMissedMonitoringPoints_=(enabled: Boolean) { settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled) }
+
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
@@ -447,9 +450,9 @@ object Department {
 
 		val WeekNumberingSystem = "weekNumberSystem"
 
-    val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
+		val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 
-    val AutoGroupDeregistration = "autoGroupDeregistration"
+		val AutoGroupDeregistration = "autoGroupDeregistration"
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
@@ -460,6 +463,8 @@ object Department {
 		val ExamGridsEnabled = "examGridsEnabled"
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
+
+		val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
 	}
 }
 

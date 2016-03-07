@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.Try
 
 abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvider {
 
@@ -91,7 +90,7 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Try(Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 1.minute)).getOrElse(Nil)
+		Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 1.minute)
 	}
 
 }
@@ -107,12 +106,10 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Try(
-			Await.result(queryService.query("eventType:ImportProfiles", 0, 50), 1.minute)
-				.filter { event =>
-					event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
-				}
-		).getOrElse(Nil)
+		Await.result(queryService.query("eventType:ImportProfiles", 0, 50), 1.minute)
+			.filter { event =>
+				event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
+			}
 	}
 
 }
@@ -128,7 +125,7 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Try(Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 1.minute)).getOrElse(Nil)
+		Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 1.minute)
 	}
 
 }
