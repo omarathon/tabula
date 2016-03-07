@@ -135,9 +135,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
+								if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 								// listen to callback for actual response
 								TurnitinLtiResponse.redirect(location.get)
 							}
