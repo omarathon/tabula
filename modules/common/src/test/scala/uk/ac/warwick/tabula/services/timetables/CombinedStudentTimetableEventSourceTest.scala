@@ -35,7 +35,8 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	@Test
 	def callsBothServicesAndAggregatesTheResult(){
-		source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue should be (timetableEvents ++ groupEvents)
+		val result = source.studentTimetableEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student).futureValue
+		result.events should be (timetableEvents ++ groupEvents)
 	}
 
 

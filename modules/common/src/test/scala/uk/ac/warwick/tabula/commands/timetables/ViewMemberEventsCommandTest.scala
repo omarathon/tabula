@@ -65,7 +65,7 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 	@Test
 	def sortsOccurencesByDate(){ new Fixture {
 		val sortedEvents = command.applyInternal()
-		sortedEvents should be (Success(Seq(earlierEvent, occurrence, laterEvent)))
+		sortedEvents.toOption.map(_.events) should be (Some(Seq(earlierEvent, occurrence, laterEvent)))
 	}}
 
 	@Test
