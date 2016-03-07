@@ -5,7 +5,7 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
-import org.joda.time.DateTime
+import org.joda.time.{LocalTime, DateTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -162,6 +162,15 @@ class SmallGroupSet
 	@Column(name = "default_weekranges")
 	var defaultWeekRanges: Seq[WeekRange] = Nil
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.DayOfWeekUserType")
+	@Column(name = "default_day")
+	var defaultDay: DayOfWeek = _
+
+	@Column(name = "default_starttime")
+	var defaultStartTime: LocalTime = _
+	@Column(name = "default_endtime")
+	var defaultEndTime: LocalTime = _
+
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "default_tutorsgroup_id")
 	private var _defaultTutors: UserGroup = UserGroup.ofUsercodes
@@ -291,6 +300,9 @@ class SmallGroupSet
     newSet.releasedToTutors = releasedToTutors
 		newSet.openForSignups = openForSignups
 		newSet.defaultWeekRanges = defaultWeekRanges
+		newSet.defaultDay = defaultDay
+		newSet.defaultStartTime = defaultStartTime
+		newSet.defaultEndTime = defaultEndTime
 		if (_defaultTutors != null) newSet._defaultTutors = _defaultTutors.duplicate()
 		newSet.defaultLocation = defaultLocation
 		newSet.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
