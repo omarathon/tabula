@@ -150,16 +150,18 @@
 
 		</fieldset>
 
-		<fieldset id="monitoring-points-options">
-			<h2>Monitoring point options</h2>
-			<@bs3form.checkbox path="autoMarkMissedMonitoringPoints">
-				<@f.checkbox path="autoMarkMissedMonitoringPoints" id="autoMarkMissedMonitoringPoints" />
-				Automatically mark small group teaching monitoring points as missed
-				<div class="help-block">
-					If checked, small group teaching monitoring points will be marked as missed if all applicable events are marked as missed for that student.
-				</div>
-			</@bs3form.checkbox>
-		</fieldset>
+		<#if features.autoMarkMissedMonitoringPoints>
+			<fieldset id="monitoring-points-options">
+				<h2>Monitoring point options</h2>
+				<@bs3form.checkbox path="autoMarkMissedMonitoringPoints">
+					<@f.checkbox path="autoMarkMissedMonitoringPoints" id="autoMarkMissedMonitoringPoints" />
+					Automatically mark small group teaching monitoring points as missed
+					<div class="help-block">
+						If checked, small group teaching monitoring points will be marked as missed if all applicable events are marked as missed for that student.
+					</div>
+				</@bs3form.checkbox>
+			</fieldset>
+		</#if>
 
 		<#if features.arbitraryRelationships>
 			<hr />
