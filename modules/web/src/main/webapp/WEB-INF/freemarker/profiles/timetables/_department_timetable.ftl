@@ -196,6 +196,8 @@
 <script type="text/javascript">
 	// TIMETABLE STUFF
 	jQuery(function($) {
+		var weeks = ${weekRangesDumper()};
+
 		var $form = $('#command');
 
 		function getEvents($container){
@@ -243,8 +245,26 @@
 				});
 			};
 		}
-		function onViewUpdate(view,element){
+		function onViewUpdate(view, element){
+			updateCalendarTitle(view, element);
 			$('.popover').hide();
+		}
+		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
+		function updateCalendarTitle(view,element){
+			if (view.name == 'agendaWeek') {
+				var start = view.start.getTime();
+				var end = view.end.getTime();
+				var week = $.grep(weeks, function(week) {
+					return (week.start >= start) && (week.end <= end);
+				});
+				if (week.length > 0) {
+					var decodedTitle = $("<div/>").html(week[0].desc).text();
+					view.title = decodedTitle;
+					view.calendar.updateTitle();
+				} // We should have an entry for every week; in the event that one's missing
+				// we'll just leave it blank. The day columns still have the date on them.
+				return true;
+			}
 		}
 
 		function createCalendar(container, defaultViewName){
@@ -252,15 +272,31 @@
 			var cal = $(container).fullCalendar({
 				events: getEvents($(container)),
 				defaultView: defaultViewName,
-				allDaySlot: true,
-				<#if startDate??>defaultDate: '${startDate}',</#if> // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
+				<#if startDate??>
+					year: ${startDate.getYear()?c},
+					month: ${(startDate.getMonthOfYear() - 1)?c},
+					date: ${startDate.getDayOfMonth()?c},
+					defaultDate: '${startDate.toString("YYYY-MM-dd")}', // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
+				</#if>
+				allDaySlot: false,
 				slotMinutes: 60,
-				firstHour: 0,
+				firstHour: 8,
 				firstDay: 1, // monday
 				timeFormat: {
 					agendaWeek: '', // don't display time on event
+					agendaDay: '', // don't display time on event
 					// for all other views
-					'': 'HH:mm{ - HH:mm}'   //  17:00 - 18:30
+					'': 'HH:mm'   //  5:00 - 6:30
+				},
+				titleFormat: {
+					month: 'MMMM yyyy',
+					week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
+					day: 'dddd, MMM d, yyyy'
+				},
+				columnFormat: {
+					month: 'ddd',
+					week: 'ddd d/M',
+					day: 'dddd d/M'
 				},
 				defaultEventMinutes: 30,
 				weekends: showWeekends,
@@ -270,9 +306,22 @@
 					center: 'month,agendaWeek,agendaDay',
 					right:  'today prev,next'
 				},
-				eventAfterRender: function(event, element, view) {
-					if (event.allDay) $(element).addClass('allday');
+				weekNumbers: true,
+				weekNumberCalculation: function (moment) {
+					var start = moment.getTime();
+					var week = $.grep(weeks, function(week) {
+						return (week.start >= start);
+					});
 
+					if (week.length > 0) {
+						return week[0].shortDescription;
+					}
+
+					// We should have an entry for every week; in the event that one's missing
+					// we'll just leave it blank. The day columns still have the date on them.
+					return '';
+				},
+				eventAfterRender: function(event, element, view) {
 					var content = "<table class='event-info'>";
 					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
 						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";

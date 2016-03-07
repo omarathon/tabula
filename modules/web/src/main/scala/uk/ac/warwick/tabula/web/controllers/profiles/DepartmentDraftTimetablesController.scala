@@ -50,7 +50,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	@RequestMapping(method = Array(GET))
 	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		Mav("profiles/timetables/department_draft",
-			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate.toString("YYYY-MM-dd"),
+			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate,
 			"canFilterStudents" -> false,
 			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department))
 		)
