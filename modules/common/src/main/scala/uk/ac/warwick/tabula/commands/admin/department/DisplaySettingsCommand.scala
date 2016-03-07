@@ -53,6 +53,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 		})
 	var studentRelationshipExpected: JMap[StudentRelationshipType, JMap[CourseType, JBoolean]] =
 		LazyMaps.create{_: StudentRelationshipType => JMap[CourseType, JBoolean]() }.asJava
+	var autoMarkMissedMonitoringPoints = department.autoMarkMissedMonitoringPoints
 
 	def populate() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
@@ -89,6 +90,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 				department.setStudentRelationshipExpected(relationshipType, courseType, Option(isExpected).exists(_.booleanValue))
 			}
 		}
+		department.autoMarkMissedMonitoringPoints = autoMarkMissedMonitoringPoints
 
 		moduleAndDepartmentService.save(department)
 		department

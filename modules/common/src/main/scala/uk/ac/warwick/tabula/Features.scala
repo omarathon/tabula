@@ -136,6 +136,7 @@ abstract class Features {
 
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -260,6 +261,8 @@ class FeaturesMessage {
 	@BeanProperty var examGrids = false
 
 	@BeanProperty var reports = true
+
+	@BeanProperty var autoMarkMissedMonitoringPoints = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
