@@ -19,8 +19,12 @@ import DepartmentTimetablesCommand._
 
 object DepartmentTimetablesCommand {
 	val RequiredPermission = Permissions.Module.ViewTimetable
+	val DraftPermission = Permissions.Timetabling.ViewDraft
 	val FilterStudentPermission = ViewMemberEventsCommand.RequiredPermission
 	val FilterStaffPermission = ViewMemberEventsCommand.RequiredPermission
+
+	private[timetables] type ReturnType = (Seq[EventOccurrence], Seq[String])
+	type CommandType = Appliable[ReturnType]
 
 	def apply(
 		department: Department,
@@ -36,7 +40,7 @@ object DepartmentTimetablesCommand {
 		moduleTimetableCommandFactory,
 		studentPersonalTimetableCommandFactory,
 		staffPersonalTimetableCommandFactory
-	) with ComposableCommand[(Seq[EventOccurrence], Seq[String])]
+	) with ComposableCommand[ReturnType]
 		with AutowiringTermBasedEventOccurrenceServiceComponent
 		with AutowiringProfileServiceComponent
 		with AutowiringSecurityServiceComponent
@@ -44,6 +48,31 @@ object DepartmentTimetablesCommand {
 		with AutowiringRelationshipServiceComponent
 		with ReadOnly with Unaudited
 		with DepartmentTimetablesPermissions
+		with DepartmentTimetablesCommandState
+		with DepartmentTimetablesCommandRequest
+
+	def draft(
+		department: Department,
+		academicYear: AcademicYear,
+		user: CurrentUser,
+		moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
+		studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
+		staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
+	) =	new DepartmentTimetablesCommandInternal(
+		department,
+		user,
+		academicYear,
+		moduleTimetableCommandFactory,
+		studentPersonalTimetableCommandFactory,
+		staffPersonalTimetableCommandFactory
+	) with ComposableCommand[ReturnType]
+		with AutowiringTermBasedEventOccurrenceServiceComponent
+		with AutowiringProfileServiceComponent
+		with AutowiringSecurityServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
+		with AutowiringRelationshipServiceComponent
+		with ReadOnly with Unaudited
+		with DraftDepartmentTimetablesPermissions
 		with DepartmentTimetablesCommandState
 		with DepartmentTimetablesCommandRequest
 
@@ -56,7 +85,7 @@ class DepartmentTimetablesCommandInternal(
 	moduleTimetableCommandFactory: ViewModuleTimetableCommandFactory,
 	studentPersonalTimetableCommandFactory: ViewStudentPersonalTimetableCommandFactory,
 	staffPersonalTimetableCommandFactory: ViewStaffPersonalTimetableCommandFactory
-)	extends CommandInternal[(Seq[EventOccurrence], Seq[String])] {
+)	extends CommandInternal[ReturnType] {
 	self: DepartmentTimetablesCommandRequest
 		with EventOccurrenceServiceComponent
 		with SecurityServiceComponent
@@ -78,13 +107,16 @@ class DepartmentTimetablesCommandInternal(
 		}
 
 		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
-		val moduleEvents = moduleCommands.flatMap { case(module, cmd) => cmd.apply() match {
-			case Success(events) =>
-				events
-			case Failure(t) =>
-				errors.append(s"Unable to load timetable for ${module.code.toUpperCase}")
-				Seq()
-		}}.distinct
+		val moduleEvents = moduleCommands.flatMap { case (module, cmd) =>
+			cmd.academicYear = academicYear
+			cmd.apply() match {
+				case Success(events) =>
+					events
+				case Failure(t) =>
+					errors.append(s"Unable to load timetable for ${module.code.toUpperCase}")
+					Seq()
+			}
+		}.distinct
 
 		errors.appendAll(students.asScala.filter(student => !studentMembers.exists(_.universityId == student)).map(student =>
 			s"Could not find a student with a University ID of $student"
@@ -137,6 +169,14 @@ trait DepartmentTimetablesPermissions extends RequiresPermissionsChecking with P
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(RequiredPermission, mandatory(department))
+	}
+}
+
+trait DraftDepartmentTimetablesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: DepartmentTimetablesCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(DraftPermission, mandatory(department))
 	}
 }
 

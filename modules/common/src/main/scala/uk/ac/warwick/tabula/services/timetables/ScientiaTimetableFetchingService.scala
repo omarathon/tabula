@@ -11,7 +11,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.{Futures, FoundUser, ClockComponent, Logging}
+import uk.ac.warwick.tabula.helpers.{ClockComponent, FoundUser, Futures, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
@@ -21,18 +21,20 @@ import scala.xml.Elem
 
 trait ScientiaConfiguration {
 	val perYearUris: Seq[(String, AcademicYear)]
+	val cacheSuffix: String
 }
 
 trait ScientiaConfigurationComponent {
 	val scientiaConfiguration: ScientiaConfiguration
 }
 
-trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent with ClockComponent{
+trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent with ClockComponent {
 	val scientiaConfiguration = new AutowiringScientiaConfiguration
+
 	class AutowiringScientiaConfiguration extends ScientiaConfiguration {
-		def scientiaFormat(year:AcademicYear) = {
+		def scientiaFormat(year: AcademicYear) = {
 			// e.g. 1314
-			(year.startYear%100).toString +(year.endYear%100).toString
+			(year.startYear % 100).toString + (year.endYear % 100).toString
 		}
 
 		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
@@ -41,16 +43,21 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
 			val month = clock.now.getMonthOfYear
 			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
-				currentAcademicYear.map { _ - 1 }
+				currentAcademicYear.map(_ - 1)
 			else
 				None
 		}
+
 		def yearProperty: Option[Seq[AcademicYear]] =
 			Wire.optionProperty("${scientia.years}").map { _.split(",").map(AcademicYear.parse) }
-		lazy val perYearUris =	yearProperty
-			.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
-			.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/",year) }
+
+		lazy val perYearUris =
+			yearProperty.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
+				.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
+
+		lazy val cacheSuffix = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
 	}
+
 }
 
 trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
@@ -168,7 +175,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
 			service
 		} else {
-			new CachedCompleteTimetableFetchingService(service, cacheName)
+			new CachedCompleteTimetableFetchingService(service, s"$cacheName${scientiaConfiguration.cacheSuffix}")
 		}
 	}
 

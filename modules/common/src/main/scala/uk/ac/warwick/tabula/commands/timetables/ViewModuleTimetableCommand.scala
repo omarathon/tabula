@@ -41,7 +41,7 @@ object ViewModuleTimetableCommand {
 }
 
 trait ViewModuleTimetableCommandFactory {
-	def apply(module: Module): ComposableCommand[Try[Seq[TimetableEvent]]]
+	def apply(module: Module): Appliable[Try[Seq[TimetableEvent]]] with ViewModuleTimetableRequest
 }
 class ViewModuleTimetableCommandFactoryImpl(service: ModuleTimetableFetchingService) extends ViewModuleTimetableCommandFactory {
 	def apply(module: Module) = ViewModuleTimetableCommand(module, service)
