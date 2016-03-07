@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -29,8 +30,8 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 		val timetableFetchingService = mock[CompleteTimetableFetchingService]
 	}
 
-	source.timetableFetchingService.getTimetableForStudent(student.universityId) returns Future.successful(timetableEvents)
-	source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns Future.successful(groupEvents)
+	source.timetableFetchingService.getTimetableForStudent(student.universityId) returns Future.successful(EventList.fresh(timetableEvents))
+	source.studentGroupEventSource.eventsFor(student, currentUser, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(groupEvents))
 
 	@Test
 	def callsBothServicesAndAggregatesTheResult(){

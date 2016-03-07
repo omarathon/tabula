@@ -53,9 +53,9 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	@Test def parseICal() {
 		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
-		events.size should be (142)
+		events.events.size should be (142)
 
-		val combined = service.combineIdenticalEvents(events).sorted
+		val combined = service.combineIdenticalEvents(events).events.sorted
 		combined.size should be (136)
 
 		// Check that the first few events are as expected
@@ -130,9 +130,9 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	@Test def tab2662() {
 		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
-		events.size should be (2)
+		events.events.size should be (2)
 
-		val combined = service.combineIdenticalEvents(events).sorted
+		val combined = service.combineIdenticalEvents(events).events.sorted
 		combined.size should be (1)
 		combined.head.weekRanges should be (Seq(WeekRange(1), WeekRange(3, 5)))
 	}
@@ -205,7 +205,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 				staffListInBSV = true
 			)
 		)(service.termService)
-		events.size should be (122)
+		events.events.size should be (122)
 	}
 
 }

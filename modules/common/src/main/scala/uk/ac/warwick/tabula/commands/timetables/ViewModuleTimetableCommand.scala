@@ -4,20 +4,24 @@ import java.util.concurrent.TimeoutException
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.timetables.ViewModuleTimetableCommand.{CommandType, ReturnType}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Await
 import scala.util.Try
 
 object ViewModuleTimetableCommand {
-	def apply(module: Module) =
+	private[timetables] type ReturnType = Try[EventList]
+	type CommandType = Appliable[ReturnType] with ViewModuleTimetableRequest
+
+	def apply(module: Module): CommandType =
 		new ViewModuleTimetableCommandInternal(module)
-			with ComposableCommand[Try[Seq[TimetableEvent]]]
+			with ComposableCommand[ReturnType]
 			with ViewModuleTimetablePermissions
 			with ViewModuleTimetableValidation
 			with ViewModuleTimetableDescription with ReadOnly
@@ -29,9 +33,9 @@ object ViewModuleTimetableCommand {
 		}
 
 	// Re-usable service
-	def apply(module: Module, service: ModuleTimetableFetchingService) =
+	def apply(module: Module, service: ModuleTimetableFetchingService): CommandType =
 		new ViewModuleTimetableCommandInternal(module)
-			with ComposableCommand[Try[Seq[TimetableEvent]]]
+			with ComposableCommand[ReturnType]
 			with ViewModuleTimetablePermissions
 			with ViewModuleTimetableValidation
 			with Unaudited with ReadOnly
@@ -41,21 +45,21 @@ object ViewModuleTimetableCommand {
 }
 
 trait ViewModuleTimetableCommandFactory {
-	def apply(module: Module): Appliable[Try[Seq[TimetableEvent]]] with ViewModuleTimetableRequest
+	def apply(module: Module): CommandType
 }
 class ViewModuleTimetableCommandFactoryImpl(service: ModuleTimetableFetchingService) extends ViewModuleTimetableCommandFactory {
 	def apply(module: Module) = ViewModuleTimetableCommand(module, service)
 }
 
 abstract class ViewModuleTimetableCommandInternal(val module: Module)
-	extends CommandInternal[Try[Seq[TimetableEvent]]]
+	extends CommandInternal[ReturnType]
 		with ViewModuleTimetableRequest {
 
 	self: ModuleTimetableFetchingServiceComponent =>
 
-	def applyInternal(): Try[Seq[TimetableEvent]] = {
+	def applyInternal(): ReturnType = {
 		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ViewModuleEventsCommand.Timeout))
-			.recover { case _: TimeoutException | _: TimetableEmptyException => Nil }
+			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
 }
@@ -90,7 +94,7 @@ trait ViewModuleTimetableValidation extends SelfValidating {
 /**
 	* This won't be audited, but it is included in things like stopwatch task names
 	*/
-trait ViewModuleTimetableDescription extends Describable[Try[Seq[TimetableEvent]]] with Unaudited {
+trait ViewModuleTimetableDescription extends Describable[ReturnType] with Unaudited {
 	self: ViewModuleTimetableRequest =>
 
 	override def describe(d: Description): Unit = d.module(module).properties("academicYear" -> academicYear.toString)

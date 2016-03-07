@@ -32,3 +32,8 @@ but it should look more like h4
 .fc-week-number {
 	white-space: nowrap;
 }
+
+.fc-last-updated {
+	margin-top: 10px;
+	font-size: 0.9em;
+}

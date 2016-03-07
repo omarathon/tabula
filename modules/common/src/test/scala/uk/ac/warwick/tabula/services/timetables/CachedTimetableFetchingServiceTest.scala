@@ -5,6 +5,7 @@ import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -20,7 +21,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
 		val delegate = mock[CompleteTimetableFetchingService]
 
-		delegate.getTimetableForStudent(studentId) returns Future.successful(studentEvents)
+		delegate.getTimetableForStudent(studentId) returns Future.successful(EventList.fresh(studentEvents))
 
 		val cache = new CachedCompleteTimetableFetchingService(delegate, "cacheName")
 	}
@@ -48,7 +49,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
 		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
-		delegate.getTimetableForStaff(studentId) returns Future.successful(staffEvents)
+		delegate.getTimetableForStaff(studentId) returns Future.successful(EventList.fresh(staffEvents))
 
 		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)
 		cache.getTimetableForStudent(studentId).futureValue should be (studentEvents)

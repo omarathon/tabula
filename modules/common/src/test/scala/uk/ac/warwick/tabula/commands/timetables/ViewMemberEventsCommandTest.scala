@@ -4,6 +4,7 @@ import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.{TermServiceComponent, TermService}
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -44,8 +45,8 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 		command.from =  new LocalDate
 		command.to = command.start.plusDays(2)
-		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(timetableEvents)
-		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(meetingOccurrences)
+		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(timetableEvents))
+		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventOccurrenceList.fresh(meetingOccurrences))
 		command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 	}
 

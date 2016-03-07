@@ -14,6 +14,7 @@ import scala.language.higherKinds
 
 trait Futures {
 
+	// TODO express this using combine()
 	def flatten[A, M[X] <: TraversableOnce[X]](in: Future[M[A]]*)(implicit executor: ExecutionContext): Future[Seq[A]] = {
 		val p = scala.concurrent.Promise[Seq[A]]
 
@@ -22,6 +23,18 @@ trait Futures {
 
 		// Get the sequential result of the futures and flatten them
 		Future.sequence(in).foreach { results => p.trySuccess(results.flatten) }
+
+		p.future
+	}
+
+	def combine[A](in: Seq[Future[A]], fn: (Seq[A] => A))(implicit executor: ExecutionContext): Future[A] = {
+		val p = scala.concurrent.Promise[A]
+
+		// If any of the Futures fail, fire the first failure up to the Promise
+		in.foreach { _.onFailure { case t => p.tryFailure(t) } }
+
+		// Get the sequential result of the futures and flatten them
+		Future.sequence(in).foreach { results => p.trySuccess(fn(results)) }
 
 		p.future
 	}
