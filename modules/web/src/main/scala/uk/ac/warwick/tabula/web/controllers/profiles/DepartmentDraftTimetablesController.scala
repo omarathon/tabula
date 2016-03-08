@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.timetables._
-import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables.{ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent}
-import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 import scala.util.{Failure, Try}
@@ -37,10 +37,10 @@ class DepartmentDraftTimetablesController extends ProfilesController
 			new ViewModuleTimetableCommandFactoryImpl(timetableFetchingService),
 			// Don't support students
 			new ViewStudentPersonalTimetableCommandFactory() {
-				override def apply(student: StudentMember): Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest =
-					new Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest {
+				override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =
+					new Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest {
 						override val member = student
-						override def apply(): Try[Seq[EventOccurrence]] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
+						override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
 					}
 			},
 			new ViewStaffPersonalTimetableCommandFactoryImpl(user)
@@ -62,8 +62,8 @@ class DepartmentDraftTimetablesController extends ProfilesController
 		@PathVariable department: Department
 	) = {
 		val result = cmd.apply()
-		val calendarEvents = FullCalendarEvent.colourEvents(result._1.map(FullCalendarEvent(_, userLookup)))
-		Mav(new JSONView(Map("events" -> calendarEvents, "errors" -> result._2)))
+		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
+		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))
 	}
 
 }

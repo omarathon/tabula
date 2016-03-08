@@ -222,6 +222,18 @@
 					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
 					data: $form.serialize(),
 					success:function(data){
+						if (data.lastUpdated) {
+							// Update the last updated timestamp
+							$container.find('> .fc-last-updated').remove();
+
+							var now = moment();
+							var time = moment(data.lastUpdated);
+
+							$container.append(
+									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + toTimestamp(now, time))
+							);
+						}
+
 						var events = data.events, errorDiv = $('div.alert-error');
 						// TAB-3008 - Change times to Europe/London
 						$.each(events, function(i, event){
@@ -244,6 +256,20 @@
 					}
 				});
 			};
+		}
+		function toTimestamp(now, then) {
+			var yesterday = now.clone().subtract(1, 'day');
+			if (now.diff(then) < 60000) { // less than a minute ago
+				return then.from(now);
+			} else if (now.isSame(then, 'day')) {
+				return then.format('LT [Today]');
+			} else if (yesterday.isSame(then, 'day')) {
+				return then.format('LT [Yesterday]');
+			} else if (now.isSame(then, 'year')) {
+				return then.format('ddd Do MMM LT');
+			} else {
+				return then.format('ddd Do MMM YYYY LT');
+			}
 		}
 		function onViewUpdate(view, element){
 			updateCalendarTitle(view, element);

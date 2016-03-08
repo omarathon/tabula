@@ -3,14 +3,16 @@ package uk.ac.warwick.tabula.commands.timetables
 import org.joda.time.{DateTime, Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand.ReturnType
 import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventList, EventOccurrenceList}
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
 import scala.concurrent.Await
@@ -20,13 +22,14 @@ import scala.util.Try
 object ViewMemberEventsCommand extends Logging {
 	val Timeout = 15.seconds
 
-	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest with SelfValidating
+	private[timetables] type ReturnType = Try[EventOccurrenceList]
+	type TimetableCommand = Appliable[ReturnType] with ViewMemberEventsRequest with SelfValidating
 	val RequiredPermission = Permissions.Profiles.Read.Timetable
 
-	def apply(member: Member, currentUser: CurrentUser) = member match {
+	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
 			new ViewStudentEventsCommandInternal(student, currentUser)
-				with ComposableCommand[Try[Seq[EventOccurrence]]]
+				with ComposableCommand[ReturnType]
 				with ViewMemberEventsPermissions
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
@@ -37,7 +40,7 @@ object ViewMemberEventsCommand extends Logging {
 
 		case staff: StaffMember =>
 			new ViewStaffEventsCommandInternal(staff, currentUser)
-				with ComposableCommand[Try[Seq[EventOccurrence]]]
+				with ComposableCommand[ReturnType]
 				with ViewMemberEventsPermissions
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
@@ -51,10 +54,10 @@ object ViewMemberEventsCommand extends Logging {
 			throw new ItemNotFoundException
 	}
 
-	def public(member: Member, currentUser: CurrentUser) = member match {
+	def public(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
 			new ViewStudentEventsCommandInternal(student, currentUser)
-				with ComposableCommand[Try[Seq[EventOccurrence]]]
+				with ComposableCommand[ReturnType]
 				with PubliclyVisiblePermissions
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
@@ -65,7 +68,7 @@ object ViewMemberEventsCommand extends Logging {
 
 		case staff: StaffMember =>
 			new ViewStaffEventsCommandInternal(staff, currentUser)
-				with ComposableCommand[Try[Seq[EventOccurrence]]]
+				with ComposableCommand[ReturnType]
 				with PubliclyVisiblePermissions
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
@@ -83,15 +86,15 @@ object ViewMemberEventsCommand extends Logging {
 trait MemberTimetableCommand {
 	self: ViewMemberEventsRequest with TermServiceComponent with EventOccurrenceServiceComponent =>
 
-	protected def eventsToOccurrences(events: Seq[TimetableEvent]): Seq[EventOccurrence] = {
+	protected def eventsToOccurrences(events: EventList): EventOccurrenceList = {
 		val dateRange = createDateRange()
+		val lastUpdated = events.lastUpdated
 
 		if (academicYear != null) {
-			events.filter { event => event.year == academicYear }
-				.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange))
+			EventOccurrenceList(events.events.filter { event => event.year == academicYear }
+				.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
 		} else {
-			events
-				.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange))
+			EventOccurrenceList(events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
 		}
 	}
 
@@ -105,20 +108,20 @@ trait MemberTimetableCommand {
 		new Interval(startDate, endDate)
 	}
 
-	protected def sorted(events: Seq[EventOccurrence]) = {
+	protected def sorted(result: EventOccurrenceList) = {
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		events.sortBy(_.start)
+		result.map(_.sortBy(_.start))
 	}
 
 }
 
 abstract class ViewStudentEventsCommandInternal(val member: StudentMember, currentUser: CurrentUser)
-	extends CommandInternal[Try[Seq[EventOccurrence]]]
+	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
 	self: StudentTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
 
-	def applyInternal(): Try[Seq[EventOccurrence]] = {
+	def applyInternal(): ReturnType = {
 		val timetableOccurrences =
 			studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student)
 				.map(eventsToOccurrences)
@@ -129,27 +132,28 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 			})
 
 		Try(Await.result(
-			Futures.flatten(timetableOccurrences, meetingOccurrences), ViewMemberEventsCommand.Timeout
+			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 
 }
 
 abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUser: CurrentUser)
-	extends CommandInternal[Try[Seq[EventOccurrence]]]
+	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
 	self: StaffTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
 
-	def applyInternal(): Try[Seq[EventOccurrence]] = {
+	def applyInternal(): ReturnType = {
 		val timetableOccurrences =
 			staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff)
 				.map(eventsToOccurrences)
 
-		val meetingOccurrences = scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
+		val meetingOccurrences =
+			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
 
 		Try(Await.result(
-			Futures.flatten(timetableOccurrences, meetingOccurrences), ViewMemberEventsCommand.Timeout
+			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
 
@@ -189,7 +193,7 @@ trait ViewMemberEventsValidation extends SelfValidating {
 }
 
 trait ViewStaffPersonalTimetableCommandFactory {
-	def apply(staffMember: StaffMember): Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
+	def apply(staffMember: StaffMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
 class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
@@ -203,7 +207,7 @@ class ViewStaffPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)
 }
 
 trait ViewStudentPersonalTimetableCommandFactory {
-	def apply(student: StudentMember): Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
+	def apply(student: StudentMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
 class ViewStudentPersonalTimetableCommandFactoryImpl(currentUser: CurrentUser)

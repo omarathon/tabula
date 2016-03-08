@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, UserLookupComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
@@ -24,14 +25,14 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 	class StudentSmallGroupEventTimetableEventSource extends StudentTimetableEventSource with SmallGroupEventTimetableEventSource {
 
-		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[Seq[TimetableEvent]] =
+		def eventsFor(student: StudentMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
 			Future.fromTry(Try(eventsFor(userLookup.getUserByUserId(student.userId), currentUser)))
 
 	}
 
 	class StaffSmallGroupEventTimetableEventSource extends StaffTimetableEventSource with SmallGroupEventTimetableEventSource {
 
-		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[Seq[TimetableEvent]] =
+		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] =
 			Future.fromTry(Try(eventsFor(userLookup.getUserByUserId(staff.userId), currentUser)))
 
 	}
@@ -52,7 +53,7 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 				}
 				.map { a => TimetableEvent(a.occurrence) }
 
-			autoTimetableEvents ++ manualTimetableEvents
+			EventList.fresh(autoTimetableEvents ++ manualTimetableEvents)
 		}
 
 		private def studentEvents(user: User, currentUser: CurrentUser) = smallGroupService.findSmallGroupsByStudent(user).filter {

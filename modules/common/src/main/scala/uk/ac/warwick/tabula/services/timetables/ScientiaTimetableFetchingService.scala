@@ -5,7 +5,7 @@ import dispatch.classic.{Http, thread, url}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.params.HttpConnectionParams
-import org.joda.time.{DateTimeConstants, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalTime}
 import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{ClockComponent, FoundUser, Futures, Logging}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, HttpClientDefaults}
 
@@ -120,9 +121,9 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
 	def getTimetableForStaff(universityId: String) = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
 
-	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Future[Seq[TimetableEvent]] = {
+	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Future[EventList] = {
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
-		val results: Seq[Future[Seq[TimetableEvent]]] = uris.map { case (uri, year) =>
+		val results: Seq[Future[EventList]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request.
@@ -148,15 +149,15 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 			result.map { events =>
 				if (excludeSmallGroupEventsInTabula)
-					events.filterNot { event =>
+					EventList.fresh(events.filterNot { event =>
 						event.eventType == TimetableEventType.Seminar &&
 							hasSmallGroups(event.parent.shortName, year)
-					}
-				else events
+					})
+				else EventList.fresh(events)
 			}
 		}
 
-		Futures.flatten(results: _*)
+		Futures.combine(results, EventList.combine)
 	}
 
 }
@@ -166,7 +167,7 @@ class TimetableEmptyException(val uri: String, val param: String)
 
 object ScientiaHttpTimetableFetchingService extends Logging {
 
-	val cacheName = "SyllabusPlusTimetables"
+	val cacheName = "SyllabusPlusTimetableLists"
 
 	def apply(scientiaConfiguration: ScientiaConfiguration) = {
 		val service = new ScientiaHttpTimetableFetchingService(scientiaConfiguration) with WAI2GoHttpLocationFetchingServiceComponent with AutowiringSmallGroupServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringWAI2GoConfigurationComponent with AutowiringUserLookupComponent
