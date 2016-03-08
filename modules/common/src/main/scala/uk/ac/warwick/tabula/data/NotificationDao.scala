@@ -23,6 +23,9 @@ trait NotificationDao {
 	def unemailedRecipientCount: Number
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo]
+
+	def unprocessedNotificationCount: Number
+	def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]]
 }
 
 @Repository
@@ -103,6 +106,20 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.createAlias("items", "items")
 			.add(is("items.entity", targetEntity))
 			.seq
+	}
+
+	private def unprocessedNotificationCriteria =
+		session.newCriteria[Notification[_ >: Null <: ToEntityReference, _]]
+			.add(is("_listenersProcessed", false))
+
+	def unprocessedNotificationCount =
+		unprocessedNotificationCriteria.count
+
+	def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]] = {
+		val scrollable = unprocessedNotificationCriteria
+			.addOrder(Order.asc("created"))
+			.scroll()
+		Scrollable(scrollable, session)
 	}
 }
 

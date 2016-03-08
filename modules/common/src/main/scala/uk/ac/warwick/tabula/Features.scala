@@ -132,7 +132,8 @@ abstract class Features {
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
-	@Value("${features.scheduling.objectStorageMigration:true}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
 
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
@@ -255,7 +256,8 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
 	@BeanProperty var schedulingTriggers = true
-	@BeanProperty var schedulingObjectStorageMigration = true
+	@BeanProperty var schedulingObjectStorageMigration = false
+	@BeanProperty var schedulingProcessNotificationListeners = true
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = false
