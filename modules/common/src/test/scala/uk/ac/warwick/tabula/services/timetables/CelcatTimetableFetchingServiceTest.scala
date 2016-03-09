@@ -34,7 +34,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent {
+	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
 		val userLookup = new MockUserLookup
 		val termService = new TermServiceImpl
 		val cacheStrategy = CacheStrategy.InMemoryOnly
@@ -46,8 +46,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
 		}
 
-		override val http: Http = new Http {
-			override def make_client = httpClient
+		override val httpClient: Http = new Http {
+			override def make_client = CelcatTimetableFetchingServiceTest.this.httpClient
 		}
 	}
 

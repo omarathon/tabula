@@ -1,18 +1,14 @@
 package uk.ac.warwick.tabula.notifications
 
-import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{Http, thread, url}
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.params.HttpConnectionParams
-import org.springframework.beans.factory.DisposableBean
+import dispatch.classic.url
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{Notification, NotificationWithTarget, ToEntityReference}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.NotificationListener
+import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent, NotificationListener}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
-import uk.ac.warwick.tabula._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -20,22 +16,10 @@ import scala.concurrent.{Await, Future}
 import scala.language.existentials
 import scala.util.parsing.json.JSON
 
-trait StartWarwickNotificationListener extends NotificationListener with DisposableBean {
-	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent =>
+trait StartWarwickNotificationListener extends NotificationListener {
+	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent with DispatchHttpClientComponent =>
 
 	@transient var json = JsonObjectMapperFactory.instance
-
-	private lazy val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
-
-	override def destroy() {
-		http.shutdown()
-	}
 
 	private def toStartActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Map[String, Any]] = {
 		val recipients = notification.recipientNotificationInfos.asScala
@@ -102,7 +86,7 @@ trait StartWarwickNotificationListener extends NotificationListener with Disposa
 					}
 				}
 
-				http.when(_ == 201)(httpRequest >:+ handler)
+				httpClient.when(_ == 201)(httpRequest >:+ handler)
 			}
 
 			case None => Future.successful(None)
@@ -115,7 +99,7 @@ trait StartWarwickNotificationListener extends NotificationListener with Disposa
 		if (features.startNotificationListener) {
 			val id = postActivity(notification)
 
-			Await.result(id, HttpClientDefaults.socketTimeout.millis)
+			Await.result(id, 10.seconds)
 		}
 	}
 
@@ -126,6 +110,7 @@ class AutowiringStartWarwickNotificationListener extends StartWarwickNotificatio
 	with AutowiringStartWarwickPropertiesComponent
 	with AutowiredTextRendererComponent
 	with AutowiringFeaturesComponent
+	with AutowiringDispatchHttpClientComponent
 
 trait StartWarwickPropertiesComponent {
 	def startApiHostname: String
