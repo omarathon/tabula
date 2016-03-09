@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.NotificationListener
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
-import uk.ac.warwick.tabula.{DateFormats, HttpClientDefaults, JsonObjectMapperFactory}
+import uk.ac.warwick.tabula._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -21,7 +21,7 @@ import scala.language.existentials
 import scala.util.parsing.json.JSON
 
 trait StartWarwickNotificationListener extends NotificationListener with DisposableBean {
-	self: StartWarwickPropertiesComponent with TextRendererComponent =>
+	self: StartWarwickPropertiesComponent with TextRendererComponent with FeaturesComponent =>
 
 	@transient var json = JsonObjectMapperFactory.instance
 
@@ -112,9 +112,11 @@ trait StartWarwickNotificationListener extends NotificationListener with Disposa
 	}
 
 	override def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
-		val id = postActivity(notification)
+		if (features.startNotificationListener) {
+			val id = postActivity(notification)
 
-		Await.result(id, HttpClientDefaults.socketTimeout.millis)
+			Await.result(id, HttpClientDefaults.socketTimeout.millis)
+		}
 	}
 
 }
@@ -123,6 +125,7 @@ trait StartWarwickNotificationListener extends NotificationListener with Disposa
 class AutowiringStartWarwickNotificationListener extends StartWarwickNotificationListener
 	with AutowiringStartWarwickPropertiesComponent
 	with AutowiredTextRendererComponent
+	with AutowiringFeaturesComponent
 
 trait StartWarwickPropertiesComponent {
 	def startApiHostname: String
