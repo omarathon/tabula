@@ -236,7 +236,8 @@ object AssignmentImporter {
 				join $sitsSchema.ins_mod mod
 					on mav.mod_code = mod.mod_code
 			where	mod.mod_iuse = 'Y' and -- in use
-						mod.mot_code not in ('S-', 'D')""" // MOT = module type code - not suspended, discontinued?
+						mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
+						mab.mab_agrp is not null"""
 
 	def GetAllAssessmentGroups = s"""
 		select distinct
@@ -269,7 +270,8 @@ object AssignmentImporter {
 			where mod.mod_iuse = 'Y' and -- in use
 						mod.mot_code not in ('S-', 'D') and -- module type - not suspended, discontinued?
 						mav.psl_code = 'Y' and
-						mav.ayr_code in (:academic_year_code)"""
+						mav.ayr_code in (:academic_year_code) and
+						mab.mab_agrp is not null"""
 
 	// for students who register for modules through SITS,this gets their assessments before their choices are confirmed
 	def GetUnconfirmedModuleRegistrations = s"""
