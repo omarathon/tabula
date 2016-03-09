@@ -13,7 +13,6 @@ import org.apache.http.{HttpRequest, HttpResponse}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.HttpClientDefaults
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -79,10 +78,11 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	// URL to call for all requests.
 	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
+	// TODO does this really need to be a custom instance?
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
+			HttpConnectionParams.setConnectionTimeout(getParams, 20000)
+			HttpConnectionParams.setSoTimeout(getParams, 20000)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})

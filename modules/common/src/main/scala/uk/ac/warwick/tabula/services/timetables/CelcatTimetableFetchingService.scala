@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.timetables
 import java.io.InputStream
 
 import dispatch.classic._
-import dispatch.classic.thread.ThreadSafeHttpClient
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.Value
@@ -11,10 +10,7 @@ import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
 import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.http.auth.AuthScope
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.params.HttpConnectionParams
 import org.joda.time.{DateTime, DateTimeZone}
-import org.springframework.beans.factory.DisposableBean
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
@@ -27,7 +23,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyCompone
 import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingService._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, HttpClientDefaults}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
@@ -91,8 +87,15 @@ object CelcatHttpTimetableFetchingService {
 	val cacheName = "CelcatTimetableLists"
 
 	def apply(celcatConfiguration: CelcatConfiguration): StudentTimetableFetchingService with StaffTimetableFetchingService = {
-		val delegate = new CelcatHttpTimetableFetchingService(celcatConfiguration) with AutowiringUserLookupComponent with AutowiringTermServiceComponent
-			with AutowiringCacheStrategyComponent with WAI2GoHttpLocationFetchingServiceComponent with AutowiringWAI2GoConfigurationComponent with AutowiringModuleAndDepartmentServiceComponent
+		val delegate =
+			new CelcatHttpTimetableFetchingService(celcatConfiguration)
+				with AutowiringUserLookupComponent
+				with AutowiringTermServiceComponent
+				with AutowiringCacheStrategyComponent
+				with WAI2GoHttpLocationFetchingServiceComponent
+				with AutowiringWAI2GoConfigurationComponent
+				with AutowiringModuleAndDepartmentServiceComponent
+				with AutowiringDispatchHttpClientComponent
 
 		if (celcatConfiguration.cacheEnabled) {
 			new CachedStaffAndStudentTimetableFetchingService(delegate, cacheName)
@@ -213,22 +216,15 @@ object CelcatHttpTimetableFetchingService {
 
 }
 
-class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging with DisposableBean {
-	self: UserLookupComponent with TermServiceComponent with LocationFetchingServiceComponent with CacheStrategyComponent with ModuleAndDepartmentServiceComponent =>
+class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguration) extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
+	self: UserLookupComponent
+		with TermServiceComponent
+		with LocationFetchingServiceComponent
+		with CacheStrategyComponent
+		with ModuleAndDepartmentServiceComponent
+		with DispatchHttpClientComponent =>
 
 	lazy val configs = celcatConfiguration.departmentConfiguration
-
-	val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(Some(celcatConfiguration.authScope, celcatConfiguration.credentials)), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
-
-	override def destroy() {
-		http.shutdown()
-	}
 
 	// a dispatch response handler which reads iCal from the response and parses it into a list of TimetableEvents
 	def handler(config: CelcatDepartmentConfiguration) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
@@ -278,7 +274,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
 	val bsvCacheEntryFactory = new SingularCacheEntryFactory[String, BSVCacheEntry] {
 		def create(baseUri: String) = {
-			val req = url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true")
+			val req =
+				(url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true"))
+					.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
 
 			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
@@ -297,7 +295,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 			// Execute the request
 			logger.info(s"Requesting staff information from $req")
-			Try(http.when(_==200)(req >:+ bsvHandler)) match {
+			Try(httpClient.when(_==200)(req >:+ bsvHandler)) match {
 				case Success(ev) => toBSVCacheEntry(ev)
 				case Failure(ex) => throw new CacheEntryUpdateException(ex)
 			}
@@ -324,14 +322,16 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[EventList] = {
 		// Add {universityId}.ics to the URL
-		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
+		val req =
+			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
+				.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
 		// else return an empty list.
 		logger.info(s"Requesting timetable data from ${req.to_uri.toString}")
 		val result =
-			Future(http.when(_==200)(req >:+ handler(config)))
+			Future(httpClient.when(_==200)(req >:+ handler(config)))
 				.recover { case StatusCode(404, _) =>
 					// Special case a 404, just return no events
 					logger.warn(s"Request for ${req.to_uri.toString} returned a 404")

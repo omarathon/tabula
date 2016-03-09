@@ -4,7 +4,7 @@ import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.NotificationDao
+import uk.ac.warwick.tabula.data.{Daoisms, NotificationDao}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
@@ -31,12 +31,13 @@ case class ActivityStream(
 )
 
 @Service
-class NotificationService extends Logging with FreemarkerTextRenderer {
+class NotificationService extends Logging with FreemarkerTextRenderer with Daoisms {
 
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 	var queryService = Wire[NotificationQueryService]
 	var indexService = Wire[NotificationIndexService]
+	var listeners = Wire.all[NotificationListener]
 
 	def getNotificationById(id: String) = dao.getById(id)
 
@@ -117,10 +118,31 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		dao.findActionRequiredNotificationsByEntityAndType[A](entity)
 	}
 
+	def processListeners() = transactional() {
+		dao.unprocessedNotifications.take(NotificationService.ProcessListenersBatchSize).foreach { notification =>
+			try {
+				logger.info("Processing notification listeners - " + notification)
+				listeners.foreach { _.listen(notification) }
+				notification.markListenersProcessed()
+				dao.update(notification)
+				session.flush()
+			} catch {
+				case throwable: Throwable => {
+					// TAB-2238 Catch and log, so that the overall transaction can still commit
+					logger.error("Exception handling notification listening:", throwable)
+				}
+			}
+		}
+	}
+
+}
+
+object NotificationService {
+	val ProcessListenersBatchSize = 100
 }
 
 trait NotificationListener {
-	def listen(notification: Notification[_,_]): Unit
+	def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit
 }
 
 trait RecipientNotificationListener {
