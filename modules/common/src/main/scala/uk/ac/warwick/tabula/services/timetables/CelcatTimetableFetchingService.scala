@@ -274,7 +274,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
 	val bsvCacheEntryFactory = new SingularCacheEntryFactory[String, BSVCacheEntry] {
 		def create(baseUri: String) = {
-			val req = url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true")
+			val req =
+				(url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true"))
+					.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
 
 			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
@@ -320,7 +322,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def doRequest(filename: String, config: CelcatDepartmentConfiguration): Future[EventList] = {
 		// Add {universityId}.ics to the URL
-		val req = url(config.baseUri) / filename <<? Map("forcebasic" -> "true")
+		val req =
+			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
+				.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
