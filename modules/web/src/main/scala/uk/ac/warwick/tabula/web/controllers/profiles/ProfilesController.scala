@@ -36,7 +36,7 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 	}
 
 	final def optionalCurrentMember = user.profile
-	final def currentMember = optionalCurrentMember getOrElse(new RuntimeMember(user))
+	final def currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
 
 }
 

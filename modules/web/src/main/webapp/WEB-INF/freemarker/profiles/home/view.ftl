@@ -21,11 +21,9 @@
 	<#assign is_tutor=showMyStudents />
 	<#assign is_admin=adminDepartments?has_content />
 
-	<#if is_staff>
-		<p class="lead muted">
-			This is a service for managing student profiles, records and tutor information
-		</p>
-	</#if>
+	<p class="lead muted">
+		This is a service for managing student profiles, records and tutor information
+	</p>
 
 	<div class="row-fluid">
 		<div class="span<#if is_admin>6<#else>12</#if>">
