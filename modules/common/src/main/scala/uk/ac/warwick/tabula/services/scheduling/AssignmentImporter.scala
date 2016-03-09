@@ -270,8 +270,8 @@ object AssignmentImporter {
 			where mod.mod_iuse = 'Y' and -- in use
 						mod.mot_code not in ('S-', 'D') and -- module type - not suspended, discontinued?
 						mav.psl_code = 'Y' and
-						mav.ayr_code in (:academic_year_code) and
-						mab.mab_agrp is not null"""
+						mab.mab_agrp is not null and
+						mav.ayr_code in (:academic_year_code)"""
 
 	// for students who register for modules through SITS,this gets their assessments before their choices are confirmed
 	def GetUnconfirmedModuleRegistrations = s"""
