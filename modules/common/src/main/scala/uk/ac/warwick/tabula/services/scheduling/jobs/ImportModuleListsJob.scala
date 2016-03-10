@@ -4,7 +4,7 @@ import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleListsCommand
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportRouteRulesCommand, ImportModuleListsCommand}
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 @Component
@@ -14,10 +14,12 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 class ImportModuleListsJob extends AutowiredJobBean {
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingModuleListsImport)
+		if (features.schedulingModuleListsImport) {
 			exceptionResolver.reportExceptions {
-				ImportModuleListsCommand().apply()
+				//ImportModuleListsCommand().apply()
+				ImportRouteRulesCommand().apply()
 			}
+		}
 	}
 
 }
