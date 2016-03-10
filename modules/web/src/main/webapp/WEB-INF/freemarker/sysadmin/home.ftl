@@ -58,6 +58,12 @@
 		</p>
 
 		<p>
+			<@f.form method="post" action="${url('/sysadmin/import-module-lists')}">
+				<input class="btn btn-danger" type="submit" value="SITS module lists" onclick="return confirm('Really? Could take a minute.')">
+			</@f.form>
+		</p>
+
+		<p>
 			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
 				<div class="input-group">
 					<@f.input id="import-profiles-dept" path="deptCode" cssClass="form-control" placeholder="deptCode (optional)" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')" /></span>
