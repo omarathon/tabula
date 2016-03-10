@@ -474,6 +474,27 @@
 						</goals>
 					</execution>
 					<execution>
+						<id>batchhash</id>
+						<phase>prepare-package</phase>
+						<configuration>
+							<target>
+								<taskdef name="batchhash" classname="uk.ac.warwick.util.ant.BatchHashTask"
+										 classpathref="maven.plugin.classpath" />
+
+								<batchhash
+										propertyfile="${project.build.directory}/${project.build.finalName}/WEB-INF/static-hashes.properties"
+										maxhashlength="12" salt="a">
+									<fileset
+											dir="${project.build.directory}/${project.build.finalName}"
+											includes="static/**" excludes="**/*.less" />
+								</batchhash>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
 						<id>copy-resource-dependencies</id>
 						<phase>process-test-resources</phase>
 						<configuration>

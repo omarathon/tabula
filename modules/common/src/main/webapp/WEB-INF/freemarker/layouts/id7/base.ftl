@@ -206,6 +206,9 @@
 					<li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
 					<li><a href="http://warwick.ac.uk/cookies">Cookies</a></li>
 					<li><a href="http://warwick.ac.uk/accessibility">Accessibility</a></li>
+					<li class="subtle">
+						App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
+					</li>
 				</ul>
 			</div>
 		</div>
