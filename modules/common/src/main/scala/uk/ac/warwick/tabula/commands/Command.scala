@@ -72,7 +72,7 @@ trait GeneratesTriggers[A] {
 
 
 trait Appliable[A]{
-  def apply():A
+  def apply(): A
 }
 
 /**

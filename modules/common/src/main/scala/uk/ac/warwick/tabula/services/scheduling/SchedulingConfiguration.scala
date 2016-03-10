@@ -100,6 +100,7 @@ object SchedulingConfiguration {
 		SimpleTriggerJob[ProcessTriggersJob](repeatInterval = 10.seconds),
 
 		SimpleTriggerJob[ProcessEmailQueueJob](repeatInterval = 1.minute),
+		SimpleTriggerJob[ProcessNotificationListenersJob](repeatInterval = 30.seconds),
 
 		SimpleTriggerJob[ProcessJobQueueJob](repeatInterval = 10.seconds),
 

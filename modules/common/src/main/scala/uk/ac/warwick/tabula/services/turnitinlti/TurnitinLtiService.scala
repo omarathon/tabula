@@ -37,6 +37,7 @@ object TurnitinLtiService {
 	val AssignmentPrefix = "Assignment-"
 
 	val turnitinAssignmentNameMaxCharacters = 99
+	val turnitinClassTitleMaxCharacters = 99
 
 	/**
 	 * Quoted supported types are...
@@ -66,7 +67,7 @@ object TurnitinLtiService {
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(s"${module.code.toUpperCase} - ${module.name}")
+		ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
@@ -135,9 +136,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
+								if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 								// listen to callback for actual response
 								TurnitinLtiResponse.redirect(location.get)
 							}

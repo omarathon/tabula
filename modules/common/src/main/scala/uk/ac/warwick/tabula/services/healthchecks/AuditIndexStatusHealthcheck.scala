@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.services.elasticsearch.AuditEventIndexService
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.util.Try
 
 @Component
 @Profile(Array("scheduling"))
@@ -23,7 +22,7 @@ class AuditIndexStatusHealthcheck extends ServiceHealthcheckProvider {
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	def run(): Unit = transactional(readOnly = true) {
 		val latestDb = Wire[AuditEventService].latest
-		val latestIndex = Try(Await.result(Wire[AuditEventIndexService].newestItemInIndexDate, 1.minute).getOrElse(new DateTime(0L))).getOrElse(new DateTime(0L))
+		val latestIndex = Await.result(Wire[AuditEventIndexService].newestItemInIndexDate, 1.minute).getOrElse(new DateTime(0L))
 		val latestIndexMinutesAgo = (latestDb.getMillis - latestIndex.getMillis) / (1000 * 60)
 
 		val status =

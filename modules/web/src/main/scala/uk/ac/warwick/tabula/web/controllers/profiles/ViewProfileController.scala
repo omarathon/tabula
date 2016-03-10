@@ -29,16 +29,14 @@ abstract class ViewProfileController extends ProfilesController {
 		openMeetingId: String,
 		agentId: String,
 		profiledStudentMember: StudentMember
-		): Mav = {
+	): Mav = {
 		val isSelf = profiledStudentMember.universityId == user.universityId
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
 		val relationshipTypes: List[String] =
-			if (currentMember.isStudent)
-				relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember])
-					.map(_.agentRole).distinct.toList
-			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map(_.studentRole + "s").distinct.toList
+			relationshipService.listAllStudentRelationshipTypesWithStudentMember(profiledStudentMember)
+				.map(_.agentRole).distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
 			case Nil => ""

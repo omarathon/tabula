@@ -374,4 +374,8 @@ object Permissions {
 	object Notification {
 		case object Dismiss extends Permission("Dismiss and restore notifications")
 	}
+
+	object Timetabling {
+		case object ViewDraft extends Permission("View draft releases of the timetable")
+	}
 }

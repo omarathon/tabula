@@ -2,14 +2,12 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.timetables.{ViewStudentPersonalTimetableCommandFactoryImpl, ViewStaffPersonalTimetableCommandFactoryImpl, ViewModuleTimetableCommandFactoryImpl}
-import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
+import uk.ac.warwick.tabula.commands.CurrentSITSAcademicYear
+import uk.ac.warwick.tabula.commands.timetables.{DepartmentTimetablesCommand, ViewModuleTimetableCommandFactoryImpl, ViewStaffPersonalTimetableCommandFactoryImpl, ViewStudentPersonalTimetableCommandFactoryImpl}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.commands.timetables.{DepartmentTimetablesCommand, DepartmentTimetablesCommandRequest}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.timetables.EventOccurrence
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 @Controller
@@ -21,7 +19,7 @@ class DepartmentTimetablesController extends ProfilesController
 	val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
 	@ModelAttribute("command")
-	def command(@PathVariable department: Department) = {
+	def command(@PathVariable department: Department): DepartmentTimetablesCommand.CommandType = {
 		DepartmentTimetablesCommand(
 			mandatory(department),
 			academicYear,
@@ -33,21 +31,21 @@ class DepartmentTimetablesController extends ProfilesController
 	}
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[(Seq[EventOccurrence], Seq[String])], @PathVariable department: Department) = {
+	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department) = {
 		Mav("profiles/timetables/department",
 			"canFilterStudents" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department)),
-			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department))
+			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department))
 		)
 	}
 
 	@RequestMapping(method = Array(POST))
 	def post(
-		@ModelAttribute("command") cmd: Appliable[(Seq[EventOccurrence], Seq[String])] with DepartmentTimetablesCommandRequest,
+		@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType,
 		@PathVariable department: Department
 	) = {
 		val result = cmd.apply()
-		val calendarEvents = FullCalendarEvent.colourEvents(result._1.map(FullCalendarEvent(_, userLookup)))
-		Mav(new JSONView(Map("events" -> calendarEvents, "errors" -> result._2)))
+		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
+		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))
 	}
 
 }

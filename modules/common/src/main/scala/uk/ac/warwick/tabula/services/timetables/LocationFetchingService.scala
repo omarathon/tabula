@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic._
-import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{ClientPNames, CookiePolicy}
-import org.apache.http.params.HttpConnectionParams
-import org.springframework.beans.factory.DisposableBean
-import uk.ac.warwick.tabula.HttpClientDefaults
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
+import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent}
 import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
 import uk.ac.warwick.util.web.Uri
 
@@ -85,19 +81,8 @@ trait WAI2GoHttpLocationFetchingServiceComponent extends LocationFetchingService
 	lazy val locationFetchingService = WAI2GoHttpLocationFetchingService(wai2GoConfiguration)
 }
 
-private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) extends LocationFetchingService with Logging with DisposableBean {
-
-	val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
-
-	override def destroy {
-		http.shutdown()
-	}
+private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) extends LocationFetchingService with Logging {
+	self: DispatchHttpClientComponent =>
 
 	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
@@ -115,7 +100,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 
 		// Execute the request
 		logger.info(s"Requesting location info for $name")
-		Try(http.when(_==200)(req >:+ handler)) match {
+		Try(httpClient.when(_==200)(req >:+ handler)) match {
 			case Success(locations)
 				if locations.size == 1 =>
 					MapLocation(locations.head.name, locations.head.locationId)
@@ -133,7 +118,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 
 object WAI2GoHttpLocationFetchingService {
 	def apply(config: WAI2GoConfiguration) = {
-		val service = new WAI2GoHttpLocationFetchingService(config)
+		val service = new WAI2GoHttpLocationFetchingService(config) with AutowiringDispatchHttpClientComponent
 
 		if (config.cached) {
 			new CachedLocationFetchingService(service)

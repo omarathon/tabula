@@ -277,23 +277,39 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 
 		val weekDescriptions = termsAndWeeks map {
 			case (year, weekNumber, weekInterval) =>
-				val defaultDescription = formatWeekName(year, weekNumber, system)
+				val longDescription = formatWeekName(year, weekNumber, system)
+
+				val baseDate = weekInterval.getStart.withDayOfWeek(DayOfWeek.Thursday.jodaDayOfWeek)
+				val shortDescription = system match {
+					case WeekRange.NumberingSystem.Academic => weekNumber.toString
+					case WeekRange.NumberingSystem.None => ""
+					case WeekRange.NumberingSystem.Term =>
+						termService.getTermFromDateIncludingVacations(baseDate) match {
+							case vac: Vacation => ""
+							case t: Term => t.getWeekNumber(baseDate)
+						}
+					case WeekRange.NumberingSystem.Cumulative =>
+						termService.getTermFromDateIncludingVacations(baseDate) match {
+							case vac: Vacation => ""
+							case t: Term => t.getCumulativeWeekNumber(baseDate)
+						}
+				}
 
 				// weekRangeFormatter always includes vacations, but we don't want them here, so if the
 				// description doesn't look like "Term X Week Y", throw it away and use a standard IntervalFormat;
 				// TAB-1906 UNLESS we're in academic week number town
-				val description = if (system == WeekRange.NumberingSystem.Academic || defaultDescription.startsWith("Term")) {
-					defaultDescription
+				val description = if (system == WeekRange.NumberingSystem.Academic || longDescription.startsWith("Term")) {
+					longDescription
 				} else {
 					IntervalFormatter.format(weekInterval.getStart, weekInterval.getEnd, includeTime = false, includeDays = false)
 				}
 
-				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
+				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description, shortDescription)
 		}
 
 		// could use Jackson to map these objects but it doesn't seem worth it
 		"[" + weekDescriptions.map {
-			case (start, end, desc) => s"{'start':$start,'end':$end,'desc':'$desc'}"
+			case (start, end, desc, shortDescription) => s"{'start':$start,'end':$end,'desc':'$desc','shortDescription':'$shortDescription'}"
 		}.mkString(",") + "]"
 
 	}
@@ -308,7 +324,7 @@ class WeekRangesDumperTag extends TemplateMethodModelEx with WeekRangesDumper wi
 	def formatWeekName(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 		// use a WeekRangesFormatter to format the week name, obv.
 		val formatter = new WeekRangesFormatter(year)
-		formatter.format(Seq(WeekRange(weekNumber)),DayOfWeek.Monday,numberingSystem)
+		formatter.format(Seq(WeekRange(weekNumber)), DayOfWeek.Monday, numberingSystem)
 	}
 
 	def exec(unused: JList[_]): AnyRef = {
