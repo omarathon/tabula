@@ -36,7 +36,7 @@ case class ExamGridColumnState(
 	entities: Seq[GenerateExamGridEntity],
 	overcatSubsets: Map[GenerateExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]],
 	coreRequiredModules: Seq[Module],
-	normalLoad: Int,
+	normalLoad: BigDecimal,
 	routeRules: Seq[UpstreamRouteRule],
 	yearOfStudy: Int
 )

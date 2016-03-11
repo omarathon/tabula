@@ -83,14 +83,14 @@ class OvercattingOptionsController extends ExamsController with AutowiringModule
 }
 
 object OvercattingOptionsView {
-	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: Int) =
+	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: BigDecimal) =
 		new OvercattingOptionsView(department, academicYear, scyd, normalLoad)
 		with AutowiringModuleRegistrationServiceComponent
 		with GenerateExamGridOvercatCommandState
 		with GenerateExamGridOvercatCommandRequest
 }
 
-class OvercattingOptionsView(val department: Department, val academicYear: AcademicYear, val scyd: StudentCourseYearDetails, val normalLoad: Int) {
+class OvercattingOptionsView(val department: Department, val academicYear: AcademicYear, val scyd: StudentCourseYearDetails, val normalLoad: BigDecimal) {
 
 	self: GenerateExamGridOvercatCommandState with GenerateExamGridOvercatCommandRequest with ModuleRegistrationServiceComponent =>
 

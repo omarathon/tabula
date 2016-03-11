@@ -18,7 +18,7 @@ import scala.collection.JavaConverters._
 object GenerateExamGridOvercatCommand {
 	def overcatIdentifier(modules: Seq[ModuleRegistration]) = modules.map(_.module.code).mkString("-")
 
-	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: Int, user: CurrentUser) =
+	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: BigDecimal, user: CurrentUser) =
 		new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoad, user)
 			with ComposableCommand[Seq[Module]]
 			with AutowiringStudentCourseYearDetailsDaoComponent
@@ -36,7 +36,7 @@ class GenerateExamGridOvercatCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear,
 	val scyd: StudentCourseYearDetails,
-	val normalLoad: Int,
+	val normalLoad: BigDecimal,
 	val user: CurrentUser
 )	extends CommandInternal[Seq[Module]] {
 
@@ -115,7 +115,7 @@ trait GenerateExamGridOvercatCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 	def scyd: StudentCourseYearDetails
-	def normalLoad: Int
+	def normalLoad: BigDecimal
 	def user: CurrentUser
 
 }

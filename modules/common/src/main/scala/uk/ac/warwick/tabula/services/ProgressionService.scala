@@ -72,15 +72,15 @@ object ProgressionService {
 
 trait ProgressionService {
 
-	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: Int): ProgressionResult
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: Int): FinalYearGrade
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): FinalYearGrade
 }
 
 abstract class AbstractProgressionService extends ProgressionService {
 
 	self: ModuleRegistrationServiceComponent with CourseDaoComponent =>
 
-	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: Int): ProgressionResult = {
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		if (scyd.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			ProgressionResult.Unknown(s"No agreed mark or actual mark for modules: ${scyd.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		} else if (scyd.moduleRegistrations.isEmpty) {
@@ -106,7 +106,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
-	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: Int): ProgressionResult = {
+	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.route, scyd.academicYear, scyd.yearOfStudy)
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
@@ -129,7 +129,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ugprogression09/
 		*/
-	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails, normalLoad: Int): ProgressionResult = {
+	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.IntermediateRequiredCredits
 		val overallMarkSatisfied = getYearMark(scyd, normalLoad).map(mark => mark >= ProgressionService.IntermediateYearPassMark)
@@ -148,7 +148,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ug13
 		*/
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: Int): FinalYearGrade = {
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): FinalYearGrade = {
 		if (scyd.isFinalYear) {
 			val finalYearOfStudy = scyd.yearOfStudy.toInt
 			val scydsFromThisAndOlderCourses: Seq[StudentCourseYearDetails] = {
@@ -191,7 +191,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		scyd: StudentCourseYearDetails,
 		scydPerYear: Seq[(Int, Option[StudentCourseYearDetails])],
 		finalYearOfStudy: Int,
-		normalLoad: Int
+		normalLoad: BigDecimal
 	): Seq[(Int, Option[BigDecimal])] = {
 		scydPerYear.map{ case (year, scydOption) =>
 			(year, scydOption.flatMap(thisScyd => {
@@ -204,7 +204,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		}
 	}
 
-	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: Int): Option[BigDecimal] = {
+	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): Option[BigDecimal] = {
 		val weightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, scyd.overcattingMarkOverrides.getOrElse(Map()))
 		val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
 		if (cats > normalLoad) {

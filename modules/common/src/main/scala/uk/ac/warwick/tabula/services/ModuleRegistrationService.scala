@@ -38,7 +38,7 @@ trait ModuleRegistrationService {
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: Int): Seq[(BigDecimal, Seq[ModuleRegistration])]
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])]
 
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
@@ -82,7 +82,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		}
 	}
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: Int): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
 		if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
