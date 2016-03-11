@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumn
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, ExamGridColumnState, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, ModuleRegistrationService, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUpstreamRouteRuleServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleRegistrationService, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
@@ -22,12 +22,19 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/generate/overcatting/{scyd}"))
-class OvercattingOptionsController extends ExamsController with AutowiringModuleRegistrationServiceComponent {
+class OvercattingOptionsController extends ExamsController
+	with AutowiringModuleRegistrationServiceComponent with AutowiringUpstreamRouteRuleServiceComponent {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("GenerateExamGridMappingParameters")
 	def params = GenerateExamGridMappingParameters
+
+	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
+		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy).getOrElse(
+			ModuleRegistrationService.DefaultNormalLoad
+		)
+	}
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
@@ -35,13 +42,13 @@ class OvercattingOptionsController extends ExamsController with AutowiringModule
 			mandatory(department),
 			mandatory(academicYear),
 			mandatory(scyd),
-			ModuleRegistrationService.DefaultNormalLoad, // TODO Check the URRs for the normal load
+			normalLoad(scyd, academicYear),
 			user
 		)
 
 	@ModelAttribute("overcatView")
 	def overcatView(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
-		OvercattingOptionsView(department, academicYear, scyd, ModuleRegistrationService.DefaultNormalLoad) // TODO Check the URRs for the normal load
+		OvercattingOptionsView(department, academicYear, scyd, normalLoad(scyd, academicYear))
 
 	@RequestMapping(method = Array(GET))
 	def form(
