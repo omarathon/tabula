@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.exams.grids.columns
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UpstreamRouteRule, Module}
 import uk.ac.warwick.tabula.exams.grids.columns
 
 object ExamGridColumnOption {
@@ -31,17 +32,30 @@ object ExamGridColumnOption {
 	}
 }
 
+case class ExamGridColumnState(
+	entities: Seq[GenerateExamGridEntity],
+	overcatSubsets: Map[GenerateExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]],
+	coreRequiredModules: Seq[Module],
+	normalLoad: Int,
+	routeRules: Seq[UpstreamRouteRule],
+	yearOfStudy: Int
+)
+
+case object EmptyExamGridColumnState {
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,0)
+}
+
 @Component
 trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
 	val sortOrder: Int
 	val mandatory: Boolean = false
-	def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
+	def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn]
 
 }
 
-abstract class ExamGridColumn(entities: Seq[GenerateExamGridEntity]) {
+abstract class ExamGridColumn(state: ExamGridColumnState) {
 
 	val title: String
 	def render: Map[String, String]
@@ -89,13 +103,13 @@ object BlankColumnOption extends columns.ExamGridColumnOption {
 
 	override val sortOrder: Int = Int.MaxValue
 
-	case class Column(entities: Seq[GenerateExamGridEntity], override val title: String)
-		extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState, override val title: String)
+		extends ExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val category: String = "Additional"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> "").toMap
+			state.entities.map(entity => entity.id -> "").toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -108,8 +122,8 @@ object BlankColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = throw new UnsupportedOperationException
 
-	def getColumn(title: String): Seq[ExamGridColumn] = Seq(Column(Nil, title))
+	def getColumn(title: String): Seq[ExamGridColumn] = Seq(Column(EmptyExamGridColumnState(), title))
 
 }

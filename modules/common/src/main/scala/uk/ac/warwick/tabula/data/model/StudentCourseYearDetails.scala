@@ -194,7 +194,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
 		studentCourseDetails.student.universityId,
 		moduleRegistrations,
-		normalCATLoad,
+		moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
 		overcattingModules,
 		overcattingMarkOverrides,
 		Some(this)
@@ -223,13 +223,6 @@ trait BasicStudentCourseYearProperties {
 	@Column(name="tier4visa")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4Visa: JBoolean = _
-
-	/**
-		* Used for determining if the student has over-catted for this course.
-		* Really this should come from SITS, but until that data actually exists, let's just arbitrarily set it to 120
-		*/
-	@transient
-	var normalCATLoad: Int = 120
 
 	var agreedMark: JBigDecimal = null
 

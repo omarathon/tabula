@@ -3,19 +3,11 @@ package uk.ac.warwick.tabula.exams.grids.columns.marking
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, ExamGridColumnState, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
-trait YearColumnOption extends columns.ExamGridColumnOption {
-
-	final override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-	def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
-
-}
-
 @Component
-class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModuleRegistrationServiceComponent {
+class CurrentYearMarkColumnOption extends ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "currentyear"
 
@@ -23,14 +15,14 @@ class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModule
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity], yearOfStudy: Int) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = "Weighted Mean Module Mark"
 
-		override val category: String = s"Year $yearOfStudy Marks"
+		override val category: String = s"Year ${state.yearOfStudy} Marks"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
+			state.entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -50,7 +42,7 @@ class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModule
 				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
 			} else {
 				val cats = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-				if (cats > entity.normalCATLoad && moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1 && entity.overcattingModules.isEmpty) {
+				if (cats > state.normalLoad && state.overcatSubsets(entity).size > 1 && entity.overcattingModules.isEmpty) {
 					// If the student has overcatted, has more than one valid overcat subset, and a subset has not been chosen for the overcatted mark, don't show anything
 					None
 				} else {
@@ -61,7 +53,6 @@ class CurrentYearMarkColumnOption extends YearColumnOption with AutowiringModule
 
 	}
 
-	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
-		Seq(Column(entities, yearOfStudy))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
 
 }
