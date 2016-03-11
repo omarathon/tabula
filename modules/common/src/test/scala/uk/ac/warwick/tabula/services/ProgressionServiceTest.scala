@@ -308,7 +308,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				agreedMark = BigDecimal(50)
 			)
 			student.mostSignificantCourse.addModuleRegistration(mr3)
-			service.moduleRegistrationService.overcattedModuleSubsets(any[GenerateExamGridEntity], any[Map[Module, BigDecimal]], Matchers.eq(180)) returns Seq(
+			service.moduleRegistrationService.overcattedModuleSubsets(any[GenerateExamGridEntity], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180))) returns Seq(
 				(BigDecimal(90.0), Seq(mr1, mr2)),
 				(BigDecimal(90.0), Seq(mr1, mr3))
 			) // Two subsets
@@ -328,7 +328,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				agreedMark = BigDecimal(50)
 			)
 			student.mostSignificantCourse.addModuleRegistration(mr3)
-			service.moduleRegistrationService.overcattedModuleSubsets(any[GenerateExamGridEntity], any[Map[Module, BigDecimal]], Matchers.eq(180)) returns Seq(
+			service.moduleRegistrationService.overcattedModuleSubsets(any[GenerateExamGridEntity], any[Map[Module, BigDecimal]], Matchers.eq(BigDecimal(180))) returns Seq(
 				(BigDecimal(90.0), Seq(mr1, mr2)),
 				(BigDecimal(90.0), Seq(mr1, mr3))
 			) // Two subsets
