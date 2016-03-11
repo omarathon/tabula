@@ -2,11 +2,10 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.data.model.{ModuleRegistration, Module, ModuleSelectionStatus}
-import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus}
+import uk.ac.warwick.tabula.exams.grids.columns._
 
 trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 
@@ -22,15 +21,15 @@ trait ModulesExamGridColumnSection extends HasExamGridColumnSection {
 
 }
 
-abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal)
-	extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+abstract class ModuleExamGridColumn(state: ExamGridColumnState, module: Module, cats: JBigDecimal)
+	extends ExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
 	override val title: String = s"${module.code.toUpperCase} ${module.name}"
 
 	override def render: Map[String, String] =
-		entities.map(entity => entity.id -> {
+		state.entities.map(entity => entity.id -> {
 			getModuleRegistration(entity).map(mr => {
 				val (mark, isAgreedMark) = markWithOverride(entity, mr)
 				if (mark != null) {
@@ -117,15 +116,8 @@ abstract class ModuleExamGridColumn(entities: Seq[GenerateExamGridEntity], modul
 
 }
 
-trait ModulesColumnOption extends columns.ExamGridColumnOption {
-
-	final override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-	def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn]
-
-}
-
 @Component
-class CoreModulesColumnOption extends ModulesColumnOption {
+class CoreModulesColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "core"
 
@@ -133,7 +125,7 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
 
 		override val category: String = "Core Modules"
 
@@ -141,24 +133,24 @@ class CoreModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
-		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !coreRequiredModules.contains(mr.module))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =
+		state.entities.flatMap(_.moduleRegistrations)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Core && !state.coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(entities, module, cats)}
+			.map{case(module, cats) => Column(state, module, cats)}
 
 }
 
 @Component
-class CoreRequiredModulesColumnOption extends ModulesColumnOption {
+class CoreRequiredModulesColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "corerequired"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreRequiredModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
 
 		override val category: String = "Core Required Modules"
 
@@ -166,24 +158,24 @@ class CoreRequiredModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
-		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => coreRequiredModules.contains(mr.module))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =
+		state.entities.flatMap(_.moduleRegistrations)
+			.filter(mr => state.coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(entities, module, cats)}
+			.map{case(module, cats) => Column(state, module, cats)}
 
 }
 
 @Component
-class CoreOptionalModulesColumnOption extends ModulesColumnOption {
+class CoreOptionalModulesColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "coreoptional"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.CoreOptionalModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
 
 		override val category: String = "Core Optional Modules"
 
@@ -191,24 +183,24 @@ class CoreOptionalModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
-		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !coreRequiredModules.contains(mr.module))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =
+		state.entities.flatMap(_.moduleRegistrations)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.OptionalCore && !state.coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(entities, module, cats)}
+			.map{case(module, cats) => Column(state, module, cats)}
 
 }
 
 @Component
-class OptionalModulesColumnOption extends ModulesColumnOption {
+class OptionalModulesColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "optional"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OptionalModules
 
-	case class Column(entities: Seq[GenerateExamGridEntity], module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(entities, module, cats) {
+	case class Column(state: ExamGridColumnState, module: Module, cats: JBigDecimal) extends ModuleExamGridColumn(state, module, cats) {
 
 		override val category: String = "Optional Modules"
 
@@ -216,12 +208,12 @@ class OptionalModulesColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =
-		entities.flatMap(_.moduleRegistrations)
-			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !coreRequiredModules.contains(mr.module))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =
+		state.entities.flatMap(_.moduleRegistrations)
+			.filter(mr => mr.selectionStatus == ModuleSelectionStatus.Option && !state.coreRequiredModules.contains(mr.module))
 			.groupBy(mr => (mr.module, mr.cats))
 			.keySet
 			.toSeq.sortBy(mrc => (mrc._1, mrc._2))
-			.map{case(module, cats) => Column(entities, module, cats)}
+			.map{case(module, cats) => Column(state, module, cats)}
 
 }

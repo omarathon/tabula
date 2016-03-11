@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnState, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class PreviousYearMarksColumnOption extends YearColumnOption with AutowiringModuleRegistrationServiceComponent {
+class PreviousYearMarksColumnOption extends ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "previous"
 
@@ -17,14 +17,14 @@ class PreviousYearMarksColumnOption extends YearColumnOption with AutowiringModu
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity], yearOfStudy: Int) extends ExamGridColumn(entities) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState, thisYearOfStudy: Int) extends ExamGridColumn(state) with HasExamGridColumnCategory {
 
-		override val title: String = s"Year $yearOfStudy"
+		override val title: String = s"Year $thisYearOfStudy"
 
 		override val category: String = "Previous Year Marks"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
+			state.entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -43,16 +43,16 @@ class PreviousYearMarksColumnOption extends YearColumnOption with AutowiringModu
 				val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
 				scds.flatMap(_.freshStudentCourseYearDetails)
 			}).getOrElse(Seq())
-			val scydsForThisYear = scydsFromThisAndOlderCourses.filter(scyd => scyd.yearOfStudy.toInt == yearOfStudy)
+			val scydsForThisYear = scydsFromThisAndOlderCourses.filter(scyd => scyd.yearOfStudy.toInt == thisYearOfStudy)
 			val latestSCYDForThisYear = scydsForThisYear.lastOption // SCDs and SCYDs are sorted collections
 			latestSCYDForThisYear.flatMap(scyd => Option(scyd.agreedMark).map(mark => BigDecimal(mark)))
 		}
 
 	}
 
-	override def getColumns(yearOfStudy: Int, entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] =	{
-		val requiredYears = 1 until yearOfStudy
-		requiredYears.map(year => Column(entities, year))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =	{
+		val requiredYears = 1 until state.yearOfStudy
+		requiredYears.map(year => Column(state, year))
 	}
 
 }

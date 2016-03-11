@@ -9,6 +9,10 @@ import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, Modu
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import scala.math.BigDecimal.RoundingMode
 
+object ModuleRegistrationService {
+	final val DefaultNormalLoad = 120
+}
+
 trait ModuleRegistrationService {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
@@ -34,7 +38,7 @@ trait ModuleRegistrationService {
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])]
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])]
 
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
@@ -78,7 +82,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		}
 	}
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
 		if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
@@ -88,7 +92,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 			val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
-				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
+				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
 					// Contains all the core and optional core modules
 					coreAndOptionalCoreModules.forall(modRegs.contains) &&
 					// All the registrations have agreed or actual marks

@@ -4,7 +4,7 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, ExamGridColumnState}
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
@@ -16,15 +16,13 @@ class PotentialMarkingOptionsColumnOption extends columns.ExamGridColumnOption w
 
 	override val mandatory = true
 
-	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) {
 
 		override val title: String = "Potential marking options"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> {
-				val hasOvercatted = entity.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum > entity.normalCATLoad
-				val hasMoreThanOneSubset = moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map())).size > 1
-				if (hasOvercatted && hasMoreThanOneSubset) {
+			state.entities.map(entity => entity.id -> {
+				if (entity.cats > state.normalLoad && state.overcatSubsets(entity).size > 1) {
 					"<button class=\"btn btn-default edit-overcatting\" type=\"button\" data-student=\"%s\">Edit</button>".format(entity.id)
 				} else {
 					""
@@ -42,6 +40,6 @@ class PotentialMarkingOptionsColumnOption extends columns.ExamGridColumnOption w
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
 
 }

@@ -10,23 +10,23 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids._
-import uk.ac.warwick.tabula.commands.{FilterStudentsOrRelationships, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, FilterStudentsOrRelationships, SelfValidating}
 import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns.marking.YearColumnOption
-import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleReportsColumnOption, CoreRequiredModulesColumnOption, ModulesColumnOption}
-import uk.ac.warwick.tabula.exams.grids.columns.{BlankColumnOption, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleReportsColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -304,15 +304,19 @@ class GenerateExamGridController extends ExamsController
 		val gridOptions = gridOptionsCommand.apply()
 		val predefinedColumnIDs = gridOptions._1
 		val customColumnTitles = gridOptions._2
+		val normalLoad = ModuleRegistrationService.DefaultNormalLoad // TODO Check the URRs for the normal load
+		val state = ExamGridColumnState(
+			entities = entities,
+			overcatSubsets = entities.filter(_.cats > ModuleRegistrationService.DefaultNormalLoad).map(entity => entity ->
+				moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map()), normalLoad)
+			).toMap,
+			coreRequiredModules = coreRequiredModules.map(_.module),
+			normalLoad = normalLoad,
+			routeRules = Seq(), // TODO Fetch the URRs
+			yearOfStudy = selectCourseCommand.yearOfStudy
+		)
 
-		val predefinedColumns = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier)).flatMap{
-			case modulesColumn: ModulesColumnOption =>
-				modulesColumn.getColumns(coreRequiredModules.map(_.module), entities)
-			case yearColumn: YearColumnOption =>
-				yearColumn.getColumns(selectCourseCommand.yearOfStudy, entities)
-			case column =>
-				column.getColumns(entities)
-		}
+		val predefinedColumns = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier)).flatMap(_.getColumns(state))
 		val customColumns = customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val columns = predefinedColumns ++ customColumns
 

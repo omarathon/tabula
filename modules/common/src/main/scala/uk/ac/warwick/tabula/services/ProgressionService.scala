@@ -72,23 +72,23 @@ object ProgressionService {
 
 trait ProgressionService {
 
-	def suggestedResult(scyd: StudentCourseYearDetails): ProgressionResult
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails): FinalYearGrade
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): FinalYearGrade
 }
 
 abstract class AbstractProgressionService extends ProgressionService {
 
 	self: ModuleRegistrationServiceComponent with CourseDaoComponent =>
 
-	def suggestedResult(scyd: StudentCourseYearDetails): ProgressionResult = {
+	def suggestedResult(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		if (scyd.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			ProgressionResult.Unknown(s"No agreed mark or actual mark for modules: ${scyd.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		} else if (scyd.moduleRegistrations.isEmpty) {
 				ProgressionResult.Unknown(s"No module registrations found for ${scyd.studentCourseDetails.scjCode} ${scyd.academicYear.toString}")
 		} else if (scyd.yearOfStudy.toInt == 1) {
-			suggestedResultFirstYear(scyd)
+			suggestedResultFirstYear(scyd, normalLoad)
 		} else if (scyd.isFinalYear) {
-			val sfyg = suggestedFinalYearGrade(scyd)
+			val sfyg = suggestedFinalYearGrade(scyd, normalLoad)
 			if (sfyg == FinalYearGrade.Fail) {
 				ProgressionResult.Resit
 			} else {
@@ -98,7 +98,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 				}
 			}
 		} else {
-			suggestedResultIntermediateYear(scyd)
+			suggestedResultIntermediateYear(scyd, normalLoad)
 		}
 
 	}
@@ -106,12 +106,12 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
-	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails): ProgressionResult = {
+	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.route, scyd.academicYear, scyd.yearOfStudy)
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
-		val overallMarkSatisfied = getYearMark(scyd).map(mark => mark >= ProgressionService.FirstYearPassMark)
+		val overallMarkSatisfied = getYearMark(scyd, normalLoad).map(mark => mark >= ProgressionService.FirstYearPassMark)
 
 		if (overallMarkSatisfied.isEmpty) {
 			ProgressionResult.Unknown("Over Catted Mark not yet chosen")
@@ -129,10 +129,10 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ugprogression09/
 		*/
-	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails): ProgressionResult = {
+	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.IntermediateRequiredCredits
-		val overallMarkSatisfied = getYearMark(scyd).map(mark => mark >= ProgressionService.IntermediateYearPassMark)
+		val overallMarkSatisfied = getYearMark(scyd, normalLoad).map(mark => mark >= ProgressionService.IntermediateYearPassMark)
 
 		if (overallMarkSatisfied.isEmpty) {
 			ProgressionResult.Unknown("Over Catted Mark not yet chosen")
@@ -148,7 +148,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 	/**
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/ug13
 		*/
-	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails): FinalYearGrade = {
+	def suggestedFinalYearGrade(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): FinalYearGrade = {
 		if (scyd.isFinalYear) {
 			val finalYearOfStudy = scyd.yearOfStudy.toInt
 			val scydsFromThisAndOlderCourses: Seq[StudentCourseYearDetails] = {
@@ -164,7 +164,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 					(year, Option(scyd))
 				}
 			})
-			lazy val markPerYear: Seq[(Int, Option[BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy)
+			lazy val markPerYear: Seq[(Int, Option[BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad)
 			lazy val yearWeightings: Seq[(Int, Option[CourseYearWeighting])] = markPerYear.map { case (year, _) =>
 				(year, courseDao.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.academicYear, year))
 			}
@@ -187,23 +187,28 @@ abstract class AbstractProgressionService extends ProgressionService {
 		}
 	}
 
-	private def getMarkPerYear(scyd: StudentCourseYearDetails, scydPerYear: Seq[(Int, Option[StudentCourseYearDetails])], finalYearOfStudy: Int): Seq[(Int, Option[BigDecimal])] = {
+	private def getMarkPerYear(
+		scyd: StudentCourseYearDetails,
+		scydPerYear: Seq[(Int, Option[StudentCourseYearDetails])],
+		finalYearOfStudy: Int,
+		normalLoad: BigDecimal
+	): Seq[(Int, Option[BigDecimal])] = {
 		scydPerYear.map{ case (year, scydOption) =>
 			(year, scydOption.flatMap(thisScyd => {
 				if (year != finalYearOfStudy) {
 					Option(thisScyd.agreedMark).map(mark => BigDecimal(mark))
 				} else {
-					getYearMark(scyd)
+					getYearMark(scyd, normalLoad)
 				}
 			}))
 		}
 	}
 
-	private def getYearMark(scyd: StudentCourseYearDetails): Option[BigDecimal] = {
+	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): Option[BigDecimal] = {
 		val weightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, scyd.overcattingMarkOverrides.getOrElse(Map()))
 		val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-		if (cats > scyd.normalCATLoad) {
-			if (moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(None), scyd.overcattingMarkOverrides.getOrElse(Map())).size <= 1) {
+		if (cats > normalLoad) {
+			if (moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(None), scyd.overcattingMarkOverrides.getOrElse(Map()), normalLoad).size <= 1) {
 				// If the student has overcatted, but there's only one valid subset, just choose the mean mark
 				weightedMeanMark
 			} else if (scyd.overcattingModules.isDefined) {
