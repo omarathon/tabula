@@ -241,6 +241,11 @@ trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
 	var academicYear: AcademicYear = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "routeCode", referencedColumnName="code")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var route: Route = _
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var enrolmentStatus: SitsStatus = _

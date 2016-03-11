@@ -20,6 +20,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
 	var profileService = Wire[ProfileService]
 	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
+	var courseAndRouteService = Wire[CourseAndRouteService]
 
 	val sceSequenceNumber = row.sceSequenceNumber
 
@@ -68,6 +69,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
 		copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, toDepartment(row.enrolmentDepartmentCode)) |
 		copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
+		copyObjectProperty("route", row.routeCode, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.routeCode)) |
 		copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
 		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
 		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |
