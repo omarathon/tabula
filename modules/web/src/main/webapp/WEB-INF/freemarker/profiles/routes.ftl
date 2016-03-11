@@ -22,6 +22,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro filter_students department><@_u page="/department/${department.code}/students" /></#macro>
 <#macro department_timetables department><@_u page="/department/${department.code}/timetables" /></#macro>
+<#macro draft_department_timetables department academicYear endpoint><@_u page="/department/${department.code}/timetables/drafts/${academicYear.startYear?c}/${endpoint}" /></#macro>
 
 <#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>
 <#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
@@ -114,3 +115,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	</#if>
 	<@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/export${filterString}"/>
 </#macro>
+<#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>

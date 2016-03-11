@@ -188,7 +188,26 @@
 						<span class="muted">(you)</span>
 					<#else>
 						<#if agent.email??>
-							<p><i class="icon-envelope-alt"></i> <a href="mailto:${agent.email}">${agent.email}</a></p>
+							<p><i class="icon-envelope-alt"></i> <a href="mailto:${agent.email}">${agent.email}</a> <br/>
+								<#local ajaxTargetUrl><@routes.profiles.peoplesearchData agent /></#local>
+								<span class="pull-left ajaxPeoplesearchContents">
+									<script>
+										jQuery(function($) {
+											$.getJSON('${ajaxTargetUrl}', function(data) {
+												var extension = '';
+												var room = '';
+												if (data.extensionNumberWithExternal) {
+													extension = 'Phone: ' + data.extensionNumberWithExternal + '<br/>'
+												}
+												if (data.room) {
+													room = 'Room: ' + data.room
+												}
+												$('.ajaxPeoplesearchContents').html(extension + room);
+											});
+										});
+									</script>
+    							</span>
+							</p>
 						</#if>
 					</#if>
 				</#if>

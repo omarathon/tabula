@@ -35,7 +35,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> info.smallGroups,
 				"adminDepartments" -> info.adminDepartments,
-				"searchDepartments" -> departmentService.departmentsWithPermission(user, Permissions.Profiles.Search)
+				"searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map { _.homeDepartment }.toSet)
 			)
 		}
 	}

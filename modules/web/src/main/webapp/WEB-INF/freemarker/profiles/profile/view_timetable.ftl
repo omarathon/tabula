@@ -1,6 +1,10 @@
 <#import "profile_macros.ftl" as profile_macros />
 <#escape x as x?html>
 <div id="timetable-pane">
+	<div class="pull-right">
+		<a href="<@routes.profiles.department_timetables profile.homeDepartment />">View timetables for ${profile.homeDepartment.name}</a>
+	</div>
+
 	<h4>
 		Timetable
 		<#if profile.timetableHash?has_content && can.do("Profiles.Read.TimetablePrivateFeed", profile)>

@@ -38,6 +38,12 @@ class TurnitinLtiServiceTest extends TestBase {
 		TurnitinLtiService.classNameFor(assignment).value should be("AB101 - First year module")
 	}}
 
+	@Test def generatedLongClassName() { new Fixture {
+		module.code = "ab102"
+		module.name = "First year module with a very very long module name that exceeds Turnitin's maximum of 100 characters"
+		TurnitinLtiService.classNameFor(assignment).value should be("AB102 - First year module with a very very long module name that exceeds Turnitin's maximum of 100 ")
+	}}
+
 	@Test def generatedAssignmentName() { new Fixture {
 		TurnitinLtiService.assignmentNameFor(assignment).value should be("12345 (14/15) 1500 word assignment")
 	}}

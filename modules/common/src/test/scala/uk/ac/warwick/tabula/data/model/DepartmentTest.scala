@@ -57,6 +57,8 @@ class DepartmentTest extends TestBase with Mockito {
 		department.turnitinSmallMatchWordLimit should be (50)
     department.defaultGroupAllocationMethod should be (StudentSignUp)
 		department.autoGroupDeregistration should be {false}
+		department.autoMarkMissedMonitoringPoints should be {false}
+
 	}
 
 	@Test def groups() {

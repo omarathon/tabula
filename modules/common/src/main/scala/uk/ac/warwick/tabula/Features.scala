@@ -132,10 +132,14 @@ abstract class Features {
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
-	@Value("${features.scheduling.objectStorageMigration:true}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
+
+	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
 
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -254,12 +258,17 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
 	@BeanProperty var schedulingTriggers = true
-	@BeanProperty var schedulingObjectStorageMigration = true
+	@BeanProperty var schedulingObjectStorageMigration = false
+	@BeanProperty var schedulingProcessNotificationListeners = true
+
+	@BeanProperty var startNotificationListener = false
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = false
 
 	@BeanProperty var reports = true
+
+	@BeanProperty var autoMarkMissedMonitoringPoints = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
