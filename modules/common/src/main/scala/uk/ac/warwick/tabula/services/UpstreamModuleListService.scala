@@ -11,6 +11,7 @@ trait UpstreamModuleListService {
 	def saveOrUpdate(list: UpstreamModuleList): Unit
 	def countAllModuleLists: Int
 	def listModuleLists(start: Int, limit: Int): Seq[UpstreamModuleList]
+	def findByCodes(codes: Seq[String]): Seq[UpstreamModuleList]
 
 }
 
@@ -29,6 +30,9 @@ abstract class AbstractUpstreamModuleListService extends UpstreamModuleListServi
 
 	def listModuleLists(start: Int, limit: Int): Seq[UpstreamModuleList] =
 		upstreamModuleListDao.listModuleLists(start, limit)
+
+	def findByCodes(codes: Seq[String]): Seq[UpstreamModuleList] =
+		upstreamModuleListDao.findByCodes(codes)
 
 }
 
