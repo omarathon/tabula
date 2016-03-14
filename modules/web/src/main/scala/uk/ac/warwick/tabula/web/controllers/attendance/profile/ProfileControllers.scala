@@ -34,7 +34,12 @@ class ProfileChooseYearController extends AttendanceController {
 
 	@RequestMapping
 	def render(@PathVariable student: StudentMember) =
-		Mav("attendance/profile/years").noLayoutIf(ajax)
+		Mav("attendance/profile/years",
+			"years" ->
+				student.freshOrStaleStudentCourseDetails
+					.flatMap(_.freshOrStaleStudentCourseYearDetails)
+					.map(_.academicYear.startYear)
+		).noLayoutIf(ajax)
 }
 
 @Controller

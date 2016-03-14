@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import uk.ac.warwick.util.cache.{CacheEntryUpdateException, CacheEntryFactory, Caches}
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Futures._
-import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
+import uk.ac.warwick.util.cache.{CacheEntryFactory, CacheEntryUpdateException, Caches}
 
-import scala.concurrent.{Future, Await}
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
-import scala.util.{Try, Success, Failure}
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success, Try}
 
 /**
  * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in a
@@ -22,27 +21,10 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 	val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
 	val FetchTimeout = 15.seconds
 
-	/**
-	 * Yukkiness Ahead.
-	 *
-	 * Caches requre their payload to be serializable, but Scala's Seq trait isn't marked as serializable. Most of
-	 * the Seq implementations (Vector and LinkedList in particular, which are the defaults returned by Seq() and List() )
-	 * _are_ serializable, so it should be safe to match the Seqs to "Seq with Serializable" and assume it will never fail.
-	 */
-	type EventList = Seq[TimetableEvent] with java.io.Serializable
-
 	val cacheEntryFactory = new CacheEntryFactory[TimetableCacheKey, EventList] {
 
-		private def toEventList(events: Seq[TimetableEvent]): EventList = {
-			events match {
-				// can't use "case v: EventList" because the type inference engine in 2.10 can't cope.
-				case v: Seq[TimetableEvent] with java.io.Serializable => v
-				case _ => throw new RuntimeException("Unserializable collection returned from TimetableFetchingService")
-			}
-		}
-
 		def create(key:TimetableCacheKey): EventList = {
-			val result = (key match {
+			val result = key match {
 				case StudentKey(id) => delegate match {
 					case delegate: StudentTimetableFetchingService => delegate.getTimetableForStudent(id)
 					case _ => throw new UnsupportedOperationException("Delegate does not support fetching student timetables")
@@ -63,7 +45,7 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 					case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id)
 					case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
 				}
-			}).map(toEventList)
+			}
 
 			Try(Await.result(result, FetchTimeout)) match {
 				case Success(ev) => ev

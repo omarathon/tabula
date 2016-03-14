@@ -44,8 +44,8 @@ class DepartmentTimetablesController extends ProfilesController
 		@PathVariable department: Department
 	) = {
 		val result = cmd.apply()
-		val calendarEvents = FullCalendarEvent.colourEvents(result._1.map(FullCalendarEvent(_, userLookup)))
-		Mav(new JSONView(Map("events" -> calendarEvents, "errors" -> result._2)))
+		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
+		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))
 	}
 
 }

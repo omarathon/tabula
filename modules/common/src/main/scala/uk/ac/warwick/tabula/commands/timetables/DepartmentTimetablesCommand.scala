@@ -6,9 +6,10 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventOccurrenceList, EventList}
 import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.TimetableEventType
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
@@ -23,7 +24,7 @@ object DepartmentTimetablesCommand {
 	val FilterStudentPermission = ViewMemberEventsCommand.RequiredPermission
 	val FilterStaffPermission = ViewMemberEventsCommand.RequiredPermission
 
-	private[timetables] type ReturnType = (Seq[EventOccurrence], Seq[String])
+	private[timetables] type ReturnType = (EventOccurrenceList, Seq[String])
 	type CommandType = Appliable[ReturnType]
 
 	def apply(
@@ -107,48 +108,48 @@ class DepartmentTimetablesCommandInternal(
 		}
 
 		val moduleCommands = queryModules.map(module => module -> moduleTimetableCommandFactory.apply(module))
-		val moduleEvents = moduleCommands.flatMap { case (module, cmd) =>
+		val moduleEvents = EventList.combine(moduleCommands.map { case (module, cmd) =>
 			cmd.academicYear = academicYear
 			cmd.apply() match {
 				case Success(events) =>
 					events
 				case Failure(t) =>
 					errors.append(s"Unable to load timetable for ${module.code.toUpperCase}")
-					Seq()
+					EventList.empty
 			}
-		}.distinct
+		}).map(_.distinct)
 
 		errors.appendAll(students.asScala.filter(student => !studentMembers.exists(_.universityId == student)).map(student =>
 			s"Could not find a student with a University ID of $student"
 		))
 		val studentCommands = studentMembers.map(student => student -> studentPersonalTimetableCommandFactory.apply(student))
-		val studentEvents = studentCommands.flatMap { case (student, cmd) =>
+		val studentEvents = EventOccurrenceList.combine(studentCommands.map { case (student, cmd) =>
 			if (securityService.can(user, FilterStudentPermission, student)) {
 				cmd.from = start
 				cmd.to = end
-				cmd.apply().toOption
+				cmd.apply().getOrElse(EventOccurrenceList.empty)
 			} else {
 				errors.append(s"You do not have permission to view the timetable of ${student.fullName.getOrElse("")} (${student.universityId})")
-				None
+				EventOccurrenceList.fresh(Nil)
 			}
-		}.flatten.distinct
+		}).map(_.distinct)
 
 		errors.appendAll(staff.asScala.filter(staffMember => !staffMembers.exists(_.universityId == staffMember)).map(staffMember =>
 			s"Could not find a student with a University ID of $staffMember"
 		))
 		val staffCommands = staffMembers.map(staffMember => staffMember -> staffPersonalTimetableCommandFactory.apply(staffMember))
-		val staffEvents = staffCommands.flatMap { case (staffMember, cmd) =>
+		val staffEvents = EventOccurrenceList.combine(staffCommands.map { case (staffMember, cmd) =>
 			if (securityService.can(user, FilterStaffPermission, staffMember)) {
 				cmd.from = start
 				cmd.to = end
-				cmd.apply().toOption
+				cmd.apply().getOrElse(EventOccurrenceList.empty)
 			} else {
 				errors.append(s"You do not have permission to view the timetable of ${staffMember.fullName.getOrElse("")} (${staffMember.universityId})")
-				None
+				EventOccurrenceList.fresh(Nil)
 			}
-		}.flatten.distinct
+		}).map(_.distinct)
 
-		val occurrences = moduleEvents.flatMap(eventsToOccurrences) ++ studentEvents ++ staffEvents
+		val occurrences = eventsToOccurrences(moduleEvents) ++ studentEvents ++ staffEvents
 
 		val filtered =
 			if (eventTypes.asScala.isEmpty) occurrences
@@ -156,11 +157,13 @@ class DepartmentTimetablesCommandInternal(
 
 		// Converter to make localDates sortable
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		(filtered.sortBy(_.start), errors.toSeq)
+		(filtered.map(_.sortBy(_.start)), errors.toSeq)
 	}
 
-	private def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
-		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
+	private def eventsToOccurrences(events: EventList) = EventOccurrenceList(
+		events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))),
+		events.lastUpdated
+	)
 
 }
 

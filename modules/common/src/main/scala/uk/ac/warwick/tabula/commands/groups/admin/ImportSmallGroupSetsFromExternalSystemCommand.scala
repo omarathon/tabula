@@ -11,11 +11,10 @@ import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromExtern
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.timetables.{TimetableEmptyException, AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService, TimetableEmptyException}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
@@ -88,6 +87,7 @@ trait LookupEventsFromModuleTimetables {
 		modules.toSeq.par.flatMap { module => // Do it in parallel like a boss
 			Try {
 				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+					.events
 					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 					.groupBy { _.eventType }
 					.toSeq.map { case (eventType, events) =>

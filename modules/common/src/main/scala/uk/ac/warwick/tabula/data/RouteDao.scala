@@ -19,6 +19,7 @@ trait RouteDao {
 	def allRoutes: Seq[Route]
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
+	def getAllByCodes(codes: Seq[String]): Seq[Route]
 	def getById(id: String): Option[Route]
 	def findByDepartment(department:Department):Seq[Route]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
@@ -41,6 +42,10 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def getByCode(code: String) =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
+
+	def getAllByCodes(codes: Seq[String]): Seq[Route] = {
+		safeInSeq(() => { session.newCriteria[Route] }, "code", codes)
+	}
 
 	def getById(id: String) = getById[Route](id)
 

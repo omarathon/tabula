@@ -3,20 +3,19 @@ package uk.ac.warwick.tabula.exams.grids.columns.modules
 import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory, HasExamGridColumnSecondaryValue}
+import uk.ac.warwick.tabula.exams.grids.columns._
 
 import scala.math.BigDecimal.RoundingMode
 
 @Component
-class ModuleReportsColumnOption extends ModulesColumnOption {
+class ModuleReportsColumnOption extends ExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "modulereports"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.ModuleReports
 
-	case class PassedCoreRequiredColumn(entities: Seq[GenerateExamGridEntity], coreRequiredModules: Seq[Module])
-		extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+	case class PassedCoreRequiredColumn(state: ExamGridColumnState)
+		extends ExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 		override val category: String = "Modules Report"
 
@@ -25,7 +24,7 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		override val renderSecondaryValue: String = ""
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> getValue(entity)).toMap
+			state.entities.map(entity => entity.id -> getValue(entity)).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -38,8 +37,8 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		}
 
 		private def getValue(entity: GenerateExamGridEntity): String = {
-			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => coreRequiredModules.contains(mr.module))
-			if (coreRequiredModules.nonEmpty) {
+			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => state.coreRequiredModules.contains(mr.module))
+			if (state.coreRequiredModules.nonEmpty) {
 				if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
 					"N"
 				} else {
@@ -52,8 +51,8 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 
 	}
 
-	case class MeanModuleMarkColumn(entities: Seq[GenerateExamGridEntity])
-		extends ExamGridColumn(entities) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+	case class MeanModuleMarkColumn(state: ExamGridColumnState)
+		extends ExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
 
 		override val category: String = "Modules Report"
 
@@ -62,7 +61,7 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 		override val renderSecondaryValue: String = ""
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> {
+			state.entities.map(entity => entity.id -> {
 				val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
 				if (entityMarks.nonEmpty) {
 					(entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString
@@ -88,8 +87,8 @@ class ModuleReportsColumnOption extends ModulesColumnOption {
 
 	}
 
-	override def getColumns(coreRequiredModules: Seq[Module], entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(
-		PassedCoreRequiredColumn(entities, coreRequiredModules),
-		MeanModuleMarkColumn(entities)
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(
+		PassedCoreRequiredColumn(state),
+		MeanModuleMarkColumn(state)
 	)
 }

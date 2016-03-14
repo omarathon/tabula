@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Location, Module, NamedLocation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
@@ -139,7 +140,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 			year = AcademicYear(2012)
 		)
 
-		timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(Seq(
+		timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
 			tEventSeminar1, tEventSeminar2,
 			TimetableEvent(
 				uid="uuid3",
@@ -158,7 +159,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 				students=Nil,
 				year = AcademicYear(2012)
 			)
-		))
+		)))
 	}
 
 	@Test def init() { new FixtureWithSingleSeminarForYear with CommandFixture {

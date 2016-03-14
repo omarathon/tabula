@@ -114,6 +114,8 @@ abstract class Features {
 	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
+	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
@@ -132,11 +134,13 @@ abstract class Features {
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
-	@Value("${features.scheduling.objectStorageMigration:true}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport = defaults.schedulingModuleListsImport
+	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
+
 
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
-	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -217,6 +221,7 @@ class FeaturesMessage {
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
+	@BeanProperty var startNotificationListener = false
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true
@@ -238,6 +243,8 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 
+	@BeanProperty var autoMarkMissedMonitoringPoints = false
+
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true
 	@BeanProperty var schedulingAssignmentsImport = true
@@ -255,14 +262,15 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
 	@BeanProperty var schedulingTriggers = true
-	@BeanProperty var schedulingObjectStorageMigration = true
+	@BeanProperty var schedulingObjectStorageMigration = false
+	@BeanProperty var schedulingModuleListsImport = true
+	@BeanProperty var schedulingProcessNotificationListeners = true
+
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = false
 
 	@BeanProperty var reports = true
-
-	@BeanProperty var autoMarkMissedMonitoringPoints = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

@@ -8,25 +8,24 @@ import net.fortuna.ical4j.model.property._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, AcademicYear, RequestFailedException}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.commands.timetables.{ViewMemberEventsCommand, ViewMemberEventsRequest}
-import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
+import uk.ac.warwick.tabula.api.web.controllers.timetables.MemberCalendarController._
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand
+import uk.ac.warwick.tabula.data.model.{Member, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
-import uk.ac.warwick.tabula.web.views.{IcalView, FullCalendarEvent, JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringTermBasedEventOccurrenceServiceComponent, EventOccurrenceServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
+import uk.ac.warwick.tabula.timetables.EventOccurrence
+import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, IcalView, JSONErrorView, JSONView}
 
-import scala.util.{Failure, Success, Try}
-
-import MemberCalendarController._
+import scala.util.{Failure, Success}
 
 object MemberCalendarController {
-	type TimetableCommand = Appliable[Try[Seq[EventOccurrence]]] with ViewMemberEventsRequest
+	type TimetableCommand = ViewMemberEventsCommand.TimetableCommand
 }
 
 @Controller
@@ -100,10 +99,11 @@ trait GetMemberCalendarJsonApi {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else command.apply() match {
-			case Success(events) => Mav(new JSONView(Map(
+			case Success(result) => Mav(new JSONView(Map(
 				"success" -> true,
 				"status" -> "ok",
-				"events" -> FullCalendarEvent.colourEvents(events.map(FullCalendarEvent(_, userLookup)))
+				"events" -> FullCalendarEvent.colourEvents(result.events.map(FullCalendarEvent(_, userLookup))),
+				"lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
 			)))
 			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
 		}
@@ -143,8 +143,8 @@ trait GetMemberCalendarIcalApi {
 		command.to = end
 
 		command.apply() match {
-			case Success(events) =>
-				val cal = getIcalFeed(events, member)
+			case Success(result) =>
+				val cal = getIcalFeed(result.events, member)
 				Mav(new IcalView(cal), "filename" -> s"${member.universityId}.ics")
 			case Failure(t) =>
 				throw new RequestFailedException("The timetabling service could not be reached", t)

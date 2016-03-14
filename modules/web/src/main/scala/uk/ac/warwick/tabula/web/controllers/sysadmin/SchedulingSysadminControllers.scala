@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
-import javax.sql.DataSource
-
 import org.joda.time.DateTime
-import org.quartz.{Scheduler, TriggerKey}
+import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.scala.jdbc.core.JdbcTemplate
@@ -20,7 +18,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.scheduling.jobs.{ImportAcademicDataJob, ImportAssignmentsJob, ImportProfilesJob, ProcessScheduledNotificationsJob}
+import uk.ac.warwick.tabula.services.scheduling.jobs.{ImportAcademicDataJob, ImportAssignmentsJob, ImportModuleListsJob, ImportProfilesJob, ProcessScheduledNotificationsJob}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes
@@ -167,13 +165,25 @@ class ImportDeptModulesController extends BaseSysadminController {
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
-class ImportSitsController extends BaseSysadminController {
+class ImportSitsAssignmentsController extends BaseSysadminController {
 
 	var scheduler = Wire[Scheduler]
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
 		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsJob]()))
+	}
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/import-module-lists"))
+class ImportSitsModuleListsController extends BaseSysadminController {
+
+	var scheduler = Wire[Scheduler]
+
+	@RequestMapping(method = Array(POST))
+	def reindex() = {
+		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportModuleListsJob]()))
 	}
 }
 

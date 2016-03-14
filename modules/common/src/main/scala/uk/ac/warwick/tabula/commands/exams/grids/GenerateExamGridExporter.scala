@@ -28,6 +28,7 @@ object GenerateExamGridExporter {
 		route: Route,
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
+		normalLoad: BigDecimal,
 		scyds: Seq[GenerateExamGridEntity],
 		columns: Seq[ExamGridColumn]
 	): XSSFWorkbook = {
@@ -44,7 +45,7 @@ object GenerateExamGridExporter {
 		var currentSection = ""
 		var columnOffset = 0 // How many section columns have been added (so how many to shift the columnIndex)
 
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, scyds.size)
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size)
 
 		if (categories.nonEmpty) {
 
@@ -173,6 +174,7 @@ object GenerateExamGridExporter {
 		route: Route,
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
+		normalLoad: BigDecimal,
 		studentCount: Int
 	): Unit = {
 		def keyValueCells(key: String, value: String, rowIndex: Int) = {
@@ -191,11 +193,12 @@ object GenerateExamGridExporter {
 		keyValueCells("Year of study:", yearOfStudy.toString, 4)
 		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
 		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
-		keyValueCells("Student Count:", studentCount.toString, 6)
-		keyValueCells("Grid Generated:", DateTime.now.toString, 7)
+		keyValueCells("Normal CAT load:", normalLoad.toString, 6)
+		keyValueCells("Student Count:", studentCount.toString, 7)
+		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
 
 		{
-			val row = sheet.createRow(8)
+			val row = sheet.createRow(9)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(Fail))
@@ -203,20 +206,12 @@ object GenerateExamGridExporter {
 			valueCell.setCellValue("Failed module")
 		}
 		{
-			val row = sheet.createRow(9)
+			val row = sheet.createRow(10)
 			val keyCell = row.createCell(0)
 			keyCell.setCellValue("#*")
 			keyCell.setCellStyle(cellStyleMap(Overcat))
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Used in overcatting calculation")
-		}
-		{
-			val row = sheet.createRow(10)
-			val keyCell = row.createCell(0)
-			keyCell.setCellValue("{#}")
-			keyCell.setCellStyle(cellStyleMap(Overridden))
-			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Manually adjusted and not stored in SITS")
 		}
 		{
 			val row = sheet.createRow(11)

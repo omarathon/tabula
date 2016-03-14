@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
@@ -155,6 +156,18 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
 	def isDismissed(user: User) = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
 
+	@Column(name = "listeners_processed")
+	private var _listenersProcessed: Boolean = false
+
+	def markListenersProcessed(): Unit = {
+		_listenersProcessed = true
+	}
+
+	// Not persisted, null for transient instances
+	@Column(name = "notification_type", insertable = false, updatable = false)
+	private var _notificationType: String = _
+	def notificationType = _notificationType.maybeText.getOrElse(getClass.getAnnotation(classOf[DiscriminatorValue]).value)
+
 	// HasSettings provides the JSONified settings field... ---> HERE <---
 
 	@transient def verb: String
@@ -296,7 +309,6 @@ trait ConfigurableNotification {
 
 	// The department related to the notification's entity - i.e. the one that configures this notification
 	def configuringDepartment: Department
-	private def notificationType = getClass.getAnnotation(classOf[DiscriminatorValue]).value
 
 	final def recipients: Seq[User] = if (enabledForDepartment) allRecipients.filter(enabledForUser) else Seq()
 	def allRecipients: Seq[User]

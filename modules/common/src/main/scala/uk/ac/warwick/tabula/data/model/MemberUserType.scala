@@ -24,7 +24,7 @@ object MemberUserType {
 		"HEFP students", "HE shared student", "PGCE student", "Postgraduate (research) FT",
 		"Postgraduate (research) PT", "Postgraduate (taught) FT", "Postgraduate (taught) PT",
 		"Postgraduate extension student", "Pre-sessional student", "Undergraduate - full-time",
-		"Undergraduate - part-time", "Exchange student", "HE shared student"
+		"Undergraduate - part-time", "Exchange student", "Bursary Researcher", "Student - non credit-bearing"
 	)
 
 	val StaffTargetGroups = Set(

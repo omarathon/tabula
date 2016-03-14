@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.TermNotFoundException
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.beans.BeanProperty
 
@@ -168,22 +167,6 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 	def overcattingChosenDate_= (chosenDate: DateTime) = overcatting += (StudentCourseYearDetails.Overcatting.ChosenDate -> chosenDate)
 
-	def overcattingMarkOverrides: Option[Map[Module, BigDecimal]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.MarkOverrides)) match {
-		case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
-		case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
-		case _ => None
-	}).map(_.toSeq.flatMap{case(moduleCode, markString) =>
-		val moduleOption = moduleAndDepartmentService.getModuleByCode(moduleCode)
-		val markOption = markString.maybeText.map(mark => BigDecimal(mark))
-		if (moduleOption.isDefined && markOption.isDefined) {
-			Option((moduleOption.get, markOption.get))
-		} else {
-			None
-		}
-	}.toMap)
-	def overcattingMarkOverrides_= (markOverrides: Map[Module, BigDecimal]) = overcatting +=
-		(StudentCourseYearDetails.Overcatting.MarkOverrides -> markOverrides.map{case(module, mark) => module.code -> mark.toString})
-
 	final var agreedMarkUploadedDate: DateTime = _
 
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -194,9 +177,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
 		studentCourseDetails.student.universityId,
 		moduleRegistrations,
-		normalCATLoad,
+		moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
 		overcattingModules,
-		overcattingMarkOverrides,
+		None,
 		Some(this)
 	)
 
@@ -223,13 +206,6 @@ trait BasicStudentCourseYearProperties {
 	@Column(name="tier4visa")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4Visa: JBoolean = _
-
-	/**
-		* Used for determining if the student has over-catted for this course.
-		* Really this should come from SITS, but until that data actually exists, let's just arbitrarily set it to 120
-		*/
-	@transient
-	var normalCATLoad: Int = 120
 
 	var agreedMark: JBigDecimal = null
 

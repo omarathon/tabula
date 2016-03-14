@@ -1,42 +1,25 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
-import dispatch.classic.thread.ThreadSafeHttpClient
-import dispatch.classic.{url, thread, Http}
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import org.apache.http.params.HttpConnectionParams
-import org.springframework.beans.factory.DisposableBean
+import dispatch.classic.{Http, url}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.sso.client.trusted.{SSOConfigTrustedApplicationsManager, TrustedApplicationUtils}
-import uk.ac.warwick.tabula.web.RoutesUtils
-import uk.ac.warwick.tabula.{CurrentUser, HttpClientDefaults}
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationsManager, TrustedApplicationUtils}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.helpers.{PhoneNumberFormatter, Logging}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.helpers.{Logging, PhoneNumberFormatter}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
-import scala.util.{Failure, Success, Try}
+
+import scala.collection.JavaConverters._
 import scala.util.parsing.json.JSON
-import collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
-
-
-trait PeopleSearchData extends Logging with DisposableBean {
+trait PeopleSearchData extends Logging {
 
 	var peoplesearchUrl: String = Wire.property("${peoplesearch.api}")
-	var applicationManager = Wire[SSOConfigTrustedApplicationsManager]
-
-	private lazy val http: Http = new Http with thread.Safety {
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
-
-	override def destroy() {
-		http.shutdown()
-	}
+	var applicationManager = Wire[TrustedApplicationsManager]
+	var http = Wire[Http]
 
 	def getDataFromPeoplesearch(onBehalfOf: String, universityId:String): Map[String, String] = {
 		def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
@@ -53,7 +36,7 @@ trait PeopleSearchData extends Logging with DisposableBean {
 				}
 			}
 		}
-		val queryPara = s"membershipDetails.universityId:${universityId} AND sequenceNumber:0"
+		val queryPara = s"membershipDetails.universityId:$universityId AND sequenceNumber:0"
 		val luceneQueryPara = "true"
 		val endPointUrl = UriBuilder.parse(peoplesearchUrl).addQueryParameter("luceneQueryType", luceneQueryPara)
 			.addQueryParameter("query", queryPara).toString
