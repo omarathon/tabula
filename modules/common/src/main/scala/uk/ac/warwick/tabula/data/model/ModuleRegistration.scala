@@ -88,6 +88,8 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 			.append(occurrence, that.occurrence)
 			.build()
 
+	def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
+
 }
 
 /**

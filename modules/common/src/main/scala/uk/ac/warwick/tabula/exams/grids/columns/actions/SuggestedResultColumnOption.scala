@@ -23,7 +23,7 @@ class SuggestedResultColumnOption extends columns.ExamGridColumnOption with Auto
 
 		override def render: Map[String, String] =
 			state.entities.map(entity => entity.id -> {
-				progressionService.suggestedResult(entity.studentCourseYearDetails.get, state.normalLoad) match {
+				progressionService.suggestedResult(entity.studentCourseYearDetails.get, state.normalLoad, state.routeRules) match {
 					case unknown: ProgressionResult.Unknown => "<span title=\"%s\">%s</span>".format(unknown.details, unknown.description)
 					case result => result.description
 				}
@@ -36,7 +36,7 @@ class SuggestedResultColumnOption extends columns.ExamGridColumnOption with Auto
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			val cell = row.createCell(index)
-			progressionService.suggestedResult(entity.studentCourseYearDetails.get, state.normalLoad) match {
+			progressionService.suggestedResult(entity.studentCourseYearDetails.get, state.normalLoad, state.routeRules) match {
 				case unknown: ProgressionResult.Unknown => cell.setCellValue(s"${unknown.description} ${unknown.details}")
 				case result => cell.setCellValue(result.description)
 			}

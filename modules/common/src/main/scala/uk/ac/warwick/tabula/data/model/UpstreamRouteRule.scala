@@ -5,6 +5,7 @@ import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import collection.JavaConverters._
 
 /**
 	* Tabula store for a Pathway Module Rule (CAM_PMR) from SITS.
@@ -41,5 +42,9 @@ class UpstreamRouteRule extends GeneratedId {
 	@OneToMany(mappedBy = "rule", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	val entries: JSet[UpstreamRouteRuleEntry] = JHashSet()
+
+	def passes(moduleRegistrations: Seq[ModuleRegistration]): Boolean = {
+		entries.asScala.forall(_.passes(moduleRegistrations))
+	}
 
 }

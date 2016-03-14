@@ -8,7 +8,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns
 import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
@@ -31,9 +31,13 @@ class OvercattingOptionsController extends ExamsController
 	def params = GenerateExamGridMappingParameters
 
 	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
-		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy).getOrElse(
+		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy).getOrElse( // TODO replace with SCYD.route when available
 			ModuleRegistrationService.DefaultNormalLoad
 		)
+	}
+
+	private def routeRules(scyd: StudentCourseYearDetails, academicYear: AcademicYear): Seq[UpstreamRouteRule] = {
+		upstreamRouteRuleService.list(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy) // TODO replace with SCYD.route when available
 	}
 
 	@ModelAttribute("command")
@@ -43,12 +47,13 @@ class OvercattingOptionsController extends ExamsController
 			mandatory(academicYear),
 			mandatory(scyd),
 			normalLoad(scyd, academicYear),
+			routeRules(scyd, academicYear),
 			user
 		)
 
 	@ModelAttribute("overcatView")
 	def overcatView(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
-		OvercattingOptionsView(department, academicYear, scyd, normalLoad(scyd, academicYear))
+		OvercattingOptionsView(department, academicYear, scyd, normalLoad(scyd, academicYear), routeRules(scyd, academicYear))
 
 	@RequestMapping(method = Array(GET))
 	def form(
@@ -90,14 +95,14 @@ class OvercattingOptionsController extends ExamsController
 }
 
 object OvercattingOptionsView {
-	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: BigDecimal) =
-		new OvercattingOptionsView(department, academicYear, scyd, normalLoad)
+	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]) =
+		new OvercattingOptionsView(department, academicYear, scyd, normalLoad, routeRules)
 		with AutowiringModuleRegistrationServiceComponent
 		with GenerateExamGridOvercatCommandState
 		with GenerateExamGridOvercatCommandRequest
 }
 
-class OvercattingOptionsView(val department: Department, val academicYear: AcademicYear, val scyd: StudentCourseYearDetails, val normalLoad: BigDecimal) {
+class OvercattingOptionsView(val department: Department, val academicYear: AcademicYear, val scyd: StudentCourseYearDetails, val normalLoad: BigDecimal, val routeRules: Seq[UpstreamRouteRule]) {
 
 	self: GenerateExamGridOvercatCommandState with GenerateExamGridOvercatCommandRequest with ModuleRegistrationServiceComponent =>
 
@@ -110,7 +115,7 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 	).map(_.module)
 
 	private lazy val overcattedMarks: Seq[(BigDecimal, Seq[ModuleRegistration])] =
-		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(), overwrittenMarks, normalLoad)
+		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(), overwrittenMarks, normalLoad, routeRules)
 
 	lazy val overcattedEntities = overcattedMarks.map{case(mark, overcattedModules) => GenerateExamGridEntity(
 		GenerateExamGridOvercatCommand.overcatIdentifier(overcattedModules),

@@ -23,7 +23,7 @@ class SuggestedFinalYearGradeColumnOption extends columns.ExamGridColumnOption w
 
 		override def render: Map[String, String] =
 			state.entities.map(entity => entity.id -> {
-				progressionService.suggestedFinalYearGrade(entity.studentCourseYearDetails.get, state.normalLoad) match {
+				progressionService.suggestedFinalYearGrade(entity.studentCourseYearDetails.get, state.normalLoad, state.routeRules) match {
 					case unknown: FinalYearGrade.Unknown => "<span title=\"%s\">%s</span>".format(unknown.details, unknown.description)
 					case result => result.description
 				}
@@ -36,7 +36,7 @@ class SuggestedFinalYearGradeColumnOption extends columns.ExamGridColumnOption w
 			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
 		): Unit = {
 			val cell = row.createCell(index)
-			cell.setCellValue(progressionService.suggestedFinalYearGrade(entity.studentCourseYearDetails.get, state.normalLoad).description)
+			cell.setCellValue(progressionService.suggestedFinalYearGrade(entity.studentCourseYearDetails.get, state.normalLoad, state.routeRules).description)
 		}
 
 	}

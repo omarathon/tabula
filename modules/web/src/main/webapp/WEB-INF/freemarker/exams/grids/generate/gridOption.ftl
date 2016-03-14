@@ -135,7 +135,7 @@
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="board" checked disabled
-				/> Overcatted year mark</label>
+				/> Board agreed mark</label>
 			</div>
 		</div>
 	</div>
