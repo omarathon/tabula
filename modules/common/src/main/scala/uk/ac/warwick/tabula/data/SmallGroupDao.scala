@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
 import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
@@ -51,6 +52,7 @@ trait SmallGroupDao {
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence]
 
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
@@ -59,6 +61,8 @@ trait SmallGroupDao {
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
+
+	def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance]
 }
 
 @Repository
@@ -195,6 +199,27 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 
 	}
 
+	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence] = {
+		if (modules.isEmpty) {
+			session.newCriteria[SmallGroupEventOccurrence]
+				.add(ge("week", startWeek))
+				.add(le("week", endWeek))
+				.seq
+		} else {
+			val c = () => {
+				session.newCriteria[SmallGroupEventOccurrence]
+					.createAlias("event", "event")
+					.createAlias("event.group", "group")
+					.createAlias("group.groupSet", "groupSet")
+					.add(ge("week", startWeek))
+					.add(le("week", endWeek))
+			}
+			safeInSeq(c, "groupSet.module", modules)
+		}
+
+	}
+
+
 	def hasSmallGroups(module: Module): Boolean = {
 		session.newCriteria[SmallGroupSet]
 			.add(is("module", module))
@@ -232,4 +257,11 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	}
 
 	def delete(occurrence: SmallGroupEventOccurrence) = session.delete(occurrence)
+
+	def findAttendedSmallGroupEvents(studentId: String) =
+		session.newCriteria[SmallGroupEventAttendance]
+			.add(is("universityId", studentId))
+			.add(is("state", AttendanceState.Attended))
+			.seq
+
 }

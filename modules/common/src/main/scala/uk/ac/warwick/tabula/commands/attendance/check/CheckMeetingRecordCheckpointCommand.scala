@@ -37,7 +37,7 @@ class CheckMeetingRecordCheckpointCommandInternal(val student: StudentMember, va
 			meeting.format = meetingFormat
 			meeting.meetingDate = meetingDate
 			attendanceMonitoringMeetingRecordService.getCheckpoints(meeting)
-				.map(c => CheckpointResult(c.student))
+				.map(c => c.student)
 		}.nonEmpty
 
 		oldCheckpoints || newCheckpoints
