@@ -40,3 +40,7 @@ class UpstreamModuleList {
 	val entries: JSet[UpstreamModuleListEntry] = JHashSet()
 
 }
+
+object UpstreamModuleList {
+	final val AllModulesListCode = "ALLMODULES"
+}

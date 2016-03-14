@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import scala.math.BigDecimal.RoundingMode
 
 object ModuleRegistrationService {
-	final val DefaultNormalLoad = 120
+	final val DefaultNormalLoad = BigDecimal(120)
 }
 
 trait ModuleRegistrationService {
