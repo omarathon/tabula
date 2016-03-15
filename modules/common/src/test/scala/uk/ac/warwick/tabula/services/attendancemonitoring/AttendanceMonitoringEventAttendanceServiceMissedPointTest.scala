@@ -57,12 +57,12 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 		occurrence.week = 1
 		occurrence.termService = service.termService
 
-		val attendance = new SmallGroupEventAttendance
-		attendance.occurrence = occurrence
-		attendance.universityId = student.universityId
-		attendance.state = AttendanceState.MissedAuthorised
-		occurrence.attendance.add(attendance)
-		attendance.updatedBy = "cusfal"
+		val attendanceMarkedAsMissed = new SmallGroupEventAttendance
+		attendanceMarkedAsMissed.occurrence = occurrence
+		attendanceMarkedAsMissed.universityId = student.universityId
+		attendanceMarkedAsMissed.state = AttendanceState.MissedAuthorised
+		occurrence.attendance.add(attendanceMarkedAsMissed)
+		attendanceMarkedAsMissed.updatedBy = "cusfal"
 
 		service.profileService.getMemberByUniversityId(student.universityId) returns Option(student)
 
@@ -89,7 +89,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 		service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq(smallGroupPoint)
 		service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()
 		service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns false
-		service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendance.updatedBy, autocreated = true) returns
+		service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true) returns
 			Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.MissedAuthorised))
 
 	}
@@ -101,35 +101,52 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
 		service.smallGroupService.findOccurrenceInModulesInWeeks(1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
 		service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
-		service.getMissedCheckpoints(Seq(attendance)).size should be (1)
-		service.updateMissedCheckpoints(Seq(attendance), currentUser)
-		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendance.updatedBy, autocreated = true)
+		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (1)
+		service.updateMissedCheckpoints(Seq(attendanceMarkedAsMissed), currentUser)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true)
 	}}
 
 	@Test
-	def updatesMissedCheckpointQuantityMoreThanOne() { new Fixture {
-		val otherAttendance = new SmallGroupEventAttendance
-		otherAttendance.occurrence = new SmallGroupEventOccurrence
-		otherAttendance.occurrence.week = 2
-		otherAttendance.occurrence.event = new SmallGroupEvent
-		otherAttendance.occurrence.event.day = DayOfWeek.Monday
-		otherAttendance.universityId = student.universityId
+	def doesNotupdateMissedCheckpointQuantityForAvailableFutureOccurrence() { new Fixture {
 
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
+		// create one future occurrence where this student can possibly
+		val availableOccurrence = new SmallGroupEventOccurrence
+		availableOccurrence.week = 2
+		availableOccurrence.event = new SmallGroupEvent(group)
+		availableOccurrence.event.day = DayOfWeek.Monday
 
-		smallGroupPoint.smallGroupEventQuantity = 2
-
-		service.getMissedCheckpoints(Seq(attendance)).size should be (1)
-
-		service.updateMissedCheckpoints(Seq(attendance), currentUser)
-		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendance.updatedBy, autocreated = true)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
+		service.smallGroupService.findOccurrenceInModulesInWeeks(1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(availableOccurrence)
+		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (0)
 	}}
 
+	@Test
+	def updatesMissedCheckpointQuantityForMoreThanOnceAttendance() { new Fixture {
+
+
+			val otherAttendance = new SmallGroupEventAttendance
+			otherAttendance.occurrence = new SmallGroupEventOccurrence
+			otherAttendance.occurrence.week = 2
+			otherAttendance.occurrence.event = new SmallGroupEvent(group)
+			otherAttendance.occurrence.event.day = DayOfWeek.Monday
+			otherAttendance.universityId = student.universityId
+			otherAttendance.state = AttendanceState.Attended
+		  otherAttendance.updatedBy = "cusxx"
+
+			smallGroupPoint.smallGroupEventQuantity = 2
+			service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
+			service.smallGroupService.findOccurrenceInModulesInWeeks(1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
+			service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
+
+			service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (1)
+			service.updateMissedCheckpoints(Seq(attendanceMarkedAsMissed), currentUser)
+			verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true)
+	}}
 
 	@Test
 	def notMissed() { new Fixture {
-		attendance.state = AttendanceState.Attended
-		service.getMissedCheckpoints(Seq(attendance)).size should be (0)
+		attendanceMarkedAsMissed.state = AttendanceState.Attended
+		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (0)
 	}}
 
 

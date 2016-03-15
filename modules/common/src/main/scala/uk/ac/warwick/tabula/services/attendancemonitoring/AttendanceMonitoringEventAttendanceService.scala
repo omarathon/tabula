@@ -104,7 +104,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		getMissedCheckpoints(attendances).flatMap { case (checkpoint, eventNotes) =>
 			val eventNoteContents = eventNotes.map(note => s"[Reference Id- ${note.occurrence.id}, Event - ${note.occurrence.event.title}, Details: ${note.note}] ")
 
-			if(eventNoteContents.size > 0 ){
+			if (eventNoteContents.size > 0 ) {
 				val monitoringNote =  attendanceMonitoringService.getAttendanceNote(checkpoint.student, checkpoint.point)
 				val attendanceNote = monitoringNote.getOrElse({
 					val newNote = new AttendanceMonitoringNote
@@ -114,7 +114,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 					newNote
 				})
 				val newNoteSummary = s"\nSummary Of Small Group Event Note Details:  ${eventNoteContents.mkString(",")}"
-				if(attendanceNote.note.hasText)
+				if (attendanceNote.note.hasText)
 					attendanceNote.note = s" ${attendanceNote.note} ${newNoteSummary}"
 				else
 					attendanceNote.note = s" ${newNoteSummary}"
@@ -172,16 +172,9 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		(attendedEvents.size + unmarkedEventOccurrences.size) < point.smallGroupEventQuantity
 	}
 
-
-
 	private def checkOccurrenceNotMarked(occurence: SmallGroupEventOccurrence, student: StudentMember): Boolean = {
-    occurence.attendance.asScala.count(attendance => attendance.universityId == student.universityId) == 0
+		occurence.attendance.asScala.count(attendance => attendance.universityId == student.universityId) == 0
 	}
-
-
-
-
-
 
 	private def findAttendanceForDates(
 		startDate: LocalDate,
