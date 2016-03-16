@@ -32,16 +32,16 @@ object FiltersStudents {
 		),
 		"route" -> Seq(
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
-			"mostSignificantCourse.route" -> AliasAndJoinType("route")
+			"mostSignificantCourse.currentRoute" -> AliasAndJoinType("route")
 		),
 		"department" -> Seq(
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
-			"mostSignificantCourse.route" -> AliasAndJoinType("route"),
+			"mostSignificantCourse.currentRoute" -> AliasAndJoinType("route"),
 			"route.adminDepartment" -> AliasAndJoinType("department")
 		),
 		"teachingInfo" -> Seq(
 			"mostSignificantCourse" -> AliasAndJoinType("mostSignificantCourse"),
-			"mostSignificantCourse.route" -> AliasAndJoinType("route"),
+			"mostSignificantCourse.currentRoute" -> AliasAndJoinType("route"),
 			"route.teachingInfo" -> AliasAndJoinType("teachingInfo", JoinType.LEFT_OUTER_JOIN)
 		),
 		"allRelationships" -> Seq(
@@ -64,7 +64,7 @@ trait FiltersStudents extends FilterStudentsOrRelationships {
 	def department: Department
 
 	def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-		"mostSignificantCourse.route.code", routes.asScala.map {_.code},
+		"mostSignificantCourse.currentRoute.code", routes.asScala.map {_.code},
 		getAliasPaths("mostSignificantCourse") : _*
 	)
 
