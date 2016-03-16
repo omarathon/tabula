@@ -106,19 +106,6 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true)
 	}}
 
-	@Test
-	def doesNotupdateMissedCheckpointQuantityForAvailableFutureOccurrence() { new Fixture {
-
-		// create one future occurrence where this student can possibly
-		val availableOccurrence = new SmallGroupEventOccurrence
-		availableOccurrence.week = 2
-		availableOccurrence.event = new SmallGroupEvent(group)
-		availableOccurrence.event.day = DayOfWeek.Monday
-
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
-		service.smallGroupService.findOccurrenceInModulesInWeeks(1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(availableOccurrence)
-		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (0)
-	}}
 
 	@Test
 	def updatesMissedCheckpointQuantityForMoreThanOnceAttendance() { new Fixture {
