@@ -42,7 +42,8 @@ class GenerateExamGridController extends ExamsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
-	with AutowiringCourseDaoComponent with AutowiringModuleRegistrationServiceComponent {
+	with AutowiringCourseDaoComponent with AutowiringModuleRegistrationServiceComponent
+	with AutowiringUpstreamRouteRuleServiceComponent {
 
 	type SelectCourseCommand = Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
@@ -246,7 +247,7 @@ class GenerateExamGridController extends ExamsController
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
-		val (entities, columns, weightings) = gridData(selectCourseCommand, gridOptionsCommand, coreRequiredModules)
+		val (entities, columns, weightings, normalLoadOption) = gridData(selectCourseCommand, gridOptionsCommand, coreRequiredModules)
 		val columnValues = columns.map(_.render)
 		val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 
@@ -257,7 +258,9 @@ class GenerateExamGridController extends ExamsController
 				"categories" -> categories,
 				"scyds" -> entities,
 				"generatedDate" -> DateTime.now,
-				"weightings" -> weightings
+				"weightings" -> weightings,
+				"normalLoadOption" -> normalLoadOption,
+				"defaultNormalLoad" -> ModuleRegistrationService.DefaultNormalLoad
 			),
 			department,
 			academicYear
@@ -277,7 +280,7 @@ class GenerateExamGridController extends ExamsController
 		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
 			throw new IllegalArgumentException
 		}
-		val (entities, columns, weightings) = gridData(selectCourseCommand, gridOptionsCommand, coreRequiredModules)
+		val (entities, columns, weightings, normalLoadOption) = gridData(selectCourseCommand, gridOptionsCommand, coreRequiredModules)
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
@@ -288,6 +291,7 @@ class GenerateExamGridController extends ExamsController
 				selectCourseCommand.route,
 				selectCourseCommand.yearOfStudy,
 				weightings,
+				normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad),
 				entities,
 				columns
 			)
@@ -298,13 +302,20 @@ class GenerateExamGridController extends ExamsController
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand,
 		coreRequiredModules: Seq[CoreRequiredModule]
-	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn], Seq[CourseYearWeighting]) = {
+	): (Seq[GenerateExamGridEntity], Seq[ExamGridColumn], Seq[CourseYearWeighting], Option[BigDecimal]) = {
 		val entities = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
 
 		val gridOptions = gridOptionsCommand.apply()
 		val predefinedColumnIDs = gridOptions._1
 		val customColumnTitles = gridOptions._2
-		val normalLoad = ModuleRegistrationService.DefaultNormalLoad // TODO Check the URRs for the normal load
+
+		val normalLoadOption = upstreamRouteRuleService.findNormalLoad(
+			selectCourseCommand.route,
+			selectCourseCommand.academicYear,
+			selectCourseCommand.yearOfStudy
+		)
+		val normalLoad = normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad)
+
 		val state = ExamGridColumnState(
 			entities = entities,
 			overcatSubsets = entities.filter(_.cats > ModuleRegistrationService.DefaultNormalLoad).map(entity => entity ->
@@ -324,7 +335,7 @@ class GenerateExamGridController extends ExamsController
 			courseDao.getCourseYearWeighting(selectCourseCommand.course.code, selectCourseCommand.academicYear, year)
 		).sorted
 
-		(entities, columns, weightings)
+		(entities, columns, weightings, normalLoadOption)
 	}
 
 }

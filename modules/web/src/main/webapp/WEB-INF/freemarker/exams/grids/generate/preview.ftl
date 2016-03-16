@@ -98,6 +98,16 @@
 						</td>
 					</tr>
 					<tr>
+						<th>Normal CAT load:</th>
+						<td>
+							<#if normalLoadOption??>
+								${normalLoadOption}
+							<#else>
+								${defaultNormalLoad} <@fmt.help_popover id="normal-load" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+							</#if>
+						</td>
+					</tr>
+					<tr>
 						<th>Student Count:</th>
 						<td>${scyds?size}</td>
 					</tr>
@@ -122,10 +132,6 @@
 					<tr>
 						<td><span class="exam-grid-overcat">#</span></td>
 						<td>Used in overcatting calculation</td>
-					</tr>
-					<tr>
-						<td><span class="exam-grid-override">#</span></td>
-						<td>Manually adjusted and not stored in SITS</td>
 					</tr>
 					<tr>
 						<td>#?</td>

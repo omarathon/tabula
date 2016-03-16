@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
+import org.hibernate.criterion.Restrictions
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -15,7 +17,7 @@ trait AutowiringUpstreamRouteRuleDaoComponent extends UpstreamRouteRuleDaoCompon
 
 trait UpstreamRouteRuleDao {
 	def saveOrUpdate(list: UpstreamRouteRule): Unit
-	def list(route: Route, academicYearOption: Option[AcademicYear], yearOfStudy: Int): Seq[UpstreamRouteRule]
+	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule]
 	def removeAll(): Unit
 }
 
@@ -25,11 +27,16 @@ class UpstreamRouteRuleDaoImpl extends UpstreamRouteRuleDao with Daoisms {
 	def saveOrUpdate(list: UpstreamRouteRule): Unit =
 		session.saveOrUpdate(list)
 
-	def list(route: Route, academicYearOption: Option[AcademicYear], yearOfStudy: Int): Seq[UpstreamRouteRule] = {
+	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule] = {
 		session.newCriteria[UpstreamRouteRule]
 			.add(is("route", route))
-			.add(is("academicYear", academicYearOption.orNull))
-			.add(is("yearOfStudy", yearOfStudy))
+			.add(Restrictions.disjunction()
+				.add(is("_academicYear", academicYear))
+				.add(is("_academicYear", null))
+			).add(is("yearOfStudy", yearOfStudy))
+			.setFetchMode("entries", FetchMode.JOIN)
+			.setFetchMode("entries.list", FetchMode.JOIN)
+			.setFetchMode("entries.list.entries", FetchMode.JOIN)
 			.seq
 	}
 
