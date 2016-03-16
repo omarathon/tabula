@@ -30,11 +30,11 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val courseDetails1, courseDetails2 = new StudentCourseDetails
 
 		courseDetails1.department = testDepartment
-		courseDetails1.route = testRoute1
+		courseDetails1.currentRoute = testRoute1
 		courseDetails1.course = course
 
 		courseDetails2.department = testDepartment
-		courseDetails2.route = testRoute2
+		courseDetails2.currentRoute = testRoute2
 		courseDetails2.course = course
 	}
 

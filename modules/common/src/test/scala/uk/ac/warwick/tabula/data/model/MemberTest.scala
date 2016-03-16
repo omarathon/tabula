@@ -61,7 +61,7 @@ class MemberTest extends TestBase with Mockito {
 		routeDept.code = "ch"
 		val route = new Route
 		route.adminDepartment = routeDept
-		member.mostSignificantCourseDetails.get.route = route
+		member.mostSignificantCourseDetails.get.currentRoute = route
 		member.attachStudentCourseDetails(studentCourseDetails)
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept, routeDept))
@@ -69,7 +69,7 @@ class MemberTest extends TestBase with Mockito {
 
 		// reset route to home, and check it appears only once
 		route.adminDepartment = homeDept
-		member.mostSignificantCourseDetails.get.route = route
+		member.mostSignificantCourseDetails.get.currentRoute = route
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
@@ -188,7 +188,7 @@ class MemberTest extends TestBase with Mockito {
 		student.groupName = "Undergraduate student"
 
 		val studentCourseDetails = new StudentCourseDetails(student, "1111111/1")
-		studentCourseDetails.route = route
+		studentCourseDetails.currentRoute = route
 		studentCourseDetails.mostSignificant = true
 
 		student.attachStudentCourseDetails(studentCourseDetails)

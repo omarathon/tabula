@@ -190,6 +190,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
+			"sce_route_code" -> route.code.toUpperCase,
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON",
 			"disability" -> "A",
@@ -394,6 +395,7 @@ object ProfileImporter extends Logging {
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,
 			sce.sce_udfj as sce_agreed_mark,
+			sce.sce_rouc as sce_route_code,
 
 			ssn.ssn_mrgs as mod_reg_status,
 

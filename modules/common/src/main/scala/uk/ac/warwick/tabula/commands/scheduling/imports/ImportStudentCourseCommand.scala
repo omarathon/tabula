@@ -120,7 +120,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 	private def copyStudentCourseProperties(rowBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseProperties, rowBean, studentCourseDetailsBean) |
 		copyObjectProperty("department", row.departmentCode, studentCourseDetailsBean, toDepartment(row.departmentCode)) |
-		copyObjectProperty("route", row.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(row.routeCode)) |
+		copyObjectProperty("currentRoute", row.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(row.routeCode)) |
 		copyObjectProperty("course", row.courseCode, studentCourseDetailsBean, courseImporter.getCourseByCodeCached(row.courseCode)) |
 		copyObjectProperty("award", row.awardCode, studentCourseDetailsBean, awardImporter.getAwardByCodeCached(row.awardCode)) |
 		copyObjectProperty("statusOnRoute", row.sprStatusCode, studentCourseDetailsBean, toSitsStatus(row.sprStatusCode)) |

@@ -80,6 +80,8 @@ trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties {
 	var academicYearString = rs.getString("sce_academic_year")
 	var moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
+	var sceRouteCode = rs.getString("sce_route_code")
+
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = rs.getInt("sce_sequence_number")

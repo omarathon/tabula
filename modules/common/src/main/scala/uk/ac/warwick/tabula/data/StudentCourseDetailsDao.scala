@@ -78,7 +78,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
 	def getByRoute(route: Route) = {
 		session.newCriteria[StudentCourseDetails]
-			.add(is("route.code", route.code))
+			.add(is("currentRoute.code", route.code))
 			.add(isNull("missingFromImportSince"))
 			.seq
 	}

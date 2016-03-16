@@ -56,7 +56,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			scd.statusOnRoute = currentStudentStatus
 			scd.beginDate = new LocalDate().minusYears(2)
 
-			if (route.isDefined) scd.route = route.get
+			if (route.isDefined) scd.currentRoute = route.get
 			if (course.isDefined) scd.course = course.get
 			if (dept.isDefined)  scd.department = dept.get
 

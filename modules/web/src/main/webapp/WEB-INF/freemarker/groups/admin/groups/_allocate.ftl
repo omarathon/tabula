@@ -18,13 +18,13 @@
 		<#local profile = membersById[student.warwickId]!{} />
 		<li class="student well well-sm"
 			data-f-gender="${(profile.gender.dbValue)!}"
-			data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
+			data-f-route="${(profile.mostSignificantCourseDetails.currentRoute.code)!}"
 			data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 			<div class="profile clearfix">
 				<@fmt.member_photo profile "tinythumbnail" false />
 				<div class="name">
 					<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student.warwickId! /></h6>
-				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment!""}
+				${(profile.mostSignificantCourseDetails.currentRoute.name)!student.shortDepartment!""}
 				</div>
 			</div>
 			<input type="hidden" name="${bindpath}" value="${student.userId}" />
