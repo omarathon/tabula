@@ -110,11 +110,13 @@ trait MockedResultSet extends Mockito {
 	rsMetaData.getColumnName(2) returns "year_of_study"
 	rsMetaData.getColumnName(3) returns "spr_code"
 	rsMetaData.getColumnName(4) returns "route_code"
+	rsMetaData.getColumnName(5) returns "sce_route_code"
 
 	rs.getString("gender") returns "M"
 	rs.getInt("year_of_study") returns 3
 	rs.getString("spr_code") returns "0672089/2"
 	rs.getString("route_code") returns "C100"
+	rs.getString("sce_route_code") returns "C100"
 	rs.getString("spr_tutor1") returns "0070790"
 	rs.getString("homeDepartmentCode") returns "PH"
 	rs.getString("department_code") returns "PH"
@@ -355,11 +357,13 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rsMetaData.getColumnName(2) returns "year_of_study"
 		rsMetaData.getColumnName(3) returns "spr_code"
 		rsMetaData.getColumnName(4) returns "route_code"
+		rsMetaData.getColumnName(5) returns "sce_route_code"
 
 		rs.getString("gender") returns "M"
 		rs.getInt("year_of_study") returns 3
 		rs.getString("spr_code") returns "0672089/2"
 		rs.getString("route_code") returns null
+		rs.getString("sce_route_code") returns null
 		rs.getString("spr_tutor1") returns null
 		rs.getString("homeDepartmentCode") returns null
 		rs.getString("department_code") returns null

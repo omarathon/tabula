@@ -64,6 +64,7 @@ class ImportCommandFactory() {
 			command.sitsStatusImporter = sitsStatusImporter
 			command.maintenanceModeService = maintenanceModeService
 			command.studentCourseYearDetailsDao = studentCourseYearDetailsDao
+			command.courseAndRouteService = courseAndRouteService
 		}
 		command
 	}
