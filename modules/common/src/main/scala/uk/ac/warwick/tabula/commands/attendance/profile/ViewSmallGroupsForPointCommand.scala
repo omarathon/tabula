@@ -96,11 +96,11 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 			case Some(scd) =>
 				ViewSmallGroupsForPointCommandResult.Course(
 					student.mostSignificantCourseDetails.map(scd => scd.course.name).getOrElse(""),
-					student.mostSignificantCourseDetails.map(scd => s"${scd.route.name} (${scd.route.code.toUpperCase})").getOrElse(""),
+					student.mostSignificantCourseDetails.map(scd => s"${scd.currentRoute.name} (${scd.currentRoute.code.toUpperCase})").getOrElse(""),
 					student.homeDepartment.name,
 					student.mostSignificantCourseDetails.map(scd => scd.statusOnRoute.fullName.toLowerCase.capitalize).getOrElse(""),
 					student.mostSignificantCourseDetails.map(scd => scd.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased).getOrElse(""),
-					student.mostSignificantCourseDetails.map(scd => scd.route.degreeType.toString).getOrElse(""),
+					student.mostSignificantCourseDetails.map(scd => scd.currentRoute.degreeType.toString).getOrElse(""),
 					student.mostSignificantCourseDetails.map(scd => scd.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse("")
 				)
 		}

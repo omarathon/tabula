@@ -13,14 +13,15 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 case class CheckpointResult(
-	student: StudentMember
+	attendedMonitoringPointStudentList: Seq[StudentMember],
+	missedMonitoringPointStudentList: Seq[StudentMember]
 )
 
 // TODO: When old-style points are retired have this command return a Seq[AttendanceMonitoringCheckpoint]
 object CheckEventAttendanceCheckpointsCommand {
 	def apply(occurrence: SmallGroupEventOccurrence) =
 		new CheckEventAttendanceCheckpointsCommandInternal(occurrence)
-			with ComposableCommand[Seq[CheckpointResult]]
+			with ComposableCommand[CheckpointResult]
 			with AutowiringMonitoringPointGroupProfileServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
 			with CheckEventAttendanceCheckpointsPermissions
@@ -30,7 +31,7 @@ object CheckEventAttendanceCheckpointsCommand {
 
 
 class CheckEventAttendanceCheckpointsCommandInternal(val occurrence: SmallGroupEventOccurrence)
-	extends CommandInternal[Seq[CheckpointResult]] {
+	extends CommandInternal[CheckpointResult] {
 
 	self: CheckEventAttendanceCheckpointsCommandState with MonitoringPointGroupProfileServiceComponent
 		with AttendanceMonitoringEventAttendanceServiceComponent =>
@@ -43,12 +44,16 @@ class CheckEventAttendanceCheckpointsCommandInternal(val occurrence: SmallGroupE
 			attendance.universityId = universityId
 			attendance
 		}.toSeq
+		val studentListWithOldCheckpoints = monitoringPointGroupProfileService.getCheckpointsForAttendance(attendanceList).map(a => a.student).distinct
 
-		val oldCheckpoints = monitoringPointGroupProfileService.getCheckpointsForAttendance(attendanceList).map(c => CheckpointResult(c.student))
-
-		val newCheckpoints = attendanceMonitoringEventAttendanceService.getCheckpoints(attendanceList).map(c => CheckpointResult(c.student))
-
-		oldCheckpoints ++ newCheckpoints
+		val studentListWithNewCheckpoints = attendanceMonitoringEventAttendanceService.getCheckpoints(attendanceList).map(a => a.student).distinct
+		if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
+			val studentListWithMissedCheckpoints = attendanceMonitoringEventAttendanceService.getMissedCheckpoints(attendanceList)
+				.map { case (a, _) => a.student }.distinct
+			CheckpointResult(studentListWithOldCheckpoints ++ studentListWithNewCheckpoints, studentListWithMissedCheckpoints)
+		} else {
+			CheckpointResult(studentListWithOldCheckpoints ++ studentListWithNewCheckpoints, Seq())
+		}
 	}
 
 }

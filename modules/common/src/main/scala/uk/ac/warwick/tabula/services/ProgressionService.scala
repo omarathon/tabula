@@ -107,7 +107,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
 	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal): ProgressionResult = {
-		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.route, scyd.academicYear, scyd.yearOfStudy)
+		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.currentRoute, scyd.academicYear, scyd.yearOfStudy)
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))

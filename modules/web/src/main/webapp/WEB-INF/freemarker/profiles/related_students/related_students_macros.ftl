@@ -10,7 +10,7 @@
 	<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
 	<td>${studentCourseDetails.student.groupName!""}</td>
 	<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
-	<td>${(studentCourseDetails.route.name)!""}</td>
+	<td>${(studentCourseDetails.currentRoute.name)!""}</td>
 </tr>
 </#macro>
 

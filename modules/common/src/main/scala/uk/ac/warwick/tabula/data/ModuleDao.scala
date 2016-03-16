@@ -114,7 +114,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 					where
 						module.id = registration.module.id
 						and scd = registration.studentCourseDetails
-						and scd.route.id = route.id
+						and scd.currentRoute.id = route.id
 						and student.mostSignificantCourse = scd
 						and route in (:routes)
 						and registration.academicYear = :academicYear
@@ -143,7 +143,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						and scd = registration.studentCourseDetails
 						and scyd.studentCourseDetails = scd
 						and student.mostSignificantCourse = scd
-						and scd.route.id = route.id
+						and scd.currentRoute.id = route.id
 						and scyd.yearOfStudy in (:yearsOfStudy)
 						and registration.academicYear = :academicYear
 						and scyd.academicYear = :academicYear
@@ -174,7 +174,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 					where
 						module.id = registration.module.id
 						and scd = registration.studentCourseDetails
-						and scd.route.id = route.id
+						and scd.currentRoute.id = route.id
 						and student.mostSignificantCourse = scd
 						and scyd.studentCourseDetails = scd
 						and route = :route

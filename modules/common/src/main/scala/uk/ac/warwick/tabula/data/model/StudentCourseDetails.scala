@@ -98,7 +98,7 @@ class StudentCourseDetails
 		val latestYearDetails = Option(latestStudentCourseYearDetails)
 		val enrolmentDepartment = latestYearDetails.flatMap { scyd => Option(scyd.enrolmentDepartment) }
 
-		Stream(Option(student), Option(route), Option(department), enrolmentDepartment).flatten
+		Stream(Option(student), Option(currentRoute), Option(department), enrolmentDepartment).flatten
 			.append(
 				latestYearDetails.toStream.flatMap { scyd =>
 					// Only include module registrations for the latest year
@@ -242,7 +242,7 @@ trait StudentCourseProperties extends BasicStudentCourseProperties {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var route: Route = _
+	var currentRoute: Route = _
 
 	// this is the department from the SPR table in SITS (Student Programme Route).  It is likely to be the
 	// same as the department on the Route table, but in some cases, e.g. where routes change ownership in
