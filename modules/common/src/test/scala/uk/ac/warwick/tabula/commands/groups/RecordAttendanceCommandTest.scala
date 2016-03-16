@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, LocalDateTime}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{Department, Module, UserGroup}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.services._
@@ -40,15 +40,20 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val event = new SmallGroupEvent
 		event.group = new SmallGroup
 		event.group.groupSet = new SmallGroupSet
+		event.group.groupSet.module = new Module
+		event.group.groupSet.module.adminDepartment = new Department
+		event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints = false
+		val occurrence = new SmallGroupEventOccurrence
+		occurrence.event = event
 
 		val week = 1
 		val user = new User("abcde")
 		user.setWarwickId("1234567")
 
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport
+		command.smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) returns (occurrence)
 		command.studentsState.put("1234567", AttendanceState.Attended)
 		command.applyInternal()
-
 		verify(command.userLookup, times(0)).getUsersByUserIds(Seq("abcde").asJava)
 		verify(command.smallGroupService, times(1)).saveOrUpdateAttendance("1234567", event, week, AttendanceState.Attended, currentUser)
 	}
