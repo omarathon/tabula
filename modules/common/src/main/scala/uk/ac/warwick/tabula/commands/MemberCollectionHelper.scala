@@ -8,8 +8,8 @@ trait MemberCollectionHelper {
 		val routes = for {
 			student <- members.collect { case student: StudentMember => student };
 			course <- student.mostSignificantCourseDetails
-			if Option(course.route).isDefined
-		} yield course.route
+			if Option(course.currentRoute).isDefined
+		} yield course.currentRoute
 		routes.toSeq.sortBy(_.code).distinct
 	}
 

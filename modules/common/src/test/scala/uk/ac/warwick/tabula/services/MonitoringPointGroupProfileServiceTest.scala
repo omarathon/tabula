@@ -33,7 +33,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		val student = Fixtures.student("1234")
 		val studentRoute = Fixtures.route("a100")
 		val studentCourseDetails = student.mostSignificantCourseDetails.get
-		studentCourseDetails.route = studentRoute
+		studentCourseDetails.currentRoute = studentRoute
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)

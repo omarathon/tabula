@@ -111,7 +111,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 				result.filter { case(student, checkpoint) =>
 					val pointSet = checkpoint.point.pointSet
 					student.mostSignificantCourseDetailsForYear(pointSet.academicYear).exists(scd => {
-						pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
+						pointSet.route == scd.currentRoute && scd.freshStudentCourseYearDetails.exists(scyd =>
 							scyd.academicYear == pointSet.academicYear && (
 								pointSet.year == null || scyd.yearOfStudy == pointSet.year
 							)
@@ -196,7 +196,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			select student, mps
 			from MonitoringPointSet mps, Route r, StudentCourseDetails scd, StudentCourseYearDetails scyd, StudentMember student
 			where r = mps.route
-			and scd.route = r.code
+			and scd.currentRoute = r.code
 			and scyd.studentCourseDetails = scd
 			and scd.student = student
 			and mps.academicYear = :academicYear
@@ -237,7 +237,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 				select student, mp
 				from StudentMember student, StudentCourseDetails scd, StudentCourseYearDetails scyd, Route r, MonitoringPointSet mps, MonitoringPoint mp
 				where scd.student = student
-				and scd.route = r.code
+				and scd.currentRoute = r.code
 				and scd = scyd.studentCourseDetails
 				and mps.route = r
 				and mp.pointSet = mps
@@ -291,7 +291,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			Route r, MonitoringPointSet mps, MonitoringPoint mp, MonitoringCheckpoint mc
 			where scd.student = s
 			and scyd.studentCourseDetails = scd
-			and scd.route = r.code
+			and scd.currentRoute = r.code
 			and mps.route = r
 			and (mps.year is null or mps.year = scyd.yearOfStudy)
 			and mp.pointSet = mps
@@ -344,7 +344,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			Route r, MonitoringPointSet mps, MonitoringPoint mp
 			where scd.student = s
 			and scyd.studentCourseDetails = scd
-			and scd.route = r.code
+			and scd.currentRoute = r.code
 			and mps.route = r
 			and (mps.year is null or mps.year = scyd.yearOfStudy)
 			and mp.pointSet = mps

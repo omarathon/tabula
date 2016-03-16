@@ -357,7 +357,7 @@ object Department {
 		val name = "UG"
 		val courseTypes = CourseType.ugCourseTypes
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => true
 				case _ => false
 			}
@@ -372,7 +372,7 @@ object Department {
 		val name = "PG"
 		val courseTypes = CourseType.pgCourseTypes
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => false
 				case _ => true
 			}
@@ -409,7 +409,7 @@ object Department {
 		val name = "DepartmentRoutes"
 		val courseTypes = CourseType.all
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.contains(r.adminDepartment)}
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.exists{r => department.contains(r.adminDepartment)}
 			case _ => false
 		}
 		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {

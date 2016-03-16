@@ -111,7 +111,7 @@ class DepartmentTest extends TestBase with Mockito {
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =1))
-				s.route = ugRoute
+				s.currentRoute = ugRoute
 			})
 			m.attachStudentCourseDetails(scd)
 			m.mostSignificantCourse = scd
@@ -120,7 +120,7 @@ class DepartmentTest extends TestBase with Mockito {
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =7))
-				s.route = pgRoute
+				s.currentRoute = pgRoute
 			})
 			m.attachStudentCourseDetails(scd)
 			m.mostSignificantCourse = scd
@@ -149,10 +149,10 @@ class DepartmentTest extends TestBase with Mockito {
 		rule.matches(postgraduate, None) should be {false}
 
 		// test the various remaining different route types
-		postgraduate.mostSignificantCourseDetails.get.route.degreeType = DegreeType.InService
+		postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.InService
 		rule.matches(postgraduate, None) should be {false}
 
-		postgraduate.mostSignificantCourseDetails.get.route.degreeType = DegreeType.PGCE
+		postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.PGCE
 		rule.matches(postgraduate, None) should be {false}
 	}}
 
@@ -164,10 +164,10 @@ class DepartmentTest extends TestBase with Mockito {
 		rule.matches(postgraduate, None) should be {true}
 
 		// test the various remaining different course types
-		postgraduate.mostSignificantCourseDetails.get.route.degreeType = DegreeType.InService
+		postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.InService
 		rule.matches(postgraduate, None) should be {true}
 
-		postgraduate.mostSignificantCourseDetails.get.route.degreeType = DegreeType.PGCE
+		postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.PGCE
 		rule.matches(postgraduate, None) should be {true}
 
 	}}

@@ -595,7 +595,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 				val criteria = session.newCriteria[StudentMember]
 					.createAlias("studentCourseDetails", "studentCourseDetails")
 					.createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-					.createAlias("studentCourseDetails.route", "route")
+					.createAlias("studentCourseDetails.currentRoute", "route")
 					.add(isNull("studentCourseDetails.missingFromImportSince"))
 					.add(is("studentCourseYearDetails.academicYear", academicYear))
 

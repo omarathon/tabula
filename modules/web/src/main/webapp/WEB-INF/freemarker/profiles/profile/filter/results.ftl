@@ -23,7 +23,7 @@
 			<td><a class="profile-link" href="<@routes.profiles.profile student />">${student.universityId}</a></td>
 			<td>${student.groupName}</td>
 			<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
-			<td>${(student.mostSignificantCourseDetails.route.name)!""}</td>
+			<td>${(student.mostSignificantCourseDetails.currentRoute.name)!""}</td>
 		</tr>
 	</#macro>
 

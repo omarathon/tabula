@@ -325,7 +325,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 					scd.course.code should be ("UESA-H612")
 					scd.scjCode should be ("0672089/2")
 					scd.department.code should be ("ph")
-					scd.route.code should be ("c100")
+					scd.currentRoute.code should be ("c100")
 					scd.sprCode should be ("0672089/2")
 					scd.beginDate should be (row.beginDate)
 					scd.endDate should be (row.endDate)
@@ -409,7 +409,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 					val scd = stu.freshStudentCourseDetails.head
 					scd.course should be (null)
 					scd.department should be (null)
-					scd.route should be (null)
+					scd.currentRoute should be (null)
 					scd.beginDate should be (null)
 					scd.endDate should be (null)
 					scd.expectedEndDate should be (null)

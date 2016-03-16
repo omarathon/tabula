@@ -12,13 +12,13 @@ class MemberCollectionHelperTest extends TestBase with Mockito {
 
 			val courseDetails = new StudentCourseDetails(student, "student")
 			courseDetails.mostSignificant = true
-			courseDetails.route = null
+			courseDetails.currentRoute = null
 			student.mostSignificantCourse = courseDetails
 
 			val route = Fixtures.route("routeCode", "description")
 			val courseDetailsWithRoute = new StudentCourseDetails(studentWithRoute, "student")
 			courseDetailsWithRoute.mostSignificant = true
-			courseDetailsWithRoute.route = route
+			courseDetailsWithRoute.currentRoute = route
 			studentWithRoute.mostSignificantCourse = courseDetailsWithRoute
 
 			val helper = new MemberCollectionHelper {}

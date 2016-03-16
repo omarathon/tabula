@@ -97,7 +97,7 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 	override val user: CurrentUser = null // Never used
 
 	private lazy val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
-		scyd.studentCourseDetails.route,
+		scyd.studentCourseDetails.currentRoute,
 		academicYear,
 		scyd.yearOfStudy
 	).map(_.module)
