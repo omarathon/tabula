@@ -83,9 +83,9 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 @Profile(Array("scheduling"))
 class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 1 day, critical if no import for past day and a half
-	override val WarningThreshold = 24.hours
-	override val ErrorThreshold = 36.hours
+	// Warn if no successful import for 2 days, critical if no import for 3 days
+	override val WarningThreshold = 2.days
+	override val ErrorThreshold = 3.days
 	override val HealthcheckName = "import-academic"
 
 	override protected def auditEvents: Seq[AuditEvent] = {
@@ -99,9 +99,9 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 @Profile(Array("scheduling"))
 class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 1 and a half days, critical if no import for past 2 days
-	override val WarningThreshold = 36.hours
-	override val ErrorThreshold = 48.hours
+	// Warn if no successful import for 3 days, critical for 4 days
+	override val WarningThreshold = 3.days
+	override val ErrorThreshold = 4.days
 	override val HealthcheckName = "import-profiles"
 
 	override protected def auditEvents: Seq[AuditEvent] = {
@@ -118,9 +118,9 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 @Profile(Array("scheduling"))
 class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 1 and a half days, critical if no import for past 2 days
-	override val WarningThreshold = 36.hours
-	override val ErrorThreshold = 48.hours
+	// Warn if no successful import for 3 days, critical for 4 days
+	override val WarningThreshold = 3.days
+	override val ErrorThreshold = 4.days
 	override val HealthcheckName = "import-assignments"
 
 	override protected def auditEvents: Seq[AuditEvent] = {

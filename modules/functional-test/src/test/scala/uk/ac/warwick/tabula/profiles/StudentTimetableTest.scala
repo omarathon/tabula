@@ -92,15 +92,15 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 		events.find(e=>e("title") == "CS132 Computer Organisation & Architecture Lecture (L5)") should be ('defined)
 	}
 
-	"A user" should "not be able to view another users timetable without permission" in {
+	"A member of staff" should "be able to view any student's timetable" in {
 		Given("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
-		Then("Marker 2 should not be able to view Student 1's timetable")
+		Then("Marker 2 should be able to view Student 1's timetable")
 		val events = Try(requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker2)))
 		events match {
-			case _:Success[Seq[Map[String,Any]]]=>fail("Didn't expect to be able to get timetable feed without permission")
-			case _:Failure[Seq[Map[String,Any]]]=> //OK
+			case _:Failure[Seq[Map[String,Any]]]=>fail("Should be able to get timetable feed for any student")
+			case _:Success[Seq[Map[String,Any]]]=> //OK
 		}
 	}
 
