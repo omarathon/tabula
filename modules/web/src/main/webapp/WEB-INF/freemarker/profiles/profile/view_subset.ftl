@@ -54,10 +54,10 @@
 				<div class="col1 basic-course-details">
 					<table class="profile-or-course-info subset-course">
 						<tbody>
-							<#if (studentCourseDetails.route)??>
+							<#if (studentCourseDetails.currentRoute)??>
 							<tr>
 								<th>Route</th>
-								<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
+								<td>${(studentCourseDetails.currentRoute.name)!} (${(studentCourseDetails.currentRoute.code?upper_case)!})
 								</td>
 							</tr>
 							</#if>
@@ -80,7 +80,7 @@
 						</tr>
 						<tr>
 							<th>UG/PG</th>
-							<td>${(studentCourseDetails.route.degreeType.toString)!}
+							<td>${(studentCourseDetails.currentRoute.degreeType.toString)!}
 							</td>
 						</tr>
 						<tr>

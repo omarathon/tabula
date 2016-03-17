@@ -282,14 +282,14 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		val scd5 = m5.mostSignificantCourse
 		scd5.course = ugCourse
-		scd5.route = route1
+		scd5.currentRoute = route1
 		session.saveOrUpdate(scd5)
 		session.flush()
 		session.clear()
 
 		val scd6 = m6.mostSignificantCourse
 		scd6.course = ugCourse
-		scd6.route = route2
+		scd6.currentRoute = route2
 		session.saveOrUpdate(scd6)
 		session.flush()
 		session.clear()
@@ -376,7 +376,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		val scd1 = m1.mostSignificantCourse
 		scd1.course = ugCourse
-		scd1.route = route1
+		scd1.currentRoute = route1
 
 		profileService.save(m1)
 
@@ -392,14 +392,14 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		val scd2 = m2.mostSignificantCourse
 		scd2.course = pgtCourse
-		scd2.route = route2
+		scd2.currentRoute = route2
 
 		session.saveOrUpdate(scd2)
 
 		relationshipService.studentDepartmentMatchesAndExpectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 
 		// TAB-1712
-		scd2.route = null
+		scd2.currentRoute = null
 		session.saveOrUpdate(scd2)
 		relationshipService.studentDepartmentMatchesAndExpectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 	}

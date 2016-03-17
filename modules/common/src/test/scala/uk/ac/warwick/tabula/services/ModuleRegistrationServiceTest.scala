@@ -79,7 +79,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Option)
 			)
 			moduleRegistrations.foreach(scd.addModuleRegistration)
-			val result = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toGenerateExamGridEntity(), Map())
+			val result = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toGenerateExamGridEntity(), Map(), 120)
 			// There are 81 CATS of core modules, leaving 39 to reach the normal load of 120
 			// All the options are 15 CATS, so there are 5 combinations of modules that are valid (4 with 3 in each and 1 with 4)
 			result.size should be (5)

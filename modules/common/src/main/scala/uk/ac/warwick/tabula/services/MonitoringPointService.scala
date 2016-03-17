@@ -197,7 +197,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 			scd.freshStudentCourseYearDetails.find { scyd =>
 				scyd.academicYear == academicYear
 			}.flatMap { scyd =>
-				findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)) orElse findMonitoringPointSet(scd.route, academicYear, None)
+				findMonitoringPointSet(scd.currentRoute, academicYear, Option(scyd.yearOfStudy)) orElse findMonitoringPointSet(scd.currentRoute, academicYear, None)
 			}
 		}.lastOption // StudentCourseDetails is sorted by SCJ code, so we're returning the last valid one
 	}

@@ -32,6 +32,7 @@
 
 			<p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 
+			<p class="clearfix">&nbsp;</p>
 			<form>
 				<table class="table table-condensed grid overcat">
 					<thead>
@@ -104,7 +105,7 @@
 						</#list>
 						<tr class="new-marks">
 							<td colspan="${overcatView.optionsColumns?size}" class="borderless"></td>
-							<th class="section-value-label">New Module Mark</th>
+							<th class="section-value-label rotated"><div class="rotate nomargin" style="margin-top:-47px;">New<br/>Module<br/>Mark</div></th>
 							<#assign currentCategory = "" />
 							<#list mapGet(overcatView.columnsBySCYD, scyd) as column>
 								<#if column.category?has_content && currentCategory != column.category>
@@ -142,9 +143,11 @@
 <script>
 	jQuery(function($){
 		var $modalBody = $('.modal-body');
+
 		$('.modal-body th.first-in-category, .modal-body td.first-in-category').each(function(){
 			$(this).prev().addClass('last-in-category');
 		});
+
 		$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();
 			var height = $(this).find('.rotate').height();
@@ -220,6 +223,23 @@
 		}).on('click', 'button[name=cancel]', function(){
 			$(this).closest('.modal').modal('hide');
 		});
+
+		$modalBody.closest('.modal').on('shown.bs.modal', function(){
+			$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
+				var width = $(this).find('.rotate').width();
+				var height = $(this).find('.rotate').height();
+				$(this).css('height', width + 15).css('min-width', height + 5);
+				$(this).find('.rotate').css({
+					'margin-left': height / 2
+				}).not('.nomargin').css({
+					'margin-top': -(height)
+				}).end().filter('.middle').not('.nomargin').css({
+					'margin-top': width / 4
+				});
+			});
+			$modalBody.wideTables();
+		});
+
 	});
 </script>
 

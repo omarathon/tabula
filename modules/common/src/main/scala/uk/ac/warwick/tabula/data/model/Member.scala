@@ -300,7 +300,7 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
 		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => route.teachingDepartments).toStream
+		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.currentRoute)).flatMap(route => route.teachingDepartments).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
@@ -336,7 +336,7 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3598 - Add study departments and routes for any current course
 		val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
 		val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
-		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.route }.toStream
+		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.currentRoute }.toStream
 
 		// Cache the def result
 		val mostSignificantCourse = mostSignificantCourseDetails
@@ -408,7 +408,7 @@ class StudentMember extends Member with StudentProperties {
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
-			if (details != null && details.route != null) ", " + details.route.name
+			if (details != null && details.currentRoute != null) ", " + details.currentRoute.name
 			else ""
 		case _ => ""
 	}
