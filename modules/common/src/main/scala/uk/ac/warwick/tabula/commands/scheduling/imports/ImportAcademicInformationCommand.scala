@@ -88,7 +88,8 @@ object ImportAcademicInformationCommand {
 	def newDepartmentFrom(d: DepartmentInfo, moduleAndDepartmentService: ModuleAndDepartmentService): Department = {
 		val department = new Department
 		department.code = d.code
-		department.fullName = d.name
+		department.fullName = d.fullName
+		department.shortName = d.shortName
 
 		d.parentCode.foreach { code =>
 			// Don't try and handle a badly-specified code - just let the .get fail
