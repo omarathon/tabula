@@ -44,7 +44,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 	def title = "%s: %s received for \"%s\"".format(moduleCode, submissionTitle, assignment.name)
 
-	def canEmailUser(user: User) : Boolean = {
+	def canEmailUser(user: User): Boolean = {
 		// Alert on noteworthy submissions by default
 		val setting = userSettings.getByUserId(user.getUserId).map { _.alertsSubmission }.getOrElse(UserSettings.AlertsNoteworthySubmissions)
 
@@ -77,7 +77,9 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 			roleGrantedUsers ++ explicitlyGrantedUsers
 		}
 
-		val adminsWithPermission = (usersWithPermission(assignment) ++ usersWithPermission(module) ++ usersWithPermission(module.adminDepartment)).toSeq
+		def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+
+		val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission).toSeq
 			.filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
 
 		// Contact the current marker, if there is one, and the submission has already been released
@@ -89,7 +91,6 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		} else {
 			Seq()
 		}
-
 		(adminsWithPermission ++ currentMarker).filter(canEmailUser)
 	}
 
