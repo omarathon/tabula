@@ -331,9 +331,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 }
 
 object Fixtures {
-	val TestDepartment = DepartmentInfo("Test Services", "xxx", null)
-	val TestSubDepartment = DepartmentInfo("Test Services - Undergraduates", "xxx-ug", null,Some("xxx"),Some("UG"))
-	val TestSubSubDepartment = DepartmentInfo("Test Services - Freshers", "xxx-ug1", null,Some("xxx-ug"),Some("UG,Y1"))
+	val TestDepartment = DepartmentInfo("Test Services", "Test Services", "xxx", null)
+	val TestSubDepartment = DepartmentInfo("Test Services - Undergraduates", "Test Services - UG", "xxx-ug", null, Some("xxx"), Some("UG"))
+	val TestSubSubDepartment = DepartmentInfo("Test Services - Freshers", "Test Services - Freshers", "xxx-ug1", null, Some("xxx-ug"), Some("UG,Y1"))
 
 	val TestModule1 = ModuleInfo("Test Module 1", "xxx01", "xxx-xxx01", DegreeType.Undergraduate)
 	val TestModule2 = ModuleInfo("Test Module 2", "xxx02", "xxx-xxx02", DegreeType.Undergraduate)
