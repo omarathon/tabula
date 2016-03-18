@@ -42,7 +42,7 @@
 	</td>
 	<td class="duration-col duration-col-department-wide toggle-cell">
 	</td>
-	<td data-datesort="${graph.deadline.millis?c!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
+	<td data-datesort="${(graph.deadline.millis?c)!''}" class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
 </tr>
 </#macro>
 
