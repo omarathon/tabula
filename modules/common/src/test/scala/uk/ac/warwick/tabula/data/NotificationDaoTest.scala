@@ -15,7 +15,7 @@ import org.hibernate.ObjectNotFoundException
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{PermissionsTarget, Permissions}
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
@@ -107,14 +107,22 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		assignment.module = module
 		session.save(assignment)
 
-		permissionsService.ensureUserGroupFor(module, ModuleManagerRoleDefinition) returns (UserGroup.ofUniversityIds)
-		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (UserGroup.ofUniversityIds)
-		permissionsService.getAllGrantedRolesFor(assignment) returns (Nil)
-		permissionsService.getAllGrantedRolesFor(module) returns (Nil)
-		permissionsService.getAllGrantedRolesFor(department) returns (Nil)
-		permissionsService.getGrantedPermission(assignment, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-		permissionsService.getGrantedPermission(module, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-		permissionsService.getGrantedPermission(department, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+		/** Had to construct this stream and then  extract assignment,module,dept from there to set expectations. If we set expectation
+			* on assignemnet,dept,module objects directly they are somehow still null (expectation don't work). SubmissionReceivedNotification works on stream
+			* elements now and it is possible for expectation to work properly they needd to be of same type - scala.collection.immutable.Stream.ConsWrapper
+			*
+			**/
+		val assignmentWithParents = Fixtures.withParents(assignment);
+
+
+		permissionsService.ensureUserGroupFor(assignmentWithParents(0), ModuleManagerRoleDefinition) returns (UserGroup.ofUniversityIds)
+		permissionsService.ensureUserGroupFor(assignmentWithParents(1), DepartmentalAdministratorRoleDefinition) returns (UserGroup.ofUniversityIds)
+		permissionsService.getAllGrantedRolesFor(assignmentWithParents(0)) returns (Nil)
+		permissionsService.getAllGrantedRolesFor(assignmentWithParents(1)) returns (Nil)
+		permissionsService.getAllGrantedRolesFor(assignmentWithParents(2)) returns (Nil)
+		permissionsService.getGrantedPermission(assignmentWithParents(0), Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+		permissionsService.getGrantedPermission(assignmentWithParents(1), Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
+		permissionsService.getGrantedPermission(assignmentWithParents(2), Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
 
 		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
 
@@ -124,6 +132,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		notificationDao.save(notification)
 		notification.target.id should not be (null)
 	}
+
 
 	@Test
 	def scheduledMeetings() {
