@@ -53,11 +53,11 @@
 		    <property name="password" value="${sits.db.password}"/>
 		</bean>
 
-		<bean id="membershipDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
-		    <property name="url" value="${membership.db.url}"/>
-		    <property name="username" value="${membership.db.username}"/>
-		    <property name="password" value="${membership.db.password}"/>
+		<bean id="fimDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		    <property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver"/>
+		    <property name="url" value="${fim.db.url}"/>
+		    <property name="username" value="${fim.db.username}"/>
+		    <property name="password" value="${fim.db.password}"/>
 		</bean>
 	</beans>
 
@@ -97,8 +97,8 @@
 	       <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
 
-	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		   <property name="jndiName" value="java:comp/env/jdbc/MembershipDS"/>
+	    <bean id="fimDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		   <property name="jndiName" value="java:comp/env/jdbc/FIMDS"/>
 		   <property name="lookupOnStartup" value="false" />
 		   <property name="proxyInterface" value="javax.sql.DataSource" />
 	    </bean>
@@ -107,7 +107,7 @@
 	<beans profile="sandbox,test">
 		<jdbc:embedded-database id="sitsDataSource" />
 
-		<jdbc:embedded-database id="membershipDataSource" />
+		<jdbc:embedded-database id="fimDataSource" />
 	</beans>
 
 	<beans profile="test">
@@ -127,8 +127,8 @@
 			p:dataSource-ref="sitsDataSource" />
 
 		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner"
-			p:dataSource-ref="membershipDataSource"
-			p:scripts="membership.sql" />
+			p:dataSource-ref="fimDataSource"
+			p:scripts="fim.sql" />
 
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>

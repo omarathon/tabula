@@ -18,6 +18,7 @@ addcp lib/build/servlet-api.jar
 addcp lib/build/jsp-api.jar
 addcp lib/build/log4j/log4j-1.2.16.jar
 addcp lib/build/ojdbc6.jar
+addcp lib/build/jtds-1.3.1.jar
 addcp src/console/scala
 addcp src/console/resources
 addcp src/main/resources

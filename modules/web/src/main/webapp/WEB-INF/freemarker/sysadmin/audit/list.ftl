@@ -27,7 +27,8 @@
 	</#assign>
 	<#assign helpLink>
 		<a href="#"
-			class="use-introductory<#if showIntro("audit-search-syntax")> auto</#if>"
+			class="use-introductory<#if showIntro("audit-search-syntax", "anywhere")> auto</#if>"
+		    data-hash="${introHash("audit-search-syntax", "anywhere")}"
 			data-title="Query terms"
 			data-trigger="click"
 			data-placement="right"

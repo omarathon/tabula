@@ -128,7 +128,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				</#assign>
 				<a href="#"
 				   id="membership-buttons-disabled-intro"
-				   class="use-introductory auto"
+				   class="use-introductory<#if showIntro("tier4-filtering", "anywhere")> auto</#if>"
 				   data-hash="${introHash("tier4-filtering", "anywhere")}"
 				   data-placement="bottom"
 				   data-html="true"

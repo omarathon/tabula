@@ -44,7 +44,7 @@
 				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].mark??><div>Mark: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].mark}%</div></#if>
 				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].grade??><div>Grade: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].grade}</div></#if>
 			<#else>
-				<div>Mark: ${feedback.studentViewableRawMark}</div>
+				<#if feedback.studentViewableRawMark??><div>Mark: ${feedback.studentViewableRawMark}</div></#if>
 				<#if feedback.studentViewableRawGrade??><div>Grade: ${feedback.studentViewableRawGrade}</div></#if>
 			</#if>
 		</div>
