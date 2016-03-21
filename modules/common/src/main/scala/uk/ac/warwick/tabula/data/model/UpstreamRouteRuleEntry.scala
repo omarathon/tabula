@@ -53,14 +53,23 @@ class UpstreamRouteRuleEntry extends GeneratedId {
 	def minModules_=(minModulesOption: Option[Int]): Unit = {
 		_minModules = JInteger(minModulesOption)
 	}
-	def minModules: Option[Int] = Option(_minModules)
+	def minModules: Option[Int] = if (_minModules == null) None else Option(_minModules)
 
 	@Column(name="max_modules")
 	private var _maxModules: JInteger = null
 	def maxModules_=(maxModulesOption: Option[Int]): Unit = {
 		_maxModules = JInteger(maxModulesOption)
 	}
-	def maxModules: Option[Int] = Option(_maxModules)
+	def maxModules: Option[Int] = if (_maxModules == null) None else Option(_maxModules)
 
+	def passes(moduleRegistrations: Seq[ModuleRegistration]): Boolean = {
+		val registrationsInList = moduleRegistrations.filter(mr => list.matches(mr.toSITSCode))
+		val cats = registrationsInList.map(mr => BigDecimal(mr.cats)).sum
+		val quantity = registrationsInList.size
+		(minCats.isEmpty || minCats.get <= cats) &&
+			(maxCats.isEmpty || maxCats.get >= cats) &&
+			(minModules.isEmpty || minModules.get <= quantity) &&
+			(maxModules.isEmpty || maxModules.get >= quantity)
+	}
 
 }

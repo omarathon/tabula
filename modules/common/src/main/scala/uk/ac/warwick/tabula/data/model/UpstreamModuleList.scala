@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type
 import org.hibernate.annotations.BatchSize
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import collection.JavaConverters._
 
 /**
 	* Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
@@ -38,6 +39,8 @@ class UpstreamModuleList {
 	@OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	val entries: JSet[UpstreamModuleListEntry] = JHashSet()
+
+	def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
 
 }
 
