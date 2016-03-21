@@ -31,13 +31,13 @@ class OvercattingOptionsController extends ExamsController
 	def params = GenerateExamGridMappingParameters
 
 	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
-		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.currentRoute, academicYear, scyd.yearOfStudy).getOrElse( // TODO replace with SCYD.route when available
+		upstreamRouteRuleService.findNormalLoad(scyd.route, academicYear, scyd.yearOfStudy).getOrElse(
 			ModuleRegistrationService.DefaultNormalLoad
 		)
 	}
 
 	private def routeRules(scyd: StudentCourseYearDetails, academicYear: AcademicYear): Seq[UpstreamRouteRule] = {
-		upstreamRouteRuleService.list(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy) // TODO replace with SCYD.route when available
+		upstreamRouteRuleService.list(scyd.route, academicYear, scyd.yearOfStudy)
 	}
 
 	@ModelAttribute("command")
