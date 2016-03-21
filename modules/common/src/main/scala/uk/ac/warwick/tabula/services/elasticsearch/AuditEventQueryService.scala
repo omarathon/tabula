@@ -106,6 +106,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		with AuditEventServiceComponent
 		with UserLookupComponent =>
 
+	final val MaxEventsLimit = 10000 // Elasticsearch index.max_result_window
+
 	/**
 		* Convert a list of ElasticSearch hits to a list of AuditEvents.
 		* Any events not found in the database will be returned as placeholder
@@ -170,7 +172,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 			else eventTypeQuery
 
 		client.execute {
-			searchFor query query
+			searchFor query query limit MaxEventsLimit
 		}.map { results =>
 			toAuditEvents(results.hits)
 		}
