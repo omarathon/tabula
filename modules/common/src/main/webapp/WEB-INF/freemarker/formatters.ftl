@@ -59,7 +59,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				</#assign>
 				<a href="#"
 				   id="related-depts-intro"
-				   class="use-introductory auto"
+				   class="use-introductory<#if showIntro("related-depts", "anywhere")> auto</#if>"
 				   data-hash="${introHash("related-depts", "anywhere")}"
 				   data-title="Related departments"
 				   data-placement="bottom"
@@ -109,7 +109,7 @@ preposition: Text to relate the title to the department name in the second line,
 					</#assign>
 					<a href="#"
 					   id="departmentsWithPermission-intro"
-					   class="use-introductory auto"
+					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
 					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
 					   data-title="Other departments"
 					   data-placement="bottom"

@@ -26,7 +26,7 @@
 				</#assign>
 				<a href="#"
 				   id="tier4-intro"
-				   class="use-introductory auto"
+				   class="use-introductory<#if showIntro("tier4-filtering", "anywhere")> auto</#if>"
 				   data-hash="${introHash("tier4-filtering", "anywhere")}"
 				   data-title="Tier 4 Filtering"
 				   data-placement="bottom"
