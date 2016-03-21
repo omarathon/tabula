@@ -4,8 +4,8 @@
 <#macro student_item profile bindpath="">
 	<#if profile.mostSignificantCourseDetails??>
 		<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-		<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.route?? >
-			<#local route = mostSignificantCourseDetails.route />
+		<#if mostSignificantCourseDetails?? && mostSignificantCourseDetails.currentRoute?? >
+			<#local route = mostSignificantCourseDetails.currentRoute />
 		</#if>
 		<li class="student well well-small"
 		data-f-gender="${(profile.gender.dbValue)!}"

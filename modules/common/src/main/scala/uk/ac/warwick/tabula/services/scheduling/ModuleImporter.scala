@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
+import dispatch.classic.{Http, url}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQuery, MappingSqlQueryWithParameters}
 import org.springframework.jdbc.core.SqlParameter
@@ -15,12 +16,13 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 
 import scala.collection.JavaConverters._
+import scala.util.parsing.json.JSON
 
-case class DepartmentInfo(val name: String, val code: String, val faculty: String, val parentCode:Option[String] = None, val filterName:Option[String] = None)
-case class ModuleInfo(val name: String, val code: String, val group: String, val degreeType: DegreeType)
-case class ModuleTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
-case class RouteInfo(val name: String, val code: String, val degreeType: DegreeType)
-case class RouteTeachingDepartmentInfo(val code: String, val departmentCode: String, val percentage: JBigDecimal)
+case class DepartmentInfo(fullName: String, shortName: String, code: String, faculty: String, parentCode: Option[String] = None, filterName: Option[String] = None)
+case class ModuleInfo(name: String, code: String, group: String, degreeType: DegreeType)
+case class ModuleTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
+case class RouteInfo(name: String, code: String, degreeType: DegreeType)
+case class RouteTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
 
 /**
  * Retrieves department and module information from an external location.
@@ -41,15 +43,35 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
-	var membership = Wire[DataSource]("membershipDataSource")
+	var httpClient = Wire[Http]
 
-	lazy val departmentInfoMappingQuery = new DepartmentInfoMappingQuery(membership)
+	var departmentsApiUrl: String = Wire.property("${departments.api}")
+
 	lazy val moduleInfoMappingQuery = new ModuleInfoMappingQuery(sits)
 	lazy val moduleTeachingDepartmentMappingQuery = new ModuleTeachingDepartmentInfoMappingQuery(sits)
 	lazy val routeInfoMappingQuery = new RouteInfoMappingQuery(sits)
 	lazy val routeTeachingDepartmentMappingQuery = new RouteTeachingDepartmentInfoMappingQuery(sits)
 
-	def getDepartments(): Seq[DepartmentInfo] = departmentInfoMappingQuery.execute.asScala
+	def getDepartments(): Seq[DepartmentInfo] = {
+		httpClient.when(_ == 200)(url(departmentsApiUrl) >- { json =>
+			JSON.parseFull(json) match {
+				case Some(departments: Seq[Map[String, Any]] @unchecked) =>
+					departments
+						.filterNot(_.get("deleted").exists(_ == true))
+						.filterNot(_.get("inUse").exists(_ == false))
+						.filter(_.get("code").collect { case s: String => s }.orNull.hasText)
+						.map { properties =>
+							DepartmentInfo(
+								fullName = properties.get("name").collect { case s: String => s }.orNull.safeTrim,
+								shortName = properties.get("shortName").collect { case s: String => s }.orNull.safeTrim,
+								code = properties.get("code").collect { case s: String => s }.orNull.toLowerCase,
+								faculty = properties.get("faculty").collect { case s: String => s }.orNull.safeTrim
+							)
+						}
+				case _ => throw new IllegalArgumentException(s"Couldn't parse JSON $json")
+			}
+		})
+	}
 
 	def getModules(deptCode: String): Seq[ModuleInfo] = moduleInfoMappingQuery.executeByNamedParam(JMap(
 		"department_code" -> deptCode.toUpperCase
@@ -69,8 +91,8 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 @Profile(Array("sandbox")) @Service
 class SandboxModuleImporter extends ModuleImporter {
 
-	def getDepartments: Seq[DepartmentInfo] =
-		SandboxData.Departments.toSeq map { case (code, d) => DepartmentInfo(d.name, d.code, d.facultyCode) }
+	def getDepartments(): Seq[DepartmentInfo] =
+		SandboxData.Departments.toSeq map { case (code, d) => DepartmentInfo(d.name, d.name, d.code, d.facultyCode) }
 
 	def getModules(deptCode: String): Seq[ModuleInfo] =
 		SandboxData.Departments.get(deptCode).map(_.modules.toSeq.map{ case (code, m) => ModuleInfo(m.name, m.code, deptCode + "-" + m.code, DegreeType.fromCode("UG")) }).getOrElse(Seq())
@@ -108,19 +130,6 @@ class SandboxModuleImporter extends ModuleImporter {
 
 object ModuleImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
-
-	final val GetDepartmentsSql = """
-		select
-			d.department_name name,
-			d.department_code code,
-			f.faculty_name faculty
-
-		from cmsowner.uow_departments d
-			join cmsowner.uow_faculties f
-				on d.faculty_code = f.faculty_code
-
-		where d.department_code is not null
-		"""
 
 	final val GetModulesSql = """
 		select substr(mod.mod_code,0,5) as code, max(mod.mod_name) as name, max(mod.sch_code) as scheme_code
@@ -174,15 +183,6 @@ object ModuleImporter {
 		where
 			psd.psd_pwyc = :route_code
 		"""
-
-	class DepartmentInfoMappingQuery(ds: DataSource) extends MappingSqlQuery[DepartmentInfo](ds, GetDepartmentsSql) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) =
-			DepartmentInfo(
-				rs.getString("name").safeTrim,
-				rs.getString("code").toLowerCase,
-				rs.getString("faculty").safeTrim)
-	}
 
 	class ModuleInfoMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[ModuleInfo](ds, GetModulesSql) {
 		declareParameter(new SqlParameter("department_code", Types.VARCHAR))

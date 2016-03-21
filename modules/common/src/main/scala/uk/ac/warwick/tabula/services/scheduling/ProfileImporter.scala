@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
+import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -44,10 +45,10 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
-	var membership = Wire[DataSource]("membershipDataSource")
+	var fim = Wire[DataSource]("fimDataSource")
 
-	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
-	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
+	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
+	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
 	lazy val applicantQuery = new ApplicantQuery(sits)
 
@@ -190,6 +191,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessSITSAcademicYearByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
+			"sce_route_code" -> route.code.toUpperCase,
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON",
 			"disability" -> "A",
@@ -394,6 +396,7 @@ object ProfileImporter extends Logging {
 			sce.sce_seq2 as sce_sequence_number,
 			sce.sce_dptc as enrolment_department_code,
 			sce.sce_udfj as sce_agreed_mark,
+			sce.sce_rouc as sce_route_code,
 
 			ssn.ssn_mrgs as mod_reg_status,
 
@@ -503,7 +506,7 @@ object ProfileImporter extends Logging {
 	}
 
 	val GetMembershipByUniversityIdInformation = """
-		select * from cmsowner.uow_current_members where university_number in (:universityIds)
+		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
 		"""
 
 	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
@@ -513,7 +516,7 @@ object ProfileImporter extends Logging {
 	}
 
 	val GetMembershipByDepartmentInformation = """
-		select * from cmsowner.uow_current_members where id_dept = :departmentCode
+		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and deptCode = :departmentCode
 		"""
 
 	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
@@ -524,23 +527,23 @@ object ProfileImporter extends Logging {
 
 	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true) =
 		MembershipMember(
-			universityId 						= rs.getString("university_number"),
-			departmentCode					= rs.getString("id_dept"),
-			email										= rs.getString("email"),
-			targetGroup							= rs.getString("desc_target_group"),
-			title										= rs.getString("pref_title"),
-			preferredForenames			= rs.getString("pref_forenames"),
-			preferredSurname				= rs.getString("pref_surname"),
-			position								= rs.getString("desc_position"),
-			dateOfBirth							= sqlDateToLocalDate(rs.getDate("dob")),
-			usercode								= rs.getString("its_usercode").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("university_number")}" else null),
-			startDate								= sqlDateToLocalDate(rs.getDate("dt_start")),
-			endDate									= sqlDateToLocalDate(rs.getDate("dt_end")),
-			modified								= sqlDateToDateTime(rs.getDate("dt_modified")),
-			phoneNumber							= rs.getString("tel_business"),
+			universityId 						= rs.getString("universityId"),
+			departmentCode					= rs.getString("deptCode"),
+			email										= rs.getString("mail"),
+			targetGroup							= rs.getString("targetGroup"),
+			title										= rs.getString("title"),
+			preferredForenames			= rs.getString("preferredFirstname"),
+			preferredSurname				= rs.getString("preferredSurname"),
+			position								= rs.getString("jobTitle"),
+			dateOfBirth							= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("dateOfBirth")),
+			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
+			startDate								= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("startDate")),
+			endDate									= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("endDate")),
+			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
+			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),
-			alternativeEmailAddress	= rs.getString("external_email"),
-			userType								= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
+			alternativeEmailAddress	= rs.getString("externalEmail"),
+			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup"))
 		)
 
 	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =

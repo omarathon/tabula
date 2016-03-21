@@ -53,8 +53,8 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 						s.userId,
 						null,
 						null,
-						scd.map(_.route.code).getOrElse(""),
-						scd.map(_.route.name).getOrElse("")
+						scd.map(_.currentRoute.code).getOrElse(""),
+						scd.map(_.currentRoute.name).getOrElse("")
 					)
 				})
 			} else if (hasBeenFiltered) {

@@ -33,7 +33,7 @@ abstract class ExtensionRequestNotification
 		Map(
 			"relationships" -> relationships,
 			"scdCourse" -> scd.course,
-			"scdRoute" -> scd.route,
+			"scdRoute" -> scd.currentRoute,
 			"scdAward" -> scd.award
 		)
 	}).getOrElse(Map())

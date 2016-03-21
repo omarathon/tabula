@@ -31,7 +31,7 @@ class OvercattingOptionsController extends ExamsController
 	def params = GenerateExamGridMappingParameters
 
 	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
-		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.route, academicYear, scyd.yearOfStudy).getOrElse( // TODO replace with SCYD.route when available
+		upstreamRouteRuleService.findNormalLoad(scyd.studentCourseDetails.currentRoute, academicYear, scyd.yearOfStudy).getOrElse( // TODO replace with SCYD.route when available
 			ModuleRegistrationService.DefaultNormalLoad
 		)
 	}
@@ -67,9 +67,6 @@ class OvercattingOptionsController extends ExamsController
 				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
 			)
 		).getOrElse("")
-		scyd.overcattingMarkOverrides.foreach(overcattingMarkOverrides =>
-			overcattingMarkOverrides.foreach{ case(module, mark) => overcatView.newModuleMarks.put(module, mark.toString) }
-		)
 		Mav("exams/grids/generate/overcat").noLayoutIf(ajax)
 	}
 
@@ -109,7 +106,7 @@ class OvercattingOptionsView(val department: Department, val academicYear: Acade
 	override val user: CurrentUser = null // Never used
 
 	private lazy val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(
-		scyd.studentCourseDetails.route,
+		scyd.studentCourseDetails.currentRoute,
 		academicYear,
 		scyd.yearOfStudy
 	).map(_.module)

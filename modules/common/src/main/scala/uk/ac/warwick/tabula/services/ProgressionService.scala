@@ -107,7 +107,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		* Regulation defined at: http://www2.warwick.ac.uk/services/aro/dar/quality/categories/examinations/conventions/fyboe
 		*/
 	private def suggestedResultFirstYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
-		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.route, scyd.academicYear, scyd.yearOfStudy)
+		val coreRequiredModules = moduleRegistrationService.findCoreRequiredModules(scyd.studentCourseDetails.currentRoute, scyd.academicYear, scyd.yearOfStudy)
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
@@ -206,30 +206,22 @@ abstract class AbstractProgressionService extends ProgressionService {
 	}
 
 	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Option[BigDecimal] = {
-		val weightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, scyd.overcattingMarkOverrides.getOrElse(Map()))
+		val weightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
 		val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
 		if (cats > normalLoad) {
-			if (scyd.overcattingModules.isDefined) {
+			if (moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(None), Map(), normalLoad, routeRules).size <= 1) {
+				// If the student has overcatted, but there's only one valid subset, just choose the mean mark
+				weightedMeanMark
+			} else if (scyd.overcattingModules.isDefined) {
 				// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
 				// calculate the overcatted mark from that subset
-				val overcatMark = moduleRegistrationService.weightedMeanYearMark(
-					scyd.moduleRegistrations.filter(mr => scyd.overcattingModules.get.contains(mr.module)),
-					scyd.overcattingMarkOverrides.getOrElse(Map())
-				)
+				val overcatMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations.filter(mr => scyd.overcattingModules.get.contains(mr.module)), Map())
 				// Providing they're both defined, return the larger
 				if (weightedMeanMark.isDefined && overcatMark.isDefined) {
 					Option(Seq(weightedMeanMark.get, overcatMark.get).max)
 				} else {
 					None
 				}
-			} else if (moduleRegistrationService.overcattedModuleSubsets(
-				scyd.toGenerateExamGridEntity(None),
-				scyd.overcattingMarkOverrides.getOrElse(Map()),
-				normalLoad,
-				routeRules
-			).size <= 1) {
-				// If the student has overcatted, but there's only one valid subset, just choose the mean mark
-				weightedMeanMark
 			}  else {
 				None
 			}

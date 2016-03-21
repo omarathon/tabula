@@ -16,7 +16,7 @@ class ImportModuleListsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingModuleListsImport) {
 			exceptionResolver.reportExceptions {
-				//ImportModuleListsCommand().apply()
+				ImportModuleListsCommand().apply()
 				ImportRouteRulesCommand().apply()
 			}
 		}

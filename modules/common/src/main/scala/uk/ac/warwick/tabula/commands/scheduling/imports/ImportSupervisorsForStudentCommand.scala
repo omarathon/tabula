@@ -19,7 +19,7 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
 	var relationshipService = Wire.auto[RelationshipService]
 
 	def applyInternal() {
-		if (studentCourseDetails.route != null && studentCourseDetails.route.degreeType == Postgraduate) {
+		if (studentCourseDetails.currentRoute != null && studentCourseDetails.currentRoute.degreeType == Postgraduate) {
 			transactional() {
 				importSupervisors()
 			}

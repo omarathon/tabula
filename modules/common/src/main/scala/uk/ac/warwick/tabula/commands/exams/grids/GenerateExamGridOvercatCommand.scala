@@ -54,7 +54,6 @@ class GenerateExamGridOvercatCommandInternal(
 		scyd.overcattingModules = modules
 		scyd.overcattingChosenBy = user.apparentUser
 		scyd.overcattingChosenDate = DateTime.now
-		scyd.overcattingMarkOverrides = overwrittenMarks
 		studentCourseYearDetailsDao.saveOrUpdate(scyd)
 		modules
 	}
@@ -71,9 +70,6 @@ trait PopulateGenerateExamGridOvercatCommand extends PopulateOnForm {
 				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
 			)
 		).getOrElse("")
-		scyd.overcattingMarkOverrides.foreach(overcattingMarkOverrides =>
-			overcattingMarkOverrides.foreach{case(module, mark) => newModuleMarks.put(module, mark.toString) }
-		)
 	}
 }
 

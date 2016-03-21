@@ -66,7 +66,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 			val route = new Route
 			route.degreeType = Postgraduate
-			studentCourseDetails.route = route
+			studentCourseDetails.currentRoute = route
 			session.saveOrUpdate(route)
 		}
 
