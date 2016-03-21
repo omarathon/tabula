@@ -40,10 +40,12 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 	with StudentCourseYearDetailsDaoComponent =>
 
 	override def applyInternal() = {
-		val updatedEntities = filteredEntities.map{ case(entity, subsetList) =>
+		val updatedEntities = filteredEntities.map { case (entity, subsetList) =>
 			val scyd = entity.studentCourseYearDetails.get
+
 			// Set the choice to be the first one (the one with the highest mark)
 			val chosenModuleSubset = subsetList.head
+
 			// Save the overcat choice
 			scyd.overcattingModules = chosenModuleSubset._2.map(_.module)
 			scyd.overcattingChosenBy = user.apparentUser
@@ -51,6 +53,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 			studentCourseYearDetailsDao.saveOrUpdate(scyd)
 			entity -> subsetList.head
 		}
+
 		// Re-fetch the entities to account for the newly chosen subset
 		GenerateExamGridCheckAndApplyOvercatCommand.Result(fetchEntities, updatedEntities.toMap)
 	}
@@ -132,10 +135,9 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	).map(entity => entity ->
 		// Build the subsets...
 		moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map()), normalLoad, routeRules)
-	).filter(
-		// Only keep entities where a valid subset exists...
-		_._2.nonEmpty
-	).filter{ case(entity, subsets) => entity.overcattingModules match {
+	).filter { case (_, subsets) =>
+		subsets.nonEmpty
+	}.filter { case (entity, subsets) => entity.overcattingModules match {
 		// And either their current overcat choice is empty...
 		case None => true
 		// Or the highest mark is now a different set of modules (in case the rules have changed)
