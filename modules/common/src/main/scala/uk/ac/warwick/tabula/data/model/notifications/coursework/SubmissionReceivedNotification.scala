@@ -91,7 +91,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		} else {
 			Seq()
 		}
-		(adminsWithPermission ++ currentMarker).filter(canEmailUser)
+		(adminsWithPermission ++ currentMarker).distinct.filter(canEmailUser)
 	}
 
 }
