@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventIndexService, ElasticsearchIndexingResult, NotificationIndexService, ProfileIndexService}
 import uk.ac.warwick.tabula.services.healthchecks.QuartzJdbc
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
-import uk.ac.warwick.tabula.services.scheduling.jobs.{ImportAcademicDataJob, ImportAssignmentsJob, ImportModuleListsJob, ImportProfilesJob, ProcessScheduledNotificationsJob}
+import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.Routes

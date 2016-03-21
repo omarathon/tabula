@@ -9,11 +9,11 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.scheduling.{ImportRowTracker, PropertyCopying, SitsStudentRow}
+import uk.ac.warwick.tabula.helpers.scheduling.{PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling._
 
-class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
+class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
@@ -55,8 +55,6 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 			studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
 		}
 
-		val key = new StudentCourseYearKey(studentCourseYearDetails.studentCourseDetails.scjCode, studentCourseYearDetails.sceSequenceNumber)
-		importRowTracker.studentCourseYearDetailsSeen.add(key)
 
 		studentCourseYearDetails
 	}

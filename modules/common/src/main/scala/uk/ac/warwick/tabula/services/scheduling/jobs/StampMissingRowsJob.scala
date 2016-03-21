@@ -5,9 +5,8 @@ import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportProfilesCommand, StampMissingRowsCommand, StampMissingRowsCommandInternal}
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
@@ -15,24 +14,13 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Profile(Array("scheduling"))
 @DisallowConcurrentExecution
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
-class ImportProfilesJob extends AutowiredJobBean {
-
-	private val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	private val scheduler = Wire[Scheduler]
+class StampMissingRowsJob extends AutowiredJobBean {
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingProfilesImport)
 			exceptionResolver.reportExceptions {
-				val deptCode = Option(context.getMergedJobDataMap.getString("departmentCode")).flatMap(_.maybeText)
-				if (deptCode.isEmpty) {
-					moduleAndDepartmentService.allDepartments.foreach(dept =>
-						scheduler.scheduleNow[ImportProfilesJob]("departmentCode" -> dept.code)
-					)
-				} else {
-					val cmd = new ImportProfilesCommand()
-					cmd.deptCode = deptCode.get
-					cmd.apply()
-				}
+				val cmd = StampMissingRowsCommand()
+				cmd.apply()
 			}
 
 	}

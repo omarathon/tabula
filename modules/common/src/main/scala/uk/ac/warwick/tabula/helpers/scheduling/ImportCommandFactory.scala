@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.scheduling.{AwardImporter, CourseImporter, 
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, RelationshipService}
 
 class ImportCommandFactory() {
-	val rowTracker = new ImportRowTracker
+
 	var test = false
 
 	// This lot are all normally auto-wired within the import commands.  Declared here in order to allow us to
@@ -34,8 +34,8 @@ class ImportCommandFactory() {
 	// needed by Command
 	var maintenanceModeService: MaintenanceModeService = _
 
-	def createImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember) = {
-		val command = new ImportStudentCourseCommand(row, stuMem, this)
+	def createImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMember) = {
+		val command = new ImportStudentCourseCommand(rows, stuMem, this)
 
 		if (test) {
 			// needed directly by ImportStudentCourseCommand
@@ -57,7 +57,7 @@ class ImportCommandFactory() {
 	}
 
 	def createImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails) = {
-		val command = new ImportStudentCourseYearCommand(row, studentCourseDetails, rowTracker)
+		val command = new ImportStudentCourseYearCommand(row, studentCourseDetails)
 		if (test) { // FIXME horrible hack
 			command.modeOfAttendanceImporter = modeOfAttendanceImporter
 			command.profileService = profileService

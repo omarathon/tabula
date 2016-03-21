@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import java.sql.ResultSet
-
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands._
@@ -18,9 +16,10 @@ object ImportStudentRowCommand {
 	def apply(
 		member: MembershipInformation,
 		ssoUser: User,
-		resultSet: ResultSet,
-		importCommandFactory: ImportCommandFactory) = {
-		new ImportStudentRowCommandInternal(member, ssoUser, resultSet, importCommandFactory)
+		rows: Seq[SitsStudentRow],
+		importCommandFactory: ImportCommandFactory
+	) = {
+		new ImportStudentRowCommandInternal(member, ssoUser, rows, importCommandFactory)
 			with Command[Member]
 			with AutowiringProfileServiceComponent
 			with AutowiringTier4RequirementImporterComponent
@@ -36,9 +35,9 @@ object ImportStudentRowCommand {
 class ImportStudentRowCommandInternal(
 	val member: MembershipInformation,
 	val ssoUser: User,
-	val resultSet: ResultSet,
+	val rows: Seq[SitsStudentRow],
 	var importCommandFactory: ImportCommandFactory
-) extends ImportMemberCommand(member, ssoUser, Some(resultSet))
+) extends ImportMemberCommand(member, ssoUser, None, rows.headOption)
 	with Describable[Member]
 	with ImportStudentRowCommandState
 	with PropertyCopying
@@ -46,17 +45,20 @@ class ImportStudentRowCommandInternal(
 
 	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent =>
 
-	// these properties are from membership but may be overwritten by the SITS data (working theory)
-	this.nationality = resultSet.getString("nationality")
-	this.mobileNumber = resultSet.getString("mobile_number")
+	val studentRow = rows.headOption
 
-	val row = new SitsStudentRow(resultSet)
-	this.deceased = row.deceased
+	studentRow.foreach { row =>
+		// these properties are from membership but may be overwritten by the SITS data (working theory)
+		this.nationality = row.nationality.orNull
+		this.mobileNumber = row.mobileNumber.orNull
+
+		this.deceased = row.deceased
+	}
 
 	override def applyInternal(): Member = {
 		transactional() {
 			// set appropriate disability object iff a non-null code is retrieved - I <3 scala options
-			profileService.getDisability(row.disabilityCode).foreach(this.disability = _)
+			studentRow.flatMap(_.disabilityCode).foreach(code => profileService.getDisability(code).foreach(this.disability = _))
 
 			val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
@@ -80,14 +82,13 @@ class ImportStudentRowCommandInternal(
 				case _ => (true, new StudentMember(universityId))
 			}
 
-			if (!importCommandFactory.rowTracker.universityIdsSeen.contains(member.universityId)) {
-				saveStudentDetails(isTransient, member)
+			saveStudentDetails(isTransient, member)
+
+			rows.groupBy(_.scjCode).foreach { case (_, rowsForCourse) =>
+				val studentCourseDetails = importCommandFactory.createImportStudentCourseCommand(rowsForCourse, member).apply()
+				member.attachStudentCourseDetails(studentCourseDetails)
 			}
 
-			val studentCourseDetails = importCommandFactory.createImportStudentCourseCommand(row, member).apply()
-			member.attachStudentCourseDetails(studentCourseDetails)
-
-			importCommandFactory.rowTracker.universityIdsSeen.add(member.universityId)
 
 			member
 		}
