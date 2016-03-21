@@ -116,7 +116,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
-			.add(is("scd.currentRoute", route))
+			.add(is("route", route))
 			.add(is("enrolledOrCompleted", true))
 
 		if (eagerLoad) {
