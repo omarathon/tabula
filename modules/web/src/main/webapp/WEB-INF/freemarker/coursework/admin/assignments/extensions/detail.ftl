@@ -3,7 +3,7 @@
 <#assign extension = command.extension />
 
 <#assign feedbackNotice>
-	<#if extension.approved>
+	<#if extension.approved && extension.feedbackDeadline??>
 		<br>Feedback for this student is currently due <@fmt.date date=extension.feedbackDeadline capitalise=false at=true />.
 	</#if>
 </#assign>
