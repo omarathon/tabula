@@ -118,7 +118,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
 			val universityIdsInMembership =
 				universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
-					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala.toSeq
+					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala
 						.map { _.universityId }
 				}
 
@@ -271,7 +271,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					userType
 				)
 			)
-		}.toSeq
+		}
 
 	def studentsForDepartment(department: SandboxData.Department) =
 		department.routes.values.flatMap { route =>
@@ -563,8 +563,8 @@ object ProfileImporter extends Logging {
 			position								= rs.getString("jobTitle"),
 			dateOfBirth							= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("dateOfBirth")),
 			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
-			startDate								= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("startDate")),
-			endDate									= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("endDate")),
+			startDate								= rs.getString("startDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).orNull,
+			endDate									= rs.getString("endDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).orNull,
 			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
 			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),
@@ -572,30 +572,27 @@ object ProfileImporter extends Logging {
 			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup"))
 		)
 
-	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
-		(Option(date) map { new LocalDate(_) }).orNull
-
 	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
 		(Option(date) map { new DateTime(_) }).orNull
 
 }
 
 case class MembershipMember(
-	val universityId: String = null,
-	val departmentCode: String = null,
-	val email: String = null,
-	val targetGroup: String = null,
-	val title: String = null,
-	val preferredForenames: String = null,
-	val preferredSurname: String = null,
-	val position: String = null,
-	val dateOfBirth: LocalDate = null,
-	val usercode: String = null,
-	val startDate: LocalDate = null,
-	val endDate: LocalDate = null,
-	val modified: DateTime = null,
-	val phoneNumber: String = null,
-	val gender: Gender = null,
-	val alternativeEmailAddress: String = null,
-	val userType: MemberUserType
+	universityId: String = null,
+	departmentCode: String = null,
+	email: String = null,
+	targetGroup: String = null,
+	title: String = null,
+	preferredForenames: String = null,
+	preferredSurname: String = null,
+	position: String = null,
+	dateOfBirth: LocalDate = null,
+	usercode: String = null,
+	startDate: LocalDate = null,
+	endDate: LocalDate = null,
+	modified: DateTime = null,
+	phoneNumber: String = null,
+	gender: Gender = null,
+	alternativeEmailAddress: String = null,
+	userType: MemberUserType
 )

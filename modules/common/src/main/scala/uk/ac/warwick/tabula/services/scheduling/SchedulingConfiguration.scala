@@ -52,7 +52,12 @@ object SchedulingConfiguration {
 			val trigger = new PersistableSimpleTriggerFactoryBean
 			trigger.setName(name)
 			trigger.setJobDetail(jobDetail)
-			trigger.setRepeatInterval(repeatInterval.toMillis)
+			if (repeatInterval > 0.seconds) {
+				trigger.setRepeatInterval(repeatInterval.toMillis)
+			} else {
+				trigger.setRepeatInterval(1.minute.toMillis) // Have to set something or it defaults to zero and throws
+				trigger.setRepeatCount(0)
+			}
 			trigger.setMisfireInstruction(misfireInstruction)
 			trigger.afterPropertiesSet()
 			trigger.getObject
@@ -89,6 +94,7 @@ object SchedulingConfiguration {
 		// Imports
 		CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
 		CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
+		SimpleTriggerJob[ImportProfilesSingleDepartmentJob](repeatInterval = 0.seconds), // Register the trigger only, don't repeat or schedule
 		CronTriggerJob[StampMissingRowsJob](cronExpression = "23 0 0 * * ?"), // 11:00pm
 		CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
 		CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am

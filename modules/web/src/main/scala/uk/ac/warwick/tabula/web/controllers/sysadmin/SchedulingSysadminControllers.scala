@@ -201,7 +201,12 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 
 	@RequestMapping(method = Array(POST))
 	def importProfiles(@RequestParam deptCode: String) = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]("departmentCode" -> deptCode)))
+		if (deptCode.maybeText.isEmpty) {
+			Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]()))
+		} else {
+			Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> deptCode)))
+		}
+
 	}
 }
 

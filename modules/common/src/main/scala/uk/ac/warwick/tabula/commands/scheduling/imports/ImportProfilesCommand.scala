@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
@@ -14,7 +15,9 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.ProfileIndexService
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
+import scala.util.Try
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
 
@@ -67,7 +70,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							m.member.universityId -> new AnonymousUser()
 						}.toMap
 					else benchmarkTask("Fetch user details") {
-						logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+						logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
 						membershipInfos.map { m =>
 							val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
@@ -81,18 +84,23 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 						}.toMap
 					}
 
-				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members")
+				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members (batch #${batchNumber + 1})")
 				val importMemberCommands = benchmarkTask("Fetch member details") {
 					transactional() {
 						profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)
 					}
 				}
 
-				logger.info("Updating members")
+				logger.info(s"Updating members for department=${department.code}, batch=#${batchNumber + 1}")
 				benchmarkTask("Update members") {
 				// each apply has its own transaction
 					transactional() {
-						importMemberCommands map { _.apply() }
+						importMemberCommands.foreach(cmd => Try(cmd.apply()).recover {
+							case e: StaleObjectStateException =>
+								logger.error(s"Tried to import ${cmd.universityId} in department ${department.code} but member was already imported")
+								logger.error(e.getMessage)
+							case e => throw e
+						})
 						session.flush()
 					}
 				}
