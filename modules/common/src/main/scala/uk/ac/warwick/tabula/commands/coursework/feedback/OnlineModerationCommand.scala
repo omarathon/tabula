@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl, FinaliseFeedbackCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{FinaliseFeedbackComponent, FinaliseFeedbackComponentImpl}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{ModeratorRejectedNotification, ReleaseToMarkerNotification, ReturnToMarkerNotification}
@@ -69,8 +69,12 @@ abstract class OnlineModerationCommand(
 			newFeedback
 		})
 
-		val firstMarkerFeedback = parentFeedback.retrieveFirstMarkerFeedback
-		secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
+		val firstMarkerFeedback = parentFeedback.getFirstMarkerFeedback.getOrElse(throw new IllegalArgumentException("Could not find first marker feedback"))
+		secondMarkerFeedback = parentFeedback.getSecondMarkerFeedback.getOrElse {
+			val mf = new MarkerFeedback(parentFeedback)
+			parentFeedback.secondMarkerFeedback = mf
+			mf
+		}
 		val markerFeedback = Seq(firstMarkerFeedback, secondMarkerFeedback)
 
 		// if the second-marker feedback is already rejected then do nothing - UI should prevent this
@@ -112,10 +116,12 @@ abstract class OnlineModerationCommand(
 	override def validate(errors: Errors) {
 		super.fieldValidation(errors)
 
-		if (!Option(approved).isDefined)
+		if (Option(approved).isEmpty)
 			errors.rejectValue("approved", "markers.moderation.approved.notDefined")
 		else if(!approved && !rejectionComments.hasText)
 			errors.rejectValue("rejectionComments", "markers.moderation.rejectionComments.empty")
+
+
 	}
 
 }

@@ -6,22 +6,22 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.{UserAware, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, NextMarkerFeedback, MarkingCompletedState, MarkingCompletedCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UserAware}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingCompletedCommand, MarkingCompletedState, CreatesNextMarkerFeedback}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-completed"))
 class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[SelfValidating]
-	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with NextMarkerFeedback
+	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with CreatesNextMarkerFeedback
 		with CanProxy
 
 	@ModelAttribute("markingCompletedCommand")
@@ -53,16 +53,14 @@ class MarkingCompletedController extends CourseworkController {
 		@ModelAttribute("markingCompletedCommand") form: MarkingCompletedCommand,
 		errors: Errors
 	) = {
-		val isUserALaterMarker = form.markerFeedback.exists { markerFeedback =>
-			def checkNextMarkerFeedbackForMarker(thisMarkerFeedback: MarkerFeedback): Boolean = {
-				form.nextMarkerFeedback(thisMarkerFeedback).exists { mf =>
-					if (mf.getMarkerUsercode.getOrElse("") == user.apparentId)
-						true
-					else
-						checkNextMarkerFeedbackForMarker(mf)
-				}
+		val isUserALaterMarker = form.markerFeedback.asScala.exists { markerFeedback =>
+			val isSecondMarkerForStudent = assignment.getStudentsSecondMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
+			val isThirdMarkerForStudent = assignment.getStudentsThirdMarker(markerFeedback.feedback.universityId).exists(_.getUserId == user.apparentId)
+			markerFeedback.getFeedbackPosition match {
+				case FirstFeedback => isSecondMarkerForStudent || isThirdMarkerForStudent
+				case SecondFeedback => isThirdMarkerForStudent
+				case _ => false
 			}
-			checkNextMarkerFeedbackForMarker(markerFeedback)
 		}
 
 		val nextStageRole = requestInfo

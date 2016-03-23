@@ -35,9 +35,11 @@ class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Moc
 	@Test
 	def secondMarkerTest() {
 		assignment.feedbacks.foreach{feedback =>
-			val fmFeedback = feedback.retrieveFirstMarkerFeedback
+			val fmFeedback = new MarkerFeedback(feedback)
+			feedback.firstMarkerFeedback = fmFeedback
 			fmFeedback.state = MarkingState.MarkingCompleted
-			val smFeedback = feedback.retrieveSecondMarkerFeedback
+			val smFeedback = new MarkerFeedback(feedback)
+			feedback.secondMarkerFeedback = smFeedback
 			smFeedback.state = MarkingState.ReleasedForMarking
 		}
 
