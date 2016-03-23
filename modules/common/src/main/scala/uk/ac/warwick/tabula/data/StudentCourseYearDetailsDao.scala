@@ -10,8 +10,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
-import scala.collection.mutable
-
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
@@ -21,7 +19,7 @@ trait StudentCourseYearDetailsDao {
 	def getFreshIds: Seq[String]
 	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
-	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String]
+	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 
 	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails]
@@ -79,7 +77,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 	// TODO - put these two methods in a service
-	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String] =
+	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String] =
 			keys.flatMap {
 				key => getIdFromKey(key)
 			}

@@ -101,39 +101,48 @@ trait ImportCommandFactorySetup
 	with ImportStudentCourseYearCommandSetup {}
 
 trait MockedResultSet extends Mockito {
-	val rs = smartMock[ResultSet]
-	val rsMetaData = smartMock[ResultSetMetaData]
-	rs.getMetaData returns rsMetaData
 
-	rsMetaData.getColumnCount returns 4
-	rsMetaData.getColumnName(1) returns "gender"
-	rsMetaData.getColumnName(2) returns "year_of_study"
-	rsMetaData.getColumnName(3) returns "spr_code"
-	rsMetaData.getColumnName(4) returns "route_code"
-	rsMetaData.getColumnName(5) returns "sce_route_code"
+	def getResultSet(scjCode: String = "0672089/2", sceSequenceNumber: Int = 1): ResultSet = {
+		val rs = smartMock[ResultSet]
+		val rsMetaData = smartMock[ResultSetMetaData]
+		rs.getMetaData returns rsMetaData
 
-	rs.getString("gender") returns "M"
-	rs.getInt("year_of_study") returns 3
-	rs.getString("spr_code") returns "0672089/2"
-	rs.getString("route_code") returns "C100"
-	rs.getString("sce_route_code") returns "C100"
-	rs.getString("spr_tutor1") returns "0070790"
-	rs.getString("homeDepartmentCode") returns "PH"
-	rs.getString("department_code") returns "PH"
-	rs.getString("scj_code") returns "0672089/2"
-	rs.getDate("begin_date") returns new Date(DateTime.now.minusYears(2).getMillis)
-	rs.getDate("end_date") returns new Date(DateTime.now.plusYears(1).getMillis)
-	rs.getDate("expected_end_date") returns new Date(DateTime.now.plusYears(2).getMillis)
-	rs.getInt("sce_sequence_number") returns 1
-	rs.getString("enrolment_status_code") returns "F"
-	rs.getString("mode_of_attendance_code") returns "P"
-	rs.getString("sce_academic_year") returns "10/11"
-	rs.getString("most_signif_indicator") returns "Y"
-	rs.getString("mod_reg_status") returns "CON"
-	rs.getString("course_code") returns "UESA-H612"
-	rs.getString("disability") returns "Q"
-	rs.getString("award_code") returns "BA"
-	rs.getBigDecimal("sce_agreed_mark") returns new JBigDecimal(66.666666)
+		rsMetaData.getColumnCount returns 6
+		rsMetaData.getColumnName(1) returns "gender"
+		rsMetaData.getColumnName(2) returns "year_of_study"
+		rsMetaData.getColumnName(3) returns "spr_code"
+		rsMetaData.getColumnName(4) returns "route_code"
+		rsMetaData.getColumnName(5) returns "sce_route_code"
+		rsMetaData.getColumnName(6) returns "disability"
+
+		rs.getString("preferred_forename") returns "Mathew"
+		rs.getString("family_name") returns "Mannion"
+		rs.getDate("date_of_birth") returns new Date(new LocalDate(1984, DateTimeConstants.AUGUST, 19).toDateTimeAtStartOfDay.getMillis)
+		rs.getString("gender") returns "M"
+		rs.getInt("year_of_study") returns 3
+		rs.getString("spr_code") returns "0672089/2"
+		rs.getString("route_code") returns "C100"
+		rs.getString("sce_route_code") returns "C100"
+		rs.getString("spr_tutor1") returns "0070790"
+		rs.getString("homeDepartmentCode") returns "PH"
+		rs.getString("department_code") returns "PH"
+		rs.getString("scj_code") returns scjCode
+		rs.getDate("begin_date") returns new Date(DateTime.now.minusYears(2).getMillis)
+		rs.getDate("end_date") returns new Date(DateTime.now.plusYears(1).getMillis)
+		rs.getDate("expected_end_date") returns new Date(DateTime.now.plusYears(2).getMillis)
+		rs.getInt("sce_sequence_number") returns sceSequenceNumber
+		rs.getString("enrolment_status_code") returns "F"
+		rs.getString("mode_of_attendance_code") returns "P"
+		rs.getString("sce_academic_year") returns "10/11"
+		rs.getString("most_signif_indicator") returns "Y"
+		rs.getString("mod_reg_status") returns "CON"
+		rs.getString("course_code") returns "UESA-H612"
+		rs.getString("disability") returns "Q"
+		rs.getString("award_code") returns "BA"
+		rs.getBigDecimal("sce_agreed_mark") returns new JBigDecimal(66.666666)
+	}
+
+	val rs = getResultSet()
 }
 
 // scalastyle:off magic.number
@@ -160,8 +169,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			userType				= Student)
 	}
 
-	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup
-	with MemberSetup {
+	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup	with MemberSetup {
 		val rs: ResultSet
 
 		val mac = MembershipInformation(mm)
@@ -174,13 +182,13 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		tier4RequirementImporter.hasTier4Requirement("0672089") returns false
 
-		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, importCommandFactory) with ComponentMixins
+		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), importCommandFactory) with ComponentMixins
 		rowCommand.memberDao = memberDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 		rowCommand.profileService = profileService
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
 
-		val row = new SitsStudentRow(rs)
+		val row = SitsStudentRow(rs)
 	}
 
 	trait Environment extends MockedResultSet with EnvironmentWithoutResultSet
@@ -211,7 +219,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			row.sprStatusCode = "P"
 			row.endDate = new DateTime().minusMonths(6).toLocalDate
 
-			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, student)
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), student)
 			courseCommand.applyInternal()
 
 			rel1.endDate.toLocalDate should be (row.endDate)
@@ -251,7 +259,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 
-			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, smartMock[StudentMember])
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), smartMock[StudentMember])
 
 			importCommandFactory.relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -285,7 +293,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			rowCommand.applyInternal() match {
 				case stuMem: StudentMember =>
-					val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, stuMem)
+					val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), stuMem)
 					courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be {false}
 					studentCourseDetails.missingFromImportSince should be (null)
 					studentCourseDetails.missingFromImportSince = DateTime.now
@@ -521,8 +529,38 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			// override to test for attempted import of unknown disability
 			rs.getString("disability") returns "Mystery"
-			student = rowCommand.applyInternal().asInstanceOf[StudentMember]
+			val newRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), importCommandFactory) with ComponentMixins
+			newRowCommand.memberDao = memberDao
+			newRowCommand.moduleAndDepartmentService = modAndDeptService
+			newRowCommand.profileService = profileService
+			newRowCommand.tier4RequirementImporter = tier4RequirementImporter
+			student = newRowCommand.applyInternal().asInstanceOf[StudentMember]
 			student.disability should be (None)
+		}
+	}
+
+	@Test def testImportStudentCourseYearCommandMultipleYearsAndCourses() {
+		new Environment {
+			val row1 = SitsStudentRow(getResultSet("0770884/1", 1))
+			val row2 = SitsStudentRow(getResultSet("0770884/1", 2))
+			val row3 = SitsStudentRow(getResultSet("0770884/2", 3))
+			val row4 = SitsStudentRow(getResultSet("0770884/2", 2))
+
+			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
+
+			val thisRowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(row1, row2, row3, row4), importCommandFactory) with ComponentMixins
+			thisRowCommand.memberDao = memberDao
+			thisRowCommand.moduleAndDepartmentService = modAndDeptService
+			thisRowCommand.profileService = profileService
+			thisRowCommand.tier4RequirementImporter = tier4RequirementImporter
+
+			val result = thisRowCommand.applyInternal().asInstanceOf[StudentMember]
+			result.freshStudentCourseDetails.size should be (2)
+			result.freshStudentCourseDetails.find(_.scjCode == "0770884/1").exists(_.freshStudentCourseYearDetails.size == 2)
+			result.freshStudentCourseDetails.find(_.scjCode == "0770884/2").exists(_.freshStudentCourseYearDetails.size == 2)
+
+			verify(importCommandFactory.studentCourseDetailsDao, times(2)).saveOrUpdate(any[StudentCourseDetails])
+			verify(importCommandFactory.studentCourseYearDetailsDao, times(4)).saveOrUpdate(any[StudentCourseYearDetails])
 		}
 	}
 }
