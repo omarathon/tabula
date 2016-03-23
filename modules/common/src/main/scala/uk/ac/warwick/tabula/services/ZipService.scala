@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -18,7 +19,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import scala.collection.JavaConverters._
 
 @Service
-class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent with Logging {
+class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent with Logging with TaskBenchmarking {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
@@ -61,14 +62,14 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 	 */
 	def getAllFeedbackZips(assignment: Assignment): RenderableFile =
 		getZip(resolvePathForFeedback(assignment),
-			assignment.feedbacks.asScala flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
+			assignment.feedbacks.asScala.flatMap(getFeedbackZipItems)
 		)
 
 	/**
 	 * Find all file attachment fields and any attachments in them, as a single list.
 	 * TODO This doesn't check for duplicate file names
 	 */
-	def getSubmissionZipItems(submission: Submission): Seq[ZipItem] = {
+	def getSubmissionZipItems(submission: Submission): Seq[ZipItem] = benchmarkTask(s"Create zip item for $submission") {
 		val allAttachments = submission.allAttachments
 		val user = userLookup.getUserByUserId(submission.userId)
 		val assignment = submission.assignment
@@ -96,27 +97,28 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 	 * Get a zip containing these submissions. If there is more than one submission
 	 * for a user, the zip _might_ work but look weird.
 	 */
-	def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
-		createUnnamedZip(submissions flatMap getSubmissionZipItems, progressCallback)
+	def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = benchmarkTask("Create zip") {
+		createUnnamedZip(submissions.flatMap(getSubmissionZipItems), progressCallback)
+	}
 
 	/**
 		* Get a zip containing these feedbacks.
 	*/
 	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
-		createUnnamedZip(feedbacks flatMap getFeedbackZipItems, progressCallback)
+		createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback)
 
 	/**
 	 * Get a zip containing these marker feedbacks.
 	 */
 	def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): RenderableFile =
-		createUnnamedZip(markerFeedbacks flatMap getMarkerFeedbackZipItems)
+		createUnnamedZip(markerFeedbacks.flatMap(getMarkerFeedbackZipItems))
 
 	/**
 	 * A zip of submissions with a folder for each student.
 	 */
 	def getAllSubmissionsZip(assignment: Assignment): RenderableFile =
 		getZip(resolvePathForSubmission(assignment),
-			assignment.submissions.asScala flatMap getSubmissionZipItems)
+			assignment.submissions.asScala.flatMap(getSubmissionZipItems))
 
 	/**
 	 * A zip of feedback templates for each student registered on the assignment

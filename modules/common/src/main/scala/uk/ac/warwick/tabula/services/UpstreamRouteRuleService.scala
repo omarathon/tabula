@@ -12,6 +12,7 @@ trait UpstreamRouteRuleService {
 	def saveOrUpdate(list: UpstreamRouteRule): Unit
 	def removeAll(): Unit
 	def findNormalLoad(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Option[BigDecimal]
+	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule]
 
 }
 
@@ -35,6 +36,9 @@ abstract class AbstractUpstreamRouteRuleService extends UpstreamRouteRuleService
 			Option(relevantRules.flatMap(_.minCats).max)
 		}
 	}
+
+	def list(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[UpstreamRouteRule] =
+		upstreamRouteRuleDao.list(route, academicYear, yearOfStudy)
 
 }
 

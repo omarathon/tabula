@@ -564,7 +564,7 @@ object ProfileImporter extends Logging {
 			dateOfBirth							= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("dateOfBirth")),
 			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
 			startDate								= rs.getString("startDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).orNull,
-			endDate									= rs.getString("endDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).orNull,
+			endDate									= rs.getString("endDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
 			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
 			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),

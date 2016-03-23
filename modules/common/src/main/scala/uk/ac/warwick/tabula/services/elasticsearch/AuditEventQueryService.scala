@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{QueryDefinition, RichSearchHit}
+import com.sksamuel.elastic4s.{QueryDefinition, RichSearchHit, RichSearchResponse}
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
@@ -165,15 +165,24 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	private def eventsOfType(eventType: String, restrictions: QueryDefinition*): Future[Seq[AuditEvent]] = {
 		val eventTypeQuery = termQuery("eventType", eventType)
 
-		val query =
+		val searchQuery =
 			if (restrictions.nonEmpty) bool { must(restrictions :+ eventTypeQuery) }
 			else eventTypeQuery
 
-		client.execute {
-			searchFor query query
-		}.map { results =>
-			toAuditEvents(results.hits)
+		def scrollNextResults(results: RichSearchResponse): Future[Seq[AuditEvent]] = {
+			val events = toAuditEvents(results.hits)
+
+			if (events.isEmpty || results.scrollIdOpt.isEmpty) Future.successful(events)
+			else forScroll(results.scrollId).map { nextEvents => events ++ nextEvents }
 		}
+
+		def forScroll(id: String): Future[Seq[AuditEvent]] =
+			client.execute(searchScroll(id).keepAlive("15s")).flatMap(scrollNextResults)
+
+		// Keep scroll context open for 15 seconds, fetch 100 at a time for performance
+		client.execute {
+			searchFor.query(searchQuery).scroll("15s").limit(100)
+		}.flatMap(scrollNextResults)
 	}
 
 	private def parsedEventsOfType(eventType: String, restrictions: QueryDefinition*): Future[Seq[AuditEvent]] =

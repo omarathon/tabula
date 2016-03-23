@@ -94,7 +94,7 @@
 			</#assign>
 			<a href="#"
 			   id="no-route-departments-intro"
-			   class="use-introductory auto"
+			   class="use-introductory<#if showIntro("no-route-departments-intro", "anywhere")> auto</#if>"
 			   data-hash="${introHash("no-route-departments-intro", "anywhere")}"
 			   data-placement="bottom"
 			   data-html="true"

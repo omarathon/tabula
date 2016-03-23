@@ -166,7 +166,7 @@
 			</#assign>
 			<a href="#"
 			   id="profiles-missing-info"
-			   class="use-introductory auto"
+			   class="use-introductory<#if showIntro("profiles-missing-info", "anywhere")> auto</#if>"
 			   data-hash="${introHash("profiles-missing-info", "anywhere")}"
 			   data-placement="bottom"
 			   data-html="true"
