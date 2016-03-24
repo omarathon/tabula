@@ -1,85 +1,74 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
-import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
+import org.springframework.beans.{BeanWrapper, PropertyAccessorFactory}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
-import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, StudentCourseDetailsDao}
-import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.ModuleRegistrationDao
 import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationRow
 
-
-class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]]
-	with Logging with Unaudited with PropertyCopying {
+class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow], modules: Set[Module])
+	extends Command[Seq[ModuleRegistration]] with Logging with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var moduleRegistrationDao = Wire[ModuleRegistrationDao]
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
-	val scjCode = modRegRow.scjCode
-	lazy val tabulaModule = moduleAndDepartmentService.getModuleBySitsCode(modRegRow.sitsModuleCode)
-	val cats: JBigDecimal = modRegRow.cats
-	val assessmentGroup = modRegRow.assessmentGroup
-	val selectionStatusCode = modRegRow.selectionStatusCode
-	val occurrence = modRegRow.occurrence
-	val academicYear = AcademicYear.parse(modRegRow.academicYear)
-	val selectionStatus: ModuleSelectionStatus = null
-	val actualMark = modRegRow.actualMark
-	val actualGrade = modRegRow.actualGrade
-	val agreedMark = modRegRow.agreedMark
-	val agreedGrade = modRegRow.agreedGrade
 
-	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
-		tabulaModule match {
-			case None =>
-				logger.warn("No stem module for " + modRegRow.sitsModuleCode + " found in Tabula for " + scjCode + " - maybe it hasn't been imported yet?")
-				None
-			case Some(module: Module) =>
-				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode)
 
-				studentCourseDetailsDao.getByScjCode(scjCode) match {
-					case None =>
-						logger.warn("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
-						None
-					case Some(scd: StudentCourseDetails) =>
-						val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(
-							throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
-						)
-						val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear, occurrence)
+	override def applyInternal(): Seq[ModuleRegistration] = {
+		logger.debug("Importing module registration for student " + course.scjCode)
 
-						val isTransient = moduleRegistrationExisting.isEmpty
+		courseRows.map { modRegRow =>
+			val module = modules.find(_.code == Module.stripCats(modRegRow.sitsModuleCode).get.toLowerCase).get
+			val existingRegistration = course.moduleRegistrations.find(mr =>
+				mr.module.code == module.code
+					&& mr.academicYear == AcademicYear.parse(modRegRow.academicYear)
+					&& mr.cats == modRegRow.cats
+					&& mr.occurrence == modRegRow.occurrence
+			)
 
-						val moduleRegistration = moduleRegistrationExisting match {
-							case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
-							case _ =>
-								new ModuleRegistration(scd, module, cats, academicYear, occurrence)
-						}
+			val isTransient = existingRegistration.isEmpty
 
-						val commandBean = new BeanWrapperImpl(ImportModuleRegistrationsCommand.this)
-						val moduleRegistrationBean = new BeanWrapperImpl(moduleRegistration)
+			val moduleRegistration = existingRegistration match {
+				case Some(moduleRegistration: ModuleRegistration) =>
+					moduleRegistration
+				case _ =>
+					val mr = new ModuleRegistration(
+						course,
+						module,
+						modRegRow.cats,
+						AcademicYear.parse(modRegRow.academicYear),
+						modRegRow.occurrence
+					)
+					course.addModuleRegistration(mr)
+					mr
+			}
 
-						val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
-							copySelectionStatus(moduleRegistrationBean, selectionStatusCode) |
-							copyBigDecimal(moduleRegistrationBean, "actualMark", actualMark) |
-							copyBigDecimal(moduleRegistrationBean, "agreedMark", agreedMark)
+			val rowBean = PropertyAccessorFactory.forBeanPropertyAccess(modRegRow)
+			val moduleRegistrationBean = PropertyAccessorFactory.forBeanPropertyAccess(moduleRegistration)
 
-						if (isTransient || hasChanged) {
-							logger.debug("Saving changes for " + moduleRegistration)
+			val hasChanged = copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
+				copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+				copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
+				copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
 
-							moduleRegistration.lastUpdatedDate = DateTime.now
-							moduleRegistrationDao.saveOrUpdate(moduleRegistration)
-						}
+			if (isTransient || hasChanged) {
+				logger.debug("Saving changes for " + moduleRegistration)
 
-						Some(moduleRegistration)
-				}
+				moduleRegistration.lastUpdatedDate = DateTime.now
+				moduleRegistrationDao.saveOrUpdate(moduleRegistration)
+			}
+
+			moduleRegistration
+
 		}
-	})
+	}
 
 	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String) = {
 		val property = "selectionStatus"
@@ -102,6 +91,6 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade"
 	)
 
-	override def describe(d: Description) = d.properties("scjCode" -> scjCode)
+	override def describe(d: Description) = d.properties("scjCode" -> course.scjCode)
 
 }
