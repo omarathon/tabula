@@ -6,8 +6,7 @@
 	<#if extension.approved>
 		<#if extension.feedbackDeadline??>
 		<br>Feedback for this student is currently due <@fmt.date date=extension.feedbackDeadline capitalise=false at=true />.
-		</#if>
-		<#if !extension.feedbackDeadline??>
+		<<#else>
 		<br>Feedback for this student has no due date.
 		</#if>
 	</#if>
