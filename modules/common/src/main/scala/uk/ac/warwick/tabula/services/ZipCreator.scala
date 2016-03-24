@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.{FileInputStream, File, InputStream, OutputStream}
+import java.io.{File, FileInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.zip.Deflater
@@ -9,6 +9,7 @@ import com.google.common.io.Files
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
 import org.springframework.http.HttpStatus
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.FileHasherComponent
 import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -48,7 +49,7 @@ case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends Z
  * be re-used later, so it's better to delete and try recreating later
  * than to keep serving half a corrupt file).
  */
-trait ZipCreator extends Logging {
+trait ZipCreator extends Logging with TaskBenchmarking {
 	self: ObjectStorageServiceComponent with FileHasherComponent =>
 
 	import ZipCreator._
@@ -76,7 +77,7 @@ trait ZipCreator extends Logging {
 	 * Create a new Zip with a randomly generated name.
 	 */
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = {
+	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = benchmarkTask("Create unnamed zip") {
 		writeZip(unusedName, items, progressCallback)
 	}
 
@@ -103,8 +104,13 @@ trait ZipCreator extends Logging {
 			val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
 
 			// Upload the zip to the object store
-			objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
-			objectStorageService.renderable(objectKey(name), Some(name)).get
+			benchmarkTask("Push zip to object store") {
+				objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
+			}
+
+			benchmarkTask("Return renderable zip") {
+				objectStorageService.renderable(objectKey(name), Some(name)).get
+			}
 		} finally {
 			if (!file.delete()) file.deleteOnExit()
 		}
@@ -128,14 +134,16 @@ trait ZipCreator extends Logging {
 	 */
 	def invalidate(name: String) = objectStorageService.delete(objectKey(name))
 
-	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }) {
+	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }): Unit = benchmarkTask("Write zip items") {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
 			items.zipWithIndex.foreach { case(item, index) => item match {
 				case file: ZipFileItem if Option(file.input).nonEmpty && file.length > 0 =>
-					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
-					copy(file.input, zip)
-					zip.closeArchiveEntry()
-					progressCallback(index, items.size)
+					benchmarkTask(s"Write ${file.name}") {
+						zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
+						copy(file.input, zip)
+						zip.closeArchiveEntry()
+						progressCallback(index, items.size)
+					}
 				case file: ZipFileItem =>
 					// do nothing
 					progressCallback(index, items.size)

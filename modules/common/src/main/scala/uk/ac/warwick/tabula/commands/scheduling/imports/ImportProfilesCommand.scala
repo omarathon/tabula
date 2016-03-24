@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
@@ -7,13 +8,16 @@ import uk.ac.warwick.tabula.commands.{Command, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, ImportRowTracker}
+import uk.ac.warwick.tabula.helpers.scheduling.ImportCommandFactory
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.ProfileIndexService
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
+import scala.collection.JavaConverters._
+import scala.util.Try
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
 
@@ -41,7 +45,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def applyInternal() {
 		if (features.profiles) {
 			benchmarkTask("Import members") {
-				doMemberDetails(madService.getDepartmentByCode(deptCode))
+				doMemberDetails(madService.getDepartmentByCode(deptCode).getOrElse(
+					throw new IllegalArgumentException(s"Could not find department with code $deptCode")
+				))
 			}
 			logger.info("Import completed")
 		}
@@ -49,117 +55,90 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 
-	def doMemberDetails(department : Option[Department]) {
+	def doMemberDetails(department: Department) {
 		logger.info("Importing member details")
 		val importCommandFactory = new ImportCommandFactory
-		val importStart = DateTime.now
 
-		val departments = department match {
-			case Some(d) => Seq(d)
-			case None => madService.allDepartments
-		}
+		logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
+			benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
+				val users: Map[UniversityId, User] =
+					if (department.code == ProfileImporter.applicantDepartmentCode)
+						membershipInfos.map { m =>
+							val user = new AnonymousUser
+							user.setUserId(m.member.universityId)
+							user.setWarwickId(m.member.universityId)
+							m.member.universityId -> new AnonymousUser()
+						}.toMap
+					else benchmarkTask("Fetch user details") {
+						logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon (batch #${batchNumber + 1})")
 
-		departments.foreach { department =>
-			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
-				benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
-					val users: Map[UniversityId, User] =
-						if (department.code == ProfileImporter.applicantDepartmentCode)
-							membershipInfos.map { m =>
-								val user = new AnonymousUser
-								user.setUserId(m.member.universityId)
-								user.setWarwickId(m.member.universityId)
-								m.member.universityId -> new AnonymousUser()
-							}.toMap
-						else benchmarkTask("Fetch user details") {
-							logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+						membershipInfos.map { m =>
+							val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-							membershipInfos.map { m =>
-								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
+							val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
+								case FoundUser(u) => u
+								case _ => userLookup.getUserByUserId(usercode)
+							}
 
-								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = true) match {
-									case FoundUser(u) => u
-									case _ => userLookup.getUserByUserId(usercode)
-								}
-
-								m.member.universityId -> user
-							}.toMap
-						}
-
-					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members")
-					val importMemberCommands = benchmarkTask("Fetch member details") {
-						transactional() {
-							profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)
-						}
+							m.member.universityId -> user
+						}.toMap
 					}
 
-					logger.info("Updating members")
-					benchmarkTask("Update members") {
-					// each apply has its own transaction
-						transactional() {
-							importMemberCommands map { _.apply() }
-							session.flush()
-						}
-					}
-
-					benchmarkTask("Update visa fields on StudentCourseYearDetails records") {
-						transactional() {
-							updateVisa(importMemberCommands)
-						}
-					}
-
-					benchmarkTask("Update module registrations and small groups") {
-						transactional() {
-							updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
-						}
-					}
-
-					benchmarkTask("Update accredited prior learning") {
-						transactional() {
-							updateAccreditedPriorLearning(membershipInfos, users)
-						}
-					}
-
-					benchmarkTask("Rationalise relationships") {
-						transactional() {
-							rationaliseRelationships(importMemberCommands)
-						}
-					}
-
+				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members (batch #${batchNumber + 1})")
+				val importMemberCommands = benchmarkTask("Fetch member details") {
 					transactional() {
-						val members = importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
-						members.foreach(member => {
-							member.lastImportDate = DateTime.now
-							memberDao.saveOrUpdate(member)
-						})
-
-						profileIndexService.indexItemsWithoutNewTransaction(members)
+						profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)
 					}
 				}
+
+				logger.info(s"Updating members for department=${department.code}, batch=#${batchNumber + 1}")
+				benchmarkTask("Update members") {
+				// each apply has its own transaction
+					transactional() {
+						importMemberCommands.foreach(cmd => Try(cmd.apply()).recover {
+							case e: StaleObjectStateException =>
+								logger.error(s"Tried to import ${cmd.universityId} in department ${department.code} but member was already imported")
+								logger.error(e.getMessage)
+							case e => throw e
+						})
+						session.flush()
+					}
+				}
+
+				benchmarkTask("Update visa fields on StudentCourseYearDetails records") {
+					transactional() {
+						updateVisa(importMemberCommands)
+					}
+				}
+
+				benchmarkTask("Update module registrations and small groups") {
+					transactional() {
+						updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
+					}
+				}
+
+				benchmarkTask("Update accredited prior learning") {
+					transactional() {
+						updateAccreditedPriorLearning(membershipInfos, users)
+					}
+				}
+
+				benchmarkTask("Rationalise relationships") {
+					transactional() {
+						rationaliseRelationships(importMemberCommands)
+					}
+				}
+
+				transactional() {
+					val members = importMemberCommands.map(_.universityId).distinct.flatMap(u => memberDao.getByUniversityId(u))
+					members.foreach(member => {
+						member.lastImportDate = DateTime.now
+						memberDao.saveOrUpdate(member)
+					})
+
+					profileIndexService.indexItemsWithoutNewTransaction(members)
+				}
 			}
-		}
-
-		if (department.isEmpty)
-			benchmarkTask("Stamp missing rows") {
-				stampMissingRows(importCommandFactory.rowTracker, importStart)
-		}
-	}
-
-	def stampMissingRows(importRowTracker: ImportRowTracker, importStart: DateTime) {
-		transactional() {
-			logger.warn("Timestamping missing rows.  Found "
-					+ importRowTracker.universityIdsSeen.size + " students, "
-					+ importRowTracker.scjCodesSeen.size + " studentCourseDetails, "
-					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.")
-
-			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
-			logger.warn("Timestamping missing students")
-			memberDao.stampMissingFromImport(importRowTracker.newStaleUniversityIds, importStart)
-
-			logger.warn("Timestamping missing studentCourseDetails")
-			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.newStaleScjCodes, importStart)
-
-			logger.warn("Timestamping missing studentCourseYearDetails")
-			studentCourseYearDetailsDao.stampMissingFromImport(importRowTracker.newStaleScydIds, importStart)
 		}
 	}
 
@@ -274,7 +253,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					val members = importMemberCommands map { _.apply() }
 
 					// update missingFromSitsSince field in this student's member and course records:
-					updateMissingForIndividual(universityId, importCommandFactory.rowTracker)
+					updateMissingForIndividual(universityId)
 
 					session.flush()
 
@@ -307,31 +286,20 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 	}
 
-	def updateMissingForIndividual(universityId: String, importRowTracker: ImportRowTracker): Unit = {
-		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach { member =>
-			updateMissingForIndividual(member, importRowTracker)
-		}
-	}
-
-	/*
-	 * Called after refreshing an individual student.
-	 *
-	 * For any rows for this member which were previously not seen in the import but have now re-emerged,
-	 * record that fact by setting missingFromSitsImportSince to null.
-	 *
-	 * Also, for any rows for this member which were previously seen but which are now missing,
-	 * record that fact by setting missingFromSiteImportSince to now.
-	 */
-	def updateMissingForIndividual(member: Member, importRowTracker: ImportRowTracker) {
-		member match {
+	def updateMissingForIndividual(universityId: String): Unit = {
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
 			case stu: StudentMember =>
+				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
+				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
+				val scjCodesSeen = sitsRows.map(_.scjCode).distinct
+				val studentCourseYearKeysSeen = sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
 
 				// update missingFromImportSince on member
-				if (stu.missingFromImportSince != null && importRowTracker.universityIdsSeen.contains(stu.universityId)) {
+				if (stu.missingFromImportSince != null && universityIdsSeen.contains(stu.universityId)) {
 					stu.missingFromImportSince = null
 					memberDao.saveOrUpdate(stu)
 				}
-				else if (stu.missingFromImportSince == null && !importRowTracker.universityIdsSeen.contains(stu.universityId)) {
+				else if (stu.missingFromImportSince == null && !universityIdsSeen.contains(stu.universityId)) {
 					var missingSince = stu.missingFromImportSince
 					stu.missingFromImportSince = DateTime.now
 					missingSince = stu.missingFromImportSince
@@ -340,15 +308,11 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				}
 
 				for (scd <- stu.freshOrStaleStudentCourseDetails) {
-
 					// on studentCourseDetails
-					if (scd.missingFromImportSince != null
-							&& importRowTracker.scjCodesSeen.contains(scd.scjCode)) {
+					if (scd.missingFromImportSince != null && scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = null
 						studentCourseDetailsDao.saveOrUpdate(scd)
-					}
-					else if (scd.missingFromImportSince == null
-							&& !importRowTracker.scjCodesSeen.contains(scd.scjCode)) {
+					} else if (scd.missingFromImportSince == null && !scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = DateTime.now
 						studentCourseDetailsDao.saveOrUpdate(scd)
 					}
@@ -356,13 +320,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					// and on studentCourseYearDetails
 					for (scyd <- scd.freshOrStaleStudentCourseYearDetails) {
 						val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
-						if (scyd.missingFromImportSince != null
-								&& importRowTracker.studentCourseYearDetailsSeen.contains(key)) {
+						if (scyd.missingFromImportSince != null && studentCourseYearKeysSeen.contains(key)) {
 							scyd.missingFromImportSince = null
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
-						}
-						else if (scyd.missingFromImportSince == null
-								&& !importRowTracker.studentCourseYearDetailsSeen.contains(key)) {
+						} else if (scyd.missingFromImportSince == null && !studentCourseYearKeysSeen.contains(key)) {
 							scyd.missingFromImportSince = DateTime.now
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
 						}
@@ -385,4 +346,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 	def describe(d: Description) = d.property("deptCode" -> deptCode)
+
+	// Makes the related event easier to spot in the logs
+	override def describeResult(d: Description, result: Unit) = d.property("deptCode" -> deptCode)
 }

@@ -185,7 +185,7 @@
 					   title="Download a zip of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
 					   href="<@routes.coursework.downloadmarkersubmissions assignment=assignment marker=marker />"
 					   data-container="body">
-						<i class="icon-download"></i> Download submissions
+						<i class="icon-download"></i> Download all submissions
 					</a>
 				</li>
 				<#if hasFirstMarkerFeedback>
