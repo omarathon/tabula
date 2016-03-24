@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling.jobs
 
-import org.quartz.{JobExecutionContext, Scheduler}
+import org.quartz.{DisallowConcurrentExecution, JobExecutionContext, Scheduler}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 @Component
 @Profile(Array("scheduling"))
+@DisallowConcurrentExecution
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportProfilesJob extends AutowiredJobBean {
 
@@ -33,6 +34,7 @@ class ImportProfilesJob extends AutowiredJobBean {
 
 @Component
 @Profile(Array("scheduling"))
+@DisallowConcurrentExecution
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportProfilesSingleDepartmentJob extends AutowiredJobBean with Logging {
 
