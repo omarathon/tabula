@@ -40,7 +40,14 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal() = {
-		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy, eagerLoad = true).map(scyd => scyd.toGenerateExamGridEntity())
+		studentCourseYearDetailsDao.findByCourseRouteYear(
+			academicYear,
+			course,
+			route,
+			yearOfStudy,
+			eagerLoad = true,
+			disableFreshFilter = true
+		).map(scyd => scyd.toGenerateExamGridEntity())
 	}
 
 }
