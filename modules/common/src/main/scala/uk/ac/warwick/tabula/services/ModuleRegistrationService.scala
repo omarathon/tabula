@@ -121,7 +121,10 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 			}
 			subsetsToReturn.map(modRegs =>
 				(weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))
-			).sortBy(_._1).reverse
+			).sortBy { case (mark, modRegs) =>
+				// Add a definitive sort so subsets with the same mark always come out the same order
+				(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
+			}.reverse
 		}
 	}
 
