@@ -190,7 +190,6 @@ class Assignment
 			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
 
 		// allow 20 days from the submission day only for submissions that aren't late. Late submissions are excluded from this calculation
-		//submission.isLate -> workingDaysHelper.datePlusWorkingDays(submission.submittedDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
 		if (submission.isLate)
 			None
 		else

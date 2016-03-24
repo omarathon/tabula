@@ -119,6 +119,8 @@ trait ReportWorld extends TestBase with Mockito {
 	val extension = new Extension(idFormat(3))
 	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
+	extension.assignment =  assignmentSix
+	extension.userId = "cuxxxx"
 	assignmentSix.extensions = Seq(extension)
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module) = {

@@ -28,11 +28,11 @@
 	<td><@fmt.date date=job.createdDate seconds=true /></td>
 	<td>${job.jobType}</td>
 	<td>
-		<#if job.user.exists>
+		<#if job.user?? && job.user.exists>
 			${job.user.toString}
 		</#if>
 	</td>
-	<td>${job.status!''}</td>
+	<td>${job.id} -${job.status!''}</td>
 	<td>
 		<#if job.finished && job.succeeded>
 			<span class="label label-success">Succeeded</span>
