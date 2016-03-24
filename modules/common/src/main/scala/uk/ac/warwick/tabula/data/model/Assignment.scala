@@ -182,7 +182,7 @@ class Assignment
 	}
 
 
-	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
+	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
 		// If we have an extension, use the extension's expiry date
 		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
 
@@ -194,7 +194,7 @@ class Assignment
 			None
 		else
 			Some(baseFeedbackDeadline)
-	}.flatten
+	}
 
 	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>
 		val now = LocalDate.now
