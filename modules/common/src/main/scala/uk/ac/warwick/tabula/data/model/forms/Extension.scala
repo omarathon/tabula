@@ -142,10 +142,15 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	// feedback deadline taking the extension into account
-	def feedbackDeadline = expiryDate.map(ed =>
-		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed)
-	)
+	// calculate deadline only if not late
+	def feedbackDeadline = {
+		val withinDeadline = assignment.findSubmission(universityId).flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
+		withinDeadline.collect { case (true) =>
+			expiryDate.map(ed =>
+				workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed))
+		}.flatten
+	}
+
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
 
