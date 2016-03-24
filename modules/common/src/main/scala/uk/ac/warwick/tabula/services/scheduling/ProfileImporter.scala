@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
-import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -24,6 +24,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 case class MembershipInformation(member: MembershipMember)
 
@@ -503,22 +504,22 @@ object ProfileImporter extends Logging {
 
 	val GetApplicantInformation = f"""
 		select
-			stu.stu_code as university_number,
-			'SL' as id_dept,
-			stu.stu_caem as email,
-			'Applicant' as desc_target_group,
-			stu.stu_titl as pref_title,
-			stu.stu_fusd as pref_forenames,
-			stu.stu_surn as pref_surname,
-			'Applicant' as desc_position,
-			stu.stu_dob as dob,
-			null as its_usercode,
-			stu.stu_begd as dt_start,
-			stu.stu_endd as dt_end,
-			stu.stu_updd as dt_modified,
-			null as tel_business,
+			stu.stu_code as universityId,
+			'SL' as deptCode,
+			stu.stu_caem as mail,
+			'Applicant' as targetGroup,
+			stu.stu_titl as title,
+			stu.stu_fusd as preferredFirstname,
+			stu.stu_surn as preferredSurname,
+			'Applicant' as jobTitle,
+			to_char(stu.stu_dob, 'yyyy/mm/dd') as dateOfBirth,
+			null as cn,
+			to_char(stu.stu_begd, 'yyyy/mm/dd') as startDate,
+			to_char(stu.stu_endd, 'yyyy/mm/dd') as endDate,
+			stu.stu_updd as last_modification_date,
+			null as telephoneNumber,
 			stu.stu_gend as gender,
-			stu.stu_haem as external_email
+			stu.stu_haem as externalEmail
 		from $sitsSchema.ins_stu stu
 		where
 			stu.stu_sta1 like '%%A' and -- applicant
@@ -527,8 +528,12 @@ object ProfileImporter extends Logging {
 		"""
 
 	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
+
+		val SqlDatePattern = "yyyy/MM/dd"
+		val SqlDateTimeFormat = DateTimeFormat.forPattern(SqlDatePattern)
+
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetMembershipByUniversityIdInformation = """
@@ -551,7 +556,7 @@ object ProfileImporter extends Logging {
 		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
 
-	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true) =
+	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =
 		MembershipMember(
 			universityId 						= rs.getString("universityId"),
 			departmentCode					= rs.getString("deptCode"),
@@ -561,10 +566,10 @@ object ProfileImporter extends Logging {
 			preferredForenames			= rs.getString("preferredFirstname"),
 			preferredSurname				= rs.getString("preferredSurname"),
 			position								= rs.getString("jobTitle"),
-			dateOfBirth							= ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate(rs.getString("dateOfBirth")),
+			dateOfBirth							= rs.getString("dateOfBirth").maybeText.map(dateTimeFormater.parseLocalDate).orNull,
 			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
-			startDate								= rs.getString("startDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).orNull,
-			endDate									= rs.getString("endDate").maybeText.map(ISODateTimeFormat.dateHourMinuteSecondMillis().parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
+			startDate								= rs.getString("startDate").maybeText.flatMap(d => Try(dateTimeFormater.parseLocalDate(d)).toOption).orNull,
+			endDate									= rs.getString("endDate").maybeText.map(dateTimeFormater.parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
 			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
 			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),
