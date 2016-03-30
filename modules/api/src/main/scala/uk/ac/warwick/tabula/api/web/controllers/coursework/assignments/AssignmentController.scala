@@ -34,16 +34,58 @@ object AssignmentController {
 	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest with BindListener with SelfValidating
 }
 
-@Controller
-@RequestMapping(value = Array("/v1/module/{module}/assignments/{assignment}"), params = Array("!universityId"))
-class AssignmentController extends ApiController
-	with GetAssignmentApi with GetAssignmentApiFullOutput
-	with EditAssignmentApi
-	with DeleteAssignmentApi
+abstract class AssignmentController extends ApiController
 	with AssignmentToJsonConverter
 	with AssessmentMembershipInfoToJsonConverter
 	with AssignmentStudentToJsonConverter
-	with ReplacingAssignmentStudentMessageResolver {
+	with ReplacingAssignmentStudentMessageResolver
+	with GetAssignmentApiFullOutput {
+
+	@ModelAttribute("getCommand")
+	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+		SubmissionAndFeedbackCommand(module, assignment)
+
+	def getAssignmentMav(command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, assignment: Assignment) = {
+		if (errors.hasErrors) {
+			Mav(new JSONErrorView(errors))
+		} else {
+			val results = command.apply()
+
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok"
+			) ++ outputJson(assignment, results)))
+		}
+	}
+}
+
+@Controller
+@RequestMapping(
+	method = Array(RequestMethod.GET),
+	value = Array("/v1/module/{module}/assignments/{assignment}"),
+	params = Array("!universityId"),
+	produces = Array("application/json"))
+class GetAssignmentController extends AssignmentController with GetAssignmentApi with GetAssignmentApiFullOutput {
+	validatesSelf[SelfValidating]
+}
+
+@Controller
+@RequestMapping(
+	method = Array(RequestMethod.PUT),
+	value = Array("/v1/module/{module}/assignments/{assignment}"),
+	params = Array("!universityId"),
+	produces = Array("application/json"))
+class EditAssignmentController extends AssignmentController with EditAssignmentApi {
+	validatesSelf[SelfValidating]
+}
+
+@Controller
+@RequestMapping(
+	method = Array(RequestMethod.DELETE),
+	value = Array("/v1/module/{module}/assignments/{assignment}"),
+	params = Array("!universityId"),
+	produces = Array("application/json"))
+class DeleteAssignmentController extends AssignmentController with DeleteAssignmentApi {
 	validatesSelf[SelfValidating]
 }
 
@@ -56,24 +98,13 @@ class AssignmentCreateSubmissionController extends ApiController
 }
 
 trait GetAssignmentApi {
-	self: ApiController with GetAssignmentApiOutput =>
-
-	@ModelAttribute("getCommand")
-	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-		SubmissionAndFeedbackCommand(module, assignment)
+	self: AssignmentController with GetAssignmentApiOutput =>
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def get(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val results = command.apply()
+	def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment) = {
+		// Return the GET representation
+		getAssignmentMav(command, errors, assignment)
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok"
-			) ++ outputJson(assignment, results)))
-		}
 	}
 
 	@InitBinder(Array("getCommand"))
@@ -83,7 +114,6 @@ trait GetAssignmentApi {
 			override def toString(filter: CourseworkFilter) = filter.getName
 		})
 	}
-
 }
 
 trait GetAssignmentApiOutput {
@@ -101,7 +131,7 @@ trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
 }
 
 trait EditAssignmentApi {
-	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter with GetAssignmentApi =>
+	self: AssignmentController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
 	@ModelAttribute("editCommand")
 	def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand =
@@ -121,7 +151,7 @@ trait EditAssignmentApi {
 			val assignment = command.apply()
 
 			// Return the GET representation
-			get(getCommand(assignment.module, assignment), errors, assignment)
+			getAssignmentMav(getCommand(assignment.module, assignment), errors, assignment)
 		}
 	}
 }
@@ -146,7 +176,7 @@ class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCo
 }
 
 trait DeleteAssignmentApi {
-	self: ApiController =>
+	self: AssignmentController =>
 
 	@ModelAttribute("deleteCommand")
 	def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
