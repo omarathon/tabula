@@ -44,8 +44,15 @@
 		</p>
 
 		<p>
-			You do not currently have permission to manage any assignments or feedback. Please contact your
-			departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+			<#if userHomeDepartment?has_content>
+				<#assign uams = usersWithRole('UserAccessMgrRoleDefinition', userHomeDepartment) />
+			</#if>
+			You do not currently have permission to manage any assignments or feedback. If you believe this is an error then please
+			<#if uams?has_content>
+				contact your department's <a href="mailto:${uams?first.email}">User Access Manager</a> for Tabula.
+			<#else>
+				email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
+			</#if>
 		</p>
 
 		<script type="text/javascript">

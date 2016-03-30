@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand.CourseworkHomepageInformation
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand}
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 
-@Controller class HomeController extends CourseworkController {
+@Controller class HomeController extends CourseworkController with AutowiringModuleAndDepartmentServiceComponent {
 
 	hideDeletedItems
 
@@ -27,7 +29,9 @@ import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 					"ownedModule" -> info.ownedModules,
 					"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
 					"activities" -> info.activities,
-					"ajax" -> ajax)
+					"ajax" -> ajax,
+					"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
+				)
 			case _ => Mav("coursework/home/view")
 		}
 }
