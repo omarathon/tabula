@@ -177,9 +177,9 @@ class Assignment
 		None
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
-	} else {
+	} else if (extensions.exists(_.feedbackDeadline.isDefined)){
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-	}
+	} else None
 
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
