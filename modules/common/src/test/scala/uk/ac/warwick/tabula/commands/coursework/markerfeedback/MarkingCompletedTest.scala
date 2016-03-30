@@ -100,7 +100,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday") { new CommandFixture {
 			val students = List("0672088", "0672089")
-			assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
+			assignment.feedbacks.foreach(addMarkerFeedback(_, SecondFeedback))
 			val feedbacks = assignment.feedbacks.filter(f => students.contains(f.universityId))
 			command.markerFeedback = feedbacks.map(_.secondMarkerFeedback)
 			setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
@@ -129,8 +129,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def finalMarkingComplete() {
 		inContext[MarkingCompletedTest.Ctx] {
 			withUser("cuslaj") { new CommandFixture {
-				assignment.feedbacks.map(addMarkerFeedback(_, ThirdFeedback))
-				assignment.feedbacks.map(addMarkerFeedback(_, SecondFeedback))
+				assignment.feedbacks.foreach(addMarkerFeedback(_, ThirdFeedback))
+				assignment.feedbacks.foreach(addMarkerFeedback(_, SecondFeedback))
 				setFinalMarkerFeedbackState(MarkingState.InProgress)
 				setFirstMarkerFeedbackState(MarkingState.MarkingCompleted)
 				setSecondMarkerFeedbackState(MarkingState.MarkingCompleted)
@@ -198,9 +198,9 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		}
 
 		notifications.size should be(2)
-		notifications(0).recipients should contain(marker3)
-		notifications(0).entities should contain(mf3)
-		notifications(0).entities should contain(mf4)
+		notifications.head.recipients should contain(marker3)
+		notifications.head.entities should contain(mf3)
+		notifications.head.entities should contain(mf4)
 		notifications(1).recipients should contain(marker2)
 		notifications(1).entities should contain(mf1)
 		notifications(1).entities should contain(mf2)

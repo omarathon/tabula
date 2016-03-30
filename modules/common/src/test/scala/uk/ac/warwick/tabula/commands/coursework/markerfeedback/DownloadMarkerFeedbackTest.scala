@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import java.io.{ByteArrayInputStream, FileInputStream}
 import java.util.zip.ZipInputStream
 
 import com.google.common.io.ByteSource
 import org.junit.Before
 import uk.ac.warwick.tabula.commands.coursework.feedback.{AdminGetSingleMarkerFeedbackCommand, DownloadMarkersFeedbackForPositionCommand}
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, FirstFeedback}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, FirstFeedback, MarkerFeedback}
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, Zips}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
-import scala.collection.JavaConversions._
+import collection.JavaConverters._
 
 class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
@@ -24,10 +23,11 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		attachment.objectStorageService = zipService.objectStorageService
 		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
-		assignment.feedbacks.foreach{feedback =>
-			feedback.firstMarkerFeedback.attachments = List(attachment)
+		assignment.feedbacks.asScala.foreach { feedback =>
+			feedback.firstMarkerFeedback.attachments = List(attachment).asJava
 			feedback.firstMarkerFeedback.state = MarkingCompleted
-			val smFeedback = feedback.retrieveSecondMarkerFeedback
+			val smFeedback = new MarkerFeedback(feedback)
+			feedback.secondMarkerFeedback = smFeedback
 			smFeedback.state = ReleasedForMarking
 		}
 	}

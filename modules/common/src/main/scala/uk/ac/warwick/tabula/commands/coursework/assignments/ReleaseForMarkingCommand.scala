@@ -12,9 +12,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import collection.JavaConverters._
 
 object ReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =
@@ -37,16 +35,16 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 	self: AssessmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
 
 	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
-	def studentsWithKnownMarkers: Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
+	def studentsWithKnownMarkers: Seq[String] = students.asScala.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
 	def unreleasableSubmissions: Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
-	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers
+	def studentsWithoutKnownMarkers:Seq[String] = students.asScala -- studentsWithKnownMarkers
 	def studentsAlreadyReleased = invalidFeedback.asScala.map(f => f.universityId)
 
 	override def applyInternal() = {
 		// get the parent feedback or create one if none exist
 		val feedbacks = studentsWithKnownMarkers.toBuffer.map { uniId: String =>
-			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
+			val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == uniId).getOrElse({
 				val newFeedback = new AssignmentFeedback
 				newFeedback.assignment = assignment
 				newFeedback.uploaderId = user.getUserId
@@ -60,24 +58,26 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 			parentFeedback
 		}
 
-		val feedbackToUpdate: Seq[AssignmentFeedback] = feedbacks -- invalidFeedback
+		val feedbackToUpdate: Seq[AssignmentFeedback] = feedbacks -- invalidFeedback.asScala
 
-		newReleasedFeedback = feedbackToUpdate.map(f => {
-			val markerFeedback = f.retrieveFirstMarkerFeedback
+		newReleasedFeedback.clear()
+		newReleasedFeedback.addAll(feedbackToUpdate.map(f => {
+			val markerFeedback = new MarkerFeedback(f)
+			f.firstMarkerFeedback = markerFeedback
 			stateService.updateState(markerFeedback, MarkingState.ReleasedForMarking)
 			markerFeedback
-		})
+		}).asJava)
 
 		feedbacksUpdated = feedbackToUpdate.size
 		feedbackToUpdate.toList
 	}
 
 	override def onBind(result: BindingResult) {
-		invalidFeedback = for {
-			universityId <- students
-			parentFeedback <- assignment.feedbacks.find(_.universityId == universityId)
+		invalidFeedback.addAll((for {
+			universityId <- students.asScala
+			parentFeedback <- assignment.feedbacks.asScala.find(_.universityId == universityId)
 			if parentFeedback.firstMarkerFeedback != null
-		} yield parentFeedback
+		} yield parentFeedback).asJava)
 	}
 
 	override def validate(errors: Errors) {
