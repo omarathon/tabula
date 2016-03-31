@@ -13,9 +13,12 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportModuleRegistrationsCommand
-import uk.ac.warwick.tabula.data.MemberDaoImpl
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.data.model.{Module, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.SandboxData
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{AutoUploadedConfirmedModuleRegistrationsQuery, ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
 import uk.ac.warwick.userlookup.User
 
@@ -30,9 +33,36 @@ trait ModuleRegistrationImporter {
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand]
 }
 
+trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with Logging {
+
+	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	protected def applyForRows(rows: Seq[ModuleRegistrationRow]) = {
+		val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
+			moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
+				case None =>
+					logger.warn(s"No stem module for $sitsModuleCode found in Tabula for SCJ: ${moduleRows.map(_.scjCode).distinct.mkString(", ")}")
+					None
+				case Some(module) => Some(module)
+			}
+		}.toSet
+		val tabulaModuleCodes = tabulaModules.map(_.code)
+		val rowsBySCD: Map[StudentCourseDetails, Seq[ModuleRegistrationRow]] = rows.groupBy(_.scjCode).map { case (scjCode, scjRows) =>
+			studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(
+				throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
+			) -> scjRows.filter(row => {
+				val moduleCode = Module.stripCats(row.sitsModuleCode)
+				moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
+			})
+		}
+		rowsBySCD.map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
+	}
+}
+
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with TaskBenchmarking {
+class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with TaskBenchmarking {
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
@@ -44,19 +74,20 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Tas
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
 		benchmarkTask("Fetch module registrations") {
-			membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
+			val rows = membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
 				val universityId = mac.member.universityId
 				val params = HashMap(("universityId", universityId))
 				queries.flatMap { query =>
 					query.executeByNamedParam(params.asJava).asScala
-				}.distinct.map { new ImportModuleRegistrationsCommand(_) }
+				}.distinct
 			}.seq
+			applyForRows(rows).toSeq
 		}
 	}
 }
 
 @Profile(Array("sandbox")) @Service
-class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
+class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
 	var memberDao = Wire.auto[MemberDaoImpl]
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
@@ -71,14 +102,13 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 		}
 
 	def studentModuleRegistrationDetails(universityId: String, ssoUser: User) = {
-		for {
+		val rows = (for {
 			(code, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
 			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
 			moduleCode <- route.moduleCodes
 		} yield {
-
-			val row = ModuleRegistrationRow(
+			new ModuleRegistrationRow(
 				scjCode = "%s/1".format(universityId),
 				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
 				cats = new JBigDecimal(15),
@@ -91,9 +121,9 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				agreedMark = Some(new JBigDecimal("90.0")),
 				agreedGrade = "A"
 			)
+		}).toSeq
 
-			new ImportModuleRegistrationsCommand(row)
-		}
+		applyForRows(rows)
 	}
 }
 
@@ -189,7 +219,7 @@ object ModuleRegistrationImporter {
 			"""
 
 	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
-		ModuleRegistrationRow(
+		new ModuleRegistrationRow(
 			resultSet.getString("scj_code"),
 			resultSet.getString("mod_code"),
 			resultSet.getBigDecimal("credit"),
@@ -226,16 +256,46 @@ object ModuleRegistrationImporter {
 	}
 }
 
-case class ModuleRegistrationRow(
-	scjCode: String,
-	sitsModuleCode: String,
-	cats: JBigDecimal,
-	assessmentGroup: String,
-	selectionStatusCode: String,
-	occurrence: String,
-	academicYear: String,
-	actualMark: Option[JBigDecimal],
-	actualGrade: String,
-	agreedMark: Option[JBigDecimal],
-	agreedGrade: String
-)
+// Full class rather than case class so it can be BeanWrapped
+class ModuleRegistrationRow {
+
+	var scjCode: String = _
+	var sitsModuleCode: String = _
+	var cats: JBigDecimal = _
+	var assessmentGroup: String = _
+	var selectionStatusCode: String = _
+	var occurrence: String = _
+	var academicYear: String = _
+	var actualMark: Option[JBigDecimal] = _
+	var actualGrade: String = _
+	var agreedMark: Option[JBigDecimal] = _
+	var agreedGrade: String = _
+
+	def this(
+		scjCode: String,
+		sitsModuleCode: String,
+		cats: JBigDecimal,
+		assessmentGroup: String,
+		selectionStatusCode: String,
+		occurrence: String,
+		academicYear: String,
+		actualMark: Option[JBigDecimal],
+		actualGrade: String,
+		agreedMark: Option[JBigDecimal],
+		agreedGrade: String
+	) {
+		this()
+		this.scjCode = scjCode
+		this.sitsModuleCode = sitsModuleCode
+		this.cats = cats
+		this.assessmentGroup = assessmentGroup
+		this.selectionStatusCode = selectionStatusCode
+		this.occurrence = occurrence
+		this.academicYear = academicYear
+		this.actualMark = actualMark
+		this.actualGrade = actualGrade
+		this.agreedMark = agreedMark
+		this.agreedGrade = agreedGrade
+	}
+
+}

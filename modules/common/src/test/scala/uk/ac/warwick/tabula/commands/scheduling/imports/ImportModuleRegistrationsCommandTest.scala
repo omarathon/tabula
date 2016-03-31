@@ -34,9 +34,9 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		val madService = smartMock[ModuleAndDepartmentService]
 		madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
-		val modRegRow1 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
+		val modRegRow1 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14",
 			Some(new JBigDecimal("90.0")), "A", Some(new JBigDecimal("90.0")), "A")
-		val modRegRow2 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
+		val modRegRow2 = new ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14",
 			Some(new JBigDecimal("50.0")), "C", Some(new JBigDecimal("50.0")), "C")
 
 		val scdDao = smartMock[StudentCourseDetailsDao]
@@ -47,51 +47,49 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 	}
 
 	@Transactional
-	@Test def testCaptureModuleRegistration() {
+	@Test def captureModuleRegistration() {
 		new Environment {
 
 			// apply the command
-			val command = new ImportModuleRegistrationsCommand(modRegRow1)
+			val command = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow1), Set(mod))
 			command.moduleAndDepartmentService = madService
-			command.studentCourseDetailsDao = scdDao
 			command.moduleRegistrationDao = mrDao
 
-			val newModReg = command.applyInternal().get
+			val newModRegs = command.applyInternal()
 
 			// check results
-			newModReg.academicYear should be (new AcademicYear(2013))
-			newModReg.assessmentGroup should be ("A")
-			newModReg.module should be (mod)
-			newModReg.cats should be (cats)
-			newModReg.occurrence should be (occurrence)
-			newModReg.selectionStatus.description should be ("Core")
-			newModReg.studentCourseDetails should be (scd)
-			newModReg.lastUpdatedDate.getDayOfMonth should be (LocalDate.now.getDayOfMonth)
+			newModRegs.size should be (1)
+			newModRegs.head.academicYear should be (new AcademicYear(2013))
+			newModRegs.head.assessmentGroup should be ("A")
+			newModRegs.head.module should be (mod)
+			newModRegs.head.cats should be (cats)
+			newModRegs.head.occurrence should be (occurrence)
+			newModRegs.head.selectionStatus.description should be ("Core")
+			newModRegs.head.studentCourseDetails should be (scd)
+			newModRegs.head.lastUpdatedDate.getDayOfMonth should be (LocalDate.now.getDayOfMonth)
 
 			// now reset the last updated date to 10 days ago:
 			val tenDaysAgo = DateTime.now.minusDays(10)
-			newModReg.lastUpdatedDate = tenDaysAgo
-			newModReg.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
+			newModRegs.head.lastUpdatedDate = tenDaysAgo
+			newModRegs.head.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
 			session.flush()
 
 			// now re-import the same mod reg - the lastupdateddate shouldn't change
-			val command2 = new ImportModuleRegistrationsCommand(modRegRow1)
+			val command2 = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow1), Set(mod))
 			command2.moduleAndDepartmentService = madService
-			command2.studentCourseDetailsDao = scdDao
 			command2.moduleRegistrationDao = mrDao
 
 
-			val newModReg2 = command2.applyInternal().get
-			newModReg2.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
+			val newModRegs2 = command2.applyInternal()
+			newModRegs2.head.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
 
 			// try just changing the selection status:
-			val command3 = new ImportModuleRegistrationsCommand(modRegRow2)
+			val command3 = new ImportModuleRegistrationsCommand(scd, Seq(modRegRow2), Set(mod))
 			command3.moduleAndDepartmentService = madService
-			command3.studentCourseDetailsDao = scdDao
 			command3.moduleRegistrationDao = mrDao
 
-			val newModReg3 = command3.applyInternal().get
-			newModReg3.selectionStatus.description should be ("Option")
+			val newModRegs3 = command3.applyInternal()
+			newModRegs3.head.selectionStatus.description should be ("Option")
 		}
 	}
 }
