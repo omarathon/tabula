@@ -152,6 +152,13 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 			val academicYear: AcademicYear = AcademicYear(2014)
 		}
 
+		validator.filteredPoints = Map("point" -> Seq(GroupedPoint(point1, Seq(), Seq(point1, point2))))
+		validator.studentDatas = Seq(
+			AttendanceMonitoringStudentData(null, null, student1.universityId, null, null, null, null, null),
+			AttendanceMonitoringStudentData(null, null, student2.universityId, null, null, null, null, null),
+			AttendanceMonitoringStudentData(null, null, student3.universityId, null, null, null, null, null)
+		)
+
 		val conversionService = new GenericConversionService()
 
 		val attendanceMonitoringPointConverter = new AttendanceMonitoringPointIdConverter
@@ -160,11 +167,14 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 		validator.attendanceMonitoringService.getPointById(point1.id) returns Option(point1)
 		validator.attendanceMonitoringService.getPointById(point2.id) returns Option(point2)
+		validator.attendanceMonitoringService.getCheckpoints(Seq(point1, point2), Seq(student1, student2, student3)) returns Map()
 
 		val memberUniversityIdConverter = new MemberUniversityIdConverter
 		memberUniversityIdConverter.service = validator.profileService
 		conversionService.addConverter(memberUniversityIdConverter)
 
+		validator.profileService.getAllMembersWithUniversityIds(Seq(student1.universityId, student2.universityId)) returns Seq(student1, student2)
+		validator.profileService.getAllMembersWithUniversityIds(Seq(student2.universityId, student3.universityId)) returns Seq(student2, student3)
 		validator.profileService.getMemberByUniversityIdStaleOrFresh(student1.universityId) returns Option(student1)
 		validator.profileService.getMemberByUniversityIdStaleOrFresh(student2.universityId) returns Option(student2)
 		validator.profileService.getMemberByUniversityIdStaleOrFresh(student3.universityId) returns Option(student3)

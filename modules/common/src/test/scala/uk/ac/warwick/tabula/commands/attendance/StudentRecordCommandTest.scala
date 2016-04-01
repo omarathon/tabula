@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.attendance.view
+package uk.ac.warwick.tabula.commands.attendance
 
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
@@ -6,27 +6,25 @@ import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringScheme, AttendanceState}
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
-class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
+class StudentRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = new Department
 		val thisAcademicYear = AcademicYear(2014)
 		val thisStudent = Fixtures.student("1234")
 
-		val validator = new RecordStudentAttendanceValidation with TermServiceComponent
-			with AttendanceMonitoringServiceComponent with RecordStudentAttendanceCommandState {
+		val validator = new StudentRecordValidation with TermServiceComponent
+			with AttendanceMonitoringServiceComponent with StudentRecordCommandState
+			with StudentRecordCommandRequest {
 
 			val termService = smartMock[TermService]
 			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val department = thisDepartment
 			val academicYear = thisAcademicYear
 			val student = thisStudent
 			val user = null
@@ -43,6 +41,8 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 		notInSchemePoint.id = "3"
 		validator.attendanceMonitoringService.getPointById(notInSchemePoint.id) returns Option(notInSchemePoint)
 
+		validator.attendanceMonitoringService.getCheckpoints(Seq(point1, point2), thisStudent, withFlush = false) returns Map()
+
 		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 
 		val attendanceMonitoringPointConverter = new AttendanceMonitoringPointIdConverter
@@ -58,7 +58,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def invalidPoint() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -72,12 +72,12 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def alreadyReported() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
 		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, null)
+		validator.checkpointMap.put(point1, AttendanceState.Attended)
 		validator.validate(errors)
 
 		errors.hasErrors should be {true}
@@ -86,7 +86,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def tooSoon() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -101,7 +101,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def beforeStartDateButNull() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
 
@@ -116,7 +116,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def beforeStartDateButAuthorised() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns Some(new AttendanceMonitoringNote)
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm
@@ -132,7 +132,7 @@ class RecordStudentAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def authorisedWithNoNote() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, Option(thisDepartment), thisAcademicYear) returns Seq(point1, point2)
+		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
 		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq(autumnTerm.getTermTypeAsString)
 		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns None
 		validator.termService.getTermFromDateIncludingVacations(any[BaseDateTime]) returns autumnTerm

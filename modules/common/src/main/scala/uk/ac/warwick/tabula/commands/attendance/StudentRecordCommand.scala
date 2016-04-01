@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.attendance
 
-import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.commands.attendance.view.FiltersCheckpointMapChanges
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -18,20 +18,21 @@ object StudentRecordCommand {
 	def apply(academicYear: AcademicYear, student: StudentMember, user: CurrentUser) =
 		new StudentRecordCommandInternal(academicYear, student, user)
 			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
-			with PopulatesAgentStudentRecordCommand
+			with PopulatesStudentRecordCommand
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
 			with StudentRecordValidation
 			with StudentRecordDescription
 			with StudentRecordPermissions
 			with StudentRecordCommandState
+			with StudentRecordCommandRequest
 }
 
 
 class StudentRecordCommandInternal(val academicYear: AcademicYear, val student: StudentMember, val user: CurrentUser)
 	extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
 
-	self: StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
+	self: StudentRecordCommandRequest with StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
 		attendanceMonitoringService.setAttendance(student, checkpointMap.asScala.toMap, user)
@@ -39,26 +40,27 @@ class StudentRecordCommandInternal(val academicYear: AcademicYear, val student: 
 
 }
 
-trait PopulatesAgentStudentRecordCommand extends PopulateOnForm {
+trait PopulatesStudentRecordCommand extends PopulateOnForm {
 
-	self: StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
+	self: StudentRecordCommandRequest with StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def populate() = {
-		val points = attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
-		val checkpoints = attendanceMonitoringService.getCheckpoints(points, student)
-		points.foreach(p => checkpointMap.put(p, checkpoints.get(p).map(_.state).orNull))
+		studentPointCheckpointMap(student).foreach { case (point, checkpoint) => checkpointMap.put(point, Option(checkpoint).map(_.state).orNull) }
 	}
 }
 
-trait StudentRecordValidation extends SelfValidating {
+trait StudentRecordValidation extends SelfValidating with FiltersCheckpointMapChanges {
 
-	self: StudentRecordCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent =>
+	self: StudentRecordCommandRequest with StudentRecordCommandState
+		with AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
 	override def validate(errors: Errors) = {
-		val points = attendanceMonitoringService.listStudentsPoints(student, None, academicYear)
 		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
 
-		checkpointMap.asScala.foreach { case (point, state) =>
+		filterCheckpointMapForChanges(
+			Map(student -> checkpointMap.asScala.toMap),
+			studentPointCheckpointMap.mapValues(_.mapValues(Option(_).map(_.state).orNull))
+		).getOrElse(student, Map()).foreach { case (point, state) =>
 			errors.pushNestedPath(s"checkpointMap[${point.id}]")
 
 			if (!points.contains(point)) {
@@ -73,6 +75,11 @@ trait StudentRecordValidation extends SelfValidating {
 			if (point.isStartDateInFuture && !(state == null || state == AttendanceState.MissedAuthorised)) {
 				if (state == AttendanceState.MissedUnauthorised) errors.rejectValue("", "monitoringCheckpoint.missedUnauthorised.beforeStart")
 				else if (state == AttendanceState.Attended) errors.rejectValue("", "monitoringCheckpoint.attended.beforeStart")
+			}
+
+			// check that a note exists for authorised absences
+			if (state == AttendanceState.MissedAuthorised && attendanceMonitoringService.getAttendanceNote(student, point).isEmpty) {
+				errors.rejectValue("", "monitoringCheckpoint.missedAuthorised.noNote")
 			}
 
 			errors.popNestedPath()
@@ -103,11 +110,24 @@ trait StudentRecordDescription extends Describable[Seq[AttendanceMonitoringCheck
 }
 
 trait StudentRecordCommandState {
+
+	self: AttendanceMonitoringServiceComponent =>
+
 	def academicYear: AcademicYear
 	def student: StudentMember
 	def user: CurrentUser
 
-	// Bind variables
+	def departmentOption: Option[Department] = None
 
+	lazy val points = attendanceMonitoringService.listStudentsPoints(student, departmentOption, academicYear)
+
+	lazy val studentPointCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]] = {
+		val checkpoints = attendanceMonitoringService.getCheckpoints(points, student)
+		Map(student -> points.map(p => p -> checkpoints.getOrElse(p, null)).toMap)
+	}
+
+}
+
+trait StudentRecordCommandRequest {
 	var checkpointMap: JMap[AttendanceMonitoringPoint, AttendanceState] = JHashMap()
 }

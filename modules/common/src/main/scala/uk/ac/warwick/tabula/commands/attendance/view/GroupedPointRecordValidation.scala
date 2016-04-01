@@ -1,16 +1,31 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 import uk.ac.warwick.tabula.services.{SecurityServiceComponent, TermServiceComponent}
-import uk.ac.warwick.tabula.commands.MemberOrUser
 
-trait GroupedPointRecordValidation {
+trait FiltersCheckpointMapChanges {
+
+	def filterCheckpointMapForChanges(
+		changedCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]],
+		existingCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]]
+	): Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]] = {
+		val flattenedChanges: Seq[(StudentMember, AttendanceMonitoringPoint, AttendanceState)] =
+			changedCheckpointMap.mapValues(_.toSeq).toSeq.flatMap { case (student, pointCheckpoints) => pointCheckpoints.map { case (point, state) => (student, point, state) } }
+		val changes = flattenedChanges.filter { case (student, point, state) =>
+			!existingCheckpointMap.get(student).flatMap(_.get(point)).contains(state)
+		}
+		changes.groupBy(_._1).mapValues(_.groupBy(_._2).mapValues(_.head._3))
+	}
+}
+
+trait GroupedPointRecordValidation extends FiltersCheckpointMapChanges {
 
 	self: AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
 
@@ -18,9 +33,10 @@ trait GroupedPointRecordValidation {
 		errors: Errors,
 		templatePoint: AttendanceMonitoringPoint,
 		checkpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]],
+		existingCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]],
 		user: CurrentUser
 	) = {
-		checkpointMap.foreach{ case(student, pointMap) =>
+		filterCheckpointMapForChanges(checkpointMap, existingCheckpointMap).foreach{ case(student, pointMap) =>
 			pointMap.foreach{ case(point, state) =>
 				errors.pushNestedPath(s"checkpointMap[${student.universityId}][${point.id}]")
 				// Check point is valid for student
