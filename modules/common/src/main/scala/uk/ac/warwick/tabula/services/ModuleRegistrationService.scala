@@ -3,10 +3,11 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+
 import scala.math.BigDecimal.RoundingMode
 
 object ModuleRegistrationService {
@@ -38,7 +39,12 @@ trait ModuleRegistrationService {
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])]
+	def overcattedModuleSubsets(
+		entity: GenerateExamGridEntity,
+		markOverrides: Map[Module, BigDecimal],
+		normalLoad: BigDecimal,
+		rules: Seq[UpstreamRouteRule]
+	): Seq[(BigDecimal, Seq[ModuleRegistration])]
 
 	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
@@ -82,7 +88,12 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		}
 	}
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal], normalLoad: BigDecimal): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+	def overcattedModuleSubsets(
+		entity: GenerateExamGridEntity,
+		markOverrides: Map[Module, BigDecimal],
+		normalLoad: BigDecimal,
+		rules: Seq[UpstreamRouteRule]
+	): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
 		if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
@@ -98,7 +109,22 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 					// All the registrations have agreed or actual marks
 					modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
 			)
-			validSubsets.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))).sortBy(_._1).reverse
+			val ruleFilteredSubsets = validSubsets.filter(modRegs => rules.forall(_.passes(modRegs.toSeq)))
+			val subsetsToReturn = {
+				if (ruleFilteredSubsets.isEmpty) {
+					// Something is wrong with the rules, as at the very least the the subset of all the modules should match,
+					// so don't do the rule filtering
+					validSubsets
+				} else {
+					ruleFilteredSubsets
+				}
+			}
+			subsetsToReturn.map(modRegs =>
+				(weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))
+			).sortBy { case (mark, modRegs) =>
+				// Add a definitive sort so subsets with the same mark always come out the same order
+				(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
+			}.reverse
 		}
 	}
 

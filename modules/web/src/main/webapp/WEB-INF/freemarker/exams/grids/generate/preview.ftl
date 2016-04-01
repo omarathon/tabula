@@ -38,32 +38,34 @@
 			</p>
 		</div>
 
-		<div class="alert alert-info">
-			<h3>Over catted marks</h3>
-			<p>For students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your course regulations.</p>
-			<p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#" class="show-more">Show More</a></p>
-			<div class="more hidden">
-				<p>Each course normally consists of modules each with a CATs score and to pass that course you must achieve the minimum number of CATs.</p>
-				<p>
-					The University allows students to study additional modules, if they so wish for their own education and to potentially achieve a higher mark.
-					Any student who studies more than the normal load of CATs has been deemed to have over-catted.
-				</p>
-				<p>
-					So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the student has taken.
-					If this is higher than the mean module mark, it will be the mark they are awarded, as long as the combination satisfies the course regulations.
-				</p>
-				<p>
-					The regulations governing each course vary widely but always have a minimum number of CATS and the maximum number of CATS to be taken.
-					Usually a course is made up of sets of modules from which the student must pick modules.
-					Some courses may not allow certain combinations of modules to be taken in a year or over several years.
-				</p>
-				<p>
-					Because of the variety of valid combinations possible it is not currently possible for Tabula to be sure that the final over-catted mark it derives complies with the regulations,
-					and we ask the exam board to choose the final over-catted mark to ensure that it meets with all the regulations. <a href="#" class="show-less">Less</a>
-				</p>
+		<#if !routeRules?has_content>
+			<div class="alert alert-info">
+				<h3>Over catted marks</h3>
+				<p>There were no Pathway Module Rules defined in SITS for this route, year of study, and academic year.</p>
+				<p>Therefore for students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your course regulations.</p>
+				<p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#" class="show-more">Show More</a></p>
+				<div class="more hidden">
+					<p>Each course normally consists of modules each with a CATs score and to pass that course you must achieve the minimum number of CATs.</p>
+					<p>
+						The University allows students to study additional modules, if they so wish for their own education and to potentially achieve a higher mark.
+						Any student who studies more than the normal load of CATs has been deemed to have over-catted.
+					</p>
+					<p>
+						So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the student has taken.
+						If this is higher than the mean module mark, it will be the mark they are awarded, as long as the combination satisfies the course regulations.
+					</p>
+					<p>
+						The regulations governing each course vary widely but always have a minimum number of CATS and the maximum number of CATS to be taken.
+						Usually a course is made up of sets of modules from which the student must pick modules.
+						Some courses may not allow certain combinations of modules to be taken in a year or over several years.
+					</p>
+					<p>
+						Unless Pathway Module Rules are defined it is not possible for Tabula to be sure that the final over-catted mark it derives complies with the regulations,
+						and we ask the exam board to choose the final over-catted mark to ensure that it meets with all the regulations. <a href="#" class="show-less">Less</a>
+					</p>
+				</div>
 			</div>
-
-		</div>
+		</#if>
 
 		<div class="key clearfix">
 			<table class="table table-condensed">

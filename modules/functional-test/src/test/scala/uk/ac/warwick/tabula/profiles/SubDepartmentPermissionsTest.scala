@@ -41,14 +41,14 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 	}
 
 
-	"A sub-departmental administrator" should "not have admin rights on students in their parent department" in {
+	"A sub-departmental administrator" should "be able to view timetables for students in their parent department" in {
 		Given("Student3 is a postgraduate, registered on a module in xxx")
 		createModule("xxx","xpg12","Postgrad module")
 		registerStudentsOnModule(Seq(P.Student3),"xpg12")
 
-		Then("Admin3 can't view Student3's profile")
+		Then("Admin3 can view Student3's profile, in a different department, and see their timetable")
 		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student3.warwickId}")
-		find(cssSelector("#timetable-pane")) should not be 'defined
+		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students who match their sub-departments" in {
@@ -87,10 +87,10 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 		signIn as P.Admin4 to Path(s"/profiles/view/${P.Student1.warwickId}")
 		find(cssSelector("#timetable-pane")) should be ('defined)
 
-		And("Admin4 cannot view student2's profile")
+		And("Admin4 can also view student2's timetable, in a different department")
 
 		go to Path(s"/profiles/view/${P.Student2.warwickId}")
-		find(cssSelector("#timetable-pane")) should not be 'defined
+		find(cssSelector("#timetable-pane")) should be ('defined)
 	}
 
 }

@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, ResultSetMetaData}
 
 import org.joda.time.{DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportStaffMemberCommand, ImportStudentRowCommand, ImportCommandFactorySetup}
+import uk.ac.warwick.tabula.commands.scheduling.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand}
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
-import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.helpers.scheduling.SitsStudentRow
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -59,7 +59,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				))
 
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
 				member.firstName should be (name)
 			}
 		}
@@ -80,7 +80,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				))
 
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, Seq(SitsStudentRow(rs)), importCommandFactory)
 				member.lastName should be (name)
 			}
 		}

@@ -2,10 +2,10 @@
 <!DOCTYPE server-xml [
 	<!ENTITY tabula-ds SYSTEM "tabula-ds.xml">
 	<!ENTITY sits-ds SYSTEM "sits-ds.xml">
-	<!ENTITY membership-ds SYSTEM "membership-ds.xml">
+	<!ENTITY fim-ds SYSTEM "fim-ds.xml">
 ]>
 <Context>
 	&tabula-ds;
 	&sits-ds;
-	&membership-ds;
+	&fim-ds;
 </Context>

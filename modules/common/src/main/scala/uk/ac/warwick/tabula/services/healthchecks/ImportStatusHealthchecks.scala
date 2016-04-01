@@ -7,7 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.AuditEvent
+import uk.ac.warwick.tabula.data.model.{AuditEvent, Department}
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
 
 import scala.concurrent.Await
@@ -24,10 +25,7 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 		*/
 	protected def auditEvents: Seq[AuditEvent]
 
-	@Scheduled(fixedRate = 60 * 1000) // 1 minute
-	def run(): Unit = transactional(readOnly = true) {
-		val imports = auditEvents
-
+	protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
 		// Get the last one that's successful
 		val lastSuccessful = imports.find { event => !event.hadError && !event.isIncomplete }
 
@@ -66,7 +64,7 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 				d.toStandardSeconds.getSeconds / 3600.0
 			}.getOrElse(0)
 
-		update(ServiceHealthcheck(
+		ServiceHealthcheck(
 			name = HealthcheckName,
 			status = status,
 			testedAt = DateTime.now,
@@ -74,7 +72,14 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 			performanceData = Seq(
 				ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo, WarningThreshold.toHours, ErrorThreshold.toHours)
 			)
-		))
+		)
+	}
+
+	@Scheduled(fixedRate = 60 * 1000) // 1 minute
+	def run(): Unit = transactional(readOnly = true) {
+		val imports = auditEvents
+
+		update(getServiceHealthCheck(imports))
 	}
 
 }
@@ -104,12 +109,57 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 	override val ErrorThreshold = 4.days
 	override val HealthcheckName = "import-profiles"
 
+	lazy val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
 	override protected def auditEvents: Seq[AuditEvent] = {
 		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportProfiles", 0, 50), 1.minute)
-			.filter { event =>
-				event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
+		Await.result(queryService.query("eventType:ImportProfiles", 0, 1000), 1.minute)
+	}
+
+	private def checkDepartment(imports: Seq[AuditEvent], department: Department): (Department, ServiceHealthcheck) = {
+		val thisDepartmentImports = imports.filter(event =>
+			event.data == "{\"deptCode\":\"%s\"}".format(department.code)
+				// legacy imports
+				|| event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
+		)
+		(department, getServiceHealthCheck(thisDepartmentImports))
+	}
+
+	@Scheduled(fixedRate = 60 * 1000) // 1 minute
+	override def run(): Unit = transactional(readOnly = true) {
+		val allDepartments = moduleAndDepartmentService.allDepartments
+		val imports = auditEvents
+
+		val healthchecks = allDepartments.map(department => checkDepartment(imports, department))
+
+		val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
+			val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
+			val warnings = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Warning }
+
+			// Show oldest import
+			def sorted(departmentAndChecks: Seq[(Department, ServiceHealthcheck)]): (Department, ServiceHealthcheck) = {
+				departmentAndChecks.sortBy { case (_, check) => check.performanceData.head.value match {
+					case lastSuccessfulHoursAgo: Double => lastSuccessfulHoursAgo
+					case _ => 0
+				}}.last
 			}
+
+			if (errors.nonEmpty) {
+				sorted(errors)
+			} else if (warnings.nonEmpty) {
+				sorted(warnings)
+			} else {
+				sorted(healthchecks)
+			}
+		}
+
+		update(ServiceHealthcheck(
+			name = healthcheckToUpdate.name,
+			status = healthcheckToUpdate.status,
+			testedAt = healthcheckToUpdate.testedAt,
+			message = Seq(healthcheckToUpdate.message, s"oldest department ${department.code}").mkString(", "),
+			performanceData = healthcheckToUpdate.performanceData
+		))
 	}
 
 }

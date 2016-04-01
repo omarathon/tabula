@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -15,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, MemberUserType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.scheduling.ImportCommandFactory
+import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, SitsStudentRow}
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{AcademicYear, Features}
@@ -23,6 +24,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 case class MembershipInformation(member: MembershipMember)
 
@@ -35,6 +37,7 @@ trait ProfileImporter {
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
+	def multipleStudentInformationQuery: MultipleStudentInformationQuery
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -44,20 +47,29 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
-	var membership = Wire[DataSource]("membershipDataSource")
+	var fim = Wire[DataSource]("fimDataSource")
 
-	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
-	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
+	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
+	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
 	lazy val applicantQuery = new ApplicantQuery(sits)
 
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User, importCommandFactory: ImportCommandFactory) = {
+	def studentInformationQuery = {
 
 		val sceYearClause =
 			if (features.includePastYears) ""
 			else "and sce.sce_ayrc in (:year)"
 
-		new StudentInformationQuery(sits, member, ssoUser, importCommandFactory, sceYearClause)
+		new StudentInformationQuery(sits, sceYearClause)
+	}
+
+	def multipleStudentInformationQuery = {
+
+		val sceYearClause =
+			if (features.includePastYears) ""
+			else "and sce.sce_ayrc in (:year)"
+
+		new MultipleStudentInformationQuery(sits, sceYearClause)
 	}
 
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
@@ -72,18 +84,23 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student => members.flatMap { info =>
-					val universityId = info.member.universityId
-					val ssoUser = users(universityId)
+				case Student =>	members.map { info =>
+						val universityId = info.member.universityId
+						val ssoUser = users(universityId)
 
-					studentInformationQuery(info, ssoUser, importCommandFactory).executeByNamedParam(
-						if (features.includePastYears)
-							Map("universityId" -> universityId)
-						else
-							Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
-
-					).toSeq
-				}.seq
+						val sitsRows = studentInformationQuery.executeByNamedParam(
+							if (features.includePastYears)
+								Map("universityId" -> universityId)
+							else
+								Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+						).toSeq
+						ImportStudentRowCommand(
+							info,
+							ssoUser,
+							sitsRows,
+							importCommandFactory
+						)
+					}.seq
 				case Applicant | Other => members.map { info =>
 					val ssoUser = users(info.member.universityId)
 					new ImportOtherMemberCommand(info, ssoUser)
@@ -102,7 +119,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
 			val universityIdsInMembership =
 				universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
-					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala.toSeq
+					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection)).asScala
 						.map { _.universityId }
 				}
 
@@ -162,7 +179,6 @@ class SandboxProfileImporter extends ProfileImporter {
 			"user_code" -> member.usercode,
 			"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
 			"in_use_flag" -> "Active",
-			"date_of_inactivation" -> member.endDate.toDateTimeAtStartOfDay(),
 			"alternative_email_address" -> null,
 			"mobile_number" -> null,
 			"nationality" -> "British (ex. Channel Islands & Isle of Man)",
@@ -200,7 +216,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		ImportStudentRowCommand(
 			mac,
 			ssoUser,
-			rs,
+			Seq(SitsStudentRow(rs)),
 			importCommandFactory
 		)
 	}
@@ -256,7 +272,7 @@ class SandboxProfileImporter extends ProfileImporter {
 					userType
 				)
 			)
-		}.toSeq
+		}
 
 	def studentsForDepartment(department: SandboxData.Department) =
 		department.routes.values.flatMap { route =>
@@ -329,6 +345,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			)
 		}
 
+	def multipleStudentInformationQuery = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
@@ -347,8 +364,8 @@ object ProfileImporter extends Logging {
 			"and sce.sce_ayrc in (:year)"
 		}
 
-	def GetStudentInformation(sceYearClause: String) = f"""
-		select
+	private def GetStudentInformation(sceYearClause: String) = f"""
+			select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
 			stu.stu_fusd as preferred_forename,
@@ -359,7 +376,6 @@ object ProfileImporter extends Logging {
 			stu.stu_udf3 as user_code,
 			stu.stu_dob as date_of_birth,
 			case when stu.stu_endd < sysdate then 'Inactive' else 'Active' end as in_use_flag,
-			stu.stu_endd as date_of_inactivation,
 			stu.stu_haem as alternative_email_address,
 			stu.stu_cat3 as mobile_number,
 			stu.stu_dsbc as disability,
@@ -444,17 +460,20 @@ object ProfileImporter extends Logging {
 
 			left outer join $sitsSchema.ins_prs prs -- Personnel
 				on spr.prs_code = prs.prs_code
+		 """
 
-		where stu.stu_code = :universityId
-		order by stu.stu_code
+	def GetSingleStudentInformation(sceYearClause: String) = GetStudentInformation(sceYearClause) + f"""
+			where stu.stu_code = :universityId
+			order by stu.stu_code
 		"""
 
-	class StudentInformationQuery(ds: DataSource,
-																member: MembershipInformation,
-																ssoUser: User,
-																importCommandFactory: ImportCommandFactory,
-																sceYearClause: String)
-		extends MappingSqlQuery[ImportStudentRowCommandInternal](ds, GetStudentInformation(sceYearClause)) {
+	def GetMultipleStudentsInformation(sceYearClause: String) = GetStudentInformation(sceYearClause) + f"""
+			where stu.stu_code in (:universityIds)
+			order by stu.stu_code
+		"""
+
+	class StudentInformationQuery(ds: DataSource, sceYearClause: String)
+		extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation(sceYearClause)) {
 
 		var features = Wire.auto[Features]
 
@@ -465,33 +484,42 @@ object ProfileImporter extends Logging {
 
 		compile()
 
-		override def mapRow(rs: ResultSet, rowNumber: Int)
-		= ImportStudentRowCommand(
-			member,
-			ssoUser,
-			rs,
-			importCommandFactory
-		)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
+	}
+
+	class MultipleStudentInformationQuery(ds: DataSource, sceYearClause: String)
+		extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation(sceYearClause)) {
+
+		var features = Wire.auto[Features]
+
+		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+
+		if (!features.includePastYears)
+			declareParameter(new SqlParameter("year", Types.VARCHAR))
+
+		compile()
+
+		override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
 	}
 
 	val GetApplicantInformation = f"""
 		select
-			stu.stu_code as university_number,
-			'SL' as id_dept,
-			stu.stu_caem as email,
-			'Applicant' as desc_target_group,
-			stu.stu_titl as pref_title,
-			stu.stu_fusd as pref_forenames,
-			stu.stu_surn as pref_surname,
-			'Applicant' as desc_position,
-			stu.stu_dob as dob,
-			null as its_usercode,
-			stu.stu_begd as dt_start,
-			stu.stu_endd as dt_end,
-			stu.stu_updd as dt_modified,
-			null as tel_business,
+			stu.stu_code as universityId,
+			'SL' as deptCode,
+			stu.stu_caem as mail,
+			'Applicant' as targetGroup,
+			stu.stu_titl as title,
+			stu.stu_fusd as preferredFirstname,
+			stu.stu_surn as preferredSurname,
+			'Applicant' as jobTitle,
+			to_char(stu.stu_dob, 'yyyy/mm/dd') as dateOfBirth,
+			null as cn,
+			to_char(stu.stu_begd, 'yyyy/mm/dd') as startDate,
+			to_char(stu.stu_endd, 'yyyy/mm/dd') as endDate,
+			stu.stu_updd as last_modification_date,
+			null as telephoneNumber,
 			stu.stu_gend as gender,
-			stu.stu_haem as external_email
+			stu.stu_haem as externalEmail
 		from $sitsSchema.ins_stu stu
 		where
 			stu.stu_sta1 like '%%A' and -- applicant
@@ -500,12 +528,16 @@ object ProfileImporter extends Logging {
 		"""
 
 	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
+
+		val SqlDatePattern = "yyyy/MM/dd"
+		val SqlDateTimeFormat = DateTimeFormat.forPattern(SqlDatePattern)
+
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetMembershipByUniversityIdInformation = """
-		select * from cmsowner.uow_current_members where university_number in (:universityIds)
+		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
 		"""
 
 	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
@@ -515,7 +547,7 @@ object ProfileImporter extends Logging {
 	}
 
 	val GetMembershipByDepartmentInformation = """
-		select * from cmsowner.uow_current_members where id_dept = :departmentCode
+		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and deptCode = :departmentCode
 		"""
 
 	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
@@ -524,29 +556,26 @@ object ProfileImporter extends Logging {
 		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
 
-	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true) =
+	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =
 		MembershipMember(
-			universityId 						= rs.getString("university_number"),
-			departmentCode					= rs.getString("id_dept"),
-			email										= rs.getString("email"),
-			targetGroup							= rs.getString("desc_target_group"),
-			title										= rs.getString("pref_title"),
-			preferredForenames			= rs.getString("pref_forenames"),
-			preferredSurname				= rs.getString("pref_surname"),
-			position								= rs.getString("desc_position"),
-			dateOfBirth							= sqlDateToLocalDate(rs.getDate("dob")),
-			usercode								= rs.getString("its_usercode").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("university_number")}" else null),
-			startDate								= sqlDateToLocalDate(rs.getDate("dt_start")),
-			endDate									= sqlDateToLocalDate(rs.getDate("dt_end")),
-			modified								= sqlDateToDateTime(rs.getDate("dt_modified")),
-			phoneNumber							= rs.getString("tel_business"),
+			universityId 						= rs.getString("universityId"),
+			departmentCode					= rs.getString("deptCode"),
+			email										= rs.getString("mail"),
+			targetGroup							= rs.getString("targetGroup"),
+			title										= rs.getString("title"),
+			preferredForenames			= rs.getString("preferredFirstname"),
+			preferredSurname				= rs.getString("preferredSurname"),
+			position								= rs.getString("jobTitle"),
+			dateOfBirth							= rs.getString("dateOfBirth").maybeText.map(dateTimeFormater.parseLocalDate).orNull,
+			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
+			startDate								= rs.getString("startDate").maybeText.flatMap(d => Try(dateTimeFormater.parseLocalDate(d)).toOption).orNull,
+			endDate									= rs.getString("endDate").maybeText.map(dateTimeFormater.parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
+			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
+			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
 			gender									= Gender.fromCode(rs.getString("gender")),
-			alternativeEmailAddress	= rs.getString("external_email"),
-			userType								= MemberUserType.fromTargetGroup(rs.getString("desc_target_group"))
+			alternativeEmailAddress	= rs.getString("externalEmail"),
+			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup"))
 		)
-
-	private def sqlDateToLocalDate(date: java.sql.Date): LocalDate =
-		(Option(date) map { new LocalDate(_) }).orNull
 
 	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
 		(Option(date) map { new DateTime(_) }).orNull
@@ -554,21 +583,21 @@ object ProfileImporter extends Logging {
 }
 
 case class MembershipMember(
-	val universityId: String = null,
-	val departmentCode: String = null,
-	val email: String = null,
-	val targetGroup: String = null,
-	val title: String = null,
-	val preferredForenames: String = null,
-	val preferredSurname: String = null,
-	val position: String = null,
-	val dateOfBirth: LocalDate = null,
-	val usercode: String = null,
-	val startDate: LocalDate = null,
-	val endDate: LocalDate = null,
-	val modified: DateTime = null,
-	val phoneNumber: String = null,
-	val gender: Gender = null,
-	val alternativeEmailAddress: String = null,
-	val userType: MemberUserType
+	universityId: String = null,
+	departmentCode: String = null,
+	email: String = null,
+	targetGroup: String = null,
+	title: String = null,
+	preferredForenames: String = null,
+	preferredSurname: String = null,
+	position: String = null,
+	dateOfBirth: LocalDate = null,
+	usercode: String = null,
+	startDate: LocalDate = null,
+	endDate: LocalDate = null,
+	modified: DateTime = null,
+	phoneNumber: String = null,
+	gender: Gender = null,
+	alternativeEmailAddress: String = null,
+	userType: MemberUserType
 )

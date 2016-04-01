@@ -10,8 +10,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
-import scala.collection.mutable
-
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
@@ -21,10 +19,17 @@ trait StudentCourseYearDetailsDao {
 	def getFreshIds: Seq[String]
 	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
-	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String]
+	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
 	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 
-	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails]
+	def findByCourseRouteYear(
+		academicYear: AcademicYear,
+		course: Course,
+		route: Route,
+		yearOfStudy: Int,
+		eagerLoad: Boolean = false,
+		disableFreshFilter: Boolean = false
+	): Seq[StudentCourseYearDetails]
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
 	def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
 	def listForYearMarkExport: Seq[StudentCourseYearDetails]
@@ -79,7 +84,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 	// TODO - put these two methods in a service
-	def convertKeysToIds(keys: mutable.HashSet[StudentCourseYearKey]): mutable.HashSet[String] =
+	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String] =
 			keys.flatMap {
 				key => getIdFromKey(key)
 			}
@@ -110,13 +115,24 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		}
 	}
 
-	def findByCourseRouteYear(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, eagerLoad: Boolean = false): Seq[StudentCourseYearDetails] = {
-		val c = session.newCriteria[StudentCourseYearDetails]
+	def findByCourseRouteYear(
+		academicYear: AcademicYear,
+		course: Course,
+		route: Route,
+		yearOfStudy: Int,
+		eagerLoad: Boolean = false,
+		disableFreshFilter: Boolean = false
+	): Seq[StudentCourseYearDetails] = {
+		val thisSession = disableFreshFilter match {
+			case true => sessionWithoutFreshFilters
+			case false => session
+		}
+		val c = thisSession.newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
 			.add(is("academicYear", academicYear))
 			.add(is("yearOfStudy", yearOfStudy))
 			.add(is("scd.course", course))
-			.add(is("scd.currentRoute", route))
+			.add(is("route", route))
 			.add(is("enrolledOrCompleted", true))
 
 		if (eagerLoad) {

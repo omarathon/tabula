@@ -4,7 +4,11 @@
 
 <#assign feedbackNotice>
 	<#if extension.approved>
-		<br>Feedback for this student is currently due <@fmt.date date=extension.feedbackDeadline capitalise=false at=true />.
+		<#if extension.feedbackDeadline??>
+			<br>Feedback for this student is currently due <@fmt.date date=extension.feedbackDeadline capitalise=false at=true />.
+		<#else>
+			<br>Feedback for this student has no due date.
+		</#if>
 	</#if>
 </#assign>
 

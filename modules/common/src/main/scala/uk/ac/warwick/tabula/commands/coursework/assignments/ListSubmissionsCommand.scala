@@ -46,9 +46,10 @@ abstract class ListSubmissionsCommandInternal(val module: Module, val assignment
 		val submissions = assignment.submissions.sortBy(_.submittedDate).reverse
 		val downloads =
 			if (checkIndex) try {
-				Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment), 5.seconds)
+				Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment), 15.seconds)
 			} catch { case timeout: TimeoutException => Nil }
 			else Nil
+
 		submissions.map { submission =>
 			SubmissionListItem(submission, downloads.contains(submission))
 		}

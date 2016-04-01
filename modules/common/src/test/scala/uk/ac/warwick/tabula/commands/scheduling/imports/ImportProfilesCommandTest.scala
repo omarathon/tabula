@@ -1,17 +1,14 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
-import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
 import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.scheduling.ImportRowTracker
-import uk.ac.warwick.tabula.services.{ModuleRegistrationServiceImpl, SmallGroupService}
 import uk.ac.warwick.tabula.services.scheduling.{SitsAcademicYearAware, SitsAcademicYearService}
+import uk.ac.warwick.tabula.services.{ModuleRegistrationServiceImpl, SmallGroupService}
 
-import scala.collection.mutable
 import scala.language.implicitConversions
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
@@ -118,128 +115,6 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	}
 
 	@Transactional
-	@Test def testStampMissingRows() {
-		new Environment {
-			val tracker = new ImportRowTracker
-
-			tracker.memberDao = memberDao
-			tracker.studentCourseDetailsDao = scdDao
-			tracker.studentCourseYearDetailsDao = scydDao
-
-			tracker.universityIdsSeen.add(stu.universityId)
-			tracker.scjCodesSeen.add(scd.scjCode)
-
-			tracker.studentCourseYearDetailsSeen.add(key1)
-
-			command.stampMissingRows(tracker, DateTime.now)
-			session.flush()
-			session.clear()
-
-			stu.missingFromImportSince should be (null)
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
-
-			tracker.universityIdsSeen.remove(stu.universityId)
-
-			command.stampMissingRows(tracker, DateTime.now)
-			session.flush()
-			session.clear()
-
-			var stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
-
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
-			stuMem.missingFromImportSince should not be null
-
-			tracker.scjCodesSeen.remove(scd.scjCode)
-			command.stampMissingRows(tracker, DateTime.now)
-			session.flush()
-			session.clear()
-
-			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
-			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should not be null
-			scd.missingFromImportSince should not be null
-			scyd.missingFromImportSince should be (null)
-
-			tracker.studentCourseYearDetailsSeen.remove(key1)
-			command.stampMissingRows(tracker, DateTime.now)
-			session.flush()
-			session.clear()
-
-			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
-			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should not be null
-			scd.missingFromImportSince should not be null
-			scyd.missingFromImportSince should not be null
-
-		}
-	}
-
-	@Transactional
-	@Test def testUpdateMissingForIndividual() {
-		new Environment {
-			val tracker = new ImportRowTracker
-			tracker.universityIdsSeen.add(stu.universityId)
-			tracker.scjCodesSeen.add(scd.scjCode)
-
-			val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
-			tracker.studentCourseYearDetailsSeen.add(key)
-
-			command.updateMissingForIndividual(stu, tracker)
-			session.flush()
-			session.clear()
-
-			var stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should be (null)
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
-
-			tracker.universityIdsSeen.remove(stu.universityId)
-
-			command.updateMissingForIndividual(stuMem, tracker)
-
-			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should not be null
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
-
-			tracker.scjCodesSeen.remove(scd.scjCode)
-			command.updateMissingForIndividual(stuMem, tracker)
-
-			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should not be null
-			scd.missingFromImportSince should not be null
-			scyd.missingFromImportSince should be (null)
-
-			tracker.studentCourseYearDetailsSeen.remove(key)
-			command.updateMissingForIndividual(stuMem, tracker)
-
-			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
-
-			stuMem.missingFromImportSince should not be null
-			scd.missingFromImportSince should not be null
-			scyd.missingFromImportSince should not be null
-
-		}
-	}
-
-	@Transactional
 	@Test
 	def testConvertKeysToIds(): Unit = {
 		new Environment {
@@ -250,10 +125,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scyd2 = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber).get
 			val idForScyd2 = scyd2.id
 
-			val keys = new mutable.HashSet[StudentCourseYearKey]
-
-			keys.add(key1)
-			keys.add(key2)
+			val keys = Seq(key1, key2)
 
 			val ids = command.studentCourseYearDetailsDao.convertKeysToIds(keys)
 

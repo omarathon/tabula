@@ -26,7 +26,6 @@ class UpstreamModuleListEntry extends GeneratedId {
 		_matchString = "^%s".format(globString.replace(".", "\\.").replace("?", ".").replace("*", ".*"))
 	}
 
-	@transient
-	lazy val pattern = Pattern.compile(_matchString)
+	def pattern = Pattern.compile(_matchString)
 
 }

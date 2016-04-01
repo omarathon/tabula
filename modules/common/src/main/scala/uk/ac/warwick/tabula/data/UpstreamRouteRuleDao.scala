@@ -34,9 +34,6 @@ class UpstreamRouteRuleDaoImpl extends UpstreamRouteRuleDao with Daoisms {
 				.add(is("_academicYear", academicYear))
 				.add(is("_academicYear", null))
 			).add(is("yearOfStudy", yearOfStudy))
-			.setFetchMode("entries", FetchMode.JOIN)
-			.setFetchMode("entries.list", FetchMode.JOIN)
-			.setFetchMode("entries.list.entries", FetchMode.JOIN)
 			.seq
 	}
 

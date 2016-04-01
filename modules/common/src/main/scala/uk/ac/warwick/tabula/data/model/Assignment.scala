@@ -177,22 +177,23 @@ class Assignment
 		None
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
-	} else {
+	} else if (extensions.exists(_.feedbackDeadline.isDefined)){
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-	}
+	} else None
 
-	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
+
+	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
 		// If we have an extension, use the extension's expiry date
 		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
 
 		val baseFeedbackDeadline =
 			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
 
-		// If the submission was late, allow 20 days from the submission day
+		// allow 20 days from the submission day only for submissions that aren't late. Late submissions are excluded from this calculation
 		if (submission.isLate)
-			workingDaysHelper.datePlusWorkingDays(submission.submittedDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+			None
 		else
-			baseFeedbackDeadline
+			Some(baseFeedbackDeadline)
 	}
 
 	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>

@@ -54,8 +54,25 @@ class EditSchemeMembershipCommandInternal(val scheme: AttendanceMonitoringScheme
 	override def applyInternal() = {
 		val membershipItems: Seq[SchemeMembershipItem] = {
 			val excludedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(excludedStudentIds.asScala, SchemeMembershipExcludeType, scheme.academicYear)
-			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems( includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
-			(excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
+			val includedMemberItems = attendanceMonitoringService.findSchemeMembershipItems(includedStudentIds.asScala, SchemeMembershipIncludeType, scheme.academicYear)
+			// TAB-4242 If a member has gone missing they can't be removed from the excluded or included students unless we add some stubs in
+			val missingExcludedItems = excludedStudentIds.asScala.diff(excludedMemberItems.map(_.universityId)).map(universityId => SchemeMembershipItem(
+				itemType = SchemeMembershipExcludeType,
+				firstName = "(unknown)",
+				lastName = "(unknown)",
+				universityId = universityId,
+				userId = "(unknown)",
+				existingSchemes = Seq()
+			))
+			val missingIncludedItems = includedStudentIds.asScala.diff(includedMemberItems.map(_.universityId)).map(universityId => SchemeMembershipItem(
+				itemType = SchemeMembershipIncludeType,
+				firstName = "(unknown)",
+				lastName = "(unknown)",
+				universityId = universityId,
+				userId = "(unknown)",
+				existingSchemes = Seq()
+			))
+			(excludedMemberItems ++ includedMemberItems ++ missingExcludedItems ++ missingIncludedItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
 		}
 
 		EditSchemeMembershipCommandResult(

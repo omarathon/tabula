@@ -37,6 +37,7 @@ tabula/
 ├── lib/
 │   ├── logback.xml
 │   ├── ojdbc7.jar
+│   ├── jtds-1.3.1.jar
 │   ├── tabula.properties
 │   └── tabula-sso-config.xml
 ├── logs/
@@ -74,6 +75,10 @@ This is just copied from the `conf` directory in the Tomcat 8 install. I couldn'
 ### `lib/ojdbc7.jar`
 
 You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc7.jar
+
+### `lib/jtds-1.3.1.jar`
+
+You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
 
 ### `lib/logback.xml`
 
