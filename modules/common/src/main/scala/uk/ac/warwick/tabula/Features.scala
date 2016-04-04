@@ -114,7 +114,7 @@ abstract class Features {
 	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
-	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
@@ -243,7 +243,7 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 
-	@BeanProperty var autoMarkMissedMonitoringPoints = false
+	@BeanProperty var autoMarkMissedMonitoringPoints = true
 
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true
