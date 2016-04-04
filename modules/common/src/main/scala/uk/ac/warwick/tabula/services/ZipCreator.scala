@@ -1,21 +1,24 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.File
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.{File, FileInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import org.springframework.http.HttpStatus
-import uk.ac.warwick.tabula.system.exceptions.UserError
-
-import scala.collection.mutable.ListBuffer
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import uk.ac.warwick.tabula.helpers.Logging
 import java.util.UUID
 import java.util.zip.Deflater
-import uk.ac.warwick.util.core.spring.FileUtils
+
+import com.google.common.io.Files
+import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOutputStream}
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream.UnicodeExtraFieldPolicy
+import org.springframework.http.HttpStatus
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.FileHasherComponent
+import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
+import uk.ac.warwick.tabula.system.exceptions.UserError
+import uk.ac.warwick.util.core.spring.FileUtils
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * An item in a Zip file. Can be a file or a folder.
@@ -46,10 +49,10 @@ case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends Z
  * be re-used later, so it's better to delete and try recreating later
  * than to keep serving half a corrupt file).
  */
-trait ZipCreator extends Logging {
-	import ZipCreator._
+trait ZipCreator extends Logging with TaskBenchmarking {
+	self: ObjectStorageServiceComponent with FileHasherComponent =>
 
-	def zipDir: File
+	import ZipCreator._
 
 	/**
 	 * General method for building a zip out of a list of ZipItems.
@@ -64,20 +67,18 @@ trait ZipCreator extends Logging {
 	 * it becomes stale.
 	 */
 	@throws[ZipRequestTooLargeError]("if the file doesn't exist and the items are too large to be zipped")
-	def getZip(name: String, items: Seq[ZipItem]) = {
-		val file = fileForName(name)
-		if (!file.exists) writeToFile(file, items)
-		file
+	def getZip(name: String, items: Seq[ZipItem]): RenderableFile = {
+		objectStorageService.renderable(objectKey(name), Some(name)).getOrElse {
+			writeZip(name, items)
+		}
 	}
 
 	/**
 	 * Create a new Zip with a randomly generated name.
 	 */
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }) = {
-		val file = unusedFile
-		writeToFile(file, items, progressCallback)
-		file
+	def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = benchmarkTask("Create unnamed zip") {
+		writeZip(unusedName, items, progressCallback)
 	}
 
 	private def isOverSizeLimit(items: Seq[ZipItem]) =
@@ -86,44 +87,65 @@ trait ZipCreator extends Logging {
 	private val CompressionLevel = Deflater.BEST_COMPRESSION
 
 	@throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-	private def writeToFile(file: File, items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }) = {
+	private def writeZip(name: String, items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile = {
 		if (isOverSizeLimit(items)) throw new ZipRequestTooLargeError
 
-		file.getParentFile.mkdirs
-		openZipStream(file) { (zip) =>
-			zip.setLevel(CompressionLevel)
-			// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip
-			zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
-			writeItems(items, zip, progressCallback)
+		// Create a temporary file
+		val file = File.createTempFile(name, ".zip")
+
+		try {
+			openZipStream(file) { (zip) =>
+				zip.setLevel(CompressionLevel)
+				// HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip
+				zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
+				writeItems(items, zip, progressCallback)
+			}
+
+			val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
+
+			// Upload the zip to the object store
+			benchmarkTask("Push zip to object store") {
+				objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
+			}
+
+			benchmarkTask("Return renderable zip") {
+				objectStorageService.renderable(objectKey(name), Some(name)).get
+			}
+		} finally {
+			if (!file.delete()) file.deleteOnExit()
 		}
 	}
 
 	private val UnusedFilenameAttempts = 100
 
 	/** Try 100 times to get an unused filename */
-	private def unusedFile = Stream.range(1, UnusedFilenameAttempts)
-		.map(_ => fileForName(randomUUID))
-		.find(!_.exists)
-		.getOrElse(throw new IllegalStateException("Couldn't find unique filename"))
+	private def unusedName: String =
+		Stream.range(1, UnusedFilenameAttempts)
+			.map { _ => randomUUID }
+			.find { name => !objectStorageService.keyExists(objectKey(name)) }
+			.getOrElse(throw new IllegalStateException("Couldn't find unique key"))
 
-	private def randomUUID = UUID.randomUUID.toString.replace("-", "")
+	private def randomUUID: String = UUID.randomUUID.toString.replace("-", "")
 
 	/**
 	 * Invalidates a previously created zip, by deleting its file.
 	 *
 	 * @param name The name as passed to getZip when creating the file.
 	 */
-	def invalidate(name: String) = fileForName(name).delete()
+	def invalidate(name: String) = objectStorageService.delete(objectKey(name))
 
-	private def fileForName(name: String) = new File(zipDir, name + ".zip")
-
-	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }) {
+	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }): Unit = benchmarkTask("Write zip items") {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
-			items.zipWithIndex.foreach{ case(item, index) => item match {
+			items.zipWithIndex.foreach { case(item, index) => item match {
+				case file: ZipFileItem if Option(file.input).nonEmpty && file.length > 0 =>
+					benchmarkTask(s"Write ${file.name}") {
+						zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
+						copy(file.input, zip)
+						zip.closeArchiveEntry()
+						progressCallback(index, items.size)
+					}
 				case file: ZipFileItem =>
-					zip.putArchiveEntry(new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength)))
-					copy(file.input, zip)
-					zip.closeArchiveEntry()
+					// do nothing
 					progressCallback(index, items.size)
 				case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
 			}}
@@ -183,6 +205,9 @@ object ZipCreator {
 
 	val MaxFolderLength = 20
 	val MaxFileLength = 100
+
+	val ObjectKeyPrefix = "zips/"
+	def objectKey(name: String) = ObjectKeyPrefix + name
 }
 
 class ZipRequestTooLargeError extends java.lang.RuntimeException("Files too large to compress") with UserError {

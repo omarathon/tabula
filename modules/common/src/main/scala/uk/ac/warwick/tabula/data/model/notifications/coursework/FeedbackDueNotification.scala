@@ -15,23 +15,24 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 
 	self : Notification[_, Unit] with NotificationPreSaveBehaviour =>
 
-	protected def deadline: LocalDate
+	protected def deadline: Option[LocalDate]
 	protected def assignment: Assignment
 
 	@transient private lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	protected def daysLeft = {
-		val now = created.toLocalDate
+	protected def daysLeft =
+		deadline.map { d =>
+			val now = created.toLocalDate
 
-		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
-		val offset =
-			if (deadline.isBefore(now)) 1
-			else -1 // today or in the future
+			// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
+			val offset =
+				if (d.isBefore(now)) 1
+				else -1 // today or in the future
 
-		workingDaysHelper.getNumWorkingDays(now, deadline) + offset
-	}
+			workingDaysHelper.getNumWorkingDays(now, d) + offset
+		}.getOrElse(Integer.MAX_VALUE)
 
-	protected def dueToday = created.toLocalDate == deadline
+	protected def dueToday = deadline.contains(created.toLocalDate)
 
 	override final def onPreSave(newRecord: Boolean) {
 		priority = if (daysLeft == 1) {
@@ -61,7 +62,7 @@ class FeedbackDueGeneralNotification
 	override final def title = "%s: Feedback for \"%s\" is due to be published".format(assignment.module.code.toUpperCase, assignment.name)
 
 	override final def recipients = {
-		if (assignment.needsFeedbackPublishingIgnoreExtensions) {
+		if (deadline.nonEmpty && assignment.needsFeedbackPublishingIgnoreExtensions) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
 				.getOrElse(throw new IllegalStateException("No such module"))
@@ -71,7 +72,7 @@ class FeedbackDueGeneralNotification
 		}
 	}
 
-	override final def deadline = assignment.feedbackDeadline.getOrElse(throw new IllegalStateException("No feedback deadline for open-ended assignments"))
+	override final def deadline = assignment.feedbackDeadline
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_general.ftl", Map(
 		"assignment" -> assignment,
@@ -96,7 +97,7 @@ class FeedbackDueExtensionNotification
 
 	override final def recipients = {
 		// only send to recipients if the assignments needs feedback publishing and the student actually submitted
-		if (submission.isDefined && assignment.needsFeedbackPublishingFor(extension.universityId)) {
+		if (submission.nonEmpty && deadline.nonEmpty && assignment.needsFeedbackPublishingFor(extension.universityId)) {
 			val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 			moduleAndDepartmentService.getModuleByCode(assignment.module.code)
 				.getOrElse(throw new IllegalStateException("No such module"))
@@ -106,9 +107,7 @@ class FeedbackDueExtensionNotification
 		}
 	}
 
-	override final def deadline = extension.feedbackDeadline.map(_.toLocalDate).getOrElse(
-		throw new IllegalArgumentException("Cannot send a FeedbackDueExtension for an extension without a feedbackDeadline")
-	)
+	override final def deadline = extension.feedbackDeadline.map(_.toLocalDate)
 
 	override def content: FreemarkerModel = FreemarkerModel("/WEB-INF/freemarker/notifications/feedback_reminder_extension.ftl", Map(
 		"extension" -> extension,

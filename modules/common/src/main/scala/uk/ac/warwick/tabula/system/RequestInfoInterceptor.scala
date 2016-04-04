@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /** Provides a limited interface of request-level things, which are required by some objects
 	* like CurrentUser before a full RequestInfo can be created.
@@ -59,6 +60,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 
 object RequestInfoInterceptor {
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
+	val UserAgentHeader = "User-Agent"
 
 	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService) = {
 		// Transfer cache from an EarlyAccessInfo if one exists.
@@ -77,7 +79,8 @@ object RequestInfoInterceptor {
 			maintenance = isMaintenance,
 			requestLevelCache = cache,
 			hasEmergencyMessage = emergencyMessageService.enabled,
-			emergencyMessage = emergencyMessage
+			emergencyMessage = emergencyMessage,
+			userAgent = request.getHeader(UserAgentHeader).textOrEmpty
 		)
 	}
 

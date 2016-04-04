@@ -167,7 +167,6 @@ object AdminDepartmentHomeCommandTest {
 		bean(){mock[MaintenanceModeService]}
 		bean(){mock[Features]}
 		bean(){mock[TriggerService]}
-		bean("indexTopic"){mock[Queue]}
 		bean(){
 			val service = mock[ModuleAndDepartmentService]
 			service.modulesWithPermission(any[CurrentUser], any[Permission], any[Department]) returns Set.empty

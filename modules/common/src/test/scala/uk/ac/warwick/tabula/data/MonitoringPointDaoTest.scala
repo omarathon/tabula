@@ -15,7 +15,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 
 	val monitoringPointDao = new MonitoringPointDaoImpl
 	val routeDao = new RouteDaoImpl
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 
 	val route1 = Fixtures.route("g553")
 	val route2 = Fixtures.route("h553")
@@ -79,9 +79,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 	@Test def getCheckpointByMember() {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.freshStudentCourseDetails.head.route = route1
+			student1.freshStudentCourseDetails.head.currentRoute = route1
 			val student2 = Fixtures.student("2345")
-			student2.freshStudentCourseDetails.head.route = route1
+			student2.freshStudentCourseDetails.head.currentRoute = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -111,9 +111,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
 
-			student1.freshStudentCourseDetails.head.route = route1
+			student1.freshStudentCourseDetails.head.currentRoute = route1
 			val student2 = Fixtures.student("2345")
-			student2.freshStudentCourseDetails.head.route = route1
+			student2.freshStudentCourseDetails.head.currentRoute = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -205,7 +205,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 		val student = Fixtures.student(userId)
 		var scd = student.freshStudentCourseDetails.head
 		student.mostSignificantCourse = scd
-		scd.route = route
+		scd.currentRoute = route
 		var scyd = scd.latestStudentCourseYearDetails
 		scd.removeStudentCourseYearDetails(scyd)
 		var newScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(academicYear, null, year, scd)

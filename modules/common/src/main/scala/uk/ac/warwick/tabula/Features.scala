@@ -57,7 +57,6 @@ abstract class Features {
 	@Value("${features.collectMarks:true}") var collectMarks = defaults.collectMarks
 	@Value("${features.turnitin:true}") var turnitin = defaults.turnitin
 	@Value("${features.turnitinSubmissions:true}") var turnitinSubmissions = defaults.turnitinSubmissions
-	@Value("${features.turnitinLTI:true}") var turnitinLTI = defaults.turnitinLTI
 	@Value("${features.assignmentMembership:true}") var assignmentMembership = defaults.assignmentMembership
 	@Value("${features.extensions:true}") var extensions = defaults.extensions
 	@Value("${features.feedbackTemplates:true}") var feedbackTemplates = defaults.feedbackTemplates
@@ -92,7 +91,6 @@ abstract class Features {
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.disability.rendering.submissions:false}") var disabilityOnSubmission = defaults.disabilityOnSubmission
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
-	@Value("${features.xSendfile:true}") var xSendfile = defaults.xSendfile
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
 	@Value("${features.profiles.showModuleResults:true}") var showModuleResults = defaults.showModuleResults
@@ -116,6 +114,8 @@ abstract class Features {
 	@Value("${features.queueFeedbackForSits:true}") var queueFeedbackForSits = defaults.queueFeedbackForSits
 	@Value("${features.searchOnApiComponent:true}") var searchOnApiComponent = defaults.searchOnApiComponent
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
+	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:false}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
+	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
@@ -134,6 +134,10 @@ abstract class Features {
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
+	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
+	@Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport = defaults.schedulingModuleListsImport
+	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
+
 
 	@Value("${features.exams:true}") var exams = defaults.exams
 	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
@@ -176,7 +180,6 @@ class FeaturesMessage {
 	@BeanProperty var academicYear2018 = false
 
 	@BeanProperty var emailStudents = false
-	@BeanProperty var xSendfile = true
 	@BeanProperty var activityStreams = true
 	@BeanProperty var masqueradersCanWrite = false
 	@BeanProperty var masqueradeElevatedPermissions = false
@@ -188,7 +191,6 @@ class FeaturesMessage {
 	@BeanProperty var collectMarks = true
 	@BeanProperty var turnitin = true
 	@BeanProperty var turnitinSubmissions = true
-	@BeanProperty var turnitinLTI = true
 	@BeanProperty var assignmentMembership = true
 	@BeanProperty var extensions = true
 	@BeanProperty var feedbackTemplates = true
@@ -219,6 +221,7 @@ class FeaturesMessage {
 	@BeanProperty var showAccreditedPriorLearning = true
 	@BeanProperty var autoGroupDeregistration = false
 	@BeanProperty var celcatTimetablesChemistry = true
+	@BeanProperty var startNotificationListener = false
 
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true
@@ -240,6 +243,8 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 
+	@BeanProperty var autoMarkMissedMonitoringPoints = false
+
 	@BeanProperty var schedulingAcademicInformationImport = true
 	@BeanProperty var schedulingProfilesImport = true
 	@BeanProperty var schedulingAssignmentsImport = true
@@ -257,6 +262,10 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
 	@BeanProperty var schedulingTriggers = true
+	@BeanProperty var schedulingObjectStorageMigration = false
+	@BeanProperty var schedulingModuleListsImport = true
+	@BeanProperty var schedulingProcessNotificationListeners = true
+
 
 	@BeanProperty var exams = true
 	@BeanProperty var examGrids = false

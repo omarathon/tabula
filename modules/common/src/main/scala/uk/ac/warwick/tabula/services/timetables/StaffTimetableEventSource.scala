@@ -4,13 +4,14 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.helpers.{Futures, SystemClockComponent}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.concurrent.Future
 
 trait StaffTimetableEventSource extends TimetableEventSource[StaffMember] {
-	override def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[Seq[TimetableEvent]]
+	override def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
 }
 
 trait StaffTimetableEventSourceComponent {
@@ -24,11 +25,11 @@ trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSour
 
 	class CombinedStaffTimetableEventSource() extends StaffTimetableEventSource {
 
-		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[Seq[TimetableEvent]] = {
-			val timetableEvents: Future[Seq[TimetableEvent]] = timetableFetchingService.getTimetableForStaff(staff.universityId)
-			val smallGroupEvents: Future[Seq[TimetableEvent]] = staffGroupEventSource.eventsFor(staff, currentUser, context)
+		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] = {
+			val timetableEvents: Future[EventList] = timetableFetchingService.getTimetableForStaff(staff.universityId)
+			val smallGroupEvents: Future[EventList] = staffGroupEventSource.eventsFor(staff, currentUser, context)
 
-			Futures.flatten(Seq(timetableEvents, smallGroupEvents))
+			Futures.combine(Seq(timetableEvents, smallGroupEvents), EventList.combine)
 		}
 
 	}

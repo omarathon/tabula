@@ -307,7 +307,9 @@ class FileField extends AssignmentFormField {
 					else errors.rejectValue("file", "file.toomany", Array(attachmentLimit: JInteger), "")
 				} else if (hasDuplicates(v.file.fileNames)) {
 					errors.rejectValue("file", "file.duplicate")
-				} else if (attachmentTypes.nonEmpty) {
+				}
+
+				if (attachmentTypes.nonEmpty) {
 					val attachmentStrings = attachmentTypes.map(s => "." + s)
 					val fileNames = v.file.fileNames map (_.toLowerCase)
 					val invalidFiles = fileNames.filter(s => !attachmentStrings.exists(s.endsWith))
@@ -315,7 +317,9 @@ class FileField extends AssignmentFormField {
 						if (invalidFiles.size == 1) errors.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 						else errors.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 					}
-				} else if (Option(individualFileSizeLimit).nonEmpty){
+				}
+
+				if (Option(individualFileSizeLimit).nonEmpty){
 					val invalidFiles = v.file.individualFileSizes.filter(_._2 > individualFileSizeLimitInBytes)
 					if (invalidFiles.nonEmpty) {
 						if (invalidFiles.size == 1) errors.rejectValue("file", "file.toobig.one", Array(invalidFiles.map(_._1).mkString("")), "")

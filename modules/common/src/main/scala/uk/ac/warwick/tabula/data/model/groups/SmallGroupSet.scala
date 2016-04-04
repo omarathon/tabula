@@ -5,9 +5,10 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
-import org.joda.time.DateTime
+import org.joda.time.{LocalTime, DateTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
@@ -51,7 +52,8 @@ class SmallGroupSet
 		with HasSettings
 		with Serializable
 		with PostLoadBehaviour
-		with ToEntityReference {
+		with ToEntityReference
+		with TaskBenchmarking {
 	type Entity = SmallGroupSet
 
 	import SmallGroupSet.Settings
@@ -160,6 +162,15 @@ class SmallGroupSet
 	@Column(name = "default_weekranges")
 	var defaultWeekRanges: Seq[WeekRange] = Nil
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.DayOfWeekUserType")
+	@Column(name = "default_day")
+	var defaultDay: DayOfWeek = _
+
+	@Column(name = "default_starttime")
+	var defaultStartTime: LocalTime = _
+	@Column(name = "default_endtime")
+	var defaultEndTime: LocalTime = _
+
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "default_tutorsgroup_id")
 	private var _defaultTutors: UserGroup = UserGroup.ofUsercodes
@@ -195,10 +206,10 @@ class SmallGroupSet
 			membershipService.determineMembershipIds(upstreamAssessmentGroups, Some(members))
 		}
 
-	def allStudentsCount =
+	def allStudentsCount = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
-		}
+		}}
 
 	def unallocatedStudents = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
@@ -208,7 +219,7 @@ class SmallGroupSet
 		}
 	}
 
-	def unallocatedStudentsCount = {
+	def unallocatedStudentsCount = benchmarkTask(s"${this.id} unallocatedStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
 				// Efficiency
@@ -289,6 +300,9 @@ class SmallGroupSet
     newSet.releasedToTutors = releasedToTutors
 		newSet.openForSignups = openForSignups
 		newSet.defaultWeekRanges = defaultWeekRanges
+		newSet.defaultDay = defaultDay
+		newSet.defaultStartTime = defaultStartTime
+		newSet.defaultEndTime = defaultEndTime
 		if (_defaultTutors != null) newSet._defaultTutors = _defaultTutors.duplicate()
 		newSet.defaultLocation = defaultLocation
 		newSet.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet

@@ -42,14 +42,11 @@ ${*
 .externalToolBuilders
 
 # IntelliJ IDE
-/.idea/workspace.xml
-/.idea/tasks.xml
-/.idea/artifacts
-/.idea/libraries
-/.idea/dictionaries
-/.idea/scala_compiler.xml
+!/.idea/modules.iml
+!/.idea/modules/*.iml
+!/.idea/codeStyleSettings.xml
+!/.idea/fileTemplates/*
 /.idea/*
-.idea/
 *.iml
 *.iws
 

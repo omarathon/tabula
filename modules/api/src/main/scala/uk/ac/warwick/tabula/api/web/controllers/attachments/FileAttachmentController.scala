@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.api.web.controllers.attachments
 
-import java.io.InputStream
+import java.io.{File, InputStream}
 import javax.servlet.http.HttpServletResponse
 
+import com.google.common.io.Files
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.validation.BindException
@@ -48,23 +49,29 @@ trait CreateFileAttachmentApi {
 	)(implicit response: HttpServletResponse) = createFile(is, contentType, contentLength, filename, user)
 
 	private def createFile(is: InputStream, contentType: String, contentLength: Long, filename: String, user: CurrentUser)(implicit response: HttpServletResponse) = {
-		val a = transactional() {
-			val attachment = new FileAttachment
-			attachment.name = filename
-			attachment.uploadedData = is
-			attachment.uploadedDataLength = contentLength
-			attachment.uploadedBy = user.apparentId
-			fileDao.saveTemporary(attachment)
+		// Stream it out to a temporary file on the file system
+		val file = File.createTempFile(filename, ".tmp")
+
+		try {
+			val a = transactional() {
+				val attachment = new FileAttachment
+				attachment.name = filename
+				attachment.uploadedData = Files.asByteSource(file)
+				attachment.uploadedBy = user.apparentId
+				fileDao.saveTemporary(attachment)
+			}
+
+			response.setStatus(HttpStatus.CREATED.value())
+			response.addHeader("Location", toplevelUrl + Routes.api.attachment(a))
+
+			Mav(new JSONView(Map(
+				"success" -> true,
+				"status" -> "ok",
+				"attachment" -> jsonFileAttachmentObject(a)
+			)))
+		} finally {
+			if (!file.delete()) file.deleteOnExit()
 		}
-
-		response.setStatus(HttpStatus.CREATED.value())
-		response.addHeader("Location", toplevelUrl + Routes.api.attachment(a))
-
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"attachment" -> jsonFileAttachmentObject(a)
-		)))
 	}
 
 	// Catch the situation where a filename hasn't been provided

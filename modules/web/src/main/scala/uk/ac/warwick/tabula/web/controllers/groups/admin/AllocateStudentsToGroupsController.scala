@@ -26,7 +26,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") smallGroupSet: SmallGroupSet): AllocateStudentsToGroupsCommand =
+	def command(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet): AllocateStudentsToGroupsCommand =
 		AllocateStudentsToGroupsCommand(module, smallGroupSet, user)
 
 	@RequestMapping

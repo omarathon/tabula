@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 @Controller
 class ArchiveSmallGroupSetController extends GroupsController {
 
-	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set
+	@ModelAttribute("smallGroupSet") def set(@PathVariable set: SmallGroupSet) = set
 
-	@ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) =
+	@ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable set: SmallGroupSet) =
 		new ArchiveSmallGroupSetCommand(module, set)
 
 	@RequestMapping

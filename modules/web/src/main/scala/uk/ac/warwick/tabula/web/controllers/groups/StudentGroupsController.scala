@@ -27,7 +27,6 @@ class StudentGroupsController extends GroupsController {
 
 	@RequestMapping(method = Array(POST, GET))
 	def listGroups(@ModelAttribute("command") command: Appliable[GroupsViewModel.ViewModules]): Mav = {
-
 		val data = command.apply()
 
 		val title = {

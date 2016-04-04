@@ -518,7 +518,7 @@
 			</@dropdown_menu>
 		</div>
 
-		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+		<h4 class="section-title with-button"><@fmt.module_name module /></h4>
 
 		<#if has_groups>
 			<div class="striped-section-contents">
@@ -918,7 +918,7 @@
 						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 							<#if can.do("SmallGroupEvents.ViewRegister", event)>
 								<div class="eventRegister">
-									<a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>">
+									<a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>" data-html="true">
 										Record
 									</a>
 								</div>
@@ -1071,7 +1071,7 @@
 				 data-href="<@routes.groups.moduleAttendanceInYear module academicYear/>"
 				 data-name="${module_anchor(module)}">
 				<div class="clearfix">
-					<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+					<h4 class="section-title with-button"><@fmt.module_name module /></h4>
 
 					<div class="striped-section-contents">
 			    </div>

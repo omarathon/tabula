@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -21,8 +18,14 @@ import scala.collection.JavaConverters._
 object GenerateExamGridOvercatCommand {
 	def overcatIdentifier(modules: Seq[ModuleRegistration]) = modules.map(_.module.code).mkString("-")
 
-	def apply(department: Department, academicYear: AcademicYear, scyd: StudentCourseYearDetails, user: CurrentUser) =
-		new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, user)
+	def apply(
+		department: Department,
+		academicYear: AcademicYear,
+		scyd: StudentCourseYearDetails,
+		normalLoad: BigDecimal,
+		routeRules: Seq[UpstreamRouteRule],
+		user: CurrentUser
+	) = new GenerateExamGridOvercatCommandInternal(department, academicYear, scyd, normalLoad, routeRules, user)
 			with ComposableCommand[Seq[Module]]
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringModuleRegistrationServiceComponent
@@ -35,8 +38,14 @@ object GenerateExamGridOvercatCommand {
 }
 
 
-class GenerateExamGridOvercatCommandInternal(val department: Department, val academicYear: AcademicYear, val scyd: StudentCourseYearDetails, val user: CurrentUser)
-	extends CommandInternal[Seq[Module]] {
+class GenerateExamGridOvercatCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val scyd: StudentCourseYearDetails,
+	val normalLoad: BigDecimal,
+	val routeRules: Seq[UpstreamRouteRule],
+	val user: CurrentUser
+)	extends CommandInternal[Seq[Module]] {
 
 	self: GenerateExamGridOvercatCommandRequest with StudentCourseYearDetailsDaoComponent =>
 
@@ -45,7 +54,6 @@ class GenerateExamGridOvercatCommandInternal(val department: Department, val aca
 		scyd.overcattingModules = modules
 		scyd.overcattingChosenBy = user.apparentUser
 		scyd.overcattingChosenDate = DateTime.now
-		scyd.overcattingMarkOverrides = overwrittenMarks
 		studentCourseYearDetailsDao.saveOrUpdate(scyd)
 		modules
 	}
@@ -62,9 +70,6 @@ trait PopulateGenerateExamGridOvercatCommand extends PopulateOnForm {
 				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
 			)
 		).getOrElse("")
-		scyd.overcattingMarkOverrides.foreach(overcattingMarkOverrides =>
-			overcattingMarkOverrides.foreach{case(module, mark) => newModuleMarks.put(module, mark.toString) }
-		)
 	}
 }
 
@@ -113,6 +118,8 @@ trait GenerateExamGridOvercatCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 	def scyd: StudentCourseYearDetails
+	def normalLoad: BigDecimal
+	def routeRules: Seq[UpstreamRouteRule]
 	def user: CurrentUser
 
 }
@@ -123,9 +130,17 @@ trait GenerateExamGridOvercatCommandRequest {
 
 	var overcatChoice: String = _
 
+	lazy val overcattedModuleSubsets = moduleRegistrationService.overcattedModuleSubsets(
+		scyd.toGenerateExamGridEntity(),
+		overwrittenMarks,
+		normalLoad,
+		routeRules
+	)
+
 	def chosenModuleSubset: Option[(BigDecimal, Seq[ModuleRegistration])] =
-		moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(), overwrittenMarks)
-			.find{case(_, modules) => GenerateExamGridOvercatCommand.overcatIdentifier(modules) == overcatChoice.maybeText.getOrElse("")}
+		overcattedModuleSubsets.find{case(_, modules) =>
+			GenerateExamGridOvercatCommand.overcatIdentifier(modules) == overcatChoice.maybeText.getOrElse("")
+		}
 
 	var newModuleMarks: JMap[Module, String] = LazyMaps.create { module: Module => null: String }.asJava
 

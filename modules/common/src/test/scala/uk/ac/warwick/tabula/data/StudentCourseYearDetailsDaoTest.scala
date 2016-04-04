@@ -1,21 +1,15 @@
 package uk.ac.warwick.tabula.data
 
-import org.junit.Before
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.Fixtures
 import org.joda.time.DateTime
-import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import org.junit.Before
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey, StudentMember}
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 	val scydDao = new StudentCourseYearDetailsDaoImpl
 	val scdDao = new StudentCourseDetailsDaoImpl
-	val memDao = new MemberDaoImpl
+	val memDao = new AutowiringMemberDaoImpl
 
 	@Before
 	def setup() {
@@ -129,9 +123,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		scyd3.missingFromImportSince should be (null)
 		scyd4.missingFromImportSince should be (null)
 
-		val seenSceKeys = new mutable.HashSet[StudentCourseYearKey]
-		seenSceKeys.add(key1)
-		seenSceKeys.add(key3)
+		val seenSceKeys = Seq(key1, key3)
 
 		val seenIds = scydDao.convertKeysToIds(seenSceKeys)
 

@@ -2,14 +2,15 @@ package uk.ac.warwick.tabula
 
 import java.io.{InputStream, File, StringReader}
 import java.util.concurrent.TimeUnit
+import org.jclouds.ContextBuilder
+import org.jclouds.blobstore.BlobStoreContext
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 
 import scala.collection.JavaConversions._
-import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
-import org.hamcrest.Matcher
-import org.hamcrest.Matchers.allOf
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.ReadableInstant
@@ -60,6 +61,7 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
 	}
 
 	Transactions.enabled = false
+	EventHandling.enabled = false
 
 	// IntelliJ tests via JUnit only half-fill this property, so set it here.
 	if (System.getProperty("TestProcessId") == "F${surefire.forkNumber}") {
@@ -131,6 +133,8 @@ trait TestHelpers extends TestFixtures {
 
 	var temporaryFiles: Set[File] = Set.empty
 
+	var blobStoreContext: BlobStoreContext = _
+
 	// Location of /tmp - best to create a subdir below it.
 	lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
 	val random = new scala.util.Random
@@ -139,6 +143,15 @@ trait TestHelpers extends TestFixtures {
 
 	@Before def setupAspects = {
 
+	}
+
+	def createTransientObjectStore(): ObjectStorageService = {
+		if (blobStoreContext == null)
+			blobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
+
+		val blobStore = new BlobStoreObjectStorageService(blobStoreContext, "JavaTestTmp-" + random.nextLong())
+		blobStore.afterPropertiesSet()
+		blobStore
 	}
 
 	/** Returns a new temporary directory that will get cleaned up
@@ -172,7 +185,10 @@ trait TestHelpers extends TestFixtures {
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */
-	@After def deleteTemporaryDirs = try{temporaryFiles.par foreach FileUtils.recursiveDelete} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
+	@After def deleteTemporaryDirs = try{
+		temporaryFiles.par foreach FileUtils.recursiveDelete
+		if (blobStoreContext != null) blobStoreContext.close()
+	} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
 	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
 		try {

@@ -4,9 +4,12 @@ import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.userlookup.User
+
+import scala.concurrent.Future
 
 // scalastyle:off magic.number
 // reusable environment for marking workflow tests
@@ -71,18 +74,12 @@ trait ReportWorld extends TestBase with Mockito {
 	createPublishEvent(assignmentEight, 31, studentData(1, 50))	// late (same details as assignmentSeven, just not a dissertation)
 
 	var auditEventQueryMethods = mock[AuditEventQueryMethods]
-	auditEventQueryMethods.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {
-		val args = argsObj.asInstanceOf[Array[_]]
-		val assignment = args(0).asInstanceOf[Assignment]
-		val user = args(1).asInstanceOf[User]
-		auditEvents.filter(event => {event.userId == user.getUserId && event.assignmentId.get == assignment.id})
-	}}
 
 	auditEventQueryMethods.publishFeedbackForStudent(any[Assignment], any[String]) answers {argsObj => {
 		val args = argsObj.asInstanceOf[Array[_]]
 		val assignment = args(0).asInstanceOf[Assignment]
 		val warwickId = args(1).asInstanceOf[String]
-		auditEvents.filter(event => {event.students.contains(warwickId) && event.assignmentId.get == assignment.id})
+		Future.successful(auditEvents.filter(event => {event.students.contains(warwickId) && event.assignmentId.get == assignment.id}))
 	}}
 
 
@@ -122,6 +119,8 @@ trait ReportWorld extends TestBase with Mockito {
 	val extension = new Extension(idFormat(3))
 	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
+	extension.assignment =  assignmentSix
+	extension.userId = "cuxxxx"
 	assignmentSix.extensions = Seq(extension)
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module) = {

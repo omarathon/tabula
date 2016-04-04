@@ -287,7 +287,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	}
 
 	def save(gb: GradeBoundary): Unit = {
-		session.saveOrUpdate(gb)
+		session.save(gb)
 	}
 
 	def deleteGradeBoundaries(marksCode: String): Unit = {

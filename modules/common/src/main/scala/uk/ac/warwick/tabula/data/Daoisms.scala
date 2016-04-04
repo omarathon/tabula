@@ -17,7 +17,7 @@ import scala.reflect._
 import scala.util.Try
 
 /** Trait for self-type annotation, declaring availability of a Session. */
-trait SessionComponent{
+trait SessionComponent {
   protected def session:Session
 }
 
@@ -51,7 +51,6 @@ trait HelperRestrictions extends Logging {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 	def isNot = org.hibernate.criterion.Restrictions.neOrIsNotNull _
 	def isSubquery(propertyName: String, subquery: DetachedCriteria) = new PropertySubqueryExpressionWithToString(propertyName, subquery)
-	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
 	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
 		if (iterable.isEmpty) {
 			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")

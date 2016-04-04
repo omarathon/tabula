@@ -99,7 +99,7 @@ h1.modal-title {
 
 .mac-cmd {
 	font-size: 140%;
-	vertical-align: bottom;
+	vertical-align: middle;
 }
 
 label.disabled {
@@ -255,6 +255,10 @@ summary {
 			max-height: 450px;
 		}
 	}
+	.popover-content {
+		overflow-y: auto;
+		max-height: 450px;
+	}
 }
 
 .module-info, .striped-section {
@@ -271,6 +275,11 @@ summary {
 	.section-title {
 		color: #606060 !important;
 		margin-top: 0;
+		margin-bottom: 0;
+		&.with-button {
+			margin-top: 6px;
+			margin-bottom: 6px;
+		}
 	}
 
 	.button-list .btn {
@@ -283,6 +292,9 @@ summary {
 
 		&.expanded {
 			.striped-section-contents { display: block; }
+			.section-title {
+				margin-bottom: 11px;
+			}
 		}
 	}
 }
@@ -290,7 +302,6 @@ summary {
 .module-info .module-manage-button, .striped-section .section-manage-button {
 	display: inline-block;
 	margin-left: 8px;
-	top: 3px;
 	float:right;
 }
 
@@ -880,4 +891,9 @@ ul.profile-user-list {
 			}
 		}
 	}
+}
+
+// Handle rotated hedares when scrolling
+.id7-wide-table-wrapper-container .table-responsive {
+	position: relative;
 }

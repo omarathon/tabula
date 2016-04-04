@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.api.web.helpers
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.api.web.controllers.TopLevelUrlAware
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkCommandTypes
+import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkCommandTypes
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, Submission, Assignment}
 import uk.ac.warwick.tabula.web.Routes
@@ -29,6 +30,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 
 			"extended" -> info("isExtended"),
 			"extensionRequested" -> info("extensionRequested"),
+			"studentDeadline" -> DateFormats.IsoDateTime.print(info("studentDeadline").asInstanceOf[DateTime]),
 			"submittable" -> info("submittable"),
 			"resubmittable" -> info("resubmittable"),
 			"closed" -> info("closed"),

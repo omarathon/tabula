@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.junit.Before
-import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDaoImpl}
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, StudentCourseDetailsDaoImpl}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, StaffAssistantsHelpers}
 import uk.ac.warwick.tabula._
-
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import scala.collection.JavaConverters._
 
 class MemberTest extends TestBase with Mockito {
@@ -45,8 +45,8 @@ class MemberTest extends TestBase with Mockito {
 		val mod2 = new Module("cs102")
 		mod1.adminDepartment = extDept
 		mod2.adminDepartment = homeDept
-		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
-		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A")
 		studentCourseDetails.addModuleRegistration(modReg1)
 		studentCourseDetails.addModuleRegistration(modReg2)
 
@@ -61,7 +61,7 @@ class MemberTest extends TestBase with Mockito {
 		routeDept.code = "ch"
 		val route = new Route
 		route.adminDepartment = routeDept
-		member.mostSignificantCourseDetails.get.route = route
+		member.mostSignificantCourseDetails.get.currentRoute = route
 		member.attachStudentCourseDetails(studentCourseDetails)
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept, routeDept))
@@ -69,7 +69,7 @@ class MemberTest extends TestBase with Mockito {
 
 		// reset route to home, and check it appears only once
 		route.adminDepartment = homeDept
-		member.mostSignificantCourseDetails.get.route = route
+		member.mostSignificantCourseDetails.get.currentRoute = route
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
@@ -96,8 +96,8 @@ class MemberTest extends TestBase with Mockito {
 
 		val mod1 = new Module("cs101")
 		val mod2 = new Module("cs102")
-		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
-		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		val modReg1 = new ModuleRegistration(scd1, mod1, new JBigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(scd1, mod2, new JBigDecimal("12.0"), AcademicYear(2013), "A")
 		scd1.addModuleRegistration(modReg1)
 		scd1.addModuleRegistration(modReg2)
 
@@ -110,8 +110,8 @@ class MemberTest extends TestBase with Mockito {
 
 		val mod3 = new Module("cs103")
 		val mod4 = new Module("cs104")
-		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
-		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		val modReg3 = new ModuleRegistration(scd2, mod3, new JBigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg4 = new ModuleRegistration(scd2, mod4, new JBigDecimal("12.0"), AcademicYear(2013), "A")
 		scd2.addModuleRegistration(modReg3)
 		scd2.addModuleRegistration(modReg4)
 
@@ -188,7 +188,7 @@ class MemberTest extends TestBase with Mockito {
 		student.groupName = "Undergraduate student"
 
 		val studentCourseDetails = new StudentCourseDetails(student, "1111111/1")
-		studentCourseDetails.route = route
+		studentCourseDetails.currentRoute = route
 		studentCourseDetails.mostSignificant = true
 
 		student.attachStudentCourseDetails(studentCourseDetails)
@@ -231,7 +231,7 @@ class MemberTest extends TestBase with Mockito {
 
 class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 
 	@Before def setup() {

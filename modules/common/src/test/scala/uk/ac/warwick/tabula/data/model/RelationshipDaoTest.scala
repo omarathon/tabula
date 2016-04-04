@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 // scalastyle:off magic.number
 class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito {
 
-	val memberDao = new MemberDaoImpl
+	val memberDao = new AutowiringMemberDaoImpl
 	val relationshipDao = new RelationshipDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
 

@@ -24,15 +24,15 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-	@ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForDepartmentSmallGroupSetCommand =
+	@ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForDepartmentSmallGroupSetCommand =
 		UpdateStudentsForDepartmentSmallGroupSetCommand(mandatory(department), mandatory(set))
 
 	@ModelAttribute("findCommand")
-	def findCommand(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): FindStudentsForDepartmentSmallGroupSetCommand =
+	def findCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): FindStudentsForDepartmentSmallGroupSetCommand =
 		FindStudentsForDepartmentSmallGroupSetCommand(mandatory(department), mandatory(set))
 
 	@ModelAttribute("editMembershipCommand")
-	def editMembershipCommand(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetMembershipCommand =
+	def editMembershipCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetMembershipCommand =
 		EditDepartmentSmallGroupSetMembershipCommand(mandatory(department), mandatory(set))
 
 	protected val renderPath: String

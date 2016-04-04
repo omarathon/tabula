@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.feedback.OnlineFeedbackState
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model._
-import scala.collection.JavaConversions._
+import collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
@@ -37,20 +37,23 @@ class BulkModerationApprovalCommandInternal(val assignment: Assignment, val mark
 
 	override def onBind(result: BindingResult) {
 		// filter out any feedbacks where the current user is not the marker
-		markerFeedback = markerFeedback.filter(_.getMarkerUser == marker)
+		markerFeedback = markerFeedback.asScala.filter(_.getMarkerUser.exists { _ == marker }).asJava
 	}
 
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
-		if (markerFeedback.isEmpty) errors.rejectValue("students", "markerFeedback.finishMarking.noStudents")
+		if (markerFeedback.isEmpty)
+			errors.rejectValue("students", "markers.finishMarking.noStudents")
+		else if (markerFeedback.asScala.exists(_.feedback.getFirstMarkerFeedback.isEmpty))
+			errors.rejectValue("students", "markers.missingMarkerFeedback")
 	}
 
 	def applyInternal() {
-		markerFeedback.foreach(mf => {
+		markerFeedback.asScala.foreach(mf => {
 			val parentFeedback = mf.feedback
 
 			// copy the first markers comments to the parent feedback and save
-			val firstMarkerFeedback = parentFeedback.retrieveFirstMarkerFeedback
+			val firstMarkerFeedback = parentFeedback.getFirstMarkerFeedback.get
 			finaliseFeedback(assignment, Seq(firstMarkerFeedback))
 			parentFeedback.updatedDate = DateTime.now
 			feedbackService.saveOrUpdate(parentFeedback)
@@ -78,7 +81,7 @@ trait BulkModerationApprovalDescription extends Describable[Unit] {
 
 	override def describe(d: Description){
 		d.assignment(assignment)
-			.property("students" -> markerFeedback.map(_.feedback.universityId))
+			.property("students" -> markerFeedback.asScala.map(_.feedback.universityId))
 	}
 
 	override def describeResult(d: Description){

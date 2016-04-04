@@ -156,9 +156,9 @@
 							   data-placement="bottom"
 							   data-container="body"
 							   data-content='${popoverContent}'
-							   data-html="true">
+							   data-html="true"><#compress>
 								<i class="fa fa-question-circle"></i>
-							</a>
+							</#compress></a>
 							</span>
 						<div class="btn-group">
 							<button type="button" class="btn btn-default">
@@ -329,8 +329,8 @@
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
 							Saving this attendance will set monitoring points for
-							<span class="students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
-							as attended.
+							<span class="attended-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
+							<span class="missed-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
 						</div>
 					</div>
 

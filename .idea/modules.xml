@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/modules/all/all.iml" filepath="$PROJECT_DIR$/modules/all/all.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/api/api.iml" filepath="$PROJECT_DIR$/modules/api/api.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/attendance/attendance.iml" filepath="$PROJECT_DIR$/modules/attendance/attendance.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/common/common.iml" filepath="$PROJECT_DIR$/modules/common/common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/coursework/courses.iml" filepath="$PROJECT_DIR$/modules/coursework/courses.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/functional-test/functional-test.iml" filepath="$PROJECT_DIR$/modules/functional-test/functional-test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/profiles/profiles.iml" filepath="$PROJECT_DIR$/modules/profiles/profiles.iml" />
-      <module fileurl="file://$PROJECT_DIR$/modules/scheduling/scheduling.iml" filepath="$PROJECT_DIR$/modules/scheduling/scheduling.iml" />
       <module fileurl="file://$PROJECT_DIR$/tabula-project.iml" filepath="$PROJECT_DIR$/tabula-project.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/web/web.iml" filepath="$PROJECT_DIR$/modules/web/web.iml" />
     </modules>

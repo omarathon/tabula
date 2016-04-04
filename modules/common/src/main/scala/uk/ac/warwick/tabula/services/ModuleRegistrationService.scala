@@ -3,20 +3,27 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
 
+object ModuleRegistrationService {
+	final val DefaultNormalLoad = BigDecimal(120)
+}
+
 trait ModuleRegistrationService {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule): Unit
+	def delete(coreRequiredModule: CoreRequiredModule): Unit
 
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration]
@@ -32,7 +39,14 @@ trait ModuleRegistrationService {
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])]
+	def overcattedModuleSubsets(
+		entity: GenerateExamGridEntity,
+		markOverrides: Map[Module, BigDecimal],
+		normalLoad: BigDecimal,
+		rules: Seq[UpstreamRouteRule]
+	): Seq[(BigDecimal, Seq[ModuleRegistration])]
+
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule]
 
 }
 
@@ -42,10 +56,14 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = moduleRegistrationDao.saveOrUpdate(moduleRegistration)
 
+	def saveOrUpdate(coreRequiredModule: CoreRequiredModule) = moduleRegistrationDao.saveOrUpdate(coreRequiredModule)
+
+	def delete(coreRequiredModule: CoreRequiredModule): Unit = moduleRegistrationDao.delete(coreRequiredModule)
+
 	def getByNotionalKey(
 		studentCourseDetails: StudentCourseDetails,
 		module: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		academicYear: AcademicYear,
 		occurrence: String
 	): Option[ModuleRegistration] =
@@ -56,7 +74,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
-			val mark: BigDecimal = markOverrides.getOrElse(mr.module, Option(mr.agreedMark).map(agreedMark => BigDecimal(agreedMark)).orNull)
+			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mr.firstDefinedMark.map(mark => BigDecimal(mark)).orNull)
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
 			(mark, cats)
 		}).filter{case(mark, cats) => mark != null & cats != null}
@@ -70,25 +88,48 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 		}
 	}
 
-	def overcattedModuleSubsets(entity: GenerateExamGridEntity, markOverrides: Map[Module, BigDecimal]): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
-		if (entity.moduleRegistrations.exists(_.agreedMark == null)) {
+	def overcattedModuleSubsets(
+		entity: GenerateExamGridEntity,
+		markOverrides: Map[Module, BigDecimal],
+		normalLoad: BigDecimal,
+		rules: Seq[UpstreamRouteRule]
+	): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
+		if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			Seq()
 		} else {
-			val coreAndCoreReqModules = entity.moduleRegistrations.filter(mr =>
-				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.CoreRequired
+			val coreAndOptionalCoreModules = entity.moduleRegistrations.filter(mr =>
+				mr.selectionStatus == ModuleSelectionStatus.Core || mr.selectionStatus == ModuleSelectionStatus.OptionalCore
 			)
 			val subsets = entity.moduleRegistrations.toSet.subsets.toSeq
 			val validSubsets = subsets.filter(_.nonEmpty).filter(modRegs =>
 				// CATS total of at least the normal load
-				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= entity.normalCATLoad &&
-					// Contains all the core and core required modules
-					coreAndCoreReqModules.forall(modRegs.contains) &&
-					// All the registrations have agreed marks
-					modRegs.forall(mr => mr.agreedMark != null || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
+				modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum >= normalLoad &&
+					// Contains all the core and optional core modules
+					coreAndOptionalCoreModules.forall(modRegs.contains) &&
+					// All the registrations have agreed or actual marks
+					modRegs.forall(mr => mr.firstDefinedMark.isDefined || markOverrides.get(mr.module).isDefined && markOverrides(mr.module) != null)
 			)
-			validSubsets.map(modRegs => (weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))).sortBy(_._1).reverse
+			val ruleFilteredSubsets = validSubsets.filter(modRegs => rules.forall(_.passes(modRegs.toSeq)))
+			val subsetsToReturn = {
+				if (ruleFilteredSubsets.isEmpty) {
+					// Something is wrong with the rules, as at the very least the the subset of all the modules should match,
+					// so don't do the rule filtering
+					validSubsets
+				} else {
+					ruleFilteredSubsets
+				}
+			}
+			subsetsToReturn.map(modRegs =>
+				(weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))
+			).sortBy { case (mark, modRegs) =>
+				// Add a definitive sort so subsets with the same mark always come out the same order
+				(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))
+			}.reverse
 		}
 	}
+
+	def findCoreRequiredModules(route: Route, academicYear: AcademicYear, yearOfStudy: Int): Seq[CoreRequiredModule] =
+		moduleRegistrationDao.findCoreRequiredModules(route, academicYear, yearOfStudy)
 
 }
 

@@ -34,7 +34,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
 		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
-	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent {
+	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
 		val userLookup = new MockUserLookup
 		val termService = new TermServiceImpl
 		val cacheStrategy = CacheStrategy.InMemoryOnly
@@ -46,16 +46,16 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
 		}
 
-		override val http: Http = new Http {
-			override def make_client = httpClient
+		override val httpClient: Http = new Http {
+			override def make_client = CelcatTimetableFetchingServiceTest.this.httpClient
 		}
 	}
 
 	@Test def parseICal() {
 		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
-		events.size should be (142)
+		events.events.size should be (142)
 
-		val combined = service.combineIdenticalEvents(events).sorted
+		val combined = service.combineIdenticalEvents(events).events.sorted
 		combined.size should be (136)
 
 		// Check that the first few events are as expected
@@ -130,9 +130,9 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	@Test def tab2662() {
 		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
-		events.size should be (2)
+		events.events.size should be (2)
 
-		val combined = service.combineIdenticalEvents(events).sorted
+		val combined = service.combineIdenticalEvents(events).events.sorted
 		combined.size should be (1)
 		combined.head.weekRanges should be (Seq(WeekRange(1), WeekRange(3, 5)))
 	}
@@ -205,7 +205,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 				staffListInBSV = true
 			)
 		)(service.termService)
-		events.size should be (122)
+		events.events.size should be (122)
 	}
 
 }

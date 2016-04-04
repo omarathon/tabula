@@ -14,7 +14,7 @@ import uk.ac.warwick.util.termdates.TermFactoryImpl
 trait TimetableDriver extends FixturesDriver  {
 
 	def setTimetableFor(userId:String, year:FunctionalTestAcademicYear, content:Elem) {
-		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/stubTimetable/student"
+		val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
 		val req = url(uri).POST << Map("studentId" -> userId, "year"->year.toSyllabusPlusFormat, "content"->content.toString)
 		http.when(_==200)(req >| )
 	}
@@ -32,7 +32,7 @@ trait TimetableDriver extends FixturesDriver  {
 			val startOfYear = termDates.getFirstTermOfYearContaining(new DateTime).getStartDate
 			val start = startOfYear.getMillis / 1000
 			val end = startOfYear.plusYears(2).getMillis / 1000
-			val req = (url(FunctionalTestProperties.SiteRoot + "/profiles/timetable/api") <<?
+			val req = (url(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar") <<?
 				Map(
 					"from" -> start.toString,
 					"to" -> end.toString,

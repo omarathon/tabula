@@ -18,7 +18,7 @@ trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permi
 
 	@ModelAttribute("departmentsWithPermission")
 	def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.filter(_.routes.asScala.nonEmpty).sortBy(_.fullName)
+		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)
 
 		cachedBy((user, departmentPermission)) {
 			moduleAndDepartmentService.departmentsWithPermission(user, departmentPermission)

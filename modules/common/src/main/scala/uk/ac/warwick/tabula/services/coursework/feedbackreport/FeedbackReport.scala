@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.coursework.feedbackreport
 
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -11,7 +12,10 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
 import uk.ac.warwick.tabula.data.model.{FeedbackReportGenerator, Assignment, Department}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssessmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssessmentMembershipService}
+
+import scala.concurrent.{TimeoutException, Await}
+import scala.concurrent.duration._
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
@@ -194,7 +198,12 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, submission.universityId)
 			if feedback.released
 			publishEventDate <- Option(feedback.releasedDate).orElse {
-				auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId).headOption.map { _.eventDate }
+				try {
+					Await.result(
+						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.universityId),
+						5.seconds
+					).headOption.map { _.eventDate }
+				} catch { case timeout: TimeoutException => None }
 			}
 		} yield {
 			// was feedback returned within 20 working days?

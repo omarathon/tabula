@@ -1,28 +1,34 @@
 package uk.ac.warwick.tabula.commands.timetables
 
+import java.util.concurrent.TimeoutException
+
 import org.joda.time.{Interval, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.commands.timetables.ViewModuleEventsCommand.{CommandType, ReturnType}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.EventOccurrence
 
 import scala.concurrent.Await
-import scala.util.Try
 import scala.concurrent.duration._
+import scala.util.Try
 
 object ViewModuleEventsCommand {
 	val Timeout = 15.seconds
 
-	def apply(module: Module) =
+	private[timetables] type ReturnType = Try[EventOccurrenceList]
+	type CommandType = Appliable[ReturnType]
+
+	def apply(module: Module): CommandType =
 		new ViewModuleEventsCommandInternal(module)
-			with ComposableCommand[Try[Seq[EventOccurrence]]]
+			with ComposableCommand[ReturnType]
 			with ViewModuleEventsPermissions
 			with ViewModuleEventsValidation
 			with Unaudited with ReadOnly
@@ -36,9 +42,9 @@ object ViewModuleEventsCommand {
 		}
 
 	// Re-usable service
-	def apply(module: Module, service: ModuleTimetableFetchingService) =
+	def apply(module: Module, service: ModuleTimetableFetchingService): CommandType =
 		new ViewModuleEventsCommandInternal(module)
-			with ComposableCommand[Try[Seq[EventOccurrence]]]
+			with ComposableCommand[ReturnType]
 			with ViewModuleEventsPermissions
 			with ViewModuleEventsValidation
 			with Unaudited with ReadOnly
@@ -50,19 +56,19 @@ object ViewModuleEventsCommand {
 }
 
 trait ViewModuleEventsCommandFactory {
-	def apply(module: Module): ComposableCommand[Try[Seq[EventOccurrence]]]
+	def apply(module: Module): CommandType
 }
 class ViewModuleEventsCommandFactoryImpl(service: ModuleTimetableFetchingService) extends ViewModuleEventsCommandFactory {
 	def apply(module: Module) = ViewModuleEventsCommand(module, service)
 }
 
 abstract class ViewModuleEventsCommandInternal(val module: Module)
-	extends CommandInternal[Try[Seq[EventOccurrence]]]
+	extends CommandInternal[ReturnType]
 		with ViewModuleEventsRequest {
 
 	self: ModuleTimetableFetchingServiceComponent with TermServiceComponent with EventOccurrenceServiceComponent =>
 
-	def applyInternal(): Try[Seq[EventOccurrence]] = {
+	def applyInternal(): ReturnType = {
 		val timetableEvents = timetableFetchingService.getTimetableForModule(module.code.toUpperCase)
 			.map { events =>
 				if (academicYear != null) {
@@ -84,10 +90,12 @@ abstract class ViewModuleEventsCommandInternal(val module: Module)
 			// Converter to make localDates sortable
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
-			events.flatMap { event =>
+			EventOccurrenceList(events.events.flatMap { event =>
 				eventOccurrenceService.fromTimetableEvent(event, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
-			}.sortBy(_.start)
-		}, ViewModuleEventsCommand.Timeout))
+			}.sortBy(_.start), events.lastUpdated)
+		}, ViewModuleEventsCommand.Timeout)).recover {
+			case _: TimeoutException | _: TimetableEmptyException => EventOccurrenceList(Nil, None)
+		}
 	}
 }
 

@@ -22,8 +22,8 @@ class MissedSmallGroupsByModuleReportController extends AbstractSmallGroupsByMod
 	@RequestMapping(method = Array(GET))
 	override def page(
 		@ModelAttribute("filteredAttendanceCommand") cmd: Appliable[AllSmallGroupsReportCommandResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
+		@PathVariable("department") department: Department,
+		@PathVariable("academicYear") academicYear: AcademicYear
 	) = {
 		Mav("reports/smallgroups/missedByModule")
 			.crumbs(

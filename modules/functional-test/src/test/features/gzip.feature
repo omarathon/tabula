@@ -10,7 +10,5 @@ Feature: GZipped content
     Then the content-encoding response header <expected_encoding>
 
   Examples:
-    | user_agent                                                                                | expected_encoding |
-    | Mozilla/5.0 (Windows; U; Windows NT 6.1; pt-PT; rv:1.9.2.6) Gecko/20100625 Firefox/3.6.6  | should be "gzip"  |
-    | Mozilla/4.0 (Windows; MSIE 6.0; Windows NT 6.0)                                           | should not exist  |
-    | Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4325)                | should be "gzip"  |
+    | user_agent                                                                                               | expected_encoding |
+    | Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36 | should be "gzip"  |

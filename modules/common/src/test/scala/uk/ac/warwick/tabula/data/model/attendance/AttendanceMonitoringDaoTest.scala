@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.attendance
 import org.joda.time.{DateTime, LocalDate}
 import org.junit.Before
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.data.AttendanceMonitoringDaoImpl
+import uk.ac.warwick.tabula.data.{AutowiringAttendanceMonitoringDao, AttendanceMonitoringDaoImpl}
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula._
 
@@ -15,17 +15,17 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
 	val student1 = Fixtures.student("1234","1234")
 	student1.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
-	student1.mostSignificantCourse.route = route
+	student1.mostSignificantCourse.currentRoute = route
 	student1.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
 	val student2 = Fixtures.student("2345","2345")
 	student2.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
-	student2.mostSignificantCourse.route = route
+	student2.mostSignificantCourse.currentRoute = route
 	student2.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
 	val student3 = Fixtures.student("2346","2346")
 	student3.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
-	student3.mostSignificantCourse.route = route
+	student3.mostSignificantCourse.currentRoute = route
 	student3.mostSignificantCourse.latestStudentCourseYearDetails.academicYear = academicYear
 
 	val userLookup = new MockUserLookup
@@ -34,7 +34,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		MemberOrUser(student2).asUser
 	)
 
-	val attendanceMonitoringDao = new AttendanceMonitoringDaoImpl {
+	val attendanceMonitoringDao = new AutowiringAttendanceMonitoringDao {
 		// Force the multi-query IN() clauses for 3 or more items
 		override val maxInClause = 2
 	}
@@ -203,7 +203,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
 		val studentNotOnAScheme = Fixtures.student("3456","3456")
 		studentNotOnAScheme.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
-		studentNotOnAScheme.mostSignificantCourse.route = route
+		studentNotOnAScheme.mostSignificantCourse.currentRoute = route
 		session.save(studentNotOnAScheme)
 
 		val student1Totals = Fixtures.attendanceMonitoringCheckpointTotal(student1, department, academicYear, 1, 1, 1, 1)
@@ -232,7 +232,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		// 2 SCDs, both null end date
 		val newSCD = Fixtures.studentCourseDetails(student1, department, scjCode = "1234/2")
 		newSCD.beginDate = DateTime.now.minusYears(2).toLocalDate
-		newSCD.route = route
+		newSCD.currentRoute = route
 		newSCD.latestStudentCourseYearDetails.academicYear = academicYear
 		session.save(department)
 		session.save(route)

@@ -70,6 +70,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			commandInternal.assignmentInfoView = Table
 			commandInternal.weekNumberingSystem = Term
 			commandInternal.autoGroupDeregistration = false
+			commandInternal.autoMarkMissedMonitoringPoints = true
 
 			commandInternal.applyInternal()
 
@@ -83,6 +84,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			testDepartment.assignmentInfoView should be(Table)
 			testDepartment.weekNumberingSystem should be(Term)
 			testDepartment.autoGroupDeregistration should be (false)
+			testDepartment.autoMarkMissedMonitoringPoints should be (true)
 
 		}
 	}

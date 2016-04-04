@@ -5,9 +5,9 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.StudentAssignmentInfoToJsonConverter
+import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkFullScreenCommand
-import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.data.model.Member
 
 import MemberAssignmentsController._

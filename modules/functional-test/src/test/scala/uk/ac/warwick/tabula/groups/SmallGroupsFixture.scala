@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
   before{
-    go to Path("/scheduling/fixtures/setup")
+    go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
   }
 

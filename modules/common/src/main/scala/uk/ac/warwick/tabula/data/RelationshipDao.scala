@@ -332,7 +332,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		restrictions.foreach { _.apply(criteria) }
 		criteria.createAlias("mostSignificantCourse", "mostSignificantCourse")
 			.createAlias("mostSignificantCourse.course", "course")
-			.createAlias("mostSignificantCourse.route", "route", JoinType.LEFT_OUTER_JOIN)
+			.createAlias("mostSignificantCourse.currentRoute", "route", JoinType.LEFT_OUTER_JOIN)
 			.createAlias("mostSignificantCourse.studentCourseYearDetails", "scyd", JoinType.LEFT_OUTER_JOIN)
 			.addOrder(Order.asc("lastName"))
 			.addOrder(Order.asc("firstName"))

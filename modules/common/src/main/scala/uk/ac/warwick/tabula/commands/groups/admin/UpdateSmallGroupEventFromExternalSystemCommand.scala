@@ -1,19 +1,23 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import java.util.concurrent.TimeoutException
+
 import org.joda.time.LocalTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation, Location, Module}
-import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{Location, MapLocation, Module, NamedLocation}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingServiceComponent}
-import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingServiceComponent, TimetableEmptyException}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
+import scala.util.Try
 
 object UpdateSmallGroupEventFromExternalSystemCommand {
 
@@ -45,9 +49,14 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def event: SmallGroupEvent
 
 	lazy val timetableEvents =
-		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
-			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
-			.sorted
+		Try {
+			Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+				.events
+				.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+				.sorted
+		}.recover {
+			case _: TimeoutException | _: TimetableEmptyException => Nil
+		}.get
 
 }
 

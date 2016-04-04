@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ExtensionManagerRoleDefinition, RoleDefinition, SelectorBuiltInRoleDefinition}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 import scala.annotation.tailrec
@@ -217,55 +217,8 @@ class Department extends GeneratedId
 	def assignmentGradeValidation = getBooleanSetting(Settings.AssignmentGradeValidation) getOrElse false
 	def assignmentGradeValidation_= (validation: Boolean) = settings += (Settings.AssignmentGradeValidation -> validation)
 
-	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-
-	def getCoreRequiredModules(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int): Option[Seq[Module]] = {
-		getCoreRequiredModulesMap
-			.get(academicYear.startYear.toString).flatMap(
-				_.get(course.code).flatMap(
-					_.get(route.code).flatMap(
-						_.get(yearOfStudy.toString).map(
-							_.flatMap(code => moduleAndDepartmentService.getModuleByCode(code))
-						)
-					)
-				)
-			)
-	}
-
-	def setCoreRequiredModules(academicYear: AcademicYear, course: Course, route: Route, yearOfStudy: Int, modules: Seq[Module]): Unit = {
-		val existingMap = getCoreRequiredModulesMap
-		val existingMapForAcademicYear = existingMap.getOrElse(academicYear.startYear.toString, Map())
-		val existingMapForCourse = existingMapForAcademicYear.getOrElse(course.code, Map())
-		val existingMapForRoute = existingMapForCourse.getOrElse(route.code, Map())
-		val existingModuleCodes = existingMapForRoute.getOrElse(yearOfStudy.toString, Seq())
-		val newModuleCodes = (existingModuleCodes ++ modules.map(_.code)).distinct
-		settings += (Settings.CoreRequiredModules -> (
-			existingMap + (academicYear.startYear.toString -> (
-				existingMapForAcademicYear + (course.code -> (
-					existingMapForCourse + (route.code -> (
-						existingMapForRoute + (yearOfStudy.toString -> newModuleCodes)
-					))
-				))
-			))
-		))
-	}
-
-	private def getCoreRequiredModulesMap: Map[String, Map[String, Map[String, Map[String, Seq[String]]]]] = {
-		parseMapFromAny(getSetting(Settings.CoreRequiredModules)).map(academicYearMap =>
-			academicYearMap.mapValues(courseMap =>
-				parseMapFromAny(Some(courseMap)).getOrElse(Map()).mapValues(routeMap =>
-					parseMapFromAny(Some(routeMap)).getOrElse(Map()).mapValues(yearOfStudyMap =>
-						parseMapFromAny(Some(yearOfStudyMap)).getOrElse(Map()).mapValues{
-							case seq: Seq[_] => seq.asInstanceOf[Seq[String]]
-							case seq: collection.mutable.Seq[_] => seq.toSeq.asInstanceOf[Seq[String]]
-							case _ => Seq()
-						}
-					)
-				)
-			)
-		).getOrElse(Map())
-	}
+	def autoMarkMissedMonitoringPoints = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
+	def autoMarkMissedMonitoringPoints_=(enabled: Boolean) { settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled) }
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
@@ -344,7 +297,7 @@ class Department extends GeneratedId
 			}
 		}
 
-		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find { matches } match {
+		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find(matches) match {
 			case Some(role) => Option(role)
 			case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
 			case _ => None
@@ -404,7 +357,7 @@ object Department {
 		val name = "UG"
 		val courseTypes = CourseType.ugCourseTypes
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => true
 				case _ => false
 			}
@@ -419,7 +372,7 @@ object Department {
 		val name = "PG"
 		val courseTypes = CourseType.pgCourseTypes
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => false
 				case _ => true
 			}
@@ -456,7 +409,7 @@ object Department {
 		val name = "DepartmentRoutes"
 		val courseTypes = CourseType.all
 		def matches(member: Member, department: Option[Department]) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.exists{r => department.contains(r.adminDepartment)}
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.exists{r => department.contains(r.adminDepartment)}
 			case _ => false
 		}
 		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
@@ -497,9 +450,9 @@ object Department {
 
 		val WeekNumberingSystem = "weekNumberSystem"
 
-    val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
+		val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 
-    val AutoGroupDeregistration = "autoGroupDeregistration"
+		val AutoGroupDeregistration = "autoGroupDeregistration"
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
@@ -511,7 +464,7 @@ object Department {
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
 
-		val CoreRequiredModules = "coreRequiredModules"
+		val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
 	}
 }
 

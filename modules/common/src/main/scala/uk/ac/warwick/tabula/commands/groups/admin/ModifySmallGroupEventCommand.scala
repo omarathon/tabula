@@ -2,25 +2,22 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.joda.time.LocalTime
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import scala.collection.JavaConverters._
-import ModifySmallGroupEventCommand._
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
+
+import scala.collection.JavaConverters._
 
 object ModifySmallGroupEventCommand {
 	type Command = Appliable[SmallGroupEvent] with SelfValidating with BindListener with ModifySmallGroupEventCommandState
-
-	val DefaultStartTime = new LocalTime(12, 0)
-	val DefaultEndTime = DefaultStartTime.plusHours(1)
 
 	def create(module: Module, set: SmallGroupSet, group: SmallGroup): Command =
 		new CreateSmallGroupEventCommandInternal(module, set, group)
@@ -51,8 +48,8 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 
 	var weeks: JSet[JInteger] = JSet()
 	var day: DayOfWeek = _
-	var startTime: LocalTime = DefaultStartTime
-	var endTime: LocalTime = DefaultEndTime
+	var startTime: LocalTime = _
+	var endTime: LocalTime = _
 	var location: String = _
 	var locationId: String = _
 	var title: String = _
@@ -71,7 +68,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 trait CreateSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
 	val existingEvent = None
 
-	def isEmpty = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == DefaultStartTime && endTime == DefaultEndTime
+	def isEmpty = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == null && endTime == null
 }
 
 trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
@@ -115,6 +112,9 @@ abstract class ModifySmallGroupEventCommandInternal
 
 	def copyFromDefaults(set: SmallGroupSet) {
 		weekRanges = set.defaultWeekRanges
+		day = set.defaultDay
+		startTime = set.defaultStartTime
+		endTime = set.defaultEndTime
 
 		Option(set.defaultLocation).foreach {
 			case NamedLocation(name) => location = name

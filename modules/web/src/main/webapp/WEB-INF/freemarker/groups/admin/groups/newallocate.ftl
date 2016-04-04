@@ -6,6 +6,9 @@
 	</div>
 
 	<div id="editEvents">
+		<div class="pull-right">
+			<@fmt.bulk_email_students students=command.unallocated title="Email unallocated students" />
+		</div>
 		<@components.set_wizard true 'allocate' smallGroupSet />
 
 		<#assign submitUrl><@routes.groups.createsetallocate smallGroupSet /></#assign>

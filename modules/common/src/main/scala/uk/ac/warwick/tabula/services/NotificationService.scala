@@ -1,41 +1,43 @@
 package uk.ac.warwick.tabula.services
 
-import org.apache.lucene.search.FieldDoc
 import org.hibernate.ObjectNotFoundException
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.NotificationDao
+import uk.ac.warwick.tabula.data.{Daoisms, NotificationDao}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
+import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, NotificationIndexService, NotificationQueryService}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
 import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(
-		user: User,
-		max: Int = 100,
-		priority: Double = 0,
-		includeDismissed: Boolean = false,
-		types: Option[Set[String]] = None,
-		pagination: Option[SearchPagination]
+	user: User,
+	max: Int = 100,
+	priority: Double = 0,
+	includeDismissed: Boolean = false,
+	types: Option[Set[String]] = None,
+	lastUpdatedDate: Option[DateTime]
 )
 
-case class SearchPagination(lastDoc: Int, lastField: Long, token: Long) {
-	def this(last: FieldDoc, token: Long) {
-		this(last.doc, last.fields(0).asInstanceOf[Long], token)
-	}
-}
+case class ActivityStream(
+	items: Seq[Activity[Any]],
+	lastUpdatedDate: Option[DateTime],
+	totalHits: Long
+)
 
 @Service
-class NotificationService extends Logging with FreemarkerTextRenderer {
+class NotificationService extends Logging with FreemarkerTextRenderer with Daoisms {
 
 	var dao = Wire[NotificationDao]
-	var index = Wire[NotificationIndexService]
-	var indexManager = Wire[IndexManager]
 	var userLookup = Wire[UserLookupService]
+	var queryService = Wire[NotificationQueryService]
+	var indexService = Wire[NotificationIndexService]
+	var listeners = Wire.all[NotificationListener]
 
 	def getNotificationById(id: String) = dao.getById(id)
 
@@ -44,49 +46,51 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		logger.info("Notification pushed - " + notification)
 		dao.save(notification)
 
+		indexService.indexItems(notification.recipients.toList.map { user => IndexedNotification(notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
+
 		// Individual listeners are responsible for pulling notifications
 	}
 
 	// update the notifications and rebuild their entries index
-	def update(notifications: Seq[Notification[_,_]], user: User) {
+	def update(notifications: Seq[Notification[_, _]], user: User) {
 		notifications.foreach(dao.update)
-		indexManager.indexNotificationRecipients(notifications, user)
+
+		indexService.indexItems(notifications.map { n => IndexedNotification(n.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
 	}
 
-	// Update the notifications and return the index message, but don't index now
-	def updateWithDeferredIndex(notifications: Seq[Notification[_,_]], user: User): Object = {
-		notifications.foreach(dao.update)
-		indexManager.createIndexMessage(notifications, user)
-	}
-
-	def stream(req: ActivityStreamRequest): PagingSearchResultItems[Activity[Any]] = {
-		val notifications = index.userStream(req)
+	def stream(req: ActivityStreamRequest): ActivityStream = {
+		val notifications = queryService.userStream(req)
 		val activities = notifications.items.flatMap(toActivity)
-		notifications.copy(items = activities)
+
+		ActivityStream(
+			items = activities,
+			lastUpdatedDate = notifications.lastUpdatedDate,
+			totalHits = notifications.totalHits
+		)
 	}
 
-	def toActivity(notification: Notification[_,_]) : Option[Activity[Any]] = {
+	def toActivity(notification: Notification[_, _]) : Option[Activity[Any]] = {
 		try {
 			val (message, priority) =
-			// TODO Tried pattern matching this but it wouldn't complile
-				if (notification.isInstanceOf[ActionRequiredNotification] && notification.asInstanceOf[ActionRequiredNotification].completed) {
-					val actionRequired = notification.asInstanceOf[ActionRequiredNotification]
-					val message = "Completed by %s on %s".format(
-						userLookup.getUserByUserId(actionRequired.completedBy) match {
-							case FoundUser(u) => u.getFullName
-							case _ => "Unknown user"
-						},
-						notification.dateTimeFormatter.print(actionRequired.completedOn)
-					)
-					val priority = NotificationPriority.Complete
-					(message, priority)
-				} else {
-					val content = notification.content
-					val message = renderTemplate(content.template, content.model)
-					val priority = notification.priorityOrDefault
-					(message, priority)
-				}
+				notification match {
+					case actionRequired: ActionRequiredNotification if actionRequired.completed =>
+						val actionRequired = notification.asInstanceOf[ActionRequiredNotification]
+						val message = "Completed by %s on %s".format(
+							userLookup.getUserByUserId(actionRequired.completedBy) match {
+								case FoundUser(u) => u.getFullName
+								case _ => "Unknown user"
+							},
+							notification.dateTimeFormatter.print(actionRequired.completedOn)
+						)
+						val priority = NotificationPriority.Complete
+						(message, priority)
 
+					case _ =>
+						val content = notification.content
+						val message = renderTemplate(content.template, content.model)
+						val priority = notification.priorityOrDefault
+						(message, priority)
+				}
 
 			Some(new Activity[Any](
 				id = notification.id,
@@ -114,10 +118,31 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 		dao.findActionRequiredNotificationsByEntityAndType[A](entity)
 	}
 
+	def processListeners() = transactional() {
+		dao.unprocessedNotifications.take(NotificationService.ProcessListenersBatchSize).foreach { notification =>
+			try {
+				logger.info("Processing notification listeners - " + notification)
+				listeners.foreach { _.listen(notification) }
+				notification.markListenersProcessed()
+				dao.update(notification)
+				session.flush()
+			} catch {
+				case throwable: Throwable => {
+					// TAB-2238 Catch and log, so that the overall transaction can still commit
+					logger.error("Exception handling notification listening:", throwable)
+				}
+			}
+		}
+	}
+
+}
+
+object NotificationService {
+	val ProcessListenersBatchSize = 100
 }
 
 trait NotificationListener {
-	def listen(notification: Notification[_,_]): Unit
+	def listen(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit
 }
 
 trait RecipientNotificationListener {

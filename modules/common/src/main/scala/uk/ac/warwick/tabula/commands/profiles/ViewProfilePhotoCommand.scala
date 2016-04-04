@@ -1,8 +1,13 @@
 package uk.ac.warwick.tabula.commands.profiles
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+
+import org.joda.time.Days
+import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.fileserver.{CachePolicy, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 
 object ViewProfilePhotoCommand {
@@ -14,7 +19,7 @@ abstract class ViewProfilePhotoCommand(val member: Member)
 
 	this: MemberPhotoUrlGeneratorComponent =>
 
-	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
+	PermissionCheck(Permissions.Profiles.Read.Photo, mandatory(member))
 
 	override def applyInternal() = {
 		Mav(s"redirect:${photoUrl(Option(member))}")
@@ -34,4 +39,24 @@ class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: 
 
 	override def describe(d: Description) = d.member(member).property("relationship" -> relationship)
 
+}
+
+object DefaultPhoto extends RenderableFile {
+	private def read() = {
+		val is = getClass.getResourceAsStream("/no-photo.jpg")
+		val os = new ByteArrayOutputStream
+
+		FileCopyUtils.copy(is, os)
+		os.toByteArray
+	}
+
+	// TODO is keeping this in memory the right thing to do? It's only 3kb
+	private val NoPhoto = read()
+
+	override def inputStream = new ByteArrayInputStream(NoPhoto)
+	override def filename = "no-photo.jpg"
+	override def contentType = "image/jpg"
+	override def contentLength = Some(NoPhoto.length)
+
+	override def cachePolicy = CachePolicy(expires = Some(Days.ONE))
 }

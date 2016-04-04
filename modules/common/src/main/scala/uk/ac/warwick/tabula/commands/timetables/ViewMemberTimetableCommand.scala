@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.commands.timetables
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands.timetables.ViewMemberTimetableCommand.ReturnType
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, Member}
@@ -14,12 +16,13 @@ import scala.concurrent.Await
 import scala.util.Try
 
 object ViewMemberTimetableCommand extends Logging {
-	type TimetableCommand = Appliable[Try[Seq[TimetableEvent]]] with ViewMemberTimetableRequest with SelfValidating
+	private[timetables] type ReturnType = Try[EventList]
+	type TimetableCommand = Appliable[ReturnType] with ViewMemberTimetableRequest with SelfValidating
 
 	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
 		case student: StudentMember =>
 			new ViewStudentTimetableCommandInternal(student, currentUser)
-				with ComposableCommand[Try[Seq[TimetableEvent]]]
+				with ComposableCommand[ReturnType]
 				with ViewMemberTimetablePermissions
 				with ViewMemberTimetableValidation
 				with Unaudited with ReadOnly
@@ -27,7 +30,7 @@ object ViewMemberTimetableCommand extends Logging {
 
 		case staff: StaffMember =>
 			new ViewStaffTimetableCommandInternal(staff, currentUser)
-				with ComposableCommand[Try[Seq[TimetableEvent]]]
+				with ComposableCommand[ReturnType]
 				with ViewMemberTimetablePermissions
 				with ViewMemberTimetableValidation
 				with Unaudited with ReadOnly
@@ -40,12 +43,12 @@ object ViewMemberTimetableCommand extends Logging {
 }
 
 abstract class ViewStudentTimetableCommandInternal(val member: StudentMember, currentUser: CurrentUser)
-	extends CommandInternal[Try[Seq[TimetableEvent]]]
+	extends CommandInternal[ReturnType]
 		with ViewMemberTimetableRequest {
 
 	self: StudentTimetableEventSourceComponent =>
 
-	def applyInternal(): Try[Seq[TimetableEvent]] = {
+	def applyInternal(): Try[EventList] = {
 		Try(Await.result(studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student), ViewMemberEventsCommand.Timeout))
 			.map { events => events.filter { event => event.year == academicYear }}
 	}
@@ -53,12 +56,12 @@ abstract class ViewStudentTimetableCommandInternal(val member: StudentMember, cu
 }
 
 abstract class ViewStaffTimetableCommandInternal(val member: StaffMember, currentUser: CurrentUser)
-	extends CommandInternal[Try[Seq[TimetableEvent]]]
+	extends CommandInternal[ReturnType]
 	with ViewMemberTimetableRequest {
 
 	self: StaffTimetableEventSourceComponent =>
 
-	def applyInternal(): Try[Seq[TimetableEvent]] = {
+	def applyInternal(): ReturnType = {
 		Try(Await.result(staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff), ViewMemberEventsCommand.Timeout))
 			.map { events => events.filter { event => event.year == academicYear }}
 	}

@@ -119,8 +119,10 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 	@Test def outputExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 39, 0, 0)) {
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
-
+		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
+		val submission = Fixtures.submission("1234567","cuspxp")
+		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+		assignment.submissions.add(submission)
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
 		extension.universityId = "1234567"
@@ -141,6 +143,10 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs404", "Agent Based Systems")
 		assignment.closeDate = new DateTime(2015, DateTimeConstants.JANUARY, 20, 12, 0, 0, 0)
 
+		val submission = Fixtures.submission("1234567","cuspxp")
+		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 20, 13, 0, 0, 0)
+		assignment.submissions.add(submission)
+
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
 		extension.universityId = "1234567"
@@ -160,10 +166,16 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
+		val submission = Fixtures.submission("1234567")
+		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		assignment.submissions.add(submission)
+
 		val extension = Fixtures.extension()
 		extension.assignment = assignment
 		extension.universityId = "1234567"
-		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 18, 9, 0, 0, 0)
+		extension.approve()
+		extension.feedbackDeadline should not be 'empty
 
 		val managers = UserGroup.ofUsercodes
 		userLookup.registerUsers("cuscav", "cusebr")
@@ -176,6 +188,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.submissions.add(Fixtures.submission("1234567"))
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
+		notification.deadline should not be 'empty
 		notification.recipients should not be 'empty
 	}
 
@@ -232,10 +245,14 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 	@Test def recipientsExtensionAlreadyReleased() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
-		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
 
-		assignment.submissions.add(Fixtures.submission("0000001"))
-		assignment.submissions.add(Fixtures.submission("0000002"))
+		val submission1 = Fixtures.submission("0000001")
+		val submission2 = Fixtures.submission("0000002")
+		submission1.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
+		submission2.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
+		assignment.submissions.add(submission1)
+		assignment.submissions.add(submission2)
 
 		val managers = UserGroup.ofUsercodes
 		userLookup.registerUsers("cuscav", "cusebr")
@@ -249,10 +266,15 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		extension.assignment = assignment
 		extension.universityId = "1234567"
 		extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
+		extension.approve()
+		extension.feedbackDeadline should be ('empty)
 
-		assignment.submissions.add(Fixtures.submission("1234567"))
+		val submission3 = Fixtures.submission("1234567")
+		submission3.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 15, 9, 0, 0, 0)
+		assignment.submissions.add(submission3)
 
 		val notification = Notification.init(new FeedbackDueExtensionNotification, new AnonymousUser, extension)
+		notification.deadline should not be 'empty
 		notification.recipients should not be 'empty
 
 		// Feedback added

@@ -16,13 +16,13 @@ import scala.util.{Failure, Success, Try}
  * N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
  * to use a local proxy for the scientia timetabling service; i.e.
  *
- * scientia.base.url=https://yourhost.warwick.ac.uk/scheduling/stubTimetable/
+ * scientia.base.url=https://yourhost.warwick.ac.uk/stubTimetable/
  *
  * You should _not_ need to have your IP address added to the Syllabus+ whitelist, unless you want to
  * view timetable data for real production users.
  *
  */
-class StudentTimetableTest extends BrowserTest with TimetablingFixture with  GivenWhenThen{
+class StudentTimetableTest extends BrowserTest with TimetablingFixture with GivenWhenThen {
 
 	// The default HTMLUnit JS engine throws errors about
 	// "Unexpected call to method or property access" when trying to render the profiles page
@@ -54,15 +54,15 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		timetable should be('showingCalendar)
 
 	}
-	"A student" should "be able to request a JSON feed of timetable events" in {
 
+	"A student" should "be able to request a JSON feed of timetable events" in {
 		Given("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
 
-		addStudentToGroup(P.Student1.usercode,testGroupSetId, "Group 1")
-		createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
+		addStudentToGroup(P.Student1.usercode, testGroupSetId, "Group 1")
+		createSmallGroupEvent(testGroupSetId, "Test timetabling", weekRange = "47")
 
 		When("I request the lecture API for the whole year, as that student")
 		val events = requestWholeYearsTimetableFeedFor(P.Student1)
@@ -78,6 +78,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		val smallGroup = events.last
 		smallGroup("title") should be(s"XXX654 $TEST_MODULE_NAME Tutorial (Test Place)")
 	}
+
 	"A tutor" should "be able to request their tutees timetable" in {
 		Given("Marker 1 is tutor to Student 1")
 		createStudentRelationship(P.Student1,P.Marker1)
@@ -91,15 +92,15 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		events.find(e=>e("title") == "CS132 Computer Organisation & Architecture Lecture (L5)") should be ('defined)
 	}
 
-	"A user" should "not be able to view another users timetable without permission" in {
+	"A member of staff" should "be able to view any student's timetable" in {
 		Given("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
-		Then("Marker 2 should not be able to view Student 1's timetable")
+		Then("Marker 2 should be able to view Student 1's timetable")
 		val events = Try(requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker2)))
 		events match {
-			case _:Success[Seq[Map[String,Any]]]=>fail("Didn't expect to be able to get timetable feed without permission")
-			case _:Failure[Seq[Map[String,Any]]]=> //OK
+			case _:Failure[Seq[Map[String,Any]]]=>fail("Should be able to get timetable feed for any student")
+			case _:Success[Seq[Map[String,Any]]]=> //OK
 		}
 	}
 

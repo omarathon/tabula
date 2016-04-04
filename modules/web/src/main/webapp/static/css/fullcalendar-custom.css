@@ -28,3 +28,12 @@ but it should look more like h4
 	opacity: 0;
 	filter: alpha(opacity=0);
 }
+
+.fc-week-number {
+	white-space: nowrap;
+}
+
+.fc-last-updated {
+	margin-top: 10px;
+	font-size: 0.9em;
+}

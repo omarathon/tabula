@@ -45,7 +45,7 @@ case class AuditEvent(
 	var parsedData: Option[DataType] = None,
 
 	// list of other related events (with same eventId) manually set by DAO
-	var related: Seq[AuditEvent] = Nil) {
+	@transient var related: Seq[AuditEvent] = Nil) extends Identifiable {
 
 	/** Collects up all the parsed data maps for all related events. */
 	def relatedParsedData: Seq[DataType] = related.flatMap { _.parsedData }
@@ -66,6 +66,7 @@ case class AuditEvent(
 
 	/** Was there an "error" stage, indicating an exception was thrown? */
 	def hadError = findStage("error").isDefined
+	def isIncomplete = findStage("after").isEmpty
 
 	def findStage(stage: String) = related.find(_.eventStage == stage)
 	def findBeforeStage = findStage("before")
@@ -74,7 +75,7 @@ case class AuditEvent(
 	def hasProperty(name: String): Boolean = stringProperty(name).isDefined
 
 	/** Returns whether any of the events have a property with this string value. */
-	def hasProperty(name: String, value: String): Boolean = stringProperty(name).exists(_ == value)
+	def hasProperty(name: String, value: String): Boolean = stringProperty(name).contains(value)
 
 	/**
 	 * Looks among the JSON data for a string value under this name.
@@ -102,5 +103,7 @@ case class AuditEvent(
 		userId,
 		parsedData.getOrElse(Map.empty),
 		eventDate)
+
+	override def toString = s"AuditEvent[id=$id, eventId=$eventId, eventDate=$eventDate, eventType=$eventType, eventStage=$eventStage, userId=$userId, masqueradeUserId=$masqueradeUserId, data=$data]"
 
 }

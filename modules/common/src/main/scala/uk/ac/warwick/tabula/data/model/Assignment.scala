@@ -177,22 +177,23 @@ class Assignment
 		None
 	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
-	} else {
+	} else if (extensions.exists(_.feedbackDeadline.isDefined)){
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-	}
+	} else None
 
-	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.map { wholeAssignmentDeadline =>
+
+	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
 		// If we have an extension, use the extension's expiry date
 		val extension = extensions.asScala.find { e => e.isForUser(submission.universityId, submission.userId) && e.approved }
 
 		val baseFeedbackDeadline =
 			extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
 
-		// If the submission was late, allow 20 days from the submission day
+		// allow 20 days from the submission day only for submissions that aren't late. Late submissions are excluded from this calculation
 		if (submission.isLate)
-			workingDaysHelper.datePlusWorkingDays(submission.submittedDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+			None
 		else
-			baseFeedbackDeadline
+			Some(baseFeedbackDeadline)
 	}
 
 	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>
@@ -580,7 +581,7 @@ class Assignment
 
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveThirdMarkerFeedback, feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getThirdMarkerFeedback, feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToSecondFeedbacks(user, feedback)
 		}
@@ -588,7 +589,7 @@ class Assignment
 
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToFirstFeedbacks(user, feedback)
 		}
@@ -596,7 +597,7 @@ class Assignment
 
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getFirstMarkerFeedback).flatten
 		} else {
 			Seq()
 		}
@@ -606,17 +607,17 @@ class Assignment
 		feedbackPosition match {
 			case FirstFeedback =>
 				if (this.isFirstMarker(user))
-					Some(feedback.retrieveFirstMarkerFeedback)
+					feedback.getFirstMarkerFeedback
 				else
 					None
 			case SecondFeedback =>
 				if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user))
-					Some(feedback.retrieveSecondMarkerFeedback)
+					feedback.getSecondMarkerFeedback
 				else
 					None
 			case ThirdFeedback =>
 				if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user))
-					Some(feedback.retrieveThirdMarkerFeedback)
+					feedback.getThirdMarkerFeedback
 				else
 					None
 		}
@@ -638,6 +639,15 @@ class Assignment
 	def getStudentsSecondMarker(universityId: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsSecondMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
+
+	/**
+		* Optionally returns the second marker for the given student ID
+		* Returns none if this assignment doesn't have a valid marking workflow attached
+		*/
+	def getStudentsThirdMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsThirdMarker(this, universityId))
 			.map(id => userLookup.getUserByUserId(id))
 
 	/**
@@ -679,7 +689,7 @@ class Assignment
 	def mustReleaseForMarking = hasWorkflow
 
 	def needsFeedbackPublishing = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -687,7 +697,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingIgnoreExtensions = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.exists(s => !findExtension(s.universityId).exists(_.approved) && !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))
@@ -695,7 +705,7 @@ class Assignment
 	}
 
 	def needsFeedbackPublishingFor(universityId: String) = {
-		if (openEnded || !collectSubmissions || _archived) {
+		if (openEnded || dissertation || !collectSubmissions || _archived) {
 			false
 		} else {
 			submissions.asScala.find { _.universityId == universityId }.exists(s => !fullFeedback.exists(f => f.universityId == s.universityId && f.checkedReleased))

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
 import java.io.IOException
-import javax.crypto.{Mac, SecretKey}
 import javax.crypto.spec.SecretKeySpec
+import javax.crypto.{Mac, SecretKey}
 
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
@@ -21,10 +21,11 @@ import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
 import org.xml.sax.SAXParseException
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.Routes
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
@@ -36,6 +37,7 @@ object TurnitinLtiService {
 	val AssignmentPrefix = "Assignment-"
 
 	val turnitinAssignmentNameMaxCharacters = 99
+	val turnitinClassTitleMaxCharacters = 99
 
 	/**
 	 * Quoted supported types are...
@@ -65,7 +67,7 @@ object TurnitinLtiService {
 
 	def classNameFor(assignment: Assignment) = {
 		val module = assignment.module
-		ClassName(s"${module.code.toUpperCase} - ${module.name}")
+		ClassName(StringUtils.safeSubstring(s"${module.code.toUpperCase} - ${module.name}", 0, turnitinClassTitleMaxCharacters))
 	}
 
 	def assignmentNameFor(assignment: Assignment) = {
@@ -101,8 +103,8 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, 15000)
-			HttpConnectionParams.setSoTimeout(getParams, 15000)
+			HttpConnectionParams.setConnectionTimeout(getParams, 120000)
+			HttpConnectionParams.setSoTimeout(getParams, 120000)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
@@ -128,15 +130,15 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 				"custom_duedate" -> isoFormatter.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
-			) ++ userParams(user.email, user.firstName, user.lastName)) {
+			) ++ userParams(user.userId, user.email, user.firstName, user.lastName)) {
 			request =>
 			// expect a 302
 				request >:+ {
 					(headers, request) =>
 						val location = headers("location").headOption
-						if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 							request >- {
 							(html) => {
+								if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
 								// listen to callback for actual response
 								TurnitinLtiResponse.redirect(location.get)
 							}
@@ -157,7 +159,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			</response>
 	 */
 	def submitPaper(
-		assignment: Assignment,	paperUrl: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
+		assignment: Assignment,	paperUrl: String, userId: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
 	 ): TurnitinLtiResponse = doRequest(
 
 		s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
@@ -174,7 +176,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			"custom_submission_filename" -> attachment.name
 
 		)
-			++ userParams(userEmail, userFirstName, userLastName) ) {
+			++ userParams(userId, userEmail, userFirstName, userLastName) ) {
 		request =>
 			request >:+ {
 				(headers, request) =>
@@ -202,12 +204,12 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, email: String, firstName: String, lastName: String): TurnitinLtiResponse = doRequest(
+	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String): TurnitinLtiResponse = doRequest(
 		s"$apiReportLaunch/${attachment.originalityReport.turnitinId}", Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
-		) ++ userParams(email, firstName, lastName),
+		) ++ userParams(userId, email, firstName, lastName),
 		expectedStatusCode = Some(HttpStatus.SC_MOVED_TEMPORARILY)) {
 		request =>
 			request >:+ {
@@ -273,7 +275,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				// custom - custom params should be prefixed with _custom
 				"custom_debug" -> "true"
 
-			)  ++ userParams(email, givenName, familyName) ++ customParamsForTesting(customParams, email) filter(p => p._2.nonEmpty),
+			)  ++ userParams(null, email, givenName, familyName) ++ customParamsForTesting(customParams, email) filter(p => p._2.nonEmpty),
 			endpoint, Some(secret), Some(key)
 		)
 
@@ -300,11 +302,11 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 		map
 }
 
-	def userParams(email: String, firstName: String, lastName: String): Map[String, String] = {
+	def userParams(userId: String, email: String, firstName: String, lastName: String): Map[String, String] = {
 		Map(
 			// according to the spec, need lis_person_name_full or both lis_person_name_family and lis_person_name_given.
-			"user_id" -> email,
-			"lis_person_contact_email_primary" -> email,
+			"user_id" -> email.maybeText.getOrElse(s"$userId@tabula.warwick.ac.uk"),
+			"lis_person_contact_email_primary" -> email.maybeText.getOrElse("tabula@warwick.ac.uk"),
 			"lis_person_name_given" -> firstName,
 			"lis_person_name_family" -> lastName)
 	}

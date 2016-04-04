@@ -42,20 +42,15 @@ class AdministerExamsTest extends ExamFixtures
 			textField("name").value = "Module-XXX01-Exam1"
 			submit()
 
-			Then("The user should be returned to the department module page")
-			currentUrl should include(s"/admin/department/xxx/$year")
+			Then("The user should be returned to the module page")
+			currentUrl should include(s"/admin/module/xxx01/$year")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
-
-			Then("Clicking on the module XXX01 should reveal the new exam")
-			info = getModuleInfo("XXX01")
-			click on info
-			eventually {
-				pageSource contains "Module-XXX01-Exam1" should be {true}
-			}
+			pageSource contains "Module-XXX01-Exam1" should be {true}
 
 			Then("The user can select to edit the exam")
-			click on info.findElement(By.className("assignment-buttons")).findElement(By.partialLinkText("Actions"))
+			info = getModuleInfo("XXX01")
+			click on info.findElement(By.partialLinkText("Actions"))
 
 			val editNewExam = info.findElement(By.partialLinkText("Edit properties"))
 			eventually {
@@ -72,17 +67,11 @@ class AdministerExamsTest extends ExamFixtures
 			textField("name").value = "Module-XXX01-Exam1-edited"
 			submit()
 
-			Then("The user should be returned to the department module page")
-			currentUrl should include(s"/admin/department/xxx/$year")
+			Then("The user should be returned to the module page")
+			currentUrl should include(s"/admin/module/xxx01/$year")
 			pageSource contains "Test Services" should be {true}
 			pageSource contains "XXX01" should be {true}
-
-			Then("Clicking on the module XXX01 should reveal the new exam")
-			info = getModuleInfo("XXX01")
-			click on info
-			eventually {
-				pageSource contains "Module-XXX01-Exam1-edited" should be {true}
-			}
+			pageSource contains "Module-XXX01-Exam1-edited" should be {true}
 	}
 
 	def getModuleInfo(moduleCode: String) = {

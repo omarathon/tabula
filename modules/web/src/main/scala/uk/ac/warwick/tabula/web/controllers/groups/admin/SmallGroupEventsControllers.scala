@@ -52,7 +52,7 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
 	type CreateSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
 	@ModelAttribute("createSmallGroupEventCommand") def cmd(
-		@PathVariable("module") module: Module,
+		@PathVariable module: Module,
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@PathVariable("smallGroup") group: SmallGroup
 	): CreateSmallGroupEventCommand =
@@ -107,7 +107,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 	type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
 	@ModelAttribute("editSmallGroupEventCommand") def cmd(
-		@PathVariable("module") module: Module,
+		@PathVariable module: Module,
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@PathVariable("smallGroup") group: SmallGroup,
 		@PathVariable("smallGroupEvent") event: SmallGroupEvent
@@ -167,7 +167,7 @@ abstract class AbstractUpdateSmallGroupEventFromExternalSystemController extends
 	type UpdateSmallGroupEventFromExternalSystemCommand = Appliable[SmallGroupEvent] with SelfValidating
 
 	@ModelAttribute("command") def cmd(
-		@PathVariable("module") module: Module,
+		@PathVariable module: Module,
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@PathVariable("smallGroup") group: SmallGroup,
 		@PathVariable("smallGroupEvent") event: SmallGroupEvent

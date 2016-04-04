@@ -20,7 +20,6 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 		var zipService = Wire.auto[ZipService]
 
 		private var fileFound: Boolean = _
-		var callback: (RenderableFile) => Unit = _
 
 		/**
 		 * If filename is unset, it returns a renderable Zip of all files.
@@ -37,13 +36,10 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 				}
 
 			fileFound = result.isDefined
-			if (callback != null) {
-				result.map { callback(_) }
-			}
 			result
 		}
 
-		private def zipped(memberNote: MemberNote) = new RenderableZip(zipService.getSomeMemberNoteAttachmentsZip(memberNote))
+		private def zipped(memberNote: MemberNote) = zipService.getSomeMemberNoteAttachmentsZip(memberNote)
 
 		override def describe(d: Description) = {
 			d.property("filename", filename)

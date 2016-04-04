@@ -1,25 +1,26 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import java.util.concurrent.TimeoutException
+
 import org.joda.time.LocalTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromExternalSystemCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService, TimetableEmptyException}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
-import scala.concurrent.duration._
-
-import ImportSmallGroupSetsFromExternalSystemCommand._
+import scala.util.Try
 
 object ImportSmallGroupSetsFromExternalSystemCommand {
 	val RequiredPermission = Permissions.SmallGroups.ImportFromExternalSystem
@@ -83,15 +84,19 @@ trait LookupEventsFromModuleTimetables {
 	self: ModuleTimetableFetchingServiceComponent with ImportSmallGroupSetsFromExternalSystemCommandState with ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState =>
 
 	lazy val timetabledEvents =
-		modules.toSeq
-			.flatMap { module =>
-				val allEvents =
-					Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
-						.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
-						.groupBy { _.eventType }
-
-				allEvents.toSeq.map { case (eventType, events) => new TimetabledSmallGroupEvent(module, eventType, events.sorted) }
-			}.sortBy { e => (e.module.code, e.eventType.code) }
+		modules.toSeq.par.flatMap { module => // Do it in parallel like a boss
+			Try {
+				Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase),ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+					.events
+					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
+					.groupBy { _.eventType }
+					.toSeq.map { case (eventType, events) =>
+						new TimetabledSmallGroupEvent(module, eventType, events.sorted)
+					}
+			}.recover {
+				case _: TimeoutException | _: TimetableEmptyException => Nil
+			}.get
+		}.seq.sortBy { e => (e.module.code, e.eventType.code) }
 
 }
 

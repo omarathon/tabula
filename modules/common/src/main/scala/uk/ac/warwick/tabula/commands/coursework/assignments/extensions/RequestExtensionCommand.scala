@@ -148,7 +148,7 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 		Map(
 			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
 			"scdCourse" -> scd.course,
-			"scdRoute" -> scd.route,
+			"scdRoute" -> scd.currentRoute,
 			"scdAward" -> scd.award
 		)
 	}}.getOrElse(Map())

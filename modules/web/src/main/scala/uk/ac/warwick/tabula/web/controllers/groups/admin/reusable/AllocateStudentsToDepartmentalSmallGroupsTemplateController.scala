@@ -18,7 +18,7 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateController extends BaseCo
 	type AllocateStudentsToDepartmentalSmallGroupsTemplateCommand = Appliable[ExcelView]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsTemplateCommand =
+	def command(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsTemplateCommand =
 		AllocateStudentsToDepartmentalSmallGroupsTemplateCommand(department, set)
 
 	@RequestMapping

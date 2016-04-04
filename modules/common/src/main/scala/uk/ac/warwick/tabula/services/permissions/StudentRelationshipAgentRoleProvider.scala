@@ -75,14 +75,15 @@ trait CustomRolesForAdminDepartments {
 	private def studentsAdminDepartments(student: StudentMember): Seq[Department] = {
 		student.mostSignificantCourseDetails.map(scd => {
 			Option(scd.latestStudentCourseYearDetails.enrolmentDepartment).flatMap(_.subDepartmentsContaining(student).lastOption).toSeq ++
-			Option(scd.route).flatMap(r => Option(r.adminDepartment)).flatMap(_.subDepartmentsContaining(student).lastOption).toSeq
-		}).getOrElse(Nil)
+			Option(scd.currentRoute).flatMap(r => Option(r.adminDepartment)).flatMap(_.subDepartmentsContaining(student).lastOption).toSeq
+		}).getOrElse(Nil).distinct.sortBy(_.code)
 	}
 
 	// returns department overrides for the specified definition for all of the students admin departments
-	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition) = for {
-		department <- studentsAdminDepartments(student)
-		customRole <- customRoleFor(department)(definition, student)
-	} yield customRole
+	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition) =
+		for {
+			department <- studentsAdminDepartments(student)
+			customRole <- customRoleFor(department)(definition, student)
+		} yield customRole
 
 }

@@ -1,33 +1,33 @@
 package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
-import java.io.{ByteArrayInputStream, FileInputStream, FileOutputStream}
 import java.util.zip.ZipInputStream
 
+import com.google.common.io.ByteSource
 import org.junit.Before
-import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.commands.coursework.feedback.{AdminGetSingleMarkerFeedbackCommand, DownloadMarkersFeedbackForPositionCommand}
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, FirstFeedback}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, FirstFeedback, MarkerFeedback}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, Zips}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
-import scala.collection.JavaConversions._
+import collection.JavaConverters._
 
 class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
 	@Before
 	def setup() {
 		val attachment = new FileAttachment
+		attachment.id = "123"
 
-		val file = createTemporaryFile()
-		FileCopyUtils.copy(new ByteArrayInputStream("yes".getBytes), new FileOutputStream(file))
+		attachment.objectStorageService = zipService.objectStorageService
+		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
-		attachment.file = file
-
-		assignment.feedbacks.foreach{feedback =>
-			feedback.firstMarkerFeedback.attachments = List(attachment)
+		assignment.feedbacks.asScala.foreach { feedback =>
+			feedback.firstMarkerFeedback.attachments = List(attachment).asJava
 			feedback.firstMarkerFeedback.state = MarkingCompleted
-			val smFeedback = feedback.retrieveSecondMarkerFeedback
+			val smFeedback = new MarkerFeedback(feedback)
+			feedback.secondMarkerFeedback = smFeedback
 			smFeedback.state = ReleasedForMarking
 		}
 	}
@@ -38,7 +38,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
 		command.zipService = zipService
 		val renderable = command.applyInternal()
-		val stream = new ZipInputStream(new FileInputStream(renderable.file.get))
+		val stream = new ZipInputStream(renderable.inputStream)
 		val items = Zips.map(stream){item => item.getName}
 		items.size should be (1)
 	}}
@@ -49,7 +49,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		assignment.markingWorkflow.userLookup = mockUserLookup
 		command.zipService = zipService
 		val renderable = command.applyInternal()
-		val stream = new ZipInputStream(new FileInputStream(renderable.file.get))
+		val stream = new ZipInputStream(renderable.inputStream)
 		val items = Zips.map(stream){item => item.getName}
 		items.size should be (3)
 	}}

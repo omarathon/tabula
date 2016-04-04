@@ -7,14 +7,22 @@
 			<div class="overcat-key">
 				<table class="table table-condensed">
 					<thead>
-					<tr>
-						<th colspan="2">Key</th>
-					</tr>
+						<tr>
+							<th colspan="2">Key</th>
+						</tr>
 					</thead>
 					<tbody>
 						<tr>
+							<td><span class="exam-grid-fail">#</span></td>
+							<td>Failed module</td>
+						</tr>
+						<tr>
 							<td><span class="exam-grid-override">#</span></td>
 							<td>Manually adjusted and not stored in SITS</td>
+						</tr>
+						<tr>
+							<td>#?</td>
+							<td>Agreed mark missing (using actual mark)</td>
 						</tr>
 					</tbody>
 				</table>
@@ -24,6 +32,7 @@
 
 			<p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 
+			<p class="clearfix">&nbsp;</p>
 			<form>
 				<table class="table table-condensed grid overcat">
 					<thead>
@@ -42,7 +51,7 @@
 							<@grid.categoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -50,7 +59,7 @@
 							<@grid.titleInCategoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -58,7 +67,7 @@
 							<@grid.headerRow columns=overcatView.optionsColumns showSectionLabels=false />
 							<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
 							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
+								<td class="first-in-category"></td>
 								<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
 							</#list>
 						</tr>
@@ -82,7 +91,7 @@
 									showSectionLabels=true
 								/>
 								<#list overcatView.previousYearsSCYDs as thisSCYD>
-									<td></td>
+									<td class="first-in-category"></td>
 									<@grid.entityRows
 										entity=entity
 										isFirstEntity=isFirstEntity
@@ -96,7 +105,7 @@
 						</#list>
 						<tr class="new-marks">
 							<td colspan="${overcatView.optionsColumns?size}" class="borderless"></td>
-							<th class="section-value-label">New Module Mark</th>
+							<th class="section-value-label rotated"><div class="rotate nomargin" style="margin-top:-47px;">New<br/>Module<br/>Mark</div></th>
 							<#assign currentCategory = "" />
 							<#list mapGet(overcatView.columnsBySCYD, scyd) as column>
 								<#if column.category?has_content && currentCategory != column.category>
@@ -110,35 +119,61 @@
 								</td>
 							</#list>
 						</tr>
+						<tr>
+							<td colspan="${overcatView.optionsColumns?size + 1}" class="borderless"></td>
+							<#-- 1000 just so it spans the whole rest of the row -->
+							<td colspan="1000" class="borderless">
+								<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
+								<button type="button" class="btn btn-default" name="reset">Reset</button>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</form>
 		</div>
 	</@modal.body>
 	<@modal.footer>
-		<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
-		<button type="button" class="btn btn-default" name="continue">Continue</button>
-		<button type="button" class="btn btn-default" name="cancel">Cancel</button>
+		<div class="pull-left">
+			<button type="button" class="btn btn-primary" name="continue">Continue</button>
+			<button type="button" class="btn btn-default" name="cancel">Cancel</button>
+		</div>
 	</@modal.footer>
 </@modal.wrapper>
 
 <script>
 	jQuery(function($){
+		var $modalBody = $('.modal-body');
+
+		$('.modal-body th.first-in-category, .modal-body td.first-in-category').each(function(){
+			$(this).prev().addClass('last-in-category');
+		});
+
 		$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();
 			var height = $(this).find('.rotate').height();
-			$(this).css('height', width + 15).css('width', height + 5);
+			$(this).css('height', width + 15).css('min-width', height + 5);
 			$(this).find('.rotate').css({
-				'margin-top': -(height),
 				'margin-left': height / 2
+			}).not('.nomargin').css({
+				'margin-top': -(height)
+			}).end().filter('.middle').not('.nomargin').css({
+				'margin-top': width / 4
 			});
 		});
+		$modalBody.wideTables();
 
 		var updateButtons = function(){
 			if ($('.modal-body input:checked').length > 0) {
 				$('.modal-footer button[name=continue]').prop('disabled', false);
 			} else {
 				$('.modal-footer button[name=continue]').prop('disabled', true);
+			}
+			if ($('.modal-body tr.new-marks input').filter(function(){ return $(this).val().length > 0 }).length > 0) {
+				$('.modal-body button[name=recalculate]').prop('disabled', false);
+				$('.modal-body button[name=reset]').prop('disabled', false);
+			} else {
+				$('.modal-body button[name=recalculate]').prop('disabled', true);
+				$('.modal-body button[name=reset]').prop('disabled', true);
 			}
 		};
 		updateButtons();
@@ -147,8 +182,8 @@
 			updateButtons();
 		}).on('keyup', updateButtons);
 
-		$('.modal-footer').on('click', 'button[name=recalculate]', function(){
-			$('.modal-footer button').prop('disabled', true);
+		$modalBody.on('click', 'button[name=recalculate]', function(){
+			$('.modal button').prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
@@ -157,8 +192,19 @@
 			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
 				$('#edit-overcatting-modal').html(data);
 			});
-		}).on('click', 'button[name=continue]', function(){
-			$('.modal-footer button').prop('disabled', true);
+		}).on('click', 'button[name=reset]', function(){
+			$('.modal button').prop('disabled', true);
+			var $form = $('.modal-body form');
+			$form.append($('<input/>').attr({
+				'type': 'hidden',
+				'name': 'recalculate'
+			})).find('tr.new-marks input').each(function(){ $(this).val(''); });
+			$.post('<@routes.exams.generateGridOvercatting department academicYear scyd/>', $form.serialize(), function(data){
+				$('#edit-overcatting-modal').html(data);
+			});
+		});
+		$('.modal-footer').on('click', 'button[name=continue]', function(){
+			$('.modal button').prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
@@ -177,6 +223,23 @@
 		}).on('click', 'button[name=cancel]', function(){
 			$(this).closest('.modal').modal('hide');
 		});
+
+		$modalBody.closest('.modal').on('shown.bs.modal', function(){
+			$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
+				var width = $(this).find('.rotate').width();
+				var height = $(this).find('.rotate').height();
+				$(this).css('height', width + 15).css('min-width', height + 5);
+				$(this).find('.rotate').css({
+					'margin-left': height / 2
+				}).not('.nomargin').css({
+					'margin-top': -(height)
+				}).end().filter('.middle').not('.nomargin').css({
+					'margin-top': width / 4
+				});
+			});
+			$modalBody.wideTables();
+		});
+
 	});
 </script>
 

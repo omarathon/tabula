@@ -26,7 +26,7 @@
 		<#if showSectionLabels && column.sectionTitleLabel?has_content>
 			<#if currentSection != column.sectionIdentifier>
 				<#local currentSection = column.sectionIdentifier />
-				<th>${column.sectionTitleLabel}</th>
+				<th class="rotated first-in-category"><div class="rotate middle">${column.sectionTitleLabel}</div></th>
 			</#if>
 		</#if>
 		<#if column.category?has_content>
@@ -49,7 +49,7 @@
 	<#list columns as column>
 		<#if showSectionLabels && column.sectionSecondaryValueLabel?has_content && currentSection != column.sectionIdentifier>
 			<#local currentSection = column.sectionIdentifier />
-			<th class="section-secondary-label">${column.sectionSecondaryValueLabel}</th>
+			<th class="section-secondary-label rotated first-in-category"><div class="rotate middle nomargin">${column.sectionSecondaryValueLabel}</div></th>
 		</#if>
 		<#if column.category?has_content && currentCategory != column.category>
 			<#local firstInCategory = true />
@@ -74,7 +74,7 @@
 		<#local column = columns[columnValue_index] />
 		<#if showSectionLabels && column.sectionValueLabel?has_content && currentSection != column.sectionIdentifier && isFirstEntity>
 			<#local currentSection = column.sectionIdentifier />
-			<th rowspan="${entityCount}" class="section-value-label">${column.sectionValueLabel}</th>
+			<th rowspan="${entityCount}" class="section-value-label rotated first-in-category"><div class="rotate middle">${column.sectionValueLabel}</div></th>
 		</#if>
 		<#if column.category?has_content && currentCategory != column.category>
 			<#local firstInCategory = true />

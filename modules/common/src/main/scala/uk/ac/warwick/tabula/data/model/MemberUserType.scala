@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
-
 sealed abstract class MemberUserType(val dbValue: String, val description: String)
 
 object MemberUserType {
-	case object Student extends MemberUserType("S", "Student")
-	case object Staff extends MemberUserType("N", "Staff")
-	case object Emeritus extends MemberUserType("A", "Emeritus Academic")
-	case object Other extends MemberUserType("O", "Other")
+	case object Other     extends MemberUserType("O", "Other")
+	case object Student   extends MemberUserType("S", "Student")
+	case object Staff     extends MemberUserType("N", "Staff")
+	case object Emeritus  extends MemberUserType("A", "Emeritus Academic")
+	case object Applicant extends MemberUserType("P", "Applicant")
 
 	def fromCode(code: String) = code match {
 	  	case Student.dbValue => Student
 	  	case Staff.dbValue => Staff
 	  	case Emeritus.dbValue => Emeritus
+			case Applicant.dbValue => Applicant
 	  	case Other.dbValue => Other
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException("Unexpected value: " + code)
@@ -25,7 +24,7 @@ object MemberUserType {
 		"HEFP students", "HE shared student", "PGCE student", "Postgraduate (research) FT",
 		"Postgraduate (research) PT", "Postgraduate (taught) FT", "Postgraduate (taught) PT",
 		"Postgraduate extension student", "Pre-sessional student", "Undergraduate - full-time",
-		"Undergraduate - part-time", "Exchange student", "HE shared student"
+		"Undergraduate - part-time", "Exchange student", "Bursary Researcher", "Student - non credit-bearing"
 	)
 
 	val StaffTargetGroups = Set(
@@ -43,6 +42,7 @@ object MemberUserType {
 		case group if StudentTargetGroups.contains(group) => Student
 		case group if StaffTargetGroups.contains(group) => Staff
 		case group if AcademicTargetGroups.contains(group) => Emeritus
+		case "Applicant" => Applicant
 		case null => null
 		case _ => Other
 	}

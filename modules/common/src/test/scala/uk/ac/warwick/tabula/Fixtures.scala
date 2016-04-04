@@ -8,12 +8,15 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
+
 
 	def exam(name: String) : Exam =  {
 		val exam = new Exam()
@@ -73,6 +76,7 @@ object Fixtures extends Mockito {
 	def module(code:String, name: String = null) = {
 		val m = new Module
 		m.code = code.toLowerCase
+		m.permissionsParents
 		m.name = Option(name).getOrElse("Module " + code)
 		m
 	}
@@ -216,6 +220,7 @@ object Fixtures extends Mockito {
 			case MemberUserType.Student => new StudentMember
 			case MemberUserType.Emeritus => new EmeritusMember
 			case MemberUserType.Staff => new StaffMember
+			case MemberUserType.Applicant => new ApplicantMember
 			case MemberUserType.Other => new OtherMember
 		}
 		member.firstName = universityId
@@ -335,7 +340,7 @@ object Fixtures extends Mockito {
 	def moduleRegistration(
 		scd: StudentCourseDetails,
 		mod: Module,
-		cats: java.math.BigDecimal,
+		cats: JBigDecimal,
 		year: AcademicYear,
 		occurrence: String = "",
 		agreedMark: BigDecimal = BigDecimal(0),
@@ -456,6 +461,10 @@ object Fixtures extends Mockito {
 		smm.students = UserGroup.ofUsercodes
 		students.foreach(smm.students.knownType.addUserId)
 		smm
+	}
+
+	def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = {
+		  target #:: target.permissionsParents.flatMap(withParents)
 	}
 
 }

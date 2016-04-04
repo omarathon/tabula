@@ -12,8 +12,6 @@ import scala.collection.JavaConversions._
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	val thisAssignment = newDeepAssignment()
 
 	/**

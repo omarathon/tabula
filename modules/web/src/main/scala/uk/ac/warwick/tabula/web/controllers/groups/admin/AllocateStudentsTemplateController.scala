@@ -17,7 +17,7 @@ class AllocateStudentsTemplateController extends BaseController {
 	type AllocateStudentsToGroupsTemplateCommand = Appliable[ExcelView]
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): AllocateStudentsToGroupsTemplateCommand =
+	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): AllocateStudentsToGroupsTemplateCommand =
 		AllocateStudentsToGroupsTemplateCommand(module, set)
 
 	@RequestMapping

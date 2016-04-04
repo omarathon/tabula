@@ -9,8 +9,6 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	trait Fixture {
 		val meetingRecordDao = mock[MeetingRecordDao]
 		val notificationService = mock[NotificationService]

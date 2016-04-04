@@ -126,22 +126,26 @@
 			</div>
 		</div>
 
-		<!-- Docs master nav -->
 		<div class="id7-navigation">
-			<nav class="navbar navbar-primary hidden-xs" role="navigation">
-				<#assign navigation>
-					<#if userNavigation?has_content>
-						${(userNavigation.collapsed)!""}
-					<#else>
-						${(user.navigation.collapsed)!""}
-					</#if>
-				</#assign>
+			<#assign navigation><#compress>
+				<#if userNavigation?has_content>
+					${(userNavigation.collapsed)!""}
+				<#else>
+					${(user.navigation.collapsed)!""}
+				</#if>
+			</#compress></#assign>
+			<#assign navigation><#compress>
 				<#if breadcrumbs?has_content>
 					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active next-secondary")}
 				<#else>
 					${navigation?replace("${component.name!''}-active", "${component.name!''}-active active")}
 				</#if>
-			</nav>
+			</#compress></#assign>
+			<#if navigation?has_content>
+				<nav class="navbar navbar-primary hidden-xs" role="navigation">
+					${navigation}
+				</nav>
+			</#if>
 			<#if breadcrumbs?has_content>
 				<nav class="navbar navbar-secondary" role="navigation">
 					<ul class="nav navbar-nav">
@@ -197,11 +201,14 @@
 
 			<div class="id7-footer-utility">
 				<ul>
-					<li><a href="http://warwick.ac.uk/copyright">© MMXV</a></li>
+					<li><a href="http://warwick.ac.uk/copyright">© <@warwick.copyright /></a></li>
 					<li><a href="http://warwick.ac.uk/terms">Terms</a></li>
 					<li><a href="http://warwick.ac.uk/privacy">Privacy</a></li>
 					<li><a href="http://warwick.ac.uk/cookies">Cookies</a></li>
 					<li><a href="http://warwick.ac.uk/accessibility">Accessibility</a></li>
+					<li class="subtle">
+						App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
+					</li>
 				</ul>
 			</div>
 		</div>

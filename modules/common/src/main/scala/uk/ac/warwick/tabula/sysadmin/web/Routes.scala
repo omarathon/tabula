@@ -1,7 +1,9 @@
 package uk.ac.warwick.tabula.sysadmin.web
 
+import org.quartz.TriggerKey
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
+import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -26,5 +28,11 @@ object Routes {
 
 	object Relationships {
 		def home = context + "/relationships"
+	}
+
+	object jobs {
+		def list = context + "/jobs/list"
+		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format encoded(instance.id)
+		def quartzStatus(triggerKey: TriggerKey) = context + "/jobs/quartz-status?key=%s" format encoded(triggerKey.getName)
 	}
 }

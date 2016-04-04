@@ -14,8 +14,6 @@ import java.io.{FileOutputStream, ByteArrayInputStream}
 // scalastyle:off magic.number
 class RequestExtensionCommandTest extends TestBase with Mockito {
 
-	EventHandling.enabled = false
-
 	@Test
 	def itWorks() {
 		withUser("cuslat", "1171795") {
@@ -146,12 +144,6 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
 				val newExtension = new Extension(currentUser.universityId)
 				val attachment = new FileAttachment
-
-			  val file = createTemporaryFile()
-				file.deleteOnExit()
-
-				FileCopyUtils.copy(new ByteArrayInputStream("".getBytes), new FileOutputStream(file))
-				attachment.file = file
 
 				newExtension.addAttachment(attachment)
 				assignment.extensions.add(newExtension)

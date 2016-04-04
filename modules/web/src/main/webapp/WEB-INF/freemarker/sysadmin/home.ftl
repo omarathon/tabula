@@ -14,17 +14,12 @@
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/attendancetemplates" />">Attendance monitoring templates</a></p>
 		<p><a class="btn btn-default" href="<@url page="/masquerade" context="/admin" />">Masquerade</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/emails/list" context="/scheduling" />">Email queue</a></p>
+		<p><a class="btn btn-default" href="<@url page="/sysadmin/jobs/list" />">Background jobs</a></p>
+		<p><a class="btn btn-default" href="<@url page="/sysadmin/emails/list" />">Email queue</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/statistics" />">Internal statistics</a></p>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/complete-scheduled-notification" context="/scheduling" />">Complete scheduled notifications</a></p>
+		<p><a class="btn btn-default" href="<@url page="/sysadmin/complete-scheduled-notification" />">Complete scheduled notifications</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/event-calendar" />">Upcoming event calendar</a></p>
-
-		<h2>File syncing</h2>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/sync" context="/scheduling" />">Run file syncing</a></p>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/filesystem-cleanup" context="/scheduling" />">Delete unreferenced files from filesystem</a></p>
-		<p><a class="btn btn-default" href="<@url page="/sysadmin/filesystem-sanity" context="/scheduling" />">Sanity check filesystem</a></p>
 	</div>
 
 	<div class="col-md-4">
@@ -42,14 +37,14 @@
 		<h2>Imports</h2>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import', '/scheduling')}">
+			<@f.form method="post" action="${url('/sysadmin/import')}">
 			  <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." onclick="return confirm('Really? Could take a minute.')" />
 			</@f.form>
 		</p>
 
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-department', '/scheduling')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-department')}" commandName="blankForm">
 				<div class="input-group">
 					<@f.input id="import-modules-dept" path="deptCode" cssClass="form-control" placeholder="deptCodes" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Modules" onclick="return confirm('Really? Could take a minute.')" /></span>
 				</div>
@@ -57,13 +52,19 @@
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-sits', '/scheduling')}">
+			<@f.form method="post" action="${url('/sysadmin/import-sits')}">
 			  <input class="btn btn-danger" type="submit" value="SITS assignments" onclick="return confirm('Really? Could take a minute.')">
 			</@f.form>
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-module-lists')}">
+				<input class="btn btn-danger" type="submit" value="SITS module lists" onclick="return confirm('Really? Could take a minute.')">
+			</@f.form>
+		</p>
+
+		<p>
+			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
 				<div class="input-group">
 					<@f.input id="import-profiles-dept" path="deptCode" cssClass="form-control" placeholder="deptCode (optional)" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')" /></span>
 				</div>
@@ -71,7 +72,7 @@
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
 				<textarea id="import-profiles-specific" name="members" class="input-block-level" placeholder="University IDs (one per line)" rows="2"></textarea>
 				<input class="btn btn-danger" type="submit" value="Specific profile(s)">
 			</@f.form>
@@ -81,7 +82,7 @@
 
 		<#macro reindex_form name text>
 			<p>
-				<@f.form method="post" action="${url('/sysadmin/index/run-'+name, '/scheduling')}" commandName="blankForm">
+				<@f.form method="post" action="${url('/sysadmin/index/run-'+name)}" commandName="blankForm">
 					Rebuild ${text} from
 					<div class="input-group">
 						<@f.input id="index-${name}-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')" /></span>
@@ -123,7 +124,7 @@
 		<p><a href="<@url page="/sysadmin/emergencymessage"/>">Update settings</a></p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/jobs/create-test','/scheduling')}">
+			<@f.form method="post" action="${url('/sysadmin/jobs/create-test')}">
 				<input class="btn btn-default" type="submit" value="Create test job">
 			</@f.form>
 		</p>

@@ -88,7 +88,7 @@ object CourseworkWorkflowStages {
 		def actionCode = "workflow.Submission.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
-			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined =>
+			case None if coursework.enhancedFeedback.exists(!_.feedback.isPlaceholder) =>
 				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
 			case Some(submission) if submission.submission.isLate =>
 				StageProgress(Submission, started = true, messageCode = "workflow.Submission.late", health = Warning, completed = true)
@@ -154,7 +154,7 @@ object CourseworkWorkflowStages {
 		def actionCode = "workflow.FirstMarking.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
 			case Some(item) =>
-				if (item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted)
+				if (item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.marked", health = Good, completed = true)
 				else
 					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.notMarked", health = Warning, completed = false)
@@ -168,8 +168,8 @@ object CourseworkWorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if released && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
-					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
+					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 						StageProgress(
 							SecondMarking,
 							started = true,
@@ -180,7 +180,7 @@ object CourseworkWorkflowStages {
 					else
 						StageProgress(
 							SecondMarking,
-							started = item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted,
+							started = item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted),
 							messageCode = "workflow.SecondMarking.notMarked",
 							health = Warning,
 							completed = false
@@ -196,8 +196,8 @@ object CourseworkWorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if released && item.feedback.retrieveSecondMarkerFeedback.state != Rejected =>
-					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
+					if (item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 						StageProgress(
 							Moderation,
 							started = true,
@@ -208,7 +208,7 @@ object CourseworkWorkflowStages {
 					else
 						StageProgress(
 							Moderation,
-							started = item.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted,
+							started = item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted),
 							messageCode = "workflow.ModeratedMarking.notMarked",
 							health = Warning,
 							completed = false
@@ -224,8 +224,8 @@ object CourseworkWorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
 			val released = assignment.isReleasedToThirdMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
-				case Some(item) if released && item.feedback.retrieveThirdMarkerFeedback.state != Rejected =>
-					if (item.feedback.retrieveThirdMarkerFeedback.state == MarkingCompleted )
+				case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
+					if (item.feedback.getThirdMarkerFeedback.exists(_.state == MarkingCompleted))
 						StageProgress(
 							FinaliseSeenSecondMarking,
 							started = true,
@@ -236,7 +236,7 @@ object CourseworkWorkflowStages {
 					else
 						StageProgress(
 							FinaliseSeenSecondMarking,
-							started = item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted,
+							started = item.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted),
 							messageCode = "workflow.FinaliseSeenSecondMarking.notFinalised",
 							health = Warning,
 							completed = false
@@ -313,4 +313,12 @@ object CourseworkWorkflowStages {
 			}
 		override def preconditions = Seq(Seq(ReleaseFeedback, ViewOnlineFeedback), Seq(ReleaseFeedback))
 	}
+}
+
+trait CourseworkWorkflowServiceComponent {
+	def courseworkWorkflowService: CourseworkWorkflowService
+}
+
+trait AutowiringCourseworkWorkflowServiceComponent extends CourseworkWorkflowServiceComponent {
+	var courseworkWorkflowService = Wire[CourseworkWorkflowService]
 }

@@ -75,56 +75,83 @@ var setArgOnUrl = function(url, argName, argValue){
 	}
 };
 
-exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
-	var checkForCheckpoints = function(){
-		var attendanceData = {}, $attendanceForm = $('form#recordAttendance');
-		$attendanceForm.find('select').each(function(){
-			attendanceData[$(this).data('universityid')] = $(this).val();
-		});
-		$.post('/attendance/check/smallgroup', {
-			'occurrence' : $attendanceForm.data('occurrence'),
-			'attendances' : attendanceData
-		}, function(data){
-			$attendanceForm.find('.checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
-			if (data.length === 0) {
-				$attendanceForm.find('.checkpoints-message').hide();
-			} else {
+var updateAttendanceState = function(e, $this){
+	if ($this.is('.disabled')) {
+		e.stopPropagation();
+		e.preventDefault();
+		return false;
+	} else {
+		var state = $this.data('state');
+		$this.closest('div.pull-right').find('option').filter(function() {
+			return $(this).val() == state;
+		}).prop('selected', true);
+		var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
+		noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
+	}
+};
+
+var checkForCheckpoints = function(){
+	var attendanceData = {}, $attendanceForm = $('form#recordAttendance');
+	$attendanceForm.find('select').each(function(){
+		attendanceData[$(this).data('universityid')] = $(this).val();
+	});
+	$.post('/attendance/check/smallgroup', {
+		'occurrence' : $attendanceForm.data('occurrence'),
+		'attendances' : attendanceData
+	}, function(data){
+		$attendanceForm.find('.checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
+		var attendedData = data.attended;
+		var missedData = data.missed;
+
+		if (attendedData.length == 0 && missedData.length == 0) {
+			$attendanceForm.find('.checkpoints-message').hide();
+		} else {
+			$('.missed-students').html('');
+			$('.attended-students').html('');
+			$attendanceForm.find('.checkpoints-message').show();
+			if (attendedData.length > 0) {
 				var popoverContent = $('<ul/>');
-				$.each(data, function(i, student){
+				$.each(attendedData, function(i, student){
 					popoverContent.append($('<li/>').html(student.name));
 				});
-				$attendanceForm.find('.checkpoints-message').show()
-					.find('.students').html(data.length + ' student' + ((data.length > 1)?'s':''))
-					.data('content', popoverContent.wrap('<div></div>').parent().html())
+
+				$('.attended-students').html(attendedData.length + ' student' + ((attendedData.length > 1) ? 's' : '') + ' as attended' + (missedData.length > 1 ? ', ' : ''))
+					.attr('data-content', popoverContent.wrap('<div></div>').parent().html())
 					.tabulaPopover({
 						trigger: 'click'
 					});
-			}
-		});
-	};
 
-	$('#recordAttendance').on('click', 'div.btn-group button', function(e, isBulkAction){
-		var $this = $(this);
-		if ($this.is('.disabled')) {
-			e.stopPropagation();
-			e.preventDefault();
-			return false;
-		} else {
-			var state = $this.data('state');
-			$this.closest('div.pull-right').find('option').filter(function(){
-				return $(this).val() == state;
-			}).prop('selected', true);
-			var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
-			noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
+			};
+			if (missedData.length > 0) {
+				var missedPopoverContent =  $('<ul/>');
+				$.each(missedData, function(i, student){
+					missedPopoverContent.append($('<li/>').html(student.name));
+				});
 
-			// if the row has no note and authorised was clicked then open the attendance note popup
-			if(!isBulkAction && state === "authorised" && !noteButton.hasClass("edit")) {
-				noteButton.click();
-			}
+				$('.missed-students').html(missedData.length + ' student' + ((missedData.length > 1) ? 's' : '') + ' as missed')
+					.attr('data-content', missedPopoverContent.wrap('<div></div>').parent().html())
+					.tabulaPopover({
+						trigger: 'click'
+					});
+			};
 		}
+	});
+};
+
+exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
+
+	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
+		var $this = $(this);
+		updateAttendanceState(e, $this);
 
 		if (enableCheckForCheckpoints) {
 			checkForCheckpoints();
+		}
+
+		var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
+		// if the row has no note and authorised was clicked then open the attendance note popup
+		if($this.data('state') === "authorised" && !noteButton.hasClass("edit")) {
+			noteButton.click();
 		}
     });
 
@@ -135,12 +162,6 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 	}
 };
 
-exports.enableCheckForCheckpoints = function() {
-	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
-		$('#recordAttendance')
-	});
-};
-
 $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
@@ -149,15 +170,22 @@ $(function(){
 		.find('div.pull-right').show()
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
-			$(this).on('click', function(){
-				$('.attendees .item-info').each(function(){
-					$(this).find('button').eq(i).trigger('click', ['bulkAction']);
+			$(this).on('click', function(e){
+				$('.attendees .row').each(function(){
+					$(this).find('button').eq(i).each(function() {
+						$(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
+						$(this).addClass('active');
+						updateAttendanceState(e, $(this));
+					})
 				});
+				checkForCheckpoints();
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
-					$bulkNote.attr('href', setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
-					$bulkNote.click();
+					if ($bulkNote.length) {
+						$bulkNote.attr('href', setArgOnUrl($bulkNote.attr('href'), 'isAuto', 'true'));
+						$bulkNote.click();
+					}
 				}
 			});
 		});
@@ -248,12 +276,9 @@ $(function(){
 				var $target = $search.find('input[type="hidden"]').first();
 
 				$search.on('tabula:selected', function(evt, name, universityId, userId, description) {
-					$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
-					$modalElement.modal({ remote: null });
-					$modalElement.load(formUrl + '&student=' + universityId);
-
 					$modalElement
-						.on('shown', function() {
+						.on('shown.bs.modal', function() {
+							var $form = $('form#recordAttendance');
 							var $eventInput = $modalElement.find('input[name="replacedEvent"]');
 							var $weekInput = $modalElement.find('input[name="replacedWeek"]');
 							var $replacementInput = $modalElement.find('select#replacementEventAndWeek');
@@ -267,8 +292,6 @@ $(function(){
 							var onSubmit = function(e) {
 								e.preventDefault();
 								e.stopPropagation();
-
-								var $form = $('form#recordAttendance');
 
 								$form.prepend($target.clone()).prepend(
 									$('<input />').attr({
@@ -292,6 +315,10 @@ $(function(){
 							$modalElement.html("");
 							$modalElement.removeData('modal');
 						});
+
+					$modalElement.html('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3>Loading&hellip;</h3></div></div></div>');
+					$modalElement.modal({ remote: null });
+					$modalElement.load(formUrl + '&student=' + universityId);
 				});
 
 				var xhr = null;

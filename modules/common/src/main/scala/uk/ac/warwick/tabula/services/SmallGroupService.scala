@@ -51,7 +51,7 @@ trait SmallGroupService {
 	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet]
 
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
-	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
+	def findSmallGroupSetsByMember(user: User): Seq[SmallGroupSet]
 
 	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false): Unit
@@ -63,6 +63,9 @@ trait SmallGroupService {
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+
+	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence]
+
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
@@ -244,6 +247,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
+
+	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]) =
+		smallGroupDao.findOccurrenceInModulesInWeeks(startWeek, endWeek, modules)
 
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = smallGroupDao.hasSmallGroups(module, academicYear)

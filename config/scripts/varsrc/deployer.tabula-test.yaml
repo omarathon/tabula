@@ -18,11 +18,7 @@ apaches:
 build_status: starting
 app: "tabula"
 war_names:
-- scheduling
 - api
-- attendance
-- courses
-- profiles
 - ROOT
 checkout_base: "/var/src/checkout"
 archive_dir: "/var/src/archive"
@@ -41,10 +37,10 @@ scheduler_instance: !ruby/object:Tomcat
   mode: smf
   stop_command: "/usr/sbin/svcadm disable -s tomcat:"
   war_names:
-  - scheduling
-  test_path: /scheduling/test/up
+  - ROOT
+  test_path: /service/gtg
   requests:
-     /scheduling/test/up: 200
+     /service/gtg: 200
 instances:
   tabula-test:
   - !ruby/object:Tomcat
@@ -55,15 +51,13 @@ instances:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
-    excluded_war_names:
-    - scheduling
-    test_path: /test/up
+    war_names:
+    - api
+    - ROOT
+    test_path: /service/gtg
     requests:
-       /test/up: 200
-       /courses/test/up: 200
-       /profiles/test/up: 200
-       /attendance/test/up: 200
-       /api/test/up: 200
+       /service/gtg: 200
+       /api/service/gtg: 200
   - !ruby/object:Tomcat
     deployment_state: old
     name: tabula-secondary
@@ -72,14 +66,12 @@ instances:
     state: running
     mode: smf
     stop_command: "/usr/sbin/svcadm disable -s tomcat:"
-    excluded_war_names:
-    - scheduling
-    test_path: /test/up
+    war_names:
+    - api
+    - ROOT
+    test_path: /service/gtg
     requests:
-       /test/up: 200
-       /courses/test/up: 200
-       /profiles/test/up: 200
-       /attendance/test/up: 200
-       /api/test/up: 200
+       /service/gtg: 200
+       /api/service/gtg: 200
 lockfile: /tmp/tabula_deploy.running
 notification_emails: m.mannion@warwick.ac.uk

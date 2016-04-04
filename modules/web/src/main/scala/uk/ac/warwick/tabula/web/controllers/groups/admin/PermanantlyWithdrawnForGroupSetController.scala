@@ -61,7 +61,7 @@ trait PermanantlyWithdrawnForGroupSetCommandState {
 class PermanantlyWithdrawnForGroupSetController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): Appliable[Seq[String]] =
+	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): Appliable[Seq[String]] =
 		PermanantlyWithdrawnForGroupSetCommand(module, set)
 
 	@RequestMapping

@@ -4,11 +4,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, Command, CommandInternal, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
-
 
 case class ModulePickerResult(module: Module, hasSmallGroups: Boolean, hasAssignments: Boolean)
 
@@ -20,7 +20,7 @@ class ModulePickerController extends BaseController {
 	def command = ModulePickerCommand()
 
 	@RequestMapping
-	def query(@ModelAttribute("command")cmd: Appliable[Seq[ModulePickerResult]]) = {
+	def query(@ModelAttribute("command") cmd: Appliable[Seq[ModulePickerResult]]) = {
 		val results = cmd.apply()
 		Mav(
 			new JSONView(
@@ -47,7 +47,7 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 	var checkGroups: Boolean = _
 
 	def applyInternal() = {
-		if (query.isEmpty) {
+		if (!query.hasText) {
 			Seq()
 		} else {
 			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)

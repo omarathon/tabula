@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.{Qualifier, Autowired}
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
@@ -12,14 +11,15 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.triggers.Trigger
 import uk.ac.warwick.tabula.events._
-import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, CannotPerformWriteOperationException, MaintenanceModeService}
+import uk.ac.warwick.tabula.helpers.{Logging, Promise, Promises}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, CannotPerformWriteOperationException}
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{DateFormats, AutowiringFeaturesComponent, JavaImports, RequestInfo}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, DateFormats, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.queue.Queue
-import collection.mutable.ArrayBuffer
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -72,7 +72,7 @@ trait GeneratesTriggers[A] {
 
 
 trait Appliable[A]{
-  def apply():A
+  def apply(): A
 }
 
 /**
@@ -94,36 +94,30 @@ trait Command[A] extends Describable[A] with Appliable[A]
 		with JavaImports with EventHandling with NotificationHandling with TriggerHandling
 		with PermissionsChecking with TaskBenchmarking with AutowiringFeaturesComponent with AutowiringMaintenanceModeServiceComponent {
 
-	val deferredMessages: ArrayBuffer[Object] = ArrayBuffer()
-	var messageQueue: Queue = Wire.named[Queue]("indexTopic")
+	def readOnlyTransaction = false
 
-	final def apply(): A = {
-		val result = {
-			if (EventHandling.enabled) {
-				if (readOnlyCheck(this)) {
-					recordEvent(this) {
-						transactional() {
-							handleTriggers(this) {
-								notify(this) {
-									benchmark() {
-										applyInternal()
-									}
+	final def apply(): A =
+		if (EventHandling.enabled) {
+			if (readOnlyCheck(this)) {
+				recordEvent(this) {
+					transactional(readOnlyTransaction) {
+						handleTriggers(this) {
+							notify(this) {
+								benchmark() {
+									applyInternal()
 								}
 							}
 						}
 					}
-				} else if (maintenanceModeService.enabled) {
-					throw maintenanceModeService.exception(this)
-				} else {
-					throw new CannotPerformWriteOperationException(this)
 				}
+			} else if (maintenanceModeService.enabled) {
+				throw maintenanceModeService.exception(this)
 			} else {
-				handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
+				throw new CannotPerformWriteOperationException(this)
 			}
+		} else {
+			handleTriggers(this) { notify(this) { benchmark() { applyInternal() } } }
 		}
-		deferredMessages.foreach(messageQueue.send)
-		result
-	}
 
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
 
@@ -209,25 +203,6 @@ object Command {
 	}
 }
 
-/** See ApplyWithCallback[A] */
-trait HasCallback[A] {
-	var callback: (A) => Unit = _
-}
-
-/**
- * Defines a function property to be used as a callback, plus a convenience
- * version of `apply` that provides the callback and runs the command
- * simultaneously.
- *
- * It doesn't actually call the callback - you do that in your `apply` implementation.
- */
-trait ApplyWithCallback[A] extends Command[A] with HasCallback[A] {
-	def apply(fn: (A) => Unit): A = {
-		callback = fn
-		apply()
-	}
-}
-
 /**
  * Trait for a command which has a `validate` method. Implementing this trait
  * doesn't actually make anything magic happen at the moment - you still have
@@ -243,7 +218,9 @@ trait SelfValidating {
  * which are handled separately). If it doesn't directly update or insert into the database,
  * it is safe.
  */
-trait ReadOnly
+trait ReadOnly { self: Command[_] =>
+  override def readOnlyTransaction = true
+}
 
 /**
  * A Describable (usually a Command) marked as Unaudited will not be recorded
@@ -527,7 +504,7 @@ class DescriptionImpl extends Description {
  *  frameworky stuff that Command itself implements
  */
 trait CommandInternal[A] {
-	protected def applyInternal():A
+	protected def applyInternal(): A
 }
 
 trait PopulateOnForm {

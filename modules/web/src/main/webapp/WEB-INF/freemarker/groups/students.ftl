@@ -60,7 +60,7 @@
 				<div class="name">
 					<h6>${student.fullName} <@pl.profile_link student.universityId /></h6>
 					<#if student.isMember()>
-						${(student.asMember.mostSignificantCourseDetails.route.code?upper_case)!""} ${(student.asMember.mostSignificantCourseDetails.route.name)!""}<br />
+						${(student.asMember.mostSignificantCourseDetails.currentRoute.code?upper_case)!""} ${(student.asMember.mostSignificantCourseDetails.currentRoute.name)!""}<br />
 					</#if>
 					${student.shortDepartment!""}
 				</div>

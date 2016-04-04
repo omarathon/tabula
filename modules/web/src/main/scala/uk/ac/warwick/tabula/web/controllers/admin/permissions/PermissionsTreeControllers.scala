@@ -15,10 +15,10 @@ import scala.reflect.ClassTag
 abstract class PermissionsTreeControllerMethods[A <: PermissionsTarget : ClassTag] extends AdminController {
 
 	type PermissionsTreeCommand = Appliable[PermissionsTree[A]]
-	@ModelAttribute("command") def command(@PathVariable("target") target: A): PermissionsTreeCommand = BuildPermissionsTreeCommand(target)
+	@ModelAttribute("command") def command(@PathVariable target: A): PermissionsTreeCommand = BuildPermissionsTreeCommand(target)
 
 	@RequestMapping
-	def tree(@ModelAttribute("command") command: PermissionsTreeCommand, @PathVariable("target") target: A): Mav = {
+	def tree(@ModelAttribute("command") command: PermissionsTreeCommand, @PathVariable target: A): Mav = {
 		Mav("admin/permissions/tree",
 			"tree" -> command.apply()
 		).crumbs(Breadcrumbs.Permissions(target))

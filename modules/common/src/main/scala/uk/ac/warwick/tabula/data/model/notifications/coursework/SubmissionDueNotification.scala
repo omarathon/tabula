@@ -91,9 +91,9 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 			val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
 			val allStudents = membershipService.determineMembershipUsers(assignment)
 			// first filter out students that have submitted already
-			val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.universityId == user.getWarwickId))
+			val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.isForUser(user)))
 			// finally filter students that have an approved extension
-			withoutSubmission.filterNot(user => extensions.exists(_.universityId == user.getWarwickId))
+			withoutSubmission.filterNot(user => extensions.exists(_.isForUser(user)))
 		}
 	}
 }
@@ -114,7 +114,8 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 	def recipients = {
 		val hasSubmitted = assignment.submissions.asScala.exists(_.universityId == extension.universityId)
 
-		if (hasSubmitted || !shouldSend) {
+		// Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected)
+		if (hasSubmitted || (!extension.approved || extension.expiryDate.isEmpty) || !shouldSend) {
 			Nil
 		} else {
 			Seq(userLookup.getUserByWarwickUniId(extension.universityId))

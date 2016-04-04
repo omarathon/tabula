@@ -4,7 +4,7 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption}
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnState, ExamGridColumn, ExamGridColumnOption}
 
 @Component
 class NameColumnOption extends columns.ExamGridColumnOption {
@@ -13,12 +13,12 @@ class NameColumnOption extends columns.ExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.Name
 
-	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) {
 
 		override val title: String = "Name"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> entity.name).toMap
+			state.entities.map(entity => entity.id -> entity.name).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -32,7 +32,7 @@ class NameColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
 
 }
 
@@ -43,12 +43,14 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.UniversityId
 
-	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+	override val mandatory = true
+
+	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) {
 
 		override val title: String = "ID"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> entity.universityId).toMap
+			state.entities.map(entity => entity.id -> entity.universityId).toMap
 
 		override def renderExcelCell(
 			row: XSSFRow,
@@ -62,7 +64,7 @@ class UniversityIDColumnOption extends ExamGridColumnOption {
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
 
 }
 
@@ -73,12 +75,12 @@ class StartYearColumnOption extends columns.ExamGridColumnOption {
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.StartYear
 
-	case class Column(entities: Seq[GenerateExamGridEntity]) extends ExamGridColumn(entities) {
+	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) {
 
 		override val title: String = "Start Year"
 
 		override def render: Map[String, String] =
-			entities.map(entity => entity.id -> entity.studentCourseYearDetails.flatMap(scyd =>
+			state.entities.map(entity => entity.id -> entity.studentCourseYearDetails.flatMap(scyd =>
 				Option(scyd.studentCourseDetails.sprStartAcademicYear).map(_.toString)
 			).getOrElse("[Unknown]")).toMap
 
@@ -96,6 +98,6 @@ class StartYearColumnOption extends columns.ExamGridColumnOption {
 
 	}
 
-	override def getColumns(entities: Seq[GenerateExamGridEntity]): Seq[ExamGridColumn] = Seq(Column(entities))
+	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
 
 }

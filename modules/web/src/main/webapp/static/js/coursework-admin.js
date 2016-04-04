@@ -134,7 +134,7 @@ $(function(){
 					var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
 					var doFormSubmit = false;
 
-					if ($container.data('checked') != 'none') {
+					if ($container.data('checked') != 'none' || $(this).closest('.must-have-selected').length === 0) {
 						var $checkedBoxes = $(".collection-checkbox:checked", $container);
 						$form.append($checkedBoxes.clone());
 

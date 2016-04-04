@@ -181,6 +181,8 @@ abstract class Member
 			case MemberUserType.Student =>
 				u.setStudent(true)
 				u.setUserType("Student")
+			case MemberUserType.Applicant =>
+				u.setUserType("Applicant")
 			case _ => u.setUserType("External")
 		}
 
@@ -196,10 +198,8 @@ abstract class Member
 	}
 
 	def toStringProps = Seq(
-		"universityId" -> universityId,
-		"userId" -> userId,
-		"name" -> (firstName + " " + lastName),
-		"email" -> email)
+		"universityId" -> universityId
+	)
 
 	def isStaff = userType == MemberUserType.Staff
 	def isStudent = userType == MemberUserType.Student
@@ -300,7 +300,7 @@ class StudentMember extends Member with StudentProperties {
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
 		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => route.teachingDepartments).toStream
+		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.currentRoute)).flatMap(route => route.teachingDepartments).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
@@ -336,7 +336,7 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3598 - Add study departments and routes for any current course
 		val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
 		val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
-		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.route }.toStream
+		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.currentRoute }.toStream
 
 		// Cache the def result
 		val mostSignificantCourse = mostSignificantCourseDetails
@@ -408,7 +408,7 @@ class StudentMember extends Member with StudentProperties {
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
-			if (details != null && details.route != null) ", " + details.route.name
+			if (details != null && details.currentRoute != null) ", " + details.currentRoute.name
 			else ""
 		case _ => ""
 	}
@@ -460,8 +460,19 @@ class EmeritusMember extends Member with StaffProperties {
 }
 
 @Entity
+@DiscriminatorValue("P")
+class ApplicantMember extends Member with RestrictedPhoneNumber {
+	this.userType = MemberUserType.Applicant
+
+	def this(id: String) = {
+		this()
+		this.universityId = id
+	}
+}
+
+@Entity
 @DiscriminatorValue("O")
-class OtherMember extends Member with AlumniProperties with RestrictedPhoneNumber {
+class OtherMember extends Member with RestrictedPhoneNumber {
 	this.userType = MemberUserType.Other
 
 	def this(id: String) = {
@@ -554,6 +565,8 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@Restricted(Array("Profiles.Read.Disability"))
 	private var _disability: Disability = _
 	def disability_=(d: Disability): Unit = { _disability = d }
+
+	@Restricted(Array("Profiles.Read.Disability"))
 	def disability: Option[Disability] = Option(_disability)
 
 	@Column(name="tier4_visa_requirement")
@@ -569,5 +582,3 @@ trait StaffProperties {
 	// Anyone can view staff phone number
 	def phoneNumberPermissions = Nil
 }
-
-trait AlumniProperties

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
+import org.apache.commons.lang3.StringEscapeUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.context.MessageSource
@@ -55,7 +56,7 @@ trait ControllerViews extends Logging {
 			defaultUrl
 		})(url =>
 			// Prevent returnTo rabbit hole by stripping other returnTos from the URL
-			url.replaceAll("[&?]returnTo=[^&]*", "")
+			StringEscapeUtils.escapeHtml4(url.replaceAll("[&?]returnTo=[^&]*", ""))
 		)
 
 	def Redirect(path: String, objects: (String, _)*) = Mav("redirect:" + getReturnTo(path), objects: _*)

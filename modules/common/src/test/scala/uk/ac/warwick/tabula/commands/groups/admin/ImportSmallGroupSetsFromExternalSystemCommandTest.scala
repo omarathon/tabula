@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Location, Module, NamedLocation}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
@@ -157,7 +158,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			year = AcademicYear(2012)
 		)
 
-		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(Seq(
+		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
 			tEventModule1Seminar1, tEventModule1Seminar2,
 			TimetableEvent(
 				uid="uuid3",
@@ -176,8 +177,8 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				students=Nil,
 				year = AcademicYear(2012)
 			)
-		))
-		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(Seq(
+		)))
+		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(EventList.fresh(Seq(
 			TimetableEvent(
 				uid="uuid4",
 				name="IN102S",
@@ -195,7 +196,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				students=Seq(student4, student5, student6),
 				year = AcademicYear(2013)
 			)
-		))
+		)))
 	}
 
 	@Test def init() { new CommandFixture with FixtureWithSingleSeminarForYear {

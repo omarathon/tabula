@@ -21,6 +21,7 @@ trait ModuleDao {
 	def findModulesNamedLike(query: String): Seq[Module]
 	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module]
 	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
+	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module]
 }
 
 @Repository
@@ -81,13 +82,21 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	}
 
 	def findModulesNamedLike(query: String): Seq[Module] = {
-		session.newCriteria[Module]
-			.add(disjunction()
+		val maxResults = 20
+		val modulesByCode = session.newCriteria[Module]
 			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
-			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
-			)
 			.addOrder(Order.asc("code"))
-			.setMaxResults(20).seq
+			.setMaxResults(maxResults).seq
+
+		if (modulesByCode.size < maxResults) {
+			val modulesByName = session.newCriteria[Module]
+				.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+				.addOrder(Order.asc("code"))
+				.setMaxResults(maxResults - modulesByCode.size).seq
+			(modulesByCode ++ modulesByName).distinct
+		} else {
+			modulesByCode
+		}
 	}
 
 	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] = {
@@ -105,7 +114,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 					where
 						module.id = registration.module.id
 						and scd = registration.studentCourseDetails
-						and scd.route.id = route.id
+						and scd.currentRoute.id = route.id
 						and student.mostSignificantCourse = scd
 						and route in (:routes)
 						and registration.academicYear = :academicYear
@@ -134,7 +143,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						and scd = registration.studentCourseDetails
 						and scyd.studentCourseDetails = scd
 						and student.mostSignificantCourse = scd
-						and scd.route.id = route.id
+						and scd.currentRoute.id = route.id
 						and scyd.yearOfStudy in (:yearsOfStudy)
 						and registration.academicYear = :academicYear
 						and scyd.academicYear = :academicYear
@@ -150,6 +159,33 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 				.setParameter("academicYear", academicYear)
 				.seq
 		}
+	}
+
+	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] = {
+		session.newQuery[Module](
+			"""
+					select distinct module from
+						Module as module,
+						ModuleRegistration as registration,
+						StudentCourseDetails as scd,
+						Route as route,
+						StudentMember as student,
+						StudentCourseYearDetails as scyd
+					where
+						module.id = registration.module.id
+						and scd = registration.studentCourseDetails
+						and scd.currentRoute.id = route.id
+						and student.mostSignificantCourse = scd
+						and scyd.studentCourseDetails = scd
+						and route = :route
+						and registration.academicYear = :academicYear
+						and scyd.academicYear = :academicYear
+						and scyd.yearOfStudy = :yearOfStudy
+			""")
+			.setParameter("route", route)
+			.setParameter("yearOfStudy", yearOfStudy)
+			.setParameter("academicYear", academicYear)
+			.seq
 	}
 
 }

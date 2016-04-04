@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.{FileAttachment, SitsStatus, UnspecifiedT
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.{AllocateStudentItem, GroupsExtractor, GroupsExtractorComponent}
+import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
@@ -235,8 +236,14 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		command.sort()
 
 		val attachment = new FileAttachment
-		attachment.file = createTemporaryFile()
+		attachment.id = "123"
 		attachment.name = "file.xlsx"
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		val file = new UploadedFile
 		file.maintenanceMode = smartMock[MaintenanceModeService]
@@ -258,8 +265,14 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 	@Test def validateUploadedFilePasses() { new FileUploadSupportFixture {
 		val attachment = new FileAttachment
-		attachment.file = createTemporaryFile()
+		attachment.id = "456"
 		attachment.name = "file.xlsx" // We only accept xlsx
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		val file = new UploadedFile
 		file.attached.add(attachment)
@@ -273,8 +286,14 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 	@Test def validateUploadedFileWrongExtension() { new FileUploadSupportFixture {
 		val attachment = new FileAttachment
-		attachment.file = createTemporaryFile()
+		attachment.id = "789"
 		attachment.name = "file.xls" // We only accept xlsx
+
+		val backingFile = createTemporaryFile()
+		attachment.objectStorageService = smartMock[ObjectStorageService]
+		attachment.objectStorageService.keyExists(attachment.id) returns true
+		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
+		attachment.objectStorageService.fetch(attachment.id) answers { _ => Some(new FileInputStream(backingFile)) }
 
 		val file = new UploadedFile
 		file.attached.add(attachment)

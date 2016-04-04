@@ -51,10 +51,10 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 
 	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState
 
-	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
+	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable module: Module, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
 		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 
-	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module): CreateSmallGroupSetCommand =
+	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable module: Module): CreateSmallGroupSetCommand =
 		ModifySmallGroupSetCommand.create(module)
 
 	@RequestMapping
@@ -101,10 +101,10 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
 
 	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
 
-	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
+	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
 		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(set.academicYear))
 
-	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+	@ModelAttribute("createSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
 	private def renderForm(cmd: EditSmallGroupSetCommand, model: (String, _)*) =
@@ -155,10 +155,10 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 
 	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState
 
-	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
+	@ModelAttribute("departmentSmallGroupSets") def departmentSmallGroupSets(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
 		smallGroupService.getDepartmentSmallGroupSets(module.adminDepartment, Option(academicYear).getOrElse(set.academicYear))
 
-	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
 		ModifySmallGroupSetCommand.edit(module, set)
 
 	private def renderForm(cmd: EditSmallGroupSetCommand, model: (String, _)*) = {
@@ -210,9 +210,9 @@ class DeleteSmallGroupSetController extends GroupsController {
 
 	validatesSelf[DeleteSmallGroupSetCommand]
 
-	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set
+	@ModelAttribute("smallGroupSet") def set(@PathVariable set: SmallGroupSet) = set
 
-	@ModelAttribute("deleteSmallGroupSetCommand") def cmd(@PathVariable("module") module: Module, @PathVariable("set") set: SmallGroupSet) =
+	@ModelAttribute("deleteSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable set: SmallGroupSet) =
 		new DeleteSmallGroupSetCommand(module, set)
 
 	@RequestMapping

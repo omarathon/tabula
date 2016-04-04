@@ -4,6 +4,7 @@ import org.hibernate.FetchMode
 import org.hibernate.criterion.{Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 import uk.ac.warwick.tabula.data.model.{ActionRequiredNotification, Notification, ToEntityReference}
 
@@ -18,10 +19,13 @@ trait NotificationDao {
 	def getById(id: String): Option[Notification[_  >: Null <: ToEntityReference, _]]
 	def findActionRequiredNotificationsByEntityAndType[A <: ActionRequiredNotification : ClassTag](entity: ToEntityReference): Seq[ActionRequiredNotification]
 
-	def recent(start: DateTime): Scrollable[Notification[_,_]]
+	def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference,_]]
 	def unemailedRecipientCount: Number
 	def unemailedRecipients: Scrollable[RecipientNotificationInfo]
 	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo]
+
+	def unprocessedNotificationCount: Number
+	def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]]
 }
 
 @Repository
@@ -31,8 +35,8 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 
 	/** A Scrollable of all notifications since this date, sorted date ascending.
 		*/
-	def recent(start: DateTime): Scrollable[Notification[_,_]] = {
-		val scrollable = session.newCriteria[Notification[_,_]]
+	def recent(start: DateTime): Scrollable[Notification[_ >: Null <: ToEntityReference,_]] = {
+		val scrollable = session.newCriteria[Notification[_ >: Null <: ToEntityReference,_]]
 			.add(Restrictions.ge("created", start))
 			.addOrder(Order.asc("created"))
 			.scroll()
@@ -103,4 +107,26 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 			.add(is("items.entity", targetEntity))
 			.seq
 	}
+
+	private def unprocessedNotificationCriteria =
+		session.newCriteria[Notification[_ >: Null <: ToEntityReference, _]]
+			.add(is("_listenersProcessed", false))
+
+	def unprocessedNotificationCount =
+		unprocessedNotificationCriteria.count
+
+	def unprocessedNotifications: Scrollable[Notification[_ >: Null <: ToEntityReference, _]] = {
+		val scrollable = unprocessedNotificationCriteria
+			.addOrder(Order.asc("created"))
+			.scroll()
+		Scrollable(scrollable, session)
+	}
+}
+
+trait NotificationDaoComponent {
+	def notificationDao: NotificationDao
+}
+
+trait AutowiringNotificationDaoComponent extends NotificationDaoComponent {
+	var notificationDao = Wire[NotificationDao]
 }

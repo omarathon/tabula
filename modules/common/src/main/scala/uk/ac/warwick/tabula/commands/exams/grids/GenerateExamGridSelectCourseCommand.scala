@@ -28,7 +28,7 @@ case class GenerateExamGridEntity(
 	name: String,
 	universityId: String,
 	moduleRegistrations: Seq[ModuleRegistration],
-	normalCATLoad: Int,
+	cats: BigDecimal,
 	overcattingModules: Option[Seq[Module]],
 	markOverrides: Option[Map[Module, BigDecimal]],
 	studentCourseYearDetails: Option[StudentCourseYearDetails]
@@ -40,7 +40,14 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
 	override def applyInternal() = {
-		studentCourseYearDetailsDao.findByCourseRouteYear(academicYear, course, route, yearOfStudy, eagerLoad = true).map(scyd => scyd.toGenerateExamGridEntity())
+		studentCourseYearDetailsDao.findByCourseRouteYear(
+			academicYear,
+			course,
+			route,
+			yearOfStudy,
+			eagerLoad = true,
+			disableFreshFilter = true
+		).map(scyd => scyd.toGenerateExamGridEntity())
 	}
 
 }

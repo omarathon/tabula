@@ -4,8 +4,10 @@ import java.awt.Color
 
 import org.apache.poi.ss.usermodel.{FontUnderline, HorizontalAlignment, VerticalAlignment}
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFCellStyle, XSSFColor, XSSFWorkbook}
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, Route, Course, Department}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, HasExamGridColumnCategory, HasExamGridColumnSecondaryValue, HasExamGridColumnSection}
 
 object GenerateExamGridExporter {
@@ -17,8 +19,19 @@ object GenerateExamGridExporter {
 	case object Fail extends Style
 	case object Overcat extends Style
 	case object Overridden extends Style
+	case object ActualMark extends Style
 
-	def apply(scyds: Seq[GenerateExamGridEntity], columns: Seq[ExamGridColumn], academicYear: AcademicYear): XSSFWorkbook = {
+	def apply(
+		department: Department,
+		academicYear: AcademicYear,
+		course: Course,
+		route: Route,
+		yearOfStudy: Int,
+		yearWeightings: Seq[CourseYearWeighting],
+		normalLoad: BigDecimal,
+		scyds: Seq[GenerateExamGridEntity],
+		columns: Seq[ExamGridColumn]
+	): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 
 		// Styles
@@ -32,10 +45,12 @@ object GenerateExamGridExporter {
 		var currentSection = ""
 		var columnOffset = 0 // How many section columns have been added (so how many to shift the columnIndex)
 
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size)
+
 		if (categories.nonEmpty) {
 
 			// Category row
-			val categoryRow = sheet.createRow(0)
+			val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
 			var currentSection = ""
 			var currentCategory = ""
 			var columnOffset = 0
@@ -66,7 +81,7 @@ object GenerateExamGridExporter {
 			categoryRow.setHeight((maxCellWidth * 0.5).toShort)
 
 			// Titles in categories
-			val titlesInCategoriesRow = sheet.createRow(1)
+			val titlesInCategoriesRow = sheet.createRow(sheet.getLastRowNum + 1)
 			currentSection = ""
 			columnOffset = 0
 			maxCellWidth = 0
@@ -148,6 +163,70 @@ object GenerateExamGridExporter {
 		(0 to columns.size + columnOffset).foreach(sheet.autoSizeColumn(_, true))
 
 		workbook
+	}
+
+	private def summaryAndKey(
+		sheet: XSSFSheet,
+		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle],
+		department: Department,
+		academicYear: AcademicYear,
+		course: Course,
+		route: Route,
+		yearOfStudy: Int,
+		yearWeightings: Seq[CourseYearWeighting],
+		normalLoad: BigDecimal,
+		studentCount: Int
+	): Unit = {
+		def keyValueCells(key: String, value: String, rowIndex: Int) = {
+			val row = sheet.createRow(rowIndex)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue(key)
+			keyCell.setCellStyle(cellStyleMap(Header))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue(value)
+			row
+		}
+		keyValueCells("Department:", department.name, 0)
+		keyValueCells("Academic year:", academicYear.toString, 1)
+		keyValueCells("Course:", s"${course.code.toUpperCase} ${course.name}", 2)
+		keyValueCells("Route:", s"${route.code.toUpperCase} ${route.name}", 3)
+		keyValueCells("Year of study:", yearOfStudy.toString, 4)
+		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
+		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
+		keyValueCells("Normal CAT load:", normalLoad.toString, 6)
+		keyValueCells("Student Count:", studentCount.toString, 7)
+		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
+
+		{
+			val row = sheet.createRow(9)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#")
+			keyCell.setCellStyle(cellStyleMap(Fail))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Failed module")
+		}
+		{
+			val row = sheet.createRow(10)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#*")
+			keyCell.setCellStyle(cellStyleMap(Overcat))
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Used in overcatting calculation")
+		}
+		{
+			val row = sheet.createRow(11)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("#?")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark missing (using actual mark)")
+		}
+		{
+			val row = sheet.createRow(12)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("?")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Agreed mark and actual mark missing")
+		}
 	}
 
 	private def getCellStyleMap(workbook: XSSFWorkbook): Map[GenerateExamGridExporter.Style, XSSFCellStyle] = {

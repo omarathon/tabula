@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
+import java.util.concurrent.TimeoutException
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -10,7 +11,8 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupEventsFromExternalSystemCommand, PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingService}
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
@@ -21,9 +23,10 @@ trait SyllabusPlusEventCountForModule {
 	self: ModuleTimetableFetchingServiceComponent =>
 
 	@ModelAttribute("syllabusPlusEventCount")
-	def syllabusPlusEventCount(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
-		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)).getOrElse(Nil)
-			.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+	def syllabusPlusEventCount(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
+			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }.get
+			.events.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
 }
 
 abstract class AbstractEditSmallGroupEventsController extends GroupsController
@@ -36,7 +39,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 
 	@ModelAttribute("ManageSmallGroupsMappingParameters") def params = ManageSmallGroupsMappingParameters
 
-	@ModelAttribute("command") def command(@PathVariable("module") module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupEventsCommand =
+	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupEventsCommand =
 		EditSmallGroupEventsCommand(module, set)
 
 	protected def renderPath: String

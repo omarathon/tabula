@@ -5,10 +5,10 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
@@ -102,7 +102,9 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 	}
 
 	private trait ValidationFixture extends Fixture {
-		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
+		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState with TermServiceComponent {
+			val termService = new TermServiceImpl
+
 			val department = ValidationFixture.this.department
 			val modules = Seq(ValidationFixture.this.module)
 
@@ -154,6 +156,63 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("targetAcademicYear")
 		errors.getFieldError.getCodes should contain ("smallGroupSet.copy.sameYear")
+	}
+
+	// TAB-3974
+	@Test def validationWeekNotInTargetYear(): Unit = new ValidationFixture {
+		command.sourceAcademicYear = new AcademicYear(2014) // 14/15
+		command.targetAcademicYear = new AcademicYear(2015) // 15/16
+
+		val set = Fixtures.smallGroupSet("set")
+		val group = Fixtures.smallGroup("group")
+		val event = Fixtures.smallGroupEvent("event")
+
+		set.groups.add(group)
+		group.addEvent(event)
+
+		val state = new CopySmallGroupSetState(set)
+		command.smallGroupSets.add(state)
+
+		// This is fine because there is a week 52 in both years
+		{
+			event.weekRanges = Seq(WeekRange(1, 52))
+			state.copy = true
+			state.copyGroups = true
+			state.copyEvents = true
+
+			val errors = new BindException(command, "command")
+			command.validate(errors)
+
+			errors.hasErrors should be (false)
+		}
+
+		// This is fine because we're set to not copy events
+		{
+			event.weekRanges = Seq(WeekRange(1, 53))
+			state.copy = true
+			state.copyGroups = true
+			state.copyEvents = false
+
+			val errors = new BindException(command, "command")
+			command.validate(errors)
+
+			errors.hasErrors should be (false)
+		}
+
+		{
+			event.weekRanges = Seq(WeekRange(1, 53))
+			state.copy = true
+			state.copyGroups = true
+			state.copyEvents = true
+
+			val errors = new BindException(command, "command")
+			command.validate(errors)
+
+			errors.hasErrors should be (true)
+			errors.getErrorCount should be (1)
+			errors.getFieldError.getField should be ("smallGroupSets[0].copyEvents")
+			errors.getFieldError.getCodes should contain ("smallGroupSet.copy.weekNotInTargetYear")
+		}
 	}
 
 	@Test def describe(): Unit = new Fixture {

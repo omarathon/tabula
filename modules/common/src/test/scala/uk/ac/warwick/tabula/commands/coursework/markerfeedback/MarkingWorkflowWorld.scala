@@ -61,7 +61,7 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	val zipService = new ZipService
 	zipService.userLookup = mockUserLookup
 	zipService.features = Features.empty
-	zipService.zipDir = createTemporaryDirectory()
+	zipService.objectStorageService = createTransientObjectStore()
 
 	def addFeedback(assignment:Assignment){
 		val feedback = assignment.submissions.asScala.map{ s =>
@@ -87,9 +87,18 @@ trait MarkingWorkflowWorld extends TestHelpers {
 
 	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
 		val mf = position match {
-			case (ThirdFeedback) => feedback.retrieveThirdMarkerFeedback
-			case (SecondFeedback) => feedback.retrieveSecondMarkerFeedback
-			case _ => feedback.retrieveFirstMarkerFeedback
+			case ThirdFeedback =>
+				val mf = new MarkerFeedback(feedback)
+				feedback.thirdMarkerFeedback = mf
+				mf
+			case SecondFeedback =>
+				val mf = new MarkerFeedback(feedback)
+				feedback.secondMarkerFeedback = mf
+				mf
+			case _ =>
+				val mf = new MarkerFeedback(feedback)
+				feedback.firstMarkerFeedback = mf
+				mf
 		}
 		mf.userLookup = mockUserLookup
 		mf.state = MarkingState.InProgress

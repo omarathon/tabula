@@ -40,7 +40,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 
 	type CreateDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with CreateDepartmentSmallGroupSetCommandState
 
-	@ModelAttribute("createDepartmentSmallGroupSetCommand") def cmd(@PathVariable("department") department: Department): CreateDepartmentSmallGroupSetCommand =
+	@ModelAttribute("createDepartmentSmallGroupSetCommand") def cmd(@PathVariable department: Department): CreateDepartmentSmallGroupSetCommand =
 		ModifyDepartmentSmallGroupSetCommand.create(department)
 
 	@RequestMapping
@@ -91,7 +91,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 
 	type EditDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with EditDepartmentSmallGroupSetCommandState
 
-	@ModelAttribute("editDepartmentSmallGroupSetCommand") def cmd(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetCommand =
+	@ModelAttribute("editDepartmentSmallGroupSetCommand") def cmd(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetCommand =
 		ModifyDepartmentSmallGroupSetCommand.edit(department, set)
 
 	@RequestMapping
@@ -144,15 +144,15 @@ class DeleteDepartmentSmallGroupSetController extends GroupsController {
 	type DeleteDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with DeleteDepartmentSmallGroupSetValidation
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("department") department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): DeleteDepartmentSmallGroupSetCommand =
+	def cmd(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): DeleteDepartmentSmallGroupSetCommand =
 		DeleteDepartmentSmallGroupSetCommand(department, set)
 
 	@RequestMapping
-	def form(@PathVariable("department") department: Department) =
+	def form(@PathVariable department: Department) =
 		Mav("groups/admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department), Breadcrumbs.Reusable(department))
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand, errors: Errors, @PathVariable("department") department: Department) =
+	def submit(@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand, errors: Errors, @PathVariable department: Department) =
 		if (errors.hasErrors) form(department)
 		else {
 			cmd.apply()

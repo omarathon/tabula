@@ -21,7 +21,7 @@
 	<context-param>
 		<param-name>contextInitializerClasses</param-name>
 		<param-value>
-			uk.ac.warwick.tabula.system.ContextProfileInitializer,uk.ac.warwick.tabula.system.ContextSetupInitializer
+			uk.ac.warwick.tabula.system.ContextProfileInitializer
 		</param-value>
 	</context-param>
 
@@ -32,11 +32,7 @@
 		<load-on-startup>1</load-on-startup>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/*-context.xml</param-value>
-		</init-param>
-		<init-param>
-			<param-name>contextInitializerClasses</param-name>
-			<param-value>uk.ac.warwick.tabula.system.ContextProfileInitializer</param-value>
+			<param-value>/WEB-INF/servlet-context.xml</param-value>
 		</init-param>
 		<multipart-config></multipart-config>
 	</servlet>
@@ -45,6 +41,33 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
+	<filter>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+
+		<!--
+			Set the amount of seconds the conf file will be checked for reload can be a valid integer (0 denotes check
+			every time, -1 denotes no reload check, default -1).
+
+			You can set this to 0 for testing.
+		-->
+		<init-param>
+			<param-name>confReloadCheckInterval</param-name>
+			<param-value>-1</param-value>
+		</init-param>
+
+		<!-- Disable the status page (normally at /rewrite-status) -->
+		<init-param>
+			<param-name>statusEnabled</param-name>
+			<param-value>false</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
 
 	<filter>
 		<filter-name>filters</filter-name>

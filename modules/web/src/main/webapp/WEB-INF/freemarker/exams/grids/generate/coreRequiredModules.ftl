@@ -33,9 +33,17 @@
 	<div class="alert alert-info">
 		<h3>Core required modules</h3>
 		<p>Unfortunately Tabula cannot identify core required modules within SITS. Please select the modules from the list below.</p>
+		<p><strong>Note:</strong> The chosen modules will apply to all students on route ${selectCourseCommand.route.code?upper_case} year of study ${selectCourseCommand.yearOfStudy} for ${academicYear.toString}</p>
 	</div>
 
+	<p>
+		Select the items to include in your grid for Course: ${selectCourseCommand.course.code?upper_case} ${selectCourseCommand.course.name},
+		Route ${selectCourseCommand.route.code?upper_case} ${selectCourseCommand.route.name},
+		Year of Study: ${selectCourseCommand.yearOfStudy}
+	</p>
+
 	<h3>Identify Core Required Modules</h3>
+
 
 	<table class="table table-condensed table-striped modules">
 		<thead>
@@ -45,14 +53,22 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list modules as module>
+			<#list coreRequiredModulesCommand.allModules?sort_by("code") as module>
+				<#assign isChecked = false />
+				<#list coreRequiredModulesCommand.modules as checkedModule>
+					<#if checkedModule.code == module.code>
+						<#assign isChecked = true />
+					</#if>
+				</#list>
 				<tr>
-					<td><input type="checkbox" name="modules" value="${module.code}" id="module-${module.code}" /></td>
+					<td><input type="checkbox" name="modules" value="${module.code}" id="module-${module.code}" <#if isChecked>checked</#if>></td>
 					<td><label for="module-${module.code}"> ${module.code?upper_case} ${module.name}</label></td>
 				</tr>
 			</#list>
 		</tbody>
 	</table>
+
+	<@bs3form.errors path="coreRequiredModulesCommand" />
 
 	<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.coreRequiredModules}">Next</button>
 </form>

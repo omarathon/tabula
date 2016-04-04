@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.{SprCode, AcademicYear}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.lang3.builder.CompareToBuilder
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
@@ -35,7 +36,7 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	var module: Module = null
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var cats: java.math.BigDecimal = null
+	var cats: JBigDecimal = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
@@ -53,10 +54,18 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	var occurrence: String = null
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-	var agreedMark: java.math.BigDecimal = null
+	var actualMark: JBigDecimal = null
+
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
+	var actualGrade: String = null
+
+	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
+	var agreedMark: JBigDecimal = null
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
 	var agreedGrade: String = null
+
+	def firstDefinedMark: Option[JBigDecimal] = Seq(Option(agreedMark), Option(actualMark)).flatten.headOption
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")
@@ -78,6 +87,8 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 			.append(academicYear, that.academicYear)
 			.append(occurrence, that.occurrence)
 			.build()
+
+	def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
 
 }
 

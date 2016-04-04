@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.services.turnitin
 
-import java.io.File
+import java.io.InputStream
 
 import dispatch.classic.Request.toRequestVerbs
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.commons.io.FilenameUtils.getExtension
 import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.apache.http.impl.client.DefaultRedirectStrategy
 import org.apache.http.params.HttpConnectionParams
@@ -14,49 +13,32 @@ import org.apache.http.{HttpRequest, HttpResponse}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.{DisposableBean, InitializingBean}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.HttpClientDefaults
 
-case class FileData(file: File, name: String)
+case class FileData(data: InputStream, name: String)
 
 object Turnitin {
 	/**
-	 * Quoted supported types are...
-	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".
-	 *
-	 * https://guides.turnitin.com/01_Manuals_and_Guides/Student/Student_User_Manual/09_Submitting_a_Paper#File_Types_and_Size
-	 */
-	val validExtensions = Seq("doc", "docx", "odt", "wpd", "ps", "eps", "htm", "html", "hwp", "rtf", "txt", "pdf", "pptx", "ppt", "ppsx", "pps", "xls", "xlsx")
-	val maxFileSizeInMegabytes = 20
-	val maxFileSize = maxFileSizeInMegabytes * 1024 * 1024;  // 20MB
-	
-	def validFileType(file: FileAttachment): Boolean =
-		Turnitin.validExtensions contains getExtension(file.name).toLowerCase
+		* ID that we should store classes under. They are per-module so we base it on the module code.
+		* This ID is stored within Turnitin and requests for the same ID should return the same class.
+		*/
+	def classIdFor(assignment: Assignment, prefix: String) = ClassId(prefix + "-" + assignment.module.code)
 
-	def validFileSize(file: FileAttachment): Boolean = 
-		file.actualDataLength < Turnitin.maxFileSize
-	
 	/**
-     * ID that we should store classes under. They are per-module so we base it on the module code.
-     * This ID is stored within Turnitin and requests for the same ID should return the same class.
-     */
-    def classIdFor(assignment: Assignment, prefix: String) = ClassId(prefix + "-" + assignment.module.code)
+		* ID that we should store assignments under. Our assignment ID is as good an identifier as any.
+		* This ID is stored within Turnitin and requests for the same ID should return the same assignment.
+		*/
+	def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
 
-    /**
-     * ID that we should store assignments under. Our assignment ID is as good an identifier as any.
-     * This ID is stored within Turnitin and requests for the same ID should return the same assignment.
-     */
-    def assignmentIdFor(assignment: Assignment) = AssignmentId("Assignment-" + assignment.id)
+	def classNameFor(assignment: Assignment) = {
+		val module = assignment.module
+		ClassName(module.code.toUpperCase + " - " + module.name)
+	}
 
-    def classNameFor(assignment: Assignment) = {
-        val module = assignment.module
-        ClassName(module.code.toUpperCase + " - " + module.name)
-    }
-
-    def assignmentNameFor(assignment: Assignment) = {
-        AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
-    }
+	def assignmentNameFor(assignment: Assignment) = {
+		AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
+	}
 }
 
 /**
@@ -96,10 +78,11 @@ class Turnitin extends Logging with DisposableBean with InitializingBean {
 	// URL to call for all requests.
 	lazy val endpoint = url(apiEndpoint) <:< Map("User-Agent" -> userAgent)
 
+	// TODO does this really need to be a custom instance?
 	val http: Http = new Http with thread.Safety {
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			HttpConnectionParams.setConnectionTimeout(getParams, HttpClientDefaults.connectTimeout)
-			HttpConnectionParams.setSoTimeout(getParams, HttpClientDefaults.socketTimeout)
+			HttpConnectionParams.setConnectionTimeout(getParams, 20000)
+			HttpConnectionParams.setSoTimeout(getParams, 20000)
 			setRedirectStrategy(new DefaultRedirectStrategy {
 				override def isRedirected(req: HttpRequest, res: HttpResponse, ctx: HttpContext) = false
 			})
