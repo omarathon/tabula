@@ -75,7 +75,7 @@ class ProfileRecordController extends AttendanceController
 
 	private def render(academicYear: AcademicYear, student: StudentMember) = {
 		Mav("attendance/record",
-			"department" -> currentMember.homeDepartment,
+			"department" -> student.homeDepartment,
 			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
 		).crumbs(
 			Breadcrumbs.Profile.Years(mandatory(student), user.apparentId == student.userId),
