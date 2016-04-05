@@ -21,7 +21,10 @@ trait FiltersCheckpointMapChanges {
 		val changes = flattenedChanges.filter { case (student, point, state) =>
 			!existingCheckpointMap.get(student).flatMap(_.get(point)).contains(state)
 		}
-		changes.groupBy(_._1).mapValues(_.groupBy(_._2).mapValues(_.head._3))
+		changes.groupBy { case (student, _, _) => student }
+			.mapValues(_.groupBy { case (_ , point, _) => point }
+				.mapValues(_.map { case (_, _, state) => state }.head)
+			)
 	}
 }
 
