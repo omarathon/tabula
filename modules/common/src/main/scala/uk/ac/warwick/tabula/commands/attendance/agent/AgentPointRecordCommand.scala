@@ -66,7 +66,7 @@ trait PopulateAgentPointRecordCommand extends PopulateOnForm {
 					pointMap.get(point).map(_.state).orNull
 				}.orNull
 			}.toMap.asJava
-		}.toMap.asJava
+		}.asJava
 	}
 }
 
@@ -75,7 +75,13 @@ trait AgentPointRecordValidation extends SelfValidating with GroupedPointRecordV
 	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
-		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap, user)
+		validateGroupedPoint(
+			errors,
+			templatePoint,
+			checkpointMap.asScala.mapValues(_.asScala.toMap).toMap,
+			studentPointCheckpointMap.mapValues(_.mapValues(_.state)),
+			user
+		)
 	}
 
 }
