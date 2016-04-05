@@ -47,7 +47,7 @@ class ModuleListImporterImpl extends ModuleListImporter with InitializingBean
 
 	override def getModuleLists: Seq[UpstreamModuleList] = {
 		val rows = benchmarkTask("Fetch module lists") { moduleListQuery.execute }
-		val validRows = rows.asScala.toSeq.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.academicYear.nonEmpty)
+		val validRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.academicYear.nonEmpty)
 		val routeCodes = validRows.map(_.routeCode).distinct
 		val routes = courseAndRouteService.getRoutesByCodes(routeCodes)
 		validRows.groupBy(_.routeCode).flatMap { case(routeCode, groupedRows) => routes.find(_.code == routeCode) match {
@@ -127,13 +127,14 @@ object ModuleListImporter {
 		}
 	}
 
-	def GetModuleListEntities = s"""
+	def GetModuleListEntities = """
 		select
 			fme.fmc_code as list,
 	 		fme.fme_modp as glob
-		from $sitsSchema.cam_fme fme
+		from %s.cam_fme fme
 		where fme.fmc_code in (:lists)
-	"""
+			and %s(fme.fmc_code, '\w{4}-\d-\d{2}-\w\w\w')
+	""".format(sitsSchema, dialectRegexpLike)
 
 	case class UpstreamModuleListEntityRow(
 		list: String,
