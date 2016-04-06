@@ -60,7 +60,7 @@
 
 				<#assign startIndex = ((command.page - 1) * command.studentsPerPage) />
 				<#assign endIndex = startIndex + students?size />
-				<p>Results ${startIndex + 1} - ${endIndex} of ${totalResults}</p>
+				<p class="not-relative">Results ${startIndex + 1} - ${endIndex} of ${totalResults}</p>
 			</div>
 
 			<div class="scrollable-points-table">

@@ -26,7 +26,7 @@
 
 				<#assign startIndex = ((filterCommand.page - 1) * filterCommand.studentsPerPage) />
 				<#assign endIndex = startIndex + filterResult.results?size />
-				<p>Results ${startIndex + 1} - ${endIndex} of ${filterResult.totalResults}</p>
+				<p class="not-relative">Results ${startIndex + 1} - ${endIndex} of ${filterResult.totalResults}</p>
 			</div>
 
 			<@attendance_macros.scrollablePointsTable
