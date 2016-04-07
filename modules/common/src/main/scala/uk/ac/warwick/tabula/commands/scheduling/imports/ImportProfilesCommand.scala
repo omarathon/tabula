@@ -4,7 +4,7 @@ import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Description, TaskBenchmarking}
+import uk.ac.warwick.tabula.commands.{Command, CommandWithoutTransaction, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
@@ -19,7 +19,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import scala.collection.JavaConverters._
 import scala.util.Try
 
-class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
+class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
 
 	type UniversityId = String
 
@@ -45,7 +45,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def applyInternal() {
 		if (features.profiles) {
 			benchmarkTask("Import members") {
-				doMemberDetails(madService.getDepartmentByCode(deptCode).getOrElse(
+				doMemberDetails(transactional(readOnly = true) { madService.getDepartmentByCode(deptCode)}.getOrElse(
 					throw new IllegalArgumentException(s"Could not find department with code $deptCode")
 				))
 			}

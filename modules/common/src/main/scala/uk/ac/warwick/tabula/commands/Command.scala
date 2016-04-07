@@ -96,11 +96,13 @@ trait Command[A] extends Describable[A] with Appliable[A]
 
 	def readOnlyTransaction = false
 
+	def withTransaction(f: => A): A = transactional(readOnlyTransaction) { f }
+
 	final def apply(): A =
 		if (EventHandling.enabled) {
 			if (readOnlyCheck(this)) {
 				recordEvent(this) {
-					transactional(readOnlyTransaction) {
+					withTransaction {
 						handleTriggers(this) {
 							notify(this) {
 								benchmark() {
@@ -154,6 +156,12 @@ trait Command[A] extends Describable[A] with Appliable[A]
 	private def readOnlyCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || (!maintenanceModeService.enabled && !isReadOnlyMasquerade)
 	}
+}
+
+trait CommandWithoutTransaction[A] extends Command[A] {
+
+	override final def withTransaction(f: => A): A = f
+
 }
 
 abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
@@ -513,6 +521,10 @@ trait PopulateOnForm {
 
 
 trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking {
+	self: CommandInternal[A] with Describable[A] with RequiresPermissionsChecking =>
+}
+
+trait ComposableCommandWithoutTransaction[A] extends CommandWithoutTransaction[A] with PerformsPermissionsChecking {
 	self: CommandInternal[A] with Describable[A] with RequiresPermissionsChecking =>
 }
 

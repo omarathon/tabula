@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.JavaImports._
 
 object ImportModuleListsCommand {
-	def apply() = new ComposableCommand[Unit]
+	def apply() = new ComposableCommandWithoutTransaction[Unit]
 		with ImportModuleListsCommand
 		with ImportModuleListsDescription
 		with Daoisms
