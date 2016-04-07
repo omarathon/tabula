@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.commands
 
 import org.slf4j.LoggerFactory
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -17,9 +16,6 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, DateFormats, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.queue.Queue
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -96,7 +92,7 @@ trait Command[A] extends Describable[A] with Appliable[A]
 
 	def readOnlyTransaction = false
 
-	def withTransaction(f: => A): A = transactional(readOnlyTransaction) { f }
+	def withTransaction(f: => A): A = transactional(readOnlyTransaction)(f)
 
 	final def apply(): A =
 		if (EventHandling.enabled) {
@@ -149,9 +145,9 @@ trait Command[A] extends Describable[A] with Appliable[A]
 	}
 
 	private def isReadOnlyMasquerade =
-		RequestInfo.fromThread.filter { info =>
+		RequestInfo.fromThread.exists { info =>
 			info.user.masquerading && !info.user.sysadmin && !features.masqueradersCanWrite
-		}.isDefined
+		}
 
 	private def readOnlyCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || (!maintenanceModeService.enabled && !isReadOnlyMasquerade)
@@ -197,7 +193,7 @@ object Command {
 
 	def timed[A](fn: uk.ac.warwick.util.core.StopWatch => A): A = {
 		val currentStopwatch = threadLocal.get
-		if (!currentStopwatch.isDefined) {
+		if (currentStopwatch.isEmpty) {
 			try {
 				val sw = StopWatch()
 				threadLocal.set(Some(sw))
