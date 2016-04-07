@@ -479,6 +479,7 @@ preposition: Text to relate the title to the department name in the second line,
 		   class="use-popover tabulaPopover-init"
 		   title=""
 		   data-container="body"
+		   data-placement="left"
 		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
