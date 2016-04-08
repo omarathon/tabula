@@ -9,8 +9,8 @@ import uk.ac.warwick.util.queue.Queue
 
 class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 
-	val cache = new DatabaseUserCache
 	val config = newSSOConfiguration
+	val cache = new DatabaseUserCache(config)
 
 	val context = new MockServletContext
 	context.setAttribute(SSOConfigLoader.SSO_CACHE_KEY, cache)
