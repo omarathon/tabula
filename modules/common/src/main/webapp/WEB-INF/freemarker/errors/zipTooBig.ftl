@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <div class="row-fluid">
 	<div id="maintenance-message" class="span8 offset2">
 		<img src="<@url resource="/static/images/cogs.png" />">
@@ -14,3 +15,4 @@
 		</#if>
 	</div>
 </div>
+</#escape>

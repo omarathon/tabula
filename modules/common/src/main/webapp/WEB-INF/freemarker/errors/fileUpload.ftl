@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Error</h1>
 
 <p>
@@ -18,3 +19,4 @@
 
 	<pre id="dev" class="collapse" style="overflow-x:scroll;">${stackTrace}</pre>
 </#if>
+</#escape>
