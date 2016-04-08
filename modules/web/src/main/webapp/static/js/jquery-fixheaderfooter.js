@@ -152,22 +152,26 @@
             })
         });
 
-        var $f = $container.find(selFooter);
-        var $fm = $('<div class="footer-marker" />');
-        $f.before($fm);
-        $f.scrollToFixed({
-            zIndex: 10,
-            bottom: 0,
-            limit: function() {
-                return $fm.offset().top;
-            },
-            fixed: function() {
-                if (!$f.children(':first-child').is(selFooterShadow)) $f.prepend('<hr class="' + selFooterShadow.substring(1) + '">');
-            },
-            unfixed: function() {
-                $f.children(':first-child').remove(selFooterShadow);
-            }
-        });
+		var $footers = $container.find(selFooter);
+		// use .each() as there could be more than one footer to fix (similar to header)
+		$footers.each(function(idx) {
+			var $fm = $('<div class="footer-marker" />');
+			var $currentFooter = $(this);
+			$currentFooter.before($fm);
+			$currentFooter.scrollToFixed({
+				zIndex: 10,
+				bottom: 0,
+				limit: function() {
+					return $fm.offset().top;
+				},
+				fixed: function() {
+					if (!$currentFooter.children(':first-child').is(selFooterShadow)) $currentFooter.prepend('<hr class="' + selFooterShadow.substring(1) + '">');
+				},
+				unfixed: function() {
+					$currentFooter.children(':first-child').remove(selFooterShadow);
+				}
+			});
+		});
 
         $('body').on('smallscreen', function(e) {
             isSmallscreen = !!$('body.is-smallscreen').length;
