@@ -92,7 +92,13 @@
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
 
-			<@form.filewidget basename="file" labelText="Upload supporting documentation relevant to your request" types=[] multiple=true />
+			<@form.filewidget
+				basename="file"
+				labelText="Upload supporting documentation relevant to your request"
+				types=[]
+				multiple=true
+				required=assignment.extensionAttachmentMandatory
+			/>
 
 			<#if command.attachedFiles?has_content >
 				<@form.labelled_row "attachedFiles" "Supporting documents">

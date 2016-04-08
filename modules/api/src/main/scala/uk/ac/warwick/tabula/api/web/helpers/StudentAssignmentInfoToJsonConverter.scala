@@ -55,6 +55,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
 					"allowsLateSubmissions" -> assignment.allowLateSubmissions,
 					"allowsResubmission" -> assignment.allowResubmission,
 					"allowsExtensions" -> assignment.allowExtensions,
+					"extensionAttachmentMandatory" -> assignment.extensionAttachmentMandatory,
 					"fileAttachmentLimit" -> assignment.attachmentLimit,
 					"fileAttachmentTypes" -> assignment.fileExtensions,
 					"individualFileSizeLimit" -> assignment.attachmentField.map { _.individualFileSizeLimit }.orNull,

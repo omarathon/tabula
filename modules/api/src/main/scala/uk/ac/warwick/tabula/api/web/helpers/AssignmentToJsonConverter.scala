@@ -37,6 +37,7 @@ trait AssignmentToJsonConverter {
 					"allowLateSubmissions" -> assignment.allowLateSubmissions,
 					"allowResubmission" -> assignment.allowResubmission,
 					"allowExtensions" -> assignment.allowExtensions,
+					"extensionAttachmentMandatory" -> assignment.extensionAttachmentMandatory,
 					"fileAttachmentLimit" -> assignment.attachmentLimit,
 					"fileAttachmentTypes" -> assignment.fileExtensions,
 					"individualFileSizeLimit" -> assignment.attachmentField.map { _.individualFileSizeLimit }.orNull,
