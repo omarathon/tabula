@@ -42,6 +42,7 @@
 			<path>/</path>
 			<!-- domain scope of this cookie...should be as restrictive as possible -->
 			<domain>augustus.warwick.ac.uk</domain>
+      <secure>true</secure>
 		</sscookie>
 		<!-- provider id, as assigned by single sign on -->
 		<providerid>urn:augustus.warwick.ac.uk:tabula:service</providerid>
