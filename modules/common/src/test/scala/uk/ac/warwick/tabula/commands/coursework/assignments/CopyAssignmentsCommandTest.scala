@@ -38,6 +38,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		assignment.allowResubmission = false
 		assignment.displayPlagiarismNotice = true
 		assignment.allowExtensions = true
+		assignment.extensionAttachmentMandatory = true
 		assignment.summative = false
 		assignment.assignmentService = smartMock[AssessmentService]
 	}
@@ -78,6 +79,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.allowResubmission.booleanValue should be {false}
 				newAssignment.displayPlagiarismNotice.booleanValue should be {true}
 				newAssignment.allowExtensions.booleanValue should be {true}
+				newAssignment.extensionAttachmentMandatory.booleanValue should be {true}
 				newAssignment.summative.booleanValue should be {false}
 			}
 		}

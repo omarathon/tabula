@@ -141,6 +141,7 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
 		Option(allowResubmission).foreach { state.allowResubmission = _ }
 		Option(displayPlagiarismNotice).foreach { state.displayPlagiarismNotice = _ }
 		Option(allowExtensions).foreach { state.allowExtensions = _ }
+		Option(extensionAttachmentMandatory).foreach { state.extensionAttachmentMandatory = _ }
 		Option(summative).foreach { state.summative = _ }
 		Option(dissertation).foreach { state.dissertation = _ }
 		Option(includeInFeedbackReportWithoutSubmissions).foreach { state.includeInFeedbackReportWithoutSubmissions = _ }

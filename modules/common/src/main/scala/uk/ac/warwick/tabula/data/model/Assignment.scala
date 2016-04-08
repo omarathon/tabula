@@ -45,6 +45,7 @@ object Assignment {
 		val IncludeInFeedbackReportWithoutSubmissions = "includeInFeedbackReportWithoutSubmissions"
 		val AutomaticallyReleaseToMarkers = "automaticallyReleaseToMarkers"
 		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
+		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
 	}
 }
 
@@ -717,6 +718,9 @@ class Assignment
 	def automaticallySubmitToTurnitin = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
 	def automaticallySubmitToTurnitin_= (include: Boolean) = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
 
+	def extensionAttachmentMandatory = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
+	def extensionAttachmentMandatory_= (include: Boolean) = settings += (Settings.ExtensionAttachmentMandatory -> include)
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
@@ -775,6 +779,7 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var allowResubmission: JBoolean = true
 	@BeanProperty var displayPlagiarismNotice: JBoolean = true
 	@BeanProperty var allowExtensions: JBoolean = true
+	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
@@ -791,6 +796,7 @@ trait BooleanAssignmentProperties {
 		assignment.allowResubmission = allowResubmission
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
+		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions

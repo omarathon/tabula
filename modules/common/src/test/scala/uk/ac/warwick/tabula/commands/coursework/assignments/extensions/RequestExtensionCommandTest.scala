@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
-import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
-import uk.ac.warwick.tabula.events.EventHandling
+import org.joda.time.DateTime
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipServiceComponent, RelationshipService}
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import org.joda.time.DateTime
-import org.springframework.util.FileCopyUtils
-import java.io.{FileOutputStream, ByteArrayInputStream}
+import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipService, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.{Mockito, RequestInfo, TestBase}
+
+import scala.collection.JavaConversions._
 
 // scalastyle:off magic.number
 class RequestExtensionCommandTest extends TestBase with Mockito {
@@ -128,6 +126,11 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 				errors = new BindException(command, "command")
 				command.validate(errors)
 				errors.getFieldErrors("requestedExpiryDate").isEmpty should be {true}
+
+				assignment.extensionAttachmentMandatory = true
+				errors = new BindException(command, "command")
+				command.validate(errors)
+				errors.getFieldErrors("file").nonEmpty should be {true}
 			}
 		}
 	}
