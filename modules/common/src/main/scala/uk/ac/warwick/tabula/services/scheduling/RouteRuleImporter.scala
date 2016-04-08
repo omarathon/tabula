@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.{UpstreamRouteRule, UpstreamRouteRuleEntr
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter.{UpstreamRouteRuleQuery, UpstreamRouteRuleRow}
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringUpstreamModuleListServiceComponent}
-
+import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.JavaConverters._
 
 
@@ -40,12 +40,12 @@ class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
 	override def getRouteRules: Seq[UpstreamRouteRule] = {
 		val rows = benchmarkTask("Fetch route rules") { routeRuleQuery.execute }
 		// Remove rows that have null entires that aren't allowed
-		val nonEmptyRows = rows.asScala.toSeq.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.moduleListCode.nonEmpty)
+		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.yearOfStudy.nonEmpty && r.moduleListCode.nonEmpty)
 		// Batch fetch the routes and module lists
 		val routeCodes = nonEmptyRows.map(_.routeCode).distinct
 		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
-		val routes = courseAndRouteService.getRoutesByCodes(routeCodes)
-		val moduleLists = upstreamModuleListService.findByCodes(moduleListCodes)
+		val routes = transactional(readOnly = true) { courseAndRouteService.getRoutesByCodes(routeCodes) }
+		val moduleLists = transactional(readOnly = true) { upstreamModuleListService.findByCodes(moduleListCodes) }
 		// Remove rows that have invalid routes and module lists
 		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.moduleListCode))
 			.filter { case((routeCode, moduleListCode), groupedRows) =>
