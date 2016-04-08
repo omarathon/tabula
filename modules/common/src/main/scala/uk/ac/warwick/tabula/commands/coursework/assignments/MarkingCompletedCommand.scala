@@ -32,7 +32,7 @@ object MarkingCompletedCommand {
 }
 
 abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val submitter: CurrentUser)
-	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with NextMarkerFeedback with CanProxy {
+	extends CommandInternal[Unit] with SelfValidating with UserAware with MarkingCompletedState with ReleasedState with BindListener with CreatesNextMarkerFeedback with CanProxy {
 
 	self: StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackComponent =>
 
@@ -61,25 +61,33 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	}
 
 	private def releaseNextMarkerFeedbackOrFinalise(feedbackForRelease: mutable.Buffer[MarkerFeedback]) {
-		newReleasedFeedback = (feedbackForRelease.flatMap(nextMarkerFeedback).map{ nextMarkerFeedback =>
+		newReleasedFeedback = feedbackForRelease.flatMap(createNextMarkerFeedback).map { nextMarkerFeedback =>
 			stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
 			feedbackService.save(nextMarkerFeedback)
 			nextMarkerFeedback
-		}).asJava
+		}.asJava
 
-		val feedbackToFinalise = feedbackForRelease.filter(!nextMarkerFeedback(_).isDefined)
+		val feedbackToFinalise = feedbackForRelease.filter(mf => mf.getFeedbackPosition match {
+			case FirstFeedback => !mf.feedback.markingWorkflow.hasSecondMarker
+			case SecondFeedback => !mf.feedback.markingWorkflow.hasThirdMarker
+			case _ => true
+		})
 		if (feedbackToFinalise.nonEmpty)
 			finaliseFeedback(assignment, feedbackToFinalise)
 	}
 }
 
-trait NextMarkerFeedback {
-	def nextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
+trait CreatesNextMarkerFeedback {
+	def createNextMarkerFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = {
 		markerFeedback.getFeedbackPosition match {
 			case FirstFeedback if markerFeedback.feedback.markingWorkflow.hasSecondMarker =>
-				Option(markerFeedback.feedback.retrieveSecondMarkerFeedback)
+				val mf = new MarkerFeedback(markerFeedback.feedback)
+				markerFeedback.feedback.secondMarkerFeedback = mf
+				Some(mf)
 			case SecondFeedback if markerFeedback.feedback.markingWorkflow.hasThirdMarker =>
-				Option(markerFeedback.feedback.retrieveThirdMarkerFeedback)
+				val mf = new MarkerFeedback(markerFeedback.feedback)
+				markerFeedback.feedback.thirdMarkerFeedback = mf
+				Some(mf)
 			case _ => None
 		}
 	}

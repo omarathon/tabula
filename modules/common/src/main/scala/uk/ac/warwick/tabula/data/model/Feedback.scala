@@ -229,9 +229,9 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	def getCurrentWorkflowFeedback: Option[MarkerFeedback] = {
 		getCurrentWorkflowFeedbackPosition match {
-			case Some(FirstFeedback) => Option(retrieveFirstMarkerFeedback)
-			case Some(SecondFeedback) => Option(retrieveSecondMarkerFeedback)
-			case Some(ThirdFeedback) => Option(retrieveThirdMarkerFeedback)
+			case Some(FirstFeedback) => getFirstMarkerFeedback
+			case Some(SecondFeedback) => getSecondMarkerFeedback
+			case Some(ThirdFeedback) => getThirdMarkerFeedback
 			case _ => None
 		}
 	}
@@ -257,27 +257,11 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def commentsFormattedHtml: String = formattedHtml(comments)
 
 
-	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
-	def retrieveFirstMarkerFeedback:MarkerFeedback = {
-		Option(firstMarkerFeedback).getOrElse({
-			firstMarkerFeedback = new MarkerFeedback(this)
-			firstMarkerFeedback
-		})
-	}
+	def getFirstMarkerFeedback: Option[MarkerFeedback] = Option(firstMarkerFeedback)
 
-	def retrieveSecondMarkerFeedback:MarkerFeedback = {
-		Option(secondMarkerFeedback).getOrElse({
-			secondMarkerFeedback = new MarkerFeedback(this)
-			secondMarkerFeedback
-		})
-	}
+	def getSecondMarkerFeedback: Option[MarkerFeedback] = Option(secondMarkerFeedback)
 
-	def retrieveThirdMarkerFeedback:MarkerFeedback = {
-		Option(thirdMarkerFeedback).getOrElse({
-			thirdMarkerFeedback = new MarkerFeedback(this)
-			thirdMarkerFeedback
-		})
-	}
+	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
 
 	// The current workflow position isn't None so this must be a placeholder
 	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent

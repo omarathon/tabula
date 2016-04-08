@@ -518,7 +518,7 @@
 			</@dropdown_menu>
 		</div>
 
-		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+		<h4 class="section-title with-button"><@fmt.module_name module /></h4>
 
 		<#if has_groups>
 			<div class="striped-section-contents">
@@ -1071,7 +1071,7 @@
 				 data-href="<@routes.groups.moduleAttendanceInYear module academicYear/>"
 				 data-name="${module_anchor(module)}">
 				<div class="clearfix">
-					<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+					<h4 class="section-title with-button"><@fmt.module_name module /></h4>
 
 					<div class="striped-section-contents">
 			    </div>

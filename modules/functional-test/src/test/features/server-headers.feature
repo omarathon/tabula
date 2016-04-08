@@ -4,7 +4,7 @@ Feature: Standard server headers
 
   Scenario Outline: Requesting a page, no gzip header (Vary)
     When I request <url>
-    Then the Vary response header should not exist
+    Then the Vary response header should be "Accept-Encoding"
 
     Examples:
       | url |

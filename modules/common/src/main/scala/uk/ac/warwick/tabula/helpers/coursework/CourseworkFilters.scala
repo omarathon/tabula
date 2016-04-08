@@ -234,14 +234,14 @@ object CourseworkFilters {
 	case object MarkedByFirst extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by first marker"
 		def predicate(item: Student) =
-			item.coursework.enhancedFeedback.exists(_.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted)
+			item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
 
 	case object MarkedBySecond extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by second marker"
 		def predicate(item: Student) =
-			item.coursework.enhancedFeedback.exists(_.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+			item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 
 		// Only applies to seen second marking
 		def applies(assignment: Assignment) =
@@ -325,9 +325,7 @@ object CourseworkFilters {
 
 	case object NoFeedback extends ParameterlessCourseworkFilter {
 		def getDescription = "students with no feedback"
-		def predicate(item: Student) = {
-			!item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined
-		}
+		def predicate(item: Student) = item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
 		def applies(assignment: Assignment) = true
 	}
 

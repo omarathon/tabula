@@ -581,7 +581,7 @@ class Assignment
 
 	private def getUpToThirdFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasThirdMarker && this.markingWorkflow.getStudentsThirdMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveThirdMarkerFeedback, feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getThirdMarkerFeedback, feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToSecondFeedbacks(user, feedback)
 		}
@@ -589,7 +589,7 @@ class Assignment
 
 	private def getUpToSecondFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.hasSecondMarker && this.markingWorkflow.getStudentsSecondMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveSecondMarkerFeedback, feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getSecondMarkerFeedback, feedback.getFirstMarkerFeedback).flatten
 		} else {
 			getUpToFirstFeedbacks(user, feedback)
 		}
@@ -597,7 +597,7 @@ class Assignment
 
 	private def getUpToFirstFeedbacks(user: User, feedback: Feedback): Seq[MarkerFeedback] = {
 		if (this.markingWorkflow.getStudentsFirstMarker(this, feedback.universityId).contains(user.getUserId)) {
-			Seq(feedback.retrieveFirstMarkerFeedback)
+			Seq(feedback.getFirstMarkerFeedback).flatten
 		} else {
 			Seq()
 		}
@@ -607,17 +607,17 @@ class Assignment
 		feedbackPosition match {
 			case FirstFeedback =>
 				if (this.isFirstMarker(user))
-					Some(feedback.retrieveFirstMarkerFeedback)
+					feedback.getFirstMarkerFeedback
 				else
 					None
 			case SecondFeedback =>
 				if (this.markingWorkflow.hasSecondMarker && this.isSecondMarker(user))
-					Some(feedback.retrieveSecondMarkerFeedback)
+					feedback.getSecondMarkerFeedback
 				else
 					None
 			case ThirdFeedback =>
 				if (this.markingWorkflow.hasThirdMarker && this.isThirdMarker(user))
-					Some(feedback.retrieveThirdMarkerFeedback)
+					feedback.getThirdMarkerFeedback
 				else
 					None
 		}
@@ -639,6 +639,15 @@ class Assignment
 	def getStudentsSecondMarker(universityId: String): Option[User] =
 		Option(markingWorkflow)
 			.flatMap(_.getStudentsSecondMarker(this, universityId))
+			.map(id => userLookup.getUserByUserId(id))
+
+	/**
+		* Optionally returns the second marker for the given student ID
+		* Returns none if this assignment doesn't have a valid marking workflow attached
+		*/
+	def getStudentsThirdMarker(universityId: String): Option[User] =
+		Option(markingWorkflow)
+			.flatMap(_.getStudentsThirdMarker(this, universityId))
 			.map(id => userLookup.getUserByUserId(id))
 
 	/**

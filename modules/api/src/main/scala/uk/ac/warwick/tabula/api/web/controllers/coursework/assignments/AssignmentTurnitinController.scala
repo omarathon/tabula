@@ -28,7 +28,7 @@ object AssignmentTurnitinController {
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}/turnitin"))
-class AssignmentTurnitinController extends ApiController
+class AssignmentTurnitinController extends AssignmentController
 	with GetAssignmentApi with GetAssignmentApiTurnitinOutput // Boom, re-use!
 	with CreateAssignmentTurnitinJobApi
 	with AssignmentToJsonConverter
@@ -81,9 +81,9 @@ class CreateAssignmentTurnitinJobRequest extends JsonApiRequest[SubmitToTurnitin
 }
 
 trait GetAssignmentApiTurnitinOutput extends GetAssignmentApiOutput {
-	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+	self: AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-	def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
+	override def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
 		"students" -> results.students.map { student =>
 			jsonAssignmentStudentObject(student).filterKeys { key => key == "universityId" || key == "submission" } // only include the universityId and submission keys
 		}

@@ -70,8 +70,8 @@ trait PopulateRecordMonitoringPointCommand extends PopulateOnForm {
 				}))
 			}.toSeq
 		checkpointMap = studentPointStateTuples.groupBy(_._1).mapValues(
-			_.groupBy(_._2).mapValues(_.head._3).toMap.asJava
-		).toMap.asJava
+			_.groupBy(_._2).mapValues(_.head._3).asJava
+		).asJava
 	}
 }
 
@@ -80,7 +80,13 @@ trait RecordMonitoringPointValidation extends SelfValidating with GroupedPointRe
 	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent with SecurityServiceComponent =>
 
 	override def validate(errors: Errors) {
-		validateGroupedPoint(errors, templatePoint, checkpointMap.asScala.mapValues(_.asScala.toMap).toMap, user)
+		validateGroupedPoint(
+			errors,
+			templatePoint,
+			checkpointMap.asScala.mapValues(_.asScala.toMap).toMap,
+			studentPointCheckpointMap.mapValues(_.mapValues(Option(_).map(_.state).orNull)),
+			user
+		)
 	}
 
 }

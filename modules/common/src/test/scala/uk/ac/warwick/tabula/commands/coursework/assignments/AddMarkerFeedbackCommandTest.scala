@@ -4,7 +4,7 @@ import com.google.common.io.ByteSource
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentsChooseMarkerWorkflow}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, MarkerFeedback, StudentsChooseMarkerWorkflow}
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.userlookup.User
 
@@ -53,6 +53,8 @@ class AddMarkerFeedbackCommandTest extends TestBase with Mockito {
 		feedback.addAttachment(a)
 		assignment.feedbacks.add(feedback)
 		feedback.assignment = assignment
+		val mf = new MarkerFeedback(feedback)
+		feedback.firstMarkerFeedback = mf
 
 		item.submissionExists should be (false)
 

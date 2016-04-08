@@ -127,8 +127,8 @@ trait MarkerFeedbackStateCopy {
 
 		// save mark and grade
 		if (assignment.collectMarks) {
-			if (mark.hasText) markerFeedback.mark = Some(mark.toInt)
-			if (grade.hasText) markerFeedback.grade = Some(grade)
+			markerFeedback.mark = mark.maybeText.map(_.toInt)
+			markerFeedback.grade = grade.maybeText
 		}
 
 
@@ -142,7 +142,7 @@ trait MarkerFeedbackStateCopy {
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
-			val filesToReplicate = (filesToKeep -- existingFiles).toSeq
+			val filesToReplicate = filesToKeep -- existingFiles
 			fileAttachmentService.deleteAttachments(filesToRemove)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 			val replicatedFiles = filesToReplicate.map ( _.duplicate() )

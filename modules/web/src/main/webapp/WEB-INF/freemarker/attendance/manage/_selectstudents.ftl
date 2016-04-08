@@ -253,7 +253,7 @@
 
 			<#assign startIndex = ((findCommand.page - 1) * findCommand.studentsPerPage) />
 			<#assign endIndex = startIndex + findCommandResult.membershipItems?size />
-			<p>
+			<p class="not-relative">
 				Results ${startIndex + 1} - ${endIndex} of ${findCommand.totalResults}
 			</p>
 

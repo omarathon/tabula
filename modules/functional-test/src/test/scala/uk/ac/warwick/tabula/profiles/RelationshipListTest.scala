@@ -51,7 +51,7 @@ class RelationshipListTest extends SubDepartmentFixture{
 		signIn as P.Admin3 to Path("/profiles")
 
 		Then("There is a link to administer department xxx-ug")
-		find(cssSelector("#profile-dept-admin h5")).get.underlying.getText should be("Test Services - Undergraduates")
+		find(cssSelector("#profile-dept-admin h5")).get.underlying.getText should be("Test Services - UG")
 
 		And("The tutor page shows one student with a tutor")
 		go to Path("/profiles/department/xxx-ug/tutor")

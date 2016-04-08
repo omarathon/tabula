@@ -179,3 +179,35 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 	}
 
 }
+
+@Component
+@Profile(Array("scheduling"))
+class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+
+	// Warn if no successful import for 3 days, critical for 4 days
+	override val WarningThreshold = 3.days
+	override val ErrorThreshold = 4.days
+	override val HealthcheckName = "import-module-lists"
+
+	override protected def auditEvents: Seq[AuditEvent] = {
+		val queryService = Wire[AuditEventQueryService]
+		Await.result(queryService.query("eventType:ImportModuleLists", 0, 50), 1.minute)
+	}
+
+}
+
+@Component
+@Profile(Array("scheduling"))
+class RouteRuleImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
+
+	// Warn if no successful import for 3 days, critical for 4 days
+	override val WarningThreshold = 3.days
+	override val ErrorThreshold = 4.days
+	override val HealthcheckName = "import-route-rules"
+
+	override protected def auditEvents: Seq[AuditEvent] = {
+		val queryService = Wire[AuditEventQueryService]
+		Await.result(queryService.query("eventType:ImportRouteRules", 0, 50), 1.minute)
+	}
+
+}

@@ -142,7 +142,7 @@
 					</div>
 				</#if>
 
-				<p>
+				<p class="not-relative">
 					<#assign startIndex = ((filterStudentsCommand.page - 1) * filterStudentsCommand.studentsPerPage) />
 					<#assign endIndex = startIndex + students?size />
 

@@ -104,7 +104,7 @@
 							</#if>
 						</div>
 
-						<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+						<h4 class="section-title with-button"><@fmt.module_name module /></h4>
 					</div>
 				</div>
 			</#list>
@@ -139,7 +139,7 @@
 							</#if>
 						</div>
 
-						<h2 class="section-title with-button"><@fmt.route_name route true /></h2>
+						<h4 class="section-title with-button"><@fmt.route_name route true /></h4>
 					</div>
 				</div>
 			</#list>
