@@ -189,7 +189,7 @@
 			</ol>
 			<div class="fix-footer submit-buttons">
 				<input type="submit" name="uploadSpreadsheet" class="btn btn-primary" value="Upload">
-				<a href="${cancelUrl}" class="btn">Cancel-aaaa</a>
+				<a href="${cancelUrl}" class="btn">Cancel</a>
 			</div>
 		</div>
 		<div id="small-groups" class="hide tabbable">
