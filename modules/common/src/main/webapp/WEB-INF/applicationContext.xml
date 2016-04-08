@@ -503,7 +503,6 @@
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 
 		<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
-			  p:detectAnonymousOnCampusUsers="true"
 			  p:userLookup-ref="userLookup"
 			  p:configLocation="/tabula-sso-config.xml" />
 	</beans>
@@ -540,7 +539,6 @@
 		</bean>
 
 		<bean id="ssoClientFilter" class="uk.ac.warwick.sso.client.SSOClientFilter"
-			  p:detectAnonymousOnCampusUsers="true"
 			  p:userLookup-ref="userLookup"
 			  p:config-ref="ssoConfiguration" />
 
