@@ -211,7 +211,7 @@
 				</div>
 			</#macro>
 
-			<form id="recordAttendance" action="" method="post">
+			<form id="recordAttendance" action="" method="post" class="dirty-check">
 				<div class="striped-section-contents attendees">
 					<script>
 						AttendanceRecording.bindButtonGroupHandler();
@@ -226,7 +226,7 @@
 				<div class="fix-footer submit-buttons">
 					<div class="pull-right">
 						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-						<a class="btn" href="${returnTo}">Cancel</a>
+						<a class="btn dirty-check-ignore" href="${returnTo}">Cancel</a>
 					</div>
 				</div>
 			</form>
