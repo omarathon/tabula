@@ -118,6 +118,23 @@ so that they can be passed around between requests.
 							</@form.field>
 						</@form.row>
 
+						<#if (assignment.countUnapprovedExtensions gt 0)!false>
+							<script>
+								jQuery(function($){
+									$('#allowExtensions').change(function() {
+										if ($(this).is(':checked')) {
+											$('form.edit-assignment').confirmModal(false);
+										} else {
+											$('form.edit-assignment').confirmModal({
+												message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> awaiting review for this assignment. If you turn off extensions, all extension requests awaiting review will be rejected. Any extensions already granted will remain in place.',
+												confirm: 'Continue, reject extension requests awaiting review'
+											});
+										}
+									});
+								});
+							</script>
+						</#if>
+
 						<@form.row cssClass="allows-extensions">
 							<@form.label></@form.label>
 							<@form.field>
