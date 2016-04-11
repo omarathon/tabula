@@ -47,8 +47,8 @@ class MarkerAddMarksController extends CourseworkController {
 		@PathVariable marker: User,
 		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
 	) = {
-		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
-		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, user.apparentUser))
+		val submissions = assignment.getMarkersSubmissions(marker)
+		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, marker))
 		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
 		val filteredSubmissions = submissions.filter(s => filteredFeedbackId.contains(s.universityId))
 
