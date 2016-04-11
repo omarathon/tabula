@@ -298,7 +298,7 @@
 		</#macro>
 
 		<div class="attendees">
-			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
+			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
 				<script type="text/javascript">
 					AttendanceRecording.bindButtonGroupHandler(true);
 				</script>
@@ -325,7 +325,7 @@
 					<div class="fix-footer submit-buttons">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-							<a class="btn btn-default" href="${returnTo}">Cancel</a>
+							<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
 							Saving this attendance will set monitoring points for

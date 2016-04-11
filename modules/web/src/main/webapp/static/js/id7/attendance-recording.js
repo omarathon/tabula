@@ -143,6 +143,7 @@ exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
+		$this.trigger('checkform.areYouSure');
 
 		if (enableCheckForCheckpoints) {
 			checkForCheckpoints();
@@ -166,7 +167,17 @@ $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
 	var $recordForm = $('.recordCheckpointForm');
-	$recordForm.find('.fix-header')
+	$recordForm.on('click.saveButtonPrompt', 'div.btn-group button', function() {
+		$recordForm.off('click.saveButtonPrompt').find('.submit-buttons .btn-primary')
+			.data({
+				'content': 'Remember to save any changes you make by clicking \'Save\'',
+				'placement': 'top',
+				'container': '.fix-footer'
+			}).tabulaPopover();
+		window.setTimeout(function() {
+			$recordForm.find('.submit-buttons .btn-primary').popover('show');
+		}, 100);
+	}).find('.fix-header')
 		.find('div.pull-right').show()
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
@@ -179,6 +190,7 @@ $(function(){
 					})
 				});
 				checkForCheckpoints();
+				$recordForm.find('form').trigger('checkform.areYouSure');
 				// if the bulk authorised was clicked then open the bulk attendance note popup
 				if (i === 2) {
 					var $bulkNote = $('.bulk-attendance-note');
