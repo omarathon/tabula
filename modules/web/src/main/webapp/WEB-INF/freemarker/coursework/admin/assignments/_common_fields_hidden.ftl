@@ -30,6 +30,7 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@hiddenorfalse path="allowResubmission" />
 <@hiddenorfalse path="allowExtensions" />
 <@hiddenorfalse path="extensionAttachmentMandatory" />
+<@hiddenorfalse path="allowExtensionsAfterCloseDate" />
 <@hiddenorfalse path="summative" />
 <@hiddenorfalse path="includeInFeedbackReportWithoutSubmissions" />
 <@hiddenorfalse path="automaticallyReleaseToMarkers" />

@@ -46,6 +46,7 @@ object Assignment {
 		val AutomaticallyReleaseToMarkers = "automaticallyReleaseToMarkers"
 		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
 		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
+		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 	}
 }
 
@@ -548,7 +549,7 @@ class Assignment
 
 	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
 
-	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
+	def newExtensionsCanBeRequested: Boolean = extensionsPossible && (!isClosed || allowExtensionsAfterCloseDate)
 
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
@@ -719,7 +720,10 @@ class Assignment
 	def automaticallySubmitToTurnitin_= (include: Boolean) = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
 
 	def extensionAttachmentMandatory = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
-	def extensionAttachmentMandatory_= (include: Boolean) = settings += (Settings.ExtensionAttachmentMandatory -> include)
+	def extensionAttachmentMandatory_= (mandatory: Boolean) = settings += (Settings.ExtensionAttachmentMandatory -> mandatory)
+
+	def allowExtensionsAfterCloseDate = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
+	def allowExtensionsAfterCloseDate_= (allow: Boolean) = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
 
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
@@ -780,6 +784,7 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var displayPlagiarismNotice: JBoolean = true
 	@BeanProperty var allowExtensions: JBoolean = true
 	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
+	@BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
@@ -797,6 +802,7 @@ trait BooleanAssignmentProperties {
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
 		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
+		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions

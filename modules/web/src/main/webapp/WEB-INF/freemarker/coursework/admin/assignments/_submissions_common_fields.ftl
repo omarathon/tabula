@@ -144,6 +144,16 @@ so that they can be passed around between requests.
 								</label>
 							</@form.field>
 						</@form.row>
+
+						<@form.row cssClass="allows-extensions">
+							<@form.label></@form.label>
+							<@form.field>
+								<label class="checkbox">
+									<@f.checkbox path="allowExtensionsAfterCloseDate" id="allowExtensionsAfterCloseDate" />
+									Allow students to request extensions after the close date
+								</label>
+							</@form.field>
+						</@form.row>
 					</div>
 				</#if>
 
