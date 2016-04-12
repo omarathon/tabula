@@ -64,7 +64,7 @@
 						</li>
 						<li class="must-have-selected">
 							<#assign deletesubmissionurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
-							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submission' >
+							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submissions' >
 								<i class="icon-remove icon-fixed-width"></i> Delete submissions
 							</@fmt.permission_button>
 						</li>
