@@ -15,7 +15,7 @@ class DownloadRegisterAsPdfController extends GroupsController {
 
 	@ModelAttribute
 	def command(@PathVariable event: SmallGroupEvent, @RequestParam week: Int): DownloadRegisterAsPdfCommand
-		= DownloadRegisterAsPdfCommand(event, week)
+		= DownloadRegisterAsPdfCommand(event, week, user)
 
 	@RequestMapping
 	def downloadAsPdf(@ModelAttribute command: DownloadRegisterAsPdfCommand) = command.apply()
