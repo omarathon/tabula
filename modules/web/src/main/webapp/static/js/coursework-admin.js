@@ -125,16 +125,17 @@ $(function(){
 
 			$('.form-post', $outerContainer).click(function(event){
 				event.preventDefault();
-				if(!$(this).hasClass("disabled")) {
+				var $this = $(this);
+				if(!$this.hasClass("disabled")) {
 					var action = this.href;
-					if ($(this).data('href')) {
-						action = $(this).data('href')
+					if ($this.data('href')) {
+						action = $this.data('href')
 					}
 
 					var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
 					var doFormSubmit = false;
 
-					if ($container.data('checked') != 'none' || $(this).closest('.must-have-selected').length === 0) {
+					if ($container.data('checked') != 'none' || $this.closest('.must-have-selected').length === 0) {
 						var $checkedBoxes = $(".collection-checkbox:checked", $container);
 						$form.append($checkedBoxes.clone());
 
@@ -144,7 +145,7 @@ $(function(){
 						doFormSubmit = true;
 					}
 
-					if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
+					if ($this.hasClass('include-filter') && ($('.filter-form').length > 0)) {
 						var $inputs = $(':input', '.filter-form:not("#floatedHeaderContainer *")');
 						$form.append($inputs.clone());
 
@@ -838,6 +839,45 @@ $(function() {
 			}
 		});
 	});
+});
+
+/**
+ * Special case for downloading submissions as PDF.
+ * Does a check for non PDF files in submissions before fetching the download
+ */
+$(function(){
+	$('a.download-pdf').on('click', function(e){
+		var $this = $(this);
+		e.preventDefault();
+		if(!$(this).hasClass("disabled")) {
+			var $modal = $('#download-pdf-modal'), action = this.href;
+			if ($this.data('href')) {
+				action = $this.data('href')
+			}
+			var postData = $this.closest('div.form-post-container').find('.collection-checkbox:checked').map(function(){
+				var $input = $(this);
+				return $input.prop('name') + '=' + $input.val();
+			}).get().join('&');
+			$.post(action, postData, function(data){
+				if (data.submissionsWithNonPDFs.length === 0) {
+					$modal.find('.btn.btn-primary').trigger('click');
+				} else {
+					$modal.find('.count').html(data.submissionsWithNonPDFs.length);
+					var $submissionsContainer = $modal.find('.submissions').empty();
+					$.each(data.submissionsWithNonPDFs, function(i, submission){
+						var fileList = $('<ul/>');
+						$.each(submission.nonPDFFiles, function(i, file){
+							fileList.append($('<li/>').html(file));
+						});
+						$submissionsContainer.append($('<li/>').append(
+							(submission.name.length > 0) ? submission.name + ' (' + submission.universityId + ')' : submission.universityId
+						).append(fileList))
+					});
+					$modal.modal('show');
+				}
+			});
+		}
+	})
 });
 
 }(jQuery));
