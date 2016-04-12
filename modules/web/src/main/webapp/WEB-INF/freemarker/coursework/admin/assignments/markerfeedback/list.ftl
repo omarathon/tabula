@@ -188,6 +188,14 @@
 						<i class="icon-download"></i> Download all submissions
 					</a>
 				</li>
+				<li>
+					<a class="use-tooltip download-pdf"
+					   title="Download a PDF of submissions due to be marked. Note that submissions with a status of 'Marking completed' will not be included in this zip"
+					   href="<@routes.coursework.downloadMarkerSubmissionsAsPdf assignment=assignment marker=marker />"
+					   data-container="body">
+						<i class="icon-download"></i> Download all submissions as PDF
+					</a>
+				</li>
 				<#if hasFirstMarkerFeedback>
 					<li>
 						<a href="<@routes.coursework.downloadfirstmarkerfeedback assignment=assignment marker=marker />">
@@ -223,6 +231,21 @@
 			</ul>
 		</div>
 	</div>
+
+	<div id="download-pdf-modal" class="modal hide fade">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Download submissions as PDF</h3>
+		</div>
+		<div class="modal-body">
+			<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
+			<p><a class="long-running btn btn-primary" href="<@routes.coursework.downloadMarkerSubmissionsAsPdf assignment=assignment marker=marker />?download">
+				<i class="icon-download"></i> Download submissions as PDF
+			</a></p>
+			<ul class="submissions"></ul>
+		</div>
+	</div>
+
 	<#if markerFeedback?has_content>
 		<#list markerFeedback as stage>
 			<#assign isModeration = (stage.roleName!"")?starts_with("Moderator") />

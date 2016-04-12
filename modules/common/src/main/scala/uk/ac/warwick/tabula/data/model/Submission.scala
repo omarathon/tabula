@@ -1,21 +1,19 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
-
-import org.hibernate.annotations.{Type, BatchSize}
-import org.joda.time.{LocalDate, DateTime}
-
-import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
+import javax.persistence._
 import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormField}
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
+import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConversions._
 
 object Submission {
 	val UseDisabilityFieldName = "use-disability"
@@ -25,9 +23,6 @@ object Submission {
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 
 	type Entity = Submission
-
-	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
 
 	def this(universityId: String = null) {
 		this()
