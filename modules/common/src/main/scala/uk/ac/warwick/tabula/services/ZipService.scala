@@ -32,12 +32,10 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
 	def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
-	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
 	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
 	def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
 
-	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
 	def invalidateIndividualFeedbackZip(feedback: Feedback) = invalidate(resolvePath(feedback))
 
@@ -56,14 +54,6 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
 			ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
-
-	/**
-	 * A zip of feedback with a folder for each student.
-	 */
-	def getAllFeedbackZips(assignment: Assignment): RenderableFile =
-		getZip(resolvePathForFeedback(assignment),
-			assignment.feedbacks.asScala.flatMap(getFeedbackZipItems)
-		)
 
 	/**
 	 * Find all file attachment fields and any attachments in them, as a single list.

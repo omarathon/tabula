@@ -72,7 +72,6 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 				// if we are updating existing feedback then invalidate any cached feedback zips
 				if(feedback.id != null) {
 					zipService.invalidateIndividualFeedbackZip(feedback)
-					zipService.invalidateFeedbackZip(assignment)
 				}
 			case _ =>
 		}
