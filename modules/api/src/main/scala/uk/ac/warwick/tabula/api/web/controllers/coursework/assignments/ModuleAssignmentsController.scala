@@ -23,16 +23,13 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
-@Controller
-@RequestMapping(Array("/v1/module/{module}/assignments"))
-class ModuleAssignmentsController extends ApiController
-	with ListAssignmentsForModuleApi
-	with CreateAssignmentApi
+abstract class ModuleAssignmentsController extends ApiController
 	with AssignmentToJsonConverter
 	with AssessmentMembershipInfoToJsonConverter
 
-trait ListAssignmentsForModuleApi {
-	self: ApiController with AssignmentToJsonConverter =>
+@Controller
+@RequestMapping(Array("/v1/module/{module}/assignments"))
+class ListAssignmentsForModuleController extends ModuleAssignmentsController {
 
 	@ModelAttribute("listCommand")
 	def command(@PathVariable module: Module, user: CurrentUser): ViewViewableCommand[Module] =
@@ -58,8 +55,9 @@ trait ListAssignmentsForModuleApi {
 	}
 }
 
-trait CreateAssignmentApi {
-	self: ApiController with AssignmentToJsonConverter =>
+@Controller
+@RequestMapping(Array("/v1/module/{module}/assignments"))
+class CreateAssignmentController extends ModuleAssignmentsController {
 
 	@ModelAttribute("createCommand")
 	def command(@PathVariable module: Module): AddAssignmentCommand =
