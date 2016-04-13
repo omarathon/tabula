@@ -199,8 +199,15 @@ class Assignment
 	}
 
 	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>
-		val now = LocalDate.now
+		getFeedbackDeadlineWorkingDaysAway(deadline)
+	}
 
+	def feedbackDeadlineWorkingDaysAwayForSubmission(submission: Submission) = feedbackDeadlineForSubmission(submission).map { deadline =>
+		getFeedbackDeadlineWorkingDaysAway(deadline)
+	}
+
+	private def getFeedbackDeadlineWorkingDaysAway(deadline:LocalDate): Int = {
+		val now = LocalDate.now
 		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
 		val offset =
 			if (deadline.isBefore(now)) 1

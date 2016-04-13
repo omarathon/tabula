@@ -135,7 +135,7 @@
 								</a>
 							</h4>
 						</div>
-						<div class="span4">
+						<div class="span5">
 							<#if hasSubmission>
 								<p>
 									Submitted <@fmt.date date=submission.submittedDate />
@@ -145,7 +145,7 @@
 										<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 									</#if>
 									<#if !hasFeedback && submission.feedbackDeadline??>
-										<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
+										<#assign workingDaysAway = submission.feedbackDeadlineWorkingDaysAway />
 										<#if workingDaysAway lt 0>
 											<span class="label label-info">Feedback overdue: <@fmt.date date=submission.feedbackDeadline includeTime=false/></span>
 										<#else>
