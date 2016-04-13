@@ -147,9 +147,9 @@
 									<#if !hasFeedback && submission.feedbackDeadline??>
 										<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
 										<#if workingDaysAway lt 0>
-											<span class="label label-info">Feedback overdue: <@fmt.date date=assignment.feedbackDeadline includeTime=false/></span>
+											<span class="label label-info">Feedback overdue: <@fmt.date date=submission.feedbackDeadline includeTime=false/></span>
 										<#else>
-											<span class="label label-info">Feedback due: <@fmt.date date=assignment.feedbackDeadline includeTime=false/></span>
+											<span class="label label-info">Feedback due: <@fmt.date date=submission.feedbackDeadline includeTime=false/></span>
 										</#if>
 									<#elseif hasFeedback>
 										<span class="label label-info">Marking completed</span>
