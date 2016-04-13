@@ -49,12 +49,10 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, marker: User, c
 				feedback.foreach(zipService.invalidateIndividualFeedbackZip)
 				feedback
 			}.toList.flatten
-			zipService.invalidateFeedbackZip(assignment)
 			feedbacks
 		} else {
 			val feedback = saveFeedback(uniNumber, file)
 			// delete feedback zip for this assignment, since it'll now be different.
-			zipService.invalidateFeedbackZip(assignment)
 			feedback.toList
 		}
 

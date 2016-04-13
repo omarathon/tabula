@@ -28,14 +28,14 @@ import scala.collection.JavaConversions._
 
 object MarkingCompletedTest {
 	class Ctx extends FunctionalContext with Mockito {
-		bean() { mock[MaintenanceModeService] }
-		bean() { mock[EventListener] }
+		bean() { smartMock[MaintenanceModeService] }
+		bean() { smartMock[EventListener] }
 	}
 }
 
 class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mockito with FunctionalContextTesting with FeedbackServiceComponent {
 
-	val feedbackService = mock[FeedbackService]
+	val feedbackService = smartMock[FeedbackService]
 
 	@Before
 	def before() {
@@ -50,9 +50,9 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	private trait CommandTestSupport extends StateServiceComponent with FeedbackServiceComponent with FinaliseFeedbackTestImpl {
 		self: UserAware =>
 
-		val mockSession = mock[Session]
+		val smartMockSession = smartMock[Session]
 		val stateService: StateService = new ComposableStateServiceImpl with SessionComponent {
-			def session = mockSession
+			def session = smartMockSession
 		}
 
 		val feedbackService = MarkingCompletedTest.this.feedbackService
@@ -63,6 +63,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
 			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			finaliseFeedbackCommand.zipService = smartMock[ZipService]
 			finaliseFeedbackCommand.applyInternal()
 		}
 	}

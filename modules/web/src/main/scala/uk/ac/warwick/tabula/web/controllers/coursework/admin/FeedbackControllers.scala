@@ -169,19 +169,6 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 	}
 }
 
-@Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/download-zip/{filename}"))
-class DownloadAllFeedback extends CourseworkController {
-
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new AdminGetAllFeedbackCommand(module, assignment)
-
-	@RequestMapping
-	def download(cmd: AdminGetAllFeedbackCommand, @PathVariable filename: String): Mav = {
-		Mav(new RenderableFileView(cmd.apply()))
-	}
-}
-
 // A read only view of all feedback fields and attachments
 @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
