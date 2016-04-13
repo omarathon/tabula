@@ -144,7 +144,7 @@
 									<#elseif submission.authorisedLate>
 										<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 									</#if>
-									<#if !submission.late && !hasFeedback && assignment.feedbackDeadline??>
+									<#if !hasFeedback && submission.feedbackDeadline??>
 										<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
 										<#if workingDaysAway lt 0>
 											<span class="label label-info">Feedback overdue: <@fmt.date date=assignment.feedbackDeadline includeTime=false/></span>
