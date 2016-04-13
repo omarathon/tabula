@@ -1,3 +1,5 @@
+
+
 <#if students??>
 	<div class="btn-toolbar">
 		<div class="pull-right view-selector">
@@ -49,13 +51,21 @@
 								 data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
 								 href=""
 								 title="Download the submission files for the selected students as a ZIP file."
-								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download submission
+								 data-container="body"><i class="icon-download icon-fixed-width"></i> Download submissions
+							</a>
+						</li>
+						<li class="must-have-selected">
+							<a class="long-running use-tooltip download-pdf"
+							   data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.pdf'/>"
+							   href=""
+							   title="Download the submission files for the selected students as a PDF for printing."
+							   data-container="body"><i class="icon-download icon-fixed-width"></i> Download submissions as PDF
 							</a>
 						</li>
 						<li class="must-have-selected">
 							<#assign deletesubmissionurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
-							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submission' >
-								<i class="icon-remove icon-fixed-width"></i> Delete submission
+							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submissions' >
+								<i class="icon-remove icon-fixed-width"></i> Delete submissions
 							</@fmt.permission_button>
 						</li>
 					</ul>
@@ -318,6 +328,23 @@
 					<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
 				</li>
 			</ul>
+		</div>
+
+	</div>
+
+	<div id="download-pdf-modal" class="modal hide fade">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3>Download submissions as PDF</h3>
+		</div>
+		<div class="modal-body">
+			<p>There are <span class="count"></span> submissions that have files that are not PDFs (shown below). The download will not include these files.</p>
+			<p><a class="long-running form-post btn btn-primary"
+				  data-href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.pdf?download'/>"
+				  href=""
+			><i class="icon-download"></i> Download submissions as PDF
+			</a></p>
+			<ul class="submissions"></ul>
 		</div>
 	</div>
 </#if>
