@@ -44,7 +44,10 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 		}
 	}
 
-	private def zipped(feedback: Feedback) = zip.getFeedbackZip(feedback)
+	private def zipped(feedback: Feedback) = student match {
+		case Some(student: StudentMember) => zip.getFeedbackZipForStudent(feedback)
+		case _ => zip.getFeedbackZip(feedback)
+	}
 
 	override def describe(d: Description) = {
 		d.assignment(assignment)

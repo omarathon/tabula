@@ -99,6 +99,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 
 		def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
 			val finaliseFeedbackCommand = FinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+			finaliseFeedbackCommand.zipService = smartMock[ZipService]
 			finaliseFeedbackCommand.applyInternal()
 		}
 	}
