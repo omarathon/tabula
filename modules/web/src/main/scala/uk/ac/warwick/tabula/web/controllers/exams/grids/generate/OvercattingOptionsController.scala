@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
@@ -17,7 +18,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringUpstreamRouteRuleServiceComponent, AutowiringModuleRegistrationServiceComponent, ModuleRegistrationService, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
-import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.web.views.{ExcelView, JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 @Controller
@@ -68,6 +69,53 @@ class OvercattingOptionsController extends ExamsController
 			)
 		).getOrElse("")
 		Mav("exams/grids/generate/overcat").noLayoutIf(ajax)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.export))
+	def export(
+		@ModelAttribute("command") cmd: Appliable[Seq[Module]] with PopulateOnForm,
+		@ModelAttribute("overcatView") overcatView: OvercattingOptionsView with GenerateExamGridOvercatCommandRequest,
+		@PathVariable scyd: StudentCourseYearDetails
+	): View = {
+
+		cmd.populate()
+		overcatView.overcatChoice = scyd.overcattingModules.map(overcattingModules =>
+			GenerateExamGridOvercatCommand.overcatIdentifier(
+				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
+			)
+		).getOrElse("")
+
+		def previousYearsEntities = overcatView.previousYearsSCYDs.map(thisSCYD => {
+			thisSCYD.academicYear -> Seq(thisSCYD.toGenerateExamGridEntity())
+		})
+
+		def columns: Seq[ExamGridColumn] = {
+				overcatView.optionsColumns  ++ overcatView.columnsBySCYD(scyd)
+		}
+
+		val thisYearsColumns = Seq(scyd.academicYear -> columns)
+
+		def previousYearsColumns = overcatView.previousYearsSCYDs.map(thisSCYD => {
+			thisSCYD.academicYear -> overcatView.columnsBySCYD(thisSCYD)
+		})
+
+		val allColumns = thisYearsColumns ++ previousYearsColumns
+
+		new ExcelView(
+			s"Overcatting_options.xlsx",
+			GenerateExamGridExporter(
+				overcatView.department,
+				overcatView.academicYear,
+				scyd.studentCourseDetails.course,
+				scyd.route,
+				scyd.yearOfStudy,
+				Seq(),
+				ModuleRegistrationService.DefaultNormalLoad,
+				overcatView.overcattedEntities,
+				Option(previousYearsEntities),
+			  allColumns
+			)
+		)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("recalculate"))

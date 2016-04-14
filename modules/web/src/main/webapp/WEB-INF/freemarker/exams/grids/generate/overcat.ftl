@@ -33,7 +33,7 @@
 			<p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 
 			<p class="clearfix">&nbsp;</p>
-			<form>
+			<form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
 				<table class="table table-condensed grid overcat">
 					<thead>
 						<tr>
@@ -135,6 +135,7 @@
 	<@modal.footer>
 		<div class="pull-left">
 			<button type="button" class="btn btn-primary" name="continue">Continue</button>
+			<button type="button" class="btn btn-default" name="${GenerateExamGridMappingParameters.export}">Download for printing</button>
 			<button type="button" class="btn btn-default" name="cancel">Cancel</button>
 		</div>
 	</@modal.footer>
@@ -205,6 +206,17 @@
 		});
 		$('.modal-footer').on('click', 'button[name=continue]', function(){
 			$('.modal button').prop('disabled', true);
+		}).on('click', 'button[name=export]', function(){
+
+			$('.modal-footer button').prop('disabled', true);
+			var $form = $('.modal-body form');
+			$form.append($('<input/>').attr({
+				'type': 'hidden',
+				'name': 'export'
+			}));
+			$form.submit();
+		}).on('click', 'button[name=continue]', function(){
+			$('.modal-footer button').prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
