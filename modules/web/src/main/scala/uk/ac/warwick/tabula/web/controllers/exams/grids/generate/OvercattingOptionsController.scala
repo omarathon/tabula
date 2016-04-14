@@ -90,7 +90,7 @@ class OvercattingOptionsController extends ExamsController
 		})
 
 		def columns: Seq[ExamGridColumn] = {
-				overcatView.optionsColumns  ++ overcatView.columnsBySCYD(scyd)
+			overcatView.optionsColumns  ++ overcatView.columnsBySCYD(scyd)
 		}
 
 		val thisYearsColumns = Seq(scyd.academicYear -> columns)
@@ -113,7 +113,7 @@ class OvercattingOptionsController extends ExamsController
 				ModuleRegistrationService.DefaultNormalLoad,
 				overcatView.overcattedEntities,
 				Option(previousYearsEntities),
-			  allColumns
+				allColumns
 			)
 		)
 	}

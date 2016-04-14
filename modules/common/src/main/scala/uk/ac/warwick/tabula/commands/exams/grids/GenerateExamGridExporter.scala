@@ -93,7 +93,7 @@ object GenerateExamGridExporter {
 						case _ =>
 							categoryRow.createCell(columnIndex + columnOffset) // Blank cell
 					}
-						categoriesRowColumnOffset = columnIndex + columnOffset + 1
+					categoriesRowColumnOffset = columnIndex + columnOffset + 1
 				}
 
 				categoryRow.setHeight((maxCellWidth * 0.5).toShort)
