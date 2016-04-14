@@ -31,7 +31,7 @@ object GenerateExamGridExporter {
 		normalLoad: BigDecimal,
 		scyds: Seq[GenerateExamGridEntity],
 		allPreviousYearsScyds: Option[Seq[(AcademicYear, Seq[GenerateExamGridEntity])]],
-		columns: Seq[(AcademicYear, Seq[ExamGridColumn])]
+		columnsByYear: Seq[(AcademicYear, Seq[ExamGridColumn])]
 	): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 
@@ -49,7 +49,7 @@ object GenerateExamGridExporter {
 		var titlesInCategoriesRowColumnOffset = 0
 		var headersRowColumnOffset = 0
 
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size, !allPreviousYearsScyds.isDefined)
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size, allPreviousYearsScyds.isEmpty)
 
 		if (allPreviousYearsScyds.isDefined) {
 			scydHeadingRowNum = sheet.getLastRowNum + 1
@@ -61,10 +61,10 @@ object GenerateExamGridExporter {
 		val headerRow = sheet.createRow(sheet.getLastRowNum + 1)
 
 		// once per each academicYear
-		columns.foreach { column =>
+		columnsByYear.foreach { case (thisAcademicYear, columns) =>
 
-			val indexedColumns = column._2.zipWithIndex
-			val categories = column._2.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
+			val indexedColumns = columns.zipWithIndex
+			val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 
 			if (categories.nonEmpty) {
 				var currentSection = ""
@@ -133,7 +133,7 @@ object GenerateExamGridExporter {
 			columnOffset = headersRowColumnOffset
 			indexedColumns.foreach { case (column, columnIndex) =>
 				column match {
-					case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionSecondaryValueLabel.nonEmpty => //&& showSectionLabels =>
+					case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionSecondaryValueLabel.nonEmpty =>
 						currentSection = hasSection.sectionIdentifier
 						val cell = headerRow.createCell(columnIndex + columnOffset)
 						cell.setCellStyle(cellStyleMap(Header))
@@ -155,7 +155,7 @@ object GenerateExamGridExporter {
 				headersRowColumnOffset =  columnIndex + columnOffset + 1
 			}
 
-			if (column._1.equals(academicYear)){
+			if (thisAcademicYear.equals(academicYear)){
 				var currentColumn = 0
 				// Values per student and section labels
 				scyds.zipWithIndex.foreach { case (scyd, scydIndex) =>
@@ -183,21 +183,21 @@ object GenerateExamGridExporter {
 
 					if (allPreviousYearsScyds.isDefined) {
 						var previousYearsColumnOffset = 0
-						allPreviousYearsScyds.get.foreach { previousYearScyds =>
-							previousYearScyds._2.zipWithIndex.foreach { case (scyd, scydIndex) =>
+						allPreviousYearsScyds.get.foreach { case (previousAcademicYear, previousYearScyds) =>
+							previousYearScyds.zipWithIndex.foreach { case (scyd, scydIndex) =>
 
-								columns.filter { column => column._1 == previousYearScyds._1 }.foreach { case(year, column) =>
-									val previndexedColumns = column.zipWithIndex
+								columnsByYear.filter { column => column._1 == previousAcademicYear}.foreach { case (year, thisYearsColumns) =>
+									val previndexedColumns = thisYearsColumns.zipWithIndex
 
-									previndexedColumns.foreach { case (col, columnIndex) => {
-										col.renderExcelCell(row, (columnIndex + currentColumn + 1), scyd, cellStyleMap)
+									previndexedColumns.foreach { case (col, columnIndex) =>
+										col.renderExcelCell(row, columnIndex + currentColumn + 1, scyd, cellStyleMap)
 										previousYearsColumnOffset = columnIndex + currentColumn
-									}}
+									}
 									currentColumn = previousYearsColumnOffset + 1
-
 									val cell = sheet.getRow(scydHeadingRowNum).createCell(currentColumn - previndexedColumns.size)
 									cell.setCellValue(s"${scyd.studentCourseYearDetails.get.academicYear} Modules ( ${scyd.studentCourseYearDetails.get.studentCourseDetails.scjCode})")
 									sheet.addMergedRegion(new CellRangeAddress(scydHeadingRowNum, scydHeadingRowNum, currentColumn - previndexedColumns.size, currentColumn))
+
 								}
 								currentColumn = currentColumn + 1 // blank cell after each year
 							}
@@ -205,7 +205,7 @@ object GenerateExamGridExporter {
 					}
 				}
 			}
-			(0 to columns.size + columnOffset).foreach(sheet.autoSizeColumn(_, true))
+			(0 to columnsByYear.size + columnOffset).foreach(sheet.autoSizeColumn(_, true))
 		}
 
 		workbook
