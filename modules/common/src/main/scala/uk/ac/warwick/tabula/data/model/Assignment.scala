@@ -175,13 +175,26 @@ class Assignment
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
+	/**
+		* deadline based on assignmentclose date logic if there are no extensions OR no approved extensions OR any submission exists without extension OR
+		* 0 submissions along with some students with unapproved extensions.
+		* deadline based on extension expiry date logic if none of the above AND (there are submissions within extension deadline OR if there are approved extensions  for all students)
+		*
+		*/
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
-	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
+	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId))) || !doesAllMembersHaveApprovedExtensions) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
-	} else if (extensions.exists(_.feedbackDeadline.isDefined)){
+	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-	} else None
+	} else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
+		Option(workingDaysHelper.datePlusWorkingDays(extensions.map(_.expiryDate).min.get.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	}	else None
+
+
+	private def doesAllMembersHaveApprovedExtensions: Boolean =
+		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
+			.filterNot(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId))).size == 0
 
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
