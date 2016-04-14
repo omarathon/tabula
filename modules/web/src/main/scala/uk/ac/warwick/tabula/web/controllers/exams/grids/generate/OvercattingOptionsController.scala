@@ -99,8 +99,6 @@ class OvercattingOptionsController extends ExamsController
 			thisSCYD.academicYear -> overcatView.columnsBySCYD(thisSCYD)
 		})
 
-		val allColumns = thisYearsColumns ++ previousYearsColumns
-
 		new ExcelView(
 			s"Overcatting_options.xlsx",
 			GenerateExamGridExporter(
@@ -113,7 +111,7 @@ class OvercattingOptionsController extends ExamsController
 				ModuleRegistrationService.DefaultNormalLoad,
 				overcatView.overcattedEntities,
 				Option(previousYearsEntities),
-				allColumns
+				thisYearsColumns ++ previousYearsColumns
 			)
 		)
 	}

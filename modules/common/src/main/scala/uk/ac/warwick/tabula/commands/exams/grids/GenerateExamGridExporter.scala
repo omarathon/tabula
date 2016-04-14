@@ -71,7 +71,6 @@ object GenerateExamGridExporter {
 				var currentCategory = ""
 				columnOffset = categoriesRowColumnOffset
 				var maxCellWidth = 0
-
 				indexedColumns.foreach { case (column, columnIndex) =>
 					column match {
 						case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection =>
@@ -183,12 +182,11 @@ object GenerateExamGridExporter {
 					currentColumn = currentColumn + 1
 
 					if (allPreviousYearsScyds.isDefined) {
-
 						var previousYearsColumnOffset = 0
 						allPreviousYearsScyds.get.foreach { previousYearScyds =>
 							previousYearScyds._2.zipWithIndex.foreach { case (scyd, scydIndex) =>
 
-								columns.filter { column => column._1 == previousYearScyds._1 }.foreach { case(acYear, column) =>
+								columns.filter { column => column._1 == previousYearScyds._1 }.foreach { case(year, column) =>
 									val previndexedColumns = column.zipWithIndex
 
 									previndexedColumns.foreach { case (col, columnIndex) => {
