@@ -49,7 +49,7 @@ object GenerateExamGridExporter {
 		var titlesInCategoriesRowColumnOffset = 0
 		var headersRowColumnOffset = 0
 
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size)
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size, !allPreviousYearsScyds.isDefined)
 
 		if (allPreviousYearsScyds.isDefined) {
 			scydHeadingRowNum = sheet.getLastRowNum + 1
@@ -104,7 +104,7 @@ object GenerateExamGridExporter {
 				maxCellWidth = 0
 				indexedColumns.foreach { case (column, columnIndex) =>
 					column match {
-						case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection => // && showSectionLabels =>
+						case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection =>
 							currentSection = hasSection.sectionIdentifier
 								val cell = titlesInCategoriesRow.createCell(columnIndex + columnOffset)
 								cell.setCellStyle(cellStyleMap(Header))
@@ -177,8 +177,8 @@ object GenerateExamGridExporter {
 							case _ =>
 						}
 					}
-						currentColumn = columnIndex + columnOffset
-						column.renderExcelCell(row, columnIndex + columnOffset, scyd, cellStyleMap)
+					currentColumn = columnIndex + columnOffset
+					column.renderExcelCell(row, columnIndex + columnOffset, scyd, cellStyleMap)
 					}
 					currentColumn = currentColumn + 1
 
@@ -223,7 +223,8 @@ object GenerateExamGridExporter {
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
 		normalLoad: BigDecimal,
-		studentCount: Int
+		count: Int,
+		showStudentCount: Boolean
 	): Unit = {
 		def keyValueCells(key: String, value: String, rowIndex: Int) = {
 			val row = sheet.createRow(rowIndex)
@@ -242,7 +243,11 @@ object GenerateExamGridExporter {
 		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
 		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
 		keyValueCells("Normal CAT load:", normalLoad.toString, 6)
-		keyValueCells("Student Count:", studentCount.toString, 7)
+		if (showStudentCount) {
+			keyValueCells("Student Count:", count.toString, 7)
+		} else {
+			keyValueCells("Count:", count.toString, 7)
+		}
 		keyValueCells("Grid Generated:", DateTime.now.toString, 8)
 
 		{
