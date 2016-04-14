@@ -12,57 +12,61 @@
 <body>
 <h2>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case})</h2>
 <h2>${feedback.assignment.name}</h2>
-<h3>Feedback for ${user.warwickId} </h3>
+<h3>Feedback for ${studentId}</h3>
+
+<#assign adjustments = feedback.studentViewableAdjustments />
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
-		<#if feedback.studentViewableAdjustments?has_content && feedback.latestMark??>
+		<#if adjustments?has_content && feedback.latestMark??>
 			<h3>Adjusted mark: ${feedback.latestMark}%</h3>
 		<#elseif feedback.latestMark??>
 			<h3>Mark: ${feedback.latestMark}%</h3>
 		</#if>
-		<#if feedback.studentViewableAdjustments?has_content && feedback.latestGrade??>
+		<#if adjustments?has_content && feedback.latestGrade??>
 			<h3>Adjusted grade: ${feedback.latestGrade}</h3>
 		<#elseif feedback.latestGrade??>
 			<h3>Grade: ${feedback.latestGrade}</h3>
 		</#if>
 	</div>
 </#if>
-	<#list feedback.studentViewableAdjustments as viewableFeedback>
-		<#if viewableFeedback??>
+<#list adjustments as adjustment>
+	<#if adjustment??>
 		<div class="alert">
 			<p>
-				<strong>${viewableFeedback.reason}</strong> - An adjustment has been made to your final mark.
+				<strong>${adjustment.reason}</strong> - An adjustment has been made to your final mark.
 				<#if feedback.assignment.summative>
 					The mark shown above will contribute to your final module mark.
 				</#if>
 			</p>
-			<#if viewableFeedback.comments??><p>${viewableFeedback.comments}</p></#if>
+
+			<#if adjustment.comments??><p>${adjustment.comments}</p></#if>
+
 			<p>Your marks before adjustment were:</p>
 
-			<#if viewableFeedback_has_next>
-				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].mark??><div>Mark: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].mark}%</div></#if>
-				<#if feedback.studentViewableAdjustments[viewableFeedback_index +1].grade??><div>Grade: ${feedback.studentViewableAdjustments[viewableFeedback_index +1].grade}</div></#if>
+			<#if adjustment_has_next>
+				<#if adjustments[adjustment_index + 1].mark??><div>Mark: ${adjustments[adjustment_index + 1].mark}%</div></#if>
+				<#if adjustments[adjustment_index + 1].grade??><div>Grade: ${adjustments[adjustment_index + 1].grade}</div></#if>
 			<#else>
-				<#if feedback.studentViewableRawMark??><div>Mark: ${feedback.studentViewableRawMark}</div></#if>
-				<#if feedback.studentViewableRawGrade??><div>Grade: ${feedback.studentViewableRawGrade}</div></#if>
+				<#if feedback.actualMark??><div>Mark: ${feedback.actualMark}%</div></#if>
+				<#if feedback.actualGrade??><div>Grade: ${feedback.actualGrade}</div></#if>
 			</#if>
 		</div>
-		</#if>
-	</#list>
+	</#if>
+</#list>
 
 
-<#if  feedback.assignment.genericFeedback??>
-<div class="feedback-notes">
-<h4>Feedback for all students on this assignment</h4>
-${feedback.assignment.genericFeedback!""}
-</div>
+<#if feedback.assignment.genericFeedback??>
+	<div class="feedback-notes">
+		<h4>Feedback for all students on this assignment</h4>
+		${feedback.assignment.genericFeedback!""}
+	</div>
 </#if>
 <#if feedback.comments??>
-<div class="feedback-notes">
-<h4>Feedback on your submission</h4>
-${feedback.comments!""}
-</div>
+	<div class="feedback-notes">
+		<h4>Feedback on your submission</h4>
+		${feedback.comments!""}
+	</div>
 </#if>
 
 <#if feedback.attachments?has_content>
