@@ -56,7 +56,6 @@ class ExtensionRequestController extends CourseworkController{
 					"profile" -> profile,
 					"module" -> module,
 					"assignment" -> assignment,
-					"isClosed" -> assignment.isClosed,
 					"department" -> module.adminDepartment,
 					"isModification" -> isModification,
 					"existingRequest" -> existingRequest.orNull,
