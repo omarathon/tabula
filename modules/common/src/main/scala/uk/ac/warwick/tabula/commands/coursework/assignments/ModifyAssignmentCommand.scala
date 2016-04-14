@@ -198,14 +198,14 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 				}
 			}
 
+			val feedbackDeadline = assignment.feedbackDeadline
 			val feedbackNotifications =
-				if (assignment.dissertation) // No feedback deadline for dissertations
+				if (assignment.dissertation || feedbackDeadline.isEmpty) // No feedback deadline for dissertations or late submissions
 					Seq()
 				else {
 					val daysToSend = Seq(-7, -1, 0)
 
-					val proposedTimes = for (day <- daysToSend) yield assignment.feedbackDeadline
-						.getOrElse(throw new IllegalStateException("No feedback deadline for open-ended assignments"))
+					val proposedTimes = for (day <- daysToSend) yield feedbackDeadline.get
 						.plusDays(day).toDateTimeAtStartOfDay
 
 					// Filter out all times that are in the past. This should only generate ScheduledNotifications for the future.
