@@ -10,6 +10,7 @@ import org.jclouds.blobstore.strategy.internal.MultipartUploadSlicingAlgorithm
 import org.jclouds.io.internal.BasePayloadSlicer
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.Assert
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
@@ -19,7 +20,7 @@ import scala.collection.JavaConverters._
 	* Implementation uses the Apache jclouds library to push and pull data to the cloud store
 	*/
 class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectContainerName: String)
-	extends ObjectStorageService with Logging with InitializingBean {
+	extends ObjectStorageService with Logging with InitializingBean with TaskBenchmarking {
 
 	protected lazy val blobStore = blobStoreContext.getBlobStore
 
@@ -58,9 +59,13 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
 				blobStore.uploadMultipartPart(multipartUpload, index + 1, payload)
 			}.seq
 
-			blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
+			benchmarkTask(s"blobstore upload multipart $key size=${metadata.contentLength}") {
+				blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
+			}
 		} else {
-			blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
+			benchmarkTask(s"blobstore upload single $key size=${metadata.contentLength}") {
+				blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
+			}
 		}
 	}
 
