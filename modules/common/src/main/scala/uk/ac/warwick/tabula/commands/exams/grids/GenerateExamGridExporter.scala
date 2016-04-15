@@ -155,60 +155,60 @@ object GenerateExamGridExporter {
 				headersRowColumnOffset =  columnIndex + columnOffset + 1
 			}
 
-			if (thisAcademicYear.equals(academicYear)){
-				var currentColumn = 0
-				// Values per student and section labels
-				scyds.zipWithIndex.foreach { case (scyd, scydIndex) =>
-					currentSection = ""
-					columnOffset = 0
-					val row = sheet.createRow(sheet.getLastRowNum + 1)
-					indexedColumns.foreach { case (column, columnIndex) =>
-						column match {
-							case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionValueLabel.nonEmpty =>
-								currentSection = hasSection.sectionIdentifier
-								if (scydIndex == 0) {
-									val cell = row.createCell(columnIndex + columnOffset)
-									cell.setCellStyle(cellStyleMap(Header))
-									cell.setCellValue(hasSection.sectionValueLabel)
-									sheet.addMergedRegion(new CellRangeAddress(row.getRowNum, row.getRowNum + scyds.size - 1, columnIndex + columnOffset, columnIndex + columnOffset))
-								}
-								columnOffset = columnOffset + 1
-							case _ =>
-						}
-						currentColumn = columnIndex + columnOffset
-						column.renderExcelCell(row, columnIndex + columnOffset, scyd, cellStyleMap)
-					}
-					currentColumn = currentColumn + 1
 
-					if (allPreviousYearsScyds.isDefined) {
-						var previousYearsColumnOffset = 0
-						allPreviousYearsScyds.get.foreach { case (previousAcademicYear, previousYearScyds) =>
-							previousYearScyds.zipWithIndex.foreach { case (prevYearScyd, _) =>
-
-								columnsByYear.filter {case (columnsYear, _) => columnsYear == previousAcademicYear}.foreach { case (_, thisYearsColumns) =>
-									val previndexedColumns = thisYearsColumns.zipWithIndex
-
-									previndexedColumns.foreach { case (col, columnIndex) =>
-										col.renderExcelCell(row, columnIndex + currentColumn + 1, prevYearScyd, cellStyleMap)
-										previousYearsColumnOffset = columnIndex + currentColumn
-									}
-									currentColumn = previousYearsColumnOffset + 1
-									// only add scyd heading row data once
-									if (scydIndex == 0){
-										val cell = sheet.getRow(scydHeadingRowNum).createCell(currentColumn - previndexedColumns.size)
-										cell.setCellValue(s"${prevYearScyd.studentCourseYearDetails.get.academicYear} Modules ( ${prevYearScyd.studentCourseYearDetails.get.studentCourseDetails.scjCode})")
-										sheet.addMergedRegion(new CellRangeAddress(scydHeadingRowNum, scydHeadingRowNum, currentColumn - previndexedColumns.size, currentColumn))
-									}
-								}
-								currentColumn = currentColumn + 1 // blank cell after each year
-							}
-						}
-					}
-				}
-			}
 			(0 to columnsByYear.size + columnOffset).foreach(sheet.autoSizeColumn(_, true))
 		}
 
+		val thisYearsIndexedColumns = columnsByYear.find(_._1 == academicYear).get._2.zipWithIndex
+		var currentColumn = 0
+		// Values per student and section labels
+		scyds.zipWithIndex.foreach { case (scyd, scydIndex) =>
+			currentSection = ""
+			columnOffset = 0
+			val row = sheet.createRow(sheet.getLastRowNum + 1)
+			thisYearsIndexedColumns.foreach { case (column, columnIndex) =>
+				column match {
+					case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionValueLabel.nonEmpty =>
+						currentSection = hasSection.sectionIdentifier
+						if (scydIndex == 0) {
+							val cell = row.createCell(columnIndex + columnOffset)
+							cell.setCellStyle(cellStyleMap(Header))
+							cell.setCellValue(hasSection.sectionValueLabel)
+							sheet.addMergedRegion(new CellRangeAddress(row.getRowNum, row.getRowNum + scyds.size - 1, columnIndex + columnOffset, columnIndex + columnOffset))
+						}
+						columnOffset = columnOffset + 1
+					case _ =>
+				}
+				currentColumn = columnIndex + columnOffset
+				column.renderExcelCell(row, columnIndex + columnOffset, scyd, cellStyleMap)
+			}
+			currentColumn = currentColumn + 1
+
+			if (allPreviousYearsScyds.isDefined) {
+				var previousYearsColumnOffset = 0
+				allPreviousYearsScyds.get.foreach { case (previousAcademicYear, previousYearScyds) =>
+					previousYearScyds.zipWithIndex.foreach { case (prevYearScyd, _ ) =>
+
+						columnsByYear.filter {case (columnsYear, _) => columnsYear == previousAcademicYear}.foreach { case (_, thisYearsColumns) =>
+							val previndexedColumns = thisYearsColumns.zipWithIndex
+
+							previndexedColumns.foreach { case (col, columnIndex) =>
+								col.renderExcelCell(row, columnIndex + currentColumn + 1, prevYearScyd, cellStyleMap)
+								previousYearsColumnOffset = columnIndex + currentColumn
+							}
+							currentColumn = previousYearsColumnOffset + 1
+							// only add scyd heading row data once
+							if (scydIndex == 0){
+								val cell = sheet.getRow(scydHeadingRowNum).createCell(currentColumn - previndexedColumns.size)
+								cell.setCellValue(s"${prevYearScyd.studentCourseYearDetails.get.academicYear} Modules ( ${prevYearScyd.studentCourseYearDetails.get.studentCourseDetails.scjCode})")
+								sheet.addMergedRegion(new CellRangeAddress(scydHeadingRowNum, scydHeadingRowNum, currentColumn - previndexedColumns.size, currentColumn))
+							}
+						}
+						currentColumn = currentColumn + 1 // blank cell after each year
+					}
+				}
+			}
+		}
 		workbook
 	}
 
