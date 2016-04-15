@@ -6,7 +6,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
-import uk.ac.warwick.tabula.pdf.PdfGenerator
+import uk.ac.warwick.tabula.pdf.PdfGeneratorWithFileStorage
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
@@ -44,9 +44,8 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		attachment.name = "0123456-feedback.doc"
 		feedback.attachments.add(attachment)
 
-		val mockPdfGenerator = smartMock[PdfGenerator]
-		val mockFileDao = smartMock[FileDao]
-		mockFileDao.saveTemporary(any[FileAttachment]) answers (_ => {
+		val mockPdfGenerator = smartMock[PdfGeneratorWithFileStorage]
+		mockPdfGenerator.renderTemplateAndStore(any[String], any[String], any[Any]) answers (_ => {
 			val attachment = new FileAttachment
 			attachment.id = "234"
 			attachment.objectStorageService = mockObjectStorageService
@@ -63,7 +62,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		val command = new DownloadFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback, Some(Fixtures.student("123")))
 		command.zip = new ZipService {
 			override val pdfGenerator = mockPdfGenerator
-			override val fileDao = mockFileDao
+			override val fileDao = smartMock[FileDao]
 		}
 		command.zip.userLookup = userLookup
 		command.zip.features = Features.empty

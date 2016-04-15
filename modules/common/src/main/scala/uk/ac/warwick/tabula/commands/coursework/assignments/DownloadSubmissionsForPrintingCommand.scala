@@ -3,20 +3,18 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import java.io.ByteArrayOutputStream
 
 import com.google.common.io.ByteSource
-import com.itextpdf.text.Document
-import com.itextpdf.text.pdf.{PdfCopy, PdfReader}
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module, Submission}
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
-import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
+import uk.ac.warwick.tabula.pdf.{CombinesPdfs, FreemarkerXHTMLPDFGeneratorComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -26,6 +24,7 @@ trait DownloadAdminSubmissionsForPrintingCommandHelper
 	with AutowiredTextRendererComponent
 	with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	with AutowiringFileDaoComponent
+	with CombinesPdfs
 
 object DownloadAdminSubmissionsForPrintingCommand {
 
@@ -59,7 +58,8 @@ object DownloadMarkerSubmissionsForPrintingCommand {
 class DownloadSubmissionsForPrintingCommandInternal(val module: Module, val assignment: Assignment, val marker: User, val submitter: CurrentUser)
 	extends CommandInternal[RenderableFile] {
 
-	self: DownloadSubmissionsForPrintingCommandRequest with FreemarkerXHTMLPDFGeneratorComponent with FileDaoComponent =>
+	self: DownloadSubmissionsForPrintingCommandRequest with FreemarkerXHTMLPDFGeneratorComponent
+		with FileDaoComponent with CombinesPdfs =>
 
 	override def applyInternal() = {
 		if (submissions.isEmpty) throw new ItemNotFoundException
@@ -71,26 +71,7 @@ class DownloadSubmissionsForPrintingCommandInternal(val module: Module, val assi
 			).flatten ++ getPDFs(submission)
 		})
 
-		PdfReader.unethicalreading = true
-		val output = new ByteArrayOutputStream
-		val document = new Document()
-		val copy = new PdfCopy(document, output)
-		document.open()
-		parts.foreach(attachment => {
-			val reader = new PdfReader(attachment.dataStream)
-
-			(1 to reader.getNumberOfPages).foreach(page => {
-				copy.addPage(copy.getImportedPage(reader, page))
-			})
-			copy.freeReader(reader)
-			reader.close()
-		})
-		document.close()
-		val pdf = new FileAttachment
-		pdf.name = s"submissions.pdf"
-		pdf.uploadedData = ByteSource.wrap(output.toByteArray)
-		fileDao.saveTemporary(pdf)
-		new RenderableAttachment(pdf)
+		new RenderableAttachment(combinePdfs(parts, "submissions.pdf"))
 	}
 
 	private def doReceipt(submission: Submission): Option[FileAttachment] = {

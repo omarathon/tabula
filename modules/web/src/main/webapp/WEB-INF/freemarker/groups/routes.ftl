@@ -73,6 +73,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro moduleAttendance module><@_u page="/admin/module/${module.code}/attendance" /></#macro>
 <#macro moduleAttendanceInYear module academicYear><@_u page="/admin/module/${module.code}/${academicYear.startYear?c}/attendance" /></#macro>
 <#macro departmentAttendance department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/attendance" /></#macro>
+<#macro printRegisters department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/registers" /></#macro>
 <#macro viewNote student occurrence returnTo=""><@_u page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
 <#macro editNote student occurrence returnTo="">
 	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>

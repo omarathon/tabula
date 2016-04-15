@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.ByteArrayOutputStream
 import java.util.zip.{ZipEntry, ZipInputStream}
 
-import com.google.common.io.ByteSource
 import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -12,11 +10,11 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
+import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
@@ -26,7 +24,7 @@ import scala.collection.JavaConverters._
 
 @Service
 class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent
-	with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+	with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
 	with AutowiringFileDaoComponent with Logging with TaskBenchmarking {
 
 	@Autowired var features: Features = _
@@ -68,23 +66,14 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 	}
 
 	private def getOnlineFeedbackPdf(feedback: Feedback, forStudent: Boolean = true): FileAttachment = {
-		val tempOutputStream = new ByteArrayOutputStream()
-		pdfGenerator.renderTemplate(
+		pdfGenerator.renderTemplateAndStore(
 			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
+			"feedback.pdf",
 			Map(
 				"feedback" -> feedback,
 				"studentId" -> feedback.universityId
-			),
-			tempOutputStream
+			)
 		)
-
-		val bytes = tempOutputStream.toByteArray
-
-		// Create file
-		val pdfFileAttachment = new FileAttachment
-		pdfFileAttachment.name = "feedback.pdf"
-		pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
-		fileDao.saveTemporary(pdfFileAttachment)
 	}
 
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =

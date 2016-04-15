@@ -50,6 +50,8 @@ object Routes {
 		def departmentAttendance(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/attendance"
 		def moduleAttendance(module: Module, academicYear: AcademicYear) = context + s"/admin/module/${encoded(module.code)}/${encoded(academicYear.startYear.toString)}/attendance"
 
+		def registers(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/registers"
+
 		object reusable {
 			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format encoded(department.code)
 			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format encoded(department.code)
