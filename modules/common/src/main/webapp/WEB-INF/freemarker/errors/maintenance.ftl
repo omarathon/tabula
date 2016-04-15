@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if JspTaglibs??>
 	<#import "../formatters.ftl" as fmt />
 </#if>
@@ -26,3 +27,4 @@
 		<p>Need more help? Please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
 	</div>
 </div>
+</#escape>

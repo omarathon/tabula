@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object ImportRouteRulesCommand {
-	def apply() = new ComposableCommand[Unit]
+	def apply() = new ComposableCommandWithoutTransaction[Unit]
 		with ImportRouteRulesCommand
 		with ImportRouteRulesDescription
 		with Daoisms

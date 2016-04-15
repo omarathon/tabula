@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
 <h1>Sorry</h1>
 
@@ -66,3 +67,4 @@
 <#if IS_SSO_PROTECTED!true>Try <a class="sso-link" href="<@sso.loginlink />">signing in</a>.</#if>
 </p>
 </#if>
+</#escape>

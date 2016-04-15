@@ -3,7 +3,7 @@
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	<h1>Request an extension</h1>
 	<h4><span class="muted">for</span> ${assignment.name}</h4>
-	<#if isClosed && !isModification>
+	<#if !assignment.newExtensionsCanBeRequested>
 		<p>
 			This assignment closed <@fmt.date date=assignment.closeDate /> (${time_remaining}).
 			You cannot request an extension after the close date has passed.
@@ -92,7 +92,13 @@
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
 
-			<@form.filewidget basename="file" labelText="Upload supporting documentation relevant to your request" types=[] multiple=true />
+			<@form.filewidget
+				basename="file"
+				labelText="Upload supporting documentation relevant to your request"
+				types=[]
+				multiple=true
+				required=assignment.extensionAttachmentMandatory
+			/>
 
 			<#if command.attachedFiles?has_content >
 				<@form.labelled_row "attachedFiles" "Supporting documents">

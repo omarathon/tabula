@@ -23,7 +23,7 @@
 		<h1>Record attendance</h1>
 		<h6><span class="muted">for</span> ${student.fullName}, ${department.name}</h6>
 
-		<form id="recordAttendance" action="" method="post">
+		<form id="recordAttendance" action="" method="post" class="dirty-check">
 			<input type="hidden" name="returnTo" value="${returnTo}"/>
 			<script>
 				AttendanceRecording.bindButtonGroupHandler();
@@ -175,7 +175,7 @@
 			<div class="submit-buttons fix-footer save-row">
 				<div class="pull-right">
 					<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-					<a class="btn" href="${returnTo}">Cancel</a>
+					<a class="btn dirty-check-ignore" href="${returnTo}">Cancel</a>
 				</div>
 			</div>
 		</form>

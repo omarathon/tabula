@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import scala.util.Try
 
 object ImportAssignmentsCommand {
-	def apply() = new ComposableCommand[Unit]
+	def apply() = new ComposableCommandWithoutTransaction[Unit]
 		with ImportAssignmentsCommand
 		with ImportAssignmentsDescription
 		with Daoisms
@@ -54,8 +54,10 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 	def doAssignments() {
 		val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
-		val modules = moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
-			.groupBy(_.code).mapValues(_.head)
+		val modules = transactional(readOnly = true) {
+			moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
+				.groupBy(_.code).mapValues(_.head)
+		}
 		for (assignments <- assessmentComponents.grouped(ImportGroupSize)) {
 			transactional() {
 				for (assignment <- assignments) {
@@ -123,7 +125,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 			// empty unseen groups - this is done in transactional batches
 
-			val groupsToEmpty = transactional() {
+			val groupsToEmpty = transactional(readOnly = true) {
 				assessmentMembershipService.getUpstreamAssessmentGroupsNotIn (
 					ids = notEmptyGroupIds.filter { _.hasText }.toSeq,
 					academicYears = assignmentImporter.yearsToImport
@@ -131,7 +133,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			}
 
 			logger.info("Emptying members for unseen groups")
-			val numEmptied = assessmentMembershipService.emptyMembers(groupsToEmpty)
+			val numEmptied = transactional() {
+				assessmentMembershipService.emptyMembers(groupsToEmpty)
+			}
 			logger.info(s"Emptied $numEmptied users from ${groupsToEmpty.size} unseen groups")
 
 

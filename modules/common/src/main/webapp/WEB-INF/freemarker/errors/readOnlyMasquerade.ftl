@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if JspTaglibs??>
 	<#import "../formatters.ftl" as fmt />
 </#if>
@@ -11,3 +12,4 @@
 
 	</div>
 </div>
+</#escape>

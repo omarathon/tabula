@@ -106,6 +106,10 @@ trait RequestExtensionCommandValidation extends SelfValidating {
 		if (!hasValidExtension && !assignment.newExtensionsCanBeRequested) {
 			errors.reject("assignment.extensionRequests.disallowed")
 		}
+
+		if (assignment.extensionAttachmentMandatory && attachedFiles.isEmpty && file.attached.isEmpty) {
+			errors.rejectValue("file", "extension.file.required")
+		}
 	}
 }
 
@@ -146,7 +150,7 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 
 		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects
 		Map(
-			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.nonEmpty}),
 			"scdCourse" -> scd.course,
 			"scdRoute" -> scd.currentRoute,
 			"scdAward" -> scd.award

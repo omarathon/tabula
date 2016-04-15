@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Your request could not be handled</h1>
 
 <p>
@@ -7,3 +8,4 @@ The request to the server was missing a parameter that was required <#compress>
 	</#if>
 </#compress>
 </p>
+</#escape>

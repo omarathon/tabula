@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.{AutowiringFeedbackForSitsDaoComponent, Feedbac
 case class ValidateAndPopulateFeedbackResult(
 	valid: Seq[Feedback],
 	populated: Map[Feedback, String],
+	zero: Map[Feedback, String],
 	invalid: Map[Feedback, String]
 )
 
@@ -94,16 +95,26 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 					else
 						"valid"
 				case None =>
-					if (f.module.adminDepartment.assignmentGradeValidation && validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.isDefault))
-						"populated"
-					else
+					if (f.module.adminDepartment.assignmentGradeValidation) {
+						if (f.latestMark.get == 0) {
+							"zero"
+						} else if (validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.isDefault)) {
+							"populated"
+						} else {
+							"invalid"
+						}
+					} else {
 						"invalid"
+					}
 			}
 		})
 		ValidateAndPopulateFeedbackResult(
 			parsedFeedbacks.getOrElse("valid", Seq()),
 			parsedFeedbacks.get("populated").map(feedbacksToPopulate =>
 				feedbacksToPopulate.map(f => f -> validGrades(f.universityId).find(_.isDefault).map(_.grade).get).toMap
+			).getOrElse(Map()),
+			parsedFeedbacks.get("zero").map(feedbacksToPopulate =>
+				feedbacksToPopulate.map(f => f -> validGrades.get(f.universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
 			).getOrElse(Map()),
 			parsedFeedbacks.get("invalid").map(feedbacksToPopulate =>
 				feedbacksToPopulate.map(f => f -> validGrades.get(f.universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap

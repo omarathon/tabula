@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 
 class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends GenerateGradesFromMarkCommandState with AssessmentMembershipServiceComponent
+	trait CommandTestSupport extends GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent
 
 	trait Fixture {
 		val module = Fixtures.module("its01")

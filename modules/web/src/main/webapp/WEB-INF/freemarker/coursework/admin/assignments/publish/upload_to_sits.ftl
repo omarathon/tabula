@@ -36,6 +36,33 @@
 		</table>
 	</#if>
 
+	<#if command.gradeValidation.zero?keys?has_content>
+		<div class="alert alert-error">
+			<p>
+				<#assign total = command.gradeValidation.zero?keys?size />
+				<@fmt.p total "student" />
+				<#if total==1>
+					has feedback with a mark of zero and no grade. Zero marks are not populated with a default grade and it will not be uploaded.
+				<#else>
+					have feedback with marks of zero and no grades. Zero marks are not populated with a default grade and they will not be uploaded.
+				</#if>
+			</p>
+		</div>
+
+		<table class="table table-bordered table-condensed table-striped table-hover">
+			<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th></tr></thead>
+			<tbody>
+				<#list command.gradeValidation.zero?keys as feedback>
+					<tr>
+						<td>${feedback.universityId}</td>
+						<td>${feedback.latestMark!}</td>
+						<td>${feedback.latestGrade!}</td>
+					</tr>
+				</#list>
+			</tbody>
+		</table>
+	</#if>
+
 	<#if command.gradeValidation.populated?keys?has_content>
 		<div class="alert alert-info">
 			<#assign total = command.gradeValidation.populated?keys?size />

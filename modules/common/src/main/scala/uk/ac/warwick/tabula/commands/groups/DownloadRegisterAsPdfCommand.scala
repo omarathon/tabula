@@ -7,23 +7,25 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 
 import scala.collection.JavaConverters._
-
 import DownloadRegisterAsPdfCommand._
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.UserSettings
 
 object DownloadRegisterAsPdfCommand {
-	def apply(event: SmallGroupEvent, week: Int) =
-		new DownloadRegisterAsPdfCommandInternal(event, week)
+	def apply(event: SmallGroupEvent, week: Int, user: CurrentUser) =
+		new DownloadRegisterAsPdfCommandInternal(event, week, user)
 			with ComposableCommand[PDFView]
 			with DownloadRegisterAsPdfPermissions
 			with AutowiringProfileServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringTermServiceComponent
-			with ReadOnly with Unaudited
+			with AutowiringUserSettingsServiceComponent
+			with Unaudited
 
 	object DisplayName {
 		val Name = "name"
@@ -46,8 +48,10 @@ trait DownloadRegisterAsPdfCommandState {
 	var displayCheck = DisplayCheck.Checkbox
 }
 
-class DownloadRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val week: Int) extends CommandInternal[PDFView] with DownloadRegisterAsPdfCommandState {
-	self: ProfileServiceComponent with SmallGroupServiceComponent with UserLookupComponent with TermServiceComponent =>
+class DownloadRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val week: Int, user: CurrentUser) extends CommandInternal[PDFView] with DownloadRegisterAsPdfCommandState {
+
+	self: ProfileServiceComponent with SmallGroupServiceComponent with UserLookupComponent
+		with TermServiceComponent with UserSettingsServiceComponent =>
 
 	lazy val occurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) }
 
@@ -68,8 +72,14 @@ class DownloadRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val week:
 	}
 
 	def applyInternal() = {
+		val userSettings = userSettingsService.getByUserId(user.apparentId).getOrElse(new UserSettings(user.apparentId))
+		userSettings.registerPdfShowPhotos = showPhotos
+		userSettings.registerPdfDisplayName = displayName
+		userSettings.registerPdfDisplayCheck = displayCheck
+		userSettingsService.save(user, userSettings)
+
 		new PDFView(
-			s"register-week${week}.pdf",
+			s"register-week$week.pdf",
 			"/WEB-INF/freemarker/groups/attendance/register-pdf.ftl",
 			Map(
 				"event" -> event,

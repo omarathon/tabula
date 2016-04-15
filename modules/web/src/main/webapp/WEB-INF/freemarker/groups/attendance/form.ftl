@@ -55,32 +55,34 @@
 
 						<@bs3form.checkbox>
 							<input type="hidden" name="_showPhotos" value="" />
-							<input type="checkbox" name="showPhotos" value="true" checked />
+							<input type="checkbox" name="showPhotos" value="true" <#if (userSetting('registerPdfShowPhotos')!'t') == 't'>checked</#if> />
 							Show student photos
 						</@bs3form.checkbox>
 
+						<#assign displayName = userSetting('registerPdfDisplayName')!'name' />
 						<@bs3form.labelled_form_group "" "Name display">
 							<@bs3form.radio>
-								<input type="radio" name="displayName" value="name" checked />
+								<input type="radio" name="displayName" value="name" <#if displayName == 'name'>checked</#if> />
 								Show student name only
 							</@bs3form.radio>
 							<@bs3form.radio>
-								<input type="radio" name="displayName" value="id" />
+								<input type="radio" name="displayName" value="id" <#if displayName == 'id'>checked</#if> />
 								Show University ID only
 							</@bs3form.radio>
 							<@bs3form.radio>
-								<input type="radio" name="displayName" value="both" />
+								<input type="radio" name="displayName" value="both" <#if displayName == 'both'>checked</#if> />
 								Show both name and University ID
 							</@bs3form.radio>
 						</@bs3form.labelled_form_group>
 
+						<#assign displayCheck = userSetting('registerPdfDisplayCheck')!'checkbox' />
 						<@bs3form.labelled_form_group "" "Fill area">
 							<@bs3form.radio>
-								<input type="radio" name="displayCheck" value="checkbox" checked />
+								<input type="radio" name="displayCheck" value="checkbox" <#if displayCheck == 'checkbox'>checked</#if> />
 								Include checkbox
 							</@bs3form.radio>
 							<@bs3form.radio>
-								<input type="radio" name="displayCheck" value="line" />
+								<input type="radio" name="displayCheck" value="line" <#if displayCheck == 'line'>checked</#if> />
 								Include signature line
 							</@bs3form.radio>
 						</@bs3form.labelled_form_group>
@@ -298,7 +300,7 @@
 		</#macro>
 
 		<div class="attendees">
-			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
+			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
 				<script type="text/javascript">
 					AttendanceRecording.bindButtonGroupHandler(true);
 				</script>
@@ -325,7 +327,7 @@
 					<div class="fix-footer submit-buttons">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-							<a class="btn btn-default" href="${returnTo}">Cancel</a>
+							<a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
 							Saving this attendance will set monitoring points for

@@ -241,24 +241,24 @@ class SwappableUserLookupService(d: UserLookupService) extends UserLookupService
 
 abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends UserLookupService {
 
-	def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
-	def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)
-	def getUserByToken(t: String) = delegate.getUserByToken(t)
-	def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
-	def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
-	def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
-	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
-	def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
-	def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
-	def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
-	def getGroupService() = delegate.getGroupService
-	def getOnCampusService() = delegate.getOnCampusService
-	def getUserByUserId(id: String) = delegate.getUserByUserId(id)
-	def getCaches() = delegate.getCaches()
-	def clearCaches() = delegate.clearCaches()
-	def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
-	def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
+	override def getUsersInDepartment(d: String) = delegate.getUsersInDepartment(d)
+	override def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)
+	override def getUserByToken(t: String) = delegate.getUserByToken(t)
+	override def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
+	override def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
+	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
+	override def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
+	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
+	override def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
+	override def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
+	override def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
+	override def getGroupService = delegate.getGroupService
+	override def getOnCampusService = delegate.getOnCampusService
+	override def getUserByUserId(id: String) = delegate.getUserByUserId(id)
+	override def getCaches = delegate.getCaches
+	override def clearCaches() = delegate.clearCaches()
+	override def getUserByIdAndPassNonLoggingIn(u: String, p: String) = delegate.getUserByIdAndPassNonLoggingIn(u, p)
+	override def requestClearWebGroup(webgroup: String) = delegate.requestClearWebGroup(webgroup)
 
 }
 

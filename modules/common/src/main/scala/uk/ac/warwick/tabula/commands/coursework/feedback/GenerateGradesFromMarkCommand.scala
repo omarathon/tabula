@@ -17,15 +17,16 @@ object GenerateGradesFromMarkCommand {
 			with ComposableCommand[Map[String, Seq[GradeBoundary]]]
 			with GenerateGradesFromMarkPermissions
 			with GenerateGradesFromMarkCommandState
+			with GenerateGradesFromMarkCommandRequest
 			with ReadOnly with Unaudited
 }
 
 class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: Assessment)
 	extends CommandInternal[Map[String, Seq[GradeBoundary]]] with GeneratesGradesFromMarks {
 
-	self: GenerateGradesFromMarkCommandState with AssessmentMembershipServiceComponent =>
+	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap = assessment.assessmentGroups.asScala.toSeq.map(group =>
+	lazy val assignmentUpstreamAssessmentGroupMap = assessment.assessmentGroups.asScala.map(group =>
 		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
 	).toMap
 
@@ -51,11 +52,11 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 				membership.find(_.getWarwickId == uniID).map(u => u -> mark.toInt)
 			}.toMap
 
-		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap{case(student, _) =>
+		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
 			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
 				upstreamGroup.exists(_.members.includesUser(student))
-			}.map{ case (group, _) => student.getWarwickId -> group.assessmentComponent}
-		}.toMap
+			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
+		}
 
 		studentMarks.asScala.map{case(uniId, mark) =>
 			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
@@ -83,8 +84,9 @@ trait GenerateGradesFromMarkPermissions extends RequiresPermissionsChecking with
 trait GenerateGradesFromMarkCommandState {
 	def module: Module
 	def assessment: Assessment
+}
 
-	// Bind variables
+trait GenerateGradesFromMarkCommandRequest {
 	var studentMarks: JMap[String, String] = JHashMap()
 	var selected: JMap[String, String] = JHashMap()
 }

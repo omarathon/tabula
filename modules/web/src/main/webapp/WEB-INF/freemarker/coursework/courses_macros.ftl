@@ -284,13 +284,13 @@
 <#macro feedbackGradeValidation isGradeValidation gradeValidation>
 	<#local gradeValidationClass><#compress>
 		<#if isGradeValidation>
-			<#if gradeValidation.invalid?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
+			<#if gradeValidation.invalid?has_content || gradeValidation.zero?has_content>error<#elseif gradeValidation.populated?has_content>info</#if>
 		<#else>
 			<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>error</#if>
 		</#if>
 	</#compress></#local>
 
-	<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content>
+	<#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content>
 		<#if isGradeValidation>
 			<div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
 				<#if gradeValidation.invalid?has_content>
@@ -301,6 +301,17 @@
 							has feedback with a grade that is invalid. It will not be uploaded.
 						<#else>
 							have feedback with grades that are invalid. They will not be uploaded.
+						</#if>
+					</p>
+				</#if>
+				<#if gradeValidation.zero?has_content>
+					<#local total = gradeValidation.zero?keys?size />
+					<p>
+						<a href="#grade-validation-zero-modal" data-toggle="modal"><@fmt.p total "student" /></a>
+						<#if total==1>
+							has feedback with a mark of zero and no grade. Zero marks are not populated with a default grade and it will not be uploaded.
+						<#else>
+							have feedback with marks of zero and no grades. Zero marks are not populated with a default grade and they will not be uploaded.
 						</#if>
 					</p>
 				</#if>
@@ -315,25 +326,6 @@
 						</#if>
 					</p>
 				</#if>
-			</div>
-			<div id="grade-validation-populated-modal" class="modal hide fade">
-				<@modal.header>
-					<h2>Students with empty grades</h2>
-				</@modal.header>
-				<@modal.body>
-					<table class="table table-condensed table-bordered table-striped table-hover">
-						<thead><tr><th>University ID</th><th>Mark</th><th>Populated grade</th></tr></thead>
-						<tbody>
-							<#list gradeValidation.populated?keys as feedback>
-								<tr>
-									<td>${feedback.universityId}</td>
-									<td>${(feedback.latestMark)!}</td>
-									<td>${mapGet(gradeValidation.populated, feedback)}</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
-				</@modal.body>
 			</div>
 			<div id="grade-validation-invalid-modal" class="modal hide fade">
 				<@modal.header>
@@ -350,6 +342,44 @@
 									<td>${(feedback.latestGrade)!}</td>
 									<td>${mapGet(gradeValidation.invalid, feedback)}</td>
 								</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</div>
+			<div id="grade-validation-zero-modal" class="modal hide fade">
+				<@modal.header>
+					<h2>Students with zero marks and empty grades</h2>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Grade</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.zero?keys as feedback>
+							<tr>
+								<td>${feedback.universityId}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${(feedback.latestGrade)!}</td>
+							</tr>
+							</#list>
+						</tbody>
+					</table>
+				</@modal.body>
+			</div>
+			<div id="grade-validation-populated-modal" class="modal hide fade">
+				<@modal.header>
+					<h2>Students with empty grades</h2>
+				</@modal.header>
+				<@modal.body>
+					<table class="table table-condensed table-bordered table-striped table-hover">
+						<thead><tr><th>University ID</th><th>Mark</th><th>Populated grade</th></tr></thead>
+						<tbody>
+							<#list gradeValidation.populated?keys as feedback>
+							<tr>
+								<td>${feedback.universityId}</td>
+								<td>${(feedback.latestMark)!}</td>
+								<td>${mapGet(gradeValidation.populated, feedback)}</td>
+							</tr>
 							</#list>
 						</tbody>
 					</table>

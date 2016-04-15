@@ -125,6 +125,8 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		allowResubmission = assignment.allowResubmission
 		displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		allowExtensions = assignment.allowExtensions
+		extensionAttachmentMandatory = assignment.extensionAttachmentMandatory
+		allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
 		summative = assignment.summative
 		dissertation = assignment.dissertation
 		feedbackTemplate = assignment.feedbackTemplate

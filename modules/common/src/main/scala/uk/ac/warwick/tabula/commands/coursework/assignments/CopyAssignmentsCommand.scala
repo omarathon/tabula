@@ -67,6 +67,8 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.allowResubmission = assignment.allowResubmission
 		newAssignment.displayPlagiarismNotice = assignment.displayPlagiarismNotice
 		newAssignment.allowExtensions = assignment.allowExtensions
+		newAssignment.extensionAttachmentMandatory = assignment.extensionAttachmentMandatory
+		newAssignment.allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
 		newAssignment.summative = assignment.summative
 		newAssignment.dissertation = assignment.dissertation
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate

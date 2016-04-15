@@ -167,6 +167,8 @@ class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCo
 	allowResubmission = null
 	displayPlagiarismNotice = null
 	allowExtensions = null
+	extensionAttachmentMandatory = null
+	allowExtensionsAfterCloseDate = null
 	summative = null
 	dissertation = null
 	includeInFeedbackReportWithoutSubmissions = null

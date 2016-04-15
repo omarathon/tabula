@@ -45,6 +45,8 @@ object Assignment {
 		val IncludeInFeedbackReportWithoutSubmissions = "includeInFeedbackReportWithoutSubmissions"
 		val AutomaticallyReleaseToMarkers = "automaticallyReleaseToMarkers"
 		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
+		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
+		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
 	}
 }
 
@@ -173,13 +175,26 @@ class Assignment
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
+	/**
+		* deadline based on assignmentclose date logic if there are no extensions OR no approved extensions OR any submission exists without extension OR
+		* 0 submissions along with some students with unapproved extensions.
+		* deadline based on extension expiry date logic if none of the above AND (there are submissions within extension deadline OR if there are approved extensions  for all students)
+		*
+		*/
 	def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation) {
 		None
-	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId)))) {
+	} else if (!hasExtensions || !extensions.exists(_.approved) || submissions.exists(s => !extensions.exists(e => e.isForUser(s.universityId, s.userId))) || !doesAllMembersHaveApprovedExtensions) {
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
-	} else if (extensions.exists(_.feedbackDeadline.isDefined)){
+	} else if (extensions.exists(_.feedbackDeadline.isDefined)) {
 		Option(extensions.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-	} else None
+	} else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
+		Option(workingDaysHelper.datePlusWorkingDays(extensions.map(_.expiryDate).min.get.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	}	else None
+
+
+	private def doesAllMembersHaveApprovedExtensions: Boolean =
+		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
+			.filterNot(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId))).size == 0
 
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -547,7 +562,7 @@ class Assignment
 
 	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
 
-	def newExtensionsCanBeRequested: Boolean = !isClosed && extensionsPossible
+	def newExtensionsCanBeRequested: Boolean = extensionsPossible && (!isClosed || allowExtensionsAfterCloseDate)
 
 	def getMarkerFeedback(uniId: String, user: User, feedbackPosition: FeedbackPosition): Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
@@ -717,6 +732,12 @@ class Assignment
 	def automaticallySubmitToTurnitin = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
 	def automaticallySubmitToTurnitin_= (include: Boolean) = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
 
+	def extensionAttachmentMandatory = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
+	def extensionAttachmentMandatory_= (mandatory: Boolean) = settings += (Settings.ExtensionAttachmentMandatory -> mandatory)
+
+	def allowExtensionsAfterCloseDate = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
+	def allowExtensionsAfterCloseDate_= (allow: Boolean) = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
@@ -775,6 +796,8 @@ trait BooleanAssignmentProperties {
 	@BeanProperty var allowResubmission: JBoolean = true
 	@BeanProperty var displayPlagiarismNotice: JBoolean = true
 	@BeanProperty var allowExtensions: JBoolean = true
+	@BeanProperty var extensionAttachmentMandatory: JBoolean = false
+	@BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
 	@BeanProperty var includeInFeedbackReportWithoutSubmissions: JBoolean = false
@@ -791,6 +814,8 @@ trait BooleanAssignmentProperties {
 		assignment.allowResubmission = allowResubmission
 		assignment.displayPlagiarismNotice = displayPlagiarismNotice
 		assignment.allowExtensions = allowExtensions
+		assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
+		assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.includeInFeedbackReportWithoutSubmissions = includeInFeedbackReportWithoutSubmissions

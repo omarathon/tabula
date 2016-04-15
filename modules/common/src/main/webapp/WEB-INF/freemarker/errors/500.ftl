@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Error</h1>
 
 <p>Sorry, there's been a problem and we weren't able to complete your request.</p>
@@ -15,3 +16,4 @@
 
 	<pre id="dev" class="collapse" style="overflow-x:scroll;">${stackTrace}</pre>
 </#if>
+</#escape>

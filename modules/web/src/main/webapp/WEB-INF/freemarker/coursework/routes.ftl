@@ -68,6 +68,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro listmarkersubmissions assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/list"/></#macro>
 <#macro downloadmarkersubmissions assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.zip"/></#macro>
+<#macro downloadMarkerSubmissionsAsPdf assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/submissions.pdf"/></#macro>
 <#macro downloadfirstmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/firstmarker/feedback.zip"/></#macro>
 <#macro downloadsecondmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/secondmarker/feedback.zip"/></#macro>
 <#macro uploadmarkerfeedback assignment marker><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/feedback"/></#macro>

@@ -93,46 +93,68 @@ so that they can be passed around between requests.
 				</@form.row>
 
 				<#if features.extensions>
-					<@form.row cssClass="has-close-date">
-						<@form.label></@form.label>
-						<@form.field>
-							<label class="checkbox">
-								<@f.checkbox path="allowExtensions" id="allowExtensions" />
-								Allow extensions
-							</label>
-							<div class="help-block">
-								<#if department.allowExtensionRequests>
-									You will be able to grant extensions for an assignment to individual students,
-									and students will be able to request extensions online.
-								<#else>
-									You will be able to grant extensions for an assignment to individual students.
-									Students cannot currently request extensions online for assignments in ${department.name}.
-								</#if>
-								<#if can.do("Department.ManageExtensionSettings", department)>
-									<a class="btn btn-mini use-tooltip" title="Department extension request settings (opens in a new window/tab)" href="<@routes.coursework.extensionsettings department />" target="_blank">Review</a>
-								<#else>
-									Departmental administrators control whether extension requests are allowed across a department.
-								</#if>
-							</div>
-						</@form.field>
-					</@form.row>
+					<div class="has-close-date">
+						<@form.row>
+							<@form.label></@form.label>
+							<@form.field>
+								<label class="checkbox">
+									<@f.checkbox path="allowExtensions" id="allowExtensions" selector=".allows-extensions" />
+									Allow extensions
+								</label>
+								<div class="help-block">
+									<#if department.allowExtensionRequests>
+										You will be able to grant extensions for an assignment to individual students,
+										and students will be able to request extensions online.
+									<#else>
+										You will be able to grant extensions for an assignment to individual students.
+										Students cannot currently request extensions online for assignments in ${department.name}.
+									</#if>
+									<#if can.do("Department.ManageExtensionSettings", department)>
+										<a class="btn btn-mini use-tooltip" title="Department extension request settings (opens in a new window/tab)" href="<@routes.coursework.extensionsettings department />" target="_blank">Review</a>
+									<#else>
+										Departmental administrators control whether extension requests are allowed across a department.
+									</#if>
+								</div>
+							</@form.field>
+						</@form.row>
 
-					<#if (assignment.countUnapprovedExtensions gt 0)!false>
-						<script>
-						jQuery(function($){
-							$('#allowExtensions').change(function() {
-								if ($(this).is(':checked')) {
-									$('form.edit-assignment').confirmModal(false);
-								} else {
-									$('form.edit-assignment').confirmModal({
-										message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> awaiting review for this assignment. If you turn off extensions, all extension requests awaiting review will be rejected. Any extensions already granted will remain in place.',
-										confirm: 'Continue, reject extension requests awaiting review'
+						<#if (assignment.countUnapprovedExtensions gt 0)!false>
+							<script>
+								jQuery(function($){
+									$('#allowExtensions').change(function() {
+										if ($(this).is(':checked')) {
+											$('form.edit-assignment').confirmModal(false);
+										} else {
+											$('form.edit-assignment').confirmModal({
+												message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> awaiting review for this assignment. If you turn off extensions, all extension requests awaiting review will be rejected. Any extensions already granted will remain in place.',
+												confirm: 'Continue, reject extension requests awaiting review'
+											});
+										}
 									});
-								}
-							});
-						});
-						</script>
-					</#if>
+								});
+							</script>
+						</#if>
+
+						<@form.row cssClass="allows-extensions">
+							<@form.label></@form.label>
+							<@form.field>
+								<label class="checkbox">
+									<@f.checkbox path="extensionAttachmentMandatory" id="extensionAttachmentMandatory" />
+									Students required to attach at least 1 file to an extension request
+								</label>
+							</@form.field>
+						</@form.row>
+
+						<@form.row cssClass="allows-extensions">
+							<@form.label></@form.label>
+							<@form.field>
+								<label class="checkbox">
+									<@f.checkbox path="allowExtensionsAfterCloseDate" id="allowExtensionsAfterCloseDate" />
+									Allow students to request extensions after the close date
+								</label>
+							</@form.field>
+						</@form.row>
+					</div>
 				</#if>
 
 				<@form.row>
@@ -285,6 +307,9 @@ jQuery(function($) {
 		$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
 		$('input[name=collectSubmissions]').triggerHandler("change");
 	});
+
+
+	$("input[name='allowExtensions']").radioControlled({mode: 'hidden'});
 
 });
 </script>

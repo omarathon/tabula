@@ -137,7 +137,7 @@
 		<div id="assign-markers" class="tabbable">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#first-markers">${firstMarkerRoleName}s</a></li>
-				<#if hasSecondMarker><li><a href="#second-markers">${secondMarkerRoleName}s</a></li></#if>
+				<#if hasSecondMarker><li class="webform-tab"><a href="#second-markers">${secondMarkerRoleName}s</a></li></#if>
 			</ul>
 			<div class="tab-content">
 				<div class="tab-pane active" id="first-markers">
@@ -200,6 +200,10 @@
 <script type="text/javascript">
 (function($) {
 	$('.fix-area').fixHeaderFooter();
+	// Fire a resize to get the fixed button in the right place on change
+	$('.webform-tab').on('shown.bs.tab', function(){
+		$(window).trigger('resize');
+	});
 
 	// mode buttons
 	$('.mode').on('click', function(){
