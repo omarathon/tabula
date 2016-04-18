@@ -173,7 +173,10 @@ $(function(){
 				'content': 'Remember to save any changes you make by clicking \'Save\'',
 				'placement': 'top',
 				'container': '.fix-footer'
-			}).tabulaPopover();
+			}).tabulaPopover({'trigger':'manual'}).off('click.fixSaving').on('click.fixSaving', function(){
+				// TAB-4275
+				$(this).closest('form').trigger('submit');
+			});
 		window.setTimeout(function() {
 			$recordForm.find('.submit-buttons .btn-primary').popover('show');
 		}, 100);
