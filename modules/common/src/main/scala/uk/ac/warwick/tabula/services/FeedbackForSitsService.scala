@@ -96,7 +96,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 						"valid"
 				case None =>
 					if (f.module.adminDepartment.assignmentGradeValidation) {
-						if (f.latestMark.get == 0) {
+						if (f.latestMark.exists(_ == 0)) {
 							"zero"
 						} else if (validGrades.get(f.universityId).isDefined && validGrades(f.universityId).exists(_.isDefault)) {
 							"populated"
