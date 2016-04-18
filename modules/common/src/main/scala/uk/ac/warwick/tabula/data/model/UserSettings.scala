@@ -5,7 +5,7 @@ import javax.persistence._
 import org.apache.commons.codec.digest.DigestUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.groups.DownloadRegisterAsPdfCommand
+import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
@@ -41,18 +41,21 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 	def activeDepartment: Option[Department] = getStringSetting(Settings.ActiveDepartment).flatMap(moduleAndDepartmentService.getDepartmentByCode)
 	def activeDepartment_= (department: Department) = settings += (Settings.ActiveDepartment -> department.code)
 
-	// Active academic year should be Optional; we handle getting the latest year eslewhere
+	// Active academic year should be Optional; we handle getting the latest year elsewhere
 	def activeAcademicYear: Option[AcademicYear] = getIntSetting(Settings.ActiveAcademicYear).map(y => AcademicYear(y))
 	def activeAcademicYear_= (academicYear: AcademicYear) = settings += (Settings.ActiveAcademicYear -> academicYear.startYear)
 
 	def registerPdfShowPhotos: Boolean = getStringSetting(Settings.RegisterPdf.ShowPhotos).forall(Settings.fromForceBooleanString)
 	def registerPdfShowPhotos_= (showPhotos: Boolean) = settings += (Settings.RegisterPdf.ShowPhotos -> Settings.forceBooleanString(showPhotos))
 
-	def registerPdfDisplayName = getStringSetting(Settings.RegisterPdf.DisplayName).getOrElse(DownloadRegisterAsPdfCommand.DisplayName.Name)
+	def registerPdfDisplayName = getStringSetting(Settings.RegisterPdf.DisplayName).getOrElse(DownloadRegistersAsPdfHelper.DisplayName.Name)
 	def registerPdfDisplayName_= (name: String) = settings += (Settings.RegisterPdf.DisplayName -> name)
 
-	def registerPdfDisplayCheck = getStringSetting(Settings.RegisterPdf.DisplayCheck).getOrElse(DownloadRegisterAsPdfCommand.DisplayCheck.Checkbox)
+	def registerPdfDisplayCheck = getStringSetting(Settings.RegisterPdf.DisplayCheck).getOrElse(DownloadRegistersAsPdfHelper.DisplayCheck.Checkbox)
 	def registerPdfDisplayCheck_= (check: String) = settings += (Settings.RegisterPdf.DisplayCheck -> check)
+
+	def registerPdfSortOrder = getStringSetting(Settings.RegisterPdf.SortOrder).getOrElse(DownloadRegistersAsPdfHelper.SortOrder.Module)
+	def registerPdfSortOrder_= (check: String) = settings += (Settings.RegisterPdf.SortOrder -> check)
 
 	def string(key: String) = getStringSetting(key).orNull
 
@@ -90,6 +93,7 @@ object UserSettings {
 			val ShowPhotos = "registerPdfShowPhotos"
 			val DisplayName = "registerPdfDisplayName"
 			var DisplayCheck = "registerPdfDisplayCheck"
+			var SortOrder = "registerPdfSortOrder"
 		}
 			
 		def hiddenIntroHash(mappedPage: String, setting: String) = {

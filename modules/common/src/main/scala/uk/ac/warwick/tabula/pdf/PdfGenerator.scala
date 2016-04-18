@@ -2,21 +2,27 @@ package uk.ac.warwick.tabula.pdf
 
 import java.net.URL
 
-import com.itextpdf.text.Image
+import com.itextpdf.text.{Document, Image}
 import org.w3c.dom.Element
-import org.xhtmlrenderer.extend.{UserAgentCallback, ReplacedElementFactory}
+import org.xhtmlrenderer.extend.{ReplacedElementFactory, UserAgentCallback}
 import org.xhtmlrenderer.layout.LayoutContext
 import org.xhtmlrenderer.render.BlockBox
 import org.xhtmlrenderer.simple.extend.FormSubmissionListener
-import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication, PhotosWarwickMemberPhotoUrlGeneratorComponent}
+import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, PhotosWarwickMemberPhotoUrlGeneratorComponent, ServesPhotosFromExternalApplication}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.views.TextRendererComponent
-import org.xhtmlrenderer.pdf.{ITextImageElement, ITextFSImage, ITextRenderer}
-import java.io.OutputStream
+import org.xhtmlrenderer.pdf.{ITextFSImage, ITextImageElement, ITextRenderer}
+import java.io.{ByteArrayOutputStream, OutputStream}
+
+import com.google.common.io.ByteSource
+import com.itextpdf.text.pdf.{PdfCopy, PdfReader}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.FileDaoComponent
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.FileAttachment
 
 trait PdfGenerator {
-	def renderTemplate(templateId: String, model: Any,out:OutputStream)
+	def renderTemplate(templateId: String, model: Any, out: OutputStream)
 }
 
 trait PDFGeneratorComponent {
@@ -45,6 +51,65 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 		}
 	}
 
+}
+
+trait PdfGeneratorWithFileStorage extends PdfGenerator {
+	def renderTemplateAndStore(templateId: String, fileName: String, model: Any): FileAttachment
+}
+
+trait PDFGeneratorWithFileStorageComponent extends PDFGeneratorComponent {
+	override def pdfGenerator: PdfGeneratorWithFileStorage
+}
+
+trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTMLPDFGeneratorComponent with PDFGeneratorWithFileStorageComponent {
+
+	self: FileDaoComponent with TextRendererComponent with MemberPhotoUrlGeneratorComponent =>
+
+	override def pdfGenerator: PdfGeneratorWithFileStorage = new PdfGeneratorWithFileStorageImpl()
+
+	class PdfGeneratorWithFileStorageImpl extends PdfGeneratorImpl with PdfGeneratorWithFileStorage {
+		override def renderTemplateAndStore(templateId: String, fileName: String, model: Any): FileAttachment = {
+			val tempOutputStream = new ByteArrayOutputStream()
+			renderTemplate(templateId, model, tempOutputStream)
+
+			val bytes = tempOutputStream.toByteArray
+
+			// Create file
+			val pdfFileAttachment = new FileAttachment
+			pdfFileAttachment.name = "feedback.pdf"
+			pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
+			transactional() { fileDao.saveTemporary(pdfFileAttachment) }
+			pdfFileAttachment
+		}
+	}
+
+}
+
+trait CombinesPdfs {
+
+	self: FileDaoComponent =>
+
+	def combinePdfs(pdfs: Seq[FileAttachment], fileName: String): FileAttachment = {
+		PdfReader.unethicalreading = true
+		val output = new ByteArrayOutputStream
+		val document = new Document()
+		val copy = new PdfCopy(document, output)
+		document.open()
+		pdfs.foreach(attachment => {
+			val reader = new PdfReader(attachment.dataStream)
+
+			(1 to reader.getNumberOfPages).foreach(page => {
+				copy.addPage(copy.getImportedPage(reader, page))
+			})
+			copy.freeReader(reader)
+			reader.close()
+		})
+		document.close()
+		val pdf = new FileAttachment
+		pdf.name = fileName
+		pdf.uploadedData = ByteSource.wrap(output.toByteArray)
+		transactional() { fileDao.saveTemporary(pdf) }
+	}
 }
 
 class ProfileImageReplacedElementFactory(delegate: ReplacedElementFactory) extends ReplacedElementFactory

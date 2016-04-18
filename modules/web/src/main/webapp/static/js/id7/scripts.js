@@ -750,7 +750,7 @@
 		 * replaced with "Please wait" text, to tell the user to expect to
 		 * wait a few seconds.
 		 */
-		$('a.long-running').click(function (event) {
+		$('a.long-running, button.long-running').click(function (event) {
 			var $this = $(this);
 			var originalText = $this.html();
 			if (!$this.hasClass('clicked') && !$this.hasClass('disabled') && !$this.parent().hasClass('disabled')) {
