@@ -173,7 +173,7 @@
 										<#else>
 											<#local filename = "submission-${submission.universityId}.zip">
 										</#if>
-										<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename?url}'/>">
+										<a class="long-running" href="<@routes.coursework.downloadSingleSubmission assignment submission filename/>">
 											${attachments?size}
 											<#if attachments?size == 1> file
 											<#else> files
