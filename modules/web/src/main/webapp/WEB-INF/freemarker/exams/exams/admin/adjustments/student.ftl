@@ -28,6 +28,8 @@
 				<p>
 					Adjusted mark - ${command.feedback.latestPrivateOrNonPrivateAdjustment.mark!}<br>
 					Adjusted grade - ${command.feedback.latestPrivateOrNonPrivateAdjustment.grade!}<br>
+					Reason - ${command.feedback.latestPrivateOrNonPrivateAdjustment.reason!}<br>
+					Comments - ${command.feedback.latestPrivateOrNonPrivateAdjustment.comments!}<br>
 				</p>
 			</div>
 		</#if>
