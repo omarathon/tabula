@@ -168,17 +168,20 @@ abstract class Role(val definition: RoleDefinition, val scope: Option[Permission
 	lazy val explicitPermissions = permissions
 
 	lazy val explicitPermissionsAsList = explicitPermissions.toList
+	lazy val viewablePermissionsAsList = explicitPermissionsAsList.filterNot { case (p, _) => delegatePermissions.contains(p) }
 	lazy val subRoles = roles
+
+	private final val delegatePermissions = Seq(
+		Permissions.RolesAndPermissions.Create,
+		Permissions.RolesAndPermissions.Read,
+		Permissions.RolesAndPermissions.Update,
+		Permissions.RolesAndPermissions.Delete
+	)
 
 	private final def applyRoleDefinition(definition: RoleDefinition): Role = {
 		permissions ++= definition.permissions(scope)
 		if (definition.canDelegateThisRolesPermissions){
-			permissions ++= Map(
-				Permissions.RolesAndPermissions.Create->scope,
-				Permissions.RolesAndPermissions.Read->scope,
-				Permissions.RolesAndPermissions.Update->scope,
-			  Permissions.RolesAndPermissions.Delete->scope
-			)
+			permissions ++= delegatePermissions.map(_ -> scope)
 		}
 		roles ++= definition.subRoles(scope)
 
