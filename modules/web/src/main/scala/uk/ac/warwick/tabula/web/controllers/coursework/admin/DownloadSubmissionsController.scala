@@ -80,7 +80,9 @@ class DownloadAllSubmissionsController extends CourseworkController {
 }
 
 @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"))
+@RequestMapping(
+	value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
+	params = Array("!single"))
 class DownloadSingleSubmissionController extends CourseworkController {
 
 	var userLookup = Wire[UserLookupService]
