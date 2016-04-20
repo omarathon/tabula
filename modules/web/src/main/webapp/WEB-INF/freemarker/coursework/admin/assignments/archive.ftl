@@ -1,5 +1,6 @@
-<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/archive')}" commandName="command" cssClass="form-vertical">
 <#assign assignment=command.assignment />
+<#assign submitUrl><@routes.coursework.archiveAssignment assignment /></#assign>
+<@f.form method="post" action=submitUrl commandName="command" cssClass="form-vertical">
 
 <#if !assignment.alive>
 
