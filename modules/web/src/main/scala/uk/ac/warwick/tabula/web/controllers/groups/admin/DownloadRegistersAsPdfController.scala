@@ -40,7 +40,7 @@ class DownloadRegistersAsPdfController extends GroupsController with DepartmentS
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		DownloadRegistersAsPdfCommand(mandatory(department), mandatory(academicYear), "registers.pdf", user)
 
-	@RequestMapping(params = Array("/registers"))
+	@RequestMapping(value = Array("/registers"))
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("groups/admin/groups/print")
 			.crumbs(Breadcrumbs.DepartmentForYear(department, academicYear))
