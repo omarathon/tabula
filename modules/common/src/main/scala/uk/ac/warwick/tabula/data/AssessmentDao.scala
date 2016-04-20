@@ -148,6 +148,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.add(is("openEnded", false))
 			.add(ge("closeDate", startInclusive))
 			.add(lt("closeDate", endExclusive))
+			.add(is("_archived", false))
 			.addOrder(asc("closeDate"))
 			.seq
 
