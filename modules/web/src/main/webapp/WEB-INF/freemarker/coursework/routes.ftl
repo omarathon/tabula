@@ -59,6 +59,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro enrolment module academicYear><@_u page="/admin/module/${module.code}/assignments/enrolment/${academicYear.startYear?c}"/></#macro>
 
+<#macro archiveAssignment assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/archive" /></#macro>
+
 <#macro createAssignment module><@_u page="/admin/module/${module.code}/assignments/new" /></#macro>
 <#macro copyModuleAssignments module><@_u page="/admin/module/${module.code}/copy-assignments" /></#macro>
 <#macro archiveModuleAssignments module><@_u page="/admin/module/${module.code}/archive-assignments" /></#macro>
