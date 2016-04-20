@@ -20,6 +20,7 @@
 				<@fmt.singleWeekFormat week=attendanceNote.occurrence.week academicYear=attendanceNote.occurrence.event.group.groupSet.academicYear dept=attendanceNote.occurrence.event.group.groupSet.module.adminDepartment />
 			</p>
 
+			<p>Absence type: ${attendanceNote.absenceType.description}</p>
 
 			<#if attendanceNote.note?has_content>
 				<#noescape>${attendanceNote.escapedNote}</#noescape>
