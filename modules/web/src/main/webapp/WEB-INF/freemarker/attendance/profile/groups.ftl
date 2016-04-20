@@ -180,6 +180,7 @@
 												<#if attendance.note??>
 													<#local studentNote = attendance.note />
 													<#local note>
+														${studentNote.absenceType.description}<br />
 														${studentNote.truncatedNote}
 														<#if (studentNote.truncatedNote?length > 0)>
 															<br/>

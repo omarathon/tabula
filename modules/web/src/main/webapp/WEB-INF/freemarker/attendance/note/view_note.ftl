@@ -33,6 +33,8 @@
 			<@attendance_macros.checkpointDescription department=checkpoint.point.scheme.department checkpoint=checkpoint point=point student=attendanceNote.student/>
 		</#if>
 
+		<p>Absence type: ${attendanceNote.absenceType.description}</p>
+
 		<#if attendanceNote.note?has_content>
 			<#noescape>${attendanceNote.escapedNote}</#noescape>
 		</#if>
