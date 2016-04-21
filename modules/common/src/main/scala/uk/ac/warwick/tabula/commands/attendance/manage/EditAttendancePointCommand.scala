@@ -36,7 +36,7 @@ class EditAttendancePointCommandInternal(
 	val department: Department,
 	val academicYear: AcademicYear,
 	val templatePoint: AttendanceMonitoringPoint
-) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with UpdatesAttendanceMonitoringScheme {
+) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with TermServiceComponent with ProfileServiceComponent =>
@@ -49,7 +49,8 @@ class EditAttendancePointCommandInternal(
 			point
 		})
 
-		afterUpdate(schemesToEdit)
+		generateNotifications(schemesToEdit)
+		updateCheckpointTotals(schemesToEdit)
 
 		editedPoints
 	}

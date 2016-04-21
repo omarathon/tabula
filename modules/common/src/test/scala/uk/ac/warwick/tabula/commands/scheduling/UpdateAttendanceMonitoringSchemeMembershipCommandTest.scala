@@ -72,7 +72,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
 		schemes.contains(scheme1) should be {true}
 		schemes.contains(scheme2) should be {true}
-		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotalsAsync(Seq(student), dept, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept, AcademicYear(2014))
 	}}
 
 	@Test
@@ -102,8 +102,8 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
 		schemes.contains(scheme1) should be {true}
 		schemes.contains(scheme2) should be {true}
-		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotalsAsync(Seq(student), dept1, AcademicYear(2014))
-		verify(cmd.attendanceMonitoringService, times(1)).updateCheckpointTotalsAsync(Seq(student), dept2, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept1, AcademicYear(2014))
+		verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept2, AcademicYear(2014))
 	}}
 
 }

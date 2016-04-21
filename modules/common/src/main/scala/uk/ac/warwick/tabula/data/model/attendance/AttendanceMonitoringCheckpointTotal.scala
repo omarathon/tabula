@@ -11,6 +11,13 @@ import org.hibernate.annotations.Type
 @Table(name="ATTENDANCEMONITORINGTOTAL")
 class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 
+	def this(student: StudentMember, department: Department, academicYear: AcademicYear) {
+		this()
+		this.student = student
+		this.department = department
+		this.academicYear = academicYear
+	}
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
 	var student: StudentMember = _

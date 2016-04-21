@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyLists
-import collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipStaticType, SchemeMembershipItem}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.{SchemeMembershipIncludeType, SchemeMembershipItem, SchemeMembershipStaticType}
+import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.JavaConverters._
 
 object AddStudentsToSchemeCommand {
 	def apply(scheme: AttendanceMonitoringScheme, user: CurrentUser) =
@@ -21,7 +22,6 @@ object AddStudentsToSchemeCommand {
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServiceComponent
-			with AutowiringTermServiceComponent
 			with ComposableCommand[AttendanceMonitoringScheme]
 			with AddStudentsToSchemeValidation
 			with AddStudentsToSchemeDescription
@@ -31,11 +31,13 @@ object AddStudentsToSchemeCommand {
 
 
 class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user: CurrentUser)
-	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
+	extends CommandInternal[AttendanceMonitoringScheme] with TaskBenchmarking with RequiresCheckpointTotalUpdate {
 
-	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent with TermServiceComponent =>
+	self: AddStudentsToSchemeCommandState with AttendanceMonitoringServiceComponent	with ProfileServiceComponent =>
 
 	override def applyInternal() = {
+		val previousUniversityIds = scheme.members.members
+
 		if (doFind && linkToSits && !scheme.academicYear.isSITSInFlux(DateTime.now)) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
@@ -52,7 +54,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 		scheme.updatedDate = DateTime.now
 		attendanceMonitoringService.saveOrUpdate(scheme)
 
-		afterUpdate(Seq(scheme))
+		updateCheckpointTotals((previousUniversityIds ++ scheme.members.members).distinct, scheme.department, scheme.academicYear)
 
 		scheme
 	}

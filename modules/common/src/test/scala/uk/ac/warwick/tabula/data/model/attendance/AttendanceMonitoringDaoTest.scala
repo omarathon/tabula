@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import org.joda.time.{DateTime, LocalDate}
 import org.junit.Before
-import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.data.{AutowiringAttendanceMonitoringDao, AttendanceMonitoringDaoImpl}
-import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.commands.MemberOrUser
+import uk.ac.warwick.tabula.data.AutowiringAttendanceMonitoringDao
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
@@ -102,7 +102,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		points.contains(point4) should be {false}
 	}}
 
-	@Test def getAllCheckpoints() { transactional { tx =>
+	@Test def allCheckpoints() { transactional { tx =>
 		session.save(department)
 		session.save(route)
 		session.save(student1)
@@ -188,44 +188,6 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
 		// All students recorded against Spring, so that should be missing.
 		terms should be (Seq("Autumn", "Christmas vacation", "Easter vacation", "Summer", "Summer vacation"))
-	}}
-
-	@Test def resetTotalsForStudentsNotInAScheme() { transactional { tx =>
-		session.save(department)
-		session.save(route)
-		session.save(student1)
-		session.save(student2)
-		session.save(scheme1)
-		session.save(point1)
-		session.save(point2)
-		session.save(point3)
-		session.save(point4)
-
-		val studentNotOnAScheme = Fixtures.student("3456","3456")
-		studentNotOnAScheme.mostSignificantCourse.beginDate = DateTime.now.minusYears(2).toLocalDate
-		studentNotOnAScheme.mostSignificantCourse.currentRoute = route
-		session.save(studentNotOnAScheme)
-
-		val student1Totals = Fixtures.attendanceMonitoringCheckpointTotal(student1, department, academicYear, 1, 1, 1, 1)
-		session.save(student1Totals)
-		val student2Totals = Fixtures.attendanceMonitoringCheckpointTotal(student2, department, academicYear, 1, 1, 1, 1)
-		session.save(student2Totals)
-		val studentNotOnASchemeTotals = Fixtures.attendanceMonitoringCheckpointTotal(studentNotOnAScheme, department, academicYear, 1, 1, 1, 1)
-		session.save(studentNotOnASchemeTotals)
-
-		attendanceMonitoringDao.resetTotalsForStudentsNotInAScheme(department, academicYear)
-		student1Totals.attended should be (1)
-		student1Totals.authorised should be (1)
-		student1Totals.unauthorised should be (1)
-		student1Totals.unrecorded should be (1)
-		student2Totals.attended should be (1)
-		student2Totals.authorised should be (1)
-		student2Totals.unauthorised should be (1)
-		student2Totals.unrecorded should be (1)
-		studentNotOnASchemeTotals.attended should be (0)
-		studentNotOnASchemeTotals.authorised should be (0)
-		studentNotOnASchemeTotals.unauthorised should be (0)
-		studentNotOnASchemeTotals.unrecorded should be (0)
 	}}
 
 	@Test def correctEndDate(): Unit = { transactional { tx =>

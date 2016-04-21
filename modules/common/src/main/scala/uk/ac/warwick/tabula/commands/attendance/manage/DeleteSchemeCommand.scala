@@ -24,14 +24,15 @@ object DeleteSchemeCommand {
 }
 
 class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
-	extends CommandInternal[AttendanceMonitoringScheme] with UpdatesAttendanceMonitoringScheme {
+	extends CommandInternal[AttendanceMonitoringScheme] with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		attendanceMonitoringService.deleteScheme(scheme)
 
-		afterUpdate(Seq(scheme))
+		generateNotifications(Seq(scheme))
+		updateCheckpointTotals(scheme)
 
 		scheme
 	}

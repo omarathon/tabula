@@ -37,6 +37,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
 		val academicYear2015 = AcademicYear(2015)
 		val department = new Department
+		val student = Fixtures.student("1234")
 
 		val week5StartDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 		val week5EndDate = new LocalDate(academicYear2015.startYear, DateTimeConstants.NOVEMBER, 8).toDateTimeAtStartOfDay
@@ -52,6 +53,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		scheme.academicYear = academicYear2015
 		scheme.department = department
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Week
+		scheme.members.addUserId(student.universityId)
 		val templatePoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 0, 1)
 		templatePoint.id = "123"
 		val originalCreatedDate = new DateTime().minusDays(2)
@@ -74,7 +76,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
 			val profileService = smartMock[ProfileService]
-			profileService.getAllMembersWithUniversityIds(any[Seq[String]]) returns Seq()
+			profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 			startWeek = 5
 			endWeek = 15
 		}
@@ -94,6 +96,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 		scheme2.points.size should be (1)
 		verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
 		verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
+		verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), department, academicYear2015)
 	}}
 
 	@Test
