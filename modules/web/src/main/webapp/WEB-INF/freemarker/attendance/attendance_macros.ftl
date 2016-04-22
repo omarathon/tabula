@@ -623,3 +623,11 @@
 		</div>
 	</div>
 </#macro>
+
+<#macro checkpointTotalTitle checkpointTotal>
+	<#if checkpointTotal.updatedDate.millis == 0>
+		(awaiting update)
+	<#else>
+		Last updated <@fmt.date checkpointTotal.updatedDate />
+	</#if>
+</#macro>

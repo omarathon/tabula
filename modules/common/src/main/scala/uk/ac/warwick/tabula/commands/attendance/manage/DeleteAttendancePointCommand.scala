@@ -24,7 +24,7 @@ object DeleteAttendancePointCommand {
 
 
 class DeleteAttendancePointCommandInternal(val department: Department, val templatePoint: AttendanceMonitoringPoint)
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with UpdatesAttendanceMonitoringScheme {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent =>
@@ -32,7 +32,8 @@ class DeleteAttendancePointCommandInternal(val department: Department, val templ
 	override def applyInternal() = {
 		pointsToDelete.foreach(attendanceMonitoringService.deletePoint)
 
-		afterUpdate(schemesToEdit)
+		generateNotifications(schemesToEdit)
+		updateCheckpointTotals(schemesToEdit)
 
 		pointsToDelete
 	}

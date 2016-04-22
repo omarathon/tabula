@@ -1,29 +1,46 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import org.joda.time.DateTime
-import uk.ac.warwick.util.termdates.{TermImpl, Term}
+import uk.ac.warwick.util.termdates.{Term, TermImpl}
+
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Module, MeetingFormat, StudentRelationshipType, Department}
+import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat, Module, StudentRelationshipType}
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringScheme, AttendanceMonitoringPoint, MonitoringPointReport}
+import uk.ac.warwick.tabula.data.model.attendance._
+
 import collection.JavaConverters._
 
 class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
+		val thisDepartment = Fixtures.department("its")
+		val thisAcademicYear = AcademicYear(2014)
 		val thisTermService = smartMock[TermService]
-		val command = new CreateAttendancePointCommandState with TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
-			val department = null
-			val academicYear = null
-			val schemes = null
+		val scheme = new AttendanceMonitoringScheme
+		scheme.department = thisDepartment
+		scheme.academicYear = thisAcademicYear
+		scheme.pointStyle = AttendanceMonitoringPointStyle.Date
+		val student = Fixtures.student("1234")
+		scheme.members.addUserId(student.universityId)
+		val command = new CreateAttendancePointCommandInternal(thisDepartment, thisAcademicYear, Seq(scheme))
+			with CreateAttendancePointCommandState
+			with TermServiceComponent
+			with SmallGroupServiceComponent
+			with ModuleAndDepartmentServiceComponent
+			with AttendanceMonitoringServiceComponent
+			with ProfileServiceComponent {
+
 			val termService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
+			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val profileService = smartMock[ProfileService]
+			thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
 			val termService = thisTermService
@@ -464,6 +481,14 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 			errors.hasGlobalErrors should be {false}
 			errors.getAllErrors.asScala.map(_.getCode).contains("attendanceMonitoringPoint.overlaps") should be {false}
 		}
+	}
+
+	@Test
+	def applyInternal(): Unit = new Fixture {
+		command.attendanceMonitoringService.listAllSchemes(thisDepartment) returns Seq()
+		command.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
+		command.applyInternal()
+		verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), thisDepartment, thisAcademicYear)
 	}
 
 }

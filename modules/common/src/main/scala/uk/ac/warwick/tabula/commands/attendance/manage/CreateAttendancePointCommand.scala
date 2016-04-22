@@ -31,7 +31,8 @@ object CreateAttendancePointCommand {
 
 
 class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking
+		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with TermServiceComponent with ProfileServiceComponent =>
@@ -47,7 +48,8 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 			point
 		})
 
-		afterUpdate(schemes)
+		generateNotifications(schemes)
+		updateCheckpointTotals(schemes)
 
 		points
 	}
@@ -59,7 +61,7 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 	self: CreateAttendancePointCommandState with TermServiceComponent with AttendanceMonitoringServiceComponent =>
 
 	override def validate(errors: Errors) {
-		validateSchemePointStyles(errors, pointStyle, schemes.toSeq)
+		validateSchemePointStyles(errors, pointStyle, schemes)
 
 		validateName(errors, name)
 
@@ -69,14 +71,14 @@ trait CreateAttendancePointValidation extends SelfValidating with AttendanceMoni
 				validateDate(errors, endDate, academicYear, "endDate")
 				if (startDate != null && endDate != null) {
 					validateDates(errors, startDate, endDate)
-					validateCanPointBeEditedByDate(errors, startDate, schemes.map{_.members.members}.flatten, academicYear)
+					validateCanPointBeEditedByDate(errors, startDate, schemes.flatMap(_.members.members), academicYear)
 					validateDuplicateForDate(errors, name, startDate, endDate, schemes)
 				}
 			case AttendanceMonitoringPointStyle.Week =>
 				validateWeek(errors, startWeek, "startWeek")
 				validateWeek(errors, endWeek, "endWeek")
 				validateWeeks(errors, startWeek, endWeek)
-				validateCanPointBeEditedByWeek(errors, startWeek, schemes.map{_.members.members}.flatten, academicYear)
+				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
 				validateDuplicateForWeek(errors, name, startWeek, endWeek, schemes)
 		}
 

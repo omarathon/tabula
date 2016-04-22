@@ -71,7 +71,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue)
 		}
 		courseTypes.clear()
-		params.get("courseTypes").map{_.foreach{ item =>
+		params.get("courseTypes").foreach{_.foreach{ item =>
 			try {
 				courseTypes.add(CourseType(item))
 			} catch {
@@ -80,7 +80,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}}
 		}
 		routes.clear()
-		params.get("routes").map{_.foreach{ item =>
+		params.get("routes").foreach{_.foreach{ item =>
 			val routeCodeConverter = new RouteCodeConverter
 			routeCodeConverter.service = courseAndRouteService
 			routeCodeConverter.convertRight(item) match {
@@ -89,7 +89,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}
 		}}
 		modesOfAttendance.clear()
-		params.get("modesOfAttendance").map{_.foreach{ item =>
+		params.get("modesOfAttendance").foreach{_.foreach{ item =>
 			val modeOfAttendanceCodeConverter = new ModeOfAttendanceCodeConverter
 			modeOfAttendanceCodeConverter.dao = modeOfAttendanceDao
 			modeOfAttendanceCodeConverter.convertRight(item) match {
@@ -98,7 +98,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}
 		}}
 		yearsOfStudy.clear()
-		params.get("yearsOfStudy").map{_.foreach{ item =>
+		params.get("yearsOfStudy").foreach{_.foreach{ item =>
 			try {
 				yearsOfStudy.add(item.toInt)
 			} catch {
@@ -107,7 +107,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}}
 		}
 		sprStatuses.clear()
-		params.get("sprStatuses").map{_.foreach{ item =>
+		params.get("sprStatuses").foreach{_.foreach{ item =>
 			val sitsStatusCodeConverter = new SitsStatusCodeConverter
 			sitsStatusCodeConverter.dao = sitsStatusDao
 			sitsStatusCodeConverter.convertRight(item) match {
@@ -116,7 +116,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}
 		}}
 		modules.clear()
-		params.get("modules").map{_.foreach{ item =>
+		params.get("modules").foreach{_.foreach{ item =>
 			val moduleCodeConverter = new ModuleCodeConverter
 			moduleCodeConverter.service = moduleAndDepartmentService
 			moduleCodeConverter.convertRight(item) match {
@@ -125,7 +125,7 @@ trait DeserializesFilterImpl extends DeserializesFilter with Logging with Filter
 			}
 		}}
 		otherCriteria.clear()
-		params.get("otherCriteria").map{_.foreach{ item => otherCriteria.add(item) }}
+		params.get("otherCriteria").foreach{_.foreach{ item => otherCriteria.add(item) }}
 	}
 
 }

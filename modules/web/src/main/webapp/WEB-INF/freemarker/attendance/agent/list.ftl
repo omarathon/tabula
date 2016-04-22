@@ -40,14 +40,14 @@
 		doCommandSorting=false
 	; result>
 		<td class="unrecorded">
-			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />">
+			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
 				<span class="badge badge-<#if (result.checkpointTotal.unrecorded > 2)>important<#elseif (result.checkpointTotal.unrecorded > 0)>warning<#else>success</#if>">
 					${result.checkpointTotal.unrecorded}
 				</span>
 			</a>
 		</td>
 		<td class="missed">
-			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />">
+			<a href="<@routes.attendance.agentStudent relationshipType academicYear.startYear?c result.student />" title="<@attendance_macros.checkpointTotalTitle result.checkpointTotal />" class="use-tooltip">
 				<span class="badge badge-<#if (result.checkpointTotal.unauthorised > 2)>important<#elseif (result.checkpointTotal.unauthorised > 0)>warning<#else>success</#if>">
 					${result.checkpointTotal.unauthorised}
 				</span>

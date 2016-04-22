@@ -31,8 +31,12 @@ object CreateNewAttendancePointsFromCopyCommand {
 }
 
 
-class CreateNewAttendancePointsFromCopyCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
+class CreateNewAttendancePointsFromCopyCommandInternal(
+	val department: Department,
+	val academicYear: AcademicYear,
+	val schemes: Seq[AttendanceMonitoringScheme]
+) extends CommandInternal[Seq[AttendanceMonitoringPoint]] with GetsPointsToCreate with TaskBenchmarking
+		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
@@ -41,7 +45,8 @@ class CreateNewAttendancePointsFromCopyCommandInternal(val department: Departmen
 		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
 
-		afterUpdate(schemes)
+		generateNotifications(schemes)
+		updateCheckpointTotals(schemes)
 
 		points
 	}

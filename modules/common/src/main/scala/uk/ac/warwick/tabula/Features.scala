@@ -132,6 +132,7 @@ abstract class Features {
 	@Value("${features.scheduling.sanityCheckFilesystem:true}") var schedulingSanityCheckFilesystem = defaults.schedulingSanityCheckFilesystem
 	@Value("${features.scheduling.exportAttendanceToSits:true}") var schedulingExportAttendanceToSits = defaults.schedulingExportAttendanceToSits
 	@Value("${features.scheduling.attendance.updateSchemes:true}") var schedulingAttendanceUpdateSchemes = defaults.schedulingAttendanceUpdateSchemes
+	@Value("${features.scheduling.attendance.updateTotals:true}") var schedulingAttendanceUpdateTotals = defaults.schedulingAttendanceUpdateTotals
 	@Value("${features.scheduling.exportFeedbackToSits:true}") var schedulingExportFeedbackToSits = defaults.schedulingExportFeedbackToSits
 	@Value("${features.scheduling.triggers:true}") var schedulingTriggers = defaults.schedulingTriggers
 	@Value("${features.scheduling.objectStorageMigration:false}") var schedulingObjectStorageMigration = defaults.schedulingObjectStorageMigration
@@ -261,6 +262,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingExportAttendanceToSits = true
 	@BeanProperty var schedulingExportFeedbackToSits = true
 	@BeanProperty var schedulingAttendanceUpdateSchemes = true
+	@BeanProperty var schedulingAttendanceUpdateTotals = true
 	@BeanProperty var schedulingTriggers = true
 	@BeanProperty var schedulingObjectStorageMigration = false
 	@BeanProperty var schedulingModuleListsImport = true
