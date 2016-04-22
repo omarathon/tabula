@@ -233,7 +233,8 @@
 						</li>
 
 						<li>
-							<#assign archive_url><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
+							<#-- TAB-4255 datetime param added to cache-bust popup contents for IE-->
+							<#assign archive_url><@routes.coursework.archiveAssignment assignment />?dt=${.now?string('iso')}</#assign>
 							<#if !assignment.alive>
 								<#assign archive_caption>Unarchive assignment</#assign>
 							<#else>

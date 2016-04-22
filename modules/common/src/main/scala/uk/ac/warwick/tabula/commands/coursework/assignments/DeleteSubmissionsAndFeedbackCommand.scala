@@ -62,9 +62,9 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 			val feedbacks = for (uniId <- students; feedback <- feedbackService.getAssignmentFeedbackByUniId(assignment, uniId)) yield {
 				HibernateHelpers.initialiseAndUnproxy(feedback.attachments)
 				feedbackService.delete(mandatory(feedback))
+				zipService.invalidateIndividualFeedbackZip(feedback)
 				feedback
 			}
-			zipService.invalidateFeedbackZip(assignment)
 			feedbacks
 		} else Nil
 

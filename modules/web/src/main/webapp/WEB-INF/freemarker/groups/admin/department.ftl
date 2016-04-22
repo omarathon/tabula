@@ -117,6 +117,12 @@
 					<li<#if !hasGroupAttendance> class="disabled"</#if>>
 						<a href="<@routes.groups.departmentAttendance department adminCommand.academicYear />">View attendance</a>
 					</li>
+
+					<#if can.do('SmallGroupEvents.Register', department)>
+						<li>
+							<a href="<@routes.groups.printRegisters department adminCommand.academicYear />">Print registers</a>
+						</li>
+					</#if>
 				</ul>
 			</div>
 		</#if>

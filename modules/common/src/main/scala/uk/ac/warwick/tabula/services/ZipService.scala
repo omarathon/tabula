@@ -8,18 +8,24 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.SHAFileHasherComponent
+import uk.ac.warwick.tabula.commands.coursework.DownloadFeedbackAsPdfCommand
+import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
+import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 
 @Service
-class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent with Logging with TaskBenchmarking {
+class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent with SHAFileHasherComponent
+	with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent
+	with AutowiringFileDaoComponent with Logging with TaskBenchmarking {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
@@ -30,40 +36,50 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	def partition(id: String): String = id.replace("-", "").grouped(idSplitSize).mkString("/")
 
-	def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
-	def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
-	def resolvePathForFeedback(assignment: Assignment) = "all-feedback/" + partition(assignment.id)
-	def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
+	private def resolvePath(feedback: Feedback): String = "feedback/" + partition(feedback.id)
+	private def resolvePathForStudent(feedback: Feedback): String = "student-feedback/" + partition(feedback.id)
+	private def resolvePath(submission: Submission): String = "submission/" + partition(submission.id)
+	private def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-	def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
+	private def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
 
-	def invalidateFeedbackZip(assignment: Assignment) = invalidate(resolvePathForFeedback(assignment))
 	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
-	def invalidateIndividualFeedbackZip(feedback: Feedback) = invalidate(resolvePath(feedback))
+	def invalidateIndividualFeedbackZip(feedback: Feedback) = {
+		invalidate(resolvePath(feedback))
+		invalidate(resolvePathForStudent(feedback))
+	}
+
 
 	def getFeedbackZip(feedback: Feedback): RenderableFile =
-		getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
+		getZip(resolvePath(feedback), getFeedbackZipItems(feedback, forStudent = false))
+
+	def getFeedbackZipForStudent(feedback: Feedback): RenderableFile =
+		getZip(resolvePathForStudent(feedback), getFeedbackZipItems(feedback, forStudent = true))
 
 	def getSubmissionZip(submission: Submission): RenderableFile =
 		getZip(resolvePath(submission), getSubmissionZipItems(submission))
 
-	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
-		feedback.attachments.asScala.map { (attachment) =>
+	private def getFeedbackZipItems(feedback: Feedback, forStudent: Boolean = true): Seq[ZipItem] = {
+		(Seq(getOnlineFeedbackPdf(feedback, forStudent)) ++ feedback.attachments.asScala).map { (attachment) =>
 			ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
+	}
+
+	private def getOnlineFeedbackPdf(feedback: Feedback, forStudent: Boolean = true): FileAttachment = {
+		pdfGenerator.renderTemplateAndStore(
+			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
+			"feedback.pdf",
+			Map(
+				"feedback" -> feedback,
+				"studentId" -> feedback.universityId
+			)
+		)
+	}
 
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
 		markerFeedback.attachments.asScala.filter { _.hasData }.map { attachment =>
 			ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream, attachment.actualDataLength)
 		}
-
-	/**
-	 * A zip of feedback with a folder for each student.
-	 */
-	def getAllFeedbackZips(assignment: Assignment): RenderableFile =
-		getZip(resolvePathForFeedback(assignment),
-			assignment.feedbacks.asScala.flatMap(getFeedbackZipItems)
-		)
 
 	/**
 	 * Find all file attachment fields and any attachments in them, as a single list.
@@ -105,7 +121,7 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 		* Get a zip containing these feedbacks.
 	*/
 	def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = {(_,_) => }): RenderableFile =
-		createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback)
+		createUnnamedZip(feedbacks.flatMap(f => getFeedbackZipItems(f, forStudent = false)), progressCallback)
 
 	/**
 	 * Get a zip containing these marker feedbacks.

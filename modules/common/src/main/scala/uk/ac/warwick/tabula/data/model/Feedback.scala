@@ -171,17 +171,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		} else Seq()
 	}
 
-	def studentViewableRawMark: Option[Int] = {
-		if (hasPrivateAdjustments) latestPrivateAdjustment.map(_.mark)
-		else actualMark
-	}
-
-	def studentViewableRawGrade: Option[String] = {
-		if (hasPrivateAdjustments) latestPrivateAdjustment.flatMap(_.grade)
-		else actualGrade
-	}
-
 	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
+	def hasNonPrivateAdjustments = latestNonPrivateAdjustment.isDefined
 	def hasPrivateOrNonPrivateAdjustments = marks.asScala.nonEmpty
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)

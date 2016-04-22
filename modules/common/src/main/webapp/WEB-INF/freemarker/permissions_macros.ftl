@@ -131,7 +131,7 @@
 		<#list role.subRoles as subRole>
 			<li><@debugRole role=subRole showScopes=showScopes /></li>
 		</#list>
-		<#list role.explicitPermissionsAsList as permission>
+		<#list role.viewablePermissionsAsList as permission>
 			<li><@debugPermission permission=permission._1() scope=permission._2() showScopes=showScopes /></li>
 		</#list>
 	</ul>

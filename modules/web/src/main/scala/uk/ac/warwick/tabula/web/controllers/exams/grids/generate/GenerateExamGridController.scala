@@ -347,7 +347,8 @@ class GenerateExamGridController extends ExamsController
 				weightings,
 				normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad),
 				entities,
-				columns
+				None,
+				Seq(selectCourseCommand.academicYear -> columns)
 			)
 		)
 	}

@@ -445,6 +445,14 @@ $(function() {
 			}
 		});
 
+		$('.empty-form', $form).on('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$('input[type=text], textarea', $form).each(function() {
+				$(this).val('');
+			});
+		});
+
 		$('.feedback-comments:not(.collapsible)').off('click').on('open.collapsible close.collapsible', function() {
 			$('.expanding-table').trigger('tabula.expandingTable.repositionContent');
 		}).collapsible();

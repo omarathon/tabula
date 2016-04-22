@@ -8,7 +8,8 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotification
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService, ZipServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -34,6 +35,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
 	var fileDao = Wire.auto[FileDao]
+	var zipService = Wire.auto[ZipService]
 
 	override def applyInternal() = {
 		markerFeedbacks.map { markerFeedback =>
@@ -64,6 +66,7 @@ abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val m
 		parent.clearAttachments()
 
 		markerFeedback.attachments.foreach(parent.addAttachment)
+		zipService.invalidateIndividualFeedbackZip(parent)
 		parent
 	}
 }
