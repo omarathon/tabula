@@ -119,7 +119,6 @@
 
 		<div class="submit-buttons">
 			<input class="btn btn-primary" type="submit" value="Save">
-			<a class="btn empty-form" href="">Reset</a>
 			<a class="btn discard-changes" href="">Cancel</a>
 		</div>
 
