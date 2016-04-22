@@ -1989,6 +1989,40 @@ input.flexi-picker {
 	}
 }
 
+#container {
+	.icon-stack.icon-stack-original-size {
+		width: 1em;
+		height: 1em;
+		line-height: 1em;
+		vertical-align: -16%;
+		&.icon-fixed-width {
+			width: 16/14em;
+		}
+
+		.icon-stack-base {
+			font-size: 1em;
+		}
+		.icon-stack-small {
+			font-size: 0.6em;
+		}
+	}
+	.icon-stack.icon-stack-right {
+		.icon-stack-small {
+			width: auto;
+			line-height: 1em;
+			right: -1px;
+			left: auto;
+			bottom: -1px;
+			background: white;
+			height: 1em;
+			padding-right: 0;
+		}
+	}
+	.icon-filled-white {
+		background: white;
+	}
+}
+
 th.nowrap, td.nowrap { white-space: nowrap; }
 
 ul.nav-pills {
