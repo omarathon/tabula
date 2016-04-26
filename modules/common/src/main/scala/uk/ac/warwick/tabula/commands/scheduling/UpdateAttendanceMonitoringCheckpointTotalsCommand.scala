@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.data.Transactions._
 
 object UpdateAttendanceMonitoringCheckpointTotalsCommand {
 	def apply() =
@@ -13,19 +15,32 @@ object UpdateAttendanceMonitoringCheckpointTotalsCommand {
 			with AutowiringAttendanceMonitoringServiceComponent
 			with UpdateAttendanceMonitoringCheckpointTotalsDescription
 			with UpdateAttendanceMonitoringCheckpointTotalsPermissions
+			with UpdateAttendanceMonitoringCheckpointTotalsState
+			with UpdateAttendanceMonitoringCheckpointTotalsCommandValidation
 }
 
 
 class UpdateAttendanceMonitoringCheckpointTotalsCommandInternal extends CommandInternal[Seq[AttendanceMonitoringCheckpointTotal]] {
 
-	self: AttendanceMonitoringServiceComponent =>
+	self: AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringCheckpointTotalsState =>
 
 	override def applyInternal() = {
-		attendanceMonitoringService.listCheckpointTotalsForUpdate.map(total =>
+		totalsToUpdate.map(total =>
 			attendanceMonitoringService.updateCheckpointTotal(total.student, total.department, total.academicYear)
 		)
 	}
 
+}
+
+trait UpdateAttendanceMonitoringCheckpointTotalsCommandValidation extends SelfValidating {
+
+	self: UpdateAttendanceMonitoringCheckpointTotalsState =>
+
+	def validate(errors: Errors) {
+		if (totalsToUpdate.isEmpty) {
+			errors.reject("", "No totals to update")
+		}
+	}
 }
 
 trait UpdateAttendanceMonitoringCheckpointTotalsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -53,4 +68,9 @@ trait UpdateAttendanceMonitoringCheckpointTotalsDescription extends Describable[
 			"attended" -> total.attended
 		)))
 	}
+}
+
+trait UpdateAttendanceMonitoringCheckpointTotalsState {
+	self: AttendanceMonitoringServiceComponent =>
+	lazy val totalsToUpdate = transactional(readOnly = true) { attendanceMonitoringService.listCheckpointTotalsForUpdate }
 }

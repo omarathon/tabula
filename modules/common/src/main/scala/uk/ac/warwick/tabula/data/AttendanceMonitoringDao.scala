@@ -550,9 +550,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal] = {
 		session.newCriteria[AttendanceMonitoringCheckpointTotal]
-			.add(lt("updatedDate", DateTime.now))
+			.add(lt("updatedDate", DateTime.now.minusHours(6)))
 			.addOrder(Order.asc("updatedDate"))
-			.setMaxResults(10)
+			.setMaxResults(20)
 			.setFetchMode("department", FetchMode.JOIN)
 			.setFetchMode("student", FetchMode.JOIN)
 			.seq
