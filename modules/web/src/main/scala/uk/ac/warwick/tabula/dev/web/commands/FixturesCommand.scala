@@ -190,6 +190,12 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 						}
 						triggerService.removeExistingTriggers(assignment)
 						assignment.feedbacks.clear()
+					}
+				}
+				session.flush()
+
+				for (module <- modules.asScala) {
+					for (assignment <- module.assignments.asScala) {
 						session.delete(assignment)
 					}
 					module.assignments.clear()
