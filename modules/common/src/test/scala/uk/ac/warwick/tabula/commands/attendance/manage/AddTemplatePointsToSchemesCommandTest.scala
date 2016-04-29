@@ -3,18 +3,18 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 import org.joda.time.DateTime
 import org.mockito.Matchers
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{ScheduledNotification, Department}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringTemplate, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringTemplate}
+import uk.ac.warwick.tabula.data.model.{Department, ScheduledNotification}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
-import org.hamcrest.Matchers._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 
 class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
 	val academicYear = new AcademicYear(2014)
 	val department = new Department
+	val student = Fixtures.student("1234")
 
 	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
@@ -46,7 +46,9 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = department
+		scheme.academicYear = academicYear
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Date
+		scheme.members.addUserId(student.universityId)
 
 		val scheme1 = new AttendanceMonitoringScheme
 		scheme1.department = department
@@ -56,7 +58,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 		schemes.add(scheme1)
 
 		attendanceMonitoringService.generatePointsFromTemplateScheme(templateScheme, academicYear) returns points
-		profileService.getAllMembersWithUniversityIds(anArgThat(anything)) returns Nil
+		profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 		attendanceMonitoringService.listAllSchemes(department) returns Seq(scheme)
 
 	}
@@ -75,6 +77,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 			newPoints.size should be (6)
 			verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
 			verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])
+			verify(command.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), department, academicYear)
 		}
 	}
 

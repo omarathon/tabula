@@ -20,7 +20,7 @@
 			<h3>Grade: ${feedback.latestGrade}</h3>
 		</#if>
 	</div>
-	${feedback.studentViewableAdjustments?size}
+
 	<#list feedback.studentViewableAdjustments as viewableFeedback>
 		<#if viewableFeedback??>
 			<div class="alert">

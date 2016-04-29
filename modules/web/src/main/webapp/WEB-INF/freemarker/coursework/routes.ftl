@@ -81,7 +81,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissionsandfeedbacktable assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/table"/></#macro>
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/summary"/></#macro>
 
-<#macro downloadSingleSubmission submission filename><@_u page="/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}?single=true"/></#macro>
+<#macro downloadSubmission submission filename><@_u page="/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro assignMarkers assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/assign-markers" /></#macro>
 <#macro assignMarkersSmallGroups assignment><@url context="/groups" page="/admin/marker-allocation/${assignment.id}" /></#macro>

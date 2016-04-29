@@ -37,7 +37,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 		val allUniversityIDs = memberDao.getFreshUniversityIds()
 
-		logger.info(s"${allUniversityIDs.size} students to fetch from SITS")
+		logger.info(s"${allUniversityIDs.size} students to fetch from SITS for $sitsCurrentAcademicYear")
 
 		val parsedSitsRows = allUniversityIDs.grouped(Daoisms.MaxInClauseCount).zipWithIndex.map { case (universityIds, groupCount) =>
 			val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(
@@ -47,7 +47,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 					Map("year" -> sitsCurrentAcademicYear, "universityIds" -> universityIds).asJava
 			).asScala
 
-			logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCount} students fetched from SITS")
+			logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCount} students requested from SITS; ${sitsRows.size} rows found")
 
 			(
 				sitsRows.map(_.universityId.getOrElse("")).distinct,
@@ -59,6 +59,18 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 		val universityIdsSeen = parsedSitsRows.flatMap(_._1).distinct
 		val scjCodesSeen = parsedSitsRows.flatMap(_._2).distinct
 		val studentCourseYearKeysSeen = parsedSitsRows.flatMap(_._3)
+
+		if (universityIdsSeen.isEmpty) {
+			throw new UnsupportedOperationException("Could not find any students, so not marking all as missing")
+		}
+
+		if (scjCodesSeen.isEmpty) {
+			throw new UnsupportedOperationException("Could not find any SCJ codes, so not marking all as missing")
+		}
+
+		if (studentCourseYearKeysSeen.isEmpty) {
+			throw new UnsupportedOperationException("Could not find any year enrolments, so not marking all as missing")
+		}
 
 		val newStaleUniversityIds: Seq[String] = {
 			(allUniversityIDs.toSet -- universityIdsSeen).toSeq
@@ -75,13 +87,13 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 			(allFreshIds -- scydIdsSeen).toSeq
 		}
 
-		logger.warn("Timestamping missing students")
+		logger.warn(s"Timestamping ${newStaleUniversityIds.size} missing students")
 		memberDao.stampMissingFromImport(newStaleUniversityIds, DateTime.now)
 
-		logger.warn("Timestamping missing studentCourseDetails")
+		logger.warn(s"Timestamping ${newStaleScjCodes.size} missing studentCourseDetails")
 		studentCourseDetailsDao.stampMissingFromImport(newStaleScjCodes, DateTime.now)
 
-		logger.warn("Timestamping missing studentCourseYearDetails")
+		logger.warn(s"Timestamping ${newStaleScydIds.size} missing studentCourseYearDetails")
 		studentCourseYearDetailsDao.stampMissingFromImport(newStaleScydIds, DateTime.now)
 	}
 
