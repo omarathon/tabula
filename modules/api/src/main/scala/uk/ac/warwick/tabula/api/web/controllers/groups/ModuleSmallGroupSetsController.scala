@@ -40,6 +40,8 @@ abstract class ModuleSmallGroupSetsController extends ApiController
 	with SmallGroupEventToJsonConverter
 	with AssessmentMembershipInfoToJsonConverter {
 
+	hideDeletedItems
+
 	override def binding[CreateSmallGroupSetCommand](binder: WebDataBinder, cmd: CreateSmallGroupSetCommand) {
 		binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
 			override def fromString(code: String) = SmallGroupFormat.fromCode(code)
@@ -120,6 +122,7 @@ trait SmallGroupSetPropertiesRequest[A <: ModifySmallGroupSetCommandState] exten
 	@BeanProperty var name: String = null
 	@BeanProperty var format: SmallGroupFormat = null
 	@BeanProperty var allocationMethod: SmallGroupAllocationMethod = null
+
 	@BeanProperty var studentsCanSeeTutorName: JBoolean = false
 	@BeanProperty var studentsCanSeeOtherMembers: JBoolean = false
 	@BeanProperty var collectAttendance: JBoolean = true
