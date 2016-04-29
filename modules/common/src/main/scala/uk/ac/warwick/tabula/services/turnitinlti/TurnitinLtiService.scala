@@ -130,21 +130,9 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 				"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 				"custom_duedate" -> isoFormatter.print(new DateTime().plusYears(2)), // default is 7 days in the future, so make it far in future
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
-			) ++ userParams(user.userId, user.email, user.firstName, user.lastName)) {
-			request =>
-			// expect a 302
-				request >:+ {
-					(headers, request) =>
-						val location = headers("location").headOption
-							request >- {
-							(html) => {
-								if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
-								// listen to callback for actual response
-								TurnitinLtiResponse.redirect(location.get)
-							}
-						}
-				}
-		}
+			) ++ userParams(user.userId, user.email, user.firstName, user.lastName),
+			Some(HttpStatus.SC_OK)
+		) { request => request >- { html => TurnitinLtiResponse.fromHtml(success = true, html = html) }}
 	}
 
 	/**
