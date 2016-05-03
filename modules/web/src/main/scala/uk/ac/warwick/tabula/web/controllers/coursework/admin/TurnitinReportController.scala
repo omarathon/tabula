@@ -31,7 +31,8 @@ class TurnitinReportController extends CourseworkController {
 	@RequestMapping
 	def goToReport(@ModelAttribute("command") command: ViewPlagiarismReportCommand): Mav = command.apply() match {
 		case Left(uri) =>
-			Mav("redirect:" + uri.toString)
+			if (command.ltiParams.nonEmpty)	Mav("coursework/admin/assignments/turnitin/lti_report_forward", "turnitin_report_url" -> uri, "params" -> command.ltiParams)
+			else Mav("redirect:" + uri.toString)
 
 		case Right(error: TurnitinReportErrorWithMessage) =>
 			Mav("coursework/admin/assignments/turnitin/report_error", "problem" -> error.code, "message" -> error.message)
