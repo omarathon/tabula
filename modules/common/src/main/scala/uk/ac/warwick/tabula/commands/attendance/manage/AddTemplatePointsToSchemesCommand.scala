@@ -29,7 +29,8 @@ object AddTemplatePointsToSchemesCommand {
 }
 
 class AddTemplatePointsToSchemesCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking with UpdatesAttendanceMonitoringScheme {
+	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking
+		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
 	self: AddTemplatePointsToSchemesCommandState with AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent with TermServiceComponent =>
@@ -49,7 +50,8 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 			}
 		}
 
-		afterUpdate(schemes.asScala)
+		generateNotifications(schemes.asScala)
+		updateCheckpointTotals(schemes.asScala)
 
 		newPoints
 	}

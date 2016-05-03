@@ -86,7 +86,8 @@
 													<#if mapGet(attendanceNotes, instance)??>
 														<#local studentNote = mapGet(attendanceNotes, instance) />
 														<#local note>
-														${studentNote.truncatedNote}
+															${studentNote.absenceType.description}<br />
+															${studentNote.truncatedNote}
 															<#if (studentNote.truncatedNote?length > 0)>
 																<br/>
 															</#if>

@@ -403,12 +403,14 @@
 	<#local popoverContent>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteType?has_content><p>${formatResult.noteType}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
 	<span class="hidden-desktop visible-print">
 		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
+		<#if formatResult.noteType?has_content>${formatResult.noteType}<br /></#if>
 		<#if formatResult.noteText?has_content>${formatResult.noteText}</#if>
 	</span>
 </#macro>
@@ -417,6 +419,7 @@
 	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
 	<#local tooltipContent>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteType?has_content><p>${formatResult.noteType}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 	</#local>
 	<#local startDateInFuture = point.startDateInFuture />
@@ -445,10 +448,14 @@
 		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
+		<#if formatResult.noteType?has_content><p>${formatResult.noteType}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
-	<i class="use-popover icon-fixed-width ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" data-content="${popoverContent}" data-html="true"></i>
+	<span class="icon-stack icon-stack-original-size icon-stack-right icon-fixed-width use-popover" data-content="${popoverContent}" data-html="true">
+		<i class="use-popover icon-fixed-width icon-stack-base ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
+		<#if formatResult.noteUrl?has_content><i class="icon-fixed-width icon-stack-small icon-envelope-alt icon-filled-white"></i></#if>
+	</span>
 </#macro>
 
 <#macro checkpointIconForPointCheckpointPair department student pointCheckpointPair attendanceNotesMap>
@@ -618,4 +625,12 @@
 			</div>
 		</div>
 	</div>
+</#macro>
+
+<#macro checkpointTotalTitle checkpointTotal>
+	<#if checkpointTotal.updatedDate.millis == 0>
+		(awaiting update)
+	<#else>
+		Last updated <@fmt.date checkpointTotal.updatedDate />
+	</#if>
 </#macro>

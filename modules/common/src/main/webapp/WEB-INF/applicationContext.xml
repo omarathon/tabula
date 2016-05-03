@@ -452,8 +452,6 @@
 						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
 						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
 						<value>uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheBusterMessage</value>
-						<value>uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceUpdateCheckpointTotalMessage</value>
-						<value>uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceResetCheckpointTotalMessage</value>
 					</list>
 				</property>
 			</bean>
@@ -466,7 +464,6 @@
 	<bean class="uk.ac.warwick.tabula.services.EmergencyMessageListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService" />
-	<bean class="uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceListener" />
 
 	<!-- Expose local properties as system properties -->
 	<bean

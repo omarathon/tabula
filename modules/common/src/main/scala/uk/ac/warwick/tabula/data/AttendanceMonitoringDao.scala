@@ -4,7 +4,7 @@ import org.hibernate.FetchMode
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Order, ProjectionList, Projections, Restrictions}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -113,8 +113,9 @@ trait AttendanceMonitoringDao {
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
 	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
-	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
+	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
+	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
 }
 
 @Repository
@@ -532,27 +533,29 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 			.groupBy(_.department)
 	}
 
-	def resetTotalsForStudentsNotInAScheme(department: Department, academicYear: AcademicYear): Unit = {
-		session.flush()
-		val usersInAScheme = listSchemes(department, academicYear).flatMap(_.members.members).distinct
-		val totals = session.newCriteria[AttendanceMonitoringCheckpointTotal]
-			// TODO Is there a way to do not-in with multiple queries?
-			.add(not(safeIn("student.universityId", usersInAScheme)))
-			.add(is("department", department))
-			.add(is("academicYear", academicYear))
-			.add(or(
-				gt("attended", 0),
-				gt("authorised", 0),
-				gt("unauthorised", 0),
-				gt("unrecorded", 0)
-			))
-			.seq
-
+	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit = {
+		val dbTotals = safeInSeq(() => {
+			session.newCriteria[AttendanceMonitoringCheckpointTotal]
+				.add(is("department", department))
+				.add(is("academicYear", academicYear))
+		}, "student", students)
+		val totals = students.map(student => dbTotals.find(_.student == student).getOrElse(
+			new AttendanceMonitoringCheckpointTotal(student, department, academicYear)
+		))
 		totals.foreach(total => {
-			total.reset()
-			saveOrUpdate(total)
+			total.updatedDate = new DateTime(0)
+			session.saveOrUpdate(total)
 		})
+	}
 
+	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal] = {
+		session.newCriteria[AttendanceMonitoringCheckpointTotal]
+			.add(lt("updatedDate", DateTime.now.minusHours(6)))
+			.addOrder(Order.asc("updatedDate"))
+			.setMaxResults(20)
+			.setFetchMode("department", FetchMode.JOIN)
+			.setFetchMode("student", FetchMode.JOIN)
+			.seq
 	}
 }
 

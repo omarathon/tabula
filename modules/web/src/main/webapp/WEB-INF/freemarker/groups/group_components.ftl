@@ -867,7 +867,8 @@
 			<#if mapGet(notes, instance)??>
 				<#local studentNote = mapGet(notes, instance) />
 				<#local note>
-				${studentNote.truncatedNote}
+					${studentNote.absenceType.description}<br />
+					${studentNote.truncatedNote}
 					<#if (studentNote.truncatedNote?length > 0)>
 						<br/>
 					</#if>
@@ -887,7 +888,10 @@
 			</#local>
 
 			<td>
-				<i class="use-popover fa fa-fw ${class}" data-content="${renderedTitle?replace('\"', '')}" data-html="true"></i>
+				<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
+					<i class="fa fa-fw fa-stack-2x ${class}"></i>
+					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
+				</span>
 			</td>
 		</#list>
 		<td>

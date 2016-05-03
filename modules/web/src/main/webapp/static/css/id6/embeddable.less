@@ -755,18 +755,9 @@ fieldset.internal {
 		float: right;
 	}
 
-	.past-text-info {
-		color: #404041;
-		font-weight: bold;
-	}
-
 	&.late { color: @warningText; }
 	&.extended { color: @blue; }
 	&.not-open { color: #606060; }
-	&.past {
-		color: #404041;
-		display: block;
-	}
 }
 
 #container p.extension-button {
@@ -1995,6 +1986,40 @@ input.flexi-picker {
 .icon-ok.attended, .icon-remove.unauthorised, .icon-remove-circle.authorised, .icon-ok-circle.authorised {
 	&.non-active {
 		opacity: 0.3;
+	}
+}
+
+#container {
+	.icon-stack.icon-stack-original-size {
+		width: 1em;
+		height: 1em;
+		line-height: 1em;
+		vertical-align: -16%;
+		&.icon-fixed-width {
+			width: 16/14em;
+		}
+
+		.icon-stack-base {
+			font-size: 1em;
+		}
+		.icon-stack-small {
+			font-size: 0.6em;
+		}
+	}
+	.icon-stack.icon-stack-right {
+		.icon-stack-small {
+			width: auto;
+			line-height: 1em;
+			right: -1px;
+			left: auto;
+			bottom: -1px;
+			background: white;
+			height: 1em;
+			padding-right: 0;
+		}
+	}
+	.icon-filled-white {
+		background: white;
 	}
 }
 

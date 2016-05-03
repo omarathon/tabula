@@ -20,6 +20,7 @@ case class AttendanceMonitoringCheckpointFormatterResult(
 	iconClass: String,
 	status: String,
 	metadata: String,
+	noteType: String,
 	noteText: String,
 	noteUrl: String
 )
@@ -33,7 +34,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
 	override def exec(list: JList[_]): AttendanceMonitoringCheckpointFormatterResult = {
-		val args = list.asScala.toSeq.map {
+		val args = list.asScala.map {
 			model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 		}
 		args match {
@@ -55,7 +56,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 			case _ => ""
 		}
 
-		s"Recorded ${userString}${DateBuilder.format(checkpoint.updatedDate)}"
+		s"Recorded $userString${DateBuilder.format(checkpoint.updatedDate)}"
 	}
 
 	private def pointDuration(point: AttendanceMonitoringPoint, department: Department) = {
@@ -93,11 +94,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 
 	private def result(department: Department, checkpoint: AttendanceMonitoringCheckpoint, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
 		val point = checkpoint.point
-		val (noteText, noteUrl) = (noteOption match {
+		val (noteType, noteText, noteUrl) = (noteOption match {
 			case None => attendanceMonitoringService.getAttendanceNote(checkpoint.student, point)
 			case Some(note) => Option(note)
-		}).fold(("", ""))(note =>
-			(note.truncatedNote, Routes.Note.view(point.scheme.academicYear, checkpoint.student, point))
+		}).fold(("", "", ""))(note =>
+			(note.absenceType.description, note.truncatedNote, Routes.Note.view(point.scheme.academicYear, checkpoint.student, point))
 		)
 
 		checkpoint.state match {
@@ -108,8 +109,9 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"icon-ok fa fa-check attended",
 					s"Attended: ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
-					s"$noteText",
-					s"$noteUrl"
+					noteType,
+					noteText,
+					noteUrl
 				)
 			case AttendanceState.MissedAuthorised =>
 				AttendanceMonitoringCheckpointFormatterResult(
@@ -118,8 +120,9 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"icon-remove-circle fa fa-times-circle-o authorised",
 					s"Missed (authorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
-					s"$noteText",
-					s"$noteUrl"
+					noteType,
+					noteText,
+					noteUrl
 				)
 			case AttendanceState.MissedUnauthorised =>
 				AttendanceMonitoringCheckpointFormatterResult(
@@ -128,20 +131,21 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					"icon-remove fa fa-times unauthorised",
 					s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
-					s"$noteText",
-					s"$noteUrl"
+					noteType,
+					noteText,
+					noteUrl
 				)
 			// Should never be the case, but stops a compile warning
-			case _ => AttendanceMonitoringCheckpointFormatterResult("","","","","","","")
+			case _ => AttendanceMonitoringCheckpointFormatterResult("","","","","","","","")
 		}
 	}
 
 	private def result(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
-		val (noteText, noteUrl) = (noteOption match {
+		val (noteType, noteText, noteUrl) = (noteOption match {
 			case None => attendanceMonitoringService.getAttendanceNote(student, point)
 			case Some(note) => Option(note)
-		}).fold(("", ""))(note =>
-			(note.truncatedNote, Routes.Note.view(point.scheme.academicYear, student, point))
+		}).fold(("", "", ""))(note =>
+			(note.absenceType.description, note.truncatedNote, Routes.Note.view(point.scheme.academicYear, student, point))
 		)
 
 		if (point.endDate.isBefore(DateTime.now.toLocalDate)) {
@@ -152,8 +156,9 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"icon-warning-sign fa fa-exclamation-triangle late",
 				s"${point.name} ${pointDuration(point, department)}",
 				"",
-				s"$noteText",
-				s"$noteUrl"
+				noteType,
+				noteText,
+				noteUrl
 			)
 		} else {
 			AttendanceMonitoringCheckpointFormatterResult(
@@ -162,8 +167,9 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 				"icon-minus fa fa-minus",
 				s"${point.name} ${pointDuration(point, department)}",
 				"",
-				s"$noteText",
-				s"$noteUrl"
+				noteType,
+				noteText,
+				noteUrl
 			)
 		}
 	}

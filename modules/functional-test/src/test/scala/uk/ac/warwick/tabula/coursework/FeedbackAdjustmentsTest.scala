@@ -87,11 +87,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			eventually(currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/bulk-adjustment"))
 
 			Then("I upload a valid adjustments file")
-			click on ("file.upload")
+			click on "file.upload"
 			pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
 			And("submit the form")
-			click on (cssSelector(".btn-primary"))
+			click on cssSelector(".btn-primary")
 
 			Then("I should see the preview bulk adjustment page")
 			eventually {
@@ -141,11 +141,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			eventually(currentUrl should include(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/bulk-adjustment"))
 
 			Then("I upload a valid adjustments file")
-			click on ("file.upload")
+			click on "file.upload"
 			pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
 			And("submit the form")
-			click on (cssSelector(".btn-primary"))
+			click on cssSelector(".btn-primary")
 
 			Then("I should see the preview bulk adjustment page")
 			eventually {

@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationM
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, UserAccessMgrRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.scheduling.{ModuleInfo, DepartmentInfo}
-import uk.ac.warwick.tabula.services.{FeedbackForSitsService, ModuleAndDepartmentService, RelationshipService, SmallGroupService}
+import uk.ac.warwick.tabula.services.scheduling.{DepartmentInfo, ModuleInfo}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 
 import scala.collection.JavaConverters._
@@ -188,7 +188,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 								session.delete(feedbackForSits)
 							}
 						}
+						triggerService.removeExistingTriggers(assignment)
 						assignment.feedbacks.clear()
+					}
+				}
+				session.flush()
+
+				for (module <- modules.asScala) {
+					for (assignment <- module.assignments.asScala) {
 						session.delete(assignment)
 					}
 					module.assignments.clear()
@@ -231,6 +238,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Department' and SCOPE_ID not in (select id from department)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Module' and SCOPE_ID not in (select id from module)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from smallgroupset where module_id not in (select id from module)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from attendancemonitoringtotal where department_id not in (select id from department)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery(
+					"""
+						select scheduledtrigger.id from scheduledtrigger
+						join entityreference on target_id = entityreference.id
+						where scheduledtrigger.trigger_type = 'AssignmentClosed'
+						and entityreference.entity_id not in (select id from assignment)
+					""").list.size() == 0)
 			}
 		}
 

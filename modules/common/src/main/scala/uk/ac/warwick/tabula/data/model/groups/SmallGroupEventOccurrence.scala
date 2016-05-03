@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 
 import org.hibernate.annotations.BatchSize
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, Interval, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
@@ -34,10 +34,12 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	def permissionsParents = Stream(event)
 
 	def date: Option[LocalDate] = {
+		date(termService.getAcademicWeeksForYear(event.group.groupSet.academicYear.dateInTermOne).toMap)
+	}
+	def date(weeksForYear: Map[Integer, Interval]): Option[LocalDate] = {
 		event.day match {
 			case null => None
 			case d: DayOfWeek =>
-				val weeksForYear = termService.getAcademicWeeksForYear(event.group.groupSet.academicYear.dateInTermOne).toMap
 				def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
 					weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
@@ -46,6 +48,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	}
 
 	def dateTime: Option[DateTime] = date.map(_.toDateTime(event.startTime))
+	def dateTime(weeksForYear: Map[Integer, Interval]): Option[DateTime] = date.map(_.toDateTime(event.startTime))
 
 	override def toEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
 }

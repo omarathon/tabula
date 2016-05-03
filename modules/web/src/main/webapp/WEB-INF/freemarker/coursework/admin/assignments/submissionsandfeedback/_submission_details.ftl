@@ -26,10 +26,12 @@
 		<#if attachments?size gt 0>
 			<#if attachments?size == 1>
 				<#local filename = "${attachments[0].name}">
+				<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/>?single=true</#local>
 			<#else>
 				<#local filename = "submission-${submission.universityId}.zip">
+				<#local downloadUrl><@routes.coursework.downloadSubmission submission filename/></#local>
 			</#if>
-			<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename?url}'/>"><#compress>
+			<a class="long-running" href="${downloadUrl}"><#compress>
 				${attachments?size}
 				<#if attachments?size == 1> file
 				<#else> files

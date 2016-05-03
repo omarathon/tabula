@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.commands.reports.profiles
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
-import com.google.common.io.ByteSource
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, MonitoringPoint, MonitoringPointType}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
+import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
+import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -30,7 +27,7 @@ object ProfileExportSingleCommand {
 	def apply(student: StudentMember, academicYear: AcademicYear, user: CurrentUser) =
 		new ProfileExportSingleCommandInternal(student, academicYear, user)
 			with AutowiredTextRendererComponent
-			with FreemarkerXHTMLPDFGeneratorComponent
+			with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 			with PhotosWarwickMemberPhotoUrlGeneratorComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringMonitoringPointServiceComponent
@@ -51,7 +48,7 @@ object ProfileExportSingleCommand {
 class ProfileExportSingleCommandInternal(val student: StudentMember, val academicYear: AcademicYear, user: CurrentUser)
 	extends CommandInternal[Seq[FileAttachment]] with TaskBenchmarking {
 
-	self: FreemarkerXHTMLPDFGeneratorComponent with AttendanceMonitoringServiceComponent
+	self: FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AttendanceMonitoringServiceComponent
 		with MonitoringPointServiceComponent with AssessmentServiceComponent
 		with RelationshipServiceComponent with MeetingRecordServiceComponent
 		with SmallGroupServiceComponent
@@ -163,10 +160,10 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			.groupBy(_.state).mapValues(_
 			.groupBy(_.term)))
 
-		// Render PDF
-		val tempOutputStream = new ByteArrayOutputStream()
-		pdfGenerator.renderTemplate(
+		// Render PDF and create file
+		val pdfFileAttachment = pdfGenerator.renderTemplateAndStore(
 			"/WEB-INF/freemarker/reports/profile-export.ftl",
+			s"${student.universityId}-profile.pdf",
 			Map(
 				"student" -> student,
 				"academicYear" -> academicYear,
@@ -176,17 +173,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				"assignmentData" -> assignmentData,
 				"smallGroupData" -> smallGroupData.groupBy(_.eventId),
 				"meetingData" -> meetingData.groupBy(_.relationshipType)
-			),
-			tempOutputStream
+			)
 		)
-
-		val bytes = tempOutputStream.toByteArray
-
-		// Create file
-		val pdfFileAttachment = new FileAttachment
-		pdfFileAttachment.name = s"${student.universityId}-profile.pdf"
-		pdfFileAttachment.uploadedData = ByteSource.wrap(bytes)
-		fileDao.saveTemporary(pdfFileAttachment)
 
 		// Return results
 		Seq(pdfFileAttachment) ++
