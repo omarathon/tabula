@@ -489,6 +489,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 					result.authorised = totals.map(_.authorised).sum
 					result.unauthorised = totals.map(_.unauthorised).sum
 					result.attended = totals.map(_.attended).sum
+					result.updatedDate = DateTime.now
 					Option(result)
 				}
 		}
