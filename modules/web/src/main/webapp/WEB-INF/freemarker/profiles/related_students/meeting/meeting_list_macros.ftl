@@ -26,21 +26,21 @@
 			</#if>
 
 			<#if existingRelationship && can_create_meetings>
-				<a class="btn-like new" href="<@routes.profiles.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+				<a class="btn btn-link new" href="<@routes.profiles.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record">New record</a>
 			</#if>
 			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
-				<a class="btn-like new" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
+				<a class="btn btn-link new" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting">Schedule</a>
 			</#if>
 
 		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
 				<div class="list-controls">
-					<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-					<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+					<a class="toggle-all-details btn btn-link open-all-details" title="Expand all meetings">Expand all</a>
+					<a class="toggle-all-details btn btn-link close-all-details hide" title="Collapse all meetings">Collapse all</a>
 				</div>
 				<#list meetings as meeting>
-					<#local deletedClasses><#if meeting.deleted>deleted muted</#if></#local>
+					<#local deletedClasses><#if meeting.deleted>deleted subtle</#if></#local>
 					<#local pendingAction = meeting.pendingActionBy(viewerUser) />
 					<#local pendingActionClasses><#if pendingAction>well</#if></#local>
 
@@ -71,11 +71,11 @@
 							</#if>
 							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewerUser.universityId! == meeting.creator.universityId && !meeting.approved))>
 								<div class="meeting-record-toolbar">
-									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="<@routes.profiles.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.profiles.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.profiles.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
-									<i class="icon-spinner icon-spin"></i>
+									<a href="${editUrl}" class="btn btn-link edit-meeting-record" title="Edit record">Edit</a>
+									<a href="<@routes.profiles.delete_meeting_record meeting />" class="btn btn-link delete-meeting-record" title="Delete record">Delete</a>
+									<a href="<@routes.profiles.restore_meeting_record meeting />" class="btn btn-link restore-meeting-record" title="Restore record">Restore</a>
+									<a href="<@routes.profiles.purge_meeting_record meeting />" class="btn btn-link purge-meeting-record" title="Purge record">Purge</a>
+									<i class="fa fa-spinner fa-spin"></i>
 								</div>
 							</#if>
 						</summary>
@@ -106,13 +106,13 @@
 
 <#macro meetingState meeting studentCourseDetails>
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewerUser)>
-		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
 		<div class="alert alert-info">
 			This meeting record needs to be approved by <#list meeting.pendingApprovers as approver>${approver.fullName}<#if approver_has_next>, </#if></#list>.
 		</div>
 	<#elseif meeting.pendingApprovalBy(viewerUser)>
-		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-		<div class="pending-action alert alert-warning">
+		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
+		<div class="pending-action alert alert-info">
 			This record needs your approval. Please review, then approve or return it with comments.
 			<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
 				<br />
@@ -143,15 +143,15 @@
 			<button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
 		</form>
 	<#elseif meeting.rejectedBy(viewerMember)>
-		<small class="muted">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-		<div class="alert alert-error">
+		<p class="very-subtle">Pending revision. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
+		<div class="alert alert-danger">
 			<div class="rejection">
 				<p>You sent this record back to the other party, who will review the record and submit it for approval again.</p>
 			</div>
 		</div>
 	<#elseif meeting.pendingRevisionBy(viewerUser)>
-		<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
-		<div class="pending-action alert alert-warning">
+		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
+		<div class="pending-action alert alert-info">
 			<#list meeting.rejectedApprovals as rejectedApproval>
 				<div class="rejection">
 					<p>This record has been returned with comments by ${rejectedApproval.approver.fullName} because:</p>
@@ -164,13 +164,13 @@
 			<a class="edit-meeting-record btn btn-primary" href="<@routes.profiles.edit_meeting_record studentCourseDetails.urlSafeId meeting/>">Edit</a>
 		</div>
 	<#else>
-		<small class="muted">
+		<p class="very-subtle">
 			${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}.
 			Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate />.
 			<#if meeting.approved && (meeting.approvedBy?has_content || meeting.approvedDate?has_content)>
 				Approved<#if meeting.approvedBy?has_content> by ${meeting.approvedBy.fullName},</#if><#if meeting.approvedDate?has_content> <@fmt.date meeting.approvedDate /></#if>
 			</#if>
-		</small>
+		</p>
 	</#if>
 </#macro>
 
@@ -179,17 +179,17 @@
 	<#local canConvertMeeting = can.do("Profiles.ScheduledMeetingRecord.Confirm", meeting) />
 
 	<#if pendingAction && !canConvertMeeting>
-		<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+		<p class="very-subtle">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
 		<#if !meeting.pendingActionBy(viewerUser)>
 			<div class="alert alert-info">
 				${meeting.creator.fullName} needs to confirm that this meeting took place.
 			</div>
 		</#if>
 	<#elseif pendingAction && canConvertMeeting>
-		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
-		<#if meeting.deleted><small class="muted">This meeting has been deleted</small>
+		<p class="very-subtle">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
+		<#if meeting.deleted><p class="very-subtle">This meeting has been deleted</p>
 		<#else>
-			<div class="alert alert-warning">
+			<div class="alert alert-info">
 				Please confirm whether this scheduled meeting took place.
 			</div>
 
@@ -217,12 +217,12 @@
 						</@form.field>
 					</@form.row>
 				</div>
-				<div class="ajaxErrors alert alert-error" style="display: none;"></div>
+				<div class="ajaxErrors alert alert-danger" style="display: none;"></div>
 				<button type="submit" class="btn btn-primary">Submit</button>
 			</form>
 		</#if>
 	<#elseif meeting.missed>
-		<div class="alert alert-error rejection">
+		<div class="alert alert-danger rejection">
 			<#if meeting.missedReason?has_content>
 				<p> This meeting did not take place because: </p>
 				<blockquote class="reason">${meeting.missedReason}</blockquote>
@@ -230,9 +230,9 @@
 				<p> This meeting did not take place (no reason given) </p>
 			</#if>
 		</div>
-		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
 	<#else>
-		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
 	</#if>
 </#macro>
 

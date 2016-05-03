@@ -38,7 +38,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	@ModelAttribute("convertCommand")
 	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =  Option(meetingRecord).map(mr => {
 		ConvertScheduledMeetingRecordCommand(currentMember, mr)
-	}).getOrElse(null)
+	}).orNull
 
 	@ModelAttribute("command")
 	def getCreateCommand(
@@ -46,7 +46,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 		@PathVariable studentCourseDetails: StudentCourseDetails
 	) = Option(meetingRecord).map(mr => {
 		new CreateMeetingRecordCommand(currentMember, mr.relationship, considerAlternatives = false)
-	}).getOrElse(null)
+	}).orNull
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
@@ -80,8 +80,8 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	) = {
 		val mav = Mav("profiles/related_students/meeting/edit",
 			"command" -> cmd,
-			"modal" -> ajax,
-			"iframe" -> iframe,
+			"isModal" -> ajax,
+			"isIframe" -> iframe,
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"relationshipType"-> meetingRecord.relationship.relationshipType,

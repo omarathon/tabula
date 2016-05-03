@@ -99,7 +99,7 @@
 									</#if>
 									Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
 									<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
-									requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="icon-question-sign"></i></a>
+									requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="faf a-question-circle"></i></a>
 								</#if>
 							</td>
 						</tr>
@@ -114,14 +114,14 @@
 					<#if profile.email??>
 						<tr>
 							<th>Warwick email</th>
-							<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
+							<td><a href="mailto:${profile.email}">${profile.email}</a></td>
 						</tr>
 					</#if>
 
 					<#if profile.homeEmail??>
 						<tr>
 							<th>Alternative email</th>
-							<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
+							<td><a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 						</tr>
 					</#if>
 

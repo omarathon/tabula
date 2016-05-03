@@ -25,8 +25,8 @@
 		This is a service for managing student profiles, records and tutor information
 	</p>
 
-	<div class="row-fluid">
-		<div class="span<#if is_admin>6<#else>12</#if>">
+	<div class="row">
+		<div class="col-md-<#if is_admin>6<#else>12</#if>">
 			<#if is_staff>
 				<div class="header-with-tooltip" id="search-header">
 					<h2 class="section">Search for students</h2>
@@ -85,47 +85,47 @@
 		</div>
 
 		<#if adminDepartments?has_content>
-			<div id="profile-dept-admin" class="span6">
+			<div id="profile-dept-admin" class="col-md-6">
 				<h4>Departmental administration</h4>
 
-				<#list adminDepartments as dept>
-				<div class="clearfix">
-					<div class="btn-group pull-right">
-					  <a class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
-					  <ul class="dropdown-menu pull-right">
-							<li><a href="<@routes.profiles.deptperms dept/>">
-								<i class="icon-fixed-width icon-user"></i> Edit departmental permissions
-							</a></li>
-
-							<li><a href="<@routes.profiles.filter_students dept/>">
-								<i class="icon-fixed-width icon-group"></i> View students
-							</a></li>
-
-							<#list dept.displayedStudentRelationshipTypes as relationshipType>
-								<li><a href="<@routes.profiles.relationship_agents dept relationshipType />">
-									<i class="icon-fixed-width icon-eye-open"></i> ${relationshipType.description}s
-								</a></li>
-								<li><a href="<@routes.profiles.relationship_missing dept relationshipType />">
-									<i class="icon-fixed-width icon-eye-close"></i> Students with no ${relationshipType.description}
+				<#list adminDepartments?sort_by("code") as dept>
+					<div class="clearfix">
+						<div class="btn-group pull-right">
+						  <a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">Manage <span class="caret"></span></a>
+						  <ul class="dropdown-menu pull-right">
+								<li><a href="<@routes.profiles.deptperms dept/>">
+									Edit departmental permissions
 								</a></li>
 
-								<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
-									<li><a href="<@routes.profiles.relationship_allocate dept relationshipType />">
-										<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
-									</li>
-								</#if>
-							</#list>
+								<li><a href="<@routes.profiles.filter_students dept/>">
+									View students
+								</a></li>
 
-							<li><a href="<@routes.profiles.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
-								<i class="icon-fixed-width icon-list-alt"></i> Settings</a>
-							</li>
-					  </ul>
+								<#list dept.displayedStudentRelationshipTypes as relationshipType>
+									<li><a href="<@routes.profiles.relationship_agents dept relationshipType />">
+										${relationshipType.description}s
+									</a></li>
+									<li><a href="<@routes.profiles.relationship_missing dept relationshipType />">
+										Students with no ${relationshipType.description}
+									</a></li>
+
+									<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
+										<li><a href="<@routes.profiles.relationship_allocate dept relationshipType />">
+											Allocate ${relationshipType.description}s</a>
+										</li>
+									</#if>
+								</#list>
+
+								<li><a href="<@routes.profiles.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
+									Settings</a>
+								</li>
+						  </ul>
+						</div>
+
+						<h5 class="with-settings">${dept.name}</h5>
 					</div>
 
-					<h5>${dept.name}</h5>
-				</div>
-
-				<#if dept_has_next><hr></#if>
+					<#if dept_has_next><hr></#if>
 				</#list>
 			</div>
 		</#if>

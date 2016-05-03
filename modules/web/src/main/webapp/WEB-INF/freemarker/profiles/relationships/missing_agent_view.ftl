@@ -1,18 +1,18 @@
 <#escape x as x?html>
-<div id="agents">
+<div>
 	<div class="pull-right">
 		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
-			<a href="<@routes.profiles.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
-				<i class="icon-random icon-fixed-width"></i> Allocate ${relationshipType.description}s</a>
+			<a href="<@routes.profiles.relationship_allocate department relationshipType />" class="btn btn-default pull-right">
+				Allocate ${relationshipType.description}s</a>
 			</a>
 		</#if>
 	</div>
 
-	<h1>Students in ${department.name} with no ${relationshipType.agentRole}</h1>
+	<h1 class="with-settings">Students in ${department.name} with no ${relationshipType.agentRole}</h1>
 
 	<#if studentCount gt 0>
 		<#if missingStudents?has_content>
-			<table class="students table table-bordered table-striped table-condensed tabula-purple">
+			<table class="related_students table table-striped table-condensed">
 				<thead>
 					<tr>
 						<th class="student-col">First name</th>
@@ -46,26 +46,26 @@
 				<@fmt.bulk_email_students students=missingStudents subject="${relationshipType.agentRole?cap_first}" />
 			</p>
 		<#else>
-			<p class="alert alert-success"><i class="icon-ok"></i> All students in ${department.name} have ${relationshipType.agentRole}s recorded.</p>
+			<p class="alert alert-info">All students in ${department.name} have ${relationshipType.agentRole}s recorded.</p>
 		</#if>
 	<#else>
-		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No students are currently visible for ${department.name} in Tabula.</p>
+		<p class="alert alert-info">No students are currently visible for ${department.name} in Tabula.</p>
 	</#if>
 </div>
 
 <script type="text/javascript">
 (function($) {
 	$(function() {
-		$(".students").tablesorter({
+		$('.related_students').tablesorter({
 			sortList: [[1,0], [3,0], [4,0]]
 		});
 
-		$(".student").on("mouseover", function(e) {
-			$(this).find("td").addClass("hover");
-		}).on("mouseout", function(e) {
-			$(this).find("td").removeClass("hover");
-		}).on("click", function(e) {
-			if (! $(e.target).is("a")) $(this).find("a.profile-link")[0].click();
+		$('.student').on('mouseover', function(e) {
+			$(this).find('td').addClass('hover');
+		}).on('mouseout', function(e) {
+			$(this).find('td').removeClass('hover');
+		}).on('click', function(e) {
+			if (! $(e.target).is('a')) $(this).find('a.profile-link')[0].click();
 		});
 	});
 })(jQuery);

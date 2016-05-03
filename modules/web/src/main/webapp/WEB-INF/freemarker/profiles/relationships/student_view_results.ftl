@@ -5,12 +5,10 @@
 
 		<@student_macros.table studentCourseDetails />
 
-		<p>
-			<@fmt.bulk_email_students students=students />
-		</p>
+		<p><@fmt.bulk_email_students students=students /></p>
 
 	<#else>
-		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No ${relationshipType.studentRole}s are currently visible for you in Tabula.</p>
+		<p class="alert alert-info">No ${relationshipType.studentRole}s are currently visible for you in Tabula.</p>
 	</#if>
 
 </#escape>

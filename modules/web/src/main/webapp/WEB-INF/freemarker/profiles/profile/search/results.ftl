@@ -1,5 +1,5 @@
 <#include "form.ftl" />
-
+<#escape x as x?html>
 
 <section class="results">
 	<h2>Results</h2>
@@ -21,3 +21,4 @@
 		</ul>
 	</#if>
 </section>
+</#escape>

@@ -3,18 +3,18 @@
 	<@f.hidden path="from" />
 	<@f.hidden path="to" />
 
-<div class="student-filter btn-group-group well well-small">
+<div class="student-filter btn-group-group well well-small well-sm">
 	<button type="button" class="clear-all-filters btn btn-link">
-			<span class="icon-stack">
-				<i class="icon-filter"></i>
-				<i class="icon-ban-circle icon-stack-base"></i>
-			</span>
+		<span class="fa-stack">
+			<i class="fa fa-filter fa-stack-1x"></i>
+			<i class="fa fa-ban fa-stack-2x"></i>
+		</span>
 	</button>
 
 	<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 		<@spring.bind path=path>
 			<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+				<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 					<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 					<span class="caret"></span>
 				</a>
@@ -68,9 +68,9 @@
 
 	<#assign placeholder = "Module" />
 	<#assign modulesCustomPicker>
-		<div class="module-search input-append">
-			<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
-			<span class="add-on"><i class="icon-search"></i></span>
+		<div class="module-search input-group">
+			<input class="module-search-query module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
+			<span class="input-group-addon"><i class="fa fa-search"></i></span>
 		</div>
 	</#assign>
 	<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
@@ -83,9 +83,9 @@
 
 	<#assign placeholder = "Route" />
 	<#assign routesCustomPicker>
-		<div class="route-search input-append">
-			<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
-			<span class="add-on"><i class="icon-search"></i></span>
+		<div class="route-search input-group">
+			<input class="route-search-query route prevent-reload form-control" type="text" value="" placeholder="Search for a route" />
+			<span class="input-group-addon"><i class="fa fa-search"></i></span>
 		</div>
 	</#assign>
 	<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
@@ -108,9 +108,9 @@
 	<#if canFilterStudents>
 		<#assign placeholder = "Student" />
 		<#assign studentsCustomPicker>
-			<div class="student-search input-append">
-				<input class="student-search-query student prevent-reload" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
-				<span class="add-on"><i class="icon-search"></i></span>
+			<div class="student-search input-group">
+				<input class="student-search-query student prevent-reload form-control" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
 			</div>
 		</#assign>
 		<#assign currentfilter><@current_filter_value "studentMembers" placeholder; student>${student.universityId}</@current_filter_value></#assign>
@@ -125,9 +125,9 @@
 	<#if canFilterStaff>
 		<#assign placeholder = "Staff" />
 		<#assign staffCustomPicker>
-			<div class="staff-search input-append">
-				<input class="staff-search-query staff prevent-reload" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
-				<span class="add-on"><i class="icon-search"></i></span>
+			<div class="staff-search input-group">
+				<input class="staff-search-query staff prevent-reload form-control" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
 			</div>
 		</#assign>
 		<#assign currentfilter><@current_filter_value "staffMembers" placeholder; staffMember>${staffMember.universityId}</@current_filter_value></#assign>
@@ -150,11 +150,11 @@
 </div>
 </@f.form>
 
-<div class="alert alert-error" style="display: none;"></div>
+<div class="alert alert-danger" style="display: none;"></div>
 
 <div class="calendar-outer">
 	<div class="calendar-loading hidden-print">
-		<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
 	<div class="calendar" data-viewname="month"></div>
 </div>
@@ -234,7 +234,7 @@
 							);
 						}
 
-						var events = data.events, errorDiv = $('div.alert-error');
+						var events = data.events, errorDiv = $('div.alert-danger');
 						// TAB-3008 - Change times to Europe/London
 						$.each(events, function(i, event){
 							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
@@ -274,6 +274,7 @@
 		function onViewUpdate(view, element){
 			updateCalendarTitle(view, element);
 			$('.popover').hide();
+			$calendar.find('table').attr('role','presentation');
 		}
 		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
 		function updateCalendarTitle(view,element){
@@ -384,13 +385,14 @@
 					}
 
 					content = content + "</table>";
-					$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+					$(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content})
 				}
 			});
 		}
 
 		var $calendar = $(".calendar");
 		createCalendar($calendar, $calendar.data('viewname'));
+		$calendar.find('table').attr('role','presentation');
 
 		var prependClearLink = function($list) {
 			if (!$list.find('input:checked').length) {
@@ -402,7 +404,7 @@
 									.append(
 											$('<button />').attr('type', 'button')
 													.addClass('btn btn-link')
-													.html('<i class="icon-ban-circle"></i> Clear selected items')
+													.html('<i class="fa fa-ban"></i> Clear selected items')
 													.on('click', function(e) {
 														$list.find('input:checked').each(function() {
 															var $checkbox = $(this);

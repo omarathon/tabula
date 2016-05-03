@@ -109,7 +109,6 @@
 	<#if can.do_with_selector("Profiles.StudentRelationship.Manage", studentCourseDetails, relationshipType)>
 		<div class="btn-group pull-right">
 			<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-				<i class="icon-cog"></i>
 				Actions&hellip;
 				<span class="caret"></span>
 			</a>
@@ -121,7 +120,7 @@
 							   data-target="#modal-change-agent"
 							   data-scj="${studentCourseDetails.scjCode}"
 							>
-								<i class="icon-plus"></i> Add another ${relationshipType.agentRole}
+								Add another ${relationshipType.agentRole}
 							</a>
 						</li>
 					<#else>
@@ -130,19 +129,19 @@
 							   data-target="#modal-change-agent"
 							   data-scj="${studentCourseDetails.scjCode}"
 							>
-								<i class="icon-plus"></i> Add a ${relationshipType.agentRole}
+								Add a ${relationshipType.agentRole}
 							</a>
 						</li>
 					</#if>
 				<#else>
 				</#if>
 				<li>
-					<a href="#" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
+					<a href="#" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal">View timeline</a>
 				</li>
 			</ul>
 		</div>
 	<#else>
-		<a href="#" class="btn pull-right" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal"><i class="icon-time"></i> View timeline</a>
+		<a href="#" class="btn pull-right" data-target="#${relationshipType.urlPart}-timeline" data-toggle="modal">View timeline</a>
 	</#if>
 
 	<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1 && !relationshipType.agentRole?ends_with("s")>s</#if></h4>
@@ -162,7 +161,7 @@
 							data-target="#modal-change-agent"
 							data-scj="${studentCourseDetails.scjCode}"
 						>
-						<i class="icon-edit"></i>
+							Edit
 						</a>
 					</#if>
 				<#else>
@@ -180,7 +179,7 @@
 								data-target="#modal-change-agent"
 								data-scj="${studentCourseDetails.scjCode}"
 							>
-							<i class="icon-edit"></i>
+								Edit
 							</a>
 						</#if>
 					</h5>
@@ -188,7 +187,7 @@
 						<span class="muted">(you)</span>
 					<#else>
 						<#if agent.email??>
-							<p><i class="icon-envelope-alt"></i> <a href="mailto:${agent.email}">${agent.email}</a> <br/>
+							<p><a href="mailto:${agent.email}">${agent.email}</a> <br/>
 								<#local ajaxTargetUrl><@routes.profiles.peoplesearchData agent /></#local>
 								<span class="pull-left ajaxPeoplesearchContents">
 									<script>
@@ -215,7 +214,7 @@
 		</#list>
 		</div>
 	<#else>
-		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
+		<p class="text-warning"> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
 	</#if>
 
 	<hr />
@@ -228,7 +227,7 @@
 		</#if>
 	</#local>
 	<#local ajaxTarget>meetings-target-${relationshipType.urlPart}-${studentCourseDetails.urlSafeId}-${studentCourseYearDetails.academicYear.startYear?c}</#local>
-	<div id="${ajaxTarget}" class="meetings-target"><i class="icon-spinner icon-spin"></i><em> Loading meetings&hellip;</em></div>
+	<div id="${ajaxTarget}" class="meetings-target"><i class="fa fa-spinner fa-spin"></i><em> Loading meetings&hellip;</em></div>
 	<script>
 		jQuery(function($){
 			$.get('${ajaxRoute}', function(data){
@@ -280,19 +279,15 @@
 	<li id="timetable-pane" data-title="Timetable">
 		<section id="timetable-details" class="clearfix" >
 			<div class="pull-right">
-				<a class="timetable-fullscreen" href="<@routes.profiles.timetable profile />"><i class="icon-fullscreen"></i></a>
 				<a class="timetable-fullscreen" href="<@routes.profiles.timetable profile />">View full screen</a>
 			</div>
 
 			<h4>
 				Timetable
 				<#if profile.timetableHash?has_content && can.do("Profiles.Read.TimetablePrivateFeed", profile)>
-					<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable"><i class="icon-calendar"></i></a>
-					<span class="subscribe">
-						<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable">
-							Subscribe
-						</a>
-					</span>
+					<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable">
+						Subscribe
+					</a>
 				</#if>
 			</h4>
 			<@timetable_placeholder profile />

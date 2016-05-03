@@ -170,7 +170,7 @@
 			   data-hash="${introHash("profiles-missing-info", "anywhere")}"
 			   data-placement="bottom"
 			   data-html="true"
-			   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i> Missing or incorrect information?</a>
+			   data-content="${introText}"><i class="fa fa-question-circle"></i> Missing or incorrect information?</a>
 		</div>
 	</#if>
 

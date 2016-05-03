@@ -66,7 +66,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	) = {
 
 		Mav("profiles/related_students/meeting/edit",
-			"modal" -> true,
+			"isModal" -> true,
 			"agentName" -> (if (command.considerAlternatives) "" else command.relationship.agentName),
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
@@ -84,7 +84,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 		val formats = MeetingFormat.members
 
 		Mav("profiles/related_students/meeting/edit",
-			"iframe" -> true,
+			"isIframe" -> true,
 			"command" -> command,
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),

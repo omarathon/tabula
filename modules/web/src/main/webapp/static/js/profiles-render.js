@@ -17,12 +17,12 @@
 				$this
 					.before($spinner)
 					.on('focus', function(){
-						container.find('.use-tooltip').trigger('mouseover');
+						container.find('.use-tooltip').tooltip('show');
 					})
 					.on('blur', function(){
-						container.find('.use-tooltip').trigger('mouseout');
+						container.find('.use-tooltip').tooltip('hide');
 					})
-					.typeahead({
+					.bootstrap3Typeahead({
 						source: function(query, process) {
 							if (xhr != null) {
 								xhr.abort();
@@ -75,7 +75,7 @@
 	// make chevron rotate when "More details" clicked
 	$(function() {
 		$(".expandable-course-details").on("click", "h6", function() {
-			$(this).find("i").toggleClass("icon-chevron-right").toggleClass("icon-chevron-down").toggleClass("expanded");
+			$(this).find("i").toggleClass("fa-chevron-right").toggleClass("fa-chevron-down").toggleClass("expanded");
 		});
 	});
 
@@ -152,7 +152,7 @@
 				.appendTo($mb);
 		}).fail(function() {
 			if (!$('#meeting-modal-failure').length) {
-				var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+				var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide">Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
 				$this.before($error);
 				$error.slideDown();
 			}
@@ -199,7 +199,7 @@
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
-						$details.addClass("deleted muted");
+						$details.addClass("deleted very-subtle");
 					} else if (data.status == "error") {
 						// TAB-2487 was hard to spot because nothing is done with failed ajax
 						// TODO - come up with a better way of reporting JSONErrorView failures app wide
@@ -221,7 +221,7 @@
 				var url = $this.attr("href");
 				$.post(url, function(data) {
 					if (data.status == "successful") {
-						$details.removeClass("deleted muted");
+						$details.removeClass("deleted very-subtle");
 					}
 					$details.removeClass("processing");
 				}, "json");
@@ -294,11 +294,11 @@
 			//Bind iframe form submission to modal button
 			$("#member-note-save").on('click', function(e){
 				e.preventDefault();
-				$("#note-modal .modal-body").find('iframe').contents().find('form').submit();
-				$(this).off()  //remove click event to prevent bindings from building up
+				$("#note-modal").find(".modal-body").find('iframe').contents().find('form').submit();
+				$(this).off();  //remove click event to prevent bindings from building up
 			});
 		}
-	}
+	};
 
 	$(function() {
 		// Bind click to load create-edit member note
@@ -306,11 +306,11 @@
 			if ($(this).hasClass("disabled")) return false;
 
 			var url = $(this).attr('data-url');
-			var $modalBody =  $("#note-modal .modal-body")
+			var $modal = $("#note-modal"), $modalBody =  $modal.find(".modal-body");
 
-			$modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
-			$("#note-modal .modal-header h3 span").text($(this).attr("title"))
-			$("#note-modal").modal('show')
+			$modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>');
+			$modal.find(".modal-header h3 span").text($(this).attr("title")).end();
+			$modal.modal('show');
 			return false; //stop propagation and prevent default
 		});
 
@@ -330,7 +330,7 @@
 				if (data.status == "successful") {
 					if($this.hasClass('delete') || $this.hasClass('restore')) {
 						$toolbaritems.toggleClass("disabled");
-						$details.toggleClass("muted deleted");
+						$details.toggleClass("subtle deleted");
 						$details.find('.deleted-files').toggleClass('hidden');
 					} else if($this.hasClass('purge')) {
 						$details.slideUp("slow")

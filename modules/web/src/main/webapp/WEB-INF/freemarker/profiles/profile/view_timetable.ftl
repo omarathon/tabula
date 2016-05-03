@@ -8,12 +8,7 @@
 	<h4>
 		Timetable
 		<#if profile.timetableHash?has_content && can.do("Profiles.Read.TimetablePrivateFeed", profile)>
-			<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable"><i class="icon-calendar"></i></a>
-			<span class="subscribe">
-				<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable">
-					Subscribe
-				</a>
-			</span>
+			<a href="<@routes.profiles.timetable_ical profile />" title="Subscribe to timetable">Subscribe</a>
 		</#if>
 	</h4>
 

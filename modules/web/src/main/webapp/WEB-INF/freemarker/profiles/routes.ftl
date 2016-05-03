@@ -31,19 +31,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/template" /></#macro>
 <#macro relationship_allocate_upload department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/upload" /></#macro>
 <#macro relationship_allocate_preview department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/preview" /></#macro>
-<#macro relationship_allocate_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old" /></#macro>
-<#macro relationship_template_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old/template" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode currentAgent>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
-</#macro>
-
-<#macro relationship_edit_set relationshipType scjCode newAgent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?agent=${newAgent.universityId}" />
-</#macro>
-
-<#macro relationship_edit_replace relationshipType scjCode currentAgent newAgent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}&agent=${newAgent.universityId}" />
 </#macro>
 
 <#macro relationship_edit_no_agent relationshipType scjCode>
@@ -70,7 +60,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
 <#macro missed_scheduled_meeting_record meetingRecord relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
 
-<#macro relationship_search><@_u page="/relationships/agents/search" /></#macro>
 <#macro relationship_search_json><@_u page="/relationships/agents/search.json" /></#macro>
 
 <#macro smallgroup group><@_u page="/groups/${group.id}/view" /></#macro>

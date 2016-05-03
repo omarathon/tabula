@@ -4,19 +4,18 @@
 
 		<div class="list-controls">
 			<#if canCreateMemberNote>
-				<a class="btn-like create"
+				<a class="btn btn-link create"
 					data-toggle="modal"
 					data-target="#note-modal"
 					href="#note-modal"
 					data-url="<@routes.profiles.create_member_note profile/>"
 					title="Create new note"
 				>
-						<i class="icon-edit"></i>
-						New administrative note
+					New administrative note
 				</a>
 			</#if>
-			<a class="toggle-all-details btn-like open-all-details" title="Expand all notes"><i class="icon-plus"></i> Expand all</a>
-			<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all notes"><i class="icon-minus"></i> Collapse all</a>
+			<a class="toggle-all-details btn btn-link open-all-details" title="Expand all notes">Expand all</a>
+			<a class="toggle-all-details btn btn-link close-all-details" title="Collapse all notes">Collapse all</a>
 		</div>
 
 
@@ -31,28 +30,31 @@
 
 			<#if note.deleted>
 				<#local deleteTools = "" />
-				<#local deleted ="deleted muted" />
+				<#local deleted ="deleted subtle" />
 				<#local nonDeleteTools =" disabled" />
 			</#if>
 
 			<details class="${deleted}">
 				<summary>
 					<div class="detail-arrow-fix">
-						<#if canEditMemberNote>
-							<div class="member-note-toolbar">
-								<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note note />" class="btn-like edit${nonDeleteTools}" title="Edit note"><i class="icon-edit" ></i></a>
-								<#if canDeletePurgeMemberNote>
-									<a href="<@routes.profiles.delete_member_note note />" class="btn-like delete${nonDeleteTools}" title="Delete note"><i class="icon-trash"></i></a>
-									<a href="<@routes.profiles.restore_member_note note />" class="btn-like restore${deleteTools}" title="Restore note"><i class="icon-repeat"></i></a>
-									<a href="<@routes.profiles.purge_member_note note />" class="btn-like purge${deleteTools}" title="Purge note"><i class="icon-remove"></i></a>
-								</#if>
-								<i class="icon-spinner icon-spin"></i>
+						<div class="row">
+							<div class="col-md-2">
+								<@fmt.date date=note.creationDate includeTime=false shortMonth=true />
 							</div>
-						</#if>
-
-						<div class="date-title">
-							<div class="date"><@fmt.date date=note.creationDate includeTime=false shortMonth=true /><div style="clear: both;"></div></div>
-							<div class="title">${note.title!} <#if attachments><i class="icon-paper-clip"></i></#if></div>
+							<div class="col-md-6">
+								${note.title!} <#if attachments><i class="fa fa-paperclip"></i></#if>
+							</div>
+							<#if canEditMemberNote>
+								<div class="col-md-4 member-note-toolbar">
+									<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note note />" class="btn btn-link edit${nonDeleteTools}" title="Edit note">Edit</a>
+									<#if canDeletePurgeMemberNote>
+										<a href="<@routes.profiles.delete_member_note note />" class="btn btn-link delete${nonDeleteTools}" title="Delete note">Delete</a>
+										<a href="<@routes.profiles.restore_member_note note />" class="btn btn-link restore${deleteTools}" title="Restore note">Restore</a>
+										<a href="<@routes.profiles.purge_member_note note />" class="btn btn-link purge${deleteTools}" title="Purge note">Purge</a>
+									</#if>
+									<i class="fa fa-spinner fa-spin"></i>
+								</div>
+							</#if>
 						</div>
 					</div>
 				</summary>
@@ -66,7 +68,7 @@
 						<#assign mbDownloadUrl><@routes.profiles.download_member_note_attachment note /></#assign>
 						<div class="deleted-files ${note.deleted?string('hidden','')}"><@fmt.download_attachments note.attachments mbDownloadUrl /></div>
 					</#if>
-					<small class="muted clearfix">Student note created by ${note.creator.fullName}, <@fmt.date note.lastUpdatedDate /></small>
+					<small class="very-subtle clearfix">Student note created by ${note.creator.fullName}, <@fmt.date note.lastUpdatedDate /></small>
 				</div>
 			</details>
 		</#list>

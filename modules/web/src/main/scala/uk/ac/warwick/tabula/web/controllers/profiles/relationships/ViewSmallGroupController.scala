@@ -1,26 +1,31 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.profiles.ViewSmallGroupCommand
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 /**
  * Displays the students on a small group event of which you are a tutor.
  */
 @Controller
-class ViewSmallGroupController {
+@RequestMapping(value=Array("/profiles/groups/{smallGroup}/view"))
+class ViewSmallGroupController extends ProfilesController with AutowiringProfileServiceComponent {
 
-	@ModelAttribute def command(user: CurrentUser, @PathVariable smallGroup: SmallGroup) =
-		new ViewSmallGroupCommand(user, smallGroup)
+	@ModelAttribute
+	def command(@PathVariable smallGroup: SmallGroup) =
+		new ViewViewableCommand(Permissions.SmallGroups.Read, mandatory(smallGroup))
 
-	@RequestMapping(value=Array("/profiles/groups/{smallGroup}/view"))
-	def show(@ModelAttribute command: ViewSmallGroupCommand): Mav = {
+	@RequestMapping(method = Array(GET, HEAD))
+	def show(@PathVariable smallGroup: SmallGroup): Mav = {
+		val members = profileService.getAllMembersWithUniversityIds(smallGroup.students.users.map(_.getWarwickId))
 		Mav("profiles/groups/view",
-			"smallGroup" -> command.smallGroup,
-			"tutees" -> command.apply()
+			"smallGroup" -> smallGroup,
+			"tutees" -> members.sortBy { student =>  (student.lastName, student.firstName) }
 		)
 	}
 

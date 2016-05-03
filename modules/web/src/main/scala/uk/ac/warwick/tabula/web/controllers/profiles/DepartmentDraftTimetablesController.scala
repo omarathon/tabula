@@ -18,6 +18,9 @@ import scala.util.{Failure, Try}
 class DepartmentDraftTimetablesController extends ProfilesController
 	with AutowiringUserLookupComponent with AutowiringTermServiceComponent {
 
+	@ModelAttribute("activeDepartment")
+	def activeDepartment(@PathVariable department: Department) = department
+
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentTimetablesCommand.CommandType = {
 		val scientiaConfiguration = new ScientiaConfiguration {

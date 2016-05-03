@@ -170,7 +170,7 @@
 
 		var reinitialize = function() {
 			initForm($(this));
-		}
+		};
 
 		if (!settings.silent && !window.aysUnloadSet) {
 			window.aysUnloadSet = true;

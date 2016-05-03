@@ -16,23 +16,23 @@
 			</#list>
 		</#list>
 
-		<div class="alert alert-error">
-			<@form.labelled_row "allocationType" "Choose allocation type">
-				<@form.label clazz="radio" checkbox=true>
+		<div class="has-error">
+			<@bs3form.labelled_form_group path="allocationType" labelText="Choose allocation type">
+				<@bs3form.radio>
 					<@f.radiobutton path="allocationType" value="${allocationTypes.Replace}" />
 					Replace existing ${relationshipType.agentRole}s
 					<@fmt.help_popover id="allocationType-replace" content="For any student with a ${relationshipType.agentRole} defined in the spreadsheet, remove any existing ${relationshipType.agentRole}s and add the new ${relationshipType.agentRole}" />
-				</@form.label>
-				<@form.label clazz="radio" checkbox=true>
+				</@bs3form.radio>
+				<@bs3form.radio>
 					<@f.radiobutton path="allocationType" value="${allocationTypes.Add}" />
 					Add additional ${relationshipType.agentRole}s
 					<@fmt.help_popover id="allocationType-replace" content="For any student with a ${relationshipType.agentRole} defined in the spreadsheet, add the new ${relationshipType.agentRole}. Any existing ${relationshipType.agentRole}s will remain" />
-				</@form.label>
-			</@form.labelled_row>
+				</@bs3form.radio>
+			</@bs3form.labelled_form_group>
 		</div>
 		<div class="submit-buttons">
 			<button type="submit" class="btn btn-primary" name="continue" value="true">Continue</button>
-			<a href="/profiles/" class="btn">Cancel</a>
+			<a href="/profiles/" class="btn btn-default">Cancel</a>
 		</div>
 	</@f.form>
 
@@ -41,7 +41,7 @@
 	<h1>You have requested the following ${relationshipType.description?lower_case} changes</h1>
 
 	<#macro student_table studentMap>
-		<table class="sortable table table-bordered table-striped">
+		<table class="sortable table table-striped">
 			<thead>
 				<tr>
 					<th class="sortable">First name</th>
@@ -111,7 +111,7 @@
 		<div class="submit-buttons">
 			<input type="hidden" name="confirm" value="true">
 			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Confirm</button>
-			<a href="/profiles/" class="btn">Cancel</a>
+			<a href="/profiles/" class="btn btn-default">Cancel</a>
 		</div>
 	</@f.form>
 

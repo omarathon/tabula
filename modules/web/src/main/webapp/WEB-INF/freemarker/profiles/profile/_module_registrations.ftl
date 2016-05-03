@@ -2,7 +2,7 @@
 
 <section id="module-registrations" class="clearfix">
 	<#assign moduleRegsUrl><@routes.profiles.listModuleRegs studentCourseDetails.urlSafeId studentCourseYearDetails.academicYear/></#assign>
-	<i class="icon-spinner icon-spin"></i><em> Loading modules&hellip;</em>
+	<i class="fa fa-spinner fa-spin"></i><em> Loading modules&hellip;</em>
 	<script type="text/javascript">
 		jQuery(function($){
 			$('#module-registrations').load('${moduleRegsUrl}', {ts: new Date().getTime()}, function( response, status, xhr )  {

@@ -28,7 +28,7 @@
 	</#macro>
 
 	<#macro table students>
-		<table class="students table table-bordered table-striped table-condensed tabula-purple">
+		<table class="related_students table table-striped table-condensed">
 			<thead>
 				<tr>
 					<th class="photo-col">Photo</th>
@@ -53,13 +53,13 @@
 				(function($) {
 					$(function() {
 						<#if totalResults lte filterStudentsCommand.studentsPerPage>
-							$(".students").tablesorter({
+							$(".related_students").tablesorter({
 								headers: { 0: { sorter: false } },
 								sortList: [[2,0], [1,0]]
 							});
 						<#else>
 							// CUSTOM TABLE SORTING
-							$(".students").addClass('tablesorter')
+							$(".related_students").addClass('tablesorter')
 								.find('th:not(:first-child)').addClass('header')
 								.on('click', function(e) {
 									var $th = $(this);
@@ -94,7 +94,7 @@
 
 						$('.use-popover').tabulaPopover({
 							trigger: 'click',
-							container: '#container'
+							container: 'body'
 						});
 					});
 				})(jQuery);
@@ -103,13 +103,13 @@
 		</#if>
 	</#macro>
 
-	<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
+	<#macro pagination currentPage totalResults resultsPerPage>
 		<#local totalPages = (totalResults / resultsPerPage)?ceiling />
-		<div class="pagination pagination-right ${extra_classes}" style="margin-top: 0;">
+		<nav class="pull-right" style="margin-top: 0;">
 			<#if can.do("Department.Reports", department) >
-				<a href="<@routes.profiles.exportProfiles department academicYear filterStudentsCommand.serializeFilter />" class="btn btn-small" style="vertical-align: top;">Export profiles</a>
+				<a href="<@routes.profiles.exportProfiles department academicYear filterStudentsCommand.serializeFilter />" class="btn btn-sm btn-default" style="vertical-align: top;">Export profiles</a>
 			</#if>
-			<ul style="margin-top: 0;">
+			<ul class="pagination pagination-sm "style="margin-top: 0;">
 				<#if currentPage lte 1>
 					<li class="disabled"><span>&laquo;</span></li>
 				<#else>
@@ -130,7 +130,7 @@
 					<li><a href="?page=${currentPage + 1}" data-page="${currentPage + 1}">&raquo;</a></li>
 				</#if>
 			</ul>
-		</div>
+		</nav>
 	</#macro>
 
 	<#if totalResults?? && students??>
@@ -138,7 +138,7 @@
 			<div class="clearfix">
 				<#if totalResults gt filterStudentsCommand.studentsPerPage>
 					<div class="pull-right">
-						<@pagination filterStudentsCommand.page totalResults filterStudentsCommand.studentsPerPage "pagination-small" />
+						<@pagination filterStudentsCommand.page totalResults filterStudentsCommand.studentsPerPage />
 					</div>
 				</#if>
 

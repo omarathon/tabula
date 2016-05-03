@@ -105,21 +105,21 @@
 			</#if>
 		</ol>
 
-		<div id="note-modal" class="modal hide fade">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3><span></span> for ${profile.fullName}</h3>
-			</div>
-			<div class="modal-body"></div>
-
-			<div class="modal-footer">
-				<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
-			</div>
+		<div id="note-modal" class="modal fade">
+			<@modal.wrapper>
+				<@modal.header>
+					<h3 class="modal-title"><span></span> for ${profile.fullName}</h3>
+				</@modal.header>
+				<@modal.body></@modal.body>
+				<@modal.footer>
+					<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
+				</@modal.footer>
+			</@modal.wrapper>
 		</div>
 
-		<div id="modal" class="modal hide fade" style="display:none;"></div>
+		<div id="modal" class="modal fade" style="display:none;"></div>
 
-		<div id="modal-change-agent" class="modal hide fade"></div>
+		<div id="modal-change-agent" class="modal fade"></div>
 
 		<script type="text/javascript">
 			jQuery(function($){

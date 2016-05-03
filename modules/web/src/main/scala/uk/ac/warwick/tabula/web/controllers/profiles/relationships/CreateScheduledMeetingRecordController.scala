@@ -25,9 +25,10 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("allRelationships")
-	def allRelationships(@PathVariable studentCourseDetails: StudentCourseDetails,
-											 @PathVariable relationshipType: StudentRelationshipType) = {
-
+	def allRelationships(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable relationshipType: StudentRelationshipType
+	) = {
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 	}
 
@@ -40,9 +41,11 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 	}
 
 	@ModelAttribute("command")
-	def getCommand(@PathVariable relationshipType: StudentRelationshipType,
-				   @PathVariable studentCourseDetails: StudentCourseDetails,
-				   @RequestParam(value="relationship", required = false) relationship: StudentRelationship) =  {
+	def getCommand(
+		@PathVariable relationshipType: StudentRelationshipType,
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship
+	) = {
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails)) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
@@ -50,26 +53,26 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
 				val chosenRelationship = relationship match {
 					case r: StudentRelationship => r
-					case _ => relationships.find(rel => rel.agentMember.map(_.universityId) == Some(user.universityId))
-										.getOrElse(relationships.head)
+					case _ => relationships.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
+						.getOrElse(relationships.head)
 				}
 
 				CreateScheduledMeetingRecordCommand(currentMember, chosenRelationship, relationships.size > 1)
 		}
 	}
 
-	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
+	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
 	def getIframe(
-	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
+		@ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		@PathVariable studentCourseDetails: StudentCourseDetails
 	) = {
 		form(cmd, studentCourseDetails, iframe = true)
 	}
 
-	@RequestMapping(method=Array(GET, HEAD))
+	@RequestMapping(method = Array(GET, HEAD))
 	def get(
-	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
-	 @PathVariable studentCourseDetails: StudentCourseDetails
+		@ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
+		@PathVariable studentCourseDetails: StudentCourseDetails
 	) = {
 		form(cmd, studentCourseDetails)
 	}
@@ -82,10 +85,10 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 		val mav = Mav("profiles/related_students/meeting/schedule",
 			"returnTo" -> getReturnTo(Routes.profile.view(studentCourseDetails.student)),
 			"isModal" -> ajax,
-			"iframe" -> iframe,
+			"isIframe" -> iframe,
 			"formats" -> MeetingFormat.members
 		)
-		if(ajax)
+		if (ajax)
 			mav.noLayout()
 		else if (iframe)
 			mav.noNavigation()
@@ -93,7 +96,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 			mav
 	}
 
-	@RequestMapping(method=Array(POST), params=Array("iframe"))
+	@RequestMapping(method = Array(POST), params = Array("iframe"))
 	def submitIframe(
 		@Valid @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		errors: Errors,
@@ -126,7 +129,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController
 		}
 	}
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(method = Array(POST))
 	def submit(
 		@Valid @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		errors: Errors,

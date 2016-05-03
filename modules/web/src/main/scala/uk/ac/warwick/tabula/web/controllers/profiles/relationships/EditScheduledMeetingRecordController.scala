@@ -63,7 +63,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 		val mav = Mav("profiles/related_students/meeting/schedule",
 			"returnTo" -> getReturnTo(Routes.profile.view(studentCourseDetails.student)),
 			"isModal" -> ajax,
-			"iframe" -> iframe,
+			"isIframe" -> iframe,
 			"edit" -> true,
 			"formats" -> MeetingFormat.members
 		)

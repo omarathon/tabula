@@ -9,8 +9,6 @@
 	<#assign brand_name = "id6" />
 <#elseif requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
 	<#assign brand_name = "id6" />
-<#elseif requestPath == '/profiles' || requestPath?starts_with('/profiles/')>
-	<#assign brand_name = "id6" />
 </#if>
 
 <#-- Query string overrides -->

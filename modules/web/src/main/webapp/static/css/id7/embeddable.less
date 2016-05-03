@@ -6,6 +6,10 @@ h1, h2, h3, h4, h5, h6 {
 	a.help-popover {
 		font-size: @main-font-size;
 	}
+	&.with-settings {
+		margin-top: 0;
+		margin-right: 0;
+	}
 }
 
 h2 + h3, h2 + h4, h2 + h5, h2 + h6,
@@ -13,16 +17,10 @@ h3 + h4, h3 + h5, h3 + h6,
 h4 + h5, h4 + h6,
 h5 + h6 { margin: -8px 0 12px; }
 
-h1.with-settings {
-	margin-top: 0;
-	margin-right: 0;
-}
-
 h1.modal-title {
 	padding: 0;
 	border: 0;
 }
-
 
 .modal-xl {
 	width: auto;
@@ -61,6 +59,17 @@ h1.modal-title {
 	h1 {
 		border-bottom: 0;
 		padding-bottom: 0;
+	}
+}
+
+.header-with-tooltip {
+	> * {
+		.inline-block;
+		margin-right: 10px;
+	}
+
+	> .use-tooltip {
+		vertical-align: top;
 	}
 }
 
@@ -331,6 +340,17 @@ summary {
 
 	.striped-section-contents .item-info:first-child {
 		border-top: 0;
+	}
+}
+
+.collapse-trigger { .cursor-pointer(); }
+
+h4.collapse-trigger { margin-top: 11px; }
+
+.user-picker-collection .user-picker-container, .flexi-picker-collection .flexi-picker-container {
+	display: block !important;
+	&.input-group {
+		display: table !important;
 	}
 }
 

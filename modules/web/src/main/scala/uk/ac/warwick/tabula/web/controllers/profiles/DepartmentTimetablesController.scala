@@ -18,6 +18,9 @@ class DepartmentTimetablesController extends ProfilesController
 
 	val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
+	@ModelAttribute("activeDepartment")
+	def activeDepartment(@PathVariable department: Department) = department
+
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department): DepartmentTimetablesCommand.CommandType = {
 		DepartmentTimetablesCommand(

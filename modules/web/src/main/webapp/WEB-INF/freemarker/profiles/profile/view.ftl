@@ -24,8 +24,9 @@
 			action_descr='modify permissions'
 			classes='btn'
 			href=permissions_url
-			tooltip='Permissions'>
-			<i class="icon-lock"></i> Permissions
+			tooltip='Permissions'
+		>
+			Permissions
 		</@fmt.permission_button>
 	</div>
 </#if>

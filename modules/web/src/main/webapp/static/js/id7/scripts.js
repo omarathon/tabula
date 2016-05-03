@@ -832,12 +832,13 @@
 			$container.find(".close-all-details").hide();
 			$container.find(".open-all-details").show();
 		});
+		$tabulaPage.find('section .close-all-details').hide();
 
 		exports.initCollapsible();
 
 		// Form dirty checking
 		$('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty':true, 'renamedFieldsMarksDirty':true});
-		$('a.dirty-check-ignore').on('click', function() {
+		$('.dirty-check-ignore').on('click', function() {
 			$('form.dirty-check').trigger('reinitialize.areYouSure');
 		});
 
