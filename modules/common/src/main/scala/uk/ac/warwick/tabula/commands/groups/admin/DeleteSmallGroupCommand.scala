@@ -2,52 +2,89 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command, Description, SchedulesNotifications, SelfValidating}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{Module, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.SmallGroupService
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
-class DeleteSmallGroupCommand(val module: Module, val set: SmallGroupSet)
-	extends Command[SmallGroupSet] with SelfValidating with SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] {
+object DeleteSmallGroupCommand {
+	def apply(set: SmallGroupSet, group: SmallGroup) =
+		new DeleteSmallGroupCommandInternal(set, group)
+			with ComposableCommand[SmallGroup]
+			with DeleteSmallGroupPermissions
+			with DeleteSmallGroupDescription
+			with DeleteSmallGroupValidation
+			with AutowiringSmallGroupServiceComponent
+}
 
-	mustBeLinked(set, module)
-	PermissionCheck(Permissions.SmallGroups.Delete, set)
+trait DeleteSmallGroupCommandState {
+	def set: SmallGroupSet
 
+	def group: SmallGroup
+}
+
+class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGroup) extends CommandInternal[SmallGroup] with DeleteSmallGroupCommandState {
+	self: SmallGroupServiceComponent =>
 	var service = Wire[SmallGroupService]
 
-	var confirm = false
-
-	/**
 	override def applyInternal() = transactional() {
-		set.markDeleted()
+		group.events.foreach {
+			event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+				eventOccurrence => eventOccurrence.attendance.asScala.exists {
+					attendance => attendance.state != AttendanceState.NotRecorded
+				}).foreach(smallGroupService.delete)
+		}
+
+		set.groups.remove(group)
 		service.saveOrUpdate(set)
-		set
-	}   **/
+		group
+	}
+
+}
+
+trait DeleteSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: DeleteSmallGroupCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		mustBeLinked(group, set)
+		p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(group))
+	}
+}
+
+trait DeleteSmallGroupDescription extends Describable[SmallGroup] {
+	self: DeleteSmallGroupCommandState =>
+
+	override def describe(d: Description) {
+		d.smallGroup(group)
+	}
+}
+
+trait DeleteSmallGroupValidation extends SelfValidating {
+	self: DeleteSmallGroupCommandState with SmallGroupServiceComponent =>
 
 	def validate(errors: Errors) {
-		if (!confirm) {
-			errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
-		} else validateCanDelete(errors)
-	}
+		if (!group.students.isEmpty) {
+			errors.rejectValue("delete", "smallGroup.delete.notEmpty")
+		} else {
+			// Can't delete events that have attendance recorded against them
+			val hasAttendance =
+				group.events.exists { event =>
+					smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+						.exists {
+							_.attendance.asScala.exists { attendance =>
+								attendance.state != AttendanceState.NotRecorded
+							}
+						}
+				}
 
-	def validateCanDelete(errors: Errors) {
-		if (set.deleted) {
-			errors.reject("smallGroupSet.delete.deleted")
-		} else if (set.releasedToStudents || set.releasedToTutors) {
-			errors.reject("smallGroupSet.delete.released")
+			if (hasAttendance) {
+				errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
+			}
 		}
 	}
-
-	override def describe(d: Description) = d.smallGroupSet(set)
-
-	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
-		set.groups.asScala.flatMap(
-			_.events.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
-		)
-
-	override def scheduledNotifications(notificationTarget: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = Seq()
 }
