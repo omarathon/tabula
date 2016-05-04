@@ -26,7 +26,7 @@ class JobServiceTest extends TestBase with Mockito {
 		service.jobDao = jobDao
 		service.jobs = Array(job)
 
-		val inst = service.add(Some(currentUser), TestingJob("job", 50))
+		val inst = service.add(Some(currentUser), TestingJob("job", sleepTime = 50))
 		verify(jobDao, times(1)).saveJob(inst)
 
 		jobDao.findOutstandingInstances(10) returns Seq(inst)
@@ -80,11 +80,11 @@ class JobServiceTest extends TestBase with Mockito {
 
 		jobDao.findOutstandingInstance(any[JobInstance]) returns None
 
-		val runningJob1 = TestingJob("runningJob1", 1)
-		val runningJob2 = TestingJob("runningJob2", 1)
-		val runningJob3 = TestingJob("runningJob3", 1)
-		val runningJob4 = TestingJob("runningJob4", 1)
-		val runningJob5 = TestingJob("runningJob5", 1)
+		val runningJob1 = TestingJob("runningJob1", sleepTime = 1)
+		val runningJob2 = TestingJob("runningJob2", sleepTime = 1)
+		val runningJob3 = TestingJob("runningJob3", sleepTime = 1)
+		val runningJob4 = TestingJob("runningJob4", sleepTime = 1)
+		val runningJob5 = TestingJob("runningJob5", sleepTime = 1)
 		val runningJobs = Seq(runningJob1, runningJob2, runningJob3, runningJob4, runningJob5)
 		val runningJobInstances = runningJobs.map(job => service.add(Some(currentUser), job))
 		runningJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
@@ -97,11 +97,11 @@ class JobServiceTest extends TestBase with Mockito {
 		// Above jobs now running (they'll actually finish in the test, but the mocked DAO will return them as running)
 		runningJobInstances.foreach(job => job.started should be {true})
 
-		val outstandingJob1 = TestingJob("outstandingJob1", 1)
-		val outstandingJob2 = TestingJob("outstandingJob2", 1)
-		val outstandingJob3 = TestingJob("outstandingJob3", 1)
-		val outstandingJob4 = TestingJob("outstandingJob4", 1)
-		val outstandingJob5 = TestingJob("outstandingJob5", 1)
+		val outstandingJob1 = TestingJob("outstandingJob1", sleepTime = 1)
+		val outstandingJob2 = TestingJob("outstandingJob2", sleepTime = 1)
+		val outstandingJob3 = TestingJob("outstandingJob3", sleepTime = 1)
+		val outstandingJob4 = TestingJob("outstandingJob4", sleepTime = 1)
+		val outstandingJob5 = TestingJob("outstandingJob5", sleepTime = 1)
 		val outstandingJobs = Seq(outstandingJob1, outstandingJob2, outstandingJob3, outstandingJob4, outstandingJob5)
 		val outstandingJobInstances = outstandingJobs.map(job => service.add(Some(currentUser), job))
 		outstandingJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
@@ -125,7 +125,7 @@ class JobServiceTest extends TestBase with Mockito {
 
 		jobDao.findOutstandingInstance(any[JobInstance]) returns None
 
-		val runningJob1 = TestingJob("runningJob1", 1)
+		val runningJob1 = TestingJob("runningJob1", sleepTime = 1)
 		val runningJobInstances = Seq(runningJob1).map(job => service.add(Some(currentUser), job))
 		runningJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))
 
@@ -137,7 +137,7 @@ class JobServiceTest extends TestBase with Mockito {
 		// Above jobs now running (they'll actually finish in the test, but the mocked DAO will return them as running)
 		runningJobInstances.foreach(job => job.started should be {true})
 
-		val identicalJob = TestingJob("runningJob1", 1)
+		val identicalJob = TestingJob("runningJob1", sleepTime = 1)
 		val outstandingJobs = Seq(identicalJob)
 		val outstandingJobInstances = outstandingJobs.map(job => service.add(Some(currentUser), job))
 		outstandingJobInstances.foreach(instance => verify(jobDao, times(1)).saveJob(instance))

@@ -44,7 +44,7 @@ class JobController extends BaseController {
 
 	@RequestMapping(Array("/create-test"))
 	def test = {
-		val jobInstance = jobService.add(Some(user), TestingJob("sysadmin test", TestingJob.DefaultDelay))
+		val jobInstance = jobService.add(Some(user), TestingJob("sysadmin test", sleepTime = TestingJob.DefaultDelay))
 		val id = jobInstance.id
 		status(id)
 		Redirect(Routes.sysadmin.jobs.status(jobInstance))
