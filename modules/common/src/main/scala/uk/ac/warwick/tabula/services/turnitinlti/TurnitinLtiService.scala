@@ -192,31 +192,15 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 			}
 	}
 
-	def getOriginalityReportUrl(assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String): TurnitinLtiResponse = doRequest(
-		s"$apiReportLaunch/${attachment.originalityReport.turnitinId}", Map(
+	def getOriginalityReportEndpoint(attachment: FileAttachment) = s"$apiReportLaunch/${attachment.originalityReport.turnitinId}"
+
+	def getOriginalityReportParams(endpoint: String, assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String):Map[String, String] = {
+		getSignedParams(
+			Map(
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
-		) ++ userParams(userId, email, firstName, lastName),
-		expectedStatusCode = Some(HttpStatus.SC_MOVED_TEMPORARILY)) {
-		request =>
-			request >:+ {
-				(headers, request) =>
-					val location = headers("location").headOption
-					// TODO we could parse the html instead of throwing an exception
-					/** If document cannot be found, we expect the following html
-					<div id="api_errorblock">
-						<h2>Sorry, we could not process your request</h2>
-						<p>The requested Object Result could not be found.</p>
-					</div>
-						**/
-					if (location.isEmpty) throw new IllegalStateException(s"Expected a redirect url")
-					request >- {
-						(html) => {
-							TurnitinLtiResponse.redirect(location.get)
-						}
-					}
-			}
+		) ++ userParams(userId, email, firstName, lastName), getOriginalityReportEndpoint(attachment))
 	}
 
 	def listEndpoints(turnitinAssignmentId: String, user: CurrentUser): TurnitinLtiResponse = doRequest(

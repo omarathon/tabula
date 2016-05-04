@@ -31,6 +31,7 @@ class JobDaoImpl extends JobDao with Daoisms {
 		transactional(readOnly = true) {
 			session.newCriteria[JobInstanceImpl]
 				.add(is("started", false))
+				.addOrder(asc("createdDate"))
 				.setMaxResults(max)
 				.seq
 		}
