@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.jobs
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.services.jobs._
 
 object TestingJob {
 	val id = "testing"
 	val DefaultDelay = 500
-	def apply(name: String, sleepTime: Int = 0) = JobPrototype(id, Map(
+
+	def apply(name: String, createdDate: String = DateTime.now.toString, sleepTime: Int = 0) = JobPrototype(id, Map(
 		"name" -> name,
+		"createdDate" -> createdDate,
 		"sleepTime" -> sleepTime))
 }
 

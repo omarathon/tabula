@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.jobs
 
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.jobs.TestingJob
@@ -10,11 +11,16 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 	@Autowired var service: JobService = _
 
 	@Test def crud() = transactional { t =>
-		val inst1 = service.add(None, TestingJob("job1"))
-		val inst2 = service.add(None, TestingJob("job2"))
-		val inst3 = service.add(None, TestingJob("job3"))
-		val inst4 = service.add(None, TestingJob("job4"))
-		val inst5 = service.add(None, TestingJob("job5"))
+
+		val anHourAgo = DateTime.now.minusHours(1).toString
+		val twoHoursAgo = DateTime.now.minusHours(2).toString
+		val lastWeek = DateTime.now.minusWeeks(1).toString
+
+		val inst1 = service.add(None, TestingJob("job1", createdDate = twoHoursAgo))
+		val oldestInst = service.add(None, TestingJob("job2", createdDate = lastWeek))
+		val inst3 = service.add(None, TestingJob("job3", createdDate = twoHoursAgo))
+		val newestInst = service.add(None, TestingJob("job4", createdDate = anHourAgo))
+		val inst5 = service.add(None, TestingJob("job5", createdDate = twoHoursAgo))
 
 		session.flush()
 		session.clear()
@@ -27,6 +33,9 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 
 		jobDao.findOutstandingInstances(5).length should be (5)
 		jobDao.findOutstandingInstances(3).length should be (3)
+		/* TAB-4302 - return oldest jobs first */
+		jobDao.findOutstandingInstances(3).contains(oldestInst) should be {true}
+		jobDao.findOutstandingInstances(3).contains(newestInst) should be {false}
 
 		val inst = jobDao.getById(inst1.id).get
 
