@@ -7,8 +7,9 @@ import uk.ac.warwick.tabula.services.jobs._
 object TestingJob {
 	val id = "testing"
 	val DefaultDelay = 500
+	val defaultTime = DateTime.now.toString
 
-	def apply(name: String, createdDate: String = DateTime.now.toString, sleepTime: Int = 0) = JobPrototype(id, Map(
+	def apply(name: String, createdDate: String = defaultTime, sleepTime: Int = 0) = JobPrototype(id, Map(
 		"name" -> name,
 		"createdDate" -> createdDate,
 		"sleepTime" -> sleepTime))
