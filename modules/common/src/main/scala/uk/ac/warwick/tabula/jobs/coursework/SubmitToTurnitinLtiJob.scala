@@ -162,7 +162,7 @@ class SubmitToTurnitinLtiJob extends Job
 			def submit() = {
 				logger.info(s"$logPrefixWithJobId Waiting $WaitingRequestsToTurnitinSubmitPaperSleep ms before submitting single paper to Turnitin.")
 				Thread.sleep(WaitingRequestsToTurnitinSubmitPaperSleep)
-				logger.info(s"Submitting single paper to Turnitin: $retries retries remaining.")
+				logger.info(s"$logPrefixWithJobId Submitting single paper to Turnitin: $retries retries remaining.")
 				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl, submission.userId,
 					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.universityId, "Student")
 			}
