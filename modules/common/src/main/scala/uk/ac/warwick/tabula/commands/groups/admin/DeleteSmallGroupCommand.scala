@@ -24,7 +24,6 @@ object DeleteSmallGroupCommand {
 
 trait DeleteSmallGroupCommandState {
 	def set: SmallGroupSet
-
 	def group: SmallGroup
 }
 

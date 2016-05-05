@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.api.web.controllers.groups
 
-
 import javax.validation.Valid
 
 import org.joda.time.LocalTime
@@ -19,7 +18,6 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 import scala.beans.BeanProperty
 
-
 object SmallGroupEventController {
 	type DeleteSmallGroupEventCommand = Appliable[SmallGroupEvent] with DeleteSmallGroupEventCommandState with DeleteSmallGroupEventValidation
 	type SmallGroupEventCommand = ModifySmallGroupEventCommand.Command
@@ -33,13 +31,13 @@ class CreateSmallGroupEventControllerForApi extends SmallGroupSetController with
 trait CreateSmallGroupEventApi {
 	self: SmallGroupSetController =>
 
-	@ModelAttribute("command")
+	@ModelAttribute("createCommand")
 	def createCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): SmallGroupEventCommand =
 		ModifySmallGroupEventCommand.create(module, smallGroupSet, smallGroup)
 
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def createEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("command") command: SmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet) = {
+	def createEvent(@RequestBody request: SmallGroupEventRequest, @ModelAttribute("createCommand") command: SmallGroupEventCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet) = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)

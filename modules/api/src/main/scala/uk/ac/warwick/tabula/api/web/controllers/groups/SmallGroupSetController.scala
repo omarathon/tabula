@@ -72,7 +72,6 @@ trait GetSmallGroupSetApi {
 			val result = command.apply()
 			getSmallGroupSetMav(result)
 		}
-
 	}
 }
 
@@ -98,7 +97,6 @@ trait EditSmallGroupSetApi {
 			val result = command.apply()
 			getSmallGroupSetMav(result)
 		}
-
 	}
 }
 

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.api.web.controllers.groups
 
-import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 
 import org.springframework.http.MediaType
@@ -34,13 +33,12 @@ class CreateSmallGroupsControllerForApi extends SmallGroupSetController with Cre
 trait CreateSmallGroupsApi {
 	self: SmallGroupSetController =>
 
-
-	@ModelAttribute("command")
+	@ModelAttribute("createCommand")
 	def createCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet): CreateSmallGroupsCommand =
 		EditSmallGroupsCommand(module, smallGroupSet)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def createGroups(@RequestBody request: CreateSmallGroupsRequest, @ModelAttribute("command") command: CreateSmallGroupsCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet)(implicit response: HttpServletResponse) = {
+	def createGroups(@RequestBody request: CreateSmallGroupsRequest, @ModelAttribute("createCommand") command: CreateSmallGroupsCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet) = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
@@ -66,7 +64,7 @@ trait EditSmallGroupApi {
 		ModifySmallGroupCommand.edit(module, smallGroupSet, smallGroup)
 
 	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def editGroup(@RequestBody request: ModifySmallGroupRequest, @ModelAttribute("editCommand") command: ModifySmallGroupCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup)(implicit response: HttpServletResponse) = {
+	def editGroup(@RequestBody request: ModifySmallGroupRequest, @ModelAttribute("editCommand") command: ModifySmallGroupCommand, errors: Errors, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup) = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
@@ -90,7 +88,6 @@ trait DeleteSmallGroupApi {
 	def deleteCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet, @PathVariable smallGroup: SmallGroup): DeleteSmallGroupCommand =
 		DeleteSmallGroupCommand(smallGroupSet, smallGroup)
 
-
 	@RequestMapping(method = Array(DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
 	def deleteGroup(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupCommand, errors: Errors) = {
 		if (errors.hasErrors) {
@@ -104,7 +101,6 @@ trait DeleteSmallGroupApi {
 		}
 	}
 }
-
 
 class CreateSmallGroupsRequest extends JsonApiRequest[CreateSmallGroupsCommand] {
 	@BeanProperty var newGroups: JList[NewGroupProperties] = null

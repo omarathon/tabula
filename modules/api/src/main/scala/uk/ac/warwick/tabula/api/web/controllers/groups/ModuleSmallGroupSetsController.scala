@@ -75,9 +75,7 @@ trait ListSmallGroupSetsForModuleApi {
 				"success" -> true,
 				"status" -> "ok",
 				"academicYear" -> command.academicYear.toString,
-				"groups" -> info.setsWithPermission.filter {
-					_.set.module == module
-				}.map { viewSet => jsonSmallGroupSetObject(viewSet) }
+				"groups" -> info.setsWithPermission.filter { _.set.module == module }.map { viewSet => jsonSmallGroupSetObject(viewSet) }
 			)))
 		}
 	}
@@ -96,17 +94,12 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
-		//command.afterBind()
 
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
 			val smallGroupSet: SmallGroupSet = command.apply()
 			val viewSet = new ViewSet(smallGroupSet, smallGroupSet.groups.asScala.sorted, GroupsViewModel.Tutor)
-
-			response.setStatus(HttpStatus.CREATED.value())
-			//			response.addHeader("Location", toplevelUrl + Routes.api.assignment(assignment))
-
 			Mav(new JSONView(Map(
 				"success" -> true,
 				"status" -> "ok",
@@ -116,7 +109,6 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
 		}
 	}
 }
-
 
 trait SmallGroupSetPropertiesRequest[A <: ModifySmallGroupSetCommandState] extends JsonApiRequest[A] {
 	@BeanProperty var name: String = null
@@ -154,7 +146,6 @@ trait SmallGroupSetPropertiesRequest[A <: ModifySmallGroupSetCommandState] exten
 }
 
 class CreateSmallGroupSetRequest extends SmallGroupSetPropertiesRequest[CreateSmallGroupSetCommand] {
-
 	// Default values
 	format = SmallGroupFormat.Seminar
 }

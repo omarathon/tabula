@@ -89,6 +89,6 @@ trait EditSmallGroupDescription extends Describable[SmallGroup] {
 	self: EditSmallGroupCommandState =>
 
 	override def describe(d: Description) {
-		d.smallGroupSet(set)
+		d.smallGroup(smallGroup)
 	}
 }
