@@ -29,7 +29,7 @@ trait DeleteSmallGroupCommandState {
 
 class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGroup) extends CommandInternal[SmallGroup] with DeleteSmallGroupCommandState {
 	self: SmallGroupServiceComponent =>
-	var service = Wire[SmallGroupService]
+
 
 	override def applyInternal() = transactional() {
 		group.events.foreach {
@@ -40,7 +40,6 @@ class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGr
 		}
 
 		set.groups.remove(group)
-		service.saveOrUpdate(set)
 		group
 	}
 

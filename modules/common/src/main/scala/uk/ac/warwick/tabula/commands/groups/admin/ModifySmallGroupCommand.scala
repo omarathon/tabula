@@ -13,6 +13,14 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 object ModifySmallGroupCommand {
 	type Command = Appliable[SmallGroup] with SelfValidating with ModifySmallGroupCommandState
 
+	def create(module: Module, set: SmallGroupSet): Command =
+		new CreateSmallGroupCommandInternal(module, set)
+			with ComposableCommand[SmallGroup]
+			with CreateSmallGroupPermissions
+			with CreateSmallGroupDescription
+			with ModifySmallGroupValidation
+			with AutowiringSmallGroupServiceComponent
+
 	def edit(module: Module, set: SmallGroupSet, group: SmallGroup): Command =
 		new EditSmallGroupCommandInternal(module, set, group)
 			with ComposableCommand[SmallGroup]
@@ -25,15 +33,28 @@ object ModifySmallGroupCommand {
 trait ModifySmallGroupCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
-	def existingSmallGroup: Option[SmallGroup]
 
 	var name: String = _
 	var maxGroupSize: Int = SmallGroup.DefaultGroupSize
 }
 
+trait CreateSmallGroupCommandState extends ModifySmallGroupCommandState
+
 trait EditSmallGroupCommandState extends ModifySmallGroupCommandState {
 	def smallGroup: SmallGroup
-	def existingSmallGroup = Some(smallGroup)
+
+}
+
+class CreateSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
+	self: SmallGroupServiceComponent =>
+
+	override def applyInternal() = transactional() {
+		val smallGroup = new SmallGroup(set)
+		copyTo(smallGroup)
+		set.groups.add(smallGroup)
+		smallGroupService.saveOrUpdate(set)
+		smallGroup
+	}
 }
 
 class EditSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet, val smallGroup: SmallGroup) extends ModifySmallGroupCommandInternal with EditSmallGroupCommandState {
@@ -51,12 +72,12 @@ class EditSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet, 
 abstract class ModifySmallGroupCommandInternal
 	extends CommandInternal[SmallGroup] with ModifySmallGroupCommandState {
 
-	def copyFrom(smallGroup: SmallGroup) {
+	protected def copyFrom(smallGroup: SmallGroup) {
 		name = smallGroup.name
 		maxGroupSize = smallGroup.maxGroupSize
 	}
 
-	def copyTo(smallGroup: SmallGroup) {
+	protected def copyTo(smallGroup: SmallGroup) {
 		smallGroup.name = name
 		smallGroup.maxGroupSize = maxGroupSize
 	}
@@ -74,6 +95,23 @@ trait ModifySmallGroupValidation extends SelfValidating {
 			else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 		}
 	}
+
+trait CreateSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: CreateSmallGroupCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(set))
+	}
+}
+
+trait CreateSmallGroupDescription extends Describable[SmallGroup] {
+	self: CreateSmallGroupCommandState =>
+
+	override def describe(d: Description) {
+		d.smallGroupSet(set)
+	}
+}
+
 
 trait EditSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: EditSmallGroupCommandState =>

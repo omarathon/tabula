@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSet
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
@@ -42,12 +43,6 @@ abstract class ModuleSmallGroupSetsController extends ApiController
 
 	hideDeletedItems
 
-	override def binding[CreateSmallGroupSetCommand](binder: WebDataBinder, cmd: CreateSmallGroupSetCommand) {
-		binder.registerCustomEditor(classOf[SmallGroupFormat], new AbstractPropertyEditor[SmallGroupFormat] {
-			override def fromString(code: String) = SmallGroupFormat.fromCode(code)
-			override def toString(format: SmallGroupFormat) = format.code
-		})
-	}
 }
 
 
@@ -99,6 +94,9 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
 			Mav(new JSONErrorView(errors))
 		} else {
 			val smallGroupSet: SmallGroupSet = command.apply()
+			response.setStatus(HttpStatus.CREATED.value())
+			response.addHeader("Location", toplevelUrl + Routes.api.groupSet(smallGroupSet))
+
 			val viewSet = new ViewSet(smallGroupSet, smallGroupSet.groups.asScala.sorted, GroupsViewModel.Tutor)
 			Mav(new JSONView(Map(
 				"success" -> true,
