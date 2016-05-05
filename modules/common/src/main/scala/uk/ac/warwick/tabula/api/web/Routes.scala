@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.api.web
 
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -51,4 +52,20 @@ object Routes {
 		def calendarICalForHash(timetableHash: String) =
 			context + "/timetable/calendar/%s.ics" format encoded(timetableHash)
 	}
+
+	object groupSet {
+		def apply(groupSet: SmallGroupSet) =
+			context + "/module/%s/groups/%s" format (encoded(groupSet.module.code), encoded(groupSet.id))
+	}
+
+	object group {
+		def apply(group: SmallGroup) =
+			context + "/module/%s/groups/%s/groups/%s" format (encoded(group.groupSet.module.code), encoded(group.groupSet.id), encoded(group.id))
+	}
+
+	object event {
+		def apply(event: SmallGroupEvent) =
+			context + "/module/%s/groups/%s/groups/%s/events/%s" format (encoded(event.group.groupSet.module.code), encoded(event.group.groupSet.id), encoded(event.group.id), encoded(event.id))
+	}
+
 }
