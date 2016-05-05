@@ -308,6 +308,6 @@ class SubmitToTurnitinLtiJob extends Job
 				}
 		}
 
-		private def logPrefixWithJobId: String = "Job:" + job.id + " - "
+		private def logPrefixWithJobId: String = s"Job:${job.id} - "
 	}
 }
