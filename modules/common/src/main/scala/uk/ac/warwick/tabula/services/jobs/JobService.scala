@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
 
+import javax.annotation.PreDestroy
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -148,6 +150,20 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 			instance.succeeded = false
 			instance.finished = true
 			jobDao.update(instance)
+		}
+	}
+
+	@PreDestroy
+	def cleanUp(): Unit = transactional(){
+		val runningJobs = jobDao.listRunningJobs
+		if (runningJobs.nonEmpty) {
+			runningJobs.foreach(job => {
+				logger.warn(s"Job ${job.id} is still running; it will be restarted after the restart")
+				job.started = false
+				job.progress = 0
+				job.status = "Tabula is restarting. This job will begin again once the restart is complete."
+				jobDao.saveJob(job)
+			})
 		}
 	}
 
