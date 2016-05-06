@@ -14,15 +14,15 @@
 
 <div class="zip-complete alert alert-info" style="display: none;">
 	<h3>ZIP file generated successfully</h3>
-	<p><a href="<@routes.zipComplete jobId />" class="btn"><i class="icon-download fa fa-arrow-circle-o-down"></i> Download ZIP file</a></p>
+	<p><a href="<@routes.zipComplete jobId />" class="btn btn-link"><i class="icon-download fa fa-arrow-circle-o-down"></i> Download ZIP file</a></p>
 </div>
 
-<a class="btn" href="${returnTo}">Done</a>
+<a class="btn btn-default" href="${returnTo}">Done</a>
 
 <script>
 	jQuery(function($){
 		var updateProgress = function() {
-			$.get('<@routes.zipProgress jobId />', function(data){
+			$.get('<@routes.zipProgress jobId />' + '?dt=' + new Date().valueOf(), function(data){
 				if (data.succeeded) {
 					$('.progress .progress-bar').width("100%").removeClass('active progress-bar-striped');
 					$('.zip-progress').empty();
