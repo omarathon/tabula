@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
 
+import java.net.InetAddress
+import java.util.UUID
 import javax.annotation.PreDestroy
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,6 +27,17 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 
 	// How many jobs to load and run each time
 	val RunBatchSize = 10
+
+	lazy val schedulerInstance = {
+		try {
+			InetAddress.getLocalHost.getHostName
+		}
+		catch {
+			case e: Exception =>
+				logger.warn("Couldn't get host name for scheduler instance; returning random ID")
+				UUID.randomUUID().toString
+		}
+	}
 
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
@@ -133,6 +146,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	private def start(instance: JobInstance) {
 		transactional() {
 			instance.started = true
+			instance.schedulerInstance = this.schedulerInstance
 			jobDao.update(instance)
 		}
 	}
@@ -155,14 +169,14 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 
 	@PreDestroy
 	def cleanUp(): Unit = transactional(){
-		val runningJobs = jobDao.listRunningJobs
+		val runningJobs = jobDao.findRunningJobs(this.schedulerInstance)
 		if (runningJobs.nonEmpty) {
 			runningJobs.foreach(job => {
 				logger.warn(s"Job ${job.id} is still running; it will be restarted after the restart")
 				job.started = false
 				job.progress = 0
 				job.status = "Tabula is restarting. This job will begin again once the restart is complete."
-				jobDao.saveJob(job)
+				jobDao.update(job)
 			})
 		}
 	}
