@@ -74,27 +74,37 @@ jQuery(function($){
 	var entityTable = new EntityTable($('.entities table'));
 
 	var $studentTable = $('.students table'),
-		$distrubuteButton = $studentTable.closest('div').find('button.distribute');
+		$distributeSelectedButton = $studentTable.closest('div').find('button.distribute-selected'),
+		$distributeAllButton = $studentTable.closest('div').find('button.distribute-all');
 
-	var checkDistributeButton = function(){
-		var result = $studentTable.find('input:checked').length > 0 && entityTable.getTable().find('input:checked').length > 0;
-		if (result) {
-			$distrubuteButton.prop({
-				'disabled': false,
-				'title': 'Selected students will be equally distributed between selected personal tutors'
-			});
-			$distrubuteButton.addClass('btn-primary');
-		} else {
-			$distrubuteButton.prop({
+	var checkDistributeButtons = function(){
+		var studentsChecked = $studentTable.find('input:checked').length > 0, entitiesChecked = entityTable.getTable().find('input:checked').length > 0;
+		if (!entitiesChecked) {
+			$distributeSelectedButton.add($distributeAllButton).prop({
 				'disabled': true,
 				'title': 'You need to select some students and personal tutors to allocate'
-			});
-			$distrubuteButton.removeClass('btn-primary');
+			}).removeClass('btn-primary');
+		} else {
+			$distributeAllButton.prop({
+				'disabled': false,
+				'title': 'All students will be equally distributed between selected personal tutors'
+			}).addClass('btn-primary');
+			if (studentsChecked) {
+				$distributeSelectedButton.prop({
+					'disabled': false,
+					'title': 'Selected students will be equally distributed between selected personal tutors'
+				}).addClass('btn-primary');
+			} else {
+				$distributeSelectedButton.prop({
+					'disabled': true,
+					'title': 'You need to select some students and personal tutors to allocate'
+				}).removeClass('btn-primary');
+			}
 		}
 	};
-	$studentTable.sortableTable().on('click tabula.selectDeselectCheckboxes.toggle', 'input', checkDistributeButton);
-	entityTable.getTable().on('click tabula.selectDeselectCheckboxes.toggle', 'input', checkDistributeButton);
-	$distrubuteButton.attr('disabled', true);
+	$studentTable.sortableTable().on('click tabula.selectDeselectCheckboxes.toggle', 'input', checkDistributeButtons);
+	entityTable.getTable().on('click tabula.selectDeselectCheckboxes.toggle', 'input', checkDistributeButtons);
+	checkDistributeButtons();
 
 	var $studentQuery = $('input[name=query]').on('keypress', function(e){
 		if (e.which === 13) {
