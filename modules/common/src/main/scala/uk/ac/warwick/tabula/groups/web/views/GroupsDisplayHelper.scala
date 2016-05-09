@@ -20,19 +20,23 @@ object GroupsDisplayHelper {
 	//
 	// isTutor = true when viewing groups for another user
 
-	def getGroupsToDisplay(set:SmallGroupSet, user:User, isTutor:Boolean = false):(Seq[SmallGroup], ViewerRole) = {
-		val allGroupsInSet = set.groups.asScala.toSeq
+	def getGroupsToDisplay(set: SmallGroupSet, user:User, isTutor:Boolean = false): (Seq[SmallGroup], ViewerRole) = {
+		val allGroupsInSet = set.groups.asScala
 		val groupsStudentHasJoined = allGroupsInSet.filter(_.students.users.contains(user))
 
 		def viewerRoleOrTutor(role: ViewerRole) =
 			if(isTutor) Tutor
 			else role
 
-		groupsStudentHasJoined match {
-			case Nil if (set.allocationMethod == StudentSignUp && set.openForSignups == false) => (Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
-			case Nil if (set.allocationMethod == StudentSignUp)                                => (allGroupsInSet, viewerRoleOrTutor(StudentNotAssignedToGroup))
-			case Nil                                                                           => (Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
-			case x:Seq[SmallGroup]                                                             => (x, viewerRoleOrTutor(StudentAssignedToGroup))
+		groupsStudentHasJoined.toSeq match {
+			case Nil if set.allocationMethod == StudentSignUp && !set.openForSignups =>
+				(Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case Nil if set.allocationMethod == StudentSignUp =>
+				(allGroupsInSet, viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case Nil =>
+				(Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case x: Seq[SmallGroup] =>
+				(x, viewerRoleOrTutor(StudentAssignedToGroup))
 		}
 	}
 
@@ -42,18 +46,21 @@ object GroupsDisplayHelper {
 	// to be displayed to the student (@see getGroupsToDisplay); map the modules and groupsets to
 	// ViewModules and ViewSets for rendering.
 
-	def getViewModulesForStudent(memberGroupSets:Seq[SmallGroupSet], getDisplayGroups:(SmallGroupSet)=>(Seq[SmallGroup], ViewerRole) ):Seq[ViewModule]={
-		val memberGroupSetsWithApplicableGroups = memberGroupSets.map(set=>(set,getDisplayGroups(set))).filterNot{case(s,(groups,role))=>groups.isEmpty}
+	def getViewModulesForStudent(
+		memberGroupSets: Seq[SmallGroupSet],
+		getDisplayGroups: (SmallGroupSet) => (Seq[SmallGroup], ViewerRole)
+	): Seq[ViewModule] = {
+		val memberGroupSetsWithApplicableGroups = memberGroupSets.map(set => (set, getDisplayGroups(set)))
+			.filterNot{ case (s, (groups, role)) => groups.isEmpty}
 
 		val memberViewModules =	memberGroupSetsWithApplicableGroups.groupBy(_._1.module).map{
-			case(module,setData)=>{
-				val viewSets = setData.map{case(set,(groups,role))=>{
-					ViewSet(set,groups.sorted,role)
-				}}
-				ViewModule(module,viewSets,false)
-			}
+			case(module,setData)=>
+				val viewSets = setData.map{case(set,(groups,role))=>
+					ViewSet(set, ViewGroup.fromGroups(groups.sorted), role)
+				}
+				ViewModule(module, viewSets, false)
 		}
-		memberViewModules.filterNot(m=>m.setItems.isEmpty).toSeq
+		memberViewModules.filterNot(m => m.setItems.isEmpty).toSeq
 	}
 
 	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(_.visibleToStudents)

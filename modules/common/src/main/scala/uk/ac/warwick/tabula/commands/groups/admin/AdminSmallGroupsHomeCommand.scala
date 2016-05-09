@@ -77,7 +77,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 				if (set.archived) {
 					ViewSet(
 						set = set,
-						groups = set.groups.asScala.sorted,
+						groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
 						viewerRole = Tutor
 					)
 				} else {
@@ -85,7 +85,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 
 					ViewSetWithProgress(
 						set = set,
-						groups = set.groups.asScala.sorted,
+						groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
 						viewerRole = Tutor,
 						progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
 						nextStage = progress.nextStage,
@@ -95,7 +95,7 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 			}} else { sets.map { set =>
 				ViewSet(
 					set = set,
-					groups = set.groups.asScala.sorted,
+					groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
 					viewerRole = Tutor
 				)
 			}}
