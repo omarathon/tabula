@@ -2,18 +2,16 @@ package uk.ac.warwick.tabula.web.controllers.attendance.view.old
 
 import javax.validation.Valid
 
-import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.old.GroupedMonitoringPoint
 import uk.ac.warwick.tabula.commands.attendance.view.old.{ViewMonitoringPointsCommand, ViewMonitoringPointsState}
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-@Controller
 @RequestMapping(Array("/attendance/view/{department}/2013/points"))
 class OldViewMonitoringPointsController extends AttendanceController {
 

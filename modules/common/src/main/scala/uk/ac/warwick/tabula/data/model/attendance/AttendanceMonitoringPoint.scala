@@ -210,7 +210,7 @@ trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehavio
 	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq())
 		.map(assignmentService.getAssignmentById(_).orNull)
 	def assignmentSubmissionAssignments_= (assignments: Seq[Assignment]) =
-		settings += (Settings.AssignmentSubmissionAssignments -> assignments.map(_.id))
+		settings += (Settings.AssignmentSubmissionAssignments -> assignments.flatMap(a => Option(a).map(_.id)))
 	// See above
 	def assignmentSubmissionAssignmentsSpring_= (assignments: JSet[Assignment]) =
 		assignmentSubmissionAssignments = assignments.asScala.toSeq

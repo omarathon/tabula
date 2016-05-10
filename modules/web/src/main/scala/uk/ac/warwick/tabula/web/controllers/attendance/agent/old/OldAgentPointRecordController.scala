@@ -2,19 +2,17 @@ package uk.ac.warwick.tabula.web.controllers.attendance.agent.old
 
 import javax.validation.Valid
 
-import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.attendance.agent.old.AgentPointRecordCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+import uk.ac.warwick.tabula.commands.attendance.agent.old.AgentPointRecordCommand
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 @RequestMapping(Array("/attendance/agent/{relationshipType}/2013/point/{point}/record"))
-@Controller
 class OldAgentPointRecordController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

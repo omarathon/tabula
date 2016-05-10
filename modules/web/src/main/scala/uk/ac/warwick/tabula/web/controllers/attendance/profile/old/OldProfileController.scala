@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.profile.old
 
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.profile.old.{OldAttendanceProfileInformation, OldProfileCommand}
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.attendance.profile.old.{OldAttendanceProfileInformation, OldProfileCommand}
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-@Controller
 @RequestMapping(Array("/attendance/profile/{student}/2013"))
 class OldProfileController extends AttendanceController {
 
