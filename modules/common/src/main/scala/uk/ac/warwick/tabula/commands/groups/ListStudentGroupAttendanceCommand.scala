@@ -78,12 +78,11 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
 		val attendance = (groupByTerm(allInstances).mapValues { instances =>
 			val groups = SortedMap(instances.groupBy { case ((event, _), _) => event.group }.toSeq:_*)
-			groups.filterKeys { smallGroup => smallGroup.groupSet.visibleToStudents
-			}.mapValues { instances =>
-					SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq:_*).mapValues { instances =>
+			groups.filterKeys { smallGroup => smallGroup.groupSet.visibleToStudents }.mapValues { instances =>
+				SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq:_*).mapValues { instances =>
 						attendanceForStudent(instances, isLate(user))(user)
 					}
-				}.filter(hasExpectedAttendanceForGroup)
+			}.filter(hasExpectedAttendanceForGroup)
 		}).filterNot { case (term, attendance) => attendance.isEmpty }
 
 		val missedCountByTerm = attendance.mapValues { groups =>
