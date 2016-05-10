@@ -247,7 +247,7 @@
 			          			</li>
 		          			</ul>
 
-		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Give feedback</a></div>
+		          			<a id="app-feedback-link" href="/comments<#if info??>?currentPage=${info.requestedUri}</#if>"><span>Give feedback</span></a>
 
 									<#if user?? && user.sysadmin>
 										<div id="sysadmin-link">

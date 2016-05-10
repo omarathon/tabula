@@ -1,43 +1,50 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
+
 import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.home.AppCommentCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 
-/**
- * App to receive comments/feedback about the app.
- */
+import scala.concurrent.Future
+
 @Controller
-@RequestMapping(value = Array("/app/tell-us"))
-class AppCommentsController extends BaseController {
+@RequestMapping(Array("/comments"))
+class AppCommentsController extends BaseController with AutowiringModuleAndDepartmentServiceComponent {
 
-	@ModelAttribute def command(user: CurrentUser) = new AppCommentCommand(user)
+	validatesSelf[SelfValidating]
 
-	validatesSelf[AppCommentCommand]
+	@ModelAttribute("command")
+	def command = AppCommentCommand(user)
+
+	@ModelAttribute("Recipients")
+	def Recipients = AppCommentCommand.Recipients
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute command: AppCommentCommand, errors: Errors): Mav = {
-		formView
+	def form(@ModelAttribute("command") cmd: Appliable[Future[JBoolean]]): Mav = {
+		val hasDeptAdmin = Option(user).exists(_.loggedIn) &&
+			moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption).isDefined
+		Mav("home/comments",
+			"hasDeptAdmin" -> hasDeptAdmin
+		)
 	}
-
-	def formView = chooseLayout(Mav("app/comments/form"))
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute command: AppCommentCommand, errors: Errors): Mav = {
+	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]], errors: Errors): Mav = {
 		if (errors.hasErrors) {
-			formView
+			form(cmd)
 		} else {
-			command.apply()
-			chooseLayout(Mav("app/comments/success"))
+			cmd.apply()
+			Mav("home/comments-success")
 		}
-	}
 
-	private def chooseLayout(mav: Mav) = mav.noLayoutIf(ajax)
+	}
 
 }
