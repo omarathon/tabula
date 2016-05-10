@@ -24,7 +24,7 @@ class GroupsTutorHomeController extends GroupsController {
 	): Mav = {
 		val mapping = command.apply()
 
-		val data = generateViewModules(mapping, GroupsViewModel.Tutor)
+		val data = GroupsViewModel.ViewModules.generate(mapping, GroupsViewModel.Tutor)
 
 		Mav("groups/tutor_home",
 			"data" -> data,

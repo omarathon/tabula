@@ -60,72 +60,72 @@ class HomeControllerTest extends TestBase with Mockito{
 	}
 
 	@Test
-	def getGroupsToDisplayReturnsNilForNonSelfSignUpWithNoAllocations() { new Fixture{
+	def groupsToDisplayReturnsNilForNonSelfSignUpWithNoAllocations() { new Fixture{
 		groupSet.allocationMethod= Manual
 		getGroupsToDisplay(groupSet, unallocatedUser) should be ((Nil, StudentNotAssignedToGroup))
 	}}
 
 	@Test
-	def getGroupsToDisplayReturnsAllocatedGroupsForNonSelfSignUpWithNoAllocations() { new Fixture{
+	def groupsToDisplayReturnsAllocatedGroupsForNonSelfSignUpWithNoAllocations() { new Fixture{
 		groupSet.allocationMethod= Manual
 		getGroupsToDisplay(groupSet, unallocatedUser) should be ((Nil, StudentNotAssignedToGroup))
 	}}
 
 	@Test
-	def getGroupstoDisplayReturnsAllGroupsForOpenSelfSignupWithNoAllocation(){new Fixture{
+	def groupstoDisplayReturnsAllGroupsForOpenSelfSignupWithNoAllocation(){ new Fixture{
 		groupSet.openForSignups = true
 		groupSet.allocationMethod = StudentSignUp
 		getGroupsToDisplay(groupSet, unallocatedUser) should be ((Seq(group1, group2), StudentNotAssignedToGroup))
 	}}
 
 	@Test
-	def getGroupstoDisplayReturnsNilForClosedSelfSignupWithNoAllocation(){new Fixture{
+	def groupstoDisplayReturnsNilForClosedSelfSignupWithNoAllocation(){ new Fixture{
 		groupSet.openForSignups = false
 		groupSet.allocationMethod = StudentSignUp
 		getGroupsToDisplay(groupSet, unallocatedUser) should be ((Nil, StudentNotAssignedToGroup))
 	}}
 
 	@Test
-	def getGroupsToDisplayReturnsAllocatedGroupForNonSelfSignUp(){new Fixture {
+	def groupsToDisplayReturnsAllocatedGroupForNonSelfSignUp(){ new Fixture {
 		groupSet.allocationMethod= Manual
 		getGroupsToDisplay(groupSet, allocatedUser) should be ((Seq(group1), StudentAssignedToGroup))
 	}}
 
 	@Test
-	def getGroupsToDisplayReturnsAllocatedGroupForSelfSignUp(){new Fixture {
+	def groupsToDisplayReturnsAllocatedGroupForSelfSignUp(){ new Fixture {
 		groupSet.allocationMethod= StudentSignUp
 		getGroupsToDisplay(groupSet, allocatedUser) should be ((Seq(group1), StudentAssignedToGroup))
 	}}
 
 	@Test
-	def getViewModulesRemovesModulesWithNoGroups(){new Fixture{
+	def viewModulesRemovesModulesWithNoGroups(){new Fixture{
 		// dummy getGroupsToDisplay that always returns an empty set
 		def neverReturnGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (Nil,StudentNotAssignedToGroup )
 		getViewModulesForStudent(Seq(groupSet), neverReturnGroups) should be (Nil)
 	}}
 
 	@Test
-	def getManualGroupSetsReleasedToStudents(){new Fixture{
+	def ManualGroupSetsReleasedToStudents(){ new Fixture{
 		groupSet.allocationMethod=Manual
 		groupSet.releasedToStudents=false
 		getGroupSetsReleasedToStudents(Seq(groupSet)) should be (Nil)
 		groupSet.releasedToStudents=true
-		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be Nil
 
 	}}
 
 	@Test
-	def getSelfSignUpGroupSetsReleasedToStudents(){new Fixture{
+	def selfSignUpGroupSetsReleasedToStudents(){ new Fixture{
 		groupSet.allocationMethod=StudentSignUp
 		// self signup groups should be returned - we ignore the releasedToStudents flag
 		groupSet.releasedToStudents=false
-		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be Nil
 		groupSet.releasedToStudents=true
-		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be Nil
 	}}
 
 	@Test
-	def getViewModulesConvertsModuleToViewModule(){new Fixture{
+	def viewModulesConvertsModuleToViewModule(){ new Fixture{
 		// dummy getGroupsToDisplay that always returns all groups in the set
 		def allGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (set.groups.asScala,StudentNotAssignedToGroup )
 		val viewModules = getViewModulesForStudent(Seq(groupSet), allGroups)
@@ -133,11 +133,11 @@ class HomeControllerTest extends TestBase with Mockito{
 		viewModules.head.canManageGroups should be(false)
 		val viewSets = viewModules.head.setItems
 		viewSets.size should be(1)
-		viewSets.head.groups should be (Seq(group1, group2).sorted)
+		viewSets.head.groups.map(_.group) should be (Seq(group1, group2).sorted)
 	}}
 
 	@Test
-	def getViewModulesGroupsByModule(){new Fixture{
+	def viewModulesGroupsByModule(){ new Fixture{
 		// dummy getGroupsToDisplay that always returns all groups in the set
 		def allGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (set.groups.asScala,StudentNotAssignedToGroup )
 
@@ -146,8 +146,8 @@ class HomeControllerTest extends TestBase with Mockito{
 		viewModules.size should be(1)
 		val viewSets = viewModules.head.setItems
 		viewSets.size should be(2)
-		viewSets.head.groups should be (Seq(group1, group2).sorted)
-		viewSets.tail.head.groups should be (Seq(group3))
+		viewSets.head.groups.map(_.group) should be (Seq(group1, group2).sorted)
+		viewSets.tail.head.groups.map(_.group) should be (Seq(group3))
 	}}
 
 

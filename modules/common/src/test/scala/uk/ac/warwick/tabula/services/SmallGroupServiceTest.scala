@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.services
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef}
-import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{AutowiringAssessmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
-import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupServiceTest extends TestBase with Mockito {
 	trait Environment {
@@ -55,12 +52,14 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with UserGroupDaoComponent
 			with SmallGroupDaoComponent
 		  with SecurityServiceComponent
+			with TermServiceComponent
 			with Logging {
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
 				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
 				val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = departmentStudentGroupMembershipHelper
+				val termService = null
 
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]
 				smallGroupDao.findByModuleAndYear(module, new AcademicYear(2013)) returns Seq[SmallGroup](group)

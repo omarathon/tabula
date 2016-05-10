@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments) || nonempty(taughtGroups)>
 
 	<#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
@@ -36,3 +37,4 @@
 	</#if>
 
 </#if>
+</#escape>
