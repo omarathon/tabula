@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, ViewViewableCom
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSet
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
@@ -45,7 +45,7 @@ trait GetSmallGroupSetApiFullOutput extends GetSmallGroupSetApiOutput {
 
 	def outputJson(smallGroupSet: SmallGroupSet) = Map(
 		"academicYear" -> smallGroupSet.academicYear.toString,
-		"groupSet" -> jsonSmallGroupSetObject(new ViewSet(smallGroupSet, smallGroupSet.groups.asScala.sorted, GroupsViewModel.Tutor))
+		"groupSet" -> jsonSmallGroupSetObject(new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.sorted), GroupsViewModel.Tutor))
 	)
 
 }

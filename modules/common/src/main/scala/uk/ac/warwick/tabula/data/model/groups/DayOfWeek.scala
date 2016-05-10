@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.joda.time.DateTimeConstants
+import org.joda.time.{DateTime, DateTimeConstants}
 import java.sql.Types
+
 import org.hibernate.`type`.StandardBasicTypes
 import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
@@ -29,6 +30,7 @@ object DayOfWeek {
 	private[groups] def find(i: Int) = members find { _.jodaDayOfWeek == i }
 
 	def apply(i: Int): DayOfWeek = find(i) getOrElse { throw new IllegalArgumentException(s"Invalid value for day of week: $i") }
+	def today: DayOfWeek = DayOfWeek(DateTime.now.dayOfWeek.get)
 }
 
 class DayOfWeekUserType extends AbstractBasicUserType[DayOfWeek, JInteger] {

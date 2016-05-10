@@ -7,24 +7,21 @@ import org.joda.time.DateTime
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation._
-
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.groups.ModuleSmallGroupSetsController._
 import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
-import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, _}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewSet
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewSet}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
@@ -97,7 +94,7 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
 			response.setStatus(HttpStatus.CREATED.value())
 			response.addHeader("Location", toplevelUrl + Routes.api.groupSet(smallGroupSet))
 
-			val viewSet = new ViewSet(smallGroupSet, smallGroupSet.groups.asScala.sorted, GroupsViewModel.Tutor)
+			val viewSet = new ViewSet(smallGroupSet, ViewGroup.fromGroups(smallGroupSet.groups.asScala.sorted), GroupsViewModel.Tutor)
 			Mav(new JSONView(Map(
 				"success" -> true,
 				"status" -> "ok",

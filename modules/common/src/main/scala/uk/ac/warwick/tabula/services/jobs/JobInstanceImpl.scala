@@ -36,36 +36,39 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 	@transient var currentUserFinder = Wire.auto[CurrentUserInterceptor]
 
 	/** Human-readable status of the job */
-	var status: String = _
+	override var status: String = _
 
 	var jobType: String = _
 
-	var started = false
-	var finished = false
-	var succeeded = false
+	override var started = false
+	override var finished = false
+	override var succeeded = false
 
 	var realUser: String = _
 	var apparentUser: String = _
 
-	def userId = apparentUser
+	override def userId = apparentUser
 
 	@transient var user: CurrentUser = _
 
-	var createdDate: DateTime = new DateTime
+	override var createdDate: DateTime = new DateTime
 
-	var updatedDate: DateTime = new DateTime
+	override var updatedDate: DateTime = new DateTime
 
 	@Column(name = "progress") var _progress: Int = 0
-	def progress = _progress
-	def progress_=(p: Int) = {
+	override def progress = _progress
+	override def progress_=(p: Int) = {
 		_progress = p
 	}
+
+	@Column(name = "instance")
+	override var schedulerInstance: String = _
 
 	// CLOB
 	var data: String = "{}"
 
 	@transient private var _json: JsonMap = Map()
-	def json = _json
+	override def json = _json
 	def json_=(map: JsonMap) {
 		_json = map
 		if (jsonMapper != null) {
@@ -75,8 +78,8 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 		}
 	}
 
-	def propsMap = json
-	def propsMap_=(map: JsonMap) { json = map }
+	override def propsMap = json
+	override def propsMap_=(map: JsonMap) { json = map }
 
 	override def postLoad {
 		val map = jsonMapper.readValue(data, classOf[Map[String, Any]])
@@ -95,7 +98,7 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 		user = currentUserFinder.resolveCurrentUser(realUser, { (u, s) => apparentUser }, false)
 	}
 
-	def toStringProps = Seq(
+	override def toStringProps = Seq(
 		"id" -> id,
 		"status" -> status,
 		"jobType" -> jobType)
