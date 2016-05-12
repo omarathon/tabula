@@ -3,7 +3,7 @@
 <#escape x as x?html>
 	<#if studentCourseDetails?has_content>
 
-		<@student_macros.table studentCourseDetails />
+		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap/>
 
 		<p><@fmt.bulk_email_students students=students /></p>
 
