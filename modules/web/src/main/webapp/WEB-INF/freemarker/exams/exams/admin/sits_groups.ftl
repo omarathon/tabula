@@ -23,7 +23,7 @@
 							<input
 								type="checkbox"
 								id="chk-${available.id}"
-								name=""
+								name="upstreamGroups"
 								value="${available.id}" class="upstreamGroups"
 								${isLinked?string(" checked","")}
 							>
