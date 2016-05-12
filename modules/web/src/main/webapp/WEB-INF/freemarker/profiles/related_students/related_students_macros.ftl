@@ -22,7 +22,7 @@
 		</#if>
 		<#if showMeetings>
 			<#if lastMeeting?has_content>
-				<td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}"><@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true split=true/></td>
+				<td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}"><@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true /></td>
 			<#else>
 				<td></td>
 			</#if>
