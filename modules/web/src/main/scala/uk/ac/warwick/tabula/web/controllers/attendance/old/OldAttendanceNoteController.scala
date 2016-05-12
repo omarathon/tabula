@@ -3,22 +3,20 @@ package uk.ac.warwick.tabula.web.controllers.attendance.old
 import javax.validation.Valid
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.note.old.{AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.commands.attendance.old.CheckpointUpdatedDescription
-import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointAttendanceNote}
 import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{MonitoringPointService, UserLookupService}
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-@Controller
 @RequestMapping(Array("/attendance/note/2013/{student}/{monitoringPoint}"))
 class OldAttendanceNoteController extends AttendanceController with CheckpointUpdatedDescription {
 
@@ -44,7 +42,6 @@ class OldAttendanceNoteController extends AttendanceController with CheckpointUp
 
 }
 
-@Controller
 @RequestMapping(Array("/attendance/note/2013/{student}/{monitoringPoint}/attachment/{fileName}"))
 class OldAttendanceNoteAttachmentController extends AttendanceController {
 
@@ -59,7 +56,6 @@ class OldAttendanceNoteAttachmentController extends AttendanceController {
 
 }
 
-@Controller
 @RequestMapping(Array("/attendance/note/2013/{student}/{monitoringPoint}/edit"))
 class OldEditAttendanceNoteController extends AttendanceController {
 

@@ -62,6 +62,10 @@ class MonitoringPointSet extends GeneratedId with PermissionsTarget {
 	@Column(nullable = false)
 	var academicYear: AcademicYear = _
 
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "migratedto")
+	var migratedTo: AttendanceMonitoringScheme = _
+
 	def permissionsParents = Option(route).toStream
 
 }
