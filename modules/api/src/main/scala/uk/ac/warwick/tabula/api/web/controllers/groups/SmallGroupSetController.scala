@@ -60,7 +60,7 @@ trait GetSmallGroupSetApi {
 	@ModelAttribute("getCommand")
 	def getCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet) = {
 		mustBeLinked(mandatory(smallGroupSet), mandatory(module))
-		new ViewViewableCommand(Permissions.Module.ManageSmallGroups, smallGroupSet)
+		new ViewViewableCommand(Permissions.SmallGroups.Read, smallGroupSet)
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
