@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.admin
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Appliable}
 import uk.ac.warwick.tabula.data.model.{Department, StudentCourseDetails, StudentRelationshipType}
 import uk.ac.warwick.tabula.commands.profiles.{ViewRelatedStudentsCommandState, MissingStudentRelationshipCommand, ViewRelatedStudentsCommand, ViewStudentRelationshipsCommand}
 import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
@@ -62,7 +62,7 @@ class MissingStudentRelationshipController extends ProfilesController {
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/students"))
-class ViewStudentRelationshipStudentsController extends ProfilesController with AutowiringMeetingRecordServiceComponent {
+class ViewStudentRelationshipStudentsController extends ProfilesController with AutowiringMeetingRecordServiceComponent with TaskBenchmarking {
 
 	type ViewRelatedStudentsCommand = Appliable[Seq[StudentCourseDetails]] with ViewRelatedStudentsCommandState
 
@@ -76,7 +76,9 @@ class ViewStudentRelationshipStudentsController extends ProfilesController with 
 
 		val meetingsMap = results.map(scd => {
 			val rels = relationshipService.getRelationships(viewRelatedStudentsCommand.relationshipType, scd.student)
-			val lastMeeting = meetingRecordService.listAll(rels.toSet, Some(currentMember)).headOption
+			val lastMeeting = benchmarkTask("lastMeeting"){
+				meetingRecordService.list(rels.toSet, Some(currentMember)).headOption
+			}
 			scd.student.universityId -> lastMeeting
 		}).toMap
 
