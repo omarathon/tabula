@@ -54,15 +54,15 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 	}
 
 	override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
-		Option(simpleMessage.getFrom) map {message.setFrom}
-		Option(simpleMessage.getReplyTo) map {message.setReplyTo}
+		Option(simpleMessage.getFrom) foreach {message.setFrom}
+		Option(simpleMessage.getReplyTo) foreach {message.setReplyTo}
 
-		Option(simpleMessage.getTo) map {message.setTo}
+		Option(simpleMessage.getTo) foreach {message.setTo}
 		message.setCc(Option(simpleMessage.getCc).getOrElse(Array(): Array[String]))
 		message.setBcc(Option(simpleMessage.getBcc).getOrElse(Array(): Array[String]))
 
-		Option(simpleMessage.getSubject) map {message.setSubject}
-		Option(simpleMessage.getText) map {message.setText}
+		Option(simpleMessage.getSubject) foreach {message.setSubject}
+		Option(simpleMessage.getText) foreach {message.setText}
 	})
 
 }

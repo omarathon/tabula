@@ -89,7 +89,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro returnForMarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/return-submissions" /></#macro>
 
 <#macro onlinemarking assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online" /></#macro>
-<#macro onlinemarkingform assignment student><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online/${student.universityId}" /></#macro>
 
 <#macro feedbackadd assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
 <#macro feedbackdelete assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>

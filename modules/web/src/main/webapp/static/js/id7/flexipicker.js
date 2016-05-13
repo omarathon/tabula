@@ -103,6 +103,22 @@ var TabulaTypeahead = function(options) {
 
 };
 
+// The jQuery plugin
+$.fn.tabulaTypeahead = function (options) {
+	this.each(function () {
+		var $this = $(this);
+		if ($this.data('tabula-typeahead')) {
+			throw new Error("TabulaTypeahead has already been added to this element.");
+		}
+		var allOptions = {
+			element: $this
+		};
+		$.extend(allOptions, options || {});
+		$this.data('tabula-typeahead', new TabulaTypeahead(allOptions));
+	});
+	return this;
+};
+
 /**
  * An AJAX autocomplete-style picker that can return a variety of different
  * result types, such as users, webgroups, and typed-in email addresses.

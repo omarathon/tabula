@@ -94,7 +94,7 @@
 							<#if user?? && user.loggedIn>
 								<a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
 							</#if>
-							<a class="btn btn-brand btn-sm" id="app-feedback-link" href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Problems, questions?</a>
+							<a class="btn btn-brand btn-sm" href="/comments<#if info??>?currentPage=${info.requestedUri}</#if>">Problems, questions?</a>
 						</div>
 						<#if (info.maintenance)!false || (activeSpringProfiles!"") == "sandbox">
 							<div class="pull-right" style="line-height: 54px;">

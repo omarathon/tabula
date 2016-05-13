@@ -75,6 +75,7 @@ trait SmallGroupService {
 	def delete(occurrence: SmallGroupEventOccurrence)
 
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
+	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -84,6 +85,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with UserLookupComponent
 		with UserGroupDaoComponent
 		with SecurityServiceComponent
+		with TermServiceComponent
 		with Logging =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
@@ -267,9 +269,21 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup] = 	findSmallGroupsByTutor(user.apparentUser)
 		.filter { group =>
 			// The set is visible to tutors; OR
-			(group.groupSet.releasedToTutors ||
-			// I have permission to view the membership of the set anyway
-			securityService.can(user, Permissions.SmallGroups.ReadMembership, group))
+			group.groupSet.releasedToTutors ||
+				// I have permission to view the membership of the set anyway
+				securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
+	}
+
+	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence] = {
+		val now = DateTime.now
+		val today = DayOfWeek.today
+		val thisTermWeek = termService.getTermFromDateIncludingVacations(now).getAcademicWeekNumber(now)
+		val allModules = modules ++ departments.flatMap(_.modules.asScala)
+		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrenceInModulesInWeeks(thisTermWeek, thisTermWeek, allModules)
+		val tutorOccurrences: Seq[SmallGroupEventOccurrence] = tutors.flatMap(findSmallGroupEventsByTutor)
+			 .filter(_.group.groupSet.releasedToTutors)
+			.map(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))
+		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
 }
 
@@ -307,4 +321,5 @@ class SmallGroupServiceImpl
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
 		with AutowiringSecurityServiceComponent
+		with AutowiringTermServiceComponent
 		with Logging

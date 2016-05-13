@@ -40,6 +40,8 @@ trait JobInstance {
 	var finished: Boolean
 	var succeeded: Boolean
 
+	var schedulerInstance: String
+
 	def json: JsonMap
 
 	def user: CurrentUser

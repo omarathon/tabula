@@ -226,7 +226,6 @@
 								<include>userpicker.js</include>
 								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>
-								<include>app-comments.js</include>
 								<include>select-deselect-checkboxes.js</include>
 								<include>combo-typeahead.js</include>
 								<include>map-popups.js</include>
@@ -365,7 +364,6 @@
 								<include>js/id7/flexipicker.js</include>
 								<include>js/ajax-popup.js</include>
 								<include>js/browser-info.js</include>
-								<include>js/id7/app-comments.js</include>
 								<include>js/combo-typeahead.js</include>
 								<include>js/id7/map-popups.js</include>
 								<include>js/jquery-biglist.js</include>

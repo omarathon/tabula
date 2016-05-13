@@ -7,9 +7,10 @@ import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.services.groups.AutowiringSmallGroupSetWorkflowServiceComponent
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{SetProgress, Tutor, ViewSetWithProgress}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{SetProgress, Tutor, ViewGroup, ViewSetWithProgress}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+
 import scala.collection.JavaConverters._
 
 @Controller
@@ -31,7 +32,7 @@ class AdminSmallGroupSetController extends GroupsController with AutowiringSmall
 
 		val setView = ViewSetWithProgress(
 			set = set,
-			groups = set.groups.asScala.sorted,
+			groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
 			viewerRole = Tutor,
 			progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
 			nextStage = progress.nextStage,
