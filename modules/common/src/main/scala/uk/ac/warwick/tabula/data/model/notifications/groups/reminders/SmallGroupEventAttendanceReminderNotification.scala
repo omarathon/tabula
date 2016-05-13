@@ -6,10 +6,10 @@ import org.joda.time.Days
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupEventOccurrence}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, WeekRange}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.WholeWeekFormatter
-import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, ModuleAndDepartmentService, TermService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -115,6 +115,7 @@ class SmallGroupEventAttendanceReminderNotification
 }
 
 class SmallGroupEventAttendanceReminderNotificationSettings(departmentSettings: NotificationSettings) {
+	@transient private val userLookup = Wire[UserLookupService]
 	// Configuration settings specific to this type of notification
 	def enabled = departmentSettings.enabled
 	def notifyTutors = departmentSettings.BooleanSetting("notifyTutors", default = true)
@@ -123,6 +124,6 @@ class SmallGroupEventAttendanceReminderNotificationSettings(departmentSettings: 
 	def notifyDepartmentAdministrators = departmentSettings.BooleanSetting("notifyDepartmentAdministrators", default = false)
 	def notifyNamedUsers = departmentSettings.BooleanSetting("notifyNamedUsers", default = false)
 	def notifyNamedUsersFirst = departmentSettings.BooleanSetting("notifyNamedUsersFirst", default = false)
-	def namedUsers = departmentSettings.UserSeqSetting("namedUsers", default = Seq())
+	def namedUsers = departmentSettings.UserSeqSetting("namedUsers", default = Seq(), userLookup)
 	def notifyFirstNonEmptyGroupOnly = departmentSettings.BooleanSetting("notifyFirstNonEmptyGroupOnly", default = true)
 }

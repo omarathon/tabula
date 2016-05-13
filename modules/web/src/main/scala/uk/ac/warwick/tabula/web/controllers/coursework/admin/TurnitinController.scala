@@ -13,20 +13,17 @@ import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.services.jobs.JobService
-import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiQueueServiceComponent, TurnitinLtiService}
+import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{CurrentUser, Features}
 
 import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/turnitin"))
-class TurnitinController extends CourseworkController {
+class TurnitinController extends CourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
 	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
-
-	@Autowired var jobService: JobService = _
-	@Autowired var assignmentService: AssessmentService = _
-	@Autowired var features: Features = _
 
 	validatesSelf[SelfValidating]
 
@@ -42,32 +39,29 @@ class TurnitinController extends CourseworkController {
 		)
 	}
 
-	@RequestMapping(method = Array(GET, HEAD), params = Array("!jobId"))
+	@RequestMapping(method = Array(GET, HEAD))
 	def confirm(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors) = {
 		Mav("coursework/admin/assignments/turnitin/form", "errors" -> errors)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array("!jobId"))
+	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors) = {
 		if (errors.hasErrors) {
 			confirm(command, errors)
 		} else {
-			val jobId = command.apply().id
-			Redirect(Routes.admin.assignment.turnitin.status(command.assignment) + "?jobId=" + jobId)
+			command.apply()
+			Redirect(Routes.admin.assignment.turnitin.status(command.assignment))
 		}
 	}
 
-	@RequestMapping(params = Array("jobId"))
-	def status(@RequestParam jobId: String) = {
-		val job = jobService.getInstance(jobId)
-		val mav = Mav("coursework/admin/assignments/turnitin/status", "job" -> job).noLayoutIf(ajax)
-		// add assignment object if we can find it. FIXME This is a bit hacky.
-		job foreach { job =>
-			assignmentService.getAssignmentById(job.getString("assignment")) foreach { assignment =>
-				mav.addObjects("assignment" -> assignment)
-			}
+	@RequestMapping(value = Array("/status"))
+	def status(@PathVariable assignment: Assignment) = {
+		val assignmentStatus = turnitinLtiQueueService.getAssignmentStatus(assignment)
+		if (ajax) {
+			Mav(new JSONView(assignmentStatus.toMap))
+		} else {
+			Mav("coursework/admin/assignments/turnitin/status", "status" -> assignmentStatus)
 		}
-		mav
 	}
 
 }

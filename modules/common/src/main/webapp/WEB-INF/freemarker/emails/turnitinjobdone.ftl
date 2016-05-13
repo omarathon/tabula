@@ -3,7 +3,7 @@ You recently sent submissions for the assignment ${assignmentTitle} to Turnitin 
 <#if failureCount gt 0>
 Turnitin could not check the following <@fmt.p number=failureCount singular="submission"/>:
 
-<#list failedUploads?keys as key>
-${key} --  ${failedUploads[key]}
+<#list failedReports as report>
+${report.attachment.name} -- ${report.lastTurnitinError}
 </#list>
 </#if>

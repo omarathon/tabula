@@ -54,15 +54,14 @@ trait CreateAssignmentTurnitinJobApi {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
-			val job = command.apply()
+			val assignment = command.apply()
 
 			response.setStatus(HttpStatus.ACCEPTED.value())
-			response.addHeader("Location", toplevelUrl + Routes.api.job(job))
+			response.addHeader("Location", toplevelUrl + Routes.coursework.admin.assignment.turnitin.status(assignment))
 
 			Mav(new JSONView(Map(
 				"success" -> true,
-				"status" -> "ok",
-				"job" -> jsonJobInstanceObject(job)
+				"status" -> "ok"
 			)))
 		}
 	}
