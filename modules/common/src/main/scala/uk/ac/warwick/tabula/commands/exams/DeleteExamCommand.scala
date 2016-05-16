@@ -2,31 +2,69 @@ package uk.ac.warwick.tabula.commands.exams
 
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
-class DeleteExamCommand(val exam: Exam) extends Command[Exam] with SelfValidating {
+object DeleteExamCommand {
+	def apply(exam: Exam) =
+		new DeleteExamCommandInternal(exam)
+			with ComposableCommand[Exam]
+			with DeleteExamPermissions
+			with DeleteExamCommandState
+			with DeleteExamCommandDescription
+			with DeleteExamValidation
+			with AutowiringAssessmentServiceComponent
+}
 
-	PermissionCheck(Permissions.Assignment.Delete, exam)
+class DeleteExamCommandInternal(val exam: Exam)
+	extends CommandInternal[Exam]
+	with DeleteExamCommandState {
 
-	var service = Wire[AssessmentService]
-	var confirm = false
+	self: AssessmentServiceComponent =>
 
-	override def applyInternal() =  {
+	override def applyInternal() = {
 		exam.markDeleted()
-		service.save(exam)
+		assessmentService.save(exam)
 		exam
 	}
+}
 
-	def validate(errors: Errors) {
+trait DeleteExamPermissions extends RequiresPermissionsChecking {
+
+	self: DeleteExamCommandState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Assignment.Delete, exam)
+	}
+}
+
+trait DeleteExamCommandState  {
+
+	var confirm = false
+	def exam: Exam
+}
+
+trait DeleteExamCommandDescription extends Describable[Exam] {
+
+	self: DeleteExamCommandState with AssessmentServiceComponent =>
+
+	def describe(d: Description) {
+		d.exam(exam)
+	}
+}
+
+trait DeleteExamValidation extends SelfValidating {
+
+	self: DeleteExamCommandState =>
+
+	override def validate(errors: Errors) {
 		if (!confirm) {
 			errors.rejectValue("confirm", "exam.delete.confirm")
 		} else validateCanDelete(errors)
 	}
-
 	def validateCanDelete(errors: Errors) {
 		if (exam.deleted) {
 			errors.reject("exam.delete.deleted")
@@ -34,7 +72,6 @@ class DeleteExamCommand(val exam: Exam) extends Command[Exam] with SelfValidatin
 			errors.reject("exam.delete.marksAssociated")
 		}
 	}
-
-	override def describe(d: Description) = d.exam(exam)
-
 }
+
+

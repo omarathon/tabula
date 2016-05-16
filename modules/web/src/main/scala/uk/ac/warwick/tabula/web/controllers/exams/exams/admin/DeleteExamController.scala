@@ -5,6 +5,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.data.model.Exam
 import uk.ac.warwick.tabula.commands.exams._
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -14,8 +15,12 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/delete"))
 class DeleteExamController extends ExamsController {
 
+	type DeleteExamCommand = Appliable[Exam] with DeleteExamCommandState
+
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("command")
-	def command(@PathVariable exam : Exam) = new DeleteExamCommand(mandatory(exam))
+	def command(@PathVariable exam : Exam) = DeleteExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute("command") cmd: DeleteExamCommand) = {
