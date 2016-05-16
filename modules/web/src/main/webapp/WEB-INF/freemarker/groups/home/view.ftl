@@ -28,11 +28,9 @@
 	<#include "_student.ftl" />
 	<#include "_admin.ftl" />
 
-	<h2>Today's events</h2>
-	<#if todaysModules?has_content>
+	<#if todaysModules.moduleItems?has_content>
+		<h2>Today's events</h2>
 		<@components.module_info todaysModules />
-	<#else>
-		<p>There are no events scheduled for today</p>
 	</#if>
 
 	<#assign is_student=user.student /> <#-- Non-students may also have groups, but we still show them the intro text -->
