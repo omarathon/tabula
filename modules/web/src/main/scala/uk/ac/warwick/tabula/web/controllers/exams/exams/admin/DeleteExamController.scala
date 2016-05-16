@@ -15,8 +15,7 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 class DeleteExamController extends ExamsController {
 
 	@ModelAttribute("command")
-	def command(
-		@PathVariable exam : Exam) = new DeleteExamCommand(mandatory(exam))
+	def command(@PathVariable exam : Exam) = new DeleteExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(GET))
 	def showForm(@ModelAttribute("command") cmd: DeleteExamCommand) = {
