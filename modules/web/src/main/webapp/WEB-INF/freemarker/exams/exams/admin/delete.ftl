@@ -10,12 +10,12 @@
 		<@f.errors cssClass="error" />
 
 		<p>
-			You can delete an exam if they've been created in error.
+			You can delete an exam if it has been created in error.
 		</p>
 
 		<@bs3form.checkbox path="confirm">
 			<@f.checkbox path="confirm" id="confirmCheck" />
-			<strong> I definitely will not need this exam again and wish to delete them entirely.</strong>
+			<strong> I definitely will not need this exam again and wish to delete it entirely.</strong>
 		</@bs3form.checkbox>
 
 		<@bs3form.form_group>
