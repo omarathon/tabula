@@ -64,7 +64,8 @@ trait SmallGroupService {
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
 
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
@@ -250,8 +251,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
 
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]) =
-		smallGroupDao.findOccurrenceInModulesInWeeks(startWeek, endWeek, modules)
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear) =
+		smallGroupDao.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
+
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear) =
+		smallGroupDao.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
 
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = smallGroupDao.hasSmallGroups(module, academicYear)
@@ -277,9 +281,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence] = {
 		val now = DateTime.now
 		val today = DayOfWeek.today
+		val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(now)
 		val thisTermWeek = termService.getTermFromDateIncludingVacations(now).getAcademicWeekNumber(now)
 		val allModules = modules ++ departments.flatMap(_.modules.asScala)
-		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrenceInModulesInWeeks(thisTermWeek, thisTermWeek, allModules)
+		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrencesInModulesInWeeks(thisTermWeek, thisTermWeek, allModules, thisAcademicYear)
 		val tutorOccurrences: Seq[SmallGroupEventOccurrence] = tutors.flatMap(findSmallGroupEventsByTutor)
 			 .filter(_.group.groupSet.releasedToTutors)
 			.map(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))

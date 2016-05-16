@@ -52,7 +52,8 @@ trait SmallGroupDao {
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
 
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
@@ -199,12 +200,9 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 
 	}
 
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence] = {
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence] = {
 		if (modules.isEmpty) {
-			session.newCriteria[SmallGroupEventOccurrence]
-				.add(ge("week", startWeek))
-				.add(le("week", endWeek))
-				.seq
+			Seq()
 		} else {
 			val c = () => {
 				session.newCriteria[SmallGroupEventOccurrence]
@@ -213,10 +211,21 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 					.createAlias("group.groupSet", "groupSet")
 					.add(ge("week", startWeek))
 					.add(le("week", endWeek))
+					.add(is("groupSet.academicYear", academicYear))
 			}
 			safeInSeq(c, "groupSet.module", modules)
 		}
+	}
 
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence] = {
+		session.newCriteria[SmallGroupEventOccurrence]
+			.createAlias("event", "event")
+			.createAlias("event.group", "group")
+			.createAlias("group.groupSet", "groupSet")
+			.add(ge("week", startWeek))
+			.add(le("week", endWeek))
+			.add(is("groupSet.academicYear", academicYear))
+		  .seq
 	}
 
 
