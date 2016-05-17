@@ -65,7 +65,6 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		val rel2 = StudentRelationship(staff, relationshipType, student)
 		rel2.id = "2"
 
-
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(rel1)
 
 		rel1.studentCourseDetails = studentCourseDetails
