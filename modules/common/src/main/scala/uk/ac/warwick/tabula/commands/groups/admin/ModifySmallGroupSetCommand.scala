@@ -129,7 +129,7 @@ trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRang
 				.map { case (weekNumber, dates) =>
 					(weekNumber, termService.getTermFromAcademicWeekIncludingVacations(weekNumber, year))
 				}
-				.filterNot { case (_, term) => (term.getTermType == null) } // Remove vacations - can't do this above as mins would be wrong
+				.filterNot { case (_, term) => term.getTermType == null } // Remove vacations - can't do this above as mins would be wrong
 				.groupBy { _._2.getTermType() }
 				.map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
 
@@ -239,9 +239,13 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 			}
 
 			if (set.releasedToStudents || set.releasedToTutors) {
-				// Can't unlink or link a released set
-				if (set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
-				else if (set.linkedDepartmentSmallGroupSet != linkedDepartmentSmallGroupSet) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+				if ((set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) || (allocationMethod == SmallGroupAllocationMethod.Linked && !set.linked)) {
+					// Can't unlink or link a released set
+					errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+				}	else if (set.linked && set.linkedDepartmentSmallGroupSet != linkedDepartmentSmallGroupSet) {
+					// Can't change the link of a released set
+					errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+				}
 			}
 		}
 	}
