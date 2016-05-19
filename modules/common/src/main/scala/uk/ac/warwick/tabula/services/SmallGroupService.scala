@@ -292,7 +292,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrencesInModulesInWeeks(thisTermWeek, thisTermWeek, allModules, thisAcademicYear)
 			.filter(!_.event.group.groupSet.archived)
 		val tutorOccurrences: Seq[SmallGroupEventOccurrence] = tutors.flatMap(findSmallGroupEventsByTutor)
-			.filter(e => e.group.groupSet.releasedToTutors && e.group.groupSet.academicYear == thisAcademicYear)
+			.filter(e => e.group.groupSet.releasedToTutors && e.group.groupSet.academicYear == thisAcademicYear && !e.group.groupSet.archived)
 			.flatMap(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))
 		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
