@@ -51,7 +51,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		user.setWarwickId("1234567")
 
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport
-		command.smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) returns (occurrence)
+		command.smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) returns Option(occurrence)
 		command.studentsState.put("1234567", AttendanceState.Attended)
 		command.applyInternal()
 		verify(command.userLookup, times(0)).getUsersByUserIds(Seq("abcde").asJava)
@@ -87,7 +87,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation with SmallGroupEventInFutureCheck
 
-		command.weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, set.academicYear) returns (Some(LocalDateTime.now().minusWeeks(1)))
+		command.weekToDateConverter.toLocalDatetime(week, event.day, event.startTime, set.academicYear) returns Some(LocalDateTime.now().minusWeeks(1))
 
 		command.userLookup.getUserByWarwickUniId(invalidUser.getWarwickId) returns invalidUser
 		command.userLookup.getUserByWarwickUniId(missingUser.getWarwickId) returns missingUser
