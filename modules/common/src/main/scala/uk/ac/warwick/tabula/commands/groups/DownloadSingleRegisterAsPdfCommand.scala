@@ -50,5 +50,9 @@ trait GetsOccurrencesForDownloadSingleRegisterAsPdfCommand extends GetsOccurrenc
 
 	self: DownloadSingleRegisterAsPdfCommandState with SmallGroupServiceComponent =>
 
-	def getOccurrences: Seq[SmallGroupEventOccurrence] = Seq(transactional(readOnly = true){ smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) })
+	def getOccurrences: Seq[SmallGroupEventOccurrence] = Seq(transactional(readOnly = true){
+		smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week).getOrElse(throw new IllegalArgumentException(
+			s"Week number $week is not valid for event ${event.id}"
+		))
+	})
 }
