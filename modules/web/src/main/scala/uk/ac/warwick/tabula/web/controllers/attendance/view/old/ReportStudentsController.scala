@@ -6,15 +6,14 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.report.OldReportStudentsChoosePeriodCommand.StudentReportStatus
 import uk.ac.warwick.tabula.commands.attendance.report.{OldReportStudentsChoosePeriodCommand, OldReportStudentsConfirmCommand, ReportStudentsState}
-import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
-@Controller
 @RequestMapping(Array("/attendance/report/{department}"))
 class OldReportStudentsChoosePeriodController extends AttendanceController {
 

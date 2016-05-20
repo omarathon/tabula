@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointSet}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.commands.attendance.manage.old.AddMonitoringPointSetCommand
 
-@Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.attendance.manage.old.AddMonitoringPointSetCommand
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate}
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+
 @RequestMapping(Array("/attendance/manage/{dept}/2013/sets/add/{academicYear}"))
 class AddMonitoringPointSetController extends AttendanceController {
 
