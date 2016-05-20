@@ -96,6 +96,8 @@ trait MonitoringPointService {
 	def hasAnyPointSets(department: Department): Boolean
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
+	def getSetToMigrate: Option[MonitoringPointSet]
 }
 
 
@@ -275,6 +277,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
 		monitoringPointDao.findAttendanceNotes(students, points)
+	}
+
+	def findAttendanceNotes(points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		monitoringPointDao.findAttendanceNotes(points)
+	}
+
+	def getSetToMigrate: Option[MonitoringPointSet] = {
+		monitoringPointDao.getSetToMigrate
 	}
 
 }

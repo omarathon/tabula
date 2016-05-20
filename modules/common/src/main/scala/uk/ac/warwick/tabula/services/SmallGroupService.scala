@@ -31,7 +31,7 @@ trait SmallGroupService {
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence]
 	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup]
-	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): SmallGroupEventOccurrence
+	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence]
 	def getOrCreateSmallGroupEventOccurrences(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
 	def getAllSmallGroupEventOccurrencesForEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence]
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
@@ -64,7 +64,8 @@ trait SmallGroupService {
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
 
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
@@ -75,6 +76,7 @@ trait SmallGroupService {
 	def delete(occurrence: SmallGroupEventOccurrence)
 
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
+	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -84,6 +86,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with UserLookupComponent
 		with UserGroupDaoComponent
 		with SecurityServiceComponent
+		with TermServiceComponent
 		with Logging =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
@@ -93,17 +96,20 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 	def getDepartmentSmallGroupSetById(id: String) = smallGroupDao.getDepartmentSmallGroupSetById(id)
 	def getDepartmentSmallGroupById(id: String) = smallGroupDao.getDepartmentSmallGroupById(id)
-	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) =
-		smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber).getOrElse {
-			val newOccurrence = new SmallGroupEventOccurrence()
-			newOccurrence.event = event
-			newOccurrence.week = weekNumber
-			smallGroupDao.saveOrUpdate(newOccurrence)
-			newOccurrence
+	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence] = {
+		event.allWeeks.find(_ == weekNumber).map { _ =>
+			smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber).getOrElse {
+				val newOccurrence = new SmallGroupEventOccurrence()
+				newOccurrence.event = event
+				newOccurrence.week = weekNumber
+				smallGroupDao.saveOrUpdate(newOccurrence)
+				newOccurrence
+			}
 		}
+	}
 
 	def getOrCreateSmallGroupEventOccurrences(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] =
-		event.allWeeks.map(getOrCreateSmallGroupEventOccurrence(event, _))
+		event.allWeeks.flatMap(getOrCreateSmallGroupEventOccurrence(event, _))
 
 	def getAllSmallGroupEventOccurrencesForEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] =
 		smallGroupDao.findSmallGroupOccurrencesByEvent(event)
@@ -179,7 +185,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		state: AttendanceState,
 		user: CurrentUser
 	): SmallGroupEventAttendance = {
-		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
+		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber).getOrElse(throw new IllegalArgumentException(
+			s"Week number $weekNumber is not valid for event ${event.id}"
+		))
 
 		val attendance = smallGroupDao.getAttendance(studentId, occurrence).getOrElse({
 			val newAttendance = new SmallGroupEventAttendance
@@ -248,8 +256,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
 
-	def findOccurrenceInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module]) =
-		smallGroupDao.findOccurrenceInModulesInWeeks(startWeek, endWeek, modules)
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear) =
+		smallGroupDao.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
+
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear) =
+		smallGroupDao.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
 
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = smallGroupDao.hasSmallGroups(module, academicYear)
@@ -267,9 +278,23 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup] = 	findSmallGroupsByTutor(user.apparentUser)
 		.filter { group =>
 			// The set is visible to tutors; OR
-			(group.groupSet.releasedToTutors ||
-			// I have permission to view the membership of the set anyway
-			securityService.can(user, Permissions.SmallGroups.ReadMembership, group))
+			group.groupSet.releasedToTutors ||
+				// I have permission to view the membership of the set anyway
+				securityService.can(user, Permissions.SmallGroups.ReadMembership, group)
+	}
+
+	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence] = {
+		val now = DateTime.now
+		val today = DayOfWeek.today
+		val thisAcademicYear = AcademicYear.findAcademicYearContainingDate(now)
+		val thisTermWeek = termService.getTermFromDateIncludingVacations(now).getAcademicWeekNumber(now)
+		val allModules = modules ++ departments.flatMap(_.modules.asScala)
+		val weeksOccurrencesForModules: Seq[SmallGroupEventOccurrence] = findOccurrencesInModulesInWeeks(thisTermWeek, thisTermWeek, allModules, thisAcademicYear)
+			.filter(!_.event.group.groupSet.archived)
+		val tutorOccurrences: Seq[SmallGroupEventOccurrence] = tutors.flatMap(findSmallGroupEventsByTutor)
+			.filter(e => e.group.groupSet.releasedToTutors && e.group.groupSet.academicYear == thisAcademicYear && !e.group.groupSet.archived)
+			.flatMap(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))
+		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
 }
 
@@ -307,4 +332,5 @@ class SmallGroupServiceImpl
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
 		with AutowiringSecurityServiceComponent
+		with AutowiringTermServiceComponent
 		with Logging

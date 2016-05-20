@@ -73,9 +73,11 @@ class SubmitToTurnitinLtiJob extends Job
 
 			// Re-get this assignmnet from hibernate, to ensure we can retrieve the Turnitin id (set in a separate transaction).
 			// Otherwise we can get "Assignment LineItem not found" from Turnitin when submitting a paper
+			logger.info(s"$logPrefixWithJobId Awaiting Turnitin ID")
 			val assignmentWithTurnitinId = awaitTurnitinId(assignment, WaitingRequestsFromTurnitinCallbacksRetries)
 
 			updateStatus("Submitting papers to Turnitin")
+			logger.info(s"$logPrefixWithJobId Submitting papers to Turnitin")
 			val allAttachments = assignment.submissions.asScala flatMap { _.allAttachments.filter(TurnitinLtiService.validFile) }
 			val uploadsTotal = allAttachments.size
 
@@ -84,6 +86,7 @@ class SubmitToTurnitinLtiJob extends Job
 				else Map.empty[FileAttachment, String]
 
 			updateStatus("Getting similarity reports from Turnitin")
+			logger.info(s"s$logPrefixWithJobId Getting similarity reports from Turnitin")
 			val (originalityReports, noResults) =
 				if (uploadsTotal > 0) retrieveResults(uploadsTotal, failedUploads.keys.toSeq)
 				else (Nil, Map.empty[String, String])
@@ -102,12 +105,15 @@ class SubmitToTurnitinLtiJob extends Job
 				job.succeeded = true
 				updateProgress(100)
 			}
+			logger.info(s"$logPrefixWithJobId Submit to Turnitin job completed")
 		}
 
 		@tailrec
 		private def submitAssignment(retries: Int): TurnitinLtiResponse = {
 			def submit()  = {
+				logger.info(s"$logPrefixWithJobId Waiting $WaitingRequestsToTurnitinSleep ms before submitting assignment to Turnitin.")
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				logger.info(s"$logPrefixWithJobId Submitting assignment to Turnitin: ${retries} retries remaining")
 				turnitinLtiService.submitAssignment(assignment, job.user)
 			}
 			submit() match {
@@ -144,7 +150,7 @@ class SubmitToTurnitinLtiJob extends Job
 				updateProgress(10 + ((uploadsDone * 40) / uploadsTotal)) // 10% to 50%
 			})
 
-			if (failedUploads.nonEmpty) logger.error("Not all papers were submitted to Turnitin successfully.")
+			if (failedUploads.nonEmpty) logger.error(s"$logPrefixWithJobId Not all papers were submitted to Turnitin successfully.")
 			failedUploads
 		}
 
@@ -154,7 +160,9 @@ class SubmitToTurnitinLtiJob extends Job
 		): TurnitinLtiResponse = {
 
 			def submit() = {
+				logger.info(s"$logPrefixWithJobId Waiting $WaitingRequestsToTurnitinSubmitPaperSleep ms before submitting single paper to Turnitin.")
 				Thread.sleep(WaitingRequestsToTurnitinSubmitPaperSleep)
+				logger.info(s"$logPrefixWithJobId Submitting single paper to Turnitin: $retries retries remaining.")
 				turnitinLtiService.submitPaper(assignment, attachmentAccessUrl, submission.userId,
 					s"${submission.userId}@TurnitinLti.warwick.ac.uk", attachment, submission.universityId, "Student")
 			}
@@ -177,10 +185,10 @@ class SubmitToTurnitinLtiJob extends Job
 						}
 					response
 				case response if retries == 0 =>
-					logger.warn(s"Failed to upload ' ${attachment.name} ' - ${response.statusMessage.getOrElse("")}")
+					logger.warn(s"$logPrefixWithJobId Failed to upload ' ${attachment.name} ' - ${response.statusMessage.getOrElse("")}")
 					response
 				case response if response.statusMessage.isDefined =>
-					logger.warn(s"Failing to upload '${attachment.name} ' - ${response.statusMessage.getOrElse("")}. Try one more time")
+					logger.warn(s"$logPrefixWithJobId Failing to upload '${attachment.name} ' - ${response.statusMessage.getOrElse("")}")
 					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, 0)
 				case _ => {
 					submitSinglePaper(assignment, getAttachmentAccessUrl(submission, attachment), submission, attachment, retries - 1)
@@ -216,15 +224,15 @@ class SubmitToTurnitinLtiJob extends Job
 								attachment.originalityReport = report
 								attachment.originalityReport.reportReceived = true
 								originalityReportService.saveOriginalityReport(attachment)
-								logger.info(s"Saving Originality Report with similarity ${result.similarity.getOrElse(None)}")
+								logger.info(s"$logPrefixWithJobId Saving Originality Report with similarity ${result.similarity.getOrElse(None)}")
 							}
 							originalityReports :+ report
 						} else {
-							logger.warn(s"Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
+							logger.warn(s"$logPrefixWithJobId Failed to get results for ${attachment.id}: ${response.statusMessage.getOrElse("")}")
 							failedResults += (attachment.name -> response.statusMessage.getOrElse("failed to retrieve results"))
 						}
 					} else if(!originalityReport.isDefined) {
-						logger.warn(s"Failed to find originality report for attachment ${attachment.id}")
+						logger.warn(s"$logPrefixWithJobId Failed to find originality report for attachment ${attachment.id}")
 						failedResults += (attachment.name -> "failed to find Originality Report")
 					}
 					resultsReceived += 1
@@ -232,7 +240,7 @@ class SubmitToTurnitinLtiJob extends Job
 
 				updateProgress(10 + (((resultsReceived * 40) / uploadsTotal) * 2)) // 50% to 90%
 			})
-			if (failedResults.nonEmpty) logger.error("Did not receive all reports from Turnitin.")
+			if (failedResults.nonEmpty) logger.error(s"$logPrefixWithJobId Did not receive all reports from Turnitin.")
 			(originalityReports, failedResults)
 		}
 
@@ -242,7 +250,9 @@ class SubmitToTurnitinLtiJob extends Job
 		): TurnitinLtiResponse = {
 
 			def getResults = {
+				logger.info(s"$logPrefixWithJobId Waiting $WaitingRequestsToTurnitinSleep ms before retrieving single paper result from Turnitin.")
 				Thread.sleep(WaitingRequestsToTurnitinSleep)
+				logger.info(s"$logPrefixWithJobId Retrieving single paper result: $retries retries remaining")
 				turnitinLtiService.getSubmissionDetails(turnitinPaperId, currentUser)
 			}
 
@@ -271,6 +281,7 @@ class SubmitToTurnitinLtiJob extends Job
 		private def awaitTurnitinId(assignment: Assignment, retries: Int): Assignment = {
 			// wait for Callback from Turnitin with Turnitin assignment id - if it already has a turnitin assignment id, that's fine
 			def hasTurnitinId = {
+				logger.info(s"$logPrefixWithJobId trying to get Turnitin assignment ID: ${retries} retries remaining")
 				transactional(readOnly = true, propagation = REQUIRES_NEW) {
 					// Re-get this assignment from hibernate as the Turnitin ID has only just been set (in a separate transaction).
 					val freshAssignment = assessmentService.getAssignmentById(assignment.id).getOrElse(throw obsoleteJob)
@@ -290,10 +301,13 @@ class SubmitToTurnitinLtiJob extends Job
 						}
 						throw new FailedJobException("Failed to submit the assignment to Turnitin")
 					case _ => {
+							logger.info(s"$logPrefixWithJobId Waiting $WaitingRequestsFromTurnitinCallbackSleep ms before trying to get Turnitin assignment ID.")
 							Thread.sleep(WaitingRequestsFromTurnitinCallbackSleep)
 							awaitTurnitinId(assignment, retries - 1)
 					}
 				}
 		}
+
+		private def logPrefixWithJobId: String = s"Job:${job.id} - "
 	}
 }

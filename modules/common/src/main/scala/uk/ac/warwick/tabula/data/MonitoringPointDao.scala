@@ -72,6 +72,8 @@ trait MonitoringPointDao {
 	def hasAnyPointSets(department: Department): Boolean
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
+	def getSetToMigrate: Option[MonitoringPointSet]
 }
 
 
@@ -492,6 +494,23 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(safeIn("student", students))
 			.add(safeIn("point", points))
 			.seq
+	}
+
+	def findAttendanceNotes(points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		if(points.isEmpty)
+			return Seq()
+
+		session.newCriteria[MonitoringPointAttendanceNote]
+			.add(safeIn("point", points))
+			.seq
+	}
+
+	def getSetToMigrate: Option[MonitoringPointSet] = {
+		session.newCriteria[MonitoringPointSet]
+		  .add(isNull("migratedTo"))
+			.addOrder(Order.asc("updatedDate"))
+			.setMaxResults(1)
+			.uniqueResult
 	}
 
 }

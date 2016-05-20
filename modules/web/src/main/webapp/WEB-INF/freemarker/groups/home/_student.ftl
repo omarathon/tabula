@@ -1,5 +1,5 @@
 <#import "*/group_components.ftl" as components />
-
+<#escape x as x?html>
 <#if nonempty(memberGroupsetModules.moduleItems) || user.student>
 	<div class="header-with-tooltip" id="my-groups">
 		<h2 class="section">My groups</h2>
@@ -16,3 +16,4 @@
 		</div>
 	</#if>
 </#if>
+</#escape>

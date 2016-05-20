@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.attendance.manage.old.ManageMonitoringPointSetCommand
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.commands.attendance.manage.old.ManageMonitoringPointSetCommand
 
 /**
  * Displays the screen for creating and editing monitoring point sets
  */
-@Controller
 @RequestMapping(Array("/attendance/manage/{dept}/2013"))
 class ManageMonitoringPointsForDeptController extends AttendanceController {
 

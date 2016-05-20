@@ -41,7 +41,7 @@ trait SmallGroupSetToJsonConverter {
 		val studentMembershipInfo = jsonAssessmentMembershipInfoObject(membershipInfo, set.upstreamAssessmentGroups)
 
 		val groupInfo = Map(
-			"groups" -> viewSet.groups.map(jsonSmallGroupObject)
+			"groups" -> viewSet.groups.map(g => jsonSmallGroupObject(g.group))
 		)
 
 		basicInfo ++ specificAllocationMethodInfo ++ studentMembershipInfo ++ groupInfo

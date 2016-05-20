@@ -157,7 +157,7 @@ jQuery.fn.expandingTable = function(options) {
 
 						$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
 
-						$content.load(dataUrl, function(resp, status, req) {
+						$content.load(dataUrl, 'dt=' + new Date().valueOf(), function(resp, status, req) {
 							if ("403" == req.status) {
 								$content.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
 							}

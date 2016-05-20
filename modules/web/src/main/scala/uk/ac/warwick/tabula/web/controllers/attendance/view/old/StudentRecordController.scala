@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
 import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.commands.PopulateOnForm
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.commands.attendance.view.old.{StudentRecordCommandState, StudentRecordCommand}
 
-@Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.commands.attendance.view.old.{StudentRecordCommand, StudentRecordCommandState}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+
 @RequestMapping(Array("/attendance/view/{department}/2013/students/{student}/record"))
 class StudentRecordController extends AttendanceController {
 

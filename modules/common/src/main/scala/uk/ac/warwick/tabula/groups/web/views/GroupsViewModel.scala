@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.groups.web.views
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{AcademicYear, WorkflowStages, WorkflowStage}
+import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
+import uk.ac.warwick.tabula.data.model.groups._
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 
@@ -19,6 +19,33 @@ import scala.collection.immutable.ListMap
  * those items.
  */
 object GroupsViewModel {
+
+	object ViewModules {
+		def generate(mapping: Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]], viewerRole: ViewerRole): ViewModules = {
+			val moduleItems = for ((module, sets) <- mapping) yield {
+				ViewModule(module,
+					sets.toSeq map { case (set, groups) =>
+						ViewSet(set, ViewGroup.fromGroups(groups.sorted), viewerRole)
+					},
+					canManageGroups = false
+				)
+			}
+
+			ViewModules( moduleItems.toSeq.sortBy(_.module.code), canManageDepartment = false )
+		}
+
+		def fromOccurrences(occurrences: Seq[SmallGroupEventOccurrence], viewerRole: ViewerRole): ViewModules = {
+			ViewModules(
+				occurrences.groupBy(_.event).map { case (event, groupedOccurrences) => ViewEvent(event, occurrences) }
+					.groupBy(_.event.group).map { case (group, groupedEvents) => ViewGroup(group, groupedEvents.toSeq) }
+					.groupBy(_.group.groupSet).map { case (set, groupedGroups) => ViewSet(set, groupedGroups.toSeq, viewerRole) }
+					.groupBy(_.set.module).map { case (module, groupedSets) => ViewModule(module, groupedSets.toSeq, canManageGroups = false) }
+					.toSeq.sortBy(_.module),
+				canManageDepartment = false
+			)
+		}
+	}
+
 
 	case class ViewModules(
 		moduleItems: Seq[ViewModule],
@@ -37,12 +64,12 @@ object GroupsViewModel {
 	) {
 		def hasUnreleasedGroupsets(academicYear: AcademicYear) = module.hasUnreleasedGroupSets(academicYear)
 		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
-		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => (s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
+		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => s.openForSignups && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
 	}
 
 	trait ViewSetMethods {
 		def set: SmallGroupSet
-		def groups: Seq[SmallGroup]
+		def groups: Seq[ViewGroup]
 		def viewerRole: ViewerRole
 
 		def viewerIsStudent = (viewerRole == StudentAssignedToGroup )|| (viewerRole == StudentNotAssignedToGroup)
@@ -55,24 +82,36 @@ object GroupsViewModel {
 
 	case class ViewSet(
 		set: SmallGroupSet,
-		groups: Seq[SmallGroup],
+		groups: Seq[ViewGroup],
 		viewerRole: ViewerRole
 	) extends ViewSetMethods
 
 	case class SetProgress(
-		val percentage: Int,
-		val t: String,
-		val messageCode: String
+		percentage: Int,
+		t: String,
+		messageCode: String
 	)
 
 	case class ViewSetWithProgress(
 		set: SmallGroupSet,
-		groups: Seq[SmallGroup],
+		groups: Seq[ViewGroup],
 		viewerRole: ViewerRole,
 		progress: SetProgress,
 		nextStage: Option[WorkflowStage],
 		stages: ListMap[String, WorkflowStages.StageProgress]
 	) extends ViewSetMethods
+
+	object ViewGroup {
+		def fromGroups(groups: Seq[SmallGroup]) = groups.map(g => ViewGroup(g, ViewEvent.fromEvents(g.events)))
+	}
+
+	case class ViewGroup(group: SmallGroup, events: Seq[ViewEvent])
+
+	object ViewEvent {
+		def fromEvents(events: Seq[SmallGroupEvent]) = events.map(e => ViewEvent(e, Seq()))
+	}
+
+	case class ViewEvent(event: SmallGroupEvent, occurrences: Seq[SmallGroupEventOccurrence])
 
 	sealed trait ViewerRole
 	case object StudentAssignedToGroup extends ViewerRole

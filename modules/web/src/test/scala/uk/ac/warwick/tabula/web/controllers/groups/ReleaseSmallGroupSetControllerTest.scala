@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.commands.groups.admin.{ReleaseSmallGroupSetCommand, ReleasedSmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewModule, ViewSet}
 import uk.ac.warwick.tabula.web.controllers.groups.admin.{ReleaseAllSmallGroupSetsController, ReleaseSmallGroupSetController}
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -59,7 +59,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 			cmd.describeOutcome returns Some("hello")
 			val context = controller.submit(cmd).map
 
-			val expectedViewSet = new ViewSet(set,set.groups.asScala,GroupsViewModel.Tutor)
+			val expectedViewSet = new ViewSet(set, ViewGroup.fromGroups(set.groups.asScala), GroupsViewModel.Tutor)
 			context("notificationSentMessage") should be(Some("hello"))
 			context("groupsetItem") should be(expectedViewSet)
 			context("moduleItem") should be(new ViewModule(set.module,Seq(expectedViewSet),true))
