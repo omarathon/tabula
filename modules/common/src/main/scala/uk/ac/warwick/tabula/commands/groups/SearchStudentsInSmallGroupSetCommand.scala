@@ -50,7 +50,7 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
 	lazy val excludedEventOccurrence: Option[SmallGroupEventOccurrence] =
 		transactional() {
 			if (Option(excludeEvent).isDefined && Option(excludeWeek).isDefined) {
-				Some(smallGroupService.getOrCreateSmallGroupEventOccurrence(excludeEvent, excludeWeek))
+				smallGroupService.getOrCreateSmallGroupEventOccurrence(excludeEvent, excludeWeek)
 			} else {
 				None
 			}

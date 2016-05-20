@@ -172,7 +172,7 @@ trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences wi
 		// Get the occurrences that happen on the week of the start or end date, or a week in-between,
 		// so we don't have to calculate the true date time of every event
 		val roughOccurrances: Seq[SmallGroupEventOccurrence] = events.flatMap(event => {
-			event.allWeeks.filter(w => w >= startWeek && w <= endWeek).map(w =>
+			event.allWeeks.filter(w => w >= startWeek && w <= endWeek).flatMap(w =>
 				transactional(readOnly = true) { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, w) }
 			)
 		})

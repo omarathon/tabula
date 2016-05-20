@@ -71,4 +71,18 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.relationships(relationshipType) should be (Seq(rel1))
 	}
 
+	@Test def relationshipsOfTypeOrderedByPercentage() {
+		val rel1 = StudentRelationship(staff, relationshipType, student)
+		rel1.percentage = new JBigDecimal(40)
+		val rel2 = StudentRelationship(staff, relationshipType, student)
+		val rel3 = StudentRelationship(staff, relationshipType, student)
+		rel3.percentage = new JBigDecimal(60)
+
+		studentCourseDetails.allRelationships.add(rel1)
+		studentCourseDetails.allRelationships.add(rel2)
+		studentCourseDetails.allRelationships.add(rel3)
+
+		studentCourseDetails.allRelationshipsOfType(relationshipType) should be (Seq(rel3, rel1, rel2))
+	}
+
 }
