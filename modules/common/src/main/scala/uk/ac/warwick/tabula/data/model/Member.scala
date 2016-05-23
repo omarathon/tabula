@@ -283,11 +283,6 @@ class StudentMember extends Member with StudentProperties {
 	@BatchSize(size=200)
 	var attendanceCheckpointTotals: JSet[AttendanceMonitoringCheckpointTotal] = JHashSet()
 
-	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("MemberNotes.Read"))
-	@BatchSize(size=200)
-	var memberNotes: JSet[MemberNote] = JHashSet()
-
 	def this(id: String) = {
 		this()
 		this.universityId = id

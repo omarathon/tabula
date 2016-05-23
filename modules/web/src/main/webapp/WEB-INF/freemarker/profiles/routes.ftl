@@ -71,6 +71,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro purge_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
 <#macro download_member_note_attachment memberNote><@_u page="/notes/${memberNote.id}/" /></#macro>
 
+<#macro create_circumstances profile><@_u page="/${profile.universityId}/circumstances/add" /></#macro>
+<#macro edit_circumstances circumstances><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/edit" /></#macro>
+<#macro delete_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/delete" /></#macro>
+<#macro restore_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/restore" /></#macro>
+<#macro purge_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/purge" /></#macro>
+<#macro download_circumstances_attachment circumstances><@_u page="/circumstances/${circumstances.id}/" /></#macro>
+
 <#macro meeting_will_create_checkpoint><@_u page="/check/meeting" context="/attendance" /></#macro>
 
 <#macro timetable profile><@_u page="/timetable/${profile.universityId}"/></#macro>

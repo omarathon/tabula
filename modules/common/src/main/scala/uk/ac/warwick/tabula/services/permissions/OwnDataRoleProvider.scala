@@ -54,7 +54,7 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
 				else Stream.empty
 
 			// TAB-2122
-			case note: MemberNote =>
+			case note: AbstractMemberNote =>
 				if (user.apparentId.hasText && note.creator.getUserId == user.apparentId)
 					Stream(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
 				else Stream.empty

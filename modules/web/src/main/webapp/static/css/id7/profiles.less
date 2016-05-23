@@ -57,84 +57,6 @@
 	}
 }
 
-.membernote {
-	details {
-		summary {
-			border-bottom: 1px dotted lighten(@tabulaGrayLight, 35%);
-			padding-top: 16px;
-			&:hover {
-				background-color: @zebra-dark;
-				.transition-duration(0.3s);
-			}
-			//Workaround to avoid styling details arrow
-			.detail-arrow-fix {
-				display: inline-block;
-				width: 94%;
-				margin-bottom: -12px;
-			}
-			.col-md-2, .col-md-6 {
-				line-height: 40px;
-			}
-			// edit/delete/purge icons next to each member note
-			.member-note-toolbar {
-				.fa-spinner {
-					display: none;
-					float: right;
-				}
-			}
-		}
-		.description {
-			padding: 16px;
-		}
-		small {
-			padding-top: 8px;
-		}
-
-		&.processing {
-			summary .member-note-toolbar .fa-spinner {
-				display: inline-block;
-			}
-		}
-
-		&.deleted {
-			text-decoration: line-through;
-			summary {
-				text-decoration: line-through;
-				div {
-					text-decoration: inherit;
-				}
-			}
-		}
-	}
-}
-
-.related_students {
-	th {
-		white-space: nowrap;
-	}
-	.profile-link {
-		font-weight: bold;
-		color: @tabulaGrayLight;
-		text-decoration: none;
-
-		&:hover,&:active {
-			text-decoration: none;
-		}
-	}
-
-	.hover {
-		.cursor-pointer();
-		background-color: #ddd;
-	}
-}
-
-#agents .agent-detail {
-	font-size: @font-size-large;
-	letter-spacing: 0;
-	color: @tabulaGrayLight;
-	margin-left: 12px;
-}
-
 table.event-info {
 	// Reset
 	th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
@@ -159,6 +81,35 @@ table.event-info {
 		border-bottom: 15px solid transparent;
 	}
 
+}
+
+details.indent {
+	padding-left: 20px;
+	summary {
+		margin-left: -20px;
+	}
+}
+
+table.expanding-row-pairs {
+	td.can-expand {
+		i.fa-caret-down, i.fa-caret-right {
+			font-size: 1.5em;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+	}
+	.deleted {
+		text-decoration: line-through;
+	}
+	.disabled {
+		text-decoration: none;
+		color: @tabulaGrayLight;
+		cursor: not-allowed;
+	}
+}
+
+section.identity, section.member-notes, section.circumstances {
+	margin-bottom: 16px;
 }
 
 @import "allocate-associations.less";

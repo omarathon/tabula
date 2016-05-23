@@ -2,7 +2,7 @@
 <#escape x as x?html>
 
 <#if user.staff>
-	<#include "search/form.ftl" />
+	<#include "../profile/search/form.ftl" />
 
 	<hr class="full-width" />
 </#if>

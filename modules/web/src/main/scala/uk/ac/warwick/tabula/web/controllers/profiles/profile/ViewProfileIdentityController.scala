@@ -3,14 +3,17 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.AutowiringMemberNoteServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
-class ViewProfileIdentityController extends AbstractViewProfileController {
+class ViewProfileIdentityController extends AbstractViewProfileController
+	with AutowiringMemberNoteServiceComponent {
 
 	@RequestMapping(Array("/{member}"))
 	def viewByMemberMapping(
@@ -21,7 +24,7 @@ class ViewProfileIdentityController extends AbstractViewProfileController {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
-				Mav("").crumbs(breadcrumbs(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
+				Mav("profiles/profile/identity_staff").crumbs(breadcrumbs(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 		}
 	}
 
@@ -38,9 +41,23 @@ class ViewProfileIdentityController extends AbstractViewProfileController {
 		studentCourseDetails: StudentCourseDetails,
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
-		Mav("")
-			.crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
-			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails.student)(scyd => Routes.Profile.identity(scyd)): _*)
+		val (memberNotes: Seq[MemberNote], extenuatingCircumstances: Seq[ExtenuatingCircumstances]) = {
+			if (securityService.can(user, Permissions.MemberNotes.Delete, studentCourseDetails.student)) {
+				(memberNoteService.listNotes(studentCourseDetails.student), memberNoteService.listExtenuatingCircumstances(studentCourseDetails.student))
+			}	else if (securityService.can(user, Permissions.MemberNotes.Read, studentCourseDetails.student)) {
+				(memberNoteService.listNonDeletedNotes(studentCourseDetails.student), memberNoteService.listNonDeletedExtenuatingCircumstances(studentCourseDetails.student))
+			} else {
+				(Seq(), Seq())
+			}
+		}
+
+		Mav("profiles/profile/identity_student",
+			"member" -> studentCourseDetails.student,
+			"courseDetails" -> (Seq(studentCourseDetails) ++ studentCourseDetails.student.freshStudentCourseDetails.filterNot(_ == studentCourseDetails)),
+			"memberNotes" -> memberNotes,
+			"extenuatingCircumstances" -> extenuatingCircumstances
+		).crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
+			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.identity(scyd)): _*)
 	}
 
 }

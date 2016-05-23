@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.profiles
+package uk.ac.warwick.tabula.commands.profiles.profile
 
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.data.model.Member

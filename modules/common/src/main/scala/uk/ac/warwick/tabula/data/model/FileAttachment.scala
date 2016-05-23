@@ -47,7 +47,7 @@ class FileAttachment extends GeneratedId {
 	// optional link to a Member Note
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="member_note_id")
-	var memberNote:MemberNote =_
+	var memberNote: AbstractMemberNote =_
 
 	// optional link to Meeting Record
 	@ManyToOne(fetch = FetchType.LAZY)

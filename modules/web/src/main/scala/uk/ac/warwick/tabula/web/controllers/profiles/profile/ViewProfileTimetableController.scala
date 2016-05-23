@@ -40,7 +40,7 @@ class ViewProfileTimetableController extends AbstractViewProfileController {
 	): Mav = {
 		Mav("")
 			.crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
-			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails.student)(scyd => Routes.Profile.timetable(scyd)): _*)
+			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.timetable(scyd)): _*)
 	}
 
 }

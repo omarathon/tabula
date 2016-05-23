@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.commands.profiles.ViewProfileCommand
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.web.Mav
 

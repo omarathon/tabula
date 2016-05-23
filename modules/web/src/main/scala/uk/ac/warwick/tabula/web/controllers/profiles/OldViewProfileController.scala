@@ -53,8 +53,8 @@ abstract class OldViewProfileController extends ProfilesController {
 
 		// Get all membernotes for student
 		val memberNotes =
-			if (securityService.can(user, Permissions.MemberNotes.Delete, profiledStudentMember)) memberNoteService.list(profiledStudentMember)
-			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeleted(profiledStudentMember)
+			if (securityService.can(user, Permissions.MemberNotes.Delete, profiledStudentMember)) memberNoteService.listNotes(profiledStudentMember)
+			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeletedNotes(profiledStudentMember)
 			else null
 
 		Mav("profiles/profile/view",
