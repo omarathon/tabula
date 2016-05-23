@@ -16,7 +16,7 @@ object Routes {
 	def home = context + "/"
 	def search = context + "/search"
 
-	object profile {
+	object oldProfile {
 		def view(member: Member) = context + "/view/%s" format encoded(member.universityId)
 		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def view(scyd: StudentCourseYearDetails, meeting: AbstractMeetingRecord) = context + "/view/course/%s/%s?meeting=%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(meeting.id))
@@ -24,6 +24,13 @@ object Routes {
 		def mine = context + "/view/me"
 
 		def viewTimetable(member: Member) = context + "/timetable/%s" format encoded(member.universityId)
+	}
+
+	object Profile {
+		def identity(member: Member) = context + "/view/%s" format encoded(member.universityId)
+		def identity(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def timetable(member: Member) = context + "/view/%s/timetable" format encoded(member.universityId)
+		def timetable(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s/timetable" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

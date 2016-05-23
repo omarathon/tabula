@@ -11,8 +11,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.web.Mav
 
-@Controller
-class ViewProfileByCourseDetailsController extends ViewProfileController {
+class OldViewProfileByCourseDetailsController extends OldViewProfileController {
 
 	@ModelAttribute("viewProfileCommandForStudentCourseDetails")
 	def viewProfileCommandForStudentCourseDetails(@PathVariable studentCourseDetails: StudentCourseDetails)

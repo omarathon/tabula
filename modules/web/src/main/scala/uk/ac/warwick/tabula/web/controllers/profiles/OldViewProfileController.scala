@@ -10,8 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.Mav
 
-@Controller
-abstract class ViewProfileController extends ProfilesController {
+abstract class OldViewProfileController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]

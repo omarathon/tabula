@@ -61,7 +61,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 		iframe: Boolean = false
 	) = {
 		val mav = Mav("profiles/related_students/meeting/schedule",
-			"returnTo" -> getReturnTo(Routes.profile.view(studentCourseDetails.student)),
+			"returnTo" -> getReturnTo(Routes.oldProfile.view(studentCourseDetails.student)),
 			"isModal" -> ajax,
 			"isIframe" -> iframe,
 			"edit" -> true,
@@ -118,7 +118,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 			form(cmd, studentCourseDetails)
 		} else {
 			cmd.apply()
-			Redirect(Routes.profile.view(studentCourseDetails.student))
+			Redirect(Routes.oldProfile.view(studentCourseDetails.student))
 		}
 	}
 

@@ -39,7 +39,7 @@ abstract class StudentRelationshipChangeNotification
 
 		))
 
-	def url: String = Routes.profile.view(relationship.studentMember.get)
+	def url: String = Routes.oldProfile.view(relationship.studentMember.get)
 }
 
 

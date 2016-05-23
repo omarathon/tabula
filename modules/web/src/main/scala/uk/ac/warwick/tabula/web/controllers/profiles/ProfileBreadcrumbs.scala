@@ -1,34 +1,57 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
 import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.BreadCrumb
+import uk.ac.warwick.tabula.web.Breadcrumbs.Active
 
 trait ProfileBreadcrumbs {
 	val Breadcrumbs = ProfileBreadcrumbs
 }
 
 object ProfileBreadcrumbs {
-	abstract class Abstract extends BreadCrumb
-	case class Standard(val title: String, val url: Option[String], override val tooltip: String) extends Abstract
 
 	/**
 	 * Special case breadcrumb for a profile.
 	 */
-	case class Profile(val profile: model.Member, val isSelf: Boolean = false) extends Abstract {
+	case class Profile(profile: model.Member, isSelf: Boolean = false) extends BreadCrumb {
 		val title = if (isSelf) "Your profile" else profile.fullName match {
 			case None => "Profile for unknown user"
 			case Some(name) => name
 		}
-		val url = Some(Routes.profile.view(profile))
+		val url = Some(Routes.oldProfile.view(profile))
 		override val tooltip = profile.fullName.getOrElse("") + " (" + profile.universityId + ")"
 	}
 
-	/**
-	 * A breadcrumb without a link, to represent the current page.
-	 * We don't currently include the current page in crumbs, but can use this for page titles
-	 */
-	case class Current(val title: String) extends Abstract {
-		val url = None
+	object Profile {
+
+		sealed abstract class ProfileBreadcrumbIdentifier(id: String)
+		case object IdentityIdentifier extends ProfileBreadcrumbIdentifier("identity")
+		case object TimetableIdentifier extends ProfileBreadcrumbIdentifier("timetable")
+
+		abstract class ProfileBreadcrumb extends BreadCrumb {
+			def identifier: ProfileBreadcrumbIdentifier
+			def setActive(activeIdentifier: ProfileBreadcrumbIdentifier): BreadCrumb = {
+				if (this.identifier == activeIdentifier) {
+					Active(this.title, this.url, this.tooltip)
+				} else {
+					this
+				}
+			}
+		}
+
+		case class Identity(member: Member) extends ProfileBreadcrumb {
+			val identifier = IdentityIdentifier
+			val title = member.userId
+			val url = Some(Routes.Profile.identity(member))
+		}
+
+		case class Timetable(member: Member) extends ProfileBreadcrumb {
+			val identifier = TimetableIdentifier
+			val title = "Timetable"
+			val url = Some(Routes.Profile.timetable(member))
+		}
+
 	}
 }

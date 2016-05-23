@@ -152,7 +152,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 	// cancel sync
 	@RequestMapping(method = Array(POST), params = Array("!submit", "!modal"))
 	def cancel(@PathVariable studentCourseDetails: StudentCourseDetails) = {
-		Redirect(Routes.profile.view(studentCourseDetails.student))
+		Redirect(Routes.oldProfile.view(studentCourseDetails.student))
 	}
 
 	// submit sync
@@ -167,7 +167,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 			showForm(command, studentCourseDetails, relationshipType)
 		} else {
 			val meeting = command.apply()
-			Redirect(Routes.profile.view(studentCourseDetails.student, meeting))
+			Redirect(Routes.oldProfile.view(studentCourseDetails.student, meeting))
 		}
 	}
 
