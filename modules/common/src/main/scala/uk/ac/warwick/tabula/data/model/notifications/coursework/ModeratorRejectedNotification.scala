@@ -25,7 +25,7 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback
-	def rejectionFeedback = parentFeedback.secondMarkerFeedback
+	def rejectionFeedback = item.entity
 	def rejectedFeedback = parentFeedback.firstMarkerFeedback
 
 	def assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {

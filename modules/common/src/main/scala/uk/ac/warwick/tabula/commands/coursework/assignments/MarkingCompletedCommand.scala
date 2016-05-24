@@ -145,14 +145,14 @@ trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
 
 trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
 
-	self: MarkingCompletedState with NotificationHandling =>
+	self: MarkingCompletedState with NotificationHandling with AutowiringFeedbackServiceComponent =>
 
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
 		val notificationsToComplete = markerFeedback.asScala
 			.filter(_.state == MarkingState.MarkingCompleted)
 			.flatMap(mf =>
-				// ModeratorRejectedNotification is tied to the 2nd marker feedback
-				Option(mf.feedback.secondMarkerFeedback)
+				// TAB-4328-  ModeratorRejectedNotification is tied to the 2nd marker feedback and is orphaned at this stage.
+				feedbackService.getRejectedMarkerFeedbackByFeedback(mf.feedback)
 					.map(notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification])
 					.getOrElse(Seq()) ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++

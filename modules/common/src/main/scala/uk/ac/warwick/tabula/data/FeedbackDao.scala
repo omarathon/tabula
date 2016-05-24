@@ -8,6 +8,7 @@ trait FeedbackDao {
 	def getAssignmentFeedback(id: String): Option[AssignmentFeedback]
 	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedback(id: String): Option[MarkerFeedback]
+	def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Option[MarkerFeedback]
 	def save(feedback: Feedback)
 	def delete(feedback: Feedback)
 	def save(feedback: MarkerFeedback)
@@ -20,6 +21,11 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
 	override def getAssignmentFeedback(id: String) = getById[AssignmentFeedback](id)
 	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
+	override def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Option[MarkerFeedback] =
+		session.newCriteria[MarkerFeedback]
+			.add(is("state", MarkingState.Rejected))
+			.add(is("feedback", feedback))
+			.uniqueResult
 
 	override def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback] =
 		session.newCriteria[AssignmentFeedback]
