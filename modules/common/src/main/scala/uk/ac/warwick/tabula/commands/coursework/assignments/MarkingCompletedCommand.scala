@@ -160,7 +160,7 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 	}
 
 
-	def rejectedMarkerFeedbacks(mf: MarkerFeedback): Seq[ActionRequiredNotification] = {
+	private def rejectedMarkerFeedbacks(mf: MarkerFeedback): Seq[ActionRequiredNotification] = {
 		feedbackService.getRejectedMarkerFeedbackByFeedback(mf.feedback).flatMap(rejectedMarkerFeedback =>
 			notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification](rejectedMarkerFeedback)
 		)
