@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.coursework.turnitin
 
-import org.springframework.http.HttpStatus
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
@@ -46,6 +45,8 @@ trait ViewPlagiarismReportState {
 	def module: Module
 	def assignment: Assignment
 	def attachment: FileAttachment
+	var ltiParams: Map[String, String] = Map()
+	var ltiEndpoint: String = _
 }
 
 trait ViewPlagiarismReportRequest extends ViewPlagiarismReportState {
@@ -65,9 +66,13 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 	}
 
 	override def applyInternal() = {
+
 		if (attachment.originalityReport.turnitinId.hasText) {
-			// LTI
-			val response = turnitinLtiService.getOriginalityReportUrl(
+			//LTI
+			ltiEndpoint = turnitinLtiService.getOriginalityReportEndpoint(attachment)
+
+			ltiParams = turnitinLtiService.getOriginalityReportParams(
+				endpoint = ltiEndpoint,
 				assignment = assignment,
 				attachment = attachment,
 				userId = viewer.getUserId,
@@ -75,13 +80,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
 				firstName = viewer.getFirstName,
 				lastName = viewer.getLastName
 			)
-
-			if (!response.success && response.responseCode.isDefined && response.responseCode.get != HttpStatus.OK.value) {
-				Right(TurnitinReportError.ApiError("Response code was " + response.responseCode.get))
-			}	else {
-				if (response.redirectUrl.isDefined) Left(Uri.parse(response.redirectUrl.get))
-				else Right(TurnitinReportError.NoObjectError)
-			}
+			Left(Uri.parse(ltiEndpoint))
 		} else {
 			debug("Getting document viewer URL for FileAttachment %s", attachment.id)
 

@@ -57,7 +57,7 @@ trait AddAdditionalStudent {
 
 	def addAdditionalStudent(members: Seq[MemberOrUser]) {
 		Option(additionalStudent)
-			.filterNot { member => members.find { _.universityId == member.universityId }.isDefined }
+			.filterNot { member => members.exists(_.universityId == member.universityId) }
 			.foreach { member =>
 				val attendance = transactional() {
 					smallGroupService.saveOrUpdateAttendance(member.universityId, event, week, AttendanceState.NotRecorded, user)
@@ -65,16 +65,21 @@ trait AddAdditionalStudent {
 
 				attendance.addedManually = true
 				Option(replacedEvent).foreach { event =>
-					val replacedOccurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, replacedWeek) }
+					val replacedOccurrence = transactional() {
+						smallGroupService.getOrCreateSmallGroupEventOccurrence(event, replacedWeek).getOrElse(throw new IllegalArgumentException(
+							s"Week number $replacedWeek is not valid for event ${event.id}"
+						))
+					}
 					val replacedAttendance = transactional() {
 						smallGroupService.getAttendance(member.universityId, replacedOccurrence) match {
-							case Some(attendance) if attendance.state == AttendanceState.Attended => attendance
-							case Some(attendance) => {
-								attendance.state = AttendanceState.MissedAuthorised
-								smallGroupService.saveOrUpdate(attendance)
-								attendance
-							}
-							case None => smallGroupService.saveOrUpdateAttendance(member.universityId, replacedEvent, replacedWeek, AttendanceState.MissedAuthorised, user)
+							case Some(replaced) if replaced.state == AttendanceState.Attended =>
+								replaced
+							case Some(replaced) =>
+								replaced.state = AttendanceState.MissedAuthorised
+								smallGroupService.saveOrUpdate(replaced)
+								replaced
+							case None =>
+								smallGroupService.saveOrUpdateAttendance(member.universityId, replacedEvent, replacedWeek, AttendanceState.MissedAuthorised, user)
 						}
 					}
 
@@ -95,10 +100,10 @@ trait RemoveAdditionalStudent {
 
 	def doRemoveAdditionalStudent(members: Seq[MemberOrUser]) {
 		Option(removeAdditionalStudent)
-			.filter { member => members.find { _.universityId == member.universityId }.isDefined }
+			.filter { member => members.exists(_.universityId == member.universityId) }
 			.foreach { member =>
 				transactional() {
-					smallGroupService.deleteAttendance(member.universityId, event, week, true)
+					smallGroupService.deleteAttendance(member.universityId, event, week, isPermanent = true)
 				}
 
 				studentsState.remove(member.universityId)
@@ -119,7 +124,11 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 
-	lazy val occurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) }
+	lazy val occurrence = transactional() {
+		smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week).getOrElse(
+			throw new ItemNotFoundException
+		)
+	}
 
 	var studentsState: JMap[UniversityId, AttendanceState] =
 		LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
@@ -137,11 +146,11 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	}
 
 	lazy val attendanceNotes: Map[MemberOrUser, Map[SmallGroupEventOccurrence, SmallGroupEventAttendanceNote]] = benchmarkTask("Get attendance notes") {
-		smallGroupService.findAttendanceNotes(members.map(_.universityId), Seq(occurrence)).groupBy(_.student).map{
-			case (student, noteMap) => MemberOrUser(student) -> noteMap.groupBy(_.occurrence).map{
-				case(o, notes) => o -> notes.head
+		smallGroupService.findAttendanceNotes(members.map(_.universityId), Seq(occurrence)).groupBy(_.student).map {
+			case (student, noteMap) => MemberOrUser(student) -> noteMap.groupBy(_.occurrence).map {
+				case (o, notes) => o -> notes.head
 			}
-		}.toMap
+		}
 	}
 
 	lazy val attendances: Map[MemberOrUser, Option[SmallGroupEventAttendance]] = benchmarkTask("Get attendances") {
@@ -200,7 +209,7 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 			case (studentId, _) => studentId
 		}.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser).toSeq
 
-		if (invalidUsers.length > 0) {
+		if (invalidUsers.nonEmpty) {
 			errors.rejectValue("studentsState", "smallGroup.attendees.invalid", Array(invalidUsers), "")
 		}
 

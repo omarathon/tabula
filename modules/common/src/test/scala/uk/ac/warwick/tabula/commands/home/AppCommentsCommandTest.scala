@@ -6,78 +6,151 @@ import javax.mail.Session
 import javax.mail.internet.{MimeMessage, MimeMultipart}
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mail.WarwickMailSender
 
 class AppCommentsCommandTest extends TestBase with Mockito {
 
-	val mailSender = mock[WarwickMailSender]
+	val mockMailSender = smartMock[WarwickMailSender]
+	val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+	val mockUserLookup = new MockUserLookup()
 
 	val session = Session.getDefaultInstance(new Properties)
 	val mimeMessage = new MimeMessage(session)
-	mailSender.createMimeMessage() returns mimeMessage
+	mockMailSender.createMimeMessage() returns mimeMessage
 
 	val adminEmail = "stabula@warwick.ac.uk"
 
-	private def newCommand() = {
-		val cmd = new AppCommentCommand(currentUser)
-		cmd.mailSender = mailSender
-		cmd.freemarker = newFreemarkerConfiguration
-		cmd.adminMailAddress = adminEmail
+	val owner = new User("owner")
+	owner.setEmail("owner@warwick.ac.uk")
+	mockUserLookup.registerUserObjects(owner)
+	val dept = new Department {
+		code = "its"
+		override lazy val owners = UserGroup.ofUsercodes
+		owners.userLookup = mockUserLookup
+	}
+	dept.owners.add(owner)
 
-		cmd
+	mockModuleAndDepartmentService.getDepartmentByCode(dept.code) returns Option(dept)
+
+	trait Fixture {
+		val cmd = new AppCommentCommandInternal(currentUser) with AppCommentCommandRequest
+			with AppCommentCommandState with ModuleAndDepartmentServiceComponent {
+
+			override val mailSender = mockMailSender
+			override val freemarker = newFreemarkerConfiguration()
+			override val moduleAndDepartmentService = mockModuleAndDepartmentService
+			override val adminMailAddress = adminEmail
+			override val deptAdminTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
+			override val webTeamTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
+		}
+
+		val validator = new AppCommentValidation with AppCommentCommandRequest
 	}
 
-	@Test def populateFromNoUser {
-		val cmd = newCommand()
+	@Test
+	def populateFromNoUser() { new Fixture {
 		cmd.usercode should be (null)
 		cmd.name should be (null)
 		cmd.email should be (null)
-	}
+	}}
 
-	@Test def populateWithUser = withUser("cuscav") {
+	@Test
+	def populateWithUser() = withUser("cuscav") {
 		currentUser.apparentUser.setFullName("Billy Bob")
 		currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
-
-		val cmd = newCommand()
-		cmd.usercode should not be ('empty)
-		cmd.name should not be ('empty)
-		cmd.email should not be ('empty)
+		new Fixture {
+			cmd.usercode should not be 'empty
+			cmd.name should not be 'empty
+			cmd.email should not be 'empty
+		}
 	}
 
-	@Test def validatePasses {
-		val cmd = newCommand()
-		cmd.message = "I'm coming for you"
+	@Test
+	def validatePasses() { new Fixture {
+		validator.message = "I'm coming for you"
+		validator.recipient = AppCommentCommand.Recipients.WebTeam
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
 
 		errors.hasErrors should be (false)
-	}
+	}}
 
-	@Test def validateNoMessage {
-		val cmd = newCommand()
-		cmd.message = "   "
+	@Test
+	def validateNoMessage() { new Fixture {
+		validator.message = "   "
+		validator.recipient = AppCommentCommand.Recipients.WebTeam
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+		val errors = new BindException(validator, "command")
+		validator.validate(errors)
 
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("message")
 		errors.getFieldError.getCode should be ("NotEmpty")
-	}
+	}}
 
-	@Test def sendWithNothing {
-		// Only message is required, so this should work even if the user doesn't fill anything out
-		val cmd = newCommand()
+	@Test
+	def sendToDeptAdminWithNothing() { new Fixture {
+		// As they aren't signed in, this should throw (checked by validation)
 		cmd.message = "I'm coming for you"
+		cmd.recipient = AppCommentCommand.Recipients.DeptAdmin
 
-		cmd.applyInternal
-		verify(mailSender, times(1)).send(mimeMessage)
+		intercept[IllegalArgumentException] {
+			cmd.applyInternal()
+		}
+	}}
+
+	@Test
+	def sendToDeptAdminFullyPopulated() { withUser("cuscav") {
+		currentUser.apparentUser.setFullName("Billy Bob")
+		currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
+		currentUser.apparentUser.setDepartmentCode(dept.code)
+
+		new Fixture {
+			cmd.message = "I'm coming for you"
+			cmd.url = "http://stabula.warwick.ac.uk/my/page"
+			cmd.browser = "Chrome"
+			cmd.ipAddress = "137.205.194.132"
+			cmd.os = "Window"
+			cmd.resolution = "New years"
+			cmd.recipient = AppCommentCommand.Recipients.DeptAdmin
+
+			cmd.applyInternal()
+			verify(mockMailSender, times(1)).send(mimeMessage)
+
+			mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(owner.getEmail))
+			mimeMessage.getFrom.map {_.toString} should be (Array(adminEmail))
+			mimeMessage.getSubject should be ("Tabula feedback")
+
+			// Check properties have been set
+			val text = mimeMessage.getContent match {
+				case string: String => string
+				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+			}
+
+			text should include ("I'm coming for you")
+			text should include ("Name: Billy Bob")
+			text should include ("Email: billybob@warwick.ac.uk")
+			text should include ("Usercode: cuscav")
+		}
+	}}
+
+	@Test
+	def sendToWebTeamWithNothing() { new Fixture {
+		// Only message is required, so this should work even if the user doesn't fill anything out
+		cmd.message = "I'm coming for you"
+		cmd.recipient = AppCommentCommand.Recipients.WebTeam
+
+		cmd.applyInternal()
+		verify(mockMailSender, times(1)).send(mimeMessage)
 
 		mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
-		mimeMessage.getFrom().map {_.toString} should be (Array(adminEmail))
-		mimeMessage.getSubject() should be ("Tabula feedback")
+		mimeMessage.getFrom.map(_.toString) should be (Array(adminEmail))
+		mimeMessage.getSubject should be ("Tabula feedback")
 
 		// Check properties have been set
 		val text = mimeMessage.getContent match {
@@ -87,42 +160,46 @@ class AppCommentsCommandTest extends TestBase with Mockito {
 
 		text should include ("I'm coming for you")
 		text should include ("Name: Not provided")
-	}
+	}}
 
-	@Test def sendFullyPopulated = withUser("cuscav") {
+	@Test
+	def sendToWebTeamFullyPopulated() { withUser("cuscav") {
 		currentUser.apparentUser.setFullName("Billy Bob")
 		currentUser.apparentUser.setEmail("billybob@warwick.ac.uk")
+		currentUser.apparentUser.setDepartmentCode(dept.code)
 
-		val cmd = newCommand()
-		cmd.message = "I'm coming for you"
-		cmd.currentPage = "http://stabula.warwick.ac.uk/my/page"
-		cmd.browser = "Chrome"
-		cmd.ipAddress = "137.205.194.132"
-		cmd.os = "Window"
-		cmd.resolution = "New years"
+		new Fixture {
+			cmd.message = "I'm coming for you"
+			cmd.url = "http://stabula.warwick.ac.uk/my/page"
+			cmd.browser = "Chrome"
+			cmd.ipAddress = "137.205.194.132"
+			cmd.os = "Window"
+			cmd.resolution = "New years"
+			cmd.recipient = AppCommentCommand.Recipients.WebTeam
 
-		cmd.applyInternal
-		verify(mailSender, times(1)).send(mimeMessage)
+			cmd.applyInternal()
+			verify(mockMailSender, times(1)).send(mimeMessage)
 
-		mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
-		mimeMessage.getFrom().map {_.toString} should be (Array(adminEmail))
-		mimeMessage.getSubject() should be ("Tabula feedback")
+			mimeMessage.getRecipients(RecipientType.TO).map {_.toString} should be (Array(adminEmail))
+			mimeMessage.getFrom.map {_.toString} should be (Array(adminEmail))
+			mimeMessage.getSubject should be ("Tabula feedback")
 
-		// Check properties have been set
-		val text = mimeMessage.getContent match {
-			case string: String => string
-			case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+			// Check properties have been set
+			val text = mimeMessage.getContent match {
+				case string: String => string
+				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
+			}
+
+			text should include ("I'm coming for you")
+			text should include ("Name: Billy Bob")
+			text should include ("Email: billybob@warwick.ac.uk")
+			text should include ("Usercode: cuscav")
+			text should include ("Current page: http://stabula.warwick.ac.uk/my/page")
+			text should include ("Browser: Chrome")
+			text should include ("OS: Window")
+			text should include ("Screen resolution: New years")
+			text should include ("IP address: 137.205.194.132")
 		}
-
-		text should include ("I'm coming for you")
-		text should include ("Name: Billy Bob")
-		text should include ("Email: billybob@warwick.ac.uk")
-		text should include ("Usercode: cuscav")
-		text should include ("Current page: http://stabula.warwick.ac.uk/my/page")
-		text should include ("Browser: Chrome")
-		text should include ("OS: Window")
-		text should include ("Screen resolution: New years")
-		text should include ("IP address: 137.205.194.132")
-	}
+	}}
 
 }

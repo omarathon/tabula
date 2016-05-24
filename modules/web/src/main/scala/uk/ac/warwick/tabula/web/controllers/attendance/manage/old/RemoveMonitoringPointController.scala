@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.commands.attendance.manage.old.RemoveMonitoringPointCommand
 
-@Controller
+import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.attendance.manage.old.RemoveMonitoringPointCommand
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+
 @RequestMapping(Array("/attendance/manage/{dept}/2013/sets/{set}/edit/points/{point}/delete"))
 class RemoveMonitoringPointController extends AttendanceController {
 

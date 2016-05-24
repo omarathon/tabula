@@ -96,7 +96,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def isLatest = this.equals(studentCourseDetails.latestStudentCourseYearDetails)
 
-	def relationships(relationshipType: StudentRelationshipType): collection.mutable.Set[StudentRelationship] = {
+	def relationships(relationshipType: StudentRelationshipType): Seq[StudentRelationship] = {
 		try {
 			val academicYearStartDate = termService.getTermFromAcademicWeek(1, academicYear).getStartDate
 			val academicYearEndDate = termService.getTermFromAcademicWeek(1, academicYear.next).getStartDate.minusDays(1)
@@ -129,7 +129,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 				}
 			})
 		} catch {
-			case e: TermNotFoundException => collection.mutable.Set()
+			case e: TermNotFoundException => Seq()
 		}
 	}
 

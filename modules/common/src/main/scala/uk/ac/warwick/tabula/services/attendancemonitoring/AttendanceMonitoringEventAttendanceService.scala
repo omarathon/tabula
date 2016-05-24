@@ -104,7 +104,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		getMissedCheckpoints(attendances).flatMap { case (checkpoint, eventNotes) =>
 			val eventNoteContents = eventNotes.map(note => s"[Reference Id- ${note.occurrence.id}, Event - ${note.occurrence.event.title}, Details: ${note.note}] ")
 
-			if (eventNoteContents.size > 0 ) {
+			if (eventNoteContents.nonEmpty) {
 				val monitoringNote =  attendanceMonitoringService.getAttendanceNote(checkpoint.student, checkpoint.point)
 				val attendanceNote = monitoringNote.getOrElse({
 					val newNote = new AttendanceMonitoringNote
@@ -115,9 +115,9 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 				})
 				val newNoteSummary = s"\nSummary Of Small Group Event Note Details:  ${eventNoteContents.mkString(",")}"
 				if (attendanceNote.note.hasText)
-					attendanceNote.note = s" ${attendanceNote.note} ${newNoteSummary}"
+					attendanceNote.note = s" ${attendanceNote.note} $newNoteSummary"
 				else
-					attendanceNote.note = s" ${newNoteSummary}"
+					attendanceNote.note = s" $newNoteSummary"
 
 				attendanceNote.updatedBy = user.userId
 				attendanceNote.updatedDate = DateTime.now
@@ -209,7 +209,11 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 	): Seq[SmallGroupEventOccurrence] = {
 		val startWeek = termService.getAcademicWeekForAcademicYear(startDate.toDateTimeAtStartOfDay, academicYear)
 		val endWeek = termService.getAcademicWeekForAcademicYear(endDate.toDateTimeAtStartOfDay, academicYear)
-		val weekOccurrences = smallGroupService.findOccurrenceInModulesInWeeks(startWeek, endWeek, modules).filter { _.event.group.students.includesUser(MemberOrUser(student).asUser) }
+		val weekOccurrences = (modules match {
+			case Nil => smallGroupService.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
+			case someModules => smallGroupService.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
+
+		}).filter(_.event.group.students.includesUser(MemberOrUser(student).asUser))
 
 		//logic similar to findAttendanceForDates
 		// weekAttendances may contain attendance before the startDate and after the endDate, so filter those out

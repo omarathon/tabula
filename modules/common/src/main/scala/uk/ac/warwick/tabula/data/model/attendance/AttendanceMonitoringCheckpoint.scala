@@ -37,6 +37,10 @@ class AttendanceMonitoringCheckpoint extends GeneratedId {
 		_state = state
 	}
 
+	def setStateDangerously(state: AttendanceState): Unit = {
+		_state = state
+	}
+
 	@NotNull
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _

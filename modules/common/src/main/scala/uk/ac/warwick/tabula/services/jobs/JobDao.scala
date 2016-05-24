@@ -17,6 +17,7 @@ trait JobDao {
 	def listRecent(start: Int, count: Int): Seq[JobInstance]
 	def update(instance: JobInstance): Unit
 	def listRunningJobs: Seq[JobInstance]
+	def findRunningJobs(schedulerInstance: String): Seq[JobInstance]
 }
 
 trait HasJobDao {
@@ -31,6 +32,7 @@ class JobDaoImpl extends JobDao with Daoisms {
 		transactional(readOnly = true) {
 			session.newCriteria[JobInstanceImpl]
 				.add(is("started", false))
+				.addOrder(asc("createdDate"))
 				.setMaxResults(max)
 				.seq
 		}
@@ -58,10 +60,9 @@ class JobDaoImpl extends JobDao with Daoisms {
 
 	def saveJob(instance: JobInstance) = transactional() {
 		instance match {
-			case instance: JobInstanceImpl => {
+			case instance: JobInstanceImpl =>
 				session.save(instance)
 				instance
-			}
 			case _ => throw new IllegalArgumentException("JobDaoImpl only accepts JobInstanceImpls")
 		}
 	}
@@ -92,6 +93,15 @@ class JobDaoImpl extends JobDao with Daoisms {
 			session.newCriteria[JobInstanceImpl]
 				.add(is("started", true))
 				.add(is("finished", false))
+				.seq
+		}
+
+	def findRunningJobs(schedulerInstance: String): Seq[JobInstance] =
+		transactional(readOnly = true) {
+			session.newCriteria[JobInstanceImpl]
+				.add(is("started", true))
+				.add(is("finished", false))
+				.add(is("schedulerInstance", schedulerInstance))
 				.seq
 		}
 }

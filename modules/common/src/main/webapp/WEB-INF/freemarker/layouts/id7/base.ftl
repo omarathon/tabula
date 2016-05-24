@@ -94,7 +94,7 @@
 							<#if user?? && user.loggedIn>
 								<a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
 							</#if>
-							<a class="btn btn-brand btn-sm" id="app-feedback-link" href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Problems, questions?</a>
+							<a class="btn btn-brand btn-sm" href="/comments<#if info??>?currentPage=${info.requestedUri}</#if>">Problems, questions?</a>
 						</div>
 						<#if (info.maintenance)!false || (activeSpringProfiles!"") == "sandbox">
 							<div class="pull-right" style="line-height: 54px;">
@@ -254,5 +254,18 @@
 	</footer>
 </div>
 <div class="id7-right-border"></div>
+<#if googleAnalyticsCode?has_content>
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', '${googleAnalyticsCode}']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+</#if>
 </body>
 </html>

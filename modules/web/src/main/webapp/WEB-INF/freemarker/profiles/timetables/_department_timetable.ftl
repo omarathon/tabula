@@ -145,7 +145,7 @@
 		<input type="checkbox" name="${status.expression}" value="${eventType.code}" data-short-value="${eventType.displayName}"
 		${contains_by_code(command.eventTypes, eventType)?string('checked','')}
 		>
-	${eventType.displayName}
+		${(eventType.displayName)!}
 	</@filter>
 </div>
 </@f.form>

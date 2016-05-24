@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.agent.old
 
 import org.joda.time.DateTime
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.old.{BuildStudentPointsData, GroupMonitoringPointsByTerm, StudentPointsData}
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 object AgentStudentViewCommand {
 	def apply(student: StudentMember, academicYearOption: Option[AcademicYear]) =
@@ -48,7 +47,6 @@ trait AgentStudentViewCommandState {
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 }
 
-@Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}/2013/{student}"))
 class AgentStudentViewController extends AttendanceController {
 

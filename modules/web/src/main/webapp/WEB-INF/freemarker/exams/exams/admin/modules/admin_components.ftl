@@ -94,6 +94,24 @@
 
 							<li class="divider"></li>
 
+							<#if exam.feedbacks?size == 0>
+								<li>
+									<#local edit_url><@routes.exams.deleteExam exam /></#local>
+									<@fmt.permission_button
+										permission='Assignment.Delete'
+										scope=exam
+										action_descr='delete exam'
+										href=edit_url
+									>
+										Delete Exam
+									</@fmt.permission_button>
+								</li>
+							<#else>
+								<li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body" title="Marks associated with this exam and can't be deleted">Delete Exam</a></li>
+							</#if>
+
+							<li class="divider"></li>
+
 							<li>
 								<#local marks_url><@routes.exams.addMarks exam /></#local>
 								<@fmt.permission_button

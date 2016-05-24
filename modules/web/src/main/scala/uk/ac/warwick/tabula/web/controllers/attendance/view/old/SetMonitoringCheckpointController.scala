@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view.old
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
-import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.model.{Route, Department}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.attendance.view.old.SetMonitoringCheckpointCommand
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 @RequestMapping(Array("/attendance/view/{department}/2013/{monitoringPoint}/record"))
-@Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

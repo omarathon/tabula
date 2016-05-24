@@ -1,3 +1,4 @@
+<#import "*/group_components.ftl" as components />
 <#escape x as x?html>
 
 <#macro link_to_department department>
@@ -26,6 +27,11 @@
 <#else>
 	<#include "_student.ftl" />
 	<#include "_admin.ftl" />
+
+	<#if todaysModules.moduleItems?has_content>
+		<h2>Today's events</h2>
+		<@components.module_info todaysModules />
+	</#if>
 
 	<#assign is_student=user.student /> <#-- Non-students may also have groups, but we still show them the intro text -->
 	<#assign is_tutor=nonempty(taughtGroups) />
