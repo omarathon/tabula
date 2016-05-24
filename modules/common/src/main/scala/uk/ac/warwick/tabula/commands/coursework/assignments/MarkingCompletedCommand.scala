@@ -151,7 +151,7 @@ trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit]
 		val notificationsToComplete = markerFeedback.asScala
 			.filter(_.state == MarkingState.MarkingCompleted)
 			.flatMap(mf =>
-				// TAB-4328-  ModeratorRejectedNotification is tied to the 2nd marker feedback and is orphaned at this stage.
+				// TAB-4328-  ModeratorRejectedNotification is orphaned at this stage.
 				feedbackService.getRejectedMarkerFeedbackByFeedback(mf.feedback)
 					.map(notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification])
 					.getOrElse(Seq()) ++
