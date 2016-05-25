@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.profiles
+package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables.{ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 import scala.util.{Failure, Try}

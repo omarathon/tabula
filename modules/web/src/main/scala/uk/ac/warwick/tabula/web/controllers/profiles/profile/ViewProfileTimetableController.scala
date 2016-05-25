@@ -3,8 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.AutowiringMemberNoteServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
@@ -21,7 +23,7 @@ class ViewProfileTimetableController extends AbstractViewProfileController {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
-				Mav("").crumbs(breadcrumbs(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
+				Mav("profiles/profile/timetable_staff").crumbs(breadcrumbs(member, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
 		}
 	}
 
@@ -38,8 +40,9 @@ class ViewProfileTimetableController extends AbstractViewProfileController {
 		studentCourseDetails: StudentCourseDetails,
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
-		Mav("")
-			.crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
+		Mav("profiles/profile/timetable_student",
+			"member" -> studentCourseDetails.student
+		).crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.timetable(scyd)): _*)
 	}
 
