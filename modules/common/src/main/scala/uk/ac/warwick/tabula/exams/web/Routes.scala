@@ -52,7 +52,7 @@ object Routes {
 			private def markerroot(exam: Exam, marker: User) = admin.exam(exam) + s"/marker/${marker.getWarwickId}"
 
 			object markerFeedback {
-				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/list"
+				def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marks"
 				object complete {
 					def apply(exam: Exam, marker: User) = markerroot(exam, marker) + "/marking-completed"
 				}
