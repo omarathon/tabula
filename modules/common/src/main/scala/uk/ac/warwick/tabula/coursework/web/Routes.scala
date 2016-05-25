@@ -138,12 +138,12 @@ object Routes {
 			}
 
 			object turnitin {
-				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
+				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin/status"
 				def report(submission: Submission, report: OriginalityReport) =
 					if (report.turnitinId.hasText)
-						assignmentroot(submission.assignment) + "/turnitin-lti-report/%s".format (encoded(report.attachment.id))
+						assignmentroot(submission.assignment) + "/turnitin/lti-report/%s".format (encoded(report.attachment.id))
 					else
-						assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(report.attachment.id))
+						assignmentroot(submission.assignment) + "/turnitin/report/%s".format (encoded(report.attachment.id))
 			}
 
 			object turnitinlti {

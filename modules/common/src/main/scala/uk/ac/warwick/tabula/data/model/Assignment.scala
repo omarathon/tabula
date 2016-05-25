@@ -47,6 +47,7 @@ object Assignment {
 		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
 		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
+		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
 	}
 }
 
@@ -137,6 +138,9 @@ class Assignment
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")
 	var turnitinId: String = ""
+	var submitToTurnitin: JBoolean = false
+	var lastSubmittedToTurnitin: DateTime = _
+	var submitToTurnitinRetries: JInteger = 0
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
@@ -194,7 +198,7 @@ class Assignment
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.filterNot(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId))).size == 0
+			.forall(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -737,6 +741,11 @@ class Assignment
 
 	def allowExtensionsAfterCloseDate = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
 	def allowExtensionsAfterCloseDate_= (allow: Boolean) = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
+
+	def turnitinLtiNotifyUsers: Seq[User] = UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value
+	def turnitinLtiNotifyUsers_= (users: Seq[User]) = {
+		UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
+	}
 
 	def toEntityReference = new AssignmentEntityReference().put(this)
 

@@ -83,7 +83,7 @@ case class TurnitinLtiResponse(
 }
 	 *
 	 */
-	def submissionInfo():SubmissionResults = {
+	def submissionInfo(): SubmissionResults = {
 
 		val results = new SubmissionResults()
 
@@ -94,15 +94,13 @@ case class TurnitinLtiResponse(
 						reports.get("breakdown") match {
 							case Some(breakdowns: Map[String, Double] @unchecked) =>
 								breakdowns.get("publications_score") match {
-									case publicationsScore if publicationsScore.get != null => {
+									case publicationsScore if publicationsScore.get != null =>
 										results.publication_overlap = publicationsScore
-									}
 									case _ => Nil
 								}
 								breakdowns.get("internet_score") match {
-									case internetScore if internetScore.get != null => {
+									case internetScore if internetScore.get != null =>
 										results.web_overlap = internetScore
-									}
 									case _ => Nil
 								}
 								breakdowns.get("submitted_works_score") match {
@@ -115,10 +113,9 @@ case class TurnitinLtiResponse(
 						reports.get("numeric") match {
 							case Some(numerics: Map[String, Double] @unchecked) =>
 								numerics.get("score") match {
-									case score if score.get != null => {
+									case score if score.get != null =>
 										results.overlap = score
 										results.similarity = calculateSimilarityScore(score.get)
-									}
 									case _ => Nil
 								}
 							case _ => Nil
@@ -132,11 +129,11 @@ case class TurnitinLtiResponse(
 
 	private def calculateSimilarityScore(overlap: Double): Option[Int] = {
 		overlap match {
-			case overlap if overlap > 74 => Some(4)
-			case overlap if overlap > 49 => Some(3)
-			case overlap if overlap > 24 => Some(2)
-			case overlap if overlap > 0  => Some(1)
-			case overlap if overlap == 0 => Some(0)
+			case _ if overlap > 74 => Some(4)
+			case _ if overlap > 49 => Some(3)
+			case _ if overlap > 24 => Some(2)
+			case _ if overlap > 0  => Some(1)
+			case _ if overlap == 0 => Some(0)
 		}
 	}
 

@@ -39,6 +39,13 @@ object TurnitinLtiService {
 	val turnitinAssignmentNameMaxCharacters = 99
 	val turnitinClassTitleMaxCharacters = 99
 
+	val SubmitAssignmentWaitInSeconds = 20
+	val SubmitAssignmentMaxRetries = 50
+	val SubmitAttachmentWaitInSeconds = 2
+	val SubmitAttachmentMaxRetries = 20
+	val ReportRequestWaitInSeconds = 20
+	val ReportRequestMaxRetries = 50
+
 	/**
 	 * Quoted supported types are...
 	 * "MS Word, Acrobat PDF, Postscript, Text, HTML, WordPerfect (WPD) and Rich Text Format".

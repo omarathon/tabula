@@ -9,13 +9,8 @@ class JobServiceContextTest extends AppContextTestBase {
 	@Autowired var jobService: JobService = _
 
 	@Test def containsTurnitin() {
-		jobService.jobs.size should (be > 1)
+		jobService.jobs.length should (be > 1)
 		jobService.jobs map (_.identifier) should contain ("turnitin-submit")
-	}
-
-	@Test def containsTurnitinLti() {
-		jobService.jobs.size should (be > 1)
-		jobService.jobs map (_.identifier) should contain ("turnitin-submit-lti")
 	}
 
 	@Test def unknownJobType() {
