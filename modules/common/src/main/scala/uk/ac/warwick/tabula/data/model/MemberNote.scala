@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{BatchSize, Type}
-import javax.persistence._
 import javax.persistence.CascadeType._
+import javax.persistence._
 import javax.persistence.FetchType._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import javax.persistence.Entity
+import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
-
-@Entity @Access(AccessType.FIELD)
-class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
+@Entity
+@DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
+@Table(name = "membernote")
+abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
 
 	@transient
 	var userLookup = Wire.auto[UserLookupService]
@@ -54,5 +56,25 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget wi
 	override def toString = "MemberNote(" + id + ")"
 
 	def creator: User = userLookup.getUserByWarwickUniId(creatorId)
+
+}
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("note")
+class MemberNote extends AbstractMemberNote
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("circumstances")
+class ExtenuatingCircumstances extends AbstractMemberNote {
+
+	@NotNull
+	@Column(name = "start_date")
+	var startDate: LocalDate = _
+
+	@NotNull
+	@Column(name = "end_date")
+	var endDate: LocalDate = _
 
 }

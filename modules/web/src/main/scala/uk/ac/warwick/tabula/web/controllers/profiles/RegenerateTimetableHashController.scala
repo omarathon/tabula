@@ -13,7 +13,7 @@ class RegenerateTimetableHashController extends ProfilesController {
 	@RequestMapping(method=Array(POST))
 	def generateNewHash() = transactional() {
 		profileService.regenerateTimetableHash(currentMember)
-		Redirect(Routes.profile.view(currentMember))
+		Redirect(Routes.oldProfile.view(currentMember))
 	}
 
 }

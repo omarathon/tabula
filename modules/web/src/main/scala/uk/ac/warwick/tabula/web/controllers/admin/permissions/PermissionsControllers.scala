@@ -229,7 +229,7 @@ case class AdminLink(title: String, href: String)
 @Controller @RequestMapping(value = Array("/admin/permissions/member/{target}"))
 class MemberPermissionsController extends PermissionsControllerMethods[Member] {
 	@ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member) = Seq(
-		AdminLink("View profile", Routes.profiles.profile.view(member))
+		AdminLink("View profile", Routes.profiles.oldProfile.view(member))
 	)
 }
 

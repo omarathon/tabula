@@ -53,7 +53,7 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 
 	def url: String = {
 		if (isStudent) {
-			Routes.profiles.profile.mine
+			Routes.profiles.oldProfile.mine
 		} else {
 			Routes.groups.tutor.mygroups
 		}

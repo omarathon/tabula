@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 class ViewMyTimetableController extends ProfilesController {
 	@RequestMapping def redirect(user: CurrentUser) =
 		user.profile match {
-			case Some(profile) => Redirect(Routes.profiles.profile.viewTimetable(profile))
+			case Some(profile) => Redirect(Routes.profiles.oldProfile.viewTimetable(profile))
 			case _ => Redirect(Routes.profiles.home)
 		}
 }

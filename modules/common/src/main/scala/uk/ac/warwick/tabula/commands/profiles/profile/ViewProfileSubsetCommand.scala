@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.profiles
+package uk.ac.warwick.tabula.commands.profiles.profile
 
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
@@ -18,8 +18,8 @@ object ViewProfileSubsetCommand {
 			with ReadOnly
 }
 
-abstract class ViewProfileSubsetCommandInternal(val universityId: String, profileService: ProfileService,
-	userLookup: UserLookupService) extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
+abstract class ViewProfileSubsetCommandInternal(val universityId: String, profileService: ProfileService,	userLookup: UserLookupService)
+	extends CommandInternal[ProfileSubset] with ViewProfileSubsetCommandState {
 
 	val studentMember = profileService.getMemberByUniversityId(universityId).collect{ case sm:StudentMember => sm }
 
@@ -44,7 +44,9 @@ trait ViewProfileSubsetCommandState {
 }
 
 trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+
 	self: ViewProfileSubsetCommandState =>
+
 	override def permissionsCheck(p: PermissionsChecking) {
 		studentMember.foreach(p.PermissionCheck(Permissions.Profiles.Read.Core, _))
 		if (user.isDefined) p.PermissionCheck(UserPicker)
@@ -52,8 +54,8 @@ trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking wi
 }
 
 case class ProfileSubset (
-	val isMember: Boolean,
-	val user: Option[User],
-	val profile: Option[StudentMember],
-	val courseDetails: Option[StudentCourseDetails]
+	isMember: Boolean,
+	user: Option[User],
+	profile: Option[StudentMember],
+	courseDetails: Option[StudentCourseDetails]
 )

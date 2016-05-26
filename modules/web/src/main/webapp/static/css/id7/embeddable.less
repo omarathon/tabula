@@ -102,6 +102,24 @@ h1.modal-title {
 	background-color: #56a84f;
 }
 
+.navbar.navbar-secondary.sibling-breadcrumbs .navbar-nav > li.nav-breadcrumb:not(:first-child):not(:last-child):not(.dropdown) {
+	margin-left: 0;
+	margin-right: 0;
+	&::after {
+		font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		top: 5px;
+		width: 2px;
+		font-size: 15px;
+		font-weight: 400;
+		content: '|';
+		filter: alpha(opacity=50);
+		opacity: .5;
+		left: 100%;
+		margin-left: -2px;
+		line-height: 24px;
+	}
+}
+
 .subtle { color: @subtle-text-color; }
 .subtler { color: @very-subtle-text-color; }
 .very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }

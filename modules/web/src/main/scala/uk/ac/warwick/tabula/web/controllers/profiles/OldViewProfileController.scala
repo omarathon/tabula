@@ -10,8 +10,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.Mav
 
-@Controller
-abstract class ViewProfileController extends ProfilesController {
+abstract class OldViewProfileController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
@@ -54,8 +53,8 @@ abstract class ViewProfileController extends ProfilesController {
 
 		// Get all membernotes for student
 		val memberNotes =
-			if (securityService.can(user, Permissions.MemberNotes.Delete, profiledStudentMember)) memberNoteService.list(profiledStudentMember)
-			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeleted(profiledStudentMember)
+			if (securityService.can(user, Permissions.MemberNotes.Delete, profiledStudentMember)) memberNoteService.listNotes(profiledStudentMember)
+			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeletedNotes(profiledStudentMember)
 			else null
 
 		Mav("profiles/profile/view",

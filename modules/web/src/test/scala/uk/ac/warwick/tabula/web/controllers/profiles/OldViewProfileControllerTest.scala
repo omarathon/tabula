@@ -5,9 +5,9 @@ import uk.ac.warwick.tabula.services.{ProfileService, SecurityService, SmallGrou
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 
-class ViewProfileControllerTest extends TestBase with Mockito{
+class OldViewProfileControllerTest extends TestBase with Mockito{
 
-	val controller = new ViewProfileByStudentController
+	val controller = new OldViewProfileByStudentController
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
 	controller.smallGroupService = mock[SmallGroupService]

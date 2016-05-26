@@ -151,7 +151,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 					convertCommand.createCommand = command
 					convertCommand.apply()
 
-					Redirect(Routes.profile.view(studentCourseDetails.student))
+					Redirect(Routes.oldProfile.view(studentCourseDetails.student))
 				}
 			} else {
 					Mav("profiles/related_students/meeting/was_deleted")

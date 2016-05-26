@@ -2,17 +2,16 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
-import uk.ac.warwick.tabula.commands.profiles.ViewProfileCommand
 import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 
-@Controller
-class ViewProfileByStudentController
-	extends ViewProfileController
+class OldViewProfileByStudentController
+	extends OldViewProfileController
 	with AutowiringMeetingRecordServiceComponent {
 
 	@ModelAttribute("viewProfileCommand")
@@ -42,7 +41,7 @@ class ViewProfileByStudentController
 
 		profiledMember match {
 			case studentProfile: StudentMember if meetingForAnotherScyd.isDefined =>
-				Redirect(Routes.profile.view(meetingForAnotherScyd.get._1, meetingForAnotherScyd.get._2))
+				Redirect(Routes.oldProfile.view(meetingForAnotherScyd.get._1, meetingForAnotherScyd.get._2))
 			case studentProfile: StudentMember =>
 				viewProfileForCourse(studentProfile.mostSignificantCourseDetails,
 						studentProfile.defaultYearDetails,
@@ -55,12 +54,12 @@ class ViewProfileByStudentController
 	}
 }
 
-@Controller
-class ViewMyProfileController extends ViewProfileController {
+
+class OldViewMyProfileController extends OldViewProfileController {
 	@RequestMapping(Array("/profiles/view/me"))
 	def viewMe(currentUser: CurrentUser) = {
 		currentUser.profile map { profile =>
-			Redirect(Routes.profile.view(profile))
+			Redirect(Routes.oldProfile.view(profile))
 		} getOrElse {
 			Redirect(Routes.home)
 		}
