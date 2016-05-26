@@ -117,10 +117,6 @@ object Routes {
 				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
 			}
 
-			object onlineSecondMarker {
-				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/secondmarker"
-			}
-
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
 			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
