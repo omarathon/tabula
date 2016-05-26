@@ -123,8 +123,8 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val result = command.applyInternal()
 
 		result.entities should be (Seq(courseDetails1, courseDetails2))
-		val studentMeetingRecord = result.meetingWithTotalPendingApprovalMap.get(courseDetails1.student.universityId).get._1
-		val studentPendingApprovalCount = result.meetingWithTotalPendingApprovalMap.get(courseDetails1.student.universityId).get._2
+		val studentMeetingRecord = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._1
+		val studentPendingApprovalCount = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._2
 		studentMeetingRecord should be (Some(meetingRecord))
 		studentPendingApprovalCount should be (1)
 	}}
