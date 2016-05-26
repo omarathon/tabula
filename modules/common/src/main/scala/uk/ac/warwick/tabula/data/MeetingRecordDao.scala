@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.{Projections, Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -16,6 +16,7 @@ trait MeetingRecordDao {
 	def list(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[MeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
 	def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord]
+	def countPendingApprovals(universityId: String): Int
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
@@ -85,6 +86,13 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			.seq
 	}
 
+	def countPendingApprovals(universityId: String): Int = {
+		session.newCriteria[MeetingRecordApproval]
+			.add(Restrictions.eq("approver.universityId", universityId))
+			.add(is("state", MeetingApprovalState.Pending))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
+	}
 
 	def get(id: String) = getById[AbstractMeetingRecord](id)
 

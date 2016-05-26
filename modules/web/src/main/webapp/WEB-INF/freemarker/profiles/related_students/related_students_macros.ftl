@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#macro row student studentCourseDetails="" showMeetings=false lastMeeting="">
+<#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="">
 	<tr class="related_student">
 		<td>
 			<@fmt.member_photo student "tinythumbnail" />
@@ -21,8 +21,13 @@
 			<td>${(student.mostSignificantCourseDetails.currentRoute.name)!""}</td>
 		</#if>
 		<#if showMeetings>
-			<#if lastMeeting?has_content>
-				<td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}"><@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true /></td>
+			<#if meetingInfoPair._1()?has_content>
+				<#assign lastMeeting = meetingInfoPair._1() />
+				<#assign pendingApprovals = meetingInfoPair._2() />
+				<td data-datesort="${(lastMeeting.meetingDate.millis?c)!''}">
+					<@fmt.date date=lastMeeting.meetingDate shortMonth=true includeTime=true /><br/>
+					<span class="badge progress-bar-<#if (pendingApprovals > 2)>danger<#elseif (pendingApprovals > 0)>warning<#else>success</#if>  use-tooltip" data-original-title="Number of unapproved meetings">${pendingApprovals}</span>
+				</td>
 			<#else>
 				<td></td>
 			</#if>
