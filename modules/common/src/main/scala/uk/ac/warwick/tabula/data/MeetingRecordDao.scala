@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.{Projections, Order, Restrictions}
+import org.hibernate.criterion.{Order, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -88,10 +88,9 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def countPendingApprovals(universityId: String): Int = {
 		session.newCriteria[MeetingRecordApproval]
-			.add(Restrictions.eq("approver.universityId", universityId))
+			.add(is("approver.universityId", universityId))
 			.add(is("state", MeetingApprovalState.Pending))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue()
+			.count.intValue()
 	}
 
 	def get(id: String) = getById[AbstractMeetingRecord](id)
