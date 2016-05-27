@@ -22,22 +22,30 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 	): Mav = {
 		mandatory(member) match {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
-				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
+				viewByCourseAndYear(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
-				Mav("profiles/profile/identity_staff").crumbs(breadcrumbs(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
+				Mav("profiles/profile/identity_staff").crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 		}
 	}
 
+	@RequestMapping(Array("/course/{studentCourseDetails}"))
+	def viewByCourseOnlyMapping(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+	): Mav = {
+		viewByCourseAndYear(studentCourseDetails, activeAcademicYear)
+	}
+
 	@RequestMapping(Array("/course/{studentCourseDetails}/{academicYear}"))
-	def viewByCourseMapping(
+	def viewByCourseAndYearMapping(
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		val activeAcademicYear: Option[AcademicYear] = Some(mandatory(academicYear))
-		viewByCourse(studentCourseDetails, activeAcademicYear)
+		viewByCourseAndYear(studentCourseDetails, activeAcademicYear)
 	}
 
-	private def viewByCourse(
+	private def viewByCourseAndYear(
 		studentCourseDetails: StudentCourseDetails,
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
@@ -56,7 +64,7 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 			"courseDetails" -> (Seq(studentCourseDetails) ++ studentCourseDetails.student.freshStudentCourseDetails.filterNot(_ == studentCourseDetails)),
 			"memberNotes" -> memberNotes,
 			"extenuatingCircumstances" -> extenuatingCircumstances
-		).crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
+		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.identity(scyd)): _*)
 	}
 

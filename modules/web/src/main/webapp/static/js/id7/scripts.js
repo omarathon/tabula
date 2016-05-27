@@ -275,38 +275,43 @@
 			$(this).addClass('tabulaAjaxSubmit-init')
 		}
 
+		var errorHandler = function($form, data) {
+			var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
+			if ($form.is('.double-submit-protection')) {
+				$form.find('.submit-buttons .btn').removeClass('disabled');
+				$form.removeData('submitOnceSubmitted');
+			}
+
+			// delete any old errors
+			$(scopeSelector + "div.error").remove();
+			$(scopeSelector + '.has-error').removeClass('has-error');
+			var error;
+			for(error in data.result){
+				if (data.result.hasOwnProperty(error)) {
+					var message = data.result[error];
+					var inputSelector = scopeSelector + "input[name='" + error + "']";
+					var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
+
+					var $field = $(inputSelector + ", " + textareaSelector);
+					$field.closest(".form-group").addClass("has-error");
+
+					// insert error message
+					$field.last().after('<div class="error help-block">' + message + '</div>');
+				}
+			}
+		};
+
 		$(this).on('submit', 'form', function(e){
 			e.preventDefault();
 			var $form = $(this);
 			$.post($form.attr('action'), $form.serialize(), function(data){
-				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
-
-				if(data.status == "error"){
-					if ($form.is('.double-submit-protection')) {
-						$form.find('.submit-buttons .btn').removeClass('disabled');
-						$form.removeData('submitOnceSubmitted');
-					}
-
-					// delete any old errors
-					$(scopeSelector + "span.error").remove();
-					$(scopeSelector + '.error').removeClass('error');
-					var error;
-					for(error in data.result){
-						if (data.result.hasOwnProperty(error)) {
-							var message = data.result[error];
-							var inputSelector = scopeSelector + "input[name='" + error + "']";
-							var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
-
-							var $field = $(inputSelector + ", " + textareaSelector);
-							$field.closest(".control-group").addClass("error");
-
-							// insert error message
-							$field.last().after('<span class="error help-inline">' + message + '</span>');
-						}
-					}
+				if(data.status == "error") {
+					errorHandler($form, data);
 				} else {
 					successCallback(data)
 				}
+			}).fail(function(response){
+				errorHandler($form, response.responseJSON);
 			});
 		});
 	};

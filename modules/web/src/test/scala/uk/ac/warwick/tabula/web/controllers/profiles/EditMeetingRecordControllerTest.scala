@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
-import uk.ac.warwick.tabula.{Mockito, ItemNotFoundException, TestBase}
-import uk.ac.warwick.tabula.web.controllers.profiles.relationships.EditMeetingRecordController
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, StudentRelationship, MeetingRecord}
-import uk.ac.warwick.tabula.commands.profiles.EditMeetingRecordCommand
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.EditMeetingRecordCommandInternal
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, MemberStudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
+import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings._
 
 class EditMeetingRecordControllerTest extends TestBase with Mockito{
 
@@ -31,8 +28,8 @@ class EditMeetingRecordControllerTest extends TestBase with Mockito{
 		meeting.relationship = relationship
 		// end setup
 
-		controller.getCommand(meeting) should be(anInstanceOf[EditMeetingRecordCommand])
-		controller.getCommand(meeting) should not be(null)
+		controller.getCommand(meeting) should be(anInstanceOf[EditMeetingRecordCommandInternal])
+		controller.getCommand(meeting) should not be null
 
 	}
 }

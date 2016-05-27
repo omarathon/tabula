@@ -22,6 +22,9 @@ object CreateMemberNoteCommand {
 			with CreateMemberNoteCommandState
 			with ModifyMemberNoteCommandRequest
 			with ModifyMemberNoteCommandBindListener
+			with PopulateOnForm {
+			override def populate(): Unit = {}
+		}
 }
 
 
