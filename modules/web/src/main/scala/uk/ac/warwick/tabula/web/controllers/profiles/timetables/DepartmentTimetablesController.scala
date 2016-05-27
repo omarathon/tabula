@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.profiles
+package uk.ac.warwick.tabula.web.controllers.profiles.timetables
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
 @Controller

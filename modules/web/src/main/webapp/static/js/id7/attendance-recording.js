@@ -53,28 +53,6 @@ exports.wireButtons = function(id) {
 		});
 };
 
-var setArgOnUrl = function(url, argName, argValue){
-	if(url.indexOf('?') === -1) {
-		return url + '?' + argName + '=' + argValue;
-	} else {
-		var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),
-			found = false,
-			newArgs = $.map(args, function(pair){
-				var arg = pair.split('=');
-				if (arg[0] === argName) {
-					found = true;
-					return argName + '=' + argValue;
-				} else {
-					return pair;
-				}
-			});
-		if (!found) {
-			newArgs.push(argName + '=' + argValue);
-		}
-		return url.substring(0, url.indexOf('?')) + '?' + newArgs.join('&');
-	}
-};
-
 var updateAttendanceState = function(e, $this){
 	if ($this.is('.disabled')) {
 		e.stopPropagation();
@@ -86,7 +64,7 @@ var updateAttendanceState = function(e, $this){
 			return $(this).val() == state;
 		}).prop('selected', true);
 		var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
-		noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
+		noteButton.attr('href', GlobalScripts.setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
 	}
 };
 
