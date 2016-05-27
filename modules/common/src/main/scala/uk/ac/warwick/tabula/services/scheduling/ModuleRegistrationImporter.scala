@@ -49,14 +49,15 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
 		}.toSet
 		val tabulaModuleCodes = tabulaModules.map(_.code)
 		val rowsBySCD: Map[StudentCourseDetails, Seq[ModuleRegistrationRow]] = rows.groupBy(_.scjCode).map { case (scjCode, scjRows) =>
-			studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(
-				throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
-			) -> scjRows.filter(row => {
+			studentCourseDetailsDao.getByScjCode(scjCode).getOrElse {
+				logger.error("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
+				null
+			} -> scjRows.filter(row => {
 				val moduleCode = Module.stripCats(row.sitsModuleCode)
 				moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
 			})
 		}
-		rowsBySCD.map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
+		rowsBySCD.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
 	}
 }
 
