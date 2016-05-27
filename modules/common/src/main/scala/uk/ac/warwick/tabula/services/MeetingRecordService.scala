@@ -25,6 +25,7 @@ trait MeetingRecordService {
 	def listAll(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[AbstractMeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
 	def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord]
+	def countPendingApprovals(universityId: String): Int
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear]
@@ -50,6 +51,7 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	def listAll(rel: StudentRelationship): Seq[AbstractMeetingRecord] = {
 		(meetingRecordDao.list(rel) ++ meetingRecordDao.listScheduled(rel)).sorted
 	}
+	def countPendingApprovals(universityId: String): Int = meetingRecordDao.countPendingApprovals(universityId)
 	def get(id: String): Option[AbstractMeetingRecord] =  Option(id) match {
 		case Some(uid) if uid.nonEmpty => meetingRecordDao.get(uid)
 		case _ => None
