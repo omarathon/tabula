@@ -20,7 +20,7 @@ class AttendanceAgentViewStudentTest extends AttendanceFixture with GivenWhenThe
 		 eventually(currentUrl should include(s"/attendance/agent/tutor/2013/${P.Student1.warwickId}"))
 		 // usercode is set at student's name
 		 pageSource should include(s"${P.Student1.usercode}")
-		 className("monitoring-points").webElement.findElements(By.className("point")).size() should be (3)
+		 className("striped-section-contents").webElement.findElements(By.className("point")).size() should be (3)
 	 }
 
  }

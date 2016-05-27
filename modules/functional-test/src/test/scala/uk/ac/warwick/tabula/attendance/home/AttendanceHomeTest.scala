@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.home.old
+package uk.ac.warwick.tabula.attendance.home
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear

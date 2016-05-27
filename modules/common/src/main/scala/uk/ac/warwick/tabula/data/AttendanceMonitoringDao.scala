@@ -111,6 +111,7 @@ trait AttendanceMonitoringDao {
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal]
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal]
+	def getCheckpointTotals(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
@@ -499,6 +500,13 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 	def getAllCheckpointTotals(department: Department): Seq[AttendanceMonitoringCheckpointTotal] = {
 		session.newCriteria[AttendanceMonitoringCheckpointTotal]
 			.add(is("department", department))
+			.seq
+	}
+
+	def getCheckpointTotals(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal] = {
+		session.newCriteria[AttendanceMonitoringCheckpointTotal]
+			.add(is("department", department))
+			.add(is("academicYear", academicYear))
 			.seq
 	}
 

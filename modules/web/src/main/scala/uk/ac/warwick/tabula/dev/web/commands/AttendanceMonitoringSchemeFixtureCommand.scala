@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, AttendanceMonitoringPointStyle, AttendanceMonitoringPoint, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
-import uk.ac.warwick.tabula.data.{TransactionalComponent, SessionComponent, Daoisms, AutowiringTransactionalComponent}
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.{LocalDate, DateTime}
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{StudentMember, UserGroup}
 
 object AttendanceMonitoringSchemeFixtureCommand {
 	def apply() =
@@ -18,6 +19,7 @@ object AttendanceMonitoringSchemeFixtureCommand {
 			with ComposableCommand[AttendanceMonitoringScheme]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringProfileServiceComponent
 			with AutowiringTransactionalComponent
 			with Daoisms
 			with PubliclyVisiblePermissions
@@ -27,7 +29,8 @@ object AttendanceMonitoringSchemeFixtureCommand {
 
 class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[AttendanceMonitoringScheme] {
 
-	this: AttendanceMonitoringServiceComponent with ModuleAndDepartmentServiceComponent with TransactionalComponent with SessionComponent =>
+	this: AttendanceMonitoringServiceComponent with ModuleAndDepartmentServiceComponent
+		with ProfileServiceComponent with TransactionalComponent with SessionComponent =>
 
 	var deptCode: String = _
 	var academicYear: AcademicYear = _
@@ -36,9 +39,11 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 
 	def applyInternal() = transactional() {
 
+		val amDao = Wire[AttendanceMonitoringDao]
+
 		val department = moduleAndDepartmentService.getDepartmentByCode(deptCode).getOrElse(throw new IllegalArgumentException)
 
-		for (scheme <- attendanceMonitoringService.listAllSchemes(department)) {
+		for (scheme <- attendanceMonitoringService.listSchemes(department, academicYear)) {
 			for (point <- scheme.points){
 				for (checkpoint <- attendanceMonitoringService.getAllCheckpoints(point)){
 					session.delete(checkpoint)
@@ -47,6 +52,9 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 			// the points will also be deleted by the cascade
 			session.delete(scheme)
 		}
+
+		for (total <- amDao.getCheckpointTotals(department, academicYear)) session.delete(total)
+
 
 		val scheme = new AttendanceMonitoringScheme
 		scheme.academicYear = academicYear
@@ -73,6 +81,17 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 				point
 			}
 		}.asJava
+
+		profileService.getMemberByUniversityId(warwickId).map {
+			case studentMember: StudentMember =>
+				val checkpointTotal = new AttendanceMonitoringCheckpointTotal
+				checkpointTotal.student = studentMember
+				checkpointTotal.academicYear = academicYear
+				checkpointTotal.unrecorded = pointCount
+				checkpointTotal.updatedDate = new DateTime()
+				checkpointTotal.department = moduleAndDepartmentService.getDepartmentByCode(deptCode).getOrElse(null)
+				session.saveOrUpdate(checkpointTotal)
+		}
 
 		attendanceMonitoringService.saveOrUpdate(scheme)
 
