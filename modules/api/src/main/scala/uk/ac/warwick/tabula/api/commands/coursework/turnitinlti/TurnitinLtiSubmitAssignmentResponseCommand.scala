@@ -6,24 +6,26 @@ import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiQueueServiceComponent, TurnitinLtiQueueServiceComponent, TurnitinLtiService}
 
 object TurnitinLtiSubmitAssignmentResponseCommand {
 	def apply(assignment: Assignment) = new TurnitinLtiSubmitAssignmentResponseCommandInternal(assignment)
 		with ComposableCommand[Unit]
+		with AutowiringAssessmentServiceComponent
+		with AutowiringTurnitinLtiQueueServiceComponent
 		with TurnitinLtiSubmitAssignmentResponseCommandDescription
 		with PubliclyVisiblePermissions
-		with AutowiringAssessmentServiceComponent
 		with TurnitinLtiSubmitAssignmentResponseValidation
-
 }
 
 class TurnitinLtiSubmitAssignmentResponseCommandInternal(val assignment: Assignment) extends CommandInternal[Unit]
-with TurnitinLtiSubmitAssignmentResponseCommandState with Logging  {
-	self: AssessmentServiceComponent =>
+with TurnitinLtiSubmitAssignmentResponseCommandState with Logging {
+
+	self: AssessmentServiceComponent with TurnitinLtiQueueServiceComponent =>
 
 	override protected def applyInternal() = {
 		assignment.turnitinId = assignmentid
+		turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
 		assessmentService.save(assignment)
 	}
 }
@@ -39,7 +41,9 @@ trait TurnitinLtiSubmitAssignmentResponseCommandState extends TurnitinLtiSubmitA
 }
 
 trait TurnitinLtiSubmitAssignmentResponseValidation extends SelfValidating {
+
 	self: TurnitinLtiSubmitAssignmentResponseCommandState with AssessmentServiceComponent =>
+
 	override def validate(errors: Errors) = {
 		if (assignment != assessmentService.getAssignmentById(resource_link_id.substring(TurnitinLtiService.AssignmentPrefix.length)).get) {
 			errors.rejectValue("assignment", "turnitin.assignment.invalid")

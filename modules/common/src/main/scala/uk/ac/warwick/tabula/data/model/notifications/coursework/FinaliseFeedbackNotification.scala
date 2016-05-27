@@ -4,7 +4,7 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.userlookup.User
 
@@ -47,7 +47,7 @@ class FinaliseFeedbackNotification
 
 	override def allRecipients: Seq[User] = {
 		val finalisedFeedbacks = entities
-		if (finalisedFeedbacks.filterNot { _.checkedReleased }.isEmpty) {
+		if (finalisedFeedbacks.forall(_.checkedReleased)) {
 			Seq()
 		} else {
 			var users: Seq[User] = Seq()
@@ -82,12 +82,13 @@ class FinaliseFeedbackNotification
 }
 
 class FinaliseFeedbackNotificationSettings(departmentSettings: NotificationSettings) {
+	@transient private val userLookup = Wire[UserLookupService]
 	// Configuration settings specific to this type of notification
 	def enabled = departmentSettings.enabled
 	def notifyModuleManagers = departmentSettings.BooleanSetting("notifyModuleManagers", default = false)
 	def notifyDepartmentAdministrators = departmentSettings.BooleanSetting("notifyDepartmentAdministrators", default = false)
 	def notifyNamedUsers = departmentSettings.BooleanSetting("notifyNamedUsers", default = false)
 	def notifyNamedUsersFirst = departmentSettings.BooleanSetting("notifyNamedUsersFirst", default = false)
-	def namedUsers = departmentSettings.UserSeqSetting("namedUsers", default = Seq())
+	def namedUsers = departmentSettings.UserSeqSetting("namedUsers", default = Seq(), userLookup)
 	def notifyFirstNonEmptyGroupOnly = departmentSettings.BooleanSetting("notifyFirstNonEmptyGroupOnly", default = true)
 }

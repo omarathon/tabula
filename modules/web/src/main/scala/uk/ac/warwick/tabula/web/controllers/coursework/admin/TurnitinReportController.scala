@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.web.Mav
  */
 @Controller
 @RequestMapping(value = Array(
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin-report/{attachment}",
-	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin-lti-report/{attachment}"
+	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
+	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
 class TurnitinReportController extends CourseworkController {
 

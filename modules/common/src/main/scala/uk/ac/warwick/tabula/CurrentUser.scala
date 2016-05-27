@@ -88,6 +88,11 @@ class CurrentUser(
 			builder.toString()
 		}
 	}
+
+	override def equals(that: Any): Boolean = that match {
+		case other: CurrentUser => other.apparentUser == this.apparentUser && other.realUser == this.realUser
+		case _ => super.equals(that)
+	}
 }
 
 object CurrentUser {

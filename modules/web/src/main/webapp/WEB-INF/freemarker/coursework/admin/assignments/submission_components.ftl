@@ -15,9 +15,9 @@
 		</p>
 		<p>
 			<#if r.turnitinId?has_content>
-				<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-lti-report/${attachment.id}'/>">View full report</a>
+				<a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
 			<#else>
-				<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report - available via Tabula until end of August 2016</a>
+				<a target="turnitin-viewer" href="<@routes.coursework.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
 			</#if>
 		</p>
 	</div>

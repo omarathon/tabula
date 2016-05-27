@@ -145,19 +145,25 @@ trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
 
 trait MarkerCompletedNotificationCompletion extends CompletesNotifications[Unit] {
 
-	self: MarkingCompletedState with NotificationHandling =>
+	self: MarkingCompletedState with NotificationHandling with FeedbackServiceComponent =>
 
 	def notificationsToComplete(commandResult: Unit): CompletesNotificationsResult = {
 		val notificationsToComplete = markerFeedback.asScala
 			.filter(_.state == MarkingState.MarkingCompleted)
 			.flatMap(mf =>
-				// ModeratorRejectedNotification is tied to the 2nd marker feedback
-				Option(mf.feedback.secondMarkerFeedback)
-					.map(notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification])
-					.getOrElse(Seq()) ++
+				// TAB-4328-  ModeratorRejectedNotification is orphaned at this stage.
+				rejectedMarkerFeedbacks(mf) ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[ReleaseToMarkerNotification](mf) ++
 					notificationService.findActionRequiredNotificationsByEntityAndType[ReturnToMarkerNotification](mf)
 			)
 		CompletesNotificationsResult(notificationsToComplete, marker)
 	}
+
+
+	private def rejectedMarkerFeedbacks(mf: MarkerFeedback): Seq[ActionRequiredNotification] = {
+		feedbackService.getRejectedMarkerFeedbackByFeedback(mf.feedback).flatMap(rejectedMarkerFeedback =>
+			notificationService.findActionRequiredNotificationsByEntityAndType[ModeratorRejectedNotification](rejectedMarkerFeedback)
+		)
+	}
 }
+
