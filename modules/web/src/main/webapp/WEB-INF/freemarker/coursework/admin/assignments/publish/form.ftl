@@ -40,7 +40,7 @@ their feedback published. Those students won't be emailed again.
 </#if>
 </p>
 
-<#if features.queueFeedbackForSits && department.uploadMarksToSits>
+<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
 	<@courses_macros.uploadToSits assignment=assignment verb="Publishing" withValidation=true isGradeValidation=isGradeValidation gradeValidation=gradeValidation/>
 </#if>
 
