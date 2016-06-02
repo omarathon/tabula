@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.profiles
+package uk.ac.warwick.tabula.commands.profiles.profile
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
@@ -8,24 +8,18 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object ViewModuleRegistrationsCommand {
 	def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
-		new ViewModuleRegistrationsCommandInternal(studentCourseDetails, academicYear) with
-			ComposableCommand[Seq[ModuleRegistration]] with
-			ViewModuleRegistrationsCommandPermissions with
-			ReadOnly with Unaudited
-}
-
-trait ViewModuleRegistrationsCommandState {
-	val studentCourseDetails: StudentCourseDetails
-	val academicYear: AcademicYear
-	var studentCourseYearDetails: StudentCourseYearDetails = _
+		new ViewModuleRegistrationsCommandInternal(studentCourseDetails, academicYear)
+			with ComposableCommand[Seq[ModuleRegistration]]
+			with ViewModuleRegistrationsCommandPermissions
+			with ReadOnly with Unaudited
 }
 
 class ViewModuleRegistrationsCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
 	extends CommandInternal[Seq[ModuleRegistration]] with ViewModuleRegistrationsCommandState {
 
 	def applyInternal() = {
-			studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == academicYear).seq.head
-			studentCourseYearDetails.moduleRegistrations
+		studentCourseYearDetails = studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == academicYear).seq.head
+		studentCourseYearDetails.moduleRegistrations
 	}
 }
 
@@ -35,4 +29,10 @@ trait ViewModuleRegistrationsCommandPermissions extends RequiresPermissionsCheck
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Profiles.Read.ModuleRegistration.Core, studentCourseDetails)
 	}
+}
+
+trait ViewModuleRegistrationsCommandState {
+	val studentCourseDetails: StudentCourseDetails
+	val academicYear: AcademicYear
+	var studentCourseYearDetails: StudentCourseYearDetails = _
 }

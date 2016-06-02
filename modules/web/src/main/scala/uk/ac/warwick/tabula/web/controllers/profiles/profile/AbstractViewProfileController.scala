@@ -67,6 +67,8 @@ abstract class AbstractViewProfileController extends ProfilesController
 					ProfileBreadcrumbs.Profile.TimetableForScyd(scyd).setActive(activeIdentifier)
 				) ++ relationshipTypesToDisplay(scd).map(relationshipType =>
 					ProfileBreadcrumbs.Profile.RelationshipTypeForScyd(scyd, relationshipType).setActive(activeIdentifier)
+				) ++ Seq(
+					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier)
 				)
 		}
 

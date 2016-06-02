@@ -10,12 +10,13 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfileBreadcrumbs}
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
+import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
 class ViewProfileRelationshipTypeController extends AbstractViewProfileController
-	with MeetingRecordAcademicYearFiltering with AutowiringTermServiceComponent
+	with AutowiringTermServiceComponent
 	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
 
 	@RequestMapping(Array("/{member}/{relationshipType}"))
@@ -93,4 +94,20 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		mav.crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.RelationshipTypeIdentifier(relationshipType)): _*)
 		.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.relationshipType(scyd, relationshipType)): _*)
 
+	private def meetingNotInAcademicYear(academicYear: AcademicYear)(meeting: AbstractMeetingRecord) = {
+		try {
+			termService.getAcademicWeekForAcademicYear(meeting.meetingDate, academicYear) match {
+				case Term.WEEK_NUMBER_AFTER_END =>
+					true
+				case Term.WEEK_NUMBER_BEFORE_START if meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty =>
+					meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
+				case _ =>
+					false
+			}
+		} catch {
+			case e: TermNotFoundException =>
+				// TAB-2465 Don't include this meeting - this happens if you are looking at a year before we recorded term dates
+				true
+		}
+	}
 }
