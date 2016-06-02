@@ -52,7 +52,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
 				user.isStudent ||
 				permissionsService.getAllPermissionDefinitionsFor(user, Permissions.Profiles.ViewSearchResults).nonEmpty
 
-		val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadMarksToSits)
+		val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadExamMarksToSits)
 		val examGridsEnabled = features.examGrids && user.isStaff && homeDepartment.exists(_.examGridsEnabled)
 
 		val modelMap = Map(

@@ -21,6 +21,8 @@ trait OriginalityReportService {
 	def getOriginalityReportByFileId(fileId: String): Option[OriginalityReport]
 	def deleteOriginalityReport(attachment: FileAttachment): Unit
 	def saveOriginalityReport(attachment: FileAttachment): Unit
+	def saveOrUpdate(report: OriginalityReport): Unit
+	def refresh(report: OriginalityReport): Unit
 }
 
 @Service(value = "submissionService")
@@ -93,6 +95,10 @@ class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms
 			.add(is("attachment.id", fileId))
 			.seq.headOption
 	}
+
+	def saveOrUpdate(report: OriginalityReport): Unit = session.saveOrUpdate(report)
+
+	def refresh(report: OriginalityReport): Unit = session.refresh(report)
 }
 
 trait OriginalityReportServiceComponent {

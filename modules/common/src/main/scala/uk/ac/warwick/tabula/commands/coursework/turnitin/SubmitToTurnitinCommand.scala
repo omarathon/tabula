@@ -1,40 +1,43 @@
 package uk.ac.warwick.tabula.commands.coursework.turnitin
 
+import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.jobs.coursework.SubmitToTurnitinLtiJob
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
+import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiQueueServiceComponent, TurnitinLtiQueueServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.userlookup.User
 
 /**
-	* Creates a job that submits the assignment to Turnitin.
+	* Marks an assignment as ready for plagarism checking, adding the submitting user to the notification list
 	*
-	* Returns the job instance ID for status tracking.
+	* If the assignment has previously been created on Turnitin it creates the blank originality reports.
 	*/
 object SubmitToTurnitinCommand {
-	type CommandType = Appliable[JobInstance] with SubmitToTurnitinRequest with SelfValidating
+	type CommandType = Appliable[Assignment] with SubmitToTurnitinRequest with SelfValidating
 
 	def apply(module: Module, assignment: Assignment): CommandType =
 		new SubmitToTurnitinCommandInternal(module, assignment)
-			with ComposableCommand[JobInstance]
+			with ComposableCommand[Assignment]
 			with SubmitToTurnitinPermissions
 			with SubmitToTurnitinDescription
 			with SubmitToTurnitinValidation
-			with AutowiringJobServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with AutowiringFeaturesComponent
+			with AutowiringTurnitinLtiQueueServiceComponent
 
 	def apply(module: Module, assignment: Assignment, user: CurrentUser): CommandType =
 		new SubmitToTurnitinCommandInternal(module, assignment, user)
-			with ComposableCommand[JobInstance]
+			with ComposableCommand[Assignment]
 			with SubmitToTurnitinPermissions
 			with SubmitToTurnitinDescription
 			with SubmitToTurnitinValidation
-			with AutowiringJobServiceComponent
+			with AutowiringAssessmentServiceComponent
 			with AutowiringFeaturesComponent
+			with AutowiringTurnitinLtiQueueServiceComponent
 }
 
 trait SubmitToTurnitinState {
@@ -47,9 +50,9 @@ trait SubmitToTurnitinRequest extends SubmitToTurnitinState {
 }
 
 abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignment: Assignment)
-	extends CommandInternal[JobInstance]
-		with SubmitToTurnitinRequest {
-	self: JobServiceComponent with FeaturesComponent =>
+	extends CommandInternal[Assignment] with SubmitToTurnitinRequest {
+
+	self: AssessmentServiceComponent with FeaturesComponent with TurnitinLtiQueueServiceComponent =>
 
 	def this(module: Module, assignment: Assignment, user: CurrentUser) {
 		this(module, assignment)
@@ -58,7 +61,23 @@ abstract class SubmitToTurnitinCommandInternal(val module: Module, val assignmen
 	}
 
 	override def applyInternal() = {
-		jobService.add(submitter, SubmitToTurnitinLtiJob(assignment))
+		if (!assignment.submitToTurnitin) {
+			// Not already started the submission process
+			assignment.lastSubmittedToTurnitin = new DateTime(0)
+			assignment.turnitinLtiNotifyUsers = Seq()
+			assignment.submitToTurnitin = true
+		}
+		if (assignment.turnitinId != null) {
+			// Assignment won't be re-submitted, so create empty reports now
+			turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
+		}
+		// Add the requesting user on to the list
+		if (Option(submitter).nonEmpty) {
+			assignment.turnitinLtiNotifyUsers = (assignment.turnitinLtiNotifyUsers ++ Seq(submitter)).distinct
+		}
+
+		assessmentService.save(assignment)
+		assignment
 	}
 
 }
@@ -72,7 +91,7 @@ trait SubmitToTurnitinPermissions extends RequiresPermissionsChecking with Permi
 	}
 }
 
-trait SubmitToTurnitinDescription extends Describable[JobInstance] {
+trait SubmitToTurnitinDescription extends Describable[Assignment] {
 	self: SubmitToTurnitinState =>
 
 	override def describe(d: Description) = d.assignment(assignment)

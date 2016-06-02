@@ -25,7 +25,6 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 
 	def markerFeedback = item.entity
 	def parentFeedback = markerFeedback.feedback
-	def rejectionFeedback = parentFeedback.secondMarkerFeedback
 	def rejectedFeedback = parentFeedback.firstMarkerFeedback
 
 	def assignment = HibernateHelpers.initialiseAndUnproxy(parentFeedback) match {
@@ -42,9 +41,9 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 			"moderatorName" -> agent.getFullName,
 			"studentId" -> parentFeedback.universityId,
 			"assignment" -> assignment,
-			"rejectionComments" -> rejectionFeedback.rejectionComments,
-			"adjustedMark" -> rejectionFeedback.mark,
-			"adjustedGrade" -> rejectionFeedback.grade
+			"rejectionComments" -> markerFeedback.rejectionComments,
+			"adjustedMark" -> markerFeedback.mark,
+			"adjustedGrade" -> markerFeedback.grade
 		))
 
 	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipients.head)

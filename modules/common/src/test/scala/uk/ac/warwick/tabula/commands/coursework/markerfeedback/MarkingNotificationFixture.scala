@@ -60,6 +60,7 @@ trait MarkingNotificationFixture extends Mockito {
 		val (f, mf1) = makeMarkerFeedback(student)(MarkingNotificationFixture.FirstMarkerLink)
 		val mf2 = new MarkerFeedback()
 		mf2.userLookup = mockUserLookup
+		mf2.feedback = f
 		f.secondMarkerFeedback = mf2
 		(f, mf1, mf2)
 	}

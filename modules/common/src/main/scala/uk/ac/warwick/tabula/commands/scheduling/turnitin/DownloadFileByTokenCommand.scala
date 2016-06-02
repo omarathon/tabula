@@ -4,38 +4,43 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.system.permissions._
 
 object DownloadFileByTokenCommand {
-	def apply(submission: Submission, fileAttachment: FileAttachment, token: FileAttachmentToken ) =
+	def apply(submission: Submission, fileAttachment: FileAttachment, token: FileAttachmentToken) =
 		new DownloadFileByTokenCommandInternal(submission, fileAttachment, token)
 		with ComposableCommand[RenderableFile]
+		with AutowiringOriginalityReportServiceComponent
 		with DownloadFileByTokenCommandState
 		with DownloadFileByTokenValidation
 		with DownloadFileByTokenDescription
-		with ReadOnly
 		with PubliclyVisiblePermissions
 }
 
 class DownloadFileByTokenCommandInternal (
 		val submission: Submission,
 		val fileAttachment: FileAttachment,
-		val token: FileAttachmentToken ) extends CommandInternal[RenderableFile]{
+		val token: FileAttachmentToken
+) extends CommandInternal[RenderableFile] {
 
-	self: DownloadFileByTokenCommandState =>
+	self: DownloadFileByTokenCommandState with OriginalityReportServiceComponent =>
 
 	override def applyInternal() = {
-
 		val attachment = new RenderableAttachment(fileAttachment)
 		token.dateUsed = new DateTime()
+		if (fileAttachment.originalityReport != null) {
+			fileAttachment.originalityReport.fileRequested = DateTime.now
+			originalityReportService.saveOrUpdate(fileAttachment.originalityReport)
+		}
 		attachment
 	}
 
 }
 
 trait DownloadFileByTokenCommandState {
-
 	def submission: Submission
 	def fileAttachment: FileAttachment
 	def token: FileAttachmentToken
