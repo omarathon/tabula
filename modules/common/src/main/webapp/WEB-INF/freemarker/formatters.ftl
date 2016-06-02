@@ -424,9 +424,9 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro relation_photo member relationship resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
 		<#if (member.universityId)??>
-			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
+			<#local fullsize_img><@routes.relationshipPhoto member relationship /></#local>
 			<@lightbox_link lightbox fullsize_img>
-			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
+			<img src="<@routes.relationshipPhoto member relationship />?size=${resize}" />
 			</@lightbox_link>
 		<#else>
 			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />

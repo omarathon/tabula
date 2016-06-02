@@ -1,4 +1,3 @@
-<#import "../related_students/meeting/meeting_list_macros.ftl" as meeting_macros />
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 

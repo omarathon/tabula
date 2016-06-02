@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings.ConvertScheduledMeetingRecordController
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class CreateScheduledMeetingRecordControllerTest extends TestBase with Mockito {
 
 	val controller = new ConvertScheduledMeetingRecordController
-	val student = Fixtures.student()
-	val studentCourseDetails = student.mostSignificantCourseDetails.get
 
 	// TAB-2430
 	@Test
-	def getCreateCommand() {
-		val cmd = controller.getCreateCommand(null , studentCourseDetails)
+	def createCommand() {
+		val cmd = controller.getCreateCommand(null)
 		cmd should be(null)
 	}
 }

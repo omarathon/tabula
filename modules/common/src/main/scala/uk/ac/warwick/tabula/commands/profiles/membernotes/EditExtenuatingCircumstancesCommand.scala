@@ -17,6 +17,7 @@ object EditExtenuatingCircumstancesCommand {
 			with EditMemberNotePermissions
 			with ModifyExtenuatingCircumstancesCommandState
 			with ModifyExtenuatingCircumstancesCommandRequest
+			with PopulateExtenuatingCircumstancesCommand
 			with ModifyMemberNoteCommandBindListener
 }
 
@@ -32,6 +33,20 @@ class EditExtenuatingCircumstancesCommandInternal(val circumstances: Extenuating
 	attachedFiles = circumstances.attachments
 	startDate = circumstances.startDate
 	endDate = circumstances.endDate
+
+}
+
+trait PopulateExtenuatingCircumstancesCommand extends PopulateOnForm {
+
+	self: ModifyExtenuatingCircumstancesCommandRequest with ModifyExtenuatingCircumstancesCommandState =>
+
+	override def populate(): Unit = {
+		title = circumstances.title
+		note = circumstances.note
+		attachedFiles = circumstances.attachments
+		startDate = circumstances.startDate
+		endDate = circumstances.endDate
+	}
 
 }
 

@@ -19,6 +19,7 @@ object EditMemberNoteCommand {
 			with EditMemberNotePermissions
 			with ModifyMemberNoteCommandState
 			with ModifyMemberNoteCommandRequest
+			with PopulateMemberNoteCommand
 			with ModifyMemberNoteCommandBindListener
 }
 
@@ -29,9 +30,17 @@ class EditMemberNoteCommandInternal(val memberNote: MemberNote)
 	self: ModifyMemberNoteCommandRequest with ModifyMemberNoteCommandState
 		with FileAttachmentServiceComponent with MemberNoteServiceComponent =>
 
-	title = memberNote.title
-	note = memberNote.note
-	attachedFiles = memberNote.attachments
+}
+
+trait PopulateMemberNoteCommand extends PopulateOnForm {
+
+	self: ModifyMemberNoteCommandRequest with ModifyMemberNoteCommandState =>
+
+	override def populate(): Unit = {
+		title = memberNote.title
+		note = memberNote.note
+		attachedFiles = memberNote.attachments
+	}
 
 }
 
