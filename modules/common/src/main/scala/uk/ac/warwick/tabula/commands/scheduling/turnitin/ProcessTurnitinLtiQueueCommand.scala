@@ -192,7 +192,7 @@ trait ProcessTurnitinLtiQueueNotification extends Notifies[ProcessTurnitinLtiQue
 
 	override def emit(result: ProcessTurnitinLtiQueueCommandResult): Seq[Notification[OriginalityReport, Assignment]] = {
 
-		val completedNotifications = result.completedAssignments.filter(!_.submissions.isEmpty).flatMap(assignment => {
+		val completedNotifications = result.completedAssignments.filterNot(_.submissions.isEmpty).flatMap(assignment => {
 			val unsuccessfulReports = turnitinLtiQueueService.listOriginalityReports(assignment).filter(report =>
 				!report.reportReceived && (
 					report.submitToTurnitinRetries == TurnitinLtiService.SubmitAttachmentMaxRetries ||
