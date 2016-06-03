@@ -10,17 +10,11 @@ import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfilesController}
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/schedule/{meetingRecord}/confirm"))
-class ConvertScheduledMeetingRecordController extends ProfilesController
-	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-	with MeetingRecordAcademicYearFiltering
-	with AutowiringTermServiceComponent {
+class ConvertScheduledMeetingRecordController extends ProfilesController {
 
 	type PopulatableCommand = Appliable[MeetingRecord] with PopulateOnForm
 	type ConvertScheduledMeetingRecordCommand = Appliable[MeetingRecord] with PopulateOnForm with ConvertScheduledMeetingRecordState

@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.profiles
+package uk.ac.warwick.tabula.commands.profiles.profile
 
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
