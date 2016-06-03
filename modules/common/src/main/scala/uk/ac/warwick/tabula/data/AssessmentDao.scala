@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
@@ -28,7 +29,10 @@ trait AssessmentDao {
 	def deleteFormField(field: FormField): Unit
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
+	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
+	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
@@ -71,12 +75,43 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.setString("universityId", universityId)
 			.distinct.seq
 
+	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+		val c = session.newCriteria[AssignmentFeedback]
+			.createAlias("assignment", "assignment")
+			.add(is("universityId", universityId))
+			.add(is("released", true))
+		  .add(is("assignment.deleted", false))
+		  .add(is("assignment._hiddenFromStudents", false))
+			.setFetchMode("assignment", FetchMode.JOIN)
+
+		(academicYearOption match {
+			case Some(academicYear) =>
+				c.add(is("assignment.academicYear", academicYear)).seq
+			case _ => c.seq
+		}).map(_.assignment)
+	}
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a from Assignment a
 				join a.submissions as s
 				where s.universityId = :universityId""")
 			.setString("universityId", universityId)
 			.distinct.seq
+
+	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+		val c = session.newCriteria[Submission]
+			.createAlias("assignment", "assignment")
+			.add(is("universityId", universityId))
+			.add(is("assignment.deleted", false))
+			.add(is("assignment._hiddenFromStudents", false))
+			.setFetchMode("assignment", FetchMode.JOIN)
+
+		(academicYearOption match {
+			case Some(academicYear) =>
+				c.add(is("assignment.academicYear", academicYear)).seq
+			case _ => c.seq
+		}).map(_.assignment)
+	}
 
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		session.newCriteria[Submission]

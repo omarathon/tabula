@@ -31,6 +31,7 @@ object ProfileBreadcrumbs {
 		case object TimetableIdentifier extends ProfileBreadcrumbIdentifier("timetable")
 		case class RelationshipTypeIdentifier(relationshipType: StudentRelationshipType)
 			extends ProfileBreadcrumbIdentifier(relationshipType.urlPart)
+		case object AssignmentsIdentifier extends ProfileBreadcrumbIdentifier("assignments")
 		case object ModulesIdentifier extends ProfileBreadcrumbIdentifier("modules")
 
 		abstract class ProfileBreadcrumb extends BreadCrumb {
@@ -72,6 +73,12 @@ object ProfileBreadcrumbs {
 			val identifier = RelationshipTypeIdentifier(relationshipType)
 			val title = relationshipType.agentRole.capitalize
 			val url = Some(Routes.Profile.relationshipType(scyd, relationshipType))
+		}
+
+		case class AssignmentsForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
+			val identifier = AssignmentsIdentifier
+			val title = "Assignments"
+			val url = Some(Routes.Profile.assignments(scyd))
 		}
 
 		case class ModulesForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
