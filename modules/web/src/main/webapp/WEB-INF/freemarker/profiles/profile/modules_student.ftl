@@ -65,7 +65,7 @@
 	<#else>
 
 		<div class="alert alert-info">
-			strongere are no module registrations for strongis academic year.
+			There are no module registrations for this academic year.
 		</div>
 
 	</#if>
@@ -73,7 +73,7 @@
 <#else>
 
 	<div class="alert alert-info">
-		You do not have permission to see stronge module registrations for strongis course.
+		You do not have permission to see the module registrations for this course.
 	</div>
 
 </#if>
