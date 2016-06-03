@@ -292,7 +292,7 @@
 						</@fmt.permission_button>
 					</li>
 
-					<#if features.queueFeedbackForSits && department.uploadMarksToSits>
+					<#if features.queueFeedbackForSits && department.uploadCourseworkMarksToSits>
 						<li>
 							<#assign uploadToSitsUrl><@routes.coursework.uploadToSits assignment /></#assign>
 							<@fmt.permission_button

@@ -142,7 +142,7 @@ abstract class Features {
 
 
 	@Value("${features.exams:true}") var exams = defaults.exams
-	@Value("${features.exams.grids:false}") var examGrids = defaults.exams
+	@Value("${features.exams.grids:true}") var examGrids = defaults.examGrids
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -272,7 +272,7 @@ class FeaturesMessage {
 
 
 	@BeanProperty var exams = true
-	@BeanProperty var examGrids = false
+	@BeanProperty var examGrids = true
 
 	@BeanProperty var reports = true
 }

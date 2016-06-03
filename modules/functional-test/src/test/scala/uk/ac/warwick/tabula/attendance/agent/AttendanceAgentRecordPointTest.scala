@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceAgentRecordPointTest extends AttendanceFixture with GivenWhenThen {
 
-	 "A Member of staff who is an agent" should "be able to record attendance for a grouped point" in {
+	 "A Member of staff who is an agent" should "be able to record attendance for a point" in {
 		 Given("I am logged in as Marker1")
 		 signIn as P.Marker1 to Path("/")
 
@@ -25,7 +25,7 @@ class AttendanceAgentRecordPointTest extends AttendanceFixture with GivenWhenThe
 		 click on className("monitoring-points").webElement.findElement(By.cssSelector("div.point a.btn-primary"))
 
 		 Then("I am redirected to record the grouped point")
-		 eventually(currentUrl should(include("/attendance/agent/tutor/2013/point") and include("record")))
+		 eventually(currentUrl should(include("/attendance/agent/tutor/2013/point")))
 		 pageSource should include("Record attendance")
 		 pageSource should include("Point 1")
 		 id("recordAttendance").webElement.findElements(By.cssSelector("div.item-info")).size() should be > 0
