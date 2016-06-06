@@ -41,6 +41,8 @@ object Routes {
 			context + "/view/course/%s/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(relationshipType.urlPart))
 		def relationshipType(scd: StudentCourseDetails, academicYear: AcademicYear, relationshipType: StudentRelationshipType) =
 			context + "/view/course/%s/%s/%s" format (encoded(scd.urlSafeId), encoded(academicYear.value.toString), encoded(relationshipType.urlPart))
+		def assignments(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/assignments" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def modules(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/modules" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 	}

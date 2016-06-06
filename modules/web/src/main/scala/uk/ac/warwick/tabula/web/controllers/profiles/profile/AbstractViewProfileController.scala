@@ -68,6 +68,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 				) ++ relationshipTypesToDisplay(scd).map(relationshipType =>
 					ProfileBreadcrumbs.Profile.RelationshipTypeForScyd(scyd, relationshipType).setActive(activeIdentifier)
 				) ++ Seq(
+					ProfileBreadcrumbs.Profile.AssignmentsForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier)
 				)
 		}
