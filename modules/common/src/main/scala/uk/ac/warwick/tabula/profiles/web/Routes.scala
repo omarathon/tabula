@@ -47,6 +47,9 @@ object Routes {
 			context + "/view/course/%s/%s/modules" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def seminars(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/seminars" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def marking(member: Member) = context + "/view/%s/marking" format encoded(member.universityId)
+		def marking(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/marking" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

@@ -6,11 +6,12 @@ import org.springframework.core.convert.ConversionService
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.commands.profiles.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs.Profile.ProfileBreadcrumbIdentifier
 import uk.ac.warwick.tabula.web.controllers.profiles.{ProfileBreadcrumbs, ProfilesController}
@@ -20,6 +21,7 @@ import scala.collection.JavaConverters._
 
 abstract class AbstractViewProfileController extends ProfilesController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent
+	with AutowiringAssessmentServiceComponent
 	with RequestLevelCaching[String, Any] {
 
 	@ModelAttribute("siblingBreadcrumbs")
@@ -71,14 +73,18 @@ abstract class AbstractViewProfileController extends ProfilesController
 					ProfileBreadcrumbs.Profile.AssignmentsForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.SeminarsForScyd(scyd).setActive(activeIdentifier)
-				)
+				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser) match {
+					case Nil => Nil
+					case Seq(assignments) => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
+				})
 		}
 
 	}
 
 	protected def breadcrumbsStaff(member: Member, activeIdentifier: ProfileBreadcrumbIdentifier): Seq[BreadCrumb] = Seq(
 		ProfileBreadcrumbs.Profile.Identity(member).setActive(activeIdentifier),
-		ProfileBreadcrumbs.Profile.Timetable(member).setActive(activeIdentifier)
+		ProfileBreadcrumbs.Profile.Timetable(member).setActive(activeIdentifier),
+		ProfileBreadcrumbs.Profile.Marking(member).setActive(activeIdentifier)
 	)
 
 	protected def secondBreadcrumbs(activeAcademicYear: Option[AcademicYear], scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {
