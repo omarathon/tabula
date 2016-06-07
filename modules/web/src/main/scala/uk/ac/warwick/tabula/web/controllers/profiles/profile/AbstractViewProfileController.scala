@@ -69,7 +69,8 @@ abstract class AbstractViewProfileController extends ProfilesController
 					ProfileBreadcrumbs.Profile.RelationshipTypeForScyd(scyd, relationshipType).setActive(activeIdentifier)
 				) ++ Seq(
 					ProfileBreadcrumbs.Profile.AssignmentsForScyd(scyd).setActive(activeIdentifier),
-					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier)
+					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier),
+					ProfileBreadcrumbs.Profile.SeminarsForScyd(scyd).setActive(activeIdentifier)
 				)
 		}
 

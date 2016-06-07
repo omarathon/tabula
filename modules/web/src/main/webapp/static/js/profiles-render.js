@@ -484,6 +484,22 @@
 		});
 		
 		// End Meeting records
+
+		// Seminars
+
+		// enable/disable the "sign up" buttons
+		$('#student-groups-view')
+			.find('.sign-up-button')
+				.addClass('disabled use-tooltip')
+				.prop('disabled',true)
+				.prop('title','Please select a group')
+				.end()
+			.find('input.group-selection-radio')
+			.on('change', function(){
+				$(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
+			});
+
+		// End Seminars
 	});
 
 

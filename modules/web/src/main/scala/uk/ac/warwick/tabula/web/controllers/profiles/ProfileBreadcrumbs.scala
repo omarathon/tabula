@@ -33,6 +33,7 @@ object ProfileBreadcrumbs {
 			extends ProfileBreadcrumbIdentifier(relationshipType.urlPart)
 		case object AssignmentsIdentifier extends ProfileBreadcrumbIdentifier("assignments")
 		case object ModulesIdentifier extends ProfileBreadcrumbIdentifier("modules")
+		case object SeminarsIdentifier extends ProfileBreadcrumbIdentifier("seminars")
 
 		abstract class ProfileBreadcrumb extends BreadCrumb {
 			def identifier: ProfileBreadcrumbIdentifier
@@ -85,6 +86,12 @@ object ProfileBreadcrumbs {
 			val identifier = ModulesIdentifier
 			val title = "Modules"
 			val url = Some(Routes.Profile.modules(scyd))
+		}
+
+		case class SeminarsForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
+			val identifier = SeminarsIdentifier
+			val title = "Seminars"
+			val url = Some(Routes.Profile.seminars(scyd))
 		}
 
 	}
