@@ -5,7 +5,7 @@
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 		<#if formatResult.noteType?has_content><p>${formatResult.noteType}</p></#if>
 		<#if formatResult.noteText?has_content><p>${formatResult.noteText}</p></#if>
-		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='<@routes.profiles.view_mointeringpoint_attendance_note checkpoint/>'>View attendance note</a></p></#if>
+		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='<@routes.profiles.view_moniteringpoint_attendance_note checkpoint/>'>View attendance note</a></p></#if>
 	</#local>
 	<span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-placement="left">${formatResult.labelText}</span>
 	<span class="visible-print">

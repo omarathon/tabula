@@ -74,8 +74,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro purge_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/purge" /></#macro>
 <#macro download_circumstances_attachment circumstances><@_u page="/circumstances/${circumstances.id}/" /></#macro>
 
-<#macro view_mointeringpoint_attendance_note checkpoint><@_u page="/attendance/note/${checkpoint.student.universityId}/${checkpoint.point.id}" /></#macro>
-<#macro edit_mointeringpoint_attendance_note checkpoint><@_u page="/attendance/note/${checkpoint.student.universityId}/${checkpoint.point.id}/edit" /></#macro>
+<#macro view_moniteringpoint_attendance_note checkpoint><@_u page="/attendance/note/${checkpoint.student.universityId}/${checkpoint.point.id}" /></#macro>
+<#macro edit_moniteringpoint_attendance_note checkpoint><@_u page="/attendance/note/${checkpoint.student.universityId}/${checkpoint.point.id}/edit" /></#macro>
 
 <#macro meeting_will_create_checkpoint><@_u page="/check/meeting" context="/attendance" /></#macro>
 
