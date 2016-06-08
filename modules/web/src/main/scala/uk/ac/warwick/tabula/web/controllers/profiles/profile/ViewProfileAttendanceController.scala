@@ -5,8 +5,8 @@ import java.text.DateFormatSymbols
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.attendance.profile.AttendanceProfileCommand
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand
-import uk.ac.warwick.tabula.commands.profiles.attendance.AttendanceMonitoringPointProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
@@ -45,9 +45,9 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
 		val student = studentCourseDetails.student
-		val monitoringPointAttendanceCommandResult = AttendanceMonitoringPointProfileCommand(mandatory(student), mandatory(activeAcademicYear)).apply()
+		val monitoringPointAttendanceCommandResult = AttendanceProfileCommand(mandatory(student), mandatory(activeAcademicYear)).apply()
 		val seminarAttendanceCommandResult = ListStudentGroupAttendanceCommand(mandatory(student), mandatory(activeAcademicYear)).apply();
-		val groupedPointMap = monitoringPointAttendanceCommandResult.monitoringPointAttendanceWithCheckPoint
+		val groupedPointMap = monitoringPointAttendanceCommandResult.attendanceMonitoringPointWithCheckPoint
 		val missedPointCountByTerm = groupedPointMap.map{ case(period, pointCheckpointPairs) =>
 			period -> pointCheckpointPairs.count{ case(point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised}
 		}
