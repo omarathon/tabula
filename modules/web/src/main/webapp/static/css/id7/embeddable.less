@@ -346,11 +346,14 @@ summary {
 	border-top: 2px groove white;
 
 	padding: 0.5em;
+	&.row {
+		padding-left: 0;
+		padding-right: 0;
+	}
 	margin-left: -0.5em;
 	margin-right: -0.5em;
 
 	&:nth-of-type(odd) { background-color: @zebra-pale; }
-
 }
 
 .striped-section.no-title {
@@ -891,6 +894,8 @@ ul.profile-user-list {
 		.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
 		max-width: @width;
 	}
+	min-width: @width;
+	min-height: @width;
 }
 
 .photo.size-tinythumbnail {

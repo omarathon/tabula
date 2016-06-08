@@ -24,7 +24,7 @@ class DownloadFileByTokenController extends BaseController with Logging {
 		@PathVariable fileAttachment: FileAttachment,
 		@RequestParam(value="token", required=true) token: FileAttachmentToken)	=	{
 			mustBeLinked(mandatory(fileAttachment), mandatory(submission))
-			DownloadFileByTokenCommand(submission, fileAttachment, token)
+			DownloadFileByTokenCommand(submission, fileAttachment, mandatory(token))
 	}
 
 	@RequestMapping(method = Array(GET))

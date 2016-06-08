@@ -113,6 +113,8 @@ object SchedulingConfiguration {
 
 		SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 10.seconds),
 
+		SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds),
+
 		// SITS exports
 		SimpleTriggerJob[ExportAttendanceToSitsJob](repeatInterval = 5.minutes),
 		SimpleTriggerJob[ExportFeedbackToSitsJob](repeatInterval = 5.minutes),

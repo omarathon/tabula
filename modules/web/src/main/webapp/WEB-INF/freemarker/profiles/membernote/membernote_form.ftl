@@ -12,7 +12,7 @@
 			<@f.textarea path="note" cssClass="form-control" rows="5" cssStyle="height: 150px;" />
 		</@bs3form.labelled_form_group>
 
-		<#if command.attachedFiles?has_content && edit?? >
+		<#if command.attachedFiles?has_content>
 			<@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
 				<ul class="unstyled">
 					<#list command.attachedFiles as attachment>

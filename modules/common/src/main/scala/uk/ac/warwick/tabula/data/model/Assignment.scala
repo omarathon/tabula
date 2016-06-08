@@ -47,6 +47,7 @@ object Assignment {
 		val AutomaticallySubmitToTurnitin = "automaticallySubmitToTurnitin"
 		val ExtensionAttachmentMandatory = "extensionAttachmentMandatory"
 		val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
+		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
 	}
 }
 
@@ -137,6 +138,9 @@ class Assignment
 	var genericFeedback: String = ""
 	@Column(name="turnitin_id")
 	var turnitinId: String = ""
+	var submitToTurnitin: JBoolean = false
+	var lastSubmittedToTurnitin: DateTime = _
+	var submitToTurnitinRetries: JInteger = 0
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
@@ -194,7 +198,7 @@ class Assignment
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
 		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
-			.filterNot(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId))).size == 0
+			.forall(user => extensions.exists(e => e.approved && e.isForUser(user.getWarwickId, user.getUserId)))
 
 
 	def feedbackDeadlineForSubmission(submission: Submission) = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -211,16 +215,18 @@ class Assignment
 			Some(baseFeedbackDeadline)
 	}
 
-	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map { deadline =>
+	private def workingDaysAway(date: LocalDate) = {
 		val now = LocalDate.now
 
 		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
 		val offset =
-			if (deadline.isBefore(now)) 1
+			if (date.isBefore(now)) 1
 			else -1 // today or in the future
 
-		workingDaysHelper.getNumWorkingDays(now, deadline) + offset
+		workingDaysHelper.getNumWorkingDays(now, date) + offset
 	}
+
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = feedbackDeadline.map(workingDaysAway)
 
 	/**
 		* An Assignment has outstanding feedback if it has a submission that isn't feedback deadline-exempt
@@ -738,6 +744,29 @@ class Assignment
 	def allowExtensionsAfterCloseDate = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
 	def allowExtensionsAfterCloseDate_= (allow: Boolean) = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
 
+	def turnitinLtiNotifyUsers: Seq[User] = UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value
+	def turnitinLtiNotifyUsers_= (users: Seq[User]) = {
+		UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
+	}
+
+	def enhance(user: User): EnhancedAssignment = {
+		val extension = extensions.asScala.find(e => e.isForUser(user))
+		val submission = submissions.asScala.find(_.universityId == user.getWarwickId)
+		val feedbackDeadline = submission.flatMap(feedbackDeadlineForSubmission)
+		val feedbackDeadlineWorkingDaysAway = feedbackDeadline.map(workingDaysAway)
+		EnhancedAssignment(
+			user = user,
+			assignment = this,
+			submissionDeadline = Option(submissionDeadline(user)),
+			submission = submission,
+			feedbackDeadlineWorkingDaysAway = feedbackDeadlineWorkingDaysAway,
+			feedback = feedbacks.asScala.filter(_.released).find(_.universityId == user.getWarwickId),
+			extension = extension,
+			withinExtension = isWithinExtension(user),
+			extensionRequested = extension.isDefined && !extension.get.isManual
+		)
+	}
+
 	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
@@ -830,3 +859,15 @@ trait BooleanAssignmentProperties {
 object BooleanAssignmentProperties extends BooleanAssignmentProperties {
 	def apply(assignment: Assignment) = copyBooleansTo(assignment)
 }
+
+case class EnhancedAssignment(
+	user: User,
+	assignment: Assignment,
+	submissionDeadline: Option[DateTime],
+	submission: Option[Submission],
+	feedbackDeadlineWorkingDaysAway: Option[Int],
+	feedback: Option[Feedback],
+	extension: Option[Extension],
+	withinExtension: Boolean,
+	extensionRequested: Boolean
+)

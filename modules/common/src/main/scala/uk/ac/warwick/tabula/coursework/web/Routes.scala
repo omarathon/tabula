@@ -117,10 +117,6 @@ object Routes {
 				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/moderation"
 			}
 
-			object onlineSecondMarker {
-				def apply(assignment: Assignment, marker: User) = assignmentroot(assignment) + s"/marker/${marker.getWarwickId}/feedback/online/secondmarker"
-			}
-
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format encoded(module.code)
 
 			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
@@ -138,12 +134,12 @@ object Routes {
 			}
 
 			object turnitin {
-				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin"
+				def status(assignment: Assignment) = assignmentroot(assignment) + "/turnitin/status"
 				def report(submission: Submission, report: OriginalityReport) =
 					if (report.turnitinId.hasText)
-						assignmentroot(submission.assignment) + "/turnitin-lti-report/%s".format (encoded(report.attachment.id))
+						assignmentroot(submission.assignment) + "/turnitin/lti-report/%s".format (encoded(report.attachment.id))
 					else
-						assignmentroot(submission.assignment) + "/turnitin-report/%s".format (encoded(report.attachment.id))
+						assignmentroot(submission.assignment) + "/turnitin/report/%s".format (encoded(report.attachment.id))
 			}
 
 			object turnitinlti {

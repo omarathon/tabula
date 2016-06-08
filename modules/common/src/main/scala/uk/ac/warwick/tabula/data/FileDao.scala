@@ -173,4 +173,14 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		}
 	}
 
+	def getValidToken(attachment: FileAttachment): Option[FileAttachmentToken] = {
+		session.newCriteria[FileAttachmentToken]
+			.add(is("fileAttachmentId", attachment.id))
+			.add(Is.isNull("dateUsed"))
+			.add(Is.gt("expires", DateTime.now))
+			.addOrder(desc("expires"))
+			.setMaxResults(1)
+			.uniqueResult
+	}
+
 }

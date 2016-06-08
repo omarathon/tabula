@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.web
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.RoutesUtils
 
@@ -27,13 +28,28 @@ object Routes {
 	}
 
 	object Profile {
-		def identity(member: Member) = context + "/view/%s" format encoded(member.universityId)
-		def identity(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def identity(member: Member) =
+			context + "/view/%s" format encoded(member.universityId)
+		def identity(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def timetable(member: Member) = context + "/view/%s/timetable" format encoded(member.universityId)
-		def timetable(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s/timetable" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
-		def attendance(member: Member) = context + "/view/%s/attendance" format encoded(member.universityId)
-		def attendance(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
-
+		def timetable(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/timetable" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def relationshipType(member: Member, relationshipType: StudentRelationshipType) =
+			context + "/view/%s/%s" format (encoded(member.universityId), encoded(relationshipType.urlPart))
+		def relationshipType(scyd: StudentCourseYearDetails, relationshipType: StudentRelationshipType) =
+			context + "/view/course/%s/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(relationshipType.urlPart))
+		def relationshipType(scd: StudentCourseDetails, academicYear: AcademicYear, relationshipType: StudentRelationshipType) =
+			context + "/view/course/%s/%s/%s" format (encoded(scd.urlSafeId), encoded(academicYear.value.toString), encoded(relationshipType.urlPart))
+		def assignments(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/assignments" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def modules(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/modules" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def seminars(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/seminars" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def marking(member: Member) = context + "/view/%s/marking" format encoded(member.universityId)
+		def marking(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/marking" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

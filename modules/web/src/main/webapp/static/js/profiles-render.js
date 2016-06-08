@@ -250,7 +250,7 @@
 					$row.addClass('expanded').after($row.data('expandRow'))
 						.find('td i.fa-caret-right').removeClass('fa-caret-right').addClass('fa-caret-down');
 				}
-			});
+			}).find('tr.expand td.can-expand').trigger('click');
 		});
 
 		// MEMBER NOTE / EXTENUATING CIRCUMSTANCES STUFF
@@ -325,6 +325,181 @@
 		});
 
 		// END OF MEMBER NOTE / EXTENUATING CIRCUMSTANCES STUFF
+		
+		// Add in People search data
+		
+		$('.peoplesearch-info').each(function(){
+			var $this = $(this);
+			$.getJSON($this.data('href'), function(data) {
+				var items = [];
+				if (data.extensionNumberWithExternal) {
+					items.push('<strong>Phone:</strong> ' + data.extensionNumberWithExternal + '<br/>');
+				}
+				if (data.room) {
+					items.push('<strong>Room:</strong> ' + data.room + '<br/>');
+				}
+				$this.html(items.join(''));
+			});
+		});
+
+		// End Add in People search data
+		
+		// Meeting records
+
+		var $meetingModal = $("#meeting-modal");
+		$meetingModal.on('submit', 'form', function(e){
+			e.preventDefault();
+			// reattach the load handler and submit the inner form in the iframe
+			$meetingModal.find('iframe')
+				.off('load').on('load', meetingRecordIframeHandler)
+				.contents().find('form').submit();
+
+			// hide the iframe, so we don't get a FOUC
+			$meetingModal.find('.modal-body').slideUp();
+		});
+
+		function meetingRecordFrameLoad(frame) {
+			var $f = $(frame).contents();
+
+			// reset slow load spinner
+			$meetingModal.tabulaPrepareSpinners();
+
+			if ($f.find('#meeting-record-form').length == 1) {
+				// unhide the iframe
+				$meetingModal.find('.modal-body').slideDown();
+
+				// reset datepicker & submit protection
+				var $form = $meetingModal.find('form.double-submit-protection');
+				$form.tabulaSubmitOnce();
+				$form.find('.btn').removeClass('disabled');
+				// wipe any existing state information for the submit protection
+				$form.removeData('submitOnceSubmitted');
+
+				// show-time
+				$meetingModal.modal('show');
+				$meetingModal.off('shown.bs.modal.meetingRecordFrameLoad').on('shown.bs.modal.meetingRecordFrameLoad', function(){
+					$f.find('[name="title"]').focus();
+				});
+			} else {
+				$meetingModal.modal('hide');
+				document.location.reload(true);
+			}
+		}
+
+		// named handler that can be unbound
+		function meetingRecordIframeHandler() {
+			meetingRecordFrameLoad(this);
+			$(this).off('load', meetingRecordIframeHandler);
+		}
+
+		function prepareMeetingModal($this, targetUrl) {
+			$.get(targetUrl + '?modal', function(data) {
+				$meetingModal.html(data);
+				var $mb = $meetingModal.find('.modal-body').empty();
+				var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
+				$(iframeMarkup)
+					.off('load').on('load', meetingRecordIframeHandler)
+					.attr('src', targetUrl + '?iframe')
+					.appendTo($mb);
+			}).fail(function() {
+				if (!$('#meeting-modal-failure').length) {
+					var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+					$this.before($error);
+					$error.slideDown();
+				}
+			});
+		}
+		
+		$('section.meetings').on('click', '.new-meeting-record, .edit-meeting-record', function(e){
+			var $this = $(this);
+			prepareMeetingModal($this, $this.attr('href'));
+			e.preventDefault();
+		}).on('click', 'ul.dropdown-menu a:not(.edit-meeting-record)', function(e) {
+			// Bind click events for dropdown
+
+			var $this = $(this);
+			if($this.hasClass('disabled')) {
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			}
+
+			var $row = $this.closest('tr'),
+				$dropdownItems = $this.closest('ul').find('a'),
+				$loading = $this.closest('td').find('i.fa-spinner'),
+				url = $this.attr('href');
+
+			$loading.toggleClass('invisible');
+
+			$.post(url, function(data) {
+				if (data.status == 'successful') {
+					if($this.hasClass('delete-meeting-record') || $this.hasClass('restore-meeting-record')) {
+						$dropdownItems.toggleClass('disabled');
+						$row.toggleClass('subtle deleted');
+						$row.find('.deleted-files').toggleClass('hidden');
+					} else if($this.hasClass('purge-meeting-record')) {
+						if ($row.hasClass('expanded')) {
+							$row.find('td.can-expand').trigger('click');
+						}
+						$row.hide();
+					}
+				}
+				$loading.toggleClass('invisible');
+			}, 'json');
+
+			e.preventDefault();
+			e.stopPropagation();
+		}).on('submit', 'form.scheduled-action', function(e) {
+			// Scheduled meetings
+			e.preventDefault();
+			var $this = $(this), checkedInput = $this.find('input:checked');
+			$this.find('div.ajaxErrors').hide();
+			switch (checkedInput.val()) {
+				case 'confirm': {
+					prepareMeetingModal($this, checkedInput.data('formhref'));
+				} break;
+				case 'reschedule': {
+					$this.closest('tr').prev('tr').find('.edit-meeting-record').trigger('click');
+				} break;
+				case 'missed': {
+					$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
+						if(data.status === 'successful') {
+							document.location.reload(true);
+						} else {
+							$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
+						}
+					});
+				} break;
+			}
+		});
+
+		$('section.meetings input.reject').each( function() {
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $commentBox = $form.find('.rejection-comment');
+			$this.slideMoreOptions($commentBox, true);
+		});
+		$('section.meetings .approval').parent().tabulaAjaxSubmit(function() {
+			document.location.reload(true);
+		});
+		
+		// End Meeting records
+
+		// Seminars
+
+		// enable/disable the "sign up" buttons
+		$('#student-groups-view')
+			.find('.sign-up-button')
+				.addClass('disabled use-tooltip')
+				.prop('disabled',true)
+				.prop('title','Please select a group')
+				.end()
+			.find('input.group-selection-radio')
+			.on('change', function(){
+				$(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
+			});
+
+		// End Seminars
 	});
 
 

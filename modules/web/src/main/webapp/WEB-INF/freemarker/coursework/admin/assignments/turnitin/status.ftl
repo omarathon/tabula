@@ -1,63 +1,59 @@
-<#if info.ajax>
+<#escape x as x?html>
 
-	<#include "job-status-fragment.ftl" />
+<h1>Job status</h1>
 
-<#else>
+<p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
 
-	<#assign jobId=job.id/>
+<p>When the job is finished you'll be able to see the results on the <a href="<@routes.coursework.assignmentsubmissionsandfeedback assignment />">submissions page</a>.</p>
 
-	<h1>Job status</h1>
 
-	<p>This page will update itself automatically. You'll be sent an email when it completes so you don't have to keep this page open.</p>
-
-	<#if assignment?? >
-		<p>When the job is finished you'll be able to see the results on the
-		<a href="<@routes.coursework.assignmentsubmissionsandfeedback assignment />">submissions page</a>.</p>
-	</#if>
-
-	<!-- <p>Job ID ${jobId}</p> -->
-
-	<div id="job-status-fragment" class="well">
-	<#include "job-status-fragment.ftl" />
+<div id="job-progress">
+	<div class="progress progress-striped <#if !status.finished>active</#if>">
+		<div class="bar" style="width: ${status.progress}%;"></div>
 	</div>
 
-	<div id="job-progress">
-		<div class="progress progress-striped active">
-		  <div class="bar" style="width: ${5 + job.progress*0.95}%;"></div>
-		</div>
+	<div id="job-status-value" data-progress="${status.progress}" data-succeeded="${status.succeeded?string}" data-finished="${status.finished?string}">
+		<p>${status.status}</p>
 	</div>
+</div>
 
-	<script>
+<script>
 	(function($){
-
-	var updateProgress = function() {
-		// grab progress from data-progress attribute in response.
-		var $value = $('#job-status-value');
-		var $progress = $('#job-progress .progress');
-		var percent = $value.data('progress');
-		$progress.find('.bar').css('width', Math.floor(5+(percent*0.95))+'%');
-		if ($value.data('finished')) {
-			$progress.removeClass('active');
-			if ($value.data('succeeded') == false) {
-				$progress.addClass('progress-warning');
-			} else {
-				$progress.addClass('progress-success');
-			}
-		} else {
-			setTimeout(updateFragment, 2000);
+		function buildStatus(field, type, string) {
+			return field + " " + type + ((field != 1)? "s" : "") + string;
 		}
-	}
-
-	var $fragment = $('#job-status-fragment');
-	var updateFragment = function() {
-		$fragment.load('?ajax&jobId=${jobId}', function(){
-			updateProgress();
-		});
-	};
-	setTimeout(updateFragment, 2000);
-	updateProgress();
-
+		var updateStatus = function() {
+			$.get('<@routes.coursework.submitToTurnitinStatus assignment />', function(data){
+				var $progress = $('#job-progress').find('.bar').width(data.progress + '%').end();
+				if (data.finished) {
+					$progress.removeClass('active');
+					if (!data.succeeded) {
+						$progress.addClass('progress-warning');
+					} else {
+						$progress.addClass('progress-success');
+					}
+					$('#job-status-value').find('p').empty().html(data.status);
+				} else {
+					var statuses = [];
+					if (data.reportReceived) {
+						statuses.push(buildStatus(data.reportReceived, "report", " received"))
+					}
+					if (data.reportRequested) {
+						statuses.push(buildStatus(data.reportRequested, "report", " requested"))
+					}
+					if (data.fileSubmitted) {
+						statuses.push(buildStatus(data.fileSubmitted, "file", " submitted"))
+					}
+					if (data.awaitingSubmission) {
+						statuses.push(buildStatus(data.awaitingSubmission, "file", " awaiting submission"))
+					}
+					$('#job-status-value').find('p').empty().html(data.status + statuses.join(", "));
+					setTimeout(updateStatus, 5000);
+				}
+			});
+		};
+		setTimeout(updateStatus, 5000);
 	})(jQuery);
-	</script>
+</script>
 
-</#if>
+</#escape>

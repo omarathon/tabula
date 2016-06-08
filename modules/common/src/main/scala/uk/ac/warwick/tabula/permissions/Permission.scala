@@ -240,10 +240,10 @@ object Permissions {
 	object Extension {
 		case object MakeRequest extends Permission("Make an extension request")
 
-		case object Create extends Permission("Make an extension request")
-		case object Read extends Permission("View an extension request")
-		case object Update extends Permission("Edit an extension request")
-		case object Delete extends Permission("Remove an extension request")
+		case object Create extends Permission("Create an extension for a student")
+		case object Read extends Permission("View extensions and extension requests")
+		case object Update extends Permission("Edit an extension")
+		case object Delete extends Permission("Remove an extension")
 	}
 
 	object FeedbackTemplate {

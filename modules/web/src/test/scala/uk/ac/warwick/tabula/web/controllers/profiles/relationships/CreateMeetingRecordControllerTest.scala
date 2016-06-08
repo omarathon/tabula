@@ -4,8 +4,9 @@ import org.mockito.Mockito._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{RelationshipService, ProfileService}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings.CreateMeetingRecordController
 
 class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 
@@ -27,9 +28,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsWithoutRelationships() {
 		withUser("tutor") {
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)).thenReturn(Nil)
-
-			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails)
+			controller.getCommand(relationshipType, studentCourseDetails, null, Nil)
 		}
 	}
 
@@ -41,11 +40,9 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 			val relationship = new MemberStudentRelationship
 			relationship.studentMember = student
 			relationship.relationshipType = relationshipType
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)).thenReturn(Seq(relationship))
 
-			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails)
+			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails, relationship, Seq(relationship))
 			tutorCommand.relationship.relationshipType should be(relationshipType)
-			tutorCommand.considerAlternatives should be(false)
 		}
 	}
 
@@ -68,15 +65,12 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 			rel2.relationshipType = relationshipType
 			rel2.agent = secondAgent
 
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)).thenReturn(Seq(rel1, rel2))
-
 			studentCourseDetails.relationshipService = relationshipService
 			controller.profileService = profileService
 
-			val supervisorCommand = controller.getCommand(relationshipType, studentCourseDetails)
+			val supervisorCommand = controller.getCommand(relationshipType, studentCourseDetails, null, Seq(rel1, rel2))
 			supervisorCommand.relationship.relationshipType should be(relationshipType)
 			supervisorCommand.relationship.agent should be(firstAgent)
-			supervisorCommand.considerAlternatives should be(true)
 			supervisorCommand.creator.universityId should be(uniId)
 		}
 	}

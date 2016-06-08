@@ -40,12 +40,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 
-<#macro meeting_record scjCode relationshipType>
-	<@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/create" />
-</#macro>
-<#macro edit_meeting_record scjCode meeting_record>
-	<@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scjCode}/edit/${meeting_record.id}" />
-</#macro>
+<#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>
+<#macro edit_meeting_record scd academicYear meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/edit/${meeting_record.id}" /></#macro>
 
 <#macro delete_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
 <#macro restore_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
@@ -54,10 +50,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro download_meeting_record_attachment relationshipType meeting><@_u page="/${relationshipType.urlPart}/meeting/${meeting.id}/"/></#macro>
 
-<#macro create_scheduled_meeting_record scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
-<#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
-<#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
-<#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
+<#macro create_scheduled_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/create" /></#macro>
+<#macro edit_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/edit" /></#macro>
+<#macro choose_action_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
+<#macro confirm_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/confirm" /></#macro>
 <#macro missed_scheduled_meeting_record meetingRecord relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
 
 <#macro relationship_search_json><@_u page="/relationships/agents/search.json" /></#macro>

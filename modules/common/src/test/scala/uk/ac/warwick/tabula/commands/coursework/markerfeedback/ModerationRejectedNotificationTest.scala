@@ -43,27 +43,27 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf1)
+		val n =  createNotification(marker2, marker1, mf2)
 		n.title should be("HERON101: Feedback for student1 for \"Test assignment\" has been rejected by the moderator")
 	} }
 
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
-		val n =  createNotification(marker2, marker1, mf1)
+		val n =  createNotification(marker2, marker1, mf2)
 		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
 	}
 
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf1)
+		val n =  createNotification(marker2, marker1, mf2)
 		n.content.template should be("/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
-		val n =  createNotification(marker2, marker1, mf1)
+		val n =  createNotification(marker2, marker1, mf2)
 		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))

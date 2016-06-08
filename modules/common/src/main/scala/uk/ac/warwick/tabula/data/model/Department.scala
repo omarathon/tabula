@@ -120,8 +120,11 @@ class Department extends GeneratedId
 	def studentsCanScheduleMeetings = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
 
-	def uploadMarksToSits = getBooleanSetting(Settings.UploadMarksToSits, default = false)
-	def uploadMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadMarksToSits -> enabled) }
+	def uploadCourseworkMarksToSits = getBooleanSetting(Settings.UploadCourseworkMarksToSits, default = false)
+	def uploadCourseworkMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadCourseworkMarksToSits -> enabled) }
+
+	def uploadExamMarksToSits = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
+	def uploadExamMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadExamMarksToSits -> enabled) }
 
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
@@ -456,7 +459,8 @@ object Department {
 
 		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
 
-		val UploadMarksToSits = "uploadMarksToSits"
+		val UploadCourseworkMarksToSits = "uploadMarksToSits"
+		val UploadExamMarksToSits = "uploadExamMarksToSits"
 		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.profiles.membernotes.{CreateExtenuatingCircumstancesCommand, CreateMemberNoteCommand, EditExtenuatingCircumstancesCommand, EditMemberNoteCommand}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, ExtenuatingCircumstances, Member, MemberNote}
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
@@ -15,19 +15,21 @@ abstract class AbstractManageMemberNoteController extends ProfilesController {
 	validatesSelf[SelfValidating]
 
 	protected def viewPrefix: String
-	protected def isEdit: Boolean
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[AbstractMemberNote]) = {
-		Mav(s"profiles/membernote/${viewPrefix}_form",
-			"edit" -> isEdit
-		).noNavigation()
+	def form(@ModelAttribute("command") cmd: Appliable[AbstractMemberNote] with PopulateOnForm) = {
+		cmd.populate()
+		render(cmd)
+	}
+
+	private def render(cmd: Appliable[AbstractMemberNote]) = {
+		Mav(s"profiles/membernote/${viewPrefix}_form").noNavigation()
 	}
 
 	@RequestMapping(method=Array(POST))
 	def submit(@Valid @ModelAttribute("command") cmd: Appliable[AbstractMemberNote], errors: Errors) = {
 		if (errors.hasErrors) {
-			form(cmd)
+			render(cmd)
 		} else {
 			cmd.apply()
 			Mav(s"profiles/membernote/${viewPrefix}_form", "memberNoteSuccess" -> true).noNavigation()
@@ -46,7 +48,6 @@ class CreateMemberNoteController extends AbstractManageMemberNoteController {
 
 	override protected val viewPrefix: String = "membernote"
 
-	override protected val isEdit: Boolean = false
 }
 
 @Controller
@@ -59,7 +60,6 @@ class CreateExtenuatingCircumstancesController extends AbstractManageMemberNoteC
 
 	override protected val viewPrefix: String = "circumstances"
 
-	override protected val isEdit: Boolean = false
 }
 
 @Controller
@@ -72,7 +72,6 @@ class EditMemberNoteController extends AbstractManageMemberNoteController {
 
 	override protected val viewPrefix: String = "membernote"
 
-	override protected val isEdit: Boolean = false
 }
 
 @Controller
@@ -85,6 +84,5 @@ class EditExtenuatingCircumstancesController extends AbstractManageMemberNoteCon
 
 	override protected val viewPrefix: String = "circumstances"
 
-	override protected val isEdit: Boolean = false
 }
 
