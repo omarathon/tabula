@@ -133,8 +133,6 @@
 			<h3 class="section-title"><#if title?has_content>${title}<#else>Small groups</#if></h3>
 			<p><em>There are no small group events defined for this academic year.</em></p>
 		</div>
-
-
 	<#else>
 		<div class="seminar-attendance-profile striped-section collapsible <#if defaultExpand!false>expanded</#if>">
 			<h3 class="section-title"><#if title?has_content>${title}<#else>Small groups</#if></h3>

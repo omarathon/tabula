@@ -17,11 +17,12 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
+import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
 
 
 @Controller
 @RequestMapping(Array("/profiles/attendance/note/{student}/{point}"))
-class AttendanceNoteProfileController extends ProfilesController {
+class AttendanceNoteProfileController extends AbstractViewProfileController {
 
 	@Autowired var monitoringPointService: AttendanceMonitoringService = _
 	@Autowired var userLookup: UserLookupService = _
@@ -42,9 +43,7 @@ class AttendanceNoteProfileController extends ProfilesController {
 
 		val pointsCheckpointsMap = monitoringPointService.getCheckpoints(Seq(point), student)
 		if (pointsCheckpointsMap.nonEmpty) mav.addObjects("checkpoint" -> pointsCheckpointsMap.head._2)
-
 		mav.noLayoutIf(ajax)
-
 	}
 
 }
@@ -141,7 +140,6 @@ class EditAttendanceNoteProfileController extends ProfilesController {
 			Redirect(Routes.Profile.attendance(student), "success" -> true).noNavigation()
 		}
 	}
-
 
 }
 

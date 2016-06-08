@@ -5,9 +5,8 @@ import java.text.DateFormatSymbols
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.groups.{StudentGroupAttendance, ListStudentGroupAttendanceCommand}
-import uk.ac.warwick.tabula.commands.profiles.attendance.MonitoringPointAttendanceProfileCommand
+import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand
+import uk.ac.warwick.tabula.commands.profiles.attendance.AttendanceMonitoringPointProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
@@ -46,24 +45,12 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
 		val student = studentCourseDetails.student
-		val monitoringPointAttendanceCommandResult = MonitoringPointAttendanceProfileCommand(mandatory(student), mandatory(activeAcademicYear)).apply()
+		val monitoringPointAttendanceCommandResult = AttendanceMonitoringPointProfileCommand(mandatory(student), mandatory(activeAcademicYear)).apply()
 		val seminarAttendanceCommandResult = ListStudentGroupAttendanceCommand(mandatory(student), mandatory(activeAcademicYear)).apply();
 		val groupedPointMap = monitoringPointAttendanceCommandResult.monitoringPointAttendanceWithCheckPoint
 		val missedPointCountByTerm = groupedPointMap.map{ case(period, pointCheckpointPairs) =>
 			period -> pointCheckpointPairs.count{ case(point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised}
 		}
-
-	/**	val hasGroups = seminarAttendanceCommandResult.attendance.values.nonEmpty
-		Mav("groups/students_group_attendance",
-			"hasGroups" -> hasGroups,
-			"title" -> title,
-			"terms" -> seminarAttendanceCommandResult.attendance,
-			"attendanceNotes" -> seminarAttendanceCommandResult.notes,
-			"missedCount" -> seminarAttendanceCommandResult.missedCount,
-			"missedCountByTerm" -> seminarAttendanceCommandResult.missedCountByTerm,
-			"termWeeks" -> seminarAttendanceCommandResult.termWeeks,
-
-		).noLayoutIf(ajax)  **/
 
 		Mav("profiles/profile/attendance_student",
 			"student" -> student,
@@ -76,7 +63,6 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 			"unrecordedNotes" -> monitoringPointAttendanceCommandResult.notesWithoutCheckPoints,
 			"allCheckpointStates" -> AttendanceState.values.sortBy(state => state.description),
 			"monthNames" -> monthNames(activeAcademicYear.get),
-
 			"hasGroups" -> seminarAttendanceCommandResult.attendance.values.nonEmpty,
 			"title" -> groupTitle(seminarAttendanceCommandResult.attendance),
 			"terms" -> seminarAttendanceCommandResult.attendance,
@@ -86,8 +72,9 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 			"termWeeks" -> seminarAttendanceCommandResult.termWeeks,
 			"academicYear" -> activeAcademicYear
 
-		).crumbs(breadcrumbs(studentCourseDetails.student, ProfileBreadcrumbs.Profile.AttendanceIdentifier): _*)
+		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.AttendanceIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.attendance(scyd)): _*)
+
 	}
 
 	private def monthNames(academicYear: AcademicYear) = {

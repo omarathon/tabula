@@ -17,14 +17,14 @@ import uk.ac.warwick.util.termdates.Term
 
 import scala.collection.immutable.{ListMap, SortedMap}
 
-object MonitoringPointAttendanceProfileCommand {
+object AttendanceMonitoringPointProfileCommand {
 	def apply(student: StudentMember, academicYear: AcademicYear) =
-		new MonitoringPointAttendanceProfileCommandInternal(student, academicYear)
+		new AttendanceMonitoringPointProfileCommandInternal(student, academicYear)
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringTermServiceComponent
 			with ComposableCommand[MonitoringPointAttendanceProfileCommandResult]
-			with AttendanceProfilePermissions
-			with AttendanceProfileCommandState
+			with AttendanceMonitoringPointProfilePermissions
+			with AttendanceMonitoringPointProfileCommandState
 			with ReadOnly with Unaudited
 }
 
@@ -43,7 +43,7 @@ case class MonitoringPointAttendanceProfileCommandResult(
 	notesWithoutCheckPoints: Seq[(AttendanceMonitoringPoint, AttendanceMonitoringNote)]
 )
 
-class MonitoringPointAttendanceProfileCommandInternal(val student: StudentMember, val academicYear: AcademicYear)
+class AttendanceMonitoringPointProfileCommandInternal(val student: StudentMember, val academicYear: AcademicYear)
 	extends CommandInternal[MonitoringPointAttendanceProfileCommandResult]
 		with GroupsPoints with TaskBenchmarking {
 
@@ -78,9 +78,9 @@ class MonitoringPointAttendanceProfileCommandInternal(val student: StudentMember
 	}
 }
 
-trait AttendanceProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait AttendanceMonitoringPointProfilePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AttendanceProfileCommandState =>
+	self: AttendanceMonitoringPointProfileCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
@@ -88,7 +88,7 @@ trait AttendanceProfilePermissions extends RequiresPermissionsChecking with Perm
 
 }
 
-trait AttendanceProfileCommandState {
+trait AttendanceMonitoringPointProfileCommandState {
 	def academicYear: AcademicYear
 	def student: StudentMember
 }
