@@ -23,14 +23,16 @@
 								<#list (weekNumbers.minWeek)..(weekNumbers.maxWeek) as weekNumber>
 									<th class="instance-date-header">
 										<div class="instance-date">
-											<#if member.homeDepartment?has_content>
-												<@fmt.singleWeekFormat week=weekNumber academicYear=academicYear dept=member.homeDepartment short=!(defaultExpand!false) />
+											<#if student.homeDepartment?has_content>
+												<@fmt.singleWeekFormat week=weekNumber academicYear=academicYear dept=student.homeDepartment short=!(defaultExpand!false) />
 											</#if>
 										</div>
 									</th>
 								</#list>
 								<th class="sortable">
-									<i title="Missed events" class="icon-remove icon-fixed-width unauthorised"></i>
+									<span class="fa-stack fa-stack-original-size fa-stack-right " >
+										<i class="fa fa-fw fa-stack-2x fa-times unauthorised" title="Missed count"></i>
+									</span>
 								</th>
 							</tr>
 						</thead>
@@ -104,7 +106,7 @@
 														</#list>
 													</#local>
 
-														<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
+														<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true">
 															<i class="fa fa-fw fa-stack-2x ${class}"></i>
 															<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 														</span>
@@ -147,7 +149,9 @@
 					<#list missedCountByTerm?keys as term>
 						<#if mapGet(missedCountByTerm, term) != 0>
 							<div class="missed">
-								<i class="icon-warning-sign"></i>
+								<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw">
+									<i class="fa fa-fw fa-stack-2x fa-warning"></i>
+								</span>
 								<#if is_the_student>
 									You have
 								<#else>
