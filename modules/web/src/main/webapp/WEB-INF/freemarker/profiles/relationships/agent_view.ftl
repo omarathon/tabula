@@ -26,18 +26,20 @@
 					<tr>
 						<td>
 							<h4 class="collapse-trigger" id="${studentKey}-trigger" data-toggle="collapse" data-target="#${studentKey}" title="Expand">
-								<span class="agent-detail pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
+								<span class="very-subtle pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
 								<i class="fa fa-chevron-right fa-fw"></i>
 								<#if agentMember??>
 									${agentMember.fullName}
 									<#if agentMember.homeDepartment.code != department.code>
-										<span class="agent-detail">${agentMember.homeDepartment.name}</span>
+										<span class="very-subtle">${agentMember.homeDepartment.name}</span>
 									</#if>
+									<#assign agentId = agentMember.universityId />
 								<#else>
 									${agent}
 									<#if !agent?starts_with("Not ")>
-										<span class="agent-detail">External to Warwick</span>
+										<span class="very-subtle">External to Warwick</span>
 									</#if>
+									<#assign agentId = agent />
 								</#if>
 							</h4>
 
@@ -70,6 +72,7 @@
 								</table>
 
 								<p>
+									<a href="<@routes.profiles.relationship_reallocate department relationshipType agentId />" class="btn btn-primary">Reallocate students</a>
 									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</div>

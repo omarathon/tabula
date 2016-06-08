@@ -31,6 +31,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/template" /></#macro>
 <#macro relationship_allocate_upload department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/upload" /></#macro>
 <#macro relationship_allocate_preview department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/preview" /></#macro>
+<#macro relationship_reallocate department relationshipType agentId><@_u page="/department/${department.code}/${relationshipType.urlPart}/reallocate/${agentId}" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode currentAgent>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
