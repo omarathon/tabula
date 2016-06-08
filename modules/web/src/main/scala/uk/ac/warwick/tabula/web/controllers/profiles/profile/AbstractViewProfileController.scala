@@ -25,7 +25,8 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 	protected def breadcrumbs(member: Member, activeIdentifier: ProfileBreadcrumbIdentifier): Seq[BreadCrumb] = Seq(
 		ProfileBreadcrumbs.Profile.Identity(member).setActive(activeIdentifier),
-		ProfileBreadcrumbs.Profile.Timetable(member).setActive(activeIdentifier)
+		ProfileBreadcrumbs.Profile.Timetable(member).setActive(activeIdentifier),
+		ProfileBreadcrumbs.Profile.Attendance(member).setActive(activeIdentifier)
 	)
 
 	protected def secondBreadcrumbs(activeAcademicYear: Option[AcademicYear], scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {

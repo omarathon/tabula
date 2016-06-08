@@ -124,10 +124,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					noteText,
 					noteUrl
 				)
+			// Monitoring point still use Id6 -label-important can be removed when we later migrate that
 			case AttendanceState.MissedUnauthorised =>
 				AttendanceMonitoringCheckpointFormatterResult(
 					"Missed (unauthorised)",
-					"label-important",
+					"label-danger label-important",
 					"icon-remove fa fa-times unauthorised",
 					s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),

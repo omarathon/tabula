@@ -20,7 +20,7 @@ class StudentGroupAttendanceController extends GroupsController {
 		ListStudentGroupAttendanceCommand(member, academicYear)
 
 	@RequestMapping
-	def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance]): Mav = {
+	def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance], @PathVariable member: Member): Mav = {
 		val info = cmd.apply()
 
 		val hasGroups = info.attendance.values.nonEmpty
@@ -45,6 +45,7 @@ class StudentGroupAttendanceController extends GroupsController {
 			"missedCount" -> info.missedCount,
 			"missedCountByTerm" -> info.missedCountByTerm,
 			"termWeeks" -> info.termWeeks,
+			"student" -> member,
 			"defaultExpand" -> !ajax
 		).noLayoutIf(ajax)
 	}

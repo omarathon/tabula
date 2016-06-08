@@ -29,6 +29,7 @@ object ProfileBreadcrumbs {
 		sealed abstract class ProfileBreadcrumbIdentifier(id: String)
 		case object IdentityIdentifier extends ProfileBreadcrumbIdentifier("identity")
 		case object TimetableIdentifier extends ProfileBreadcrumbIdentifier("timetable")
+		case object AttendanceIdentifier extends ProfileBreadcrumbIdentifier("attendance")
 
 		abstract class ProfileBreadcrumb extends BreadCrumb {
 			def identifier: ProfileBreadcrumbIdentifier
@@ -51,6 +52,12 @@ object ProfileBreadcrumbs {
 			val identifier = TimetableIdentifier
 			val title = "Timetable"
 			val url = Some(Routes.Profile.timetable(member))
+		}
+
+		case class Attendance(member: Member) extends ProfileBreadcrumb {
+			val identifier = AttendanceIdentifier
+			val title = "Attendance"
+			val url = Some(Routes.Profile.attendance(member))
 		}
 
 	}

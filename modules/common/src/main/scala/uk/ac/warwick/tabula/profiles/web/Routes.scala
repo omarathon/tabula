@@ -31,6 +31,9 @@ object Routes {
 		def identity(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def timetable(member: Member) = context + "/view/%s/timetable" format encoded(member.universityId)
 		def timetable(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s/timetable" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def attendance(member: Member) = context + "/view/%s/attendance" format encoded(member.universityId)
+		def attendance(scyd: StudentCourseYearDetails) = context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)
