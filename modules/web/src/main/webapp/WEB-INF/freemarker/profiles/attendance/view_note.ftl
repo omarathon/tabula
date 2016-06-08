@@ -3,7 +3,7 @@
 <#escape x as x?html>
 	<@modal.wrapper enabled=isModal>
 		<@modal.header enabled=isModal>
-			<h2>Attendance note for ${attendanceNote.student.fullName}</h2>
+			<h3 class="modal-title">Attendance note for ${attendanceNote.student.fullName}</h3>
 		</@modal.header>
 		<@modal.body enabled=isModal>
 			<#assign content>

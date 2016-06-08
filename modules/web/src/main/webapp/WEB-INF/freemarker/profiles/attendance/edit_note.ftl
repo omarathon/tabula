@@ -13,9 +13,9 @@
 		<#if !isIframe>
 			<@modal.header enabled=isModal!false>
 				<#if command.isNew()>
-				<h2 class="modal-title">Create attendance note for ${student.fullName}</h2>
+				<h3 class="modal-title">Create attendance note for ${student.fullName}</h3>
 				<#else>
-				<h2 class="modal-title">Edit attendance note for ${student.fullName}</h2>
+				<h3 class="modal-title">Edit attendance note for ${student.fullName}</h3>
 				</#if>
 			</@modal.header>
 		</#if>
