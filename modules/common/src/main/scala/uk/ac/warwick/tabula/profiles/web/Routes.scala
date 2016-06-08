@@ -50,6 +50,10 @@ object Routes {
 		def marking(member: Member) = context + "/view/%s/marking" format encoded(member.universityId)
 		def marking(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/marking" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def attendance(member: Member) = context + "/view/%s/attendance" format encoded(member.universityId)
+		def attendance(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)
