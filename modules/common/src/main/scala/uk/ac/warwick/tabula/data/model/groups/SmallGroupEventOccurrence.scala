@@ -48,7 +48,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	}
 
 	def dateTime: Option[DateTime] = date.map(_.toDateTime(event.startTime))
-	def dateTime(weeksForYear: Map[Integer, Interval]): Option[DateTime] = date.map(_.toDateTime(event.startTime))
+	def dateTime(weeksForYear: Map[Integer, Interval]): Option[DateTime] = date(weeksForYear).map(_.toDateTime(event.startTime))
 
 	override def toEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
 }
