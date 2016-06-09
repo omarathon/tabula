@@ -1,15 +1,13 @@
 <#import "*/group_components.ftl" as components />
 <#escape x as x?html>
 <div id="student-groups-view">
-	<#assign is_the_student=user.apparentUser.warwickId! == student.universityId />
-
 	<#macro eventsInATerm term>
-		<#local weekNumbers = mapGet(termWeeks, term) />
-		<#local groupsMap = mapGet(terms, term) />
+		<#local weekNumbers = mapGet(seminarAttendanceCommandResult.termWeeks, term) />
+		<#local groupsMap = mapGet(seminarAttendanceCommandResult.attendance, term) />
 
 		<div class="item-info row-fluid term">
 			<div class="span12">
-				<h4>${term.termTypeAsString}</h4>
+				<h4 class="attendance-term">${term.termTypeAsString}</h4>
 				<div class="row-fluid term">
 					<table id="group_attendance_${term.termTypeAsString}" class="table table-striped table-condensed attendance-table">
 						<thead>
@@ -83,8 +81,8 @@
 													</#if>
 
 													<#local titles = [title] />
-													<#if mapGet(attendanceNotes, instance)??>
-														<#local studentNote = mapGet(attendanceNotes, instance) />
+													<#if mapGet(seminarAttendanceCommandResult.notes, instance)??>
+														<#local studentNote = mapGet(seminarAttendanceCommandResult.notes, instance) />
 														<#local note>
 															${studentNote.absenceType.description}<br />
 															${studentNote.truncatedNote}
@@ -130,7 +128,7 @@
 		</div>
 	</#macro>
 
-	<#if !terms?? || !hasGroups>
+	<#if !seminarAttendanceCommandResult.attendance?? || !seminarAttendanceCommandResult.hasGroups>
 		<div class="seminar-attendance-profile striped-section collapsible <#if defaultExpand!false>expanded</#if>">
 			<h3 class="section-title"><#if title?has_content>${title}<#else>Small groups</#if></h3>
 			<p><em>There are no small group events defined for this academic year.</em></p>
@@ -139,29 +137,29 @@
 		<div class="seminar-attendance-profile striped-section collapsible <#if defaultExpand!false>expanded</#if>">
 			<h3 class="section-title"><#if title?has_content>${title}<#else>Small groups</#if></h3>
 			<div class="missed-info">
-				<#if missedCount == 0>
-					<#if is_the_student>
+				<#if seminarAttendanceCommandResult.missedCount == 0>
+					<#if isSelf>
 						You have missed 0 small group events.
 					<#else>
 						${student.firstName} has missed 0 small group events.
 					</#if>
 				<#else>
-					<#list missedCountByTerm?keys as term>
-						<#if mapGet(missedCountByTerm, term) != 0>
+					<#list seminarAttendanceCommandResult.missedCountByTerm?keys as term>
+						<#if mapGet(seminarAttendanceCommandResult.missedCountByTerm, term) != 0>
 							<div class="missed">
 								<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw">
 									<i class="fa fa-fw fa-stack-2x fa-warning"></i>
 								</span>
-								<#if is_the_student>
+								<#if isSelf>
 									You have
 								<#else>
 									${student.firstName} has
 								</#if>
 								 missed
-								<#if mapGet(missedCountByTerm, term) == 1>
+								<#if mapGet(seminarAttendanceCommandResult.missedCountByTerm, term) == 1>
 									1 small group event
 								<#else>
-									${mapGet(missedCountByTerm, term)} small group events
+									${mapGet(seminarAttendanceCommandResult.missedCountByTerm, term)} small group events
 								</#if>
 								in ${term.termTypeAsString}
 							</div>
@@ -171,12 +169,12 @@
 			</div>
 
 			<div class="striped-section-contents">
-				<#if terms?keys?size == 0>
+				<#if seminarAttendanceCommandResult.attendance?keys?size == 0>
 					<div class="item-row row-fluid">
 						<div class="span12"><em>There are no small group events for this route and year of study.</em></div>
 					</div>
 				<#else>
-					<#list terms?keys as term>
+					<#list seminarAttendanceCommandResult.attendance?keys as term>
 						<@eventsInATerm term />
 					</#list>
 				</#if>

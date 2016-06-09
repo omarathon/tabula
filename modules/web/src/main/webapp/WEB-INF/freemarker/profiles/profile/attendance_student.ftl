@@ -8,6 +8,8 @@
 
 <h1>Attendance</h1>
 
+<#if hasMonitoringPointAttendancePermission>
+	<#assign groupedPointMap=monitoringPointAttendanceCommandResult.attendanceMonitoringPointWithCheckPoint />
 	<#if groupedPointMap?keys?size == 0>
 		<div class="seminar-attendance-profile striped-section collapsible">
 			<h3 class="section-title">Monitoring points</h3>
@@ -17,23 +19,23 @@
 		<div class="monitoring-points-profile striped-section collapsible expanded">
 			<h3 class="section-title">Monitoring points</h3>
 			<div class="missed-info">
-				<#if !hasAnyMissed>
-					<#if is_the_student>
+				<#if !monitoringPointAttendanceCommandResult.hasAnyMissedPoints>
+					<#if isSelf>
 						You have missed 0 monitoring points.
 					<#else>
 						${student.firstName} has missed 0 monitoring points.
 					</#if>
 				<#else>
 					<#macro missedWarning term>
-						<#if (missedPointCountByTerm[term]?? && missedPointCountByTerm[term] > 0)>
+						<#if (monitoringPointAttendanceCommandResult.missedPointCountByTerm[term]?? && monitoringPointAttendanceCommandResult.missedPointCountByTerm[term] > 0)>
 							<div class="missed">
 								<i class="icon-warning-sign"></i>
-								<#if is_the_student>
+								<#if isSelf>
 									You have
 								<#else>
 								${student.firstName} has
 								</#if>
-								missed <@fmt.p missedPointCountByTerm[term] "monitoring point" /> in ${term}
+								missed <@fmt.p monitoringPointAttendanceCommandResult.missedPointCountByTerm[term] "monitoring point" /> in ${term}
 							</div>
 						</#if>
 					</#macro>
@@ -51,26 +53,23 @@
 					<#if groupedPointMap[term]??>
 						<div class="item-info row-fluid term">
 							<div>
-								<h4>${term}</h4>
+								<h4 class="attendance-term">${term}</h4>
 								<table class="table">
 									<tbody>
 										<#list groupedPointMap[term] as pointPair>
 											<#assign point = pointPair._1() />
-										<tr class="point">
-											<td class="point">
-												${point.name}
-												(<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat point.startWeek point.endWeek	point.scheme.academicYear/>">
-												<@fmt.monitoringPointWeeksFormat point.startWeek point.endWeek point.scheme.academicYear point.scheme.department/>
-												</a>)
-											</td>
-											<td class="state">
-												<#if pointPair._2()??>
-													<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() />
-												<#else>
-													<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
-												</#if>
-											</td>
-										</tr>
+											<tr class="point">
+												<td class="point" title="${point.name} <@fmt.wholeWeekDateFormat startWeek=point.startWeek endWeek=point.endWeek academicYear=point.scheme.academicYear stripHtml=true/>">
+													${point.name} (<@fmt.wholeWeekDateFormat point.startWeek point.endWeek	point.scheme.academicYear/>)
+												</td>
+												<td class="state">
+													<#if pointPair._2()??>
+														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2()/>
+													<#else>
+														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
+													</#if>
+												</td>
+											</tr>
 										</#list>
 									</tbody>
 								</table>
@@ -82,15 +81,14 @@
 					<#if groupedPointMap[month]??>
 						<div class="item-info row-fluid term">
 							<div>
-								<h4>${month}</h4>
+								<h4 class="attendance-term">${month}</h4>
 								<table class="table">
 									<tbody>
 										<#list groupedPointMap[month] as pointPair>
 											<#assign point = pointPair._1() />
 											<tr class="point">
-												<td class="point" title="${point.name} (<@fmt.interval point.startDate point.endDate />)">
-													${point.name}
-													(<@fmt.interval point.startDate point.endDate />)
+												<td class="point" title="${point.name} (<@fmt.interval point.startDate point.endDate  true/>)">
+													${point.name} (<@fmt.interval point.startDate point.endDate />)
 												</td>
 												<td class="state">
 													<#if pointPair._2()??>
@@ -109,11 +107,11 @@
 				</#list>
 			</div>
 		</div>
-
+		<#assign allNotes = monitoringPointAttendanceCommandResult.allNotesWithSomeCheckPoints />
 		<div class="monitoring-points-profile striped-section collapsible">
 			<h3 class="section-title">Attendance notes</h3>
 			<div class="attendance-note-info">
-				<#if is_the_student>
+				<#if isSelf>
 					You have ${allNotes?size} attendance notes.
 				<#else>
 				${student.firstName} has ${allNotes?size} attendance notes.
@@ -123,25 +121,30 @@
 				<div class="row-fluid">
 					<#if (allNotes?size > 0)>
 						<h4>Filter Options</h4>
-						<div class= "checkbox-inline checkpointState-checkbox checkpointState-all">
-							<label><input type="checkbox" name="all" value="all"   checked />All</label>
-						</div>
-						<#list allCheckpointStates as state>
-							<div class= "checkbox-inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
-								<label><input  type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}</label>
+						<form>
+							<div class= "form-group checkbox-inline  checkpointState-checkbox checkpointState-all">
+								<label><input type="checkbox" name="all" value="all"   checked />All</label>
 							</div>
-						</#list>
+							<#list allCheckpointStates as state>
+								<div class= "form-group checkbox-inline checkpointState-checkbox checkpointState-${state.dbValue}"  >
+									<label><input  type="checkbox" name="${state.dbValue}" value="${state.description}"  align="left" checked />${state.description}</label>
+								</div>
+							</#list>
+						</form>
 						<@attendance_note_macros.allNotes notes=allNotes  />
-						<#list checkPointNotesMap?keys as state>
-							<@attendance_note_macros.checkpointNotes  checkpointNoteList=checkPointNotesMap[state] type=state />
+						<#list monitoringPointAttendanceCommandResult.checkPointNotes?keys as state>
+							<@attendance_note_macros.checkpointNotes  checkpointNoteList=monitoringPointAttendanceCommandResult.checkPointNotes[state] type=state />
 						</#list>
-						<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=unrecordedNotes  />
+						<@attendance_note_macros.unrecordedNotes monitoringPointNoteList=monitoringPointAttendanceCommandResult.notesWithoutCheckPoints  />
 					</#if>
 				</div>
 			</div>
 		</div>
 	</#if>
-<#include "../../groups/students_group_attendance.ftl" />
+	</#if>
+<#if hasSeminarAttendancePermission>
+	<#include "../../groups/students_group_attendance.ftl" />
+</#if>
 
 	<script>
 		jQuery(function($) {

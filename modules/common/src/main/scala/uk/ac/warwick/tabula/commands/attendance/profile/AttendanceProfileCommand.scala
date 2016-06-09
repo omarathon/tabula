@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
@@ -27,7 +27,9 @@ case class AttendanceProfileCommandResult(
 	attendanceMonitoringPointWithCheckPoint: Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]],
 	checkPointNotes: Map[String, Seq[(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)]],
 	allNotesWithSomeCheckPoints: Map[AttendanceMonitoringPoint,(AttendanceMonitoringNote,AttendanceMonitoringCheckpoint)],
-	notesWithoutCheckPoints: Seq[(AttendanceMonitoringPoint, AttendanceMonitoringNote)]
+	notesWithoutCheckPoints: Seq[(AttendanceMonitoringPoint, AttendanceMonitoringNote)],
+	missedPointCountByTerm: Map[String, Int],
+	hasAnyMissedPoints: Boolean
 	)
 
 class AttendanceProfileCommandInternal(val student: StudentMember, val academicYear: AcademicYear)
@@ -52,15 +54,26 @@ class AttendanceProfileCommandInternal(val student: StudentMember, val academicY
 		val allSortedNotesWithSomeCheckpointInfo = sortedNotes.map { case (point, note) =>
 			point ->(note, notesWithcheckPointInfo.toMap.getOrElse(note, null))
 		}
+
+		val attendanceMonitoringPointWithCheckPoint = groupedPoints.map { case (period, thesePoints) =>
+			period -> thesePoints.map { groupedPoint =>
+				groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
+			}
+		}
+
+		val missedPointCountByTerm = attendanceMonitoringPointWithCheckPoint.map { case (period, pointCheckpointPairs) =>
+			period -> pointCheckpointPairs.count { case (point, checkpoint) => checkpoint != null && checkpoint.state == AttendanceState.MissedUnauthorised }
+		}
+
+		val hasAnyMissedPoints = missedPointCountByTerm.exists { case(_, pointCount) => pointCount > 0 }
+
 		AttendanceProfileCommandResult(
-			groupedPoints.map { case (period, thesePoints) =>
-				period -> thesePoints.map { groupedPoint =>
-					groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
-				}
-			},
+			attendanceMonitoringPointWithCheckPoint,
 			sortedNotesWithcheckPointInfoGroupedByStateMap,
 			allSortedNotesWithSomeCheckpointInfo,
-			notesWithoutCheckPoints.toSeq
+			notesWithoutCheckPoints.toSeq,
+			missedPointCountByTerm,
+			hasAnyMissedPoints
 		)
 	}
 }
