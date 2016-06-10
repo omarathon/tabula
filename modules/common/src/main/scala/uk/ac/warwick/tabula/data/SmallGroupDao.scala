@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
-import org.hibernate.criterion.{Projections, Order}
+import org.hibernate.criterion.{Order, Projections}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Module}
+import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
+
 import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
@@ -212,8 +214,11 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 					.add(ge("week", startWeek))
 					.add(le("week", endWeek))
 					.add(is("groupSet.academicYear", academicYear))
+					.setFetchMode("event", FetchMode.JOIN)
 			}
-			safeInSeq(c, "groupSet.module", modules)
+			val occurrences = safeInSeq(c, "groupSet.module", modules)
+			// Filter the occurrences in case any invalid ones still exist
+			occurrences.filter(o => o.event.allWeeks.contains(o.week))
 		}
 	}
 

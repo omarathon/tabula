@@ -64,7 +64,7 @@ class GenerateMarksTemplateCommandInternal(val module: Module, val assignment: A
 		}
 
 		// add conditional formatting for invalid marks
-		addConditionalFormatting(sheet)
+		if (sheet.getLastRowNum > 0) addConditionalFormatting(sheet)
 
 		workbook
 	}

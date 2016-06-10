@@ -48,7 +48,7 @@ class GenerateExamMarksTemplateCommandInternal(val module: Module, val exam: Exa
 		}
 
 		// add conditional formatting for invalid marks
-		addConditionalFormatting(sheet)
+		if (sheet.getLastRowNum > 0) addConditionalFormatting(sheet)
 
 		workbook
 	}
