@@ -8,5 +8,6 @@ trait TrustedApplicationsManagerComponent {
 }
 
 trait AutowiringTrustedApplicationsManagerComponent extends TrustedApplicationsManagerComponent {
-	var applicationManager = Wire[TrustedApplicationsManager]
+	var _applicationManager = Wire.option[TrustedApplicationsManager]
+	var applicationManager = _applicationManager.orNull
 }

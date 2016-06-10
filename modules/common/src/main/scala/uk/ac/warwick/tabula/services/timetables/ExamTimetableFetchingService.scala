@@ -4,9 +4,11 @@ import dispatch.classic.url
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.{DateTime, Period}
 import org.joda.time.format.{DateTimeFormat, PeriodFormatterBuilder}
+import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -18,6 +20,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.xml.Elem
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.profiles.web.Routes
 
 import scala.util.Try
 
@@ -94,9 +97,6 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 object ExamTimetableHttpTimetableFetchingService extends Logging {
 
 	val cacheName = "ExamTimetableLists"
-	val examDateTimeFormatter = DateTimeFormat.forPattern("dd MMM HH:mm")
-	val examPeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix("hr ").appendMinutes().appendSuffix("mins").toFormatter
-	val examReadingTimeFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
 
 	def apply(examTimetableConfiguration: ExamTimetableConfiguration) = {
 		val service =	new ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
@@ -108,43 +108,162 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 		new CachedStaffAndStudentTimetableFetchingService(service, cacheName)
 	}
 
-	def parseXml(xml: Elem, uniId: String, termService: TermService): Seq[TimetableEvent] = {
+	def parseXml(xml: Elem, universityId: String, termService: TermService): Seq[TimetableEvent] = {
+		val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml, termService)
 		val examProfile = (xml \\ "exam-profile" \\ "profile").text
-		val academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)(termService)
 
-		(xml \\ "exam").map(examNode => {
-			val paper = (examNode \\ "paper").text
-			val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
-			val length = examPeriodFormatter.parsePeriod((examNode \\ "length").text)
-			val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
-				readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
-			)
-			val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
-				extraTimePerHourNode.text.maybeText.flatMap(s =>
-					Try(s.toInt).toOption
-				).map(minutes =>
-					Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
-				)
-			)
-			val endDateTime = Seq(Some(length), readingTime, extraTimePerHour).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
-			val uid = DigestUtils.md5Hex(Seq(examProfile, paper).mkString)
+		timetable.exams.map(timetableExam => {
+			val uid = DigestUtils.md5Hex(Seq(examProfile, timetableExam.paper).mkString)
 			TimetableEvent(
 				uid = uid,
 				name = "Exam",
 				title = "Exam",
-				description = "Exam",
+				description = "",
 				eventType = TimetableEventType.Exam,
-				weekRanges = Seq(WeekRange(termService.getTermFromDateIncludingVacations(startDateTime).getAcademicWeekNumber(startDateTime))),
-				day = DayOfWeek(startDateTime.dayOfWeek.get),
-				startTime = startDateTime.toLocalTime,
-				endTime = endDateTime.toLocalTime,
+				weekRanges = Seq(WeekRange(
+					termService.getTermFromDateIncludingVacations(timetableExam.startDateTime)
+						.getAcademicWeekNumber(timetableExam.startDateTime)
+				)),
+				day = DayOfWeek(timetableExam.startDateTime.dayOfWeek.get),
+				startTime = timetableExam.startDateTime.toLocalTime,
+				endTime = timetableExam.endDateTime.toLocalTime,
 				location = None,
-				comments = None,
+				comments = Some("More information available on the <a href=\"%s\">exam timetable</a>".format(Routes.profile.examTimetable(universityId))),
 				parent = TimetableEvent.Parent(),
 				staff = Nil,
 				students = Nil,
-				year = academicYear
+				year = timetableExam.academicYear
 			)
 		})
 	}
+}
+
+object ExamTimetableFetchingService {
+
+	val examDateTimeFormatter = DateTimeFormat.forPattern("dd MMM HH:mm")
+	val examPeriodFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix("hr ").appendMinutes().appendSuffix("mins").toFormatter
+	val examReadingTimeFormatter = new PeriodFormatterBuilder().appendHours().appendSuffix(":").appendMinutes().appendSuffix(":").appendSeconds().toFormatter
+
+	case class ExamTimetableExam(
+		academicYear: AcademicYear,
+		moduleCode: String,
+		paper: String,
+		section: String,
+		length: Period,
+		lengthString: String,
+		readingTime: Option[Period],
+		isOpenBook: Boolean,
+		startDateTime: DateTime,
+		endDateTime: DateTime,
+		extraTimePerHour: Option[Int],
+		room: String
+	)
+
+	case class ExamTimetable(
+		header: String,
+		instructions: String,
+		exams: Seq[ExamTimetableExam]
+	)
+
+	def examTimetableFromXml(xml: Elem, termService: TermService): ExamTimetable = {
+		val header = (xml \\ "exam-headerinfo").text
+		val instructions = (xml \\ "exam-instructions").text
+		val academicYear = AcademicYear((xml \\ "academic-year").text.toInt)
+		val exams = (xml \\ "exam").map(examNode => {
+			val moduleCode = (examNode \\ "module").text
+			val paper = (examNode \\ "paper").text
+			val section = (examNode \\ "section").text
+			val lengthString = (examNode \\ "length").text
+			val length = examPeriodFormatter.parsePeriod(lengthString)
+			val readingTime = (examNode \\ "read-time").headOption.flatMap(readingTimeNode =>
+				readingTimeNode.text.maybeText.map(s => examReadingTimeFormatter.parsePeriod(s.replace("01/01/1900 ", "")))
+			)
+			val isOpenBook = (examNode \\ "open-book").text.maybeText.isDefined
+
+			val startDateTime = examDateTimeFormatter.parseDateTime("%s %s".format((examNode \\ "date").text, (examNode \\ "time").text)).withYear(academicYear.endYear)
+			val extraTimePerHour = (examNode \\ "extratime-perhr").headOption.flatMap(extraTimePerHourNode =>
+				extraTimePerHourNode.text.maybeText.flatMap(s => Try(s.toInt).toOption)
+			)
+			val extraTime = extraTimePerHour.map(minutes =>
+				Period.minutes((length.toStandardMinutes.getMinutes.toFloat / 60 * minutes).toInt)
+			)
+			val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
+
+			val room = (examNode \\ "room").text
+
+			ExamTimetableExam(
+				academicYear,
+				moduleCode,
+				paper,
+				section,
+				length,
+				lengthString,
+				readingTime,
+				isOpenBook,
+				startDateTime,
+				endDateTime,
+				extraTimePerHour,
+				room
+			)
+		})
+		ExamTimetable(header, instructions, exams)
+	}
+
+}
+
+trait ExamTimetableFetchingService {
+	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable]
+}
+
+abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchingService with Logging {
+
+	self: DispatchHttpClientComponent with ExamTimetableConfigurationComponent
+		with TrustedApplicationsManagerComponent with TermServiceComponent =>
+
+	def getTimetable(member: Member, viewer: CurrentUser): Future[ExamTimetableFetchingService.ExamTimetable] = {
+		val endpoint = s"${examTimetableConfiguration.examTimetableUrl}${member.universityId}.xml"
+
+		val trustedAppHeaders = TrustedApplicationUtils.getRequestHeaders(
+			applicationManager.getCurrentApplication,
+			viewer.userId,
+			endpoint
+		).asScala.map { header => header.getName -> header.getValue }.toMap
+
+		val req = url(endpoint) <:< trustedAppHeaders
+
+		logger.info(s"Requesting exam timetable data from ${req.to_uri.toString}")
+
+		// a dispatch response handler which reads XML from the response and parses it into an ExamTimetable
+		def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+			req <> { node =>
+				ExamTimetableFetchingService.examTimetableFromXml(node, termService)
+			}
+		}
+
+		val result = Future {
+			httpClient.when(_ == 200)(req >:+ handler)
+		}
+		result.onFailure { case e =>
+			logger.warn(s"Request for ${req.to_uri.toString} failed: ${e.getMessage}")
+		}
+		result
+	}
+}
+
+@Service("examTimetableFetchingService")
+class ExamTimetableFetchingServiceImpl
+	extends AbstractExamTimetableFetchingService
+	with AutowiringDispatchHttpClientComponent
+	with AutowiringExamTimetableConfigurationComponent
+	with AutowiringTrustedApplicationsManagerComponent
+	with AutowiringUserLookupComponent
+	with AutowiringTermServiceComponent
+
+trait ExamTimetableFetchingServiceComponent {
+	def examTimetableFetchingService: ExamTimetableFetchingService
+}
+
+
+trait AutowiringExamTimetableFetchingServiceComponent extends ExamTimetableFetchingServiceComponent {
+	var examTimetableFetchingService = Wire[ExamTimetableFetchingService]
 }
