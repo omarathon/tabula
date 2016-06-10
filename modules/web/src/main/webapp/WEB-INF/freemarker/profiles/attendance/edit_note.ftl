@@ -1,5 +1,6 @@
 <#import "*/modal_macros.ftl" as modal />
-<#import "attendance_macros.ftl" as attendance_macros />
+<#import "../../attendance/attendance_macros.ftl" as attendance_macros />
+
 <#escape x as x?html>
 	<#if success??>
 		<#assign isAdd = !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content && !command.attendanceNote.absenceType?has_content />

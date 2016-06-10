@@ -1,7 +1,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <#import "../../attendance/attendance_variables.ftl" as attendance_variables />
-<#import "../attendance/attendance_macros.ftl" as attendance_macros />
+<#import "../../attendance/attendance_macros.ftl" as attendance_macros />
 <#import "../../attendance/attendance_note_macros.ftl" as attendance_note_macros />
 
 <#escape x as x?html>
@@ -64,9 +64,9 @@
 												</td>
 												<td class="state">
 													<#if pointPair._2()??>
-														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2()/>
+														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() urlProfile=true/>
 													<#else>
-														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
+														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student urlProfile=true/>
 													</#if>
 												</td>
 											</tr>
@@ -92,9 +92,9 @@
 												</td>
 												<td class="state">
 													<#if pointPair._2()??>
-														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() />
+														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() urlProfile=true />
 													<#else>
-														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student />
+														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student urlProfile=true />
 													</#if>
 												</td>
 											</tr>

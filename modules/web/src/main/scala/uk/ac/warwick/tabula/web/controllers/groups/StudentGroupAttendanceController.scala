@@ -31,5 +31,3 @@ class StudentGroupAttendanceController extends GroupsController {
 	}
 
 }
-//"isSelf" -> (user.apparentId == student.userId),
-//"isSelf" -> (user.apparentUser.warwickId! == member.universityId)
