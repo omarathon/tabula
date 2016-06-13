@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -21,7 +22,9 @@ case class StudentGroupAttendance(
 	attendance: ListStudentGroupAttendanceCommand.PerTermAttendance,
 	notes: Map[EventInstance, SmallGroupEventAttendanceNote],
 	missedCount: Int,
-	missedCountByTerm: Map[Term, Int]
+	missedCountByTerm: Map[Term, Int],
+	groupTitle: String,
+	hasGroups: Boolean
 )
 
 object ListStudentGroupAttendanceCommand {
@@ -112,7 +115,9 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 			attendance,
 			attendanceNotes,
 			missedCountByTerm.foldLeft(0) { (acc, missedByTerm) => acc + missedByTerm._2 },
-			missedCountByTerm
+			missedCountByTerm,
+			groupTitle(attendance),
+			attendance.values.nonEmpty
 		)
 	}
 
@@ -137,6 +142,22 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 			weekToDateConverter.toLocalDatetime(week, event.day, event.endTime, event.group.groupSet.academicYear)
 				.exists(eventDateTime => eventDateTime.isBefore(LocalDateTime.now()))
 	}
+
+	private def groupTitle(attendance: PerTermAttendance) = {
+		val title = {
+			val smallGroupSets = attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
+
+			val formats = smallGroupSets.map(_.format.description).distinct
+			val pluralisedFormats = formats.map {
+				case s: String if s == Example.description => s + "es"
+				case s: String => s + "s"
+				case _ =>
+			}
+			pluralisedFormats.mkString(", ")
+		}
+		title
+	}
+
 }
 
 trait ListStudentGroupAttendanceCommandState {

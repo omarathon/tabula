@@ -20,31 +20,12 @@ class StudentGroupAttendanceController extends GroupsController {
 		ListStudentGroupAttendanceCommand(member, academicYear)
 
 	@RequestMapping
-	def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance]): Mav = {
+	def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance], @PathVariable member: Member): Mav = {
 		val info = cmd.apply()
-
-		val hasGroups = info.attendance.values.nonEmpty
-
-		val title = {
-			val smallGroupSets = info.attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
-
-			val formats = smallGroupSets.map(_.format.description).distinct
-			val pluralisedFormats = formats.map {
-				case s:String if s == Example.description => s + "es"
-				case s:String => s + "s"
-				case _ =>
-			}
-			pluralisedFormats.mkString(", ")
-		}
-
 		Mav("groups/students_group_attendance",
-			"hasGroups" -> hasGroups,
-			"title" -> title,
-			"terms" -> info.attendance,
-			"attendanceNotes" -> info.notes,
-			"missedCount" -> info.missedCount,
-			"missedCountByTerm" -> info.missedCountByTerm,
-			"termWeeks" -> info.termWeeks,
+			"seminarAttendanceCommandResult" -> info,
+			"student" -> member,
+			"isSelf" -> (user.universityId.maybeText.getOrElse("") == member.universityId),
 			"defaultExpand" -> !ajax
 		).noLayoutIf(ajax)
 	}

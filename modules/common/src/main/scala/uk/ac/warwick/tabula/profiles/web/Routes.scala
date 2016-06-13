@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.web
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -50,6 +51,10 @@ object Routes {
 		def marking(member: Member) = context + "/view/%s/marking" format encoded(member.universityId)
 		def marking(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/marking" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def attendance(member: Member) = context + "/view/%s/attendance" format encoded(member.universityId)
+		def attendance(scyd: StudentCourseYearDetails) =
+			context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)
@@ -87,5 +92,11 @@ object Routes {
 
 		def missed(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
 			context + "/%s/meeting/%s/missed" format(encoded(relationshipType.urlPart), encoded(meetingRecord.id))
+	}
+
+	object Note {
+		def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
+			context + "/attendance/note/%s/%s" format(encoded(student.universityId), encoded(point.id))
+
 	}
 }
