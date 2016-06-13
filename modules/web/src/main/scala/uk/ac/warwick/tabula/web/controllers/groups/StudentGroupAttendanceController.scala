@@ -25,7 +25,7 @@ class StudentGroupAttendanceController extends GroupsController {
 		Mav("groups/students_group_attendance",
 			"seminarAttendanceCommandResult" -> info,
 			"student" -> member,
-			"isSelf" -> 	(user.universityId.maybeText.getOrElse("") == member.universityId),
+			"isSelf" -> (user.universityId.maybeText.getOrElse("") == member.universityId),
 			"defaultExpand" -> !ajax
 		).noLayoutIf(ajax)
 	}
