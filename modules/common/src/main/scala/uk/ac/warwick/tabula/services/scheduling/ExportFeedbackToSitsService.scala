@@ -32,10 +32,8 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala.toSeq
+	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala
 	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
-	val occurrences = possibleOccurrenceSequencePairs.map(_._1).mkString(",")
-	val sequences = possibleOccurrenceSequencePairs.map(_._2).mkString(",")
 
 	def getQueryParams: util.HashMap[String, Object] = JHashMap(
 		// for the where clause
@@ -47,8 +45,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		// in theory we should look for a record with occurrence and sequence from the same pair,
 		// but in practice there won't be any ambiguity since the record is already determined
 		// by student, module code and year
-		("occurrences", occurrences),
-		("sequences", sequences)
+		("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
+		("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava)
 	)
 
 	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
@@ -61,8 +59,8 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 		// in theory we should look for a record with occurrence and sequence from the same pair,
 		// but in practice there won't be any ambiguity since the record is already determined
 		// by student, module code and year
-		("occurrences", occurrences),
-		("sequences", sequences),
+		("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
+		("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava),
 
 		// data to insert
 		("actualMark", mark),
@@ -108,10 +106,10 @@ object ExportFeedbackToSitsService {
 	// Only upload when the mark/grade is empty or was previously uploaded by Tabula
 	def whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
 		and mod_code like :moduleCodeMatcher
-		and mav_occur in :occurrences
+		and mav_occur in (:occurrences)
 		and ayr_code = :academicYear
 		and psl_code = 'Y'
-		and mab_seq in :sequences
+		and mab_seq in (:sequences)
 		and (
 			sas_actm is null and sas_actg is null
 			or sas_udf1 = 'Tabula'
