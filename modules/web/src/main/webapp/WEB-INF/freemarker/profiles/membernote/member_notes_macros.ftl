@@ -38,9 +38,11 @@
 			<details class="${deleted}">
 				<summary>
 					<div class="detail-arrow-fix">
-						<#if canEditMemberNote>
+						<#if canEditMemberNote || canDeletePurgeMemberNote>
 							<div class="member-note-toolbar">
-								<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note note />" class="btn-like edit${nonDeleteTools}" title="Edit note"><i class="icon-edit" ></i></a>
+								<#if canEditMemberNote>
+									<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note note />" class="btn-like edit${nonDeleteTools}" title="Edit note"><i class="icon-edit" ></i></a>
+								</#if>
 								<#if canDeletePurgeMemberNote>
 									<a href="<@routes.profiles.delete_member_note note />" class="btn-like delete${nonDeleteTools}" title="Delete note"><i class="icon-trash"></i></a>
 									<a href="<@routes.profiles.restore_member_note note />" class="btn-like restore${deleteTools}" title="Restore note"><i class="icon-repeat"></i></a>
