@@ -58,7 +58,7 @@
 			<@modal.footer>
 				<span class="submit-buttons">
 					<#if can.do("MonitoringPoints.Record", attendanceNote.student) >
-						<a href="<@routes.profiles.edit_moniteringpoint_attendance_note checkpoint/>" class="btn btn-primary spinnable spinner-auto">
+						<a href="<@routes.profiles.edit_monitoringpoint_attendance_note attendanceNote.student attendanceNote.point/>" class="btn btn-primary spinnable spinner-auto">
 							Edit
 						</a>
 					</#if>

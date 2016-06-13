@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.web
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -91,5 +92,11 @@ object Routes {
 
 		def missed(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
 			context + "/%s/meeting/%s/missed" format(encoded(relationshipType.urlPart), encoded(meetingRecord.id))
+	}
+
+	object Note {
+		def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
+			context + "/attendance/note/%s/%s" format(encoded(student.universityId), encoded(point.id))
+
 	}
 }

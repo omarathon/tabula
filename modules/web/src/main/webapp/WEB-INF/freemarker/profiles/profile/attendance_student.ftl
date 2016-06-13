@@ -53,8 +53,8 @@
 					<#if groupedPointMap[term]??>
 						<div class="item-info row-fluid term">
 							<div>
-								<h4 class="attendance-term">${term}</h4>
-								<table class="table">
+								<h4>${term}</h4>
+								<table class="table table-hover">
 									<tbody>
 										<#list groupedPointMap[term] as pointPair>
 											<#assign point = pointPair._1() />
@@ -64,9 +64,16 @@
 												</td>
 												<td class="state">
 													<#if pointPair._2()??>
-														<@attendance_macros.checkpointLabel department=point.scheme.department checkpoint=pointPair._2() urlProfile=true/>
+														<@attendance_macros.checkpointLabel
+															department=point.scheme.department
+															checkpoint=pointPair._2()
+															urlProfile=true/>
 													<#else>
-														<@attendance_macros.checkpointLabel department=point.scheme.department point=pointPair._1() student=student urlProfile=true/>
+														<@attendance_macros.checkpointLabel
+															department=point.scheme.department
+															point=pointPair._1()
+															student=student
+															urlProfile=true/>
 													</#if>
 												</td>
 											</tr>
@@ -81,8 +88,8 @@
 					<#if groupedPointMap[month]??>
 						<div class="item-info row-fluid term">
 							<div>
-								<h4 class="attendance-term">${month}</h4>
-								<table class="table">
+								<h4>${month}</h4>
+								<table class="table table-hover">
 									<tbody>
 										<#list groupedPointMap[month] as pointPair>
 											<#assign point = pointPair._1() />
@@ -141,9 +148,18 @@
 			</div>
 		</div>
 	</#if>
-	</#if>
+<#else>
+	<div class="alert alert-info">
+		You do not have permission to see the monitoring point attendance for this course.
+	</div>
+</#if>
+
 <#if hasSeminarAttendancePermission>
 	<#include "../../groups/students_group_attendance.ftl" />
+<#else>
+	<div class="alert alert-info">
+		You do not have permission to see the seminar attendance for this course.
+	</div>
 </#if>
 
 	<script>

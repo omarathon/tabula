@@ -144,18 +144,18 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 	}
 
 	private def groupTitle(attendance: PerTermAttendance) = {
-			val title = {
-				val smallGroupSets = attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
+		val title = {
+			val smallGroupSets = attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
 
-				val formats = smallGroupSets.map(_.format.description).distinct
-				val pluralisedFormats = formats.map {
-					case s: String if s == Example.description => s + "es"
-					case s: String => s + "s"
-					case _ =>
-				}
-				pluralisedFormats.mkString(", ")
+			val formats = smallGroupSets.map(_.format.description).distinct
+			val pluralisedFormats = formats.map {
+				case s: String if s == Example.description => s + "es"
+				case s: String => s + "s"
+				case _ =>
 			}
-			title
+			pluralisedFormats.mkString(", ")
+		}
+		title
 	}
 
 }
