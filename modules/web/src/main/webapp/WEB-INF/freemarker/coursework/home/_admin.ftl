@@ -3,27 +3,13 @@
 
 	<div class="row-fluid">
 		<div class="span6">
-			<h6>Late &amp; unusual activity</h6>
-
 			<#if features.activityStreams>
+				<h6>Late &amp; unusual activity</h6>
+
 				<#import "*/activity_macros.ftl" as activity />
 				<div class="home-page-activity">
 					<@activity.activity_stream max=5 minPriority=0.5 types="SubmissionReceived,MarkedPlagarised"/>
 				</div>
-			<#else>
-				<#if activities?has_content && activities.total gt 0>
-					<table class="table table-condensed table-hover" id="activities">
-						<#include "activities.ftl" />
-
-						<tfoot aria-hidden="true" id="activity-fetcher" style="display:none;">
-						<tr><td>
-							<a href="#">See more</a>
-						</td></tr>
-						</tfoot>
-					</table>
-				<#else>
-					<p class="alert">There is no notable activity to show you right now.</p>
-				</#if>
 			</#if>
 		</div>
 
@@ -53,26 +39,4 @@
 			</#if>
 		</div>
 	</div>
-
-	<script type="text/javascript">
-		(function ($) {
-			if ($("#activities").length > 0) {
-				var sUrl = $("#activities").data("url");
-				$("#activity-fetcher").show().click(function(e) {
-					e.preventDefault();
-
-					$.get(sUrl, function(pagelet) {
-						$("#activities tbody:last").after(pagelet);
-
-						$("#activity-fetcher").remove();
-
-						$(".streaming").fadeIn("normal", function() {
-							var $streaming = $(this);
-							$streaming.replaceWith($streaming.contents());
-						});
-					});
-				});
-			}
-		})(jQuery);
-	</script>
 </#if>
