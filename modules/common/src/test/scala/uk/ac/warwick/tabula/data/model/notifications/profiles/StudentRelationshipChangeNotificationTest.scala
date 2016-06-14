@@ -54,7 +54,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 	@Test
 	def urlIsProfilePage():Unit = new TutorFixture {
 		val n = createNewTutorNotification(relationship, actor, Some(oldTutor))
-		n.url should be("/profiles/view/student")
+		n.url should be(s"/profiles/view/student/${relationship.relationshipType.urlPart}")
 		n.urlTitle should be ("view the student profile for Test Student")
 	}
 
@@ -71,7 +71,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 		n.profileService = profileService
 		n.content.template should be ("/WEB-INF/freemarker/notifications/student_change_relationship_notification.ftl")
 		n.content.model("student") should be (Some(student))
-		n.content.model("path") should be ("/profiles/view/student")
+		n.content.model("path") should be (s"/profiles/view/student/${relationship.relationshipType.urlPart}")
 		n.content.model("newAgents") should be (Seq(newTutor))
 		n.urlTitle should be ("view your student profile")
 	}

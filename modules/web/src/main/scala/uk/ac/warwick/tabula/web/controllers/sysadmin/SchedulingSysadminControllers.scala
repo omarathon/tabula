@@ -230,7 +230,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 		}
 
 		// Redirect cross-context
-		Redirect(Routes.profiles.oldProfile.view(member.get))
+		Redirect(Routes.profiles.Profile.identity(member.get))
 	}
 }
 

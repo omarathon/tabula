@@ -26,9 +26,9 @@ abstract class ScheduledMeetingRecordNotification
 
 	def studentNotFoundMessage = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
 	def agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"
-	def url = Routes.oldProfile.view(
-			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)),
-			meeting
+	def url = Routes.Profile.relationshipType(
+		meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)),
+		meeting.relationship.relationshipType
 	)
 	def urlTitle = "view this meeting"
 

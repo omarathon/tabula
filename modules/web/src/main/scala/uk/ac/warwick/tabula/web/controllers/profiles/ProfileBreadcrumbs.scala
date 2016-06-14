@@ -12,18 +12,6 @@ trait ProfileBreadcrumbs {
 
 object ProfileBreadcrumbs {
 
-	/**
-	 * Special case breadcrumb for a profile.
-	 */
-	case class Profile(profile: model.Member, isSelf: Boolean = false) extends BreadCrumb {
-		val title = if (isSelf) "Your profile" else profile.fullName match {
-			case None => "Profile for unknown user"
-			case Some(name) => name
-		}
-		val url = Some(Routes.oldProfile.view(profile))
-		override val tooltip = profile.fullName.getOrElse("") + " (" + profile.universityId + ")"
-	}
-
 	object Profile {
 
 		sealed abstract class ProfileBreadcrumbIdentifier(id: String)

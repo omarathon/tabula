@@ -54,7 +54,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 	def student = entities.head.studentCourseDetails.student
 	def recipients = Seq(student.asSsoUser)
 
-	def url: String = Routes.oldProfile.view(student)
+	def url: String = Routes.Profile.seminars(student)
 
 	def urlTitle: String = "view this information on your student profile"
 
