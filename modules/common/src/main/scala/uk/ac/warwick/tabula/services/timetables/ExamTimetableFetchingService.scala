@@ -7,7 +7,7 @@ import org.joda.time.format.{DateTimeFormat, PeriodFormatterBuilder}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.Futures._
@@ -51,7 +51,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 	extends StaffTimetableFetchingService with StudentTimetableFetchingService with Logging {
 
 	self: DispatchHttpClientComponent with TrustedApplicationsManagerComponent
-		with UserLookupComponent with TermServiceComponent =>
+		with UserLookupComponent with TermServiceComponent with FeaturesComponent =>
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	def handler(uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
@@ -60,9 +60,17 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 		}
 	}
 
+	private def featureProtected(arg: String)(f: (String) => Future[EventList]): Future[EventList] = {
+		if (features.personalExamTimetables) {
+			f(arg)
+		} else {
+			Future(EventList(Nil, None))
+		}
+	}
 
-	override def getTimetableForStudent(universityId: String) = doRequest(universityId)
-	override def getTimetableForStaff(universityId: String) = doRequest(universityId)
+
+	override def getTimetableForStudent(universityId: String) = featureProtected(universityId) { doRequest }
+	override def getTimetableForStaff(universityId: String) = featureProtected(universityId) { doRequest }
 
 	def doRequest(param: String): Future[EventList] = {
 		userLookup.getUserByWarwickUniId(param) match {
@@ -104,6 +112,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 			with AutowiringTrustedApplicationsManagerComponent
 			with AutowiringUserLookupComponent
 			with AutowiringTermServiceComponent
+			with AutowiringFeaturesComponent
 
 		new CachedStaffAndStudentTimetableFetchingService(service, cacheName)
 	}
