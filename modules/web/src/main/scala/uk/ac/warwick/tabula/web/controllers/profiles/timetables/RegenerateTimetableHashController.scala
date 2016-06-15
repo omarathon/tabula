@@ -10,11 +10,10 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @Controller
 class RegenerateTimetableHashController extends ProfilesController {
 
-
 	@RequestMapping(method=Array(POST))
 	def generateNewHash() = transactional() {
 		profileService.regenerateTimetableHash(currentMember)
-		Redirect(Routes.oldProfile.view(currentMember))
+		Redirect(Routes.Profile.timetable(currentMember))
 	}
 
 }

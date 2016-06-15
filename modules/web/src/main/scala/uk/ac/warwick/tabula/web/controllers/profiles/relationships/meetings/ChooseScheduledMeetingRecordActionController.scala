@@ -43,9 +43,9 @@ class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 		@PathVariable meetingRecord: ScheduledMeetingRecord
 	) = {
 		Redirect(
-			Routes.oldProfile.view(
+			Routes.Profile.relationshipType(
 				meetingRecord.relationship.studentMember.getOrElse(throw new IllegalArgumentException),
-				meetingRecord
+				meetingRecord.relationship.relationshipType
 			)
 		)
 	}

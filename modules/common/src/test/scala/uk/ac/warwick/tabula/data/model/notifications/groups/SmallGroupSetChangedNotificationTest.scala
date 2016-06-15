@@ -43,7 +43,8 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudent():Unit = new SmallGroupFixture{
 		val n =  createStudentNotification(groupSet1, actor, recipient)
-		n.url should be("/profiles/view/me")
+		n.userLookup = userLookup
+		n.url should be(s"/profiles/view/${recipient.getWarwickId}/seminars")
 	}
 
 
@@ -62,8 +63,9 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
 	@Test
 	def shouldCallTextRendererWithCorrectTemplateAndModel():Unit = new SmallGroupFixture {
 		val n = createStudentNotification(groupSet1, actor, recipient)
+		n.userLookup = userLookup
 		n.content.template should be (SmallGroupSetChangedNotification.templateLocation)
-		n.content.model.get("profileUrl") should be(Some("/profiles/view/me"))
+		n.content.model.get("profileUrl") should be(Some(s"/profiles/view/${recipient.getWarwickId}/seminars"))
 		n.content.model.get("groupSet") should be(Some(groupSet1))
 	}
 

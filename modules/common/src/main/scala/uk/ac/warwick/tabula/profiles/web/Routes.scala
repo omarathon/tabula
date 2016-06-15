@@ -18,16 +18,6 @@ object Routes {
 	def home = context + "/"
 	def search = context + "/search"
 
-	object oldProfile {
-		def view(member: Member) = context + "/view/%s" format encoded(member.universityId)
-		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
-		def view(scyd: StudentCourseYearDetails, meeting: AbstractMeetingRecord) = context + "/view/course/%s/%s?meeting=%s" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString), encoded(meeting.id))
-		def photo(member: Member) = context + "/view/photo/%s.jpg" format encoded(member.universityId)
-		def mine = context + "/view/me"
-
-		def viewTimetable(member: Member) = context + "/timetable/%s" format encoded(member.universityId)
-	}
-
 	object Profile {
 		def identity(member: Member) =
 			context + "/view/%s" format encoded(member.universityId)
@@ -46,6 +36,10 @@ object Routes {
 			context + "/view/course/%s/%s/assignments" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def modules(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/modules" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
+		def seminars(universityId: String) =
+			context + "/view/%s/seminars" format encoded(universityId)
+		def seminars(member: Member) =
+			context + "/view/%s/seminars" format encoded(member.universityId)
 		def seminars(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/seminars" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def marking(member: Member) = context + "/view/%s/marking" format encoded(member.universityId)
