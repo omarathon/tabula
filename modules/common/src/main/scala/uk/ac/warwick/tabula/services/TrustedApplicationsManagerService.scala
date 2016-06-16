@@ -9,5 +9,5 @@ trait TrustedApplicationsManagerComponent {
 
 trait AutowiringTrustedApplicationsManagerComponent extends TrustedApplicationsManagerComponent {
 	var _applicationManager = Wire.option[TrustedApplicationsManager]
-	var applicationManager = _applicationManager.orNull
+	def applicationManager = _applicationManager.orNull
 }
