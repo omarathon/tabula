@@ -51,7 +51,7 @@ class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotifica
 
 	private def changedGroupInfo = {
 		entities.map { newSmallGroup =>
-			(newSmallGroup, oldSmallGroupSizes.value.get(newSmallGroup.id).getOrElse("0")) }
+			(newSmallGroup, oldSmallGroupSizes.value.get(newSmallGroup.id).getOrElse("0")) }.filter { case (newGroup,oldSize) => newGroup.students.size != oldSize.toInt }
 	}
 
 	override  def extraModel = Map("groupsWithOldSizeInfo" -> changedGroupInfo)
