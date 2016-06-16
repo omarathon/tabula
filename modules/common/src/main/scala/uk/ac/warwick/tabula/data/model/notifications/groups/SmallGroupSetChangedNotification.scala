@@ -54,9 +54,7 @@ class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotifica
 			(newSmallGroup, oldSmallGroupSizes.value.get(newSmallGroup.id).getOrElse("0")) }
 	}
 
-	override  def extraModel = Map(
-		"groupsWithOldSizeInfo" -> changedGroupInfo
-	)
+	override  def extraModel = Map("groupsWithOldSizeInfo" -> changedGroupInfo)
 }
 
 sealed trait UserRoleOnGroup
