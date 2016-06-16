@@ -1,5 +1,13 @@
 Your small teaching group allocation for ${groupSet.module.code?upper_case} - "${groupSet.module.name?trim}" has been updated
 
+<#if groupsWithOldSizeInfo??>
+<#list groupsWithOldSizeInfo as changedGroupInfo>
+<#assign newGroup = changedGroupInfo._1() />
+<#assign oldGroupSize = changedGroupInfo._2() />
+${newGroup.name} has changed  from - ${oldGroupSize} to ${newGroup.students.members?size}
+</#list>
+</#if>
+
 ${groupSet.name} ${groupSet.format.description} for ${groupSet.module.code?upper_case} - ${groupSet.module.name}
 
 <#list groups as group>
