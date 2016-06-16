@@ -22,7 +22,6 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	@transient val oldSmallGroupSizes = StringMapSetting("oldSmallGroupSizes", Map())
 
-
 	def content =
 		FreemarkerModel(SmallGroupSetChangedNotification.templateLocation, Map(
 			"groups" -> entities,
@@ -53,7 +52,7 @@ class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotifica
 	private def changedGroupInfo = {
 		entities.map { newSmallGroup =>
 			(newSmallGroup, oldSmallGroupSizes.value.get(newSmallGroup.id).getOrElse("0")) }
-		}
+	}
 
 	override  def extraModel = Map(
 		"groupsWithOldSizeInfo" -> changedGroupInfo
