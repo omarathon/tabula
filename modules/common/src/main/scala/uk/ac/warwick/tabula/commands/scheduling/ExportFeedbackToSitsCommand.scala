@@ -31,6 +31,8 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 		val feedbacksToLoad = feedbackForSitsDao.feedbackToLoad
 		var feedbacksLoaded: Seq[FeedbackForSits] = Seq()
 
+		logger.info(s"Found ${feedbacksToLoad.size} feedback to upload to SITS")
+
 		// for each mark/grade
 		for (feedbackToLoad <- feedbacksToLoad) {
 			val feedback = feedbackToLoad.feedback
@@ -44,12 +46,13 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 				// first check to see if there is one and only one matching row
 				val rowCount = exportFeedbackToSitsService.countMatchingSasRecords(feedbackToLoad)
 
-				if (rowCount == 0) feedbackToLoad.status = Failed
-				else if (rowCount > 1) {
+				if (rowCount == 0) {
+					feedbackToLoad.status = Failed
+					logger.warn(f"Not updating SITS CAM_SAS for feedback $feedbackId - found zero rows")
+				} else if (rowCount > 1) {
 					feedbackToLoad.status = Failed
 					logger.warn(f"Not updating SITS CAM_SAS for feedback $feedbackId - found multiple rows")
-				}
-				else {
+				} else {
 					feedbacksLoaded = feedbacksLoaded :+ uploadFeedbackToSits(feedbackToLoad)
 				}
 				feedbackForSitsDao.saveOrUpdate(feedbackToLoad)
@@ -68,18 +71,20 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 		//  update - expecting to update one row
 		val expectedRowCount = exportFeedbackToSitsService.exportToSits(feedbackToLoad)
 
-		if (expectedRowCount == 0) feedbackToLoad.status = Failed
-		else if (expectedRowCount == 1) {
+		if (expectedRowCount == 0) {
+			feedbackToLoad.status = Failed
+			logger.warn(f"Not updating SITS CAM_SAS for feedback $feedbackId - found zero rows")
+		} else if (expectedRowCount == 1) {
 			// record what's been done in the FeedbackToLoad object
 			feedbackToLoad.status = Successful
 			feedbackToLoad.dateOfUpload = DateTime.now
 
 			feedback.latestMark.foreach( mark => feedbackToLoad.actualMarkLastUploaded = mark)
 			feedback.latestGrade.foreach( grade => feedbackToLoad.actualGradeLastUploaded = grade)
-
-		}
-		else throw new IllegalStateException(s"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
+		} else {
+			throw new IllegalStateException(s"Unexpected SITS update!  Only expected to update one row, but $expectedRowCount rows were updated " +
 				s"in CAM_SAS for student $studentId, feedback $feedbackId")
+		}
 
 		feedbackToLoad
 	}
@@ -94,6 +99,11 @@ trait ExportFeedbackToSitsCommandPermissions extends RequiresPermissionsChecking
 trait ExportFeedbackToSitsCommandDescription extends Describable[Seq[FeedbackForSits]] {
 	override def describe(d: Description) {}
 	override def describeResult(d: Description, result: Seq[FeedbackForSits]) {
-		d.property("marks/grades written to SITS CAM_SAS", result.size)
+		d.property("feedbackForSits", result.map(feedback => Map(
+			"id" -> feedback.id,
+			"feedback" -> feedback.feedback.id,
+			"mark" -> feedback.actualMarkLastUploaded,
+			"grade" -> feedback.actualGradeLastUploaded
+		)))
 	}
 }

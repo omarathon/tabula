@@ -28,7 +28,6 @@ import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceCom
 					"ownedDepartments" -> info.ownedDepartments,
 					"ownedModule" -> info.ownedModules,
 					"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
-					"activities" -> info.activities,
 					"ajax" -> ajax,
 					"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
 				)

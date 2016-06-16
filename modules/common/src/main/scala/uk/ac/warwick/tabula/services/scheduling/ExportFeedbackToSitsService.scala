@@ -32,42 +32,46 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala.toSeq
+	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala
 	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
-	val occurrences = possibleOccurrenceSequencePairs.map(_._1).mkString(",")
-	val sequences = possibleOccurrenceSequencePairs.map(_._2).mkString(",")
 
-	def getQueryParams: util.HashMap[String, Object] = JHashMap(
-		// for the where clause
-		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
-		("now", DateTime.now.toDate),
+	def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
+		case pairs if pairs.isEmpty => None
+		case Seq(pairs) => Option(JHashMap(
+			// for the where clause
+			("studentId", feedbackForSits.feedback.universityId),
+			("academicYear", feedbackForSits.feedback.academicYear.toString),
+			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
+			("now", DateTime.now.toDate),
 
-		// in theory we should look for a record with occurrence and sequence from the same pair,
-		// but in practice there won't be any ambiguity since the record is already determined
-		// by student, module code and year
-		("occurrences", occurrences),
-		("sequences", sequences)
-	)
+			// in theory we should look for a record with occurrence and sequence from the same pair,
+			// but in practice there won't be any ambiguity since the record is already determined
+			// by student, module code and year
+			("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
+			("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava)
+		))
+	}
 
-	def getUpdateParams(mark: Integer, grade: String) = JHashMap(
-		// for the where clause
-		("studentId", feedbackForSits.feedback.universityId),
-		("academicYear", feedbackForSits.feedback.academicYear.toString),
-		("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
-		("now", DateTime.now.toDate),
+	def getUpdateParams(mark: Integer, grade: String): Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
+		case pairs if pairs.isEmpty => None
+		case Seq(pairs) => Option(JHashMap(
+			// for the where clause
+			("studentId", feedbackForSits.feedback.universityId),
+			("academicYear", feedbackForSits.feedback.academicYear.toString),
+			("moduleCodeMatcher", feedbackForSits.feedback.module.code.toUpperCase + "%"),
+			("now", DateTime.now.toDate),
 
-		// in theory we should look for a record with occurrence and sequence from the same pair,
-		// but in practice there won't be any ambiguity since the record is already determined
-		// by student, module code and year
-		("occurrences", occurrences),
-		("sequences", sequences),
+			// in theory we should look for a record with occurrence and sequence from the same pair,
+			// but in practice there won't be any ambiguity since the record is already determined
+			// by student, module code and year
+			("occurrences", possibleOccurrenceSequencePairs.map(_._1).asJava),
+			("sequences", possibleOccurrenceSequencePairs.map(_._2).asJava),
 
-		// data to insert
-		("actualMark", mark),
-		("actualGrade", grade)
-	)
+			// data to insert
+			("actualMark", mark),
+			("actualGrade", grade)
+		))
+	}
 
 }
 
@@ -79,7 +83,13 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 	def countMatchingSasRecords(feedbackForSits: FeedbackForSits): Integer = {
 		val countQuery = new CountQuery(sitsDataSource)
 		val parameterGetter: ParameterGetter = new ParameterGetter(feedbackForSits)
-		countQuery.getCount(parameterGetter.getQueryParams)
+		parameterGetter.getQueryParams match {
+			case Some(params) =>
+				countQuery.getCount(params)
+			case None =>
+				logger.warn(s"Cannot upload feedback ${feedbackForSits.feedback.id} for SITS as no assessment groups found")
+				0
+		}
 	}
 
 	def exportToSits(feedbackForSits: FeedbackForSits): Integer = {
@@ -88,12 +98,19 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 
 		val grade = feedbackForSits.feedback.latestGrade
 		val mark = feedbackForSits.feedback.latestMark
-		val numRowsChanged =
-			if (grade.isDefined && mark.isDefined)
-				updateQuery.updateByNamedParam(parameterGetter.getUpdateParams(mark.get, grade.get))
-		else {
+		val numRowsChanged = {
+			if (grade.isDefined && mark.isDefined) {
+				parameterGetter.getUpdateParams(mark.get, grade.get) match {
+					case Some(params) =>
+						updateQuery.updateByNamedParam(params)
+					case None =>
+						logger.warn(s"Cannot upload feedback ${feedbackForSits.feedback.id} for SITS as no assessment groups found")
+						0
+				}
+			} else {
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
+		}
 		numRowsChanged
 	}
 }
@@ -108,10 +125,10 @@ object ExportFeedbackToSitsService {
 	// Only upload when the mark/grade is empty or was previously uploaded by Tabula
 	def whereClause = f"""where spr_code in (select spr_code from $sitsSchema.ins_spr where spr_stuc = :studentId)
 		and mod_code like :moduleCodeMatcher
-		and mav_occur in :occurrences
+		and mav_occur in (:occurrences)
 		and ayr_code = :academicYear
 		and psl_code = 'Y'
-		and mab_seq in :sequences
+		and mab_seq in (:sequences)
 		and (
 			sas_actm is null and sas_actg is null
 			or sas_udf1 = 'Tabula'
