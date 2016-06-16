@@ -79,6 +79,7 @@ abstract class Features {
 	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
 	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
 	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
+	@Value("${features.personalTimetables.exams:false}") var personalExamTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 
@@ -213,6 +214,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTutorAssignmentFiltering = true
 	@BeanProperty var arbitraryRelationships = true
 	@BeanProperty var personalTimetables = true
+	@BeanProperty var personalExamTimetables = false
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var visaInStudentProfile = true
