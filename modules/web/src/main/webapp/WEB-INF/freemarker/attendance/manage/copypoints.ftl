@@ -152,13 +152,8 @@
 					</#function>
 
 					<#assign placeholder = "All schemes" />
-					<#if isSchemes>
-						<#assign schemesBindPoint = "findCommand.findSchemes"/>
-						<#assign schemesCollection = findCommand.findSchemes/>
-					<#else>
-						<#assign schemesBindPoint = "findCommand.sets"/>
-						<#assign schemesCollection = findCommand.sets/>
-					</#if>
+					<#assign schemesBindPoint = "findCommand.findSchemes"/>
+					<#assign schemesCollection = findCommand.findSchemes/>
 					<#assign currentfilter><@current_filter_value schemesBindPoint placeholder; scheme>${scheme.shortDisplayName}</@current_filter_value></#assign>
 					<@filter schemesBindPoint placeholder currentfilter allSchemes; scheme>
 						<input type="checkbox" name="${status.expression}" value="${scheme.id}" data-short-value="${scheme.shortDisplayName}"

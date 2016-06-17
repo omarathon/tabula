@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.{Daoisms, FileDao, MeetingRecordDao}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
 import uk.ac.warwick.tabula.system.BindListener
 
@@ -24,7 +23,6 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
-	var monitoringPointMeetingRelationshipTermService = Wire.auto[MonitoringPointMeetingRelationshipTermService]
 	var attendanceMonitoringMeetingRecordService = Wire.auto[AttendanceMonitoringMeetingRecordService]
 
 	var title: String = _
@@ -83,9 +81,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		}
 
 		if (features.attendanceMonitoringMeetingPointType) {
-			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
-			if (features.attendanceMonitoringVersion2)
-				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
+			attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 
 		meeting

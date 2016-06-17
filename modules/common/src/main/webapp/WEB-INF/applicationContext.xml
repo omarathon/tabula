@@ -142,17 +142,12 @@
         <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.CourseCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
-		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
-		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
-		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
-		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTemplateIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.AttendanceStateConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.ModeOfAttendanceCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SitsStatusCodeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter" />
 		<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
-		<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTypeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
 		<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
 		<bean class="uk.ac.warwick.tabula.data.convert.AbsenceTypeConverter"/>

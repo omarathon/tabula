@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
 import uk.ac.warwick.tabula.data.{FileDao, MeetingRecordDao}
-import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
 
 
@@ -20,7 +19,6 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {
 		val meetingRecordDao = smartMock[MeetingRecordDao]
 		val fileDao = smartMock[FileDao]
-		val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
 		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 
 		val creator = Fixtures.staff("9876543", "staffmember")
@@ -43,7 +41,6 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
 		createMeetingRecordCommand.meetingRecordDao = meetingRecordDao
 		createMeetingRecordCommand.fileDao = fileDao
-		createMeetingRecordCommand.monitoringPointMeetingRelationshipTermService = monitoringPointMeetingRelationshipTermService
 		createMeetingRecordCommand.attendanceMonitoringMeetingRecordService = attendanceMonitoringMeetingRecordService
 		createMeetingRecordCommand.features = Features.empty
 		createMeetingRecordCommand.sessionFactory = smartMock[SessionFactory]

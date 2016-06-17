@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -56,10 +57,6 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	def permissionsParents = teachingDepartments.toStream
 	override def humanReadableId = code.toUpperCase + " " + name
 	override def urlSlug = code
-
-	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
-	@BatchSize(size=100)
-	var monitoringPointSets: JList[MonitoringPointSet] = JArrayList()
 
 	var missingFromImportSince: DateTime = _
 

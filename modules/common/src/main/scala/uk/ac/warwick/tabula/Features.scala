@@ -104,7 +104,6 @@ abstract class Features {
 	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
 	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
-	@Value("${features.attendanceMonitoring.version2:true}")	var attendanceMonitoringVersion2 = defaults.attendanceMonitoringVersion2
 	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.attendanceMonitoring.academicYear2015:true}")	var attendanceMonitoringAcademicYear2015 = defaults.attendanceMonitoringAcademicYear2015
 	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
@@ -243,7 +242,6 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
-	@BeanProperty var attendanceMonitoringVersion2 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 
