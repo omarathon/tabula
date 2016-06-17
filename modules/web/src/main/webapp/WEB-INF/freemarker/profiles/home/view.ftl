@@ -6,9 +6,9 @@
 </#list>
 
 <#if !user.loggedIn> <#-- Defensive: For if we ever decide not to force login for /profiles/ -->
-	<p class="lead muted">
+	<h1>
 		Administration
-	</p>
+	</h1>
 
 	<#if IS_SSO_PROTECTED!true>
 		<p class="alert">
