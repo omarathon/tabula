@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.commands.profiles
 
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
-import uk.ac.warwick.tabula.services.elasticsearch.ProfileQueryService
 
 object SearchAgentsCommand {
 	def apply(user: CurrentUser) =
@@ -16,8 +14,7 @@ object SearchAgentsCommand {
 }
 
 class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff)
-	with CommandInternal[Seq[Member]]{
-	var profileQueryService = Wire[ProfileQueryService]
+	with CommandInternal[Seq[Member]] {
 
 	override def applyInternal() =
 		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches

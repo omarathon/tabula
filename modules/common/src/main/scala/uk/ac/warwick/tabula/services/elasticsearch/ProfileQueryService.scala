@@ -7,6 +7,7 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.{Department, Member, MemberUserType}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -140,4 +141,12 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 		} catch {
 			case _: TimeoutException => Seq() // Invalid query string or timeout
 		}
+}
+
+trait ProfileQueryServiceComponent {
+	def profileQueryService: ProfileQueryService
+}
+
+trait AutowiringProfileQueryServiceComponent extends ProfileQueryServiceComponent {
+	var profileQueryService = Wire[ProfileQueryService]
 }

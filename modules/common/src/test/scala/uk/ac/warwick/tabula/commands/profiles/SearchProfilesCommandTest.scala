@@ -8,7 +8,7 @@ class SearchProfilesCommandTest extends TestBase with Mockito {
 	@Test def validQuery() {
 
 		val member = mock[Member]
-		val user = mock[CurrentUser]
+		val user = smartMock[CurrentUser]
 
 		val cmd = SearchProfilesCommand(member, user)
 

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.util.core.StringUtils
 
 @Controller
-class SearchController extends ProfilesController with SearchJSONHelpers {
+class ProfilesSearchController extends ProfilesController with SearchJSONHelpers {
 
 	type SearchProfilesCommand = Appliable[Seq[Member]] with AbstractSearchProfilesCommandState
 

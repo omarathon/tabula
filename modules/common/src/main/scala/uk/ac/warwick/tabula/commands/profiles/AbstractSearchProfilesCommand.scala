@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.elasticsearch.AutowiringProfileQueryServiceComponent
 
 abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*)
 	extends Command[Seq[Member]]
@@ -14,7 +15,8 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 		with AbstractSearchProfilesCommandState
 		with AutowiringProfileServiceComponent
 		with AutowiringSecurityServiceComponent
-		with AutowiringModuleAndDepartmentServiceComponent {
+		with AutowiringModuleAndDepartmentServiceComponent
+ 		with AutowiringProfileQueryServiceComponent {
 
 	import AbstractSearchProfilesCommand._
 
