@@ -10,7 +10,7 @@ class SearchProfilesCommandTest extends TestBase with Mockito {
 		val member = mock[Member]
 		val user = mock[CurrentUser]
 
-		val cmd = new SearchProfilesCommandInternal(member, user)
+		val cmd = SearchProfilesCommand(member, user)
 
 		// query needs to be at least 3 characters
 		cmd.query = "xx"

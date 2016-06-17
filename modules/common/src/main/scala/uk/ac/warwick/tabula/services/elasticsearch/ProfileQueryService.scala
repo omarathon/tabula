@@ -29,15 +29,12 @@ trait ProfileQueryMethods {
 
 	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member] = {
 		if (!query.hasText) Nil
-		else {
-			findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = searchAllDepts)
-		}
+		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = searchAllDepts)
 	}
 
-	def find(ownDepartment: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] = {
+	def find(ownDepartment: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] =
 		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, searchAcrossAllDepartments = false)
 	}
-}
 
 @Service
 class ProfileQueryServiceImpl extends AbstractQueryService
@@ -115,7 +112,7 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 			val userTypeQuery =
 				if (userTypes.isEmpty) None
 				else Some(bool {
-					should(userTypes.map { userType => termQuery("userType", userType.dbValue) }).minimumShouldMatch(1)
+					should(userTypes.map { userType => termQuery("userType", userType.dbValue) })
 				})
 
 			// Active only
