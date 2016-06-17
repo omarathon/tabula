@@ -123,6 +123,6 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 	@ModelAttribute("searchProfilesCommand")
 	protected def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)).orNull
+		restricted(SearchProfilesCommand(currentMember, user)).orNull
 
 }

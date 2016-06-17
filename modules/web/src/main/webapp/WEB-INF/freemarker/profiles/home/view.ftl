@@ -6,9 +6,9 @@
 </#list>
 
 <#if !user.loggedIn> <#-- Defensive: For if we ever decide not to force login for /profiles/ -->
-	<p class="lead muted">
-		This is a service for managing student profiles, records and tutor information
-	</p>
+	<h1>
+		Administration
+	</h1>
 
 	<#if IS_SSO_PROTECTED!true>
 		<p class="alert">
@@ -21,17 +21,17 @@
 	<#assign is_tutor=showMyStudents />
 	<#assign is_admin=adminDepartments?has_content />
 
-	<p class="lead muted">
-		This is a service for managing student profiles, records and tutor information
-	</p>
+	<h1>
+		Administration
+	</h1>
 
 	<div class="row">
 		<div class="col-md-<#if is_admin>6<#else>12</#if>">
 			<#if is_staff>
-				<div class="header-with-tooltip" id="search-header">
-					<h2 class="section">Search for students</h2>
-					<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Start typing a student's name, or put their University ID in, and we'll show you a list of results. Any student who studies in your department should be included.">Which students can I search for?</span>
+				<div class="header" id="search-header">
+					<h2 class="section">Search profiles</h2>
 				</div>
+				<p class="subtler">Type or paste a name or university ID</p>
 
 				<#include "../profile/search/form.ftl" />
 
@@ -77,8 +77,8 @@
 				<#list searchDepartments as dept>
 					<h2>${dept.name}</h2>
 					<ul>
-						<li><a href="<@routes.profiles.filter_students dept />">All students in ${dept.name}</a></li>
-						<li><a href="<@routes.profiles.department_timetables dept />">Timetables for ${dept.name}</a></li>
+						<li><a href="<@routes.profiles.filter_students dept />">Show all students in ${dept.name}</a></li>
+						<li><a href="<@routes.profiles.department_timetables dept />">Show all timetables for ${dept.name}</a></li>
 					</ul>
 				</#list>
 			</#if>
@@ -86,7 +86,7 @@
 
 		<#if adminDepartments?has_content>
 			<div id="profile-dept-admin" class="col-md-6">
-				<h4>Departmental administration</h4>
+				<h2>Departmental administration</h2>
 
 				<#list adminDepartments?sort_by("code") as dept>
 					<div class="clearfix">

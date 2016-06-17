@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 	var departmentService = Wire[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)).orNull
+		restricted(SearchProfilesCommand(currentMember, user)).orNull
 
 	@ModelAttribute("command")
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)

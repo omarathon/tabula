@@ -201,7 +201,9 @@
 							}
 
 							$spinner.spin('small');
-							xhr = $.get(target, { query : query }, function(data) {
+
+							var searchAllDepts = $("input[type='radio'][name='searchAllDepts']:checked").val();
+							xhr = $.get(target, { query : query, searchAllDepts : searchAllDepts }, function(data) {
 								$spinner.spin(false);
 
 								var members = [];
