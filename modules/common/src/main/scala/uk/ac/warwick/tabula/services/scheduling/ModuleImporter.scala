@@ -157,7 +157,8 @@ object ModuleImporter {
 
 			where
 				substr(top.top_code, 0, 5) = :module_code and
-				top.top_iuse = 'Y'
+				top.top_iuse = 'Y' and
+				top.dpt_code is not null
 			group by
 				substr(top.top_code, 0, 5), top.dpt_code
 		"""
