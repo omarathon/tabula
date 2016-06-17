@@ -72,8 +72,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 				) ++ Seq(
 					ProfileBreadcrumbs.Profile.AssignmentsForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier),
-					ProfileBreadcrumbs.Profile.SeminarsForScyd(scyd).setActive(activeIdentifier),
-					ProfileBreadcrumbs.Profile.AttendanceForScyd(scyd).setActive(activeIdentifier)
+					ProfileBreadcrumbs.Profile.SeminarsForScyd(scyd).setActive(activeIdentifier)
 				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser) match {
 					case Nil => Nil
 					case Seq(assignments) => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
@@ -123,6 +122,6 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 	@ModelAttribute("searchProfilesCommand")
 	protected def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)).orNull
+		restricted(SearchProfilesCommand(currentMember, user)).orNull
 
 }

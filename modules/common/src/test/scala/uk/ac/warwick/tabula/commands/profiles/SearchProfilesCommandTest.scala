@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.data.model.Member
 
 class SearchProfilesCommandTest extends TestBase with Mockito {
 
-	@Test def validQuery {
+	@Test def validQuery() {
 
 		val member = mock[Member]
 		val user = mock[CurrentUser]
 
-		val cmd = new SearchProfilesCommand(member, user)
+		val cmd = new SearchProfilesCommandInternal(member, user)
 
 		// query needs to be at least 3 characters
 		cmd.query = "xx"

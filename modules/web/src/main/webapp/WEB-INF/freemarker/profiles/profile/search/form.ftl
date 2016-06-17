@@ -13,6 +13,16 @@
 					<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
 				</span>
 			</div>
+			<@bs3form.form_group>
+				<@bs3form.radio>
+					<input type="radio" name="searchAllDepts" checked value="false">
+					Departmental students & staff
+				</@bs3form.radio>
+				<@bs3form.radio>
+					<input type="radio" name="searchAllDepts" value="true">
+					All students & staff
+				</@bs3form.radio>
+			</@bs3form.form_group>
 		</@f.form>
 	</section>
 </#if>

@@ -1,33 +1,28 @@
 package uk.ac.warwick.tabula.commands.profiles
 
 import org.hibernate.validator.constraints.NotEmpty
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, SecurityService}
+import uk.ac.warwick.tabula.services._
 
 abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserType: MemberUserType, otherUserTypes: MemberUserType*)
 	extends Command[Seq[Member]]
 		with ReadOnly
-		with Unaudited {
-	import AbstractSearchProfilesCommand._
+		with Unaudited
+		with AbstractSearchProfilesCommandState
+		with AutowiringProfileServiceComponent
+		with AutowiringSecurityServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent {
 
-	PermissionCheck(Permissions.Profiles.Search)
+	import AbstractSearchProfilesCommand._
 
 	final val userTypes = Set(firstUserType) ++ otherUserTypes
 
-	var profileService = Wire.auto[ProfileService]
-	var securityService = Wire.auto[SecurityService]
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-
-	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
-	var query: String = _
-
 	def validQuery =
 		(query.trim().length >= MinimumQueryLength) &&
-		(query.split("""\s+""").find{_.length >= MinimumTermLength}.isDefined)
+		query.split("""\s+""").exists({_.length >= MinimumTermLength})
 
 	private def singletonByUserType(option: Option[Member]) = option match {
 		case Some(member) => Seq(member) filter {userTypes contains _.userType}
@@ -64,4 +59,11 @@ object AbstractSearchProfilesCommand {
 
 	def isMaybeUsercode(query: String) = query.trim matches UsercodePattern
 
+}
+
+trait AbstractSearchProfilesCommandState {
+	@NotEmpty(message = "{NotEmpty.profiles.searchQuery}")
+	var query: String = _
+
+	var searchAllDepts: Boolean = _
 }

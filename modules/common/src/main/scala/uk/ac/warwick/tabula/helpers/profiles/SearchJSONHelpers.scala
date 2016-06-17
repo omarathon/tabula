@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.helpers.profiles
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.profiles.AbstractSearchProfilesCommand
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -26,7 +26,7 @@ trait SearchJSONHelpers {
 		profiles.map(memberToJson(_))
 	}
 
-	def submitJson(cmd: AbstractSearchProfilesCommand, errors: Errors) = {
+	def submitJson(cmd: Appliable[Seq[Member]], errors: Errors) = {
 		if (errors.hasErrors) {
 			formMav
 		} else {
@@ -36,7 +36,7 @@ trait SearchJSONHelpers {
 		}
 	}
 
-	def submit(cmd: AbstractSearchProfilesCommand, errors: Errors, path: String) = {
+	def submit(cmd: Appliable[Seq[Member]], errors: Errors, path: String) = {
 		if (errors.hasErrors) {
 			formMav
 		} else {
