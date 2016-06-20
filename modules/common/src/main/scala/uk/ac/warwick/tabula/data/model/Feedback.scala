@@ -131,7 +131,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		newMark.markType = markType
 		newMark.uploaderId = uploaderId
 		newMark.uploadedDate = DateTime.now
-		_marks.add(newMark)
+		_marks.add(0, newMark) // add at the top as we know it's the latest one, the rest get shifted down
 		newMark
 	}
 

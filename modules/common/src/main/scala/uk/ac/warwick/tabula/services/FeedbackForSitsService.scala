@@ -61,8 +61,8 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 			saveOrUpdate(feedbackForSits)
 
 			if (validatedFeedback.populated.nonEmpty) {
-				if (feedback.latestPrivateAdjustment.isDefined) {
-					feedback.latestPrivateAdjustment.foreach(m => {
+				if (feedback.latestPrivateOrNonPrivateAdjustment.isDefined) {
+					feedback.latestPrivateOrNonPrivateAdjustment.foreach(m => {
 						m.grade = Some(validatedFeedback.populated(feedback))
 						feedbackForSitsDao.saveOrUpdate(m)
 					})
