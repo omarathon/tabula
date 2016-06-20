@@ -44,7 +44,8 @@ class ViewProfileModulesController extends AbstractViewProfileController {
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
 			"moduleRegistrations" -> command.map(_.apply()).getOrElse(Seq()),
-			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
+			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
+			"member" -> studentCourseDetails.student
 		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.ModulesIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.modules(scyd)): _*)
 	}

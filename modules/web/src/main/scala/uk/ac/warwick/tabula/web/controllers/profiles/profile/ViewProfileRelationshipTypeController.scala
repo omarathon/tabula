@@ -49,9 +49,12 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 	): Mav = {
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
+		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
+
 		if (!canReadMeetings) {
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
 				"member" -> studentCourseDetails.student,
+				"isSelf" -> isSelf,
 				"relationships" -> studentCourseDetails.relationships(relationshipType),
 				"canReadMeetings" -> false
 			), studentCourseDetails, relationshipType)
@@ -61,8 +64,6 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				optionalCurrentMember,
 				mandatory(relationshipType)
 			).apply().filterNot(meetingNotInAcademicYear(thisAcademicYear))
-
-			val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
 
 			// User can schedule meetings provided they have the appropriate permission and...
 			// either they aren't the student themseleves, or all of the agents for this relationship type are in a department that allows this

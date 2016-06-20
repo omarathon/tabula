@@ -21,6 +21,10 @@
 
 <h1>${relationshipType.agentRole?cap_first}</h1>
 
+<#if !relationships?has_content>
+	<div class="alert alert-info">No ${relationshipType.agentRole} details found for this course and academic year</div>
+</#if>
+
 <div class="row">
 	<#list relationships as relationship>
 		<div class="col-md-4">
@@ -115,7 +119,9 @@
 <h2>Record of meetings</h2>
 
 <#if !(canReadMeetings!true)>
-	<div class="alert alert-error">You do not have permission to view the meetings for this student.</div>
+	<div class="alert alert-error">You do not have permission to view the meetings for this student</div>
+<#elseif !meetings?has_content>
+	<div class="alert alert-info">No meeting records exist for this academic year</div>
 <#else>
 	<section class="meetings">
 		<#if meetings?has_content>

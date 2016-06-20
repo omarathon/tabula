@@ -6,6 +6,24 @@
 
 <#escape x as x?html>
 
+<#if !isSelf>
+	<details class="indent">
+		<summary>${student.officialName}</summary>
+		<#if student.userId??>
+			${student.userId}<br/>
+		</#if>
+		<#if student.email??>
+			<a href="mailto:${student.email}">${student.email}</a><br/>
+		</#if>
+		<#if student.phoneNumber??>
+			${phoneNumberFormatter(student.phoneNumber)}<br/>
+		</#if>
+		<#if student.mobileNumber??>
+			${phoneNumberFormatter(student.mobileNumber)}<br/>
+		</#if>
+	</details>
+</#if>
+
 <h1>Attendance</h1>
 
 <#if hasMonitoringPointAttendancePermission>
