@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.web.controllers.attendance
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeCommandState, HomeInformation}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.Tap
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
@@ -70,22 +69,6 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	}}
 
 	@Test
-	def onlyOneViewPermissionRedirectedToViewDepartmentOldAM(){new Fixture{
-		info = HomeInformation(
-			hasProfile = false,
-			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
-			managePermissions = Set(),
-			allRelationshipTypes = Seq(),
-			relationshipTypesMap = Map()
-		)
-
-		controller.features.attendanceMonitoringVersion2 = false
-		val mav = controller.home(command, null)
-		mav.viewName should be(s"redirect:/attendance/$departmentCode")
-
-	}}
-
-	@Test
 	def onlyOneManagePermissionRedirectedToManageDepartment(){new Fixture{
 		info = HomeInformation(
 			hasProfile = false,
@@ -97,22 +80,6 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 
 		val mav = controller.home(command, null)
 		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
-
-	}}
-
-	@Test
-	def onlyOneManagePermissionRedirectedToManageDepartmentOldAM(){new Fixture{
-		info = HomeInformation(
-			hasProfile = false,
-			viewPermissions = Set(),
-			managePermissions = Set(new Department().tap(_.code=departmentCode)),
-			allRelationshipTypes = Seq(),
-			relationshipTypesMap = Map()
-		)
-
-		controller.features.attendanceMonitoringVersion2 = false
-		val mav = controller.home(command, null)
-		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode/2013")
 
 	}}
 

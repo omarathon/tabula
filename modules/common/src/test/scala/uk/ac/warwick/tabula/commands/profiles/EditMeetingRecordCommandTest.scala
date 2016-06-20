@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.Meet
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent, PersistenceTestBase}
 
 class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecordTests {
@@ -46,10 +46,8 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
 
 		var approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser) with ApproveMeetingRecordState with MeetingRecordDaoComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent
-			with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
+			with ApproveMeetingRecordValidation with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
 				val meetingRecordDao = smartMock[MeetingRecordDao]
-				val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
 				val features = smartMock[Features]
 				val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 				val securityService = smartMock[SecurityService]
@@ -95,11 +93,10 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		// The student is now happy with the record and approves it
 		approvalCmd = new ApproveMeetingRecordCommand(meeting, studentCurrentUser)
 			with ApproveMeetingRecordState with MeetingRecordDaoComponent with SecurityServiceComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent
-			with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent {
-				val meetingRecordDao = mock[MeetingRecordDao]
-				val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
-				val features = mock[Features]
+			with ApproveMeetingRecordValidation	with FeaturesComponent 
+			with AttendanceMonitoringMeetingRecordServiceComponent {
+				val meetingRecordDao = smartMock[MeetingRecordDao]
+				val features = smartMock[Features]
 				val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 				val securityService = smartMock[SecurityService]
 			}

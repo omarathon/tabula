@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.attendance.old
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Department, Route}

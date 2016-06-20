@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordServiceComponent
-import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServiceComponent, ProfileServiceComponent, RelationshipServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, RelationshipServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.profiles.{CurrentMemberComponent, MeetingRecordAcademicYearFiltering}
 import uk.ac.warwick.tabula.web.controllers.{ControllerImports, ControllerMethods, ControllerViews}
 
@@ -23,7 +23,6 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 		with ControllerImports
 		with CurrentMemberComponent
 		with ControllerViews
-		with MonitoringPointMeetingRelationshipTermServiceComponent
 		with AttendanceMonitoringMeetingRecordServiceComponent
 		with TermServiceComponent =>
 	/**
@@ -117,10 +116,7 @@ trait MeetingRecordModal extends MeetingRecordAcademicYearFiltering {
 				"role" -> relationshipType,
 				"meetings" -> meetingList,
 				"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-					case (meeting: MeetingRecord) => meeting.id -> (
-						monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
-							|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-						)
+					case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
 					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 				}.toMap,
 				"viewerUser" -> user,

@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 
 class RouteDaoTest extends PersistenceTestBase {
 
@@ -16,7 +14,7 @@ class RouteDaoTest extends PersistenceTestBase {
 		dao.sessionFactory = sessionFactory
 	}
 
-	@Test def getByCode = transactional { tx =>
+	@Test def byCode():Unit = transactional { tx =>
 		dao.saveOrUpdate(route)
 
 		dao.getByCode("g553") should be (Some(route))

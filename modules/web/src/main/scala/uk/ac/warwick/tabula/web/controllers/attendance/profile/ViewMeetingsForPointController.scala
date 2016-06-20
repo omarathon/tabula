@@ -19,7 +19,7 @@ class ViewMeetingsForPointController extends AttendanceController {
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Seq[(MeetingRecord, Seq[String])]]) = {
 		val meetingsStatuses = cmd.apply()
-		Mav("attendance/home/meetings",
+		Mav("attendance/view/meetings",
 			"meetingsStatuses" -> meetingsStatuses,
 			"allMeetingFormats" -> MeetingFormat.members
 		).noLayoutIf(ajax)
