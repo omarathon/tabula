@@ -3,20 +3,15 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-case class CreateNewAttendancePointsFromCopySearchCommandResult(
-	schemes: Seq[AttendanceMonitoringScheme],
-	sets: Seq[MonitoringPointSet]
-)
-
 object CreateNewAttendancePointsFromCopySearchCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new CreateNewAttendancePointsFromCopySearchCommandInternal(department, academicYear)
-			with ComposableCommand[CreateNewAttendancePointsFromCopySearchCommandResult]
+			with ComposableCommand[Seq[AttendanceMonitoringScheme]]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with CreateNewAttendancePointsFromCopySearchPermissions
 			with CreateNewAttendancePointsFromCopySearchCommandState
@@ -25,15 +20,12 @@ object CreateNewAttendancePointsFromCopySearchCommand {
 
 
 class CreateNewAttendancePointsFromCopySearchCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[CreateNewAttendancePointsFromCopySearchCommandResult] {
+	extends CommandInternal[Seq[AttendanceMonitoringScheme]] {
 
 	self: AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		CreateNewAttendancePointsFromCopySearchCommandResult(
-			attendanceMonitoringService.listSchemes(department, academicYear).sortBy(_.displayName),
-			attendanceMonitoringService.listOldSets(department, academicYear).sortBy(_.route.code)
-		)
+		attendanceMonitoringService.listSchemes(department, academicYear).sortBy(_.displayName)
 	}
 
 }

@@ -28,20 +28,8 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 		val cmd = new UpdateAttendanceMonitoringSchemeMembershipCommandInternal with CommandTestSupport
 	}
 
-	trait FeatureEnabledFixture extends Fixture {
-		cmd.features.attendanceMonitoringVersion2 = true
-	}
-
 	@Test
-	def featureTest() { new Fixture {
-		cmd.features.attendanceMonitoringVersion2 = false
-		cmd.applyInternal()
-		verify(cmd.attendanceMonitoringService, times(0)).listSchemesForMembershipUpdate
-		deserializeFilterCalled should be {false}
-	}}
-
-	@Test
-	def noSchemes() { new FeatureEnabledFixture {
+	def noSchemes() { new Fixture {
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq()
 		val schemes = cmd.applyInternal()
 		deserializeFilterCalled should be {false}
@@ -49,7 +37,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	}}
 
 	@Test
-	def sameStudentInMultipleSchemesInSameDept() { new FeatureEnabledFixture {
+	def sameStudentInMultipleSchemesInSameDept() { new Fixture {
 		val dept = Fixtures.department("its")
 		val scheme1 = new AttendanceMonitoringScheme
 		scheme1.attendanceMonitoringService = None
@@ -76,7 +64,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	}}
 
 	@Test
-	def sameStudentInMultipleSchemesInDifferentDept() { new FeatureEnabledFixture {
+	def sameStudentInMultipleSchemesInDifferentDept() { new Fixture {
 		val dept1 = Fixtures.department("its")
 		val dept2 = Fixtures.department("foo")
 		val scheme1 = new AttendanceMonitoringScheme

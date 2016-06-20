@@ -44,11 +44,12 @@ trait AttendanceMonitoringService {
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
-	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def studentAlreadyReportedThisTerm(student: StudentMember, point: AttendanceMonitoringPoint): Boolean
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def listUnreportedReports: Seq[MonitoringPointReport]
+	def markReportAsPushed(report: MonitoringPointReport): Unit
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType, academicYear: AcademicYear): Seq[SchemeMembershipItem]
 	def findPoints(
 		department: Department,
@@ -57,12 +58,6 @@ trait AttendanceMonitoringService {
 		types: Seq[AttendanceMonitoringPointType],
 		styles: Seq[AttendanceMonitoringPointStyle]
 	): Seq[AttendanceMonitoringPoint]
-	def findOldPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		sets: Seq[MonitoringPointSet],
-		types: Seq[AttendanceMonitoringPointType]
-	): Seq[MonitoringPoint]
 	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
@@ -148,9 +143,6 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemes(department, academicYear)
 
-	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet] =
-		attendanceMonitoringDao.listOldSets(department, academicYear)
-
 	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme] =
 		attendanceMonitoringDao.listSchemesForMembershipUpdate
 
@@ -164,6 +156,15 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport] =
 		attendanceMonitoringDao.findReports(studentIds, year, period)
+
+	def listUnreportedReports: Seq[MonitoringPointReport] = {
+		attendanceMonitoringDao.listUnreportedReports
+	}
+
+	def markReportAsPushed(report: MonitoringPointReport): Unit = {
+		report.pushedDate = DateTime.now
+		saveOrUpdate(report)
+	}
 
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType, academicYear: AcademicYear): Seq[SchemeMembershipItem] = {
 		val items = attendanceMonitoringDao.findSchemeMembershipItems(universityIds, itemType)
@@ -188,20 +189,6 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		styles: Seq[AttendanceMonitoringPointStyle]
 	): Seq[AttendanceMonitoringPoint] = {
 		attendanceMonitoringDao.findPoints(department, academicYear, schemes, types, styles)
-	}
-
-	def findOldPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		sets: Seq[MonitoringPointSet],
-		types: Seq[AttendanceMonitoringPointType]
-	): Seq[MonitoringPoint] = {
-		attendanceMonitoringDao.findOldPoints(department, academicYear, sets, types.map {
-			case AttendanceMonitoringPointType.Standard => null
-			case AttendanceMonitoringPointType.Meeting => MonitoringPointType.Meeting
-			case AttendanceMonitoringPointType.SmallGroup => MonitoringPointType.SmallGroup
-			case AttendanceMonitoringPointType.AssignmentSubmission => MonitoringPointType.AssignmentSubmission
-		})
 	}
 
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate] = {

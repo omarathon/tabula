@@ -38,8 +38,6 @@
 	</div>
 </#if>
 
-<#assign thisPath><@routes.attendance.manageDepartment command.dept /></#assign>
-
 <form id="chooseCreateType" class="form-inline" action="<@routes.attendance.createSet command.dept command.academicYear />">
 	<h2>Create monitoring schemes</h2>
 	<label>

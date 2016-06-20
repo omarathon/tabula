@@ -81,7 +81,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 
 	@RequestMapping(method = Array(POST), params = Array("search"))
 	def search(
-		@ModelAttribute("searchCommand") searchCommand: Appliable[CreateNewAttendancePointsFromCopySearchCommandResult],
+		@ModelAttribute("searchCommand") searchCommand: Appliable[Seq[AttendanceMonitoringScheme]],
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@PathVariable department: Department,
@@ -90,18 +90,11 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@RequestParam searchAcademicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) = {
-		val searchResult = searchCommand.apply()
-		val allSchemes = {
-			if (searchResult.schemes.isEmpty)
-				searchResult.sets
-			else
-				searchResult.schemes
-		}
+		val allSchemes = searchCommand.apply()
 		Mav("attendance/manage/copypoints",
 			"searchDepartment" -> searchDepartment,
 			"searchAcademicYear" -> searchAcademicYear,
 			"allSchemes" -> allSchemes,
-			"isSchemes" -> searchResult.schemes.nonEmpty,
 			"allTypes" -> AttendanceMonitoringPointType.values,
 			"findResult" -> findCommand.apply(),
 			"monthNames" -> monthNames(searchAcademicYear),
@@ -115,7 +108,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 
 	@RequestMapping(method = Array(POST), params = Array("copy"))
 	def copy(
-		@ModelAttribute("searchCommand") searchCommand: Appliable[CreateNewAttendancePointsFromCopySearchCommandResult],
+		@ModelAttribute("searchCommand") searchCommand: Appliable[Seq[AttendanceMonitoringScheme]],
 		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
 		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]] with SetsFindPointsResultOnCommandState with SelfValidating,
 		errors: Errors,
@@ -125,13 +118,7 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 		@RequestParam searchAcademicYear: AcademicYear,
 		@RequestParam schemes: JList[AttendanceMonitoringScheme]
 	) = {
-		val searchResult = searchCommand.apply()
-		val allSchemes = {
-			if (searchResult.schemes.isEmpty)
-				searchResult.sets
-			else
-				searchResult.schemes
-		}
+		val allSchemes = searchCommand.apply()
 		val findCommandResult = findCommand.apply()
 		cmd.setFindPointsResult(findCommandResult)
 		cmd.validate(errors)
@@ -141,7 +128,6 @@ class CreateAttendancePointsFromCopyController extends AttendanceController with
 				"searchAcademicYear" -> searchAcademicYear,
 				"findResult" -> findCommandResult,
 				"allSchemes" -> allSchemes,
-				"isSchemes" -> searchResult.schemes.nonEmpty,
 				"allTypes" -> AttendanceMonitoringPointType.values,
 				"errors" -> errors,
 				"monthNames" -> monthNames(searchAcademicYear),

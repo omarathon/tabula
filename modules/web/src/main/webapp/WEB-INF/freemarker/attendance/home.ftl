@@ -31,7 +31,7 @@
 
 <#if hasProfile>
 	<h2>
-		<a href="<@routes.attendance.attendanceProfile />">My attendance profile</a>
+		<a href="<@routes.attendance.profileHome />">My attendance profile</a>
 	</h2>
 </#if>
 
@@ -41,11 +41,7 @@
 	<ul>
 		<#list relationshipTypesMap?keys as relationshipType>
 			<#if relationshipTypesMapById[relationshipType.id]>
-				<#if academicYear.startYear == 2013>
-					<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.attendance.agentView relationshipType />">${relationshipType.studentRole?cap_first}s 13/14</a></h3></li>
-				<#else>
-					<li><h3><a id="relationship-${relationshipType.urlPart}-${academicYear.startYear?c}" href="<@routes.attendance.agentHomeForYear relationshipType academicYear.startYear?c />">${relationshipType.studentRole?cap_first}s ${academicYear.label}</a></h3></li>
-				</#if>
+				<li><h3><a id="relationship-${relationshipType.urlPart}-${academicYear.startYear?c}" href="<@routes.attendance.agentHomeForYear relationshipType academicYear.startYear?c />">${relationshipType.studentRole?cap_first}s ${academicYear.label}</a></h3></li>
 			</#if>
 		</#list>
 	</ul>
@@ -60,11 +56,7 @@
 		<ul class="unstyled">
 			<#list viewPermissions as department>
 				<li>
-					<#if academicYear.startYear == 2013>
-						<h3><a id="view-department-${department.code}" href="<@routes.attendance.viewDepartment department />">${department.name} 13/14</a></h3>
-					<#else>
-						<h3><a id="view-department-${department.code}-${academicYear.startYear?c}" href="<@routes.attendance.viewHomeForYear department academicYear.startYear?c />">${department.name} ${academicYear.label}</a></h3>
-					</#if>
+					<h3><a id="view-department-${department.code}-${academicYear.startYear?c}" href="<@routes.attendance.viewHomeForYear department academicYear.startYear?c />">${department.name} ${academicYear.label}</a></h3>
 				</li>
 			</#list>
 		</ul>
@@ -75,11 +67,7 @@
 		<ul class="unstyled">
 			<#list managePermissions as department>
 				<li>
-					<#if academicYear.startYear == 2013>
-						<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageDepartment department />">${department.name} 13/14</a></h3>
-					<#else>
-						<h3><a id="manage-department-${department.code}-${academicYear.startYear?c}" href="<@routes.attendance.manageHomeForYear department academicYear.startYear?c/>">${department.name} ${academicYear.label}</a></h3>
-					</#if>
+					<h3><a id="manage-department-${department.code}-${academicYear.startYear?c}" href="<@routes.attendance.manageHomeForYear department academicYear.startYear?c/>">${department.name} ${academicYear.label}</a></h3>
 				</li>
 			</#list>
 		</ul>

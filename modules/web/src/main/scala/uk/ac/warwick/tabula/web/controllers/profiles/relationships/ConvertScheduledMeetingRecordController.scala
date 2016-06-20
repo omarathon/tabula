@@ -1,23 +1,22 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.profiles.{ConvertScheduledMeetingRecordState, ConvertScheduledMeetingRecordCommand, CreateMeetingRecordCommand, ViewMeetingRecordCommand}
-import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfilesController}
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.profiles.{ConvertScheduledMeetingRecordCommand, ConvertScheduledMeetingRecordState, CreateMeetingRecordCommand, ViewMeetingRecordCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfilesController}
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/confirm"))
 class ConvertScheduledMeetingRecordController extends ProfilesController
-	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
 	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 	with MeetingRecordAcademicYearFiltering
 	with AutowiringTermServiceComponent {
@@ -38,7 +37,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 	@ModelAttribute("convertCommand")
 	def getConvertCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =  Option(meetingRecord).map(mr => {
 		ConvertScheduledMeetingRecordCommand(currentMember, mr)
-	}).getOrElse(null)
+	}).orNull
 
 	@ModelAttribute("command")
 	def getCreateCommand(
@@ -46,7 +45,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 		@PathVariable studentCourseDetails: StudentCourseDetails
 	) = Option(meetingRecord).map(mr => {
 		new CreateMeetingRecordCommand(currentMember, mr.relationship, considerAlternatives = false)
-	}).getOrElse(null)
+	}).orNull
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
@@ -120,10 +119,7 @@ class ConvertScheduledMeetingRecordController extends ProfilesController
 							"role" -> modifiedMeeting.relationship.relationshipType,
 							"meetings" -> meetingList,
 							"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-								case (meeting: MeetingRecord) => meeting.id -> (
-									monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
-										|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-									)
+								case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
 								case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 							}.toMap,
 							"viewerUser" -> user,
