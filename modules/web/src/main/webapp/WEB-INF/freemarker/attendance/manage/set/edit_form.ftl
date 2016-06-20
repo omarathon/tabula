@@ -18,7 +18,7 @@
 	<#include "_monitoringPointsPersisted.ftl" />
 </div>
 
-<a class="btn" href="<@routes.attendance.manageDepartment command.set.route.department />">Done</a>
+<a class="btn" href="<@routes.attendance.manageDepartment command.set.route.adminDepartment />">Done</a>
 
 <div id="modal" class="modal hide fade" style="display:none;"></div>
 

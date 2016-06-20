@@ -12,7 +12,7 @@ import scala.collection.mutable
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
-	new NamedQuery(name = "route.department", query = "select r from Route r where adminDepartment = :department")))
+	new NamedQuery(name = "route.adminDepartment", query = "select r from Route r where adminDepartment = :adminDepartment")))
 class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	def this(code: String = null, adminDepartment: Department = null) {

@@ -25,7 +25,7 @@
 									<i class="icon-remove"></i>
 								</a>
 							</div>
-							${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear />"><@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear point.pointSet.route.department /></a>)
+							${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear />"><@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear point.pointSet.route.adminDepartment /></a>)
 						</div>
 					</div>
 				</#list>

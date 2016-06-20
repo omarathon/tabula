@@ -46,7 +46,7 @@
 	</#macro>
 
 	<#macro recordStudent department student academicYear returnTo><@_u page="/view/${department.code}/2013/students/${student.universityId}/record?returnTo=${returnTo?url}" /></#macro>
-	<#macro recordStudentPoint point student returnTo><@_u page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro recordStudentPoint point student returnTo><@_u page="/${point.pointSet.route.adminDepartment.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 
 	<#macro viewNote student point returnTo=""><@_u page="/note/2013/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
 	<#macro editNote student point returnTo="">
@@ -54,7 +54,7 @@
 		<@_u page="/note/2013/${student.universityId}/${point.id}/edit${returnTo}" />
 	</#macro>
 
-	<#macro studentMeetings point member><@_u page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
+	<#macro studentMeetings point member><@_u page="/${point.pointSet.route.adminDepartment.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 
 	<#macro agentView relationshipType><@_u page="/agent/${relationshipType.urlPart}/2013"/></#macro>
 	<#macro agentStudentView student relationshipType academicYear><@_u page="/agent/${relationshipType.urlPart}/2013/${student.universityId}"/></#macro>
@@ -62,7 +62,7 @@
 	<#macro agentPointRecord pointId relationshipType returnTo><@_u page="/agent/${relationshipType.urlPart}/2013/point/${pointId}/record?returnTo=${returnTo?url}"/></#macro>
 
 	<#macro createSet department academicYear><@_u page="/manage/${department.code}/2013/sets/add/${academicYear.startYear?c}"/></#macro>
-	<#macro editSet pointSet><@_u page="/manage/${pointSet.route.department.code}/2013/sets/${pointSet.id}/edit"/></#macro>
+	<#macro editSet pointSet><@_u page="/manage/${pointSet.route.adminDepartment.code}/2013/sets/${pointSet.id}/edit"/></#macro>
 
 	<#-- Non-persistent -->
 	<#macro addPoint department><@_u page="/manage/${department.code}/2013/sets/add/points/add" /></#macro>
@@ -70,9 +70,9 @@
 	<#macro deletePoint department pointIndex><@_u page="/manage/${department.code}/2013/sets/add/points/delete/${pointIndex}" /></#macro>
 
 	<#-- Persistent -->
-	<#macro createPoint pointSet><@_u page="/manage/${pointSet.route.department.code}/2013/sets/${pointSet.id}/edit/points/add" /></#macro>
-	<#macro updatePoint point><@_u page="/manage/${point.pointSet.route.department.code}/2013/sets/${point.pointSet.id}/edit/points/${point.id}/edit" /></#macro>
-	<#macro removePoint point><@_u page="/manage/${point.pointSet.route.department.code}/2013/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
+	<#macro createPoint pointSet><@_u page="/manage/${pointSet.route.adminDepartment.code}/2013/sets/${pointSet.id}/edit/points/add" /></#macro>
+	<#macro updatePoint point><@_u page="/manage/${point.pointSet.route.adminDepartment.code}/2013/sets/${point.pointSet.id}/edit/points/${point.id}/edit" /></#macro>
+	<#macro removePoint point><@_u page="/manage/${point.pointSet.route.adminDepartment.code}/2013/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
 
 	<#macro profile profile><@_u page="/view/${profile.universityId}" context="/profiles"/></#macro>
 	<#macro attendanceProfile><@_u page="/profile" /></#macro>

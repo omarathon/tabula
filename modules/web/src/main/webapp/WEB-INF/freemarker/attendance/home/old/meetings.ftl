@@ -21,16 +21,16 @@
 			<#if command.point.validFromWeek == command.point.requiredFromWeek>
 				in
 				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.adminDepartment />
 				</a>
 			<#else>
 				between
 				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.adminDepartment />
 				</a>
 				and
 				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
-					<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+					<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.adminDepartment />
 				</a>
 			</#if>
 
@@ -65,9 +65,9 @@
 									<#assign popoverContent>
 										<#list reasons as reason>
 											<#if reason == "Took place before">
-												Took place before <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place before <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.adminDepartment />
 											<#elseif reason == "Took place after">
-												Took place after <@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place after <@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.adminDepartment />
 											<#else>
 												${reason}
 											</#if>
