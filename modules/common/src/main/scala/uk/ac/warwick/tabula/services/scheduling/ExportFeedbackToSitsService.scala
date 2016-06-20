@@ -108,6 +108,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 						0
 				}
 			} else {
+				logger.warn(f"Not updating SITS CAM_SAS for feedback ${feedbackForSits.feedback.id} - no latest mark or grade found")
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
 		}
