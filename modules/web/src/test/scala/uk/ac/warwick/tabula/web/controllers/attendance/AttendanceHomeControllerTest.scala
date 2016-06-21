@@ -13,8 +13,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	class Fixture{
 		var info = HomeInformation(
 			hasProfile = false,
-			viewPermissions = Set(),
-			managePermissions = Set(),
+			viewPermissions = Seq(),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -42,8 +42,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def onlyProfileRedirectedToProfileView(){new Fixture{
 		info = HomeInformation(
 			hasProfile = true,
-			viewPermissions = Set(),
-			managePermissions = Set(),
+			viewPermissions = Seq(),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -57,8 +57,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def onlyOneViewPermissionRedirectedToViewDepartment(){new Fixture{
 		info = HomeInformation(
 			hasProfile = false,
-			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
-			managePermissions = Set(),
+			viewPermissions = Seq(new Department().tap(_.code=departmentCode)),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -72,8 +72,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def onlyOneManagePermissionRedirectedToManageDepartment(){new Fixture{
 		info = HomeInformation(
 			hasProfile = false,
-			viewPermissions = Set(),
-			managePermissions = Set(new Department().tap(_.code=departmentCode)),
+			viewPermissions = Seq(),
+			managePermissions = Seq(new Department().tap(_.code=departmentCode)),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -87,8 +87,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def noPermissions(){new Fixture{
 		info = HomeInformation(
 			hasProfile = false,
-			viewPermissions = Set(),
-			managePermissions = Set(),
+			viewPermissions = Seq(),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -102,8 +102,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def viewPermissionsAndProfileShowHome(){new Fixture{
 		info = HomeInformation(
 			hasProfile = true,
-			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
-			managePermissions = Set(),
+			viewPermissions = Seq(new Department().tap(_.code=departmentCode)),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -117,8 +117,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def managePermissionsAndProfileShowHome(){new Fixture{
 		info = HomeInformation(
 			hasProfile = true,
-			viewPermissions = Set(),
-			managePermissions = Set(new Department().tap(_.code=departmentCode)),
+			viewPermissions = Seq(),
+			managePermissions = Seq(new Department().tap(_.code=departmentCode)),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map()
 		)
@@ -132,8 +132,8 @@ class AttendanceHomeControllerTest extends TestBase with Mockito{
 	def relationshipsAndProfileShowHome(){new Fixture{
 		info = HomeInformation(
 			hasProfile = true,
-			viewPermissions = Set(),
-			managePermissions = Set(),
+			viewPermissions = Seq(),
+			managePermissions = Seq(),
 			allRelationshipTypes = Seq(),
 			relationshipTypesMap = Map(relationshipType -> true)
 		)
