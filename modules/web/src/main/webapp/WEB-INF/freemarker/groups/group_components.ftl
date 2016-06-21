@@ -851,7 +851,7 @@
 <#macro studentAttendanceRow student attendance notes instances group showStudent=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
-	<#local department = module.department />
+	<#local department = module.adminDepartment />
 	<#local academicYear = set.academicYear />
 	<#local missedCount = 0 />
 
@@ -926,7 +926,7 @@
 <#macro singleGroupAttendance group instances studentAttendance attendanceNotes singleStudent={} showRecordButtons=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
-	<#local department = module.department />
+	<#local department = module.adminDepartment />
 	<#local academicYear = set.academicYear />
 
 	<table id="group_attendance_${group.id}" class="table table-striped table-condensed attendance-table">
@@ -1385,11 +1385,11 @@
 					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
 						<td
 								class="use-tooltip"
-								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
+								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
 								data-html="true"
 								data-container="body">
 							<@f.checkbox path=path value="${weekNumber}" />
-							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
+							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment true /></span>
 						</td>
 					</#list>
 				</tr>
@@ -1426,7 +1426,7 @@
 	<div class="running">
 		Running: <#compress>
 			<#if event.weekRanges?size gt 0 && event.day??>
-				${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.department)}
+				${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)}
 			<#elseif event.weekRanges?size gt 0>
 				[no day of week selected]
 			<#else>

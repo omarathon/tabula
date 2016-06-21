@@ -33,7 +33,7 @@
 					<@form.selector_check_row "markerFeedback" thisFeedback.id />
 				</td>
 
-				<#if assignment.module.department.showStudentName>
+				<#if assignment.module.adminDepartment.showStudentName>
 					<td class="student-col toggle-cell"><h6 class="toggle-icon">${item.student.firstName}</h6></td>
 					<td class="student-col toggle-cell"><h6>${item.student.lastName} <@pl.profile_link item.student.warwickId! /></h6></td>
 					<#assign toggleIcon = "" />
@@ -98,7 +98,7 @@
 		<#else>
 			<tr>
 				<td class="check-col"></td>
-				<#if assignment.module.department.showStudentName>
+				<#if assignment.module.adminDepartment.showStudentName>
 					<td class="student-col"><h6 class="toggle-icon">${u.firstName}</h6></td>
 					<td class="student-col"><h6>${u.lastName} <@pl.profile_link u.warwickId! /></h6></td>
 					<#assign toggleIcon = "" />
@@ -264,7 +264,7 @@
 						<th class="check-col no-sort">
 							<@form.selector_check_all />
 						</th>
-						<#if assignment.module.department.showStudentName>
+						<#if assignment.module.adminDepartment.showStudentName>
 							<th class="student-col">First name</th>
 							<th class="student-col">Last name</th>
 						</#if>
@@ -286,7 +286,7 @@
 		<script type="text/javascript">
 			(function($) {
 				var tsOptions = {
-					sortList: [<#if assignment.module.department.showStudentName>[3, 0], </#if>[2, 0], [1,0]],
+					sortList: [<#if assignment.module.adminDepartment.showStudentName>[3, 0], </#if>[2, 0], [1,0]],
 					headers: { 0: { sorter: false} }
 				};
 

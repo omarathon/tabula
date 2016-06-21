@@ -1,5 +1,5 @@
 <#assign module = assignment.module />
-<#assign department = module.department />
+<#assign department = module.adminDepartment />
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
 
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
