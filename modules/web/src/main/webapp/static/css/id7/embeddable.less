@@ -1,4 +1,5 @@
 @import "../../bower_components/warwick-id7/less/variables.less";
+@import "../../bower_components/warwick-id7/less/bootstrap/mixins/vendor-prefixes.less";
 @import "colours.less";
 @import "../css3.less";
 
@@ -463,8 +464,7 @@ input.flexi-picker {
 		@detailsDownArrow: '\25be';
 
 		height: 1.6em;
-		cursor: hand;
-		cursor: pointer;
+		.cursor-pointer();
 
 		width: 100%;
 		-moz-box-sizing: border-box;
@@ -519,6 +519,7 @@ table.tablesorter {
 			&.header {
 				background: white url(/static/images/tablesorter/bg.gif) no-repeat center right;
 				.cursor-pointer();
+				.user-select(none);
 			}
 
 			&.headerSortUp {
@@ -530,7 +531,7 @@ table.tablesorter {
 			}
 
 			&.no-sort {
-				padding-right: 0;
+				padding-right: @table-condensed-cell-padding;
 			}
 		}
 	}

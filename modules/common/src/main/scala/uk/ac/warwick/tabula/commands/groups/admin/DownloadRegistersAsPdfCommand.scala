@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.helpers.ComposableOrdering
 
 import scala.collection.JavaConverters._
 
@@ -30,7 +31,6 @@ object DownloadRegistersAsPdfCommand {
 			with GetsOccurrencesForDownloadRegistersAsPdfCommand
 			with Unaudited
 }
-
 
 class DownloadRegistersAsPdfCommandInternal(val department: Department, val academicYear: AcademicYear, filename: String, user: CurrentUser)
 	extends CommandInternal[RenderableFile] with TaskBenchmarking {
@@ -69,11 +69,30 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 		val allMembers = transactional(readOnly = true) { profileService.getAllMembersWithUniversityIds(userMap.keys.toSeq) }
 		val memberOrUserMap: Map[String, MemberOrUser] = userMap.mapValues(u => MemberOrUser(allMembers.find(_.universityId == u.getWarwickId), u))
 
+		def toOrdering(order: String): Ordering[String] = order match {
+			case "asc" => Ordering.String
+			case "desc" => Ordering.String.reverse
+		}
+		def toFieldOrdering(fieldName: String, index: Int): Ordering[MemberOrUser] = fieldName match {
+			case "firstName" => Ordering.by[MemberOrUser, String](_.firstName)(toOrdering(studentSortOrders.get(index)))
+			case "lastName" => Ordering.by[MemberOrUser, String](_.lastName)(toOrdering(studentSortOrders.get(index)))
+			case "universityId" => Ordering.by[MemberOrUser, String](_.universityId)(toOrdering(studentSortOrders.get(index)))
+		}
+
 		val fileAttachments = sortedOccurrences.map(occurrence => {
+
+			val memberOrdering = studentSortFields.asScala match {
+				case fields if fields.isEmpty =>
+					Ordering.by[MemberOrUser, (String, String, String)](mou => (mou.lastName, mou.firstName, mou.universityId))
+				case nonEmptySortFields =>
+					val orders = nonEmptySortFields.zipWithIndex.map { case (fieldName, index) => toFieldOrdering(fieldName, index)}
+					orders.tail.foldLeft(new ComposableOrdering(orders.head))((composableOrdering, nextOrdering) => composableOrdering.andThen(nextOrdering))
+			}
+
 			val members: Seq[MemberOrUser] = (
 				occurrence.event.group.students.users.map(u => memberOrUserMap.getOrElse(u.getWarwickId, MemberOrUser(None, new AnonymousUser))) ++
 				occurrence.attendance.asScala.toSeq.map(a => memberOrUserMap.getOrElse(a.universityId, MemberOrUser(None, new AnonymousUser)))
-			).distinct.sortBy { mou => (mou.lastName, mou.firstName, mou.universityId) }
+			).distinct.sorted(memberOrdering)
 
 			benchmarkTask("renderTemplateAndStore") {
 				pdfGenerator.renderTemplateAndStore(
@@ -90,6 +109,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 					)
 				)
 			}
+
 		})
 
 		new RenderableAttachment(combinePdfs(fileAttachments, filename))
