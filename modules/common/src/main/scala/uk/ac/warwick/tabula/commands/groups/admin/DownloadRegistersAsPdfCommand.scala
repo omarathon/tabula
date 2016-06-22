@@ -85,8 +85,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 				case fields if fields.isEmpty =>
 					Ordering.by[MemberOrUser, (String, String, String)](mou => (mou.lastName, mou.firstName, mou.universityId))
 				case nonEmptySortFields =>
-					val orders = nonEmptySortFields.zipWithIndex.map { case (fieldName, index) => toFieldOrdering(fieldName, index)}
-					orders.tail.foldLeft(new ComposableOrdering(orders.head))((composableOrdering, nextOrdering) => composableOrdering.andThen(nextOrdering))
+					new ComposableOrdering(nonEmptySortFields.zipWithIndex.map { case (fieldName, index) => toFieldOrdering(fieldName, index)}: _*)
 			}
 
 			val members: Seq[MemberOrUser] = (

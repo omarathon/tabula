@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.{Fixtures, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-class ComposableOrderingTest extends TestBase {
+class ComposableOrderingTest extends TestBase with Mockito {
 
 	val student1 = Fixtures.student("1234")
 	student1.firstName = "Dave"
@@ -41,7 +41,7 @@ class ComposableOrderingTest extends TestBase {
 	def doubleOrdering(): Unit = {
 		val o1 = Ordering.by[StudentMember, String](_.lastName) // student2.lastName == student3.lastName
 		val o2 = Ordering.by[StudentMember, String](_.firstName) // student3.firstName < student2.firstName
-		val c = new ComposableOrdering[StudentMember](o1).andThen(o2)
+		val c = new ComposableOrdering[StudentMember](o1, o2)
 		val sorted = students.sorted(c)
 		sorted should be (Seq(student1, student3, student2))
 	}
@@ -50,7 +50,7 @@ class ComposableOrderingTest extends TestBase {
 	def doubleOrderingWithReverse(): Unit = {
 		val o1 = Ordering.by[StudentMember, String](_.lastName) // student2.lastName == student3.lastName
 		val o2 = Ordering.by[StudentMember, String](_.firstName)(Ordering.String.reverse) // student3.firstName < student2.firstName
-		val c = new ComposableOrdering[StudentMember](o1).andThen(o2)
+		val c = new ComposableOrdering[StudentMember](o1, o2)
 		val sorted = students.sorted(c)
 		sorted should be (Seq(student1, student2, student3))
 	}
@@ -60,7 +60,7 @@ class ComposableOrderingTest extends TestBase {
 		val o1 = Ordering.by[StudentMember, String](_.lastName) // student3.lastName == student4.lastName
 		val o2 = Ordering.by[StudentMember, String](_.firstName) // student3.firstName == student4.firstName
 		val o3 = Ordering.by[StudentMember, String](_.universityId) // student3.universityId < student4.universityId
-		val c = new ComposableOrdering[StudentMember](o1).andThen(o2).andThen(o3)
+		val c = new ComposableOrdering[StudentMember](o1, o2, o3)
 		val sorted = (students ++ Seq(student4)).sorted(c)
 		sorted should be (Seq(student1, student3, student4, student2))
 	}
@@ -70,9 +70,68 @@ class ComposableOrderingTest extends TestBase {
 		val o1 = Ordering.by[StudentMember, String](_.lastName)(Ordering.String.reverse) // student3.lastName == student4.lastName
 		val o2 = Ordering.by[StudentMember, String](_.firstName) // student3.firstName == student4.firstName
 		val o3 = Ordering.by[StudentMember, String](_.universityId)(Ordering.String.reverse) // student3.universityId > student4.universityId
-		val c = new ComposableOrdering[StudentMember](o1).andThen(o2).andThen(o3)
+		val c = new ComposableOrdering[StudentMember](o1, o2, o3)
 		val sorted = (students ++ Seq(student4)).sorted(c)
 		sorted should be (Seq(student4, student3, student2, student1))
+	}
+
+	trait MockFixture {
+		private def toStudentMembers(any: Any): Array[StudentMember] = any.asInstanceOf[Array[_]].map(_.asInstanceOf[StudentMember])
+
+		val lastNameOrdering = Ordering.by[StudentMember, String](_.lastName)
+		val mockLastNameOrdering = smartMock[Ordering[StudentMember]]
+		mockLastNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+			val students = toStudentMembers(any)
+			lastNameOrdering.compare(students(0), students(1))
+		}
+
+		val firstNameOrdering = Ordering.by[StudentMember, String](_.firstName)
+		val mockFirstNameOrdering = smartMock[Ordering[StudentMember]]
+		mockFirstNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+			val students = toStudentMembers(any)
+			firstNameOrdering.compare(students(0), students(1))
+		}
+
+		val universityIdOrdering = Ordering.by[StudentMember, String](_.universityId)
+		val mockUniversityIdOrdering = smartMock[Ordering[StudentMember]]
+		mockUniversityIdOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
+			val students = toStudentMembers(any)
+			universityIdOrdering.compare(students(0), students(1))
+		}
+
+		val c = new ComposableOrdering[StudentMember](mockLastNameOrdering, mockFirstNameOrdering, mockUniversityIdOrdering)
+	}
+
+	@Test
+	def lazyCheck(): Unit = {
+		// Ensure that the orderings are only called when necessary
+
+		new MockFixture {
+			// Different last names, so only first ordering called
+			val sorted = Seq(student1, student2).sorted(c)
+			sorted should be (Seq(student1, student2))
+			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+			verify(mockFirstNameOrdering, times(0)).compare(any[StudentMember], any[StudentMember])
+			verify(mockUniversityIdOrdering, times(0)).compare(any[StudentMember], any[StudentMember])
+		}
+
+		new MockFixture {
+			// Same last name, different first name, so only 2 orderings called
+			val sorted = Seq(student2, student3).sorted(c)
+			sorted should be (Seq(student3, student2))
+			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+			verify(mockFirstNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+			verify(mockUniversityIdOrdering, times(0)).compare(any[StudentMember], any[StudentMember])
+		}
+
+		new MockFixture {
+			// Same furst and last name, so all 3 orderings called
+			val sorted = Seq(student4, student3).sorted(c)
+			sorted should be (Seq(student3, student4))
+			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+			verify(mockFirstNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+			verify(mockUniversityIdOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
+		}
 	}
 
 }
