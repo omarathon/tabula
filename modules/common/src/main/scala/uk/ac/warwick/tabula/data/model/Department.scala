@@ -239,12 +239,6 @@ class Department extends GeneratedId
 
 	def isOwnedBy(userId:String) = owners.knownType.includesUserId(userId)
 
-	@deprecated("Use ModuleAndDepartmentService.addOwner", "35")
-	def addOwner(owner:String) = owners.knownType.addUserId(owner)
-
-	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35")
-	def removeOwner(owner:String) = owners.knownType.removeUserId(owner)
-
 	def canRequestExtension = allowExtensionRequests
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.knownType.includesUserId(user)
 

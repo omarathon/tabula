@@ -20,12 +20,14 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	def title = "%s: Your %s allocation has changed".format(target.entity.module.code.toUpperCase, target.entity.format.description.toLowerCase)
 
+	@transient val oldSmallGroupSizes = StringMapSetting("oldSmallGroupSizes", Map())
+
 	def content =
 		FreemarkerModel(SmallGroupSetChangedNotification.templateLocation, Map(
 			"groups" -> entities,
 			"groupSet" -> target.entity,
 			"profileUrl" -> url
-		))
+		) ++ extraModel)
 
 	def url: String = {
 		recipientRole match {
@@ -36,6 +38,7 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	def urlTitle = "view this small group"
 
+	def extraModel: Map[String, Any] = Map()
 }
 
 @Entity
@@ -44,7 +47,15 @@ class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedNotifi
 
 @Entity
 @DiscriminatorValue(value="SmallGroupSetChangedTutor")
-class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotification(UserRoleOnGroup.Tutor)
+class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotification(UserRoleOnGroup.Tutor) {
+
+	private def changedGroupInfo = {
+		entities.map { newSmallGroup =>
+			(newSmallGroup, oldSmallGroupSizes.value.get(newSmallGroup.id).getOrElse("0")) }.filter { case (newGroup,oldSize) => newGroup.students.size != oldSize.toInt }
+	}
+
+	override  def extraModel = Map("groupsWithOldSizeInfo" -> changedGroupInfo)
+}
 
 sealed trait UserRoleOnGroup
 object UserRoleOnGroup {

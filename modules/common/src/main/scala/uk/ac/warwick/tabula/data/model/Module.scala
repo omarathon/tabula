@@ -20,7 +20,7 @@ import scala.util.matching.Regex
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
-	new NamedQuery(name = "module.department", query = "select m from Module m where adminDepartment = :department")))
+	new NamedQuery(name = "module.adminDepartment", query = "select m from Module m where adminDepartment = :adminDepartment")))
 class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	def this(code: String = null, adminDepartment: Department = null) {

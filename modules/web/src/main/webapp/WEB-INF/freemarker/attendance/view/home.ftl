@@ -9,7 +9,7 @@
 	<ul class="links">
 		<#list viewPermissions as department>
 			<li>
-				<h3><a id="view-department-${department.code}" href="<@routes.attendance.viewDepartment department />">${department.name} 13/14</a></h3>
+				<h3><a id="view-department-${department.code}" href="<@routes.attendance.viewHomeForYear department '2013'/>">${department.name} 13/14</a></h3>
 				<#if features.attendanceMonitoringAcademicYear2014>
 					<h3><a id="view-department-${department.code}" href="<@routes.attendance.viewHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 				</#if>

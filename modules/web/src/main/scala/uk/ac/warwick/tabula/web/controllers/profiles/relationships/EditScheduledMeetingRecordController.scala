@@ -1,23 +1,22 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
+import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.profiles.{ScheduledMeetingRecordResult, EditScheduledMeetingRecordCommand, ViewMeetingRecordCommand}
-import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfilesController}
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.profiles.{EditScheduledMeetingRecordCommand, ScheduledMeetingRecordResult, ViewMeetingRecordCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import javax.validation.Valid
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.web.controllers.profiles.{MeetingRecordAcademicYearFiltering, ProfilesController}
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/edit"))
 class EditScheduledMeetingRecordController extends ProfilesController
-	with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
 	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 	with MeetingRecordAcademicYearFiltering
 	with AutowiringTermServiceComponent {
@@ -96,10 +95,7 @@ class EditScheduledMeetingRecordController extends ProfilesController
 				"role" -> relationshipType,
 				"meetings" -> meetingList,
 				"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
-					case (meeting: MeetingRecord) => meeting.id -> (
-						monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
-							|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-						)
+					case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
 					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 				}.toMap,
 				"viewerUser" -> user,

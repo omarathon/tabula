@@ -1,19 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.profiles.ViewMeetingRecordCommand
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, AutowiringTermServiceComponent}
-import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
 
 @Controller
 @RequestMapping(Array("/profiles/view/meetings/{studentRelationshipType}/{studentCourseDetails}/{academicYear}"))
 class ViewMeetingsForRelationshipController
-	extends ProfilesController with AutowiringTermServiceComponent with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with MeetingRecordAcademicYearFiltering {
+	extends ProfilesController with AutowiringTermServiceComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+		with MeetingRecordAcademicYearFiltering {
 
 	@RequestMapping
 	def home(
@@ -34,10 +33,7 @@ class ViewMeetingsForRelationshipController
 			"viewerMember" -> currentMember,
 			"openMeetingId" -> openMeetingId,
 			"meetingApprovalWillCreateCheckpoint" -> meetings.map {
-				case (meeting: MeetingRecord) => meeting.id -> (
-					monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
-						|| attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-					)
+				case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
 				case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 			}.toMap
 		).noLayoutIf(ajax)

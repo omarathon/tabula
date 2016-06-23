@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.dev.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.web.bind.annotation.RequestMethod.POST
-import uk.ac.warwick.tabula.dev.web.commands._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringScheme, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.dev.web.commands._
+import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(Array("/fixtures/create/module"))
@@ -252,21 +250,6 @@ class UpdateExtensionSettingsFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("updateExtensionSettingsFixtureCommand") cmd: Appliable[Department]) {
-		cmd.apply()
-	}
-}
-
-@Controller
-@RequestMapping(Array("/fixtures/create/monitoringPointSet"))
-class CreateMonitoringPointSetFixturesController {
-
-	@ModelAttribute("createMonitoringPointSetFixtureCommand")
-	def getCreateMonitoringPointSetFixtureCommand(): Appliable[MonitoringPointSet] = {
-		MonitoringPointSetFixtureCommand()
-	}
-
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("createMonitoringPointSetFixtureCommand") cmd: Appliable[MonitoringPointSet]) {
 		cmd.apply()
 	}
 }

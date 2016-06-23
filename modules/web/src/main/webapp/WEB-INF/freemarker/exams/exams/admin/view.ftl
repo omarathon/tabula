@@ -119,7 +119,7 @@
 			<tr>
 				<td><#if hasSeatNumber>${mapGet(seatNumberMap, student)}</#if></td>
 				<td>
-					<#if module.department.showStudentName>
+					<#if module.adminDepartment.showStudentName>
 						${student.fullName} <@pl.profile_link student.warwickId />
 					<#else>
 						${student.warwickId!}

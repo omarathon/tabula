@@ -79,6 +79,9 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 			case groups =>
 				val n = Notification.init(blankNotification, apparentUser, groups, groups.head.groupSet)
 				n.recipientUserId = user.getUserId
+				n.oldSmallGroupSizes.value = setBeforeUpdates.groups.asScala.map { group =>
+					group.id -> group.students.size.toString
+				}.toMap
 				if (!sendEmail) n.priority = NotificationPriority.Trivial
 				Some(n)
 		}

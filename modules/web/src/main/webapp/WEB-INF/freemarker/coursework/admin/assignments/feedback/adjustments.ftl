@@ -122,7 +122,7 @@
 		The reason for adjustment and any comments will be made available to students when their feedback is published.
 	</div>
 
-	<#if features.queueFeedbackForSits && assignment.module.department.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
+	<#if features.queueFeedbackForSits && assignment.module.adminDepartment.uploadCourseworkMarksToSits && command.canBeUploadedToSits>
 		<@courses_macros.uploadToSits assignment=assignment verb="Adjusting" withValidation=false/>
 	</#if>
 

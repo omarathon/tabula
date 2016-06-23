@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import dispatch.classic.{Http, url}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.sso.client.trusted.{TrustedApplicationsManager, TrustedApplicationUtils}
+import uk.ac.warwick.sso.client.trusted.{TrustedApplicationUtils, TrustedApplicationsManager}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.{Logging, PhoneNumberFormatter}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, AutowiringTrustedApplicationsManagerComponent, DispatchHttpClientComponent, TrustedApplicationsManagerComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
 
@@ -17,9 +18,9 @@ import scala.util.{Failure, Success, Try}
 
 trait PeopleSearchData extends Logging {
 
+	self: DispatchHttpClientComponent with TrustedApplicationsManagerComponent =>
+
 	var peoplesearchUrl: String = Wire.property("${peoplesearch.api}")
-	var applicationManager = Wire[TrustedApplicationsManager]
-	var http = Wire[Http]
 
 	def getDataFromPeoplesearch(onBehalfOf: String, universityId:String): Map[String, String] = {
 		def handler = { (headers: Map[String, Seq[String]], req: dispatch.classic.Request) =>
@@ -50,7 +51,7 @@ trait PeopleSearchData extends Logging {
 		val req = url(peoplesearchUrl) <:< (trustedAppHeaders ++ Map("Content-Type" -> "application/json")) <<?
 			(Map("luceneQueryType" -> luceneQueryPara) ++ Map("query" -> queryPara))
 
-		Try(http.when(_ == 200)(req >:+ handler)) match {
+		Try(httpClient.when(_ == 200)(req >:+ handler)) match {
 			case Success(jsonData) => jsonData
 			case Failure(e) =>
 				logger.warn(s"Request for ${req.to_uri.toString} failed", e)
@@ -63,14 +64,20 @@ trait PeopleSearchData extends Logging {
 object PeoplesearchCommand {
 	def apply(member: Member, user:CurrentUser) =
 		new PeoplesearchCommandInternal(member, user)
+			with AutowiringDispatchHttpClientComponent
+			with AutowiringTrustedApplicationsManagerComponent
 			with ComposableCommand[Map[String, String]]
 			with PeoplesearchPermissions
 			with PeoplesearchCommandState
+			with PeopleSearchData
 			with Unaudited
 			with ReadOnly
 }
 
-class PeoplesearchCommandInternal(val member: Member, val user: CurrentUser) extends CommandInternal[Map[String, String]] with PeopleSearchData {
+class PeoplesearchCommandInternal(val member: Member, val user: CurrentUser) extends CommandInternal[Map[String, String]] {
+
+	self: PeopleSearchData =>
+
 	override def applyInternal() = {
 		val data = getDataFromPeoplesearch(user.userId, member.id)
 		data.transform { (key, value) =>
