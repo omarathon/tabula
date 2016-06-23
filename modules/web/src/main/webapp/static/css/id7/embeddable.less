@@ -181,7 +181,7 @@ details, summary { display: block; }
 // Apply a pointer cursor upon hover to indicate it's clickable; prevent Chrome outlining
 // These styles can be applied regardless of whether the fallback is needed
 summary {
-	.cursor-pointer();
+	cursor: pointer;
 	&:focus { outline: none; }
 }
 
@@ -297,6 +297,10 @@ summary {
 				margin-bottom: 11px;
 			}
 		}
+	}
+
+	:not(.striped-section-contents) div.checkbox {
+		margin: 0;
 	}
 }
 
@@ -464,7 +468,7 @@ input.flexi-picker {
 		@detailsDownArrow: '\25be';
 
 		height: 1.6em;
-		.cursor-pointer();
+		cursor: pointer;
 
 		width: 100%;
 		-moz-box-sizing: border-box;
@@ -518,7 +522,7 @@ table.tablesorter {
 
 			&.header {
 				background: white url(/static/images/tablesorter/bg.gif) no-repeat center right;
-				.cursor-pointer();
+				cursor: pointer;
 				.user-select(none);
 			}
 

@@ -70,13 +70,13 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 		val memberOrUserMap: Map[String, MemberOrUser] = userMap.mapValues(u => MemberOrUser(allMembers.find(_.universityId == u.getWarwickId), u))
 
 		def toOrdering(order: String): Ordering[String] = order match {
-			case "asc" => Ordering.String
 			case "desc" => Ordering.String.reverse
+			case _ => Ordering.String
 		}
 		def toFieldOrdering(fieldName: String, index: Int): Ordering[MemberOrUser] = fieldName match {
 			case "firstName" => Ordering.by[MemberOrUser, String](_.firstName)(toOrdering(studentSortOrders.get(index)))
 			case "lastName" => Ordering.by[MemberOrUser, String](_.lastName)(toOrdering(studentSortOrders.get(index)))
-			case "universityId" => Ordering.by[MemberOrUser, String](_.universityId)(toOrdering(studentSortOrders.get(index)))
+			case _ => Ordering.by[MemberOrUser, String](_.universityId)(toOrdering(studentSortOrders.get(index)))
 		}
 
 		val fileAttachments = sortedOccurrences.map(occurrence => {
