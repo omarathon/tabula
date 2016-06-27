@@ -31,6 +31,7 @@
 		</li>
 	</#macro>
 
+	<div id="timetable-clash-modal" class="modal fade timetable-clash-students"></div>
 	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#if (command.isStudentSignup())>
@@ -200,6 +201,18 @@
 												</ul>
 											</div>
 										</#list>
+										<div class="well clearfix clash-info hide">
+											<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
+												<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+											</div>
+											<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
+												<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+											</div>
+											<div class="student-clash-info hide">
+												<span class="possibleclash-group-info"></span>
+												<span class="actualclash-userIds"></span>
+											</div>
+										</div>
 									</div>
 								</div>
 
@@ -259,6 +272,15 @@
 				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
+			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', function(data) {
+				jQuery.each(data.students, function(i, val) {
+					var groupId = val[0];
+					var userIds = val[1];
+					$('.possibleclash-group-info').append( $('<span/>').prop("id",'clash-group-info-' + groupId).append(userIds.join(',')));
+				});
+				clashInfo();
+			});
+
 			// When the return list has changed, make sure the filter is re-run
 			$('.return-list').on('changed.tabula', function(e) {
 				// Make sure it exists before doing it
@@ -266,7 +288,39 @@
 				if (filter) {
 					filter.filter();
 				}
+				setTimeout(function() { clashInfo() }, 12);
 			});
+
+			var clashInfo =  function() {
+				var userIds = []
+				var students = $('input[name^="mapping"]').each(function() {
+					var inputName = this.name;
+					var inputValue = this.value;
+					var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
+					var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text()
+					if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
+						userIds.push(inputValue)
+					}
+				});
+				var clashUserIds = userIds.join(',');
+				$('.actualclash-userIds').append(clashUserIds);
+				var totalClashes = userIds.length;
+				$( '.clash-count').html(totalClashes);
+				if(totalClashes > 0) {
+					var $timtableClashLink = $('a.timetable-clash-link');
+					if(totalClashes > 1) {
+						$( '.clash-plural-info').removeClass("hide");
+						$( '.clash-singular-info').addClass("hide");
+					} else {
+						$( '.clash-singular-info').removeClass("hide");
+						$( '.clash-plural-info').addClass("hide");
+				    }
+					$( '.clash-info').removeClass("hide")
+					$timtableClashLink.prop('href', $timtableClashLink.data('href')  + clashUserIds);
+				} else {
+					$( '.clash-info').addClass("hide")
+			 	}
+			};
 		})(jQuery);
 	</script>
 </#escape>
