@@ -79,6 +79,7 @@ abstract class Features {
 	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
 	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
 	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
+	@Value("${features.personalTimetables.exams:false}") var personalExamTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 
@@ -103,7 +104,6 @@ abstract class Features {
 	var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
 	var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
-	@Value("${features.attendanceMonitoring.version2:true}")	var attendanceMonitoringVersion2 = defaults.attendanceMonitoringVersion2
 	@Value("${features.attendanceMonitoring.academicYear2014:true}")	var attendanceMonitoringAcademicYear2014 = defaults.attendanceMonitoringAcademicYear2014
 	@Value("${features.attendanceMonitoring.academicYear2015:true}")	var attendanceMonitoringAcademicYear2015 = defaults.attendanceMonitoringAcademicYear2015
 	@Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules = defaults.smallGroupCrossModules
@@ -213,6 +213,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTutorAssignmentFiltering = true
 	@BeanProperty var arbitraryRelationships = true
 	@BeanProperty var personalTimetables = true
+	@BeanProperty var personalExamTimetables = false
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var visaInStudentProfile = true
@@ -241,7 +242,6 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
-	@BeanProperty var attendanceMonitoringVersion2 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2014 = true
 	@BeanProperty var attendanceMonitoringAcademicYear2015 = true
 

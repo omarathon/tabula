@@ -1,20 +1,23 @@
 package uk.ac.warwick.tabula.commands.attendance.report
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear, CurrentUser, Fixtures, TestBase, Mockito}
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, MonitoringPointServiceComponent, SecurityService, MonitoringPointService}
-import uk.ac.warwick.userlookup.User
-import scala.collection.immutable.ListMap
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.immutable.ListMap
 
 class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends CreateMonitoringPointReportCommandState with MonitoringPointServiceComponent with SecurityServiceComponent {
-		val monitoringPointService = mock[MonitoringPointService]
-		val securityService = mock[SecurityService]
+	private trait CommandTestSupport extends CreateMonitoringPointReportCommandState
+		with AttendanceMonitoringServiceComponent with SecurityServiceComponent {
+		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val securityService = smartMock[SecurityService]
 	}
 
 	private trait Fixture {
@@ -66,7 +69,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 		reports(1).reporter should be ("IN0672089")
 		reports(1).student should be (student2)
 
-		verify(command.monitoringPointService, times(2)).saveOrUpdate(any[MonitoringPointReport])
+		verify(command.attendanceMonitoringService, times(2)).saveOrUpdate(any[MonitoringPointReport])
 	}}
 
 	@Test def permissions() {
@@ -121,8 +124,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 
@@ -208,8 +211,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 
@@ -243,8 +246,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns false
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 
@@ -278,8 +281,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 
@@ -309,8 +312,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 
@@ -340,8 +343,8 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
 			student2 -> 2
 		)
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student1), command.academicYear) returns Seq("Autumn", "Spring", "Summer")
+		command.attendanceMonitoringService.findNonReportedTerms(Seq(student2), command.academicYear) returns Seq("Autumn", "Spring")
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student1) returns true
 		command.securityService.can(currentUser, Permissions.MonitoringPoints.Report, student2) returns true
 

@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.commands.attendance.report
 
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.commands.{Description, SelfValidating, Describable, ComposableCommand, CommandInternal}
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
-import org.springframework.validation.Errors
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, TermService, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent, TermService}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object CreateMonitoringPointReportCommand {
 	def apply(department: Department, currentUser: CurrentUser) =
@@ -17,7 +18,7 @@ object CreateMonitoringPointReportCommand {
 			with CreateMonitoringPointReportCommandValidation
 			with CreateMonitoringPointReportCommandDescription
 			with CreateMonitoringPointReportCommandPermissions
-			with AutowiringMonitoringPointServiceComponent
+			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringSecurityServiceComponent
 }
 
@@ -33,7 +34,7 @@ trait CreateMonitoringPointReportCommandState extends CreateMonitoringPointRepor
 }
 
 class CreateMonitoringPointReportCommandInternal(val department: Department, val currentUser: CurrentUser) extends CommandInternal[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState {
-	self: MonitoringPointServiceComponent =>
+	self: AttendanceMonitoringServiceComponent =>
 
 	def applyInternal() = {
 		missedPoints.map { case (student, missedCount) =>
@@ -47,14 +48,14 @@ class CreateMonitoringPointReportCommandInternal(val department: Department, val
 			report.student = student
 			report.studentCourseDetails = scd
 			report.studentCourseYearDetails = scd.freshStudentCourseYearDetails.find(_.academicYear == academicYear).orNull
-			monitoringPointService.saveOrUpdate(report)
+			attendanceMonitoringService.saveOrUpdate(report)
 			report
 		}.toSeq
 	}
 }
 
 trait CreateMonitoringPointReportCommandValidation extends SelfValidating {
-	self: MonitoringPointServiceComponent with SecurityServiceComponent with CreateMonitoringPointReportCommandState =>
+	self: AttendanceMonitoringServiceComponent with SecurityServiceComponent with CreateMonitoringPointReportCommandState =>
 
 	override def validate(errors: Errors) = {
 		val allStudents = missedPoints.keySet.toSeq
@@ -79,7 +80,7 @@ trait CreateMonitoringPointReportCommandValidation extends SelfValidating {
 					errors.rejectValue("missedPoints", "monitoringPointReport.student.noSCYD", Array(student.universityId, academicYear.toString), "")
 				}
 
-				val nonReported = monitoringPointService.findNonReportedTerms(Seq(student), academicYear)
+				val nonReported = attendanceMonitoringService.findNonReportedTerms(Seq(student), academicYear)
 
 				if (!nonReported.contains(period)) {
 					errors.rejectValue("missedPoints", "monitoringPointReport.period.alreadyReported", Array(student.universityId), "")

@@ -30,7 +30,7 @@
 	</#if>
 
 	<#assign module=assignment.module />
-	<#assign department=module.department />
+	<#assign department=module.adminDepartment />
 	<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
 
 	<div class="fix-header pad-when-fixed">
@@ -157,7 +157,7 @@
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 							<td><@form.selector_check_row "students" student.user.warwickId /></td>
 							<td class="id">
-							<#if module.department.showStudentName>
+							<#if module.adminDepartment.showStudentName>
 								${student.user.fullName} <@pl.profile_link student.user.warwickId />
 							<#else>
 								${student.user.warwickId!}

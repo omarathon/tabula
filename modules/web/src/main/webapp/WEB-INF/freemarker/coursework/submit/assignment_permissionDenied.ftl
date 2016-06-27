@@ -16,7 +16,7 @@
 	<p><a class="btn" href="<@routes.coursework.depthome module/>">Module management - ${assignment.module.code}</a></p>
 <#else>
 	<#function has_admin module>
-		<#list module.department.owners.users as user>
+		<#list module.adminDepartment.owners.users as user>
 			<#if user.foundUser && user.email?has_content>
 				<#return true />
 			</#if>

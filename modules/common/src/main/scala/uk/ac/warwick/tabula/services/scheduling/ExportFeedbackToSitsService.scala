@@ -37,7 +37,7 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 
 	def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
 		case pairs if pairs.isEmpty => None
-		case Seq(pairs) => Option(JHashMap(
+		case _ => Option(JHashMap(
 			// for the where clause
 			("studentId", feedbackForSits.feedback.universityId),
 			("academicYear", feedbackForSits.feedback.academicYear.toString),
@@ -54,7 +54,7 @@ class ParameterGetter(feedbackForSits: FeedbackForSits) {
 
 	def getUpdateParams(mark: Integer, grade: String): Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
 		case pairs if pairs.isEmpty => None
-		case Seq(pairs) => Option(JHashMap(
+		case _ => Option(JHashMap(
 			// for the where clause
 			("studentId", feedbackForSits.feedback.universityId),
 			("academicYear", feedbackForSits.feedback.academicYear.toString),
@@ -108,6 +108,7 @@ class AbstractExportFeedbackToSitsService extends ExportFeedbackToSitsService wi
 						0
 				}
 			} else {
+				logger.warn(f"Not updating SITS CAM_SAS for feedback ${feedbackForSits.feedback.id} - no latest mark or grade found")
 				0 // issue a warning when the FeedbackForSits record is created, not here
 			}
 		}

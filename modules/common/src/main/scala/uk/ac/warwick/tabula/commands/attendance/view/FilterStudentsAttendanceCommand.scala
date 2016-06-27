@@ -6,8 +6,7 @@ import org.hibernate.sql.JoinType
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.attendance.old.AutowiringSecurityServicePermissionsAwareRoutes
-import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.{AutowiringSecurityServicePermissionsAwareRoutes, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.Permissions

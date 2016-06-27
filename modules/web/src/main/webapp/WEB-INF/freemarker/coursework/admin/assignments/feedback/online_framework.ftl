@@ -1,5 +1,5 @@
 <#assign module = assignment.module />
-<#assign department = module.department />
+<#assign department = module.adminDepartment />
 <#assign feedbackGraphs = studentFeedbackGraphs />
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />

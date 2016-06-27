@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
 <#assign module=assignment.module />
-<#assign department=module.department />
+<#assign department=module.adminDepartment />
 <#import "*/courses_macros.ftl" as courses_macros />
 
 <script type="text/javascript">

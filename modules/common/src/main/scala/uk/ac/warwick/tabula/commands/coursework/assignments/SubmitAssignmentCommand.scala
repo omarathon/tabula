@@ -37,7 +37,6 @@ object SubmitAssignmentCommand {
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeaturesComponent
 			with AutowiringZipServiceComponent
-			with AutowiringMonitoringPointProfileTermAssignmentServiceComponent
 			with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
 	def onBehalfOf(module: Module, assignment: Assignment, member: Member) =
@@ -52,7 +51,6 @@ object SubmitAssignmentCommand {
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeaturesComponent
 			with AutowiringZipServiceComponent
-			with AutowiringMonitoringPointProfileTermAssignmentServiceComponent
 			with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 }
 
@@ -98,7 +96,6 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 	self: SubmissionServiceComponent
 		with FeaturesComponent
 		with ZipServiceComponent
-		with MonitoringPointProfileTermAssignmentServiceComponent
 		with AttendanceMonitoringCourseworkSubmissionServiceComponent
 		with TriggerHandling =>
 
@@ -153,10 +150,8 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 
 		zipService.invalidateSubmissionZip(assignment)
 		submissionService.saveSubmission(submission)
-		monitoringPointProfileTermAssignmentService.updateCheckpointsForSubmission(submission)
 
-		if (features.attendanceMonitoringVersion2)
-			attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
+		attendanceMonitoringCourseworkSubmissionService.updateCheckpoints(submission)
 
 		submission
 	}

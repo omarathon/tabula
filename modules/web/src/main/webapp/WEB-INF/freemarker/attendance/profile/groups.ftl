@@ -101,7 +101,7 @@
 								</td>
 								<td>${module.code}</td>
 								<td>${module.title}</td>
-								<td>${module.department}</td>
+								<td>${module.adminDepartment}</td>
 								<td>${module.cats}</td>
 								<td>${module.status}</td>
 							</tr>

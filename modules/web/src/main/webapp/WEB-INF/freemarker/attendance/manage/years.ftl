@@ -5,7 +5,7 @@
 	<p><em>Choose the academic year to manage:</em></p>
 	<ul class="links">
 		<li>
-			<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageDepartment department />">${department.name} 13/14</a></h3>
+			<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2013'/>">${department.name} 13/14</a></h3>
 			<#if features.attendanceMonitoringAcademicYear2014>
 				<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 			</#if>

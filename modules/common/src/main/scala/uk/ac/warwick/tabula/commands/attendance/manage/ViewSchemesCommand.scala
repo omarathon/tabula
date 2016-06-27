@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import uk.ac.warwick.tabula.commands.attendance.old.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes}
-import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}

@@ -24,6 +24,8 @@ object Routes {
 		def mine = context + "/view/me"
 
 		def viewTimetable(member: Member) = context + "/timetable/%s" format encoded(member.universityId)
+
+		def examTimetable(universityId: String) = context + "/view/%s/exams" format encoded(universityId)
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

@@ -34,7 +34,7 @@ class NotificationSettingsController extends AdminController
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(@PathVariable department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand) = {
-		Mav("admin/notification-settings", "returnTo" -> getReturnTo("")).crumbs(
+		Mav("admin/notification-settings", "returnTo" -> getReturnTo(Routes.admin.department(department))).crumbs(
 			Breadcrumbs.Department(department)
 		)
 	}

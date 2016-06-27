@@ -16,7 +16,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 </#compress></#macro>
 <#macro modulehome module><@_u page="/admin/module/${module.code}/" /></#macro>
 <#macro depthome module academicYear=""><#compress>
-	<#local p>/admin/department/${module.department.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
+	<#local p>/admin/department/${module.adminDepartment.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
 	<@_u page=p />
 </#compress></#macro>
 <#macro single_set_info set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/" /></#macro>
@@ -114,7 +114,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 
 <#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>
 <#macro withdrawnStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/withdrawn" /></#macro>
-<#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
+<#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
 
 <#macro copyDepartment department><@_u page="/admin/department/${department.code}/groups/copy" /></#macro>
 <#macro copyModule module><@_u page="/admin/module/${module.code}/groups/copy" /></#macro>

@@ -50,7 +50,7 @@ trait ProfileExportReportValidation extends SelfValidating {
 			if (notMembers.nonEmpty) {
 				errors.rejectValue("students", "reports.profiles.export.notMembers", Array(notMembers.mkString(", ")), "")
 			}
-			val outsideDepartment = memberMap.values.toSeq.filterNot(_.affiliatedDepartments.contains(department))
+			val outsideDepartment = memberMap.values.toSeq.filterNot(member => member.affiliatedDepartments.flatMap(_.subDepartmentsContaining(member)).contains(department))
 			if (outsideDepartment.nonEmpty) {
 				errors.rejectValue("students", "reports.profiles.export.outsideDepartment", Array(outsideDepartment.map(m => s"${m.fullName.getOrElse("")} (${m.universityId})").mkString(", ")), "")
 			}

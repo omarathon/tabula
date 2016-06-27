@@ -31,7 +31,7 @@
 	</#if>
 
 	<#assign module=assignment.module />
-	<#assign department=module.department />
+	<#assign department=module.adminDepartment />
 	<#assign queueSitsUploadEnabled=(features.queueFeedbackForSits && department.uploadCourseworkMarksToSits) />
 
 	<div class="fix-header pad-when-fixed">

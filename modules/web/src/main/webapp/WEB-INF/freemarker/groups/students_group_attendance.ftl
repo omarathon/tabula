@@ -39,7 +39,7 @@
 							<#list groupsMap?keys as group>
 								<#local set = group.groupSet />
 								<#local module = set.module />
-								<#local department = module.department />
+								<#local department = module.adminDepartment />
 
 								<#local weeksMap = mapGet(groupsMap, group) />
 								<#local missedCount = 0 />

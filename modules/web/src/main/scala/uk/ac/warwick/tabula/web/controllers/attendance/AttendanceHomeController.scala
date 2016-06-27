@@ -36,9 +36,9 @@ class AttendanceHomeController extends AttendanceController {
 		if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships)
 			Redirect(Routes.Profile.home)
 			else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
-					Redirect(getViewDepartmentUrl(info.viewPermissions.head))
+					Redirect(Routes.View.department(info.viewPermissions.head))
 			} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
-					Redirect(getManageDepartmentUrl(info.managePermissions.head))
+					Redirect(Routes.Manage.department(info.managePermissions.head))
 			} else {
 				val academicYear = Option(academicYearOverride) match {
 					case Some(year) =>
@@ -61,16 +61,6 @@ class AttendanceHomeController extends AttendanceController {
 					"academicYear" -> academicYear
 				)
 		}
-	}
-
-	def getViewDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringVersion2) Routes.View.department(department)
-		else Routes.old.department.view(department)
-	}
-
-	def getManageDepartmentUrl(department:Department) = {
-		if (features.attendanceMonitoringVersion2) Routes.Manage.department(department)
-		else Routes.old.department.manage(department)
 	}
 
 }

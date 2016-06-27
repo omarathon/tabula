@@ -35,7 +35,7 @@ case object SmallGroupTutorRoleDefinition extends UnassignableBuiltInRoleDefinit
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.Timetable,
 		Profiles.Read.SmallGroups,
-		Profiles.Read.Disability,
+		Profiles.Read.Disability, // TAB-4386
 		Profiles.Read.Photo
 	)
 
