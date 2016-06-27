@@ -1,20 +1,22 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.ToString
-import org.joda.time.DateTime
-import org.hibernate.annotations.{BatchSize, Type}
-import org.springframework.format.annotation.DateTimeFormat
-import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
-import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
+import javax.persistence.CascadeType._
+import javax.persistence._
+
+import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType, EventOccurrence}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -40,6 +42,9 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
 
 	type Entity = AbstractMeetingRecord
+
+	@transient
+	implicit var termService = Wire[TermService]
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -106,7 +111,13 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			staff = context match {
 				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.asSsoUser }.toSeq
 				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
-			}
+			},
+			relatedUrl = Routes.Profile.relationshipType(
+				relationship.studentCourseDetails,
+				AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime),
+				relationship.relationshipType
+			),
+			relatedUrlTitle = "Meeting records"
 		))
 	}
 
