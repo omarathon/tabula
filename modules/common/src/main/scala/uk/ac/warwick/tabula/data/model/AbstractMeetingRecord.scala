@@ -44,7 +44,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	type Entity = AbstractMeetingRecord
 
 	@transient
-	var termService = Wire[TermService]
+	implicit var termService = Wire[TermService]
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -114,7 +114,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 			},
 			relatedUrl = Routes.Profile.relationshipType(
 				relationship.studentCourseDetails,
-				AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime)(termService),
+				AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime),
 				relationship.relationshipType
 			),
 			relatedUrlTitle = "Meeting records"
