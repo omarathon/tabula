@@ -36,7 +36,9 @@ case class FullCalendarEvent(
 	parentType: String = "Empty",
 	parentShortName: String = "",
 	parentFullName: String = "",
-	comments: String = ""
+	comments: String = "",
+	relatedUrl: String = "",
+	relatedUrlTitle: String = ""
 )
 
 object FullCalendarEvent {
@@ -89,7 +91,9 @@ object FullCalendarEvent {
 			},
 			parentShortName = source.parent.shortName.getOrElse(""),
 			parentFullName = source.parent.fullName.getOrElse(""),
-			comments = source.comments.getOrElse("")
+			comments = source.comments.getOrElse(""),
+			relatedUrl = source.relatedUrl,
+			relatedUrlTitle = source.relatedUrlTitle
 		)
 	}
 

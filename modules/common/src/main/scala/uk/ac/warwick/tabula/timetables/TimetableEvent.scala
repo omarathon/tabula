@@ -132,7 +132,9 @@ case class EventOccurrence(
 	location: Option[Location],
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
-	staff: Seq[User]
+	staff: Seq[User],
+	relatedUrl: String = "",
+	relatedUrlTitle: String = ""
 )
 
 object EventOccurrence {

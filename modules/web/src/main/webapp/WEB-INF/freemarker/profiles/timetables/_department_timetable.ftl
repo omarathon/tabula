@@ -230,7 +230,7 @@
 							var time = moment(data.lastUpdated);
 
 							$container.append(
-									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + toTimestamp(now, time))
+									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + Profiles.toTimestamp(now, time))
 							);
 						}
 
@@ -256,42 +256,6 @@
 					}
 				});
 			};
-		}
-		function toTimestamp(now, then) {
-			var yesterday = now.clone().subtract(1, 'day');
-			if (now.diff(then) < 60000) { // less than a minute ago
-				return then.from(now);
-			} else if (now.isSame(then, 'day')) {
-				return then.format('LT [Today]');
-			} else if (yesterday.isSame(then, 'day')) {
-				return then.format('LT [Yesterday]');
-			} else if (now.isSame(then, 'year')) {
-				return then.format('ddd Do MMM LT');
-			} else {
-				return then.format('ddd Do MMM YYYY LT');
-			}
-		}
-		function onViewUpdate(view, element){
-			updateCalendarTitle(view, element);
-			$('.popover').hide();
-			$calendar.find('table').attr('role','presentation');
-		}
-		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
-		function updateCalendarTitle(view,element){
-			if (view.name == 'agendaWeek') {
-				var start = view.start.getTime();
-				var end = view.end.getTime();
-				var week = $.grep(weeks, function(week) {
-					return (week.start >= start) && (week.end <= end);
-				});
-				if (week.length > 0) {
-					var decodedTitle = $("<div/>").html(week[0].desc).text();
-					view.title = decodedTitle;
-					view.calendar.updateTitle();
-				} // We should have an entry for every week; in the event that one's missing
-				// we'll just leave it blank. The day columns still have the date on them.
-				return true;
-			}
 		}
 
 		function createCalendar(container, defaultViewName){
@@ -327,7 +291,7 @@
 				},
 				defaultEventMinutes: 30,
 				weekends: showWeekends,
-				viewRender: onViewUpdate,
+				viewRender: Profiles.onViewUpdate,
 				header: {
 					left:   'title',
 					center: 'month,agendaWeek,agendaDay',
@@ -349,43 +313,7 @@
 					return '';
 				},
 				eventAfterRender: function(event, element, view) {
-					var content = "<table class='event-info'>";
-					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
-						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
-					}
-
-					if (event.fullTitle && event.fullTitle.length > 0) {
-						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
-					}
-
-					if (event.name && event.name.length > 0) {
-						content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
-					}
-
-					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
-
-					if (event.location && event.location.length > 0) {
-						content = content + "<tr><th>Where</th><td>";
-
-						if (event.locationId && event.locationId.length > 0) {
-							content = content + "<span class='map-location' data-lid='" + event.locationId + "'>" + event.location + "</span>";
-						} else {
-							content = content + event.location;
-						}
-
-						content = content + "</td></tr>";
-					}
-
-					if (event.tutorNames.length > 0){
-						content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
-					}
-
-					if (event.comments && event.comments.length > 0) {
-						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
-					}
-
-					content = content + "</table>";
-					$(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content})
+					Profiles.renderCalendarEvents(event, element);
 				}
 			});
 		}
@@ -400,21 +328,21 @@
 			} else {
 				if (!$list.find('.clear-this-filter').length) {
 					$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-									.append(
-											$('<button />').attr('type', 'button')
-													.addClass('btn btn-link')
-													.html('<i class="fa fa-ban"></i> Clear selected items')
-													.on('click', function(e) {
-														$list.find('input:checked').each(function() {
-															var $checkbox = $(this);
-															$checkbox.prop('checked', false);
-															updateFilter($checkbox);
-														});
+						$('<li />').addClass('clear-this-filter')
+							.append(
+								$('<button />').attr('type', 'button')
+									.addClass('btn btn-link')
+									.html('<i class="fa fa-ban"></i> Clear selected items')
+									.on('click', function(e) {
+										$list.find('input:checked').each(function() {
+											var $checkbox = $(this);
+											$checkbox.prop('checked', false);
+											updateFilter($checkbox);
+										});
 
-														doRequest($list.closest('form'));
-													})
-									).append($('<hr />'))
+										doRequest($list.closest('form'));
+									})
+							).append($('<hr />'))
 					);
 				}
 			}
