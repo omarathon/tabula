@@ -7,6 +7,21 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups.{TimetableClashStudentsInformation, ListSmallGroupSetTimetableClashStudentsCommand, SmallGroupSetTimetableClashCommand, TimetableClashInformation}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.JSONView
+
+@Controller
+@RequestMapping(value = Array("/groups/{smallGroupSet}/timetableclash"))
+class SmallGroupSetTimetableClashController extends GroupsController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable smallGroupSet: SmallGroupSet, user: CurrentUser) =
+		SmallGroupSetTimetableClashCommand(smallGroupSet, user)
+
+	@RequestMapping
+	def ajaxList(@ModelAttribute("command") command: Appliable[TimetableClashInformation]): Mav = {
+		Mav(new JSONView(Map("students" -> command.apply().timtableClashMembersPerGroup)))
+	}
+}
 
 @Controller
 @RequestMapping(value=Array("/groups/{smallGroupSet}/timetableclashstudentspopup"))
