@@ -73,8 +73,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		groupSet.groups.add(group)
 		groupSet.id =  "0001"
 
-
-
 		val group2 = new SmallGroup
 		group2.groupSet = groupSet2
 		group2.students.add(user)
@@ -96,9 +94,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 			// user  0123456 is in both groups - group and group2
 		group2.addEvent(event2)
-
-
-
 		val modreg = new ModuleRegistration(student.mostSignificantCourseDetails.get, module, new JBigDecimal(30), new AcademicYear(2013), "A")
 		val modreg2 = new ModuleRegistration(student.mostSignificantCourseDetails.get, module2, new JBigDecimal(30), new AcademicYear(2013), "A")
 		val userLookup = new MockUserLookup(true)
@@ -143,7 +138,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				departmentStudentGroupHelper.findBy(user1) returns Seq()
 				departmentStudentGroupHelper.findBy(user2) returns Seq()
 				departmentStudentGroupHelper.findBy(user3) returns Seq()
-
 
 				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event1.startTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 11, 0))
 				weekToDateConverter.toLocalDatetime(2, DayOfWeek.Monday, event1.endTime , groupSet.academicYear) returns Some(new LocalDateTime(2013, DateTimeConstants.SEPTEMBER, 15, 13, 0))
@@ -211,8 +205,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			mockUserLookup.getUserByUserId("cusda") returns user3
 			val clashes = service.findPossibleTimetableClashesForGroupSet(group.groupSet)
 			clashes.size should be (1)
-
-
 			val doesUserClashTimetable = clashes.exists { case(clashGroup,  users) =>  clashGroup ==  group.id  &&  users.contains(user.getUserId) && users.size == 1}
 			doesUserClashTimetable should be (true)
 		}

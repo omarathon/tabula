@@ -303,11 +303,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = possibleTimetableClashesForStudents(set, set.allStudents)
 
 	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
-		val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student));
+		val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
 		possibleClashes.exists { case(clashGroup, userIds) => group.id == clashGroup && userIds.contains(student.getUserId) }
 	}
 
-	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]) :Seq[(String, Seq[String])] = {
+	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(String, Seq[String])] = {
 		val currentGroupOccurrencesWithGroup = set.groups.asScala.map { group =>
 			(group, findAttendanceByGroup(group))
 		}
