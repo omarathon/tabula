@@ -292,7 +292,7 @@
 			});
 
 			var clashInfo =  function() {
-				var userIds = []
+				var userIds = [];
 				var students = $('input[name^="mapping"]').each(function() {
 					var inputName = this.name;
 					var inputValue = this.value;
