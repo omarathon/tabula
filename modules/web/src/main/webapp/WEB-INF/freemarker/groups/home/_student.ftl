@@ -42,7 +42,7 @@
 		$('[id^=select-signup]').submit( function(e) {
 			e.preventDefault();
 			var self = this;
-			var selectedFormGrpId = this.elements['group'].value
+			var selectedFormGrpId = this.elements['group'].value;
 
 			var link = $('a.timetable-clash-link').data('href');
 			$.getJSON(link, { group:selectedFormGrpId},function(data) {

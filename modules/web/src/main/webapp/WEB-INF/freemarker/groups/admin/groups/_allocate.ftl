@@ -297,9 +297,9 @@
 					var inputName = this.name;
 					var inputValue = this.value;
 					var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
-					var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text()
+					var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
 					if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
-						userIds.push(inputValue)
+						userIds.push(inputValue);
 					}
 				});
 				var clashUserIds = userIds.join(',');
@@ -315,10 +315,10 @@
 						$( '.clash-singular-info').removeClass("hide");
 						$( '.clash-plural-info').addClass("hide");
 				    }
-					$( '.clash-info').removeClass("hide")
+					$( '.clash-info').removeClass("hide");
 					$timtableClashLink.prop('href', $timtableClashLink.data('href')  + clashUserIds);
 				} else {
-					$( '.clash-info').addClass("hide")
+					$( '.clash-info').addClass("hide");
 			 	}
 			};
 		})(jQuery);
