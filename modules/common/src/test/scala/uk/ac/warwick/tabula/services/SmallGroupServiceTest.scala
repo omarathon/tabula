@@ -205,7 +205,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			mockUserLookup.getUserByUserId("cusda") returns user3
 			val clashes = service.findPossibleTimetableClashesForGroupSet(group.groupSet)
 			clashes.size should be (1)
-			val doesUserClashTimetable = clashes.exists { case(clashGroup,  users) =>  clashGroup ==  group.id  &&  users.contains(user.getUserId) && users.size == 1}
+			val doesUserClashTimetable = clashes.exists { case(clashGroup,  users) =>  clashGroup.id ==  group.id  &&  users.exists(groupUser => user.getUserId == groupUser.getUserId) && users.size == 1}
 			doesUserClashTimetable should be (true)
 		}
 	}

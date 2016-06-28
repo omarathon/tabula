@@ -77,7 +77,7 @@ trait SmallGroupService {
 
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
-	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(String, Seq[String])]
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(SmallGroup, Seq[User])]
 	def doesTimetableClashesForStudent(smallGroup: SmallGroup, student: User): Boolean
 }
 
@@ -304,10 +304,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
 		val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
-		possibleClashes.exists { case(clashGroup, userIds) => group.id == clashGroup && userIds.contains(student.getUserId) }
+		possibleClashes.exists { case(clashGroup, users) => group.id == clashGroup.id && users.exists { user => user.getUserId == student.getUserId } }
 	}
 
-	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(String, Seq[String])] = {
+	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(SmallGroup, Seq[User])] = {
 		val currentGroupOccurrencesWithGroup = set.groups.asScala.map { group =>
 			(group, findAttendanceByGroup(group))
 		}
@@ -321,8 +321,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			val groupStudentInfoWithPossibleClash = studentsWithOtherGroupOccurrenceInfo.filter { case (student, otherGroupOccurrences) =>
 				doesEventOccurrenceOverlap(groupOccurrences, otherGroupOccurrences)
 			}
-			val groupStudentUserIdsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student.getUserId }
-			(group.id, groupStudentUserIdsWithPossibleClash)
+			val groupStudentsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student }
+			(group, groupStudentsWithPossibleClash)
 		}
 	}
 

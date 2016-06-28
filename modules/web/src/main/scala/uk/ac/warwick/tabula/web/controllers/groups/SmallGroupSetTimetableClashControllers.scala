@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.web.controllers.groups
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.groups.{TimetableClashStudentsInformation, ListSmallGroupSetTimetableClashStudentsCommand, SmallGroupSetTimetableClashCommand, TimetableClashInformation}
+import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
+import uk.ac.warwick.tabula.commands.groups.{ListSmallGroupSetTimetableClashStudentsCommand, SmallGroupSetTimetableClashCommand, TimetableClashInformation}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -19,7 +19,8 @@ class SmallGroupSetTimetableClashController extends GroupsController {
 
 	@RequestMapping
 	def ajaxList(@ModelAttribute("command") command: Appliable[TimetableClashInformation]): Mav = {
-		Mav(new JSONView(Map("students" -> command.apply().timtableClashMembersPerGroup)))
+		val clashInfo = command.apply().timtableClashMembersPerGroup.map { case(group, users) => (group.id, users.map(user => user.getUserId)) }
+		Mav(new JSONView(Map("students" -> clashInfo)))
 	}
 }
 
@@ -32,9 +33,9 @@ class ListSmallGroupSetTimetableClashStudentsController extends GroupsController
 		ListSmallGroupSetTimetableClashStudentsCommand(smallGroupSet, user, usercodes)
 
 	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: Appliable[TimetableClashStudentsInformation]): Mav = {
+	def ajaxList(@ModelAttribute("command") command: Appliable[Seq[MemberOrUser]]): Mav = {
 		Mav("groups/timetableconflicts_students",
-			"students" -> command.apply().timetableClashMembers
+			"students" -> command.apply()
 		).noLayout()
 	}
 }

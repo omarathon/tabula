@@ -82,6 +82,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 
 <#macro signup_to_group set><@_u page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@_u page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
+<#macro signup_to_group_timetableclash_info set><@_u page="/module/${set.module.code}/groups/${set.id}/signuptimetableclashinfo" /></#macro>
 
 <#macro timetableclashstudentslist set><@_u page="/${set.id}/timetableclashstudentspopup?usercodes=" /></#macro>
 <#macro studenttimetableconflict set><@_u page="/module/${set.module.code}/groups/${set.id}/timetableconflict" /></#macro>
