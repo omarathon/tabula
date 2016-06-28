@@ -63,6 +63,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				scdEndDate = None,
 				null,
 				null,
+				null,
 				null
 			)
 		)
@@ -88,6 +89,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				scdEndDate = None,
 				null,
 				null,
+				null,
 				null
 			),
 			AttendanceMonitoringStudentData(
@@ -97,6 +99,7 @@ class AttendanceMonitoringUnrecordedNotificationTest extends TestBase with Mocki
 				userId = "cusebr",
 				scdBeginDate = DateTime.now.minusYears(2).toLocalDate,
 				scdEndDate = None,
+				null,
 				null,
 				null,
 				null

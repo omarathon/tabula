@@ -55,7 +55,8 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 						null,
 						scd.map(_.currentRoute.code).getOrElse(""),
 						scd.map(_.currentRoute.name).getOrElse(""),
-						null
+						scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
+						scd.map(_.sprCode).getOrElse("")
 					)
 				})
 			} else if (hasBeenFiltered) {

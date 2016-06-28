@@ -542,7 +542,8 @@ case class AttendanceMonitoringStudentData(
 	scdEndDate: Option[LocalDate],
 	routeCode: String,
 	routeName: String,
-	yearOfStudy: String
+	yearOfStudy: String,
+	sprCode: String
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -597,6 +598,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					None,
 					routeCode,
 					routeName,
+					"",
 					""
 				)
 		}
@@ -612,6 +614,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					Option(scdEndDate),
 					routeCode,
 					routeName,
+					"",
 					""
 				)
 		}

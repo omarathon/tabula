@@ -67,7 +67,8 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 				null,
 				scd.map(_.currentRoute.code).getOrElse(""),
 				null,
-				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse("")
+				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
+				scd.map(_.sprCode).getOrElse("")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)

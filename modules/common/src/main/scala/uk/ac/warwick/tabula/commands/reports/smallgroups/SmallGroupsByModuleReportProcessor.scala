@@ -56,7 +56,8 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 				null,
 				scd.map(_.currentRoute.code).getOrElse(""),
 				null,
-				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse("")
+				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
+				scd.map(_.sprCode).getOrElse("")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val processedModules = modules.asScala.map{properties =>
