@@ -353,8 +353,8 @@
 						</div>
 						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
 							Saving this attendance will set monitoring points for
-							<span class="attended-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
-							<span class="missed-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
+							<a class="attended-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></a>
+							<a class="missed-students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></a>
 						</div>
 					</div>
 
