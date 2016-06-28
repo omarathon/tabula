@@ -13,7 +13,7 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
 	val students = processorResult.students
 	val modules = processorResult.modules
 
-	val headers = Seq("First name","Last name","University ID") ++
+	val headers = Seq("First name","Last name","University ID", "Route", "Year of study") ++
 		modules.map(m => s"${m.code} ${m.name}")
 
 	override def getNoOfColumns(o: AttendanceMonitoringStudentData): Int = headers.size
@@ -26,8 +26,12 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
 				studentData.lastName
 			case 2 =>
 				studentData.universityId
+			case 3 =>
+				studentData.routeCode
+			case 4 =>
+				studentData.yearOfStudy
 			case _ =>
-				val thisModule = modules(moduleIndex - 3)
+				val thisModule = modules(moduleIndex - 5)
 				counts.get(studentData).flatMap(_.get(thisModule).map{_.toString}).getOrElse("n/a")
 		}
 	}
@@ -94,6 +98,8 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
 						firstname={studentData.firstName}
 						lastname={studentData.lastName}
 						universityid={studentData.universityId}
+						route={studentData.routeCode}
+						year={studentData.yearOfStudy}
 					/>
 				)}
 			</students>

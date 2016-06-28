@@ -14,7 +14,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 	val students = processorResult.students
 	val events = processorResult.events
 
-	val headers = Seq("First name","Last name","University ID") ++
+	val headers = Seq("First name","Last name","University ID", "Route", "Year of study") ++
 		events.map(e => s"${e.moduleCode} ${e.setName} ${e.format} ${e.groupName} ${e.dayString} Week ${e.week}") ++
 		Seq("Not recorded", "Not recorded - Late", "Missed (unauthorised)", "Missed (authorised)", "Attended")
 
@@ -34,6 +34,10 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 				studentData.lastName
 			case 2 =>
 				studentData.universityId
+			case 3 =>
+				studentData.routeCode
+			case 4 =>
+				studentData.yearOfStudy
 			case index if index == unrecordedIndex =>
 				attendance.get(studentData).map(eventMap =>
 					eventMap.map{case(event, state) => state}.count(_ == NotRecorded).toString
@@ -55,7 +59,7 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 					eventMap.map{case(event, state) => state}.count(_ == Attended).toString
 				).getOrElse("0")
 			case _ =>
-				val thisEvent = events(eventIndex - 3)
+				val thisEvent = events(eventIndex - 5)
 				attendance.get(studentData).flatMap(_.get(thisEvent).map{
 					case state if state == NotRecorded =>
 						if (thisEvent.isLate)
@@ -130,6 +134,8 @@ class SmallGroupsReportExporter(val processorResult: SmallGroupsReportProcessorR
 						firstname={studentData.firstName}
 						lastname={studentData.lastName}
 						universityid={studentData.universityId}
+						route={studentData.routeCode}
+						year={studentData.yearOfStudy}
 					/>
 				)}
 			</students>

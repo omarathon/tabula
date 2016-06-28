@@ -4,13 +4,13 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services._
 
 import scala.collection.JavaConverters._
 
@@ -18,6 +18,7 @@ object SmallGroupsReportProcessor {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new SmallGroupsReportProcessorInternal(department, academicYear)
 			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[SmallGroupsReportProcessorResult]
 			with ReportPermissions
 			with SmallGroupsReportProcessorState
@@ -49,10 +50,14 @@ case class SmallGroupsReportProcessorResult(
 class SmallGroupsReportProcessorInternal(val department: Department, val academicYear: AcademicYear)
 	extends CommandInternal[SmallGroupsReportProcessorResult] with TaskBenchmarking {
 
-	self: SmallGroupsReportProcessorState with TermServiceComponent =>
+	self: SmallGroupsReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		val processedStudents = students.asScala.map{properties =>
+			val scd = profileService.getMemberByUniversityId(properties.get("universityId")) match {
+				case Some (student: StudentMember) => Some(student.mostSignificantCourse)
+				case _ => None
+			}
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -60,8 +65,9 @@ class SmallGroupsReportProcessorInternal(val department: Department, val academi
 				null,
 				null,
 				null,
+				scd.map(_.currentRoute.code).getOrElse(""),
 				null,
-				null
+				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse("")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)

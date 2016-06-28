@@ -541,7 +541,8 @@ case class AttendanceMonitoringStudentData(
 	scdBeginDate: LocalDate,
 	scdEndDate: Option[LocalDate],
 	routeCode: String,
-	routeName: String
+	routeName: String,
+	yearOfStudy: String
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -595,7 +596,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					None,
 					routeCode,
-					routeName
+					routeName,
+					""
 				)
 		}
 		// Then get the not-nulls
@@ -609,7 +611,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					Option(scdEndDate),
 					routeCode,
-					routeName
+					routeName,
+					""
 				)
 		}
 		// Then combine the two, but filter any ended found in the not-ended

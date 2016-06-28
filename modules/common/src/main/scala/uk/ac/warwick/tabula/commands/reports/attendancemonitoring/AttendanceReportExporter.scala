@@ -22,7 +22,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	val students = processorResult.students
 	val points = processorResult.points
 
-	val headers = Seq("First name","Last name","University ID") ++
+	val headers = Seq("First name","Last name","University ID", "Route", "Year of study") ++
 		points.map(p => s"${p.name} (${intervalFormatter.exec(JList(
 			wrapper.wrap(p.startDate.toDate),
 			wrapper.wrap(p.endDate.toDate)
@@ -42,12 +42,16 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 				studentData.lastName
 			case 2 =>
 				studentData.universityId
+			case 3 =>
+				studentData.routeCode
+			case 4 =>
+				studentData.yearOfStudy
 			case index if index == unrecordedIndex =>
 				result(studentData).map { case (point, state) => state}.count(_ == NotRecorded).toString
 			case index if index == missedIndex =>
 				result(studentData).map { case (point, state) => state}.count(_ == MissedUnauthorised).toString
 			case _ =>
-				val thisPoint = points(pointIndex - 3)
+				val thisPoint = points(pointIndex - 5)
 				result(studentData).get(thisPoint).map{
 					case state if state == NotRecorded =>
 						if (thisPoint.isLate)
@@ -122,6 +126,8 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 						firstname={studentData.firstName}
 						lastname={studentData.lastName}
 						universityid={studentData.universityId}
+						route={studentData.routeCode}
+						year={studentData.yearOfStudy}
 					/>
 				)}
 			</students>
