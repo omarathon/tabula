@@ -16,7 +16,7 @@
 							<@fmt.member_photo student "tinythumbnail" false />
 							<div class="name">
 								<h6>${student.fullName} <@pl.profile_link student.universityId /></h6>
-								${(student.asMember.mostSignificantCourseDetails.currentRoute.code?upper_case)!""} ${(student.asMember.mostSignificantCourseDetails.currentRoute.name)!""}<br />
+								${(student.mostSignificantCourseDetails.currentRoute.code?upper_case)!""} ${(student.mostSignificantCourseDetails.currentRoute.name)!""}<br />
 								${student.shortDepartment!""}
 							</div>
 						</div>
