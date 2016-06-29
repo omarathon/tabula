@@ -126,7 +126,7 @@
 		</@modal.wrapper>
 	</div>
 
-	<div class="striped-section collapsible checkbox-toggle <#if command.smallGroupEventAttendanceReminderEnabled>expanded</#if>">
+	<div class="striped-section collapsible checkbox-toggle <#if command.finaliseFeedbackNotificationEnabled>expanded</#if>">
 		<div class="row">
 			<div class="col-md-10">
 				<h2 class="section-title" style="display: inline-block;">
