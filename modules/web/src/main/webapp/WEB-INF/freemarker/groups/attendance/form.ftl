@@ -232,6 +232,10 @@
 
 		<div class="attendees">
 			<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
+				<script type="text/javascript">
+					AttendanceRecording.bindButtonGroupHandler(true);
+				</script>
+
 				<table class="table table-striped table-condensed">
 					<thead class="fix-header">
 						<tr>
@@ -339,9 +343,6 @@
 
 					</tbody>
 				</table>
-				<script type="text/javascript">
-					AttendanceRecording.bindButtonGroupHandler(true);
-				</script>
 
 				<#if command.members?has_content || command.manuallyAddedUniversityIds?has_content>
 
