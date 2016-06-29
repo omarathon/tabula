@@ -77,6 +77,8 @@ trait SmallGroupService {
 
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(SmallGroup, Seq[User])]
+	def doesTimetableClashesForStudent(smallGroup: SmallGroup, student: User): Boolean
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -87,6 +89,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with UserGroupDaoComponent
 		with SecurityServiceComponent
 		with TermServiceComponent
+		with WeekToDateConverterComponent
 		with Logging =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
@@ -296,6 +299,44 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			.flatMap(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))
 		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
+
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = possibleTimetableClashesForStudents(set, set.allStudents)
+
+	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
+		val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
+		possibleClashes.exists { case(clashGroup, users) => group.id == clashGroup.id && users.exists { user => user.getUserId == student.getUserId } }
+	}
+
+	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(SmallGroup, Seq[User])] = {
+		val currentGroupOccurrencesWithGroup = set.groups.asScala.map { group =>
+			(group, findAttendanceByGroup(group))
+		}
+		val studentsWithOtherGroupOccurrenceInfo = students.map { groupSetStudent =>
+			val otherGroups = findSmallGroupsByStudent(groupSetStudent).filterNot { group => group.groupSet.id == set.id }
+			groupSetStudent -> otherGroups.flatMap { otherGrp => findAttendanceByGroup(otherGrp) }
+		}
+		// let us get all clash info only once based on the possibility of students being allocated to various groups of this  groupset. At front end we can do JS magic to filter these students
+		// whenever we randomly allocate, shuffle, unallocate students to find real clashes.
+		currentGroupOccurrencesWithGroup.map { case (group, groupOccurrences) =>
+			val groupStudentInfoWithPossibleClash = studentsWithOtherGroupOccurrenceInfo.filter { case (student, otherGroupOccurrences) =>
+				doesEventOccurrenceOverlap(groupOccurrences, otherGroupOccurrences)
+			}
+			val groupStudentsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student }
+			(group, groupStudentsWithPossibleClash)
+		}
+	}
+
+	private def doesEventOccurrenceOverlap(groupOccurrences: Seq[SmallGroupEventOccurrence], otherOccurrences: Seq[SmallGroupEventOccurrence]): Boolean = {
+		groupOccurrences.exists { groupOccurrence =>
+			val startDateTime1 = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
+			val endDateTime1 = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
+			startDateTime1.isDefined && endDateTime1.isDefined && otherOccurrences.exists { occ =>
+				val startDateTime2 = weekToDateConverter.toLocalDatetime(occ.week, occ.event.day, occ.event.startTime, occ.event.group.groupSet.academicYear)
+				val endDateTime2 = weekToDateConverter.toLocalDatetime(occ.week, occ.event.day, occ.event.endTime, occ.event.group.groupSet.academicYear)
+				startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
+			}
+		}
+	}
 }
 
 trait SmallGroupMembershipHelpers {
@@ -333,4 +374,5 @@ class SmallGroupServiceImpl
 		with AutowiringUserGroupDaoComponent
 		with AutowiringSecurityServiceComponent
 		with AutowiringTermServiceComponent
+		with TermAwareWeekToDateConverterComponent
 		with Logging

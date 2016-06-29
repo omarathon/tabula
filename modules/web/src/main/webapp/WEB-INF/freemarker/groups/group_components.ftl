@@ -693,6 +693,7 @@
 				</#list>
 				<#if setItem.viewerMustSignUp>
 					<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
+					<a data-href="<@routes.groups.signup_to_group_timetableclash_info setItem.set />" class="timetable-clash-link"  data-toggle="modal" data-target="#timetable-clash-modal"></a>
 					</form>
 				</#if>
 				<#-- Only show warnings to users that can do somthing about them -->
