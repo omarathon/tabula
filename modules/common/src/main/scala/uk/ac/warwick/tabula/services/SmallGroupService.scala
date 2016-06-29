@@ -330,10 +330,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		groupOccurrences.exists { groupOccurrence =>
 			val startDateTime1 = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
 			val endDateTime1 = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
-			otherOccurrences.exists { occ =>
+			startDateTime1.isDefined && endDateTime1.isDefined && otherOccurrences.exists { occ =>
 				val startDateTime2 = weekToDateConverter.toLocalDatetime(occ.week, occ.event.day, occ.event.startTime, occ.event.group.groupSet.academicYear)
 				val endDateTime2 = weekToDateConverter.toLocalDatetime(occ.week, occ.event.day, occ.event.endTime, occ.event.group.groupSet.academicYear)
-				startDateTime1.isDefined && endDateTime1.isDefined && startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
+				startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
 			}
 		}
 	}

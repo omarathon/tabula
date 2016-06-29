@@ -9,28 +9,30 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 
 
 object ListSmallGroupSetTimetableClashStudentsCommand {
-	def apply(smallGroupSet: SmallGroupSet, clashStudentUserIds: Seq[String]) = {
-		new ListSmallGroupSetTimetableClashStudentsCommandInternal(smallGroupSet, clashStudentUserIds)
+	def apply(smallGroupSet: SmallGroupSet) = {
+		new ListSmallGroupSetTimetableClashStudentsCommandInternal(smallGroupSet)
 			with ComposableCommand[Seq[Member]]
 			with AutowiringProfileServiceComponent
 			with ListSmallGroupSetTimetableClashStudentsCommandPermissions
+			with ListSmallGroupSetTimetableClashStudentsCommandState
 			with Unaudited with ReadOnly
 	}
 }
 
-class ListSmallGroupSetTimetableClashStudentsCommandInternal(val smallGroupSet: SmallGroupSet, clashStudentUserIds: Seq[String])
+class ListSmallGroupSetTimetableClashStudentsCommandInternal(val smallGroupSet: SmallGroupSet)
 	extends CommandInternal[Seq[Member]] with ListSmallGroupSetTimetableClashStudentsCommandState {
 	self: ProfileServiceComponent =>
 
 	override def applyInternal() = {
 		//ensure users from this group are only displayed
-		val users = smallGroupSet.allStudents.filter { user =>  clashStudentUserIds.contains(user.getUserId) }
+		val users = smallGroupSet.allStudents.filter { user =>  clashStudentUsercodes.contains(user.getUserId) }
 		users.flatMap { user => profileService.getAllMembersWithUserId(user.getUserId) }.distinct
 	}
 }
 
 trait ListSmallGroupSetTimetableClashStudentsCommandState {
 	val smallGroupSet: SmallGroupSet
+	var clashStudentUsercodes: Array[String] = _
 }
 
 trait ListSmallGroupSetTimetableClashStudentsCommandPermissions extends RequiresPermissionsChecking {
