@@ -43,12 +43,13 @@
 			e.preventDefault();
 			var self = this;
 			var selectedFormGrpId = this.elements['group'].value;
+			var signupPostFormLink = $(this).prop('action');
+			var clashInfoLink = $('a.timetable-clash-link').data('href');
 
-			var link = $('a.timetable-clash-link').data('href');
-			$.getJSON(link, { group:selectedFormGrpId},function(data) {
+			$.getJSON(clashInfoLink, { group:selectedFormGrpId},function(data) {
 				if(data.clash) {
 					$('.timetable-clash-info input[name="group"]').prop("value", selectedFormGrpId);
-					$('.timetable-clash-info form').prop("action", link);
+					$('.timetable-clash-info form').prop("action", signupPostFormLink);
 					$('a.timetable-clash-link').click();
 				} else {
 					self.submit();
