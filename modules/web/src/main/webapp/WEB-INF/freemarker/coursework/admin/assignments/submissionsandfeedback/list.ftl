@@ -311,8 +311,14 @@
 											<#assign sitsWarning = feedbackSitsStatus.dateOfUpload?has_content && feedbackSitsStatus.status.code != "uploadNotAttempted" && (
 												(feedbackSitsStatus.actualMarkLastUploaded!0) != (student.coursework.enhancedFeedback.feedback.latestMark!0) || (feedbackSitsStatus.actualGradeLastUploaded!"") != (student.coursework.enhancedFeedback.feedback.latestGrade!"")
 											) />
-											<#if feedbackSitsStatus.code == "failed" || sitsWarning >
-												<span class="label label-important use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
+											<#if feedbackSitsStatus.code == "failed">
+												<a href="<@routes.coursework.checkSitsUpload student.coursework.enhancedFeedback.feedback />" target="_blank">
+													<span style="cursor: pointer;" class="label label-important use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
+													${feedbackSitsStatus.description}
+													</span><#--
+												--></a>
+											<#elseif sitsWarning>
+												<span class="label label-important use-tooltip" title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 													${feedbackSitsStatus.description}
 												</span>
 											<#elseif feedbackSitsStatus.code == "successful">
