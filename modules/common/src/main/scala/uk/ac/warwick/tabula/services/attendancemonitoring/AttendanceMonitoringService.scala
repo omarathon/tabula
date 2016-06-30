@@ -85,6 +85,7 @@ trait AttendanceMonitoringService {
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -454,6 +455,11 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal] = {
 		attendanceMonitoringDao.listCheckpointTotalsForUpdate
 	}
+
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
+		attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(universityIds, academicYear)
+	}
+
 }
 
 trait AttendanceMonitoringMembershipHelpers {

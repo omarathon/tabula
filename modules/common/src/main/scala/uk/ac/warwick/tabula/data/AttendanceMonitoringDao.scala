@@ -541,7 +541,9 @@ case class AttendanceMonitoringStudentData(
 	scdBeginDate: LocalDate,
 	scdEndDate: Option[LocalDate],
 	routeCode: String,
-	routeName: String
+	routeName: String,
+	yearOfStudy: String,
+	sprCode: String
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -562,6 +564,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.add(min("studentCourseDetails.beginDate"))
 					.add(max("route.code"))
 					.add(max("route.name"))
+					.add(max("studentCourseYearDetails.yearOfStudy"))
+					.add(max("studentCourseDetails.sprCode"))
 			if (withEndDate) {
 				projections.add(max("studentCourseDetails.endDate"))
 			}
@@ -586,7 +590,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -595,12 +599,14 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					None,
 					routeCode,
-					routeName
+					routeName,
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then get the not-nulls
 		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, scdEndDate: LocalDate) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -609,7 +615,9 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					Option(scdEndDate),
 					routeCode,
-					routeName
+					routeName,
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then combine the two, but filter any ended found in the not-ended

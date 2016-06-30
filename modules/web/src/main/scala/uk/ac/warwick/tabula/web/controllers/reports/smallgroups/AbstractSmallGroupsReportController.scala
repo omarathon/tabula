@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentDataFetcher
 import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
@@ -20,7 +21,7 @@ import scala.collection.JavaConverters._
 
 abstract class AbstractSmallGroupsReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+	with AutowiringMaintenanceModeServiceComponent with AttendanceMonitoringStudentDataFetcher {
 
 	def command(department: Department, academicYear: AcademicYear): Appliable[AllSmallGroupsReportCommandResult]
 
@@ -60,12 +61,15 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@PathVariable academicYear: AcademicYear
 	) = {
 		val result = cmd.apply()
-		val allStudents: Seq[Map[String, String]] = result.students.map(studentUser =>
+		val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
 			Map(
-				"universityId" -> studentUser.getWarwickId,
-				"firstName" -> studentUser.getFirstName,
-				"lastName" -> studentUser.getLastName,
-				"userId" -> studentUser.getUserId
+				"universityId" -> studentData.universityId,
+				"firstName" -> studentData.firstName,
+				"lastName" -> studentData.lastName,
+				"userId" -> studentData.userId,
+				"yearOfStudy" -> studentData.yearOfStudy,
+				"sprCode" -> studentData.sprCode,
+				"route" -> studentData.routeCode
 			)
 		)
 		val allEvents: Seq[Map[String, String]] = result.eventWeeks.map(sgew =>

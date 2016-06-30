@@ -5,10 +5,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 object SmallGroupsReportFilters {
 
 	val termService = Wire[TermService]
+	val attendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	def identity(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = result
 
@@ -23,18 +25,18 @@ object SmallGroupsReportFilters {
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
 		AllSmallGroupsReportCommandResult(
 			unrecordedMap,
-			unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)),
+			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
 			unrecordedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}
 
-	def missed(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
+	def missed(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
 		val missedMap = result.attendance.map{ case(studentData, eventMap) =>
 			studentData -> eventMap.filter { case (_, state) =>	state == AttendanceState.MissedUnauthorised || state == AttendanceState.MissedAuthorised	}
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
 		AllSmallGroupsReportCommandResult(
 			missedMap,
-			missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)),
+			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
 			missedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}

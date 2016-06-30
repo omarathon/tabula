@@ -56,12 +56,15 @@ abstract class AbstractSmallGroupsByModuleReportController extends ReportsContro
 	) = {
 		cmd.setFilteredAttendance(filteredAttendanceCmd.apply())
 		val result = cmd.apply()
-		val allStudents: Seq[Map[String, String]] = result.students.map(studentUser =>
+		val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
 			Map(
-				"firstName" -> studentUser.getFirstName,
-				"lastName" -> studentUser.getLastName,
-				"userId" -> studentUser.getUserId,
-				"universityId" -> studentUser.getWarwickId
+				"firstName" -> studentData.firstName,
+				"lastName" -> studentData.lastName,
+				"userId" -> studentData.userId,
+				"universityId" -> studentData.universityId,
+				"yearOfStudy" -> studentData.yearOfStudy,
+				"sprCode" -> studentData.sprCode,
+				"route" -> studentData.routeCode
 			)
 		)
 		val allModules: Seq[Map[String, String]] = result.modules.map(module =>
