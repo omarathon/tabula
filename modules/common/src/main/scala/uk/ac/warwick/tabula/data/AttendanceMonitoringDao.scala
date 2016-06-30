@@ -108,7 +108,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotals(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]): Seq[AttendanceMonitoringStudentData]
 	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
 }
@@ -553,7 +553,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 
 	import org.hibernate.criterion.Projections._
 
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]) = {
 		def setupProjection(withEndDate: Boolean = false): ProjectionList = {
 			val projections =
 				Projections.projectionList()
@@ -564,6 +564,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.add(min("studentCourseDetails.beginDate"))
 					.add(max("route.code"))
 					.add(max("route.name"))
+					.add(max("studentCourseYearDetails.yearOfStudy"))
+					.add(max("studentCourseDetails.sprCode"))
 			if (withEndDate) {
 				projections.add(max("studentCourseDetails.endDate"))
 			}
@@ -576,7 +578,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
 					.createAlias("studentCourseDetails.currentRoute", "route")
 					.add(isNull("studentCourseDetails.missingFromImportSince"))
-					.add(is("studentCourseYearDetails.academicYear", academicYear))
+
+				if(academicYear.isDefined) criteria.add(is("studentCourseYearDetails.academicYear", academicYear.get))
 
 				if (withEndDate) {
 					criteria.add(isNotNull("studentCourseDetails.endDate"))
@@ -588,7 +591,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -598,13 +601,13 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					None,
 					routeCode,
 					routeName,
-					"",
-					""
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then get the not-nulls
 		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, scdEndDate: LocalDate) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -614,8 +617,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					Option(scdEndDate),
 					routeCode,
 					routeName,
-					"",
-					""
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then combine the two, but filter any ended found in the not-ended

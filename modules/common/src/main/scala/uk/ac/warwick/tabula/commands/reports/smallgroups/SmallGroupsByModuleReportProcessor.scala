@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.commands.reports.smallgroups
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringTermServiceComponent, ProfileServiceComponent, TermServiceComponent}
 
 import scala.collection.JavaConverters._
 
@@ -43,10 +43,6 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 
 	override def applyInternal() = {
 		val processedStudents = students.asScala.map{properties =>
-			val scd = profileService.getMemberByUniversityId(properties.get("universityId")) match {
-				case Some (student: StudentMember) => Some(student.mostSignificantCourse)
-				case _ => None
-			}
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -54,10 +50,10 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 				null,
 				null,
 				null,
-				scd.map(_.currentRoute.code).getOrElse(""),
+				properties.get("route"),
 				null,
-				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
-				scd.map(_.sprCode).getOrElse("")
+				properties.get("yearOfStudy"),
+				properties.get("sprCode")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		val processedModules = modules.asScala.map{properties =>

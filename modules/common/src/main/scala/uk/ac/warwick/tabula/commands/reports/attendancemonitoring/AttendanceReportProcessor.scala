@@ -4,12 +4,12 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandState, ReportPermissions}
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 
 import scala.collection.JavaConverters._
 
@@ -46,10 +46,6 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 
 	override def applyInternal() = {
 		val processedStudents = students.asScala.map{properties =>
-			val scd = profileService.getMemberByUniversityId(properties.get("universityId")) match {
-				case Some (student: StudentMember) => Some(student.mostSignificantCourse)
-				case _ => None
-			}
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),
 				properties.get("lastName"),
@@ -57,10 +53,10 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 				null,
 				null,
 				null,
-				scd.map(_.currentRoute.code).getOrElse(""),
+				properties.get("route"),
 				null,
-				scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
-				scd.map(_.sprCode).getOrElse("")
+				properties.get("yearOfStudy"),
+				properties.get("sprCode")
 			)
 		}.toSeq.sortBy(s => (s.lastName, s.firstName))
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._

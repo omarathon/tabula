@@ -5,11 +5,13 @@ import java.util.UUID
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent}
-import uk.ac.warwick.tabula.commands.reports.{ReportCommandRequest, ReportCommandState, ReportPermissions}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, SmallGroupServiceComponent, TermServiceComponent}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -23,6 +25,7 @@ object AllSmallGroupsReportCommand {
 		new AllSmallGroupsReportCommandInternal(department, academicYear, filter)
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringAttendanceMonitoringServiceComponent
 			with ComposableCommand[AllSmallGroupsReportCommandResult]
 			with ReportPermissions
 			with ReportCommandRequest
@@ -39,7 +42,7 @@ case class SmallGroupEventWeek(
 
 case class AllSmallGroupsReportCommandResult(
 	attendance: Map[User, Map[SmallGroupEventWeek, AttendanceState]],
-	students: Seq[User],
+	studentDatas: Seq[AttendanceMonitoringStudentData],
 	eventWeeks: Seq[SmallGroupEventWeek]
 )
 
@@ -49,7 +52,7 @@ class AllSmallGroupsReportCommandInternal(
 	val filter: AllSmallGroupsReportCommandResult => AllSmallGroupsReportCommandResult
 ) extends CommandInternal[AllSmallGroupsReportCommandResult] with TaskBenchmarking {
 
-	self: SmallGroupServiceComponent with TermServiceComponent with ReportCommandRequest =>
+	self: SmallGroupServiceComponent with TermServiceComponent with AttendanceMonitoringServiceComponent with ReportCommandRequest =>
 
 	override def applyInternal() = {
 		val thisWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
@@ -63,6 +66,8 @@ class AllSmallGroupsReportCommandInternal(
 		}
 
 		val students: Seq[User] = sets.flatMap(_.allStudents).distinct.sortBy(s => (s.getLastName, s.getFirstName))
+
+		val studentDatas: Seq[AttendanceMonitoringStudentData] = attendanceMonitoringService.getAttendanceMonitoringDataForStudents(students.map(_.getWarwickId), Some(academicYear))
 
 		val studentInGroup: Map[SmallGroup, Map[User, Boolean]] = benchmarkTask("studentInGroup") {
 			sets.flatMap(_.groups.asScala).map(group => group -> students.map(student => student -> group.students.includesUser(student)).toMap).toMap
@@ -105,7 +110,7 @@ class AllSmallGroupsReportCommandInternal(
 			}).filter{case(_, state) => state != null}.toMap).toMap
 		}
 
-		filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, students, eventWeeks))
+		filter(AllSmallGroupsReportCommandResult(studentAttendanceMap, studentDatas, eventWeeks))
 	}
 }
 
