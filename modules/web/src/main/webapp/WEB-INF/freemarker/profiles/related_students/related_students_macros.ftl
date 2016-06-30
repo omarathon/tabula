@@ -2,6 +2,7 @@
 
 <#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="">
 	<tr class="related_student">
+		<td><input class="collection-checkbox" type="checkbox" name="students" value="${student.universityId}"  /></td>
 		<td>
 			<@fmt.member_photo student "tinythumbnail" />
 		</td>
@@ -40,9 +41,11 @@
 </#macro>
 <#-- Print out a table of students/agents.-->
 <#macro table items showMeetings=false meetingsMap="">
-	<table class="related_students table table-striped table-condensed">
+	<table class="related_students student-list table table-striped table-condensed">
 		<thead>
 			<tr>
+			<tr>
+				<th class ="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
 				<th class="photo-col">Photo</th>
 				<th class="student-col">First name</th>
 				<th class="student-col">Last name</th>
@@ -68,6 +71,7 @@
 	<#if !student_table_script_included??>
 		<script type="text/javascript">
 			(function($) {
+				$('.student-list').bigList({});
 				// add a custom parser for the date column
 				$.tablesorter.addParser({
 					id: 'customdate',
@@ -82,11 +86,12 @@
 
 				$(function() {
 					$('.related_students').tablesorter({
-						sortList: [[2,0], [4,0], [5,0]],
+						sortList: [[3,0], [5,0], [6,0]],
 						headers: {
-							7:{sorter: 'customdate'}
+							8:{sorter: 'customdate'},
+							0:{sorter:false}
 						},
-						sortForce: [[2,0]]
+						sortForce: [[3,0]]
 					});
 
 					$('.related_student').on('mouseover', function(e) {
@@ -94,7 +99,7 @@
 					}).on('mouseout', function(e) {
 						$(this).find('td').removeClass('hover');
 					}).on('click', function(e) {
-						if (!$(e.target).is('a') && !$(e.target).is('img')) {
+						if (!$(e.target).is('a') && !$(e.target).is('img') && !$(e.target).is('input')) {
 							window.location = $(this).find('a.profile-link').attr('href');
 						}
 					});

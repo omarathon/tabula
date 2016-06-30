@@ -5,7 +5,7 @@
 
 		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap/>
 
-		<p><@fmt.bulk_email_students students=students /></p>
+		<p><a class="btn btn-default new-meeting-record" href="test">Record meeting for selected students</a> <@fmt.bulk_email_students students=students /></p>
 
 	<#else>
 		<p class="alert alert-info">No ${relationshipType.studentRole}s are currently visible for you in Tabula.</p>
