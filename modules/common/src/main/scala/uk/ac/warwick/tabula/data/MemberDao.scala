@@ -311,7 +311,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
 		val universityIds = idCriteria.project[String](property("universityId")).seq
 
-		getAttendanceMonitoringDataForStudents(universityIds, Some(academicYear))
+		getAttendanceMonitoringDataForStudents(universityIds, academicYear)
 	}
 
 	def findStudentsByRestrictions(

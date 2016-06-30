@@ -108,7 +108,7 @@ trait AttendanceMonitoringDao {
 	def getCheckpointTotals(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpointTotal]
 	def findRelevantPoints(department: Department, academicYear: AcademicYear, endDate: LocalDate): Seq[AttendanceMonitoringPoint]
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]): Seq[AttendanceMonitoringStudentData]
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
 }
@@ -553,7 +553,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 
 	import org.hibernate.criterion.Projections._
 
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]) = {
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear) = {
 		def setupProjection(withEndDate: Boolean = false): ProjectionList = {
 			val projections =
 				Projections.projectionList()
@@ -578,8 +578,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.createAlias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
 					.createAlias("studentCourseDetails.currentRoute", "route")
 					.add(isNull("studentCourseDetails.missingFromImportSince"))
-
-				if(academicYear.isDefined) criteria.add(is("studentCourseYearDetails.academicYear", academicYear.get))
+					.add(is("studentCourseYearDetails.academicYear", academicYear))
 
 				if (withEndDate) {
 					criteria.add(isNotNull("studentCourseDetails.endDate"))

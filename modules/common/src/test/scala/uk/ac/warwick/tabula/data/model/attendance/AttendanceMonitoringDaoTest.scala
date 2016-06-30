@@ -199,14 +199,14 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		session.save(department)
 		session.save(route)
 		session.save(student1)
-		val result1 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), Some(academicYear))
+		val result1 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
 		result1.size should be (1)
 		result1.head.scdEndDate.isEmpty should be {true}
 
 		// 2 SCDs, 1 null end date
 		newSCD.endDate = newSCD.beginDate.plusYears(3)
 		session.update(newSCD)
-		val result2 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), Some(academicYear))
+		val result2 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
 		result2.size should be (1)
 		result2.head.scdEndDate.isEmpty should be {true}
 
@@ -215,7 +215,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 			scd.endDate = scd.beginDate.plusYears(i)
 				session.update(scd)
 		}
-		val result3 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), Some(academicYear))
+		val result3 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
 		result3.size should be (1)
 		result3.head.scdEndDate.nonEmpty should be {true}
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._

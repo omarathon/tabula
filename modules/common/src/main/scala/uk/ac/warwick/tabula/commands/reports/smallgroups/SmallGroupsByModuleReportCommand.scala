@@ -39,8 +39,7 @@ class SmallGroupsByModuleReportCommandInternal(val department: Department, val a
 
 		SmallGroupsByModuleReportCommandResult(
 			byModule,
-			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(
-				byModule.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), Some(academicYear)),
+			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(byModule.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
 			byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted
 		)
 	}

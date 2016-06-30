@@ -85,7 +85,7 @@ trait AttendanceMonitoringService {
 	def findSchemesLinkedToSITSByDepartment(academicYear: AcademicYear): Map[Department, Seq[AttendanceMonitoringScheme]]
 	def setCheckpointTotalsForUpdate(students: Seq[StudentMember], department: Department, academicYear: AcademicYear): Unit
 	def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal]
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]): Seq[AttendanceMonitoringStudentData]
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
 }
 
 abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringService with TaskBenchmarking {
@@ -389,7 +389,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 			val allStudents: Map[UniversityId, AttendanceMonitoringStudentData] =
 				attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(
 					points.flatMap { _.scheme.members.members }.distinct,
-					Some(academicYear)
+					academicYear
 				).map { data => data.universityId -> data }.toMap
 
 			// Map schemes to student lists
@@ -456,7 +456,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.listCheckpointTotalsForUpdate
 	}
 
-	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: Option[AcademicYear]): Seq[AttendanceMonitoringStudentData] = {
+	def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
 		attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(universityIds, academicYear)
 	}
 

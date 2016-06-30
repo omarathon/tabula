@@ -25,19 +25,18 @@ object SmallGroupsReportFilters {
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
 		AllSmallGroupsReportCommandResult(
 			unrecordedMap,
-			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(
-				unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), Some(academicYear)),
+			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(unrecordedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
 			unrecordedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}
 
-	def missed(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
+	def missed(academicYear: AcademicYear)(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = {
 		val missedMap = result.attendance.map{ case(studentData, eventMap) =>
 			studentData -> eventMap.filter { case (_, state) =>	state == AttendanceState.MissedUnauthorised || state == AttendanceState.MissedAuthorised	}
 		}.filter{ case(studentData, eventMap) => eventMap.nonEmpty }
 		AllSmallGroupsReportCommandResult(
 			missedMap,
-			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), None),
+			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(missedMap.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
 			missedMap.flatMap { case (user, attendanceMap) => attendanceMap.keys }.toSeq.distinct.sortBy(sgew => (sgew.week, sgew.event.day.getAsInt))
 		)
 	}
