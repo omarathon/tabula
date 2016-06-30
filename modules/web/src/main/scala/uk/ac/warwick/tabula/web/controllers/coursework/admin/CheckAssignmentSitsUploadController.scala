@@ -20,7 +20,7 @@ class CheckAssignmentSitsUploadController extends CourseworkController with Auto
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedback: AssignmentFeedback) =
-		CheckSitsUploadCommand(feedback)
+		CheckSitsUploadCommand(mandatory(feedback))
 
 	@RequestMapping
 	def page(

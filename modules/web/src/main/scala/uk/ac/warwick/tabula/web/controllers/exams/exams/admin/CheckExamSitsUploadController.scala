@@ -20,7 +20,7 @@ class CheckExamSitsUploadController extends ExamsController with AutowiringProfi
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable exam: Exam, @PathVariable feedback: ExamFeedback) =
-		CheckSitsUploadCommand(feedback)
+		CheckSitsUploadCommand(mandatory(feedback))
 
 	@RequestMapping
 	def page(
