@@ -45,7 +45,7 @@ trait EditSmallGroupCommandState extends ModifySmallGroupCommandState {
 
 }
 
-class CreateSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
+class CreateSmallGroupCommandInternal(val module: Module, var set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = transactional() {

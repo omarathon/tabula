@@ -111,6 +111,8 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro import_groups department><@_u page="/admin/department/${department.code}/import-groups" /></#macro>
 <#macro import_groups_for_year department academicYear><@import_groups department />?academicYear=${academicYear.startYear?c}</#macro>
 
+<#macro import_spreadsheet department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/import-spreadsheet" /></#macro>
+
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
 
 <#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>
