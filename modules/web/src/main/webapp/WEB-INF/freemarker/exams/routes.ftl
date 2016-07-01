@@ -34,6 +34,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro viewExam exam><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}" /></#macro>
 <#macro deleteExam exam><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/delete" /></#macro>
 <#macro uploadToSits exam><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/upload-to-sits"/></#macro>
+<#macro checkSitsUpload feedback><@_u page="/exams/admin/module/${feedback.exam.module.code}/${feedback.exam.academicYear.startYear?c}/exams/${feedback.exam.id}/feedback/${feedback.id}/check-sits"/></#macro>
 <#macro feedbackAdjustment exam><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments"/></#macro>
 <#macro feedbackAdjustmentForm exam studentid><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/adjustments/${studentid}"/></#macro>
 <#macro bulkAdjustment exam><@_u page="/exams/admin/module/${exam.module.code}/${exam.academicYear.startYear?c}/exams/${exam.id}/feedback/bulk-adjustment"/></#macro>
