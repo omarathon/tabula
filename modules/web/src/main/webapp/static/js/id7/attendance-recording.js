@@ -37,8 +37,8 @@ exports.wireButtons = function(id) {
 	var $this = $(id);
 
 	$this.find('.use-popover')
-		.on('shown', function(e) {
-			var $po = $(e.target).popover().data('popover').tip();
+		.on('shown.bs.popover', function(e) {
+			var $po = $(e.target).popover().data('bs.popover').tip();
 			$po.find('[data-action="remove"]').on('click', function() {
 				var id = $(this).attr('data-student');
 				$('form#recordAttendance')
@@ -106,8 +106,9 @@ var checkForCheckpoints = function(){
 		if (attendedData.length == 0 && missedData.length == 0) {
 			$attendanceForm.find('.checkpoints-message').hide();
 		} else {
-			$('.missed-students').html('');
-			$('.attended-students').html('');
+			var $missedStudents = $('.missed-students'), $attendedStudents = $('.attended-students');
+			$missedStudents.html('');
+			$attendedStudents.html('');
 			$attendanceForm.find('.checkpoints-message').show();
 			if (attendedData.length > 0) {
 				var popoverContent = $('<ul/>');
@@ -115,32 +116,32 @@ var checkForCheckpoints = function(){
 					popoverContent.append($('<li/>').html(student.name));
 				});
 
-				$('.attended-students').html(attendedData.length + ' student' + ((attendedData.length > 1) ? 's' : '') + ' as attended' + (missedData.length > 1 ? ', ' : ''))
+				$attendedStudents.html(attendedData.length + ' student' + ((attendedData.length > 1) ? 's' : '') + ' as attended' + (missedData.length > 1 ? ', ' : ''))
 					.attr('data-content', popoverContent.wrap('<div></div>').parent().html())
 					.tabulaPopover({
 						trigger: 'click'
 					});
 
-			};
+			}
 			if (missedData.length > 0) {
 				var missedPopoverContent =  $('<ul/>');
 				$.each(missedData, function(i, student){
 					missedPopoverContent.append($('<li/>').html(student.name));
 				});
 
-				$('.missed-students').html(missedData.length + ' student' + ((missedData.length > 1) ? 's' : '') + ' as missed')
+				$missedStudents.html(missedData.length + ' student' + ((missedData.length > 1) ? 's' : '') + ' as missed')
 					.attr('data-content', missedPopoverContent.wrap('<div></div>').parent().html())
 					.tabulaPopover({
 						trigger: 'click'
 					});
-			};
+			}
 		}
 	});
 };
 
 exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 
-	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
+	$('#recordAttendance').on('click', 'tbody div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
 		$this.trigger('checkform.areYouSure');
@@ -185,7 +186,7 @@ $(function(){
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(e){
-				$('.attendees .row').each(function(){
+				$('.attendees tbody tr').each(function(){
 					$(this).find('button').eq(i).each(function() {
 						$(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
 						$(this).addClass('active');
@@ -206,13 +207,15 @@ $(function(){
 		});
 	}).end().find('a.meetings').on('click', function(e){
         e.preventDefault();
+		var $meetingsModal = $('#meetings-modal');
         $.get($(this).attr('href'), function(data){
-            $('#meetings-modal .modal-body').html(data);
-			var $customHeader = $('#meetings-modal .modal-body').find('h3.modal-header').remove();
+			var $modalBody = $meetingsModal.find('.modal-body');
+			$modalBody.html(data);
+			var $customHeader = $modalBody.find('h3.modal-header').remove();
 			if ($customHeader.length > 0) {
-				$('#meetings-modal .modal-header h3').html($customHeader.html());
+				$meetingsModal.find('.modal-header h3').html($customHeader.html());
 			}
-            $('#meetings-modal').modal("show");
+			$meetingsModal.modal("show");
             $('.use-popover').tabulaPopover({
                 trigger: 'click',
                 container: 'body'
@@ -290,7 +293,7 @@ $(function(){
 				var $input = $search.find('input[type="text"]').first();
 				var $target = $search.find('input[type="hidden"]').first();
 
-				$search.on('tabula:selected', function(evt, name, universityId, userId, description) {
+				$search.on('tabula:selected', function(evt, name, universityId) {
 					$modalElement
 						.on('shown.bs.modal', function() {
 							var $form = $('form#recordAttendance');
@@ -363,10 +366,10 @@ $(function(){
 
 								var members = flattenMemberData(data);
 								process(members);
-							}).error(function(jqXHR, textStatus, errorThrown) { if (textStatus != "abort") $spinner.spin(false); });
+							}).error(function(jqXHR, textStatus) { if (textStatus != "abort") $spinner.spin(false); });
 						},
 
-						matcher: function(item) { return true; },
+						matcher: function() { return true; },
 						sorter: function(items) { return items; }, // use 'as-returned' sort
 						highlighter: function(item) {
 							var member = item.split("|");

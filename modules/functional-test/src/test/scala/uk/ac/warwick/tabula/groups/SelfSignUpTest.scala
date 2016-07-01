@@ -40,6 +40,10 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		Then("The 'sign up' link button becomes enabled")
 		groupsetInfo.getSignupButton should be('enabled)
 
+		// Stop HTMLUnit screwing up buttons
+		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
+
+
 		When("I click the sign up button")
 		groupsetInfo.getSignupButton.click()
 

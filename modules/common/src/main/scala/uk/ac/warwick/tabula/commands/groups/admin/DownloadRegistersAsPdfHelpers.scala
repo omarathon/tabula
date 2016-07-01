@@ -59,6 +59,8 @@ trait DownloadRegistersAsPdfCommandRequest {
 	var displayName = DisplayName.Name
 	var displayCheck = DisplayCheck.Checkbox
 	var sortOrder = SortOrder.Module
+	var studentSortFields: JList[String] = JArrayList()
+	var studentSortOrders: JList[String] = JArrayList()
 }
 
 trait GetsOccurrences {
