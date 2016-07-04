@@ -17,7 +17,10 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 object ModifySmallGroupSetCommand {
-	def create(module: Module) =
+	type Command = Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState
+	type CreateCommand = Appliable[SmallGroupSet] with SelfValidating with CreateSmallGroupSetCommandState
+
+	def create(module: Module): CreateCommand =
 		new CreateSmallGroupSetCommandInternal(module)
 			with ComposableCommand[SmallGroupSet]
 			with SetDefaultSmallGroupSetName
@@ -29,7 +32,7 @@ object ModifySmallGroupSetCommand {
 			with GeneratesDefaultWeekRangesWithTermService
 			with AutowiringTermServiceComponent
 
-	def edit(module: Module, set: SmallGroupSet) =
+	def edit(module: Module, set: SmallGroupSet): Command =
 		new EditSmallGroupSetCommandInternal(module, set)
 			with ComposableCommand[SmallGroupSet]
 			with EditSmallGroupSetPermissions
