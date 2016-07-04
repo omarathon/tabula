@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.apache.poi.ss.usermodel.DateUtil
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel._
 import uk.ac.warwick.tabula.AcademicYear
@@ -36,7 +37,8 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		new ExcelView(s"Small groups for ${department.name} - ${academicYear.startYear}-${academicYear.endYear}.xlsx", workbook)
 	}
 
-	private def generateWorkbook() = {
+	// Publicly visible for testing
+	def generateWorkbook() = {
 		val workbook = new XSSFWorkbook()
 
 		val sets = smallGroupService.getSmallGroupSets(department, academicYear).sorted
@@ -69,20 +71,6 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		header.createCell(1).setCellValue("Allocation methods")
 		header.createCell(2).setCellValue("Days of the week")
 
-		// set style on all columns
-		0 to 2 foreach  { col =>
-			sheet.setDefaultColumnStyle(col, style)
-			sheet.autoSizeColumn(col)
-		}
-
-		header.setRowStyle({
-			val style = workbook.createCellStyle()
-			val font = workbook.createFont()
-			font.setBold(true)
-			style.setFont(font)
-			style
-		})
-
 		val rows = 1 to (math.max(SmallGroupFormat.members.size, math.max(SmallGroupAllocationMethod.members.size, DayOfWeek.members.size)) + 1) map sheet.createRow
 
 		SmallGroupFormat.members.zipWithIndex.foreach { case (f, index) =>
@@ -99,6 +87,20 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			val row = rows(index)
 			row.createCell(2).setCellValue(day.name)
 		}
+
+		// set style on all columns
+		0 to 2 foreach  { col =>
+			sheet.setDefaultColumnStyle(col, style)
+			sheet.autoSizeColumn(col)
+		}
+
+		header.setRowStyle({
+			val style = workbook.createCellStyle()
+			val font = workbook.createFont()
+			font.setBold(true)
+			style.setFont(font)
+			style
+		})
 
 		sheet
 	}
@@ -137,28 +139,30 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			row.createCell(8).setCellValue(set.collectAttendance)
 		}
 
-		// Small group format validation
-		{
-			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 1, 1)
-			val dvHelper = new XSSFDataValidationHelper(sheet)
-			val dvConstraint =
-				dvHelper.createFormulaListConstraint("Lookups!$A$2:$A$" + (SmallGroupFormat.members.size + 1))
-					.asInstanceOf[XSSFDataValidationConstraint]
-			val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
-			validation.setShowErrorBox(true)
-			sheet.addValidationData(validation)
-		}
+		if (sets.nonEmpty) {
+			// Small group format validation
+			{
+				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 1, 1)
+				val dvHelper = new XSSFDataValidationHelper(sheet)
+				val dvConstraint =
+					dvHelper.createFormulaListConstraint("Lookups!$A$2:$A$" + (SmallGroupFormat.members.size + 1))
+						.asInstanceOf[XSSFDataValidationConstraint]
+				val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+				validation.setShowErrorBox(true)
+				sheet.addValidationData(validation)
+			}
 
-		// Small group allocation method validation
-		{
-			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 3, 3)
-			val dvHelper = new XSSFDataValidationHelper(sheet)
-			val dvConstraint =
-				dvHelper.createFormulaListConstraint("Lookups!$B$2:$B$" + (SmallGroupAllocationMethod.members.size + 1))
-					.asInstanceOf[XSSFDataValidationConstraint]
-			val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
-			validation.setShowErrorBox(true)
-			sheet.addValidationData(validation)
+			// Small group allocation method validation
+			{
+				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 3, 3)
+				val dvHelper = new XSSFDataValidationHelper(sheet)
+				val dvConstraint =
+					dvHelper.createFormulaListConstraint("Lookups!$B$2:$B$" + (SmallGroupAllocationMethod.members.size + 1))
+						.asInstanceOf[XSSFDataValidationConstraint]
+				val validation = dvHelper.createValidation(dvConstraint, dropdownRange).asInstanceOf[XSSFDataValidation]
+				validation.setShowErrorBox(true)
+				sheet.addValidationData(validation)
+			}
 		}
 
 		// set style on all columns
@@ -166,6 +170,15 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.setDefaultColumnStyle(index, style)
 			sheet.autoSizeColumn(index)
 		}
+
+		// Boolean columns
+		val booleanStyle = workbook.createCellStyle
+		booleanStyle.cloneStyleFrom(style)
+		booleanStyle.setDataFormat(format.getFormat("BOOLEAN"))
+		sheet.setDefaultColumnStyle(4, booleanStyle)
+		sheet.setDefaultColumnStyle(5, booleanStyle)
+		sheet.setDefaultColumnStyle(6, booleanStyle)
+		sheet.setDefaultColumnStyle(8, booleanStyle)
 
 		header.setRowStyle({
 			val style = workbook.createCellStyle()
@@ -215,6 +228,12 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.autoSizeColumn(index)
 		}
 
+		// Limit column
+		val intStyle = workbook.createCellStyle
+		intStyle.cloneStyleFrom(style)
+		intStyle.setDataFormat(format.getFormat("0"))
+		sheet.setDefaultColumnStyle(3, intStyle)
+
 		header.setRowStyle({
 			val style = workbook.createCellStyle()
 			val font = workbook.createFont()
@@ -256,13 +275,13 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			row.createCell(4).setCellValue(event.tutors.knownType.members.mkString(","))
 			row.createCell(5).setCellValue(event.weekRanges.map(_.toString).mkString(","))
 			row.createCell(6).setCellValue(event.day.name)
-			row.createCell(7).setCellValue(event.startTime.toString("HH:mm"))
-			row.createCell(8).setCellValue(event.endTime.toString("HH:mm"))
+			row.createCell(7).setCellValue(DateUtil.convertTime(event.startTime.toString("HH:mm")))
+			row.createCell(8).setCellValue(DateUtil.convertTime(event.endTime.toString("HH:mm")))
 			row.createCell(9).setCellValue(event.location.name)
 		}
 
 		// Day of week validation
-		{
+		if (sets.flatMap(_.groups.asScala.sorted).flatMap(_.events.sorted).nonEmpty) {
 			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 6, 6)
 			val dvHelper = new XSSFDataValidationHelper(sheet)
 			val dvConstraint =
@@ -278,6 +297,13 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.setDefaultColumnStyle(index, style)
 			sheet.autoSizeColumn(index)
 		}
+
+		// Time columns
+		val timeStyle = workbook.createCellStyle
+		timeStyle.cloneStyleFrom(style)
+		timeStyle.setDataFormat(format.getFormat("HH:MM"))
+		sheet.setDefaultColumnStyle(7, timeStyle)
+		sheet.setDefaultColumnStyle(8, timeStyle)
 
 		header.setRowStyle({
 			val style = workbook.createCellStyle()

@@ -3,11 +3,12 @@ package uk.ac.warwick.tabula.services.groups.docconversion
 import java.io.InputStream
 
 import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.ss.usermodel.DateUtil
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.usermodel.XSSFComment
-import org.joda.time.LocalTime
+import org.joda.time.{DateTime, LocalTime}
 import org.joda.time.format.DateTimeFormat
 import org.springframework.stereotype.Service
 import org.springframework.validation.BindingResult
@@ -347,7 +348,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 	}
 
 	private def extractUsers(sheetName: String, cell: Cell, result: BindingResult): Seq[User] =
-		cell.formattedValue.trim.split("\\s*,\\s*").flatMap {
+		cell.formattedValue.trim.split("\\s*,\\s*").filter(_.hasText).flatMap {
 			case universityId if UniversityId.isValid(universityId) =>
 				val user = userLookup.getUserByWarwickUniId(universityId)
 
@@ -375,7 +376,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 		}
 
 	private def extractWeekRanges(sheetName: String, cell: Cell, result: BindingResult): Seq[WeekRange] =
-		cell.formattedValue.trim.split("\\s*,\\s*").flatMap { range =>
+		cell.formattedValue.trim.split("\\s*,\\s*").filter(_.hasText).flatMap { range =>
 			Try(WeekRange.fromString(range))
 				.map(range => Seq(range))
 				.getOrElse {
@@ -414,6 +415,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 		Try(LocalTime.parse(value, DateTimeFormat.forPattern("HH:mm:ss")))
 			.orElse(Try(LocalTime.parse(value, DateTimeFormat.forPattern("HH:mm"))))
 			.orElse(Try(LocalTime.parse(value, DateTimeFormat.forPattern("h:mma"))))
+			.orElse(Try(new DateTime(DateUtil.getJavaDate(value.toDouble)).toLocalTime))
 			.map(Some.apply)
 			.getOrElse {
 				result.reject(
