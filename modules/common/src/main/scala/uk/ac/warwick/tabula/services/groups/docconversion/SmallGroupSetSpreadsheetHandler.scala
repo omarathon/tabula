@@ -294,7 +294,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 	}
 
 	private def extractAllocationMethod(sheetName: String, cell: Cell, result: BindingResult): Option[SmallGroupAllocationMethod] = {
-		val allocationMethod = SmallGroupAllocationMethod.members.find(_.dbValue.equalsIgnoreCase(cell.formattedValue))
+		val allocationMethod = SmallGroupAllocationMethod.members.find { a => a.dbValue.equalsIgnoreCase(cell.formattedValue) || a.description.equalsIgnoreCase(cell.formattedValue) }
 		if (allocationMethod.isEmpty) {
 			result.reject(
 				"smallGroups.importSpreadsheet.invalidAllocationMethod",

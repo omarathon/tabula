@@ -6,17 +6,18 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromSpreadsheetCommand
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupSetsFromSpreadsheetCommand, SmallGroupSetsSpreadsheetTemplateCommand}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet"))
 class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
@@ -45,6 +46,16 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
 	}
 
+	@RequestMapping(method = Array(POST))
+	def processSpreadsheet(
+		@Valid @ModelAttribute("command") cmd: CommandType,
+		errors: Errors,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
+		.crumbs(Breadcrumbs.DepartmentForYear(department, academicYear))
+		.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
 	def submit(
 		@Valid @ModelAttribute("command") cmd: CommandType,
@@ -53,11 +64,28 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
 		if (errors.hasErrors) {
-			form(department, academicYear)
+			processSpreadsheet(cmd, errors, department, academicYear)
 		} else {
 			cmd.apply()
 			Redirect(Routes.groups.admin(department, academicYear))
 		}
+	}
+
+}
+
+@Controller
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet/template"))
+class SmallGroupSetsSpreadsheetTemplateController extends GroupsController {
+
+	type CommandType = Appliable[ExcelView]
+
+	@ModelAttribute("command")
+	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CommandType =
+		SmallGroupSetsSpreadsheetTemplateCommand(mandatory(department), mandatory(academicYear))
+
+	@RequestMapping
+	def getTemplate(@Valid @ModelAttribute("command") cmd: CommandType) = {
+		cmd.apply()
 	}
 
 }

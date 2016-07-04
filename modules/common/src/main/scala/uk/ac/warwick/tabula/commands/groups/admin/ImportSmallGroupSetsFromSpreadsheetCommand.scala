@@ -48,15 +48,15 @@ abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department
 
 			val group = gHolder.command.apply()
 
-			gHolder.eventCommands.foreach { command =>
-				command match {
+			gHolder.eventCommands.foreach { eHolder =>
+				eHolder.command match {
 					case c: CreateSmallGroupEventCommandInternal =>
 						c.set = set
 						c.group = group
 					case _ =>
 				}
 
-				command.apply()
+				eHolder.command.apply()
 			}
 		}
 
@@ -77,9 +77,9 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 				errors.pushNestedPath(s"groupCommands[$j]")
 
 				group.command.validate(errors)
-				group.eventCommands.zipWithIndex.foreach { case (command, k) =>
+				group.eventCommands.zipWithIndex.foreach { case (event, k) =>
 					errors.pushNestedPath(s"eventCommands[$k]")
-					command.validate(errors)
+					event.command.validate(errors)
 					errors.popNestedPath()
 				}
 
@@ -98,106 +98,103 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 		with SmallGroupServiceComponent =>
 
 	override def onBind(result: BindingResult): Unit = {
-		// Bind the file if we're not on the confirmation stage
-		if (!confirm) {
-			if (file.isMissing) {
-				result.rejectValue("file", "NotEmpty")
-			} else {
-				val fileNames = file.fileNames map (_.toLowerCase)
-				val invalidFiles = fileNames.filter(s => !SmallGroupSetSpreadsheetHandler.AcceptedFileExtensions.exists(s.endsWith))
+		if (file.isMissing) {
+			result.rejectValue("file", "NotEmpty")
+		} else {
+			val fileNames = file.fileNames map (_.toLowerCase)
+			val invalidFiles = fileNames.filter(s => !SmallGroupSetSpreadsheetHandler.AcceptedFileExtensions.exists(s.endsWith))
 
-				if (invalidFiles.nonEmpty) {
-					if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
-					else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
-				}
+			if (invalidFiles.nonEmpty) {
+				if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+				else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 			}
+		}
 
-			if (!result.hasErrors) {
-				transactional() {
-					file.onBind(result)
-					commands = file.attached.asScala.filter(_.hasData).flatMap { attachment =>
-						val extractedSets = smallGroupSetSpreadsheetHandler.readXSSFExcelFile(department, academicYear, attachment.dataStream, result)
+		if (!result.hasErrors) {
+			transactional() {
+				file.onBind(result)
+				commands = file.attached.asScala.filter(_.hasData).flatMap { attachment =>
+					val extractedSets = smallGroupSetSpreadsheetHandler.readXSSFExcelFile(department, academicYear, attachment.dataStream, result)
 
-						// Convert to commands
-						extractedSets.map { extracted =>
-							val existing =
-								smallGroupService.getSmallGroupSets(extracted.module, academicYear)
-									.find { s => s.name.equalsIgnoreCase(extracted.name) }
+					// Convert to commands
+					extractedSets.map { extracted =>
+						val existing =
+							smallGroupService.getSmallGroupSets(extracted.module, academicYear)
+								.find { s => s.name.equalsIgnoreCase(extracted.name) }
 
-							val setCommand = existing match {
-								case Some(set) => ModifySmallGroupSetCommand.edit(set.module, set)
-								case _ => ModifySmallGroupSetCommand.create(extracted.module)
-							}
-
-							setCommand.name = extracted.name
-							setCommand.format = extracted.format
-							setCommand.allocationMethod = extracted.allocationMethod
-							setCommand.allowSelfGroupSwitching = extracted.studentsCanSwitchGroup
-							setCommand.studentsCanSeeTutorName = extracted.studentsSeeTutor
-							setCommand.studentsCanSeeOtherMembers = extracted.studentsSeeStudents
-							setCommand.collectAttendance = extracted.collectAttendance
-							setCommand.linkedDepartmentSmallGroupSet = extracted.linkedSmallGroupSet.orNull
-
-							def matchesGroup(extractedGroup: ExtractedSmallGroup)(smallGroup: SmallGroup) =
-								smallGroup.name.equalsIgnoreCase(extractedGroup.name)
-
-							def matchesEvent(extractedEvent: ExtractedSmallGroupEvent)(smallGroupEvent: SmallGroupEvent) =
-								(extractedEvent.title.nonEmpty && extractedEvent.title.contains(smallGroupEvent.title)) ||
-								(extractedEvent.weekRanges == smallGroupEvent.weekRanges && extractedEvent.dayOfWeek == smallGroupEvent.day && extractedEvent.startTime == smallGroupEvent.startTime)
-
-							val groupCommands = extracted.groups.map { extractedGroup =>
-								val existingGroup = existing.toSeq.flatMap(_.groups.asScala).find(matchesGroup(extractedGroup))
-
-								val groupCommand = existingGroup match {
-									case Some(group) => ModifySmallGroupCommand.edit(group.groupSet.module, group.groupSet, group)
-									case _ => ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet)
-								}
-
-								groupCommand.name = extractedGroup.name
-								groupCommand.maxGroupSize = extractedGroup.limit.getOrElse(SmallGroup.DefaultGroupSize)
-
-								val eventCommands = extractedGroup.events.map { extractedEvent =>
-									val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
-
-									val eventCommand = existingEvent match {
-										case Some(event) => ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event)
-										case _ => ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup)
-									}
-
-									eventCommand.title = extractedEvent.title.orNull
-									eventCommand.tutors = extractedEvent.tutors.map(_.getUserId).asJava
-									eventCommand.weekRanges = extractedEvent.weekRanges
-									eventCommand.day = extractedEvent.dayOfWeek
-									eventCommand.startTime = extractedEvent.startTime
-									eventCommand.endTime = extractedEvent.endTime
-
-									extractedEvent.location.foreach {
-										case NamedLocation(name) =>
-											eventCommand.location = name
-											eventCommand.locationId = null
-										case MapLocation(name, lid) =>
-											eventCommand.location = name
-											eventCommand.locationId = lid
-									}
-
-									eventCommand
-								}
-
-								val deleteEventCommands =
-									existingGroup.toSeq.flatMap(_.events)
-										.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
-										.map { e => DeleteSmallGroupEventCommand(e.group, e) }
-
-								new ModifySmallGroupCommandHolder(groupCommand, eventCommands ++ deleteEventCommands)
-							}
-
-							val deleteGroupCommands =
-								existing.toSeq.flatMap(_.groups.asScala)
-									.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
-									.map { g => new ModifySmallGroupCommandHolder(DeleteSmallGroupCommand(g.groupSet, g), Nil) }
-
-							new ModifySmallGroupSetCommandHolder(setCommand, groupCommands ++ deleteGroupCommands)
+						val (setCommand, setCommandType) = existing match {
+							case Some(set) => (ModifySmallGroupSetCommand.edit(set.module, set), "Edit")
+							case _ => (ModifySmallGroupSetCommand.create(extracted.module), "Create")
 						}
+
+						setCommand.name = extracted.name
+						setCommand.format = extracted.format
+						setCommand.allocationMethod = extracted.allocationMethod
+						setCommand.allowSelfGroupSwitching = extracted.studentsCanSwitchGroup
+						setCommand.studentsCanSeeTutorName = extracted.studentsSeeTutor
+						setCommand.studentsCanSeeOtherMembers = extracted.studentsSeeStudents
+						setCommand.collectAttendance = extracted.collectAttendance
+						setCommand.linkedDepartmentSmallGroupSet = extracted.linkedSmallGroupSet.orNull
+
+						def matchesGroup(extractedGroup: ExtractedSmallGroup)(smallGroup: SmallGroup) =
+							smallGroup.name.equalsIgnoreCase(extractedGroup.name)
+
+						def matchesEvent(extractedEvent: ExtractedSmallGroupEvent)(smallGroupEvent: SmallGroupEvent) =
+							(extractedEvent.title.nonEmpty && extractedEvent.title.contains(smallGroupEvent.title)) ||
+							(extractedEvent.weekRanges == smallGroupEvent.weekRanges && extractedEvent.dayOfWeek == smallGroupEvent.day && extractedEvent.startTime == smallGroupEvent.startTime)
+
+						val groupCommands = extracted.groups.map { extractedGroup =>
+							val existingGroup = existing.toSeq.flatMap(_.groups.asScala).find(matchesGroup(extractedGroup))
+
+							val (groupCommand, groupCommandType) = existingGroup match {
+								case Some(group) => (ModifySmallGroupCommand.edit(group.groupSet.module, group.groupSet, group), "Edit")
+								case _ => (ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet), "Create")
+							}
+
+							groupCommand.name = extractedGroup.name
+							groupCommand.maxGroupSize = extractedGroup.limit.getOrElse(SmallGroup.DefaultGroupSize)
+
+							val eventCommands = extractedGroup.events.map { extractedEvent =>
+								val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
+
+								val (eventCommand, eventCommandType) = existingEvent match {
+									case Some(event) => (ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event), "Edit")
+									case _ => (ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup), "Create")
+								}
+
+								eventCommand.title = extractedEvent.title.orNull
+								eventCommand.tutors = extractedEvent.tutors.map(_.getUserId).asJava
+								eventCommand.weekRanges = extractedEvent.weekRanges
+								eventCommand.day = extractedEvent.dayOfWeek
+								eventCommand.startTime = extractedEvent.startTime
+								eventCommand.endTime = extractedEvent.endTime
+
+								extractedEvent.location.foreach {
+									case NamedLocation(name) =>
+										eventCommand.location = name
+										eventCommand.locationId = null
+									case MapLocation(name, lid) =>
+										eventCommand.location = name
+										eventCommand.locationId = lid
+								}
+
+								new ModifySmallGroupEventCommandHolder(eventCommand, eventCommandType)
+							}
+
+							val deleteEventCommands =
+								existingGroup.toSeq.flatMap(_.events.sorted)
+									.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
+									.map { e => new ModifySmallGroupEventCommandHolder(DeleteSmallGroupEventCommand(e.group, e), "Delete") }
+
+							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands ++ deleteEventCommands)
+						}
+
+						val deleteGroupCommands =
+							existing.toSeq.flatMap(_.groups.asScala.sorted)
+								.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
+								.map { g => new ModifySmallGroupCommandHolder(DeleteSmallGroupCommand(g.groupSet, g), "Delete", Nil) }
+
+						new ModifySmallGroupSetCommandHolder(setCommand, setCommandType, groupCommands ++ deleteGroupCommands)
 					}
 				}
 			}
@@ -205,8 +202,9 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 	}
 }
 
-class ModifySmallGroupSetCommandHolder(var command: SetCommand, var groupCommands: Seq[ModifySmallGroupCommandHolder])
-class ModifySmallGroupCommandHolder(var command: GroupCommand, var eventCommands: Seq[EventCommand])
+class ModifySmallGroupSetCommandHolder(var command: SetCommand, val commandType: String, var groupCommands: Seq[ModifySmallGroupCommandHolder])
+class ModifySmallGroupCommandHolder(var command: GroupCommand, val commandType: String, var eventCommands: Seq[ModifySmallGroupEventCommandHolder])
+class ModifySmallGroupEventCommandHolder(var command: EventCommand, val commandType: String)
 
 trait ImportSmallGroupSetsFromSpreadsheetRequest extends ImportSmallGroupSetsFromSpreadsheetState {
 	var file: UploadedFile = new UploadedFile
