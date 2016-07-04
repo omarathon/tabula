@@ -162,7 +162,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 
 						def matchesEvent(extractedEvent: ExtractedSmallGroupEvent)(smallGroupEvent: SmallGroupEvent) =
 							(extractedEvent.title.nonEmpty && extractedEvent.title.contains(smallGroupEvent.title)) ||
-							(extractedEvent.weekRanges == smallGroupEvent.weekRanges && extractedEvent.dayOfWeek == smallGroupEvent.day && extractedEvent.startTime == smallGroupEvent.startTime)
+							(extractedEvent.weekRanges == smallGroupEvent.weekRanges && extractedEvent.dayOfWeek == Option(smallGroupEvent.day) && extractedEvent.startTime == Option(smallGroupEvent.startTime))
 
 						val groupCommands = extracted.groups.map { extractedGroup =>
 							val existingGroup = existing.toSeq.flatMap(_.groups.asScala).find(matchesGroup(extractedGroup))
@@ -186,9 +186,9 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 								eventCommand.title = extractedEvent.title.orNull
 								eventCommand.tutors = extractedEvent.tutors.map(_.getUserId).asJava
 								eventCommand.weekRanges = extractedEvent.weekRanges
-								eventCommand.day = extractedEvent.dayOfWeek
-								eventCommand.startTime = extractedEvent.startTime
-								eventCommand.endTime = extractedEvent.endTime
+								eventCommand.day = extractedEvent.dayOfWeek.orNull
+								eventCommand.startTime = extractedEvent.startTime.orNull
+								eventCommand.endTime = extractedEvent.endTime.orNull
 
 								extractedEvent.location.foreach {
 									case NamedLocation(name) =>

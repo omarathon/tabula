@@ -67,48 +67,48 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 						name = "Alpha",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(u0000001, u0000002), Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.27"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Seq(cuscav), Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(u0000001, u0000002), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.27"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Seq(cuscav), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.27")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Beta",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(curef), Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.28"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Seq(curef), Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.28")))
+							ExtractedSmallGroupEvent(None, Seq(curef), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.28"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Seq(curef), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.28")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Gamma",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(u1234567), Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.29"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Seq(u2382344), Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.29")))
+							ExtractedSmallGroupEvent(None, Seq(u1234567), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.29"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Seq(u2382344), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.29")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Delta",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(u1823774, u2372372, u1915121), Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.30"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Seq(u1784383), Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.30")))
+							ExtractedSmallGroupEvent(None, Seq(u1823774, u2372372, u1915121), Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.30"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Seq(u1784383), Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.30")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Epsilon",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Nil, Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.31"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Nil, Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("S0.31")))
+							ExtractedSmallGroupEvent(None, Nil, Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.31"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Nil, Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("S0.31")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Zeta",
 						limit = None,
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Nil, Seq(WeekRange(1, 6), WeekRange(8, 10)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("B192"))),
-							ExtractedSmallGroupEvent(Some("Class Test"), Nil, Seq(WeekRange(7)), DayOfWeek.Monday, new LocalTime(11, 0), new LocalTime(12, 0), Some(NamedLocation("B192")))
+							ExtractedSmallGroupEvent(None, Nil, Seq(WeekRange(1, 6), WeekRange(8, 10)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("B192"))),
+							ExtractedSmallGroupEvent(Some("Class Test"), Nil, Seq(WeekRange(7)), Some(DayOfWeek.Monday), Some(new LocalTime(11, 0)), Some(new LocalTime(12, 0)), Some(NamedLocation("B192")))
 						)
 					)
 				)
@@ -129,28 +129,28 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 						name = "Group 1",
 						limit = Some(15),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), DayOfWeek.Monday, new LocalTime(14, 0), new LocalTime(16, 0), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Monday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(NamedLocation("S0.27")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Group 2",
 						limit = Some(20),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), DayOfWeek.Tuesday, new LocalTime(14, 0), new LocalTime(16, 0), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Tuesday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(NamedLocation("S0.27")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Group 3",
 						limit = Some(9),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), DayOfWeek.Wednesday, new LocalTime(14, 0), new LocalTime(16, 0), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Wednesday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(NamedLocation("S0.27")))
 						)
 					),
 					ExtractedSmallGroup(
 						name = "Group 4",
 						limit = Some(15),
 						events = Seq(
-							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), DayOfWeek.Thursday, new LocalTime(14, 0), new LocalTime(16, 0), Some(NamedLocation("S0.27")))
+							ExtractedSmallGroupEvent(None, Seq(cuscav), Seq(WeekRange(15, 24)), Some(DayOfWeek.Thursday), Some(new LocalTime(14, 0)), Some(new LocalTime(16, 0)), Some(NamedLocation("S0.27")))
 						)
 					)
 				)

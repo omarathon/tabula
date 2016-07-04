@@ -80,9 +80,9 @@ case class ExtractedSmallGroupEvent(
 	title: Option[String],
 	tutors: Seq[User],
 	weekRanges: Seq[WeekRange],
-	dayOfWeek: DayOfWeek,
-	startTime: LocalTime,
-	endTime: LocalTime,
+	dayOfWeek: Option[DayOfWeek],
+	startTime: Option[LocalTime],
+	endTime: Option[LocalTime],
 	location: Option[Location]
 )
 
@@ -101,7 +101,7 @@ object ExtractedSmallGroupEvent {
 	val LocationColumn = "Location"
 
 	val AllColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn, TitleColumn, TutorsColumn, WeekRangesColumn, DayColumn, StartTimeColumn, EndTimeColumn, LocationColumn)
-	val RequiredColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn, WeekRangesColumn, DayColumn, StartTimeColumn, EndTimeColumn)
+	val RequiredColumns = Seq(ModuleColumn, SetNameColumn, GroupNameColumn)
 }
 
 object SmallGroupSetSpreadsheetHandler {
@@ -499,23 +499,33 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 					Nil
 
 			val weekRanges = extractWeekRanges(sheetName, row.values(ExtractedSmallGroupEvent.WeekRangesColumn), result)
-			val dayOfWeek = extractDayOfWeek(sheetName, row.values(ExtractedSmallGroupEvent.DayColumn), result)
-			val startTime = extractLocalTime(sheetName, row.values(ExtractedSmallGroupEvent.StartTimeColumn), result)
-			val endTime = extractLocalTime(sheetName, row.values(ExtractedSmallGroupEvent.EndTimeColumn), result)
+			val dayOfWeek =
+				if (row.values.contains(ExtractedSmallGroupEvent.DayColumn))
+					extractDayOfWeek(sheetName, row.values(ExtractedSmallGroupEvent.DayColumn), result)
+				else None
+			val startTime =
+				if (row.values.contains(ExtractedSmallGroupEvent.StartTimeColumn))
+					extractLocalTime(sheetName, row.values(ExtractedSmallGroupEvent.StartTimeColumn), result)
+				else None
+			val endTime =
+				if (row.values.contains(ExtractedSmallGroupEvent.EndTimeColumn))
+					extractLocalTime(sheetName, row.values(ExtractedSmallGroupEvent.EndTimeColumn), result)
+				else None
+
 			val location =
 				if (row.values.contains(ExtractedSmallGroupEvent.LocationColumn))
 					Some(locationFetchingService.locationFor(row.values(ExtractedSmallGroupEvent.LocationColumn).formattedValue))
 				else
 					None
 
-			if (dayOfWeek.nonEmpty && startTime.nonEmpty && endTime.nonEmpty) {
+			if (title.nonEmpty || tutors.nonEmpty || weekRanges.nonEmpty || dayOfWeek.nonEmpty || startTime.nonEmpty || endTime.nonEmpty || location.nonEmpty) {
 				Seq(ExtractedSmallGroupEvent(
 					title,
 					tutors,
 					weekRanges,
-					dayOfWeek.get,
-					startTime.get,
-					endTime.get,
+					dayOfWeek,
+					startTime,
+					endTime,
 					location
 				))
 			} else {
