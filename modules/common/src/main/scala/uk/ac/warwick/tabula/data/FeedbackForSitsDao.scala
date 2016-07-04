@@ -30,7 +30,7 @@ class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 
 	def feedbackToLoad =
 		session.newCriteria[FeedbackForSits]
-			.add(isNot("status", FeedbackForSitsStatus.Successful))
+			.add(is("status", FeedbackForSitsStatus.UploadNotAttempted))
 			.seq
 
 	def getByFeedback(feedback: Feedback) = {

@@ -5,8 +5,9 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportAttendanceToSitsServiceComponent, ExportAttendanceToSitsServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, TermService}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
@@ -15,22 +16,22 @@ object ExportAttendanceToSitsCommand {
 		with ComposableCommand[Seq[MonitoringPointReport]]
 		with ExportAttendanceToSitsCommandPermissions
 		with ExportAttendanceToSitsCommandDescription
-		with AutowiringMonitoringPointServiceComponent
+		with AutowiringAttendanceMonitoringServiceComponent
 		with AutowiringExportAttendanceToSitsServiceComponent
 		with AutowiringFeaturesComponent
 }
 
 class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointReport]] with Logging {
 
-	self: MonitoringPointServiceComponent with ExportAttendanceToSitsServiceComponent with FeaturesComponent =>
+	self: AttendanceMonitoringServiceComponent with ExportAttendanceToSitsServiceComponent with FeaturesComponent =>
 
 	override def applyInternal() = transactional() {
 
 		// check reporting to sits feature is on -- with Features...
 		if (features.attendanceMonitoringReport) {
 
-			// get the reports from MPService
-			val unreportedReports = monitoringPointService.findUnreportedReports
+			// get the reports from service
+			val unreportedReports = attendanceMonitoringService.listUnreportedReports
 
 			// for each student
 			unreportedReports.groupBy(_.student).flatMap{case(student, reportList) =>
@@ -46,7 +47,7 @@ class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointR
 							case Some(report: MonitoringPointReport) =>
 								val result = exportAttendanceToSitsService.exportToSits(report)
 								if (result) {
-										monitoringPointService.markReportAsPushed(report)
+										attendanceMonitoringService.markReportAsPushed(report)
 										logger.info(s"Reported ${
 											report.missed
 										} missed points for ${

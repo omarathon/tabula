@@ -23,8 +23,7 @@ object CourseworkHomepageCommand {
 		historicAssignments: Seq[AssignmentInfo],
 		assignmentsForMarking: Seq[AssignmentInfo],
 		ownedDepartments: Set[Department],
-		ownedModules: Set[Module],
-		activities: PagedActivities
+		ownedModules: Set[Module]
 	)
 
 	def apply(user: CurrentUser) =
@@ -32,7 +31,6 @@ object CourseworkHomepageCommand {
 			with ComposableCommand[Option[CourseworkHomepageInformation]]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringAssessmentServiceComponent
-			with AutowiringActivityServiceComponent
 			with AutowiringSecurityServiceComponent
 			with PubliclyVisiblePermissions with ReadOnly with Unaudited
 }
@@ -40,7 +38,6 @@ object CourseworkHomepageCommand {
 class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandInternal[Option[CourseworkHomepageInformation]] with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent with
 		AssessmentServiceComponent with
-		ActivityServiceComponent with
 		SecurityServiceComponent =>
 
 	def applyInternal() = {
@@ -49,8 +46,6 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
 			}
 			val ownedModules = benchmarkTask("Get owned modules") { moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments) }
-
-			val pagedActivities = benchmarkTask("Get noteworthy submissions") { activityService.getNoteworthySubmissions(user) }
 
 			val assignmentsForMarking = benchmarkTask("Get assignments for marking") {
 				assessmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
@@ -79,9 +74,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 
 				assignmentsForMarking = assignmentsForMarkingInfo,
 				ownedDepartments = ownedDepartments,
-				ownedModules = ownedModules,
-
-				activities = Await.result(pagedActivities, 10.seconds)
+				ownedModules = ownedModules
 			))
 		} else {
 			None

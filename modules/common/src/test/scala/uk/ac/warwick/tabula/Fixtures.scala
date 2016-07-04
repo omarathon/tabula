@@ -4,15 +4,14 @@ import java.math
 
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -303,14 +302,6 @@ object Fixtures extends Mockito {
 		scyd
 	}
 
-	def monitoringPoint(name: String = "name", validFromWeek: Int = 0, requiredFromWeek: Int = 0) = {
-		val point = new MonitoringPoint
-		point.name = name
-		point.validFromWeek = validFromWeek
-		point.requiredFromWeek = requiredFromWeek
-		point
-	}
-
 	def memberNoteWithId(note: String, student: Member, id: String ) = {
 		val memberNote = new MemberNote
 		memberNote.note = note
@@ -324,17 +315,6 @@ object Fixtures extends Mockito {
 		memberNote.note = note
 		memberNote.member = student
 		memberNote
-	}
-
-	def monitoringCheckpoint(point: MonitoringPoint, student: StudentMember, state: AttendanceState) = {
-		val checkpoint = new MonitoringCheckpoint
-		val monitoringPointService = smartMock[MonitoringPointService]
-		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns false
-		checkpoint.monitoringPointService = monitoringPointService
-		checkpoint.point = point
-		checkpoint.student = student
-		checkpoint.state = state
-		checkpoint
 	}
 
 	def moduleRegistration(

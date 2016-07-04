@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{MockUserLookup, PersistenceTestBase, Fixtures, AcademicYear, MockGroupService}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.AssessmentComponent
-import uk.ac.warwick.tabula.data.model.AssessmentType
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
-import uk.ac.warwick.tabula.services.AssessmentMembershipServiceImpl
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import org.junit.Before
+import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, AssessmentType, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.services.AssessmentMembershipServiceImpl
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, PersistenceTestBase}
+import uk.ac.warwick.userlookup.User
 
 class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
@@ -142,12 +138,12 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 			new Fixture {
 				session.save(assignment2AC)
 				session.save(upstreamGroup2)
-				session.flush
+				session.flush()
 				session.save(assignment3AC)
 				session.save(upstreamGroup3)
-				session.flush
+				session.flush()
 				session.save(dept)
-				session.flush
+				session.flush()
 
 				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
@@ -163,12 +159,12 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 				session.save(assignment2AC)
 				session.save(upstreamGroup2)
-				session.flush
+				session.flush()
 				session.save(assignment3AC)
 				session.save(upstreamGroup3)
-				session.flush
+				session.flush()
 				session.save(dept)
-				session.flush
+				session.flush()
 
 				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}

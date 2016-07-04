@@ -49,6 +49,7 @@ object Routes {
 		def attendance(scyd: StudentCourseYearDetails) =
 			context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 
+		def examTimetable(universityId: String) = context + "/view/%s/exams" format encoded(universityId)
 	}
 
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

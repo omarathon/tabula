@@ -24,7 +24,6 @@ object ApproveMeetingRecordCommand {
 		new ApproveMeetingRecordCommand(meeting, user)
 		with AutowiringSecurityServiceComponent
 		with AutowiringMeetingRecordDaoComponent
-		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
 		with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 		with ComposableCommand[MeetingRecord]
 		with ApproveMeetingRecordDescription
@@ -37,8 +36,8 @@ object ApproveMeetingRecordCommand {
 class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: CurrentUser)
 	extends CommandInternal[MeetingRecord] with ApproveMeetingRecordState {
 
-	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent
-		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent =>
+	self: MeetingRecordDaoComponent with FeaturesComponent
+		with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent =>
 
 	def applyInternal() = transactional() {
 		if (approved) {
@@ -58,9 +57,7 @@ class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: Current
 		}
 
 		if (features.attendanceMonitoringMeetingPointType) {
-			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
-			if (features.attendanceMonitoringVersion2)
-				attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
+			attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
 		}
 
 		meeting
@@ -137,5 +134,5 @@ trait ApproveMeetingRecordState {
 	var rejectionComments: String =_
 
 	lazy val approvals: Seq[MeetingRecordApproval] =
-		meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval)).toSeq
+		meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
 }

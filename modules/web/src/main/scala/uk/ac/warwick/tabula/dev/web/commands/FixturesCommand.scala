@@ -32,7 +32,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 	var memberDao = Wire[MemberDao]
-	var monitoringPointDao = Wire[MonitoringPointDao]
 	var attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
 	var smallGroupService = Wire[SmallGroupService]
 	var permissionsService = Wire[PermissionsService]
@@ -121,18 +120,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					scd.clearModuleRegistrations()
 				}
 				session.flush()
-
-				// Checkpoints must be deleted before the associated student
-				for (route <- routes) {
-					val sets = monitoringPointDao.findMonitoringPointSets(route)
-					for (set <- sets) {
-						for (point <- set.points.asScala) {
-							for (checkpoint <- point.checkpoints.asScala) session.delete(checkpoint)
-							session.delete(point)
-						}
-						session.delete(set)
-					}
-				}
 
 				for (scheme <- schemes) {
 					for (point <- scheme.points.asScala){

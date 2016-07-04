@@ -11,8 +11,8 @@ import scala.collection.JavaConverters._
 
 case class HomeInformation(
 	hasProfile: Boolean,
-	viewPermissions: Set[Department],
-	managePermissions: Set[Department],
+	viewPermissions: Seq[Department],
+	managePermissions: Seq[Department],
 	allRelationshipTypes: Seq[StudentRelationshipType],
 	relationshipTypesMap: Map[StudentRelationshipType, Boolean]
 )
@@ -52,8 +52,8 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 			d.routes.asScala.nonEmpty || d.modules.asScala.nonEmpty || attendanceMonitoringService.listAllSchemes(d).nonEmpty
 		}
 
-		val allViewDepartments = (viewDepartments ++ viewRoutes.map(_.adminDepartment)).flatMap(withSubDepartments)
-		val allManageDepartments = manageDepartments.flatMap(withSubDepartments)
+		val allViewDepartments = (viewDepartments ++ viewRoutes.map(_.adminDepartment)).flatMap(withSubDepartments).toSeq.sortBy(_.name)
+		val allManageDepartments = manageDepartments.flatMap(withSubDepartments).toSeq.sortBy(_.name)
 
 		// These return Sets so no need to distinct the result
 

@@ -433,27 +433,6 @@ abstract class Description {
 		property("route", route.code)
 	}
 
-	def monitoringPointSet(set: MonitoringPointSet) = {
-		if (set.route != null) route(set.route)
-		property("monitoringPointSet", set.id)
-	}
-
-	def monitoringPointSetTemplate(template: MonitoringPointSetTemplate) = {
-		property("monitoringPointSetTemplate", template.id)
-	}
-
-	def monitoringPoint(monitoringPoint: MonitoringPoint) = {
-		property("monitoringPoint", monitoringPoint.id)
-	}
-
-	def monitoringPointTemplate(monitoringPoint: MonitoringPointTemplate) = {
-		property("monitoringPointTemplate", monitoringPoint.id)
-	}
-
-	def monitoringCheckpoint(monitoringPoint: MonitoringPoint) = {
-		property("monitoringCheckpoint", monitoringPoint.id)
-	}
-
 	def attendanceMonitoringScheme(scheme: AttendanceMonitoringScheme) = {
 		property("attendanceMonitoringScheme", scheme.id)
 	}

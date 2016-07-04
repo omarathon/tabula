@@ -7,7 +7,7 @@
 
 <div class="permissions-page">
 	<div class="pull-right">
-		<a class="btn btn-default" href="<@routes.admin.rolesDepartment module.department />">About roles</a>
+		<a class="btn btn-default" href="<@routes.admin.rolesDepartment module.adminDepartment />">About roles</a>
 		<a class="btn btn-default" href="<@routes.admin.permissions module />">Advanced</a>
 	</div>
 

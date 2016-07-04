@@ -101,10 +101,11 @@ object TimetableEventType {
 	case object Seminar extends TimetableEventType("SEM", "Seminar")
 	case object Induction extends TimetableEventType("IND", "Induction")
 	case object Meeting extends TimetableEventType("MEE", "Meeting")
+	case object Exam extends TimetableEventType("EXA", "Exam")
 	case class Other(c: String) extends TimetableEventType(c, c, false)
 
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting)
+	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting, Exam)
 
 	def unapply(code: String): Option[TimetableEventType] = code match {
 		case Lecture.code | Lecture.displayName => Some(Lecture)
@@ -112,6 +113,7 @@ object TimetableEventType {
 		case Seminar.code | Seminar.displayName => Some(Seminar)
 		case Induction.code | Induction.displayName => Some(Induction)
 		case Meeting.code | Meeting.displayName => Some(Meeting)
+		case Exam.code | Exam.displayName => Some(Exam)
 		case _ => None
 	}
 

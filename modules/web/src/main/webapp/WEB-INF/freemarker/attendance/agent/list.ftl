@@ -11,7 +11,7 @@
 			<span class="caret"></span>
 		</a>
 		<ul class="dropdown-menu pull-right">
-			<li><a href="<@routes.attendance.agentView relationshipType />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
+			<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2013' />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
 			<#if features.attendanceMonitoringAcademicYear2014>
 				<li><a href="<@routes.attendance.agentHomeForYear relationshipType '2014' />"><#if academicYear.startYear == 2014><strong>14/15</strong><#else>14/15</#if></a></li>
 			</#if>

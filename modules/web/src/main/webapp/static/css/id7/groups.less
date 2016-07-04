@@ -1,5 +1,6 @@
 @import "colours.less";
 @import "../../bower_components/warwick-id7/less/bootstrap/variables.less";
+@import "scrollable-table.less";
 
 .events .deleted, .item-info.deleted, .item-info.deleted .name, .item-info.deleted .events li {
 	text-decoration: line-through;
@@ -142,6 +143,9 @@ table.table.attendance-table {
 	&.tablesorter > thead > tr th.header {
 		/* Position from bottom, CSS3 feature */
 		background-position: bottom 10px right;
+		&.headerSortDown {
+			background-position: bottom 14px right;
+		}
 	}
 }
 
@@ -203,6 +207,16 @@ table.week-selector {
 	tr.selected td, tr.highlight td {
 		background-color: lighten(@tabulaGreenLight, 40%) !important;
 	}
+}
+
+.group-attendance {
+	th.missed {
+		width: 40px;
+	}
+	.right td {
+		text-align: center;
+	}
+	.scrollable-table(150px, 86px, 90px);
 }
 
 @import "record-attendance.less";

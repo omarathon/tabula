@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.data.{FileDao, MeetingRecordDao}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringMeetingRecordService
 
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
@@ -16,6 +18,9 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {
+		val meetingRecordDao = smartMock[MeetingRecordDao]
+		val fileDao = smartMock[FileDao]
+		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 
 		val creator = Fixtures.staff("9876543", "staffmember")
 		val student = Fixtures.student(universityId="1170836", userId="studentmember")

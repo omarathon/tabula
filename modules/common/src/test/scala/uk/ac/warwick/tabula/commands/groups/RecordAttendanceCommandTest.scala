@@ -20,13 +20,12 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 	// Implements the dependencies declared by the command
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
-	with ProfileServiceComponent with WeekToDateConverterComponent with MonitoringPointGroupProfileServiceComponent
+	with ProfileServiceComponent with WeekToDateConverterComponent
 	with FeaturesComponent with AttendanceMonitoringEventAttendanceServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
-		val userLookup = mock[UserLookupService]
-		val profileService = mock[ProfileService]
-		val weekToDateConverter = mock[WeekToDateConverter]
-		val monitoringPointGroupProfileService = mock[MonitoringPointGroupProfileService]
+		val smallGroupService = smartMock[SmallGroupService]
+		val userLookup = smartMock[UserLookupService]
+		val profileService = smartMock[ProfileService]
+		val weekToDateConverter = smartMock[WeekToDateConverter]
 		val attendanceMonitoringEventAttendanceService = smartMock[AttendanceMonitoringEventAttendanceService]
 		val features = emptyFeatures
 

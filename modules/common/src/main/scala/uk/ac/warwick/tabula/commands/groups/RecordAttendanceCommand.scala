@@ -35,7 +35,6 @@ object RecordAttendanceCommand {
 			with AutowiringProfileServiceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
-			with AutowiringMonitoringPointGroupProfileServiceComponent
 			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
 			with RecordAttendanceNotificationCompletion
 			with AutowiringFeaturesComponent {
@@ -120,7 +119,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with TaskBenchmarking {
 
 	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent with FeaturesComponent
-		with MonitoringPointGroupProfileServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent =>
+		with AttendanceMonitoringEventAttendanceServiceComponent =>
 
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 
@@ -190,11 +189,9 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 			}
 		}.toSeq
 
-		monitoringPointGroupProfileService.updateCheckpointsForAttendance(attendances)
-		if (features.attendanceMonitoringVersion2) {
-			attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
-			if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints)
-				attendanceMonitoringEventAttendanceService.updateMissedCheckpoints(attendances, user)
+		attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
+		if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
+			attendanceMonitoringEventAttendanceService.updateMissedCheckpoints(attendances, user)
 		}
 
 		(occurrence, attendances)

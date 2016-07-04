@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.commands.reports.profiles
 import org.joda.time.format.DateTimeFormat
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType, MonitoringPoint, MonitoringPointType}
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
@@ -30,7 +29,6 @@ object ProfileExportSingleCommand {
 			with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 			with PhotosWarwickMemberPhotoUrlGeneratorComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringAssessmentServiceComponent
@@ -49,10 +47,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	extends CommandInternal[Seq[FileAttachment]] with TaskBenchmarking {
 
 	self: FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AttendanceMonitoringServiceComponent
-		with MonitoringPointServiceComponent with AssessmentServiceComponent
-		with RelationshipServiceComponent with MeetingRecordServiceComponent
-		with SmallGroupServiceComponent
-		with TermServiceComponent with UserLookupComponent
+		with AssessmentServiceComponent	with RelationshipServiceComponent with MeetingRecordServiceComponent
+		with SmallGroupServiceComponent	with TermServiceComponent with UserLookupComponent
 		with FileDaoComponent =>
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -102,13 +98,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 
 	override def applyInternal() = {
 		// Get point data
-		val pointData = benchmarkTask("pointData") {
-			if (academicYear.startYear < 2014) {
-				getOldPointData
-			} else {
-				getPointData
-			}
-		}
+		val pointData = benchmarkTask("pointData") { getPointData }
 
 		// Get coursework
 		val assignmentData = benchmarkTask("assignmentData") {
@@ -182,39 +172,6 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment)))
 	}
 
-	private def getOldPointData: Seq[PointData] = {
-		val pointSetsByStudent = benchmarkTask("monitoringPointService.findPointSetsForStudentsByStudent") {
-			monitoringPointService.findPointSetsForStudentsByStudent(Seq(student), academicYear)
-		}
-		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
-		val checkpoints = benchmarkTask("monitoringPointService.getCheckpointsByStudent") {
-			monitoringPointService.getCheckpointsByStudent(allPoints).map(_._2) }
-		val attendanceNotes = benchmarkTask("monitoringPointService.findAttendanceNotes") {
-			monitoringPointService.findAttendanceNotes(Seq(student), allPoints).groupBy(_.student).map{
-				case (s, notes) => s -> notes.groupBy(_.point).mapValues(_.head)
-			}
-		}
-		val users = benchmarkTask("userLookup.getUsersByUserIds") {
-			userLookup.getUsersByUserIds(checkpoints.map(_.updatedBy).asJava).asScala
-		}
-		val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
-		checkpoints.map(checkpoint => {
-			PointData(
-				checkpoint.point.pointSet.route.adminDepartment.name,
-				termService.getTermFromAcademicWeek(checkpoint.point.validFromWeek, academicYear).getTermTypeAsString,
-				checkpoint.state.dbValue,
-				checkpoint.point.name,
-				Option(checkpoint.point.pointType).map(_.description).getOrElse("Standard"),
-				serializePointTypeOptions(checkpoint.point),
-				weeksForYear(checkpoint.point.validFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.toString(ProfileExportSingleCommand.DateFormat),
-				weeksForYear(checkpoint.point.requiredFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.toString(ProfileExportSingleCommand.DateFormat),
-				users(checkpoint.updatedBy),
-				checkpoint.updatedDate.toString(ProfileExportSingleCommand.TimeFormat),
-				attendanceNotes.get(student).flatMap(_.get(checkpoint.point))
-			)
-		})
-	}
-
 	private def getPointData: Seq[PointData] = {
 		val checkpoints = benchmarkTask("attendanceMonitoringService.getAllAttendance") {
 			attendanceMonitoringService.getAllAttendance(student.universityId)
@@ -285,47 +242,6 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 							point.assignmentSubmissionAssignments.map(a => a.module.code.toUpperCase + " " + a.name).mkString(", ")
 						)
 				}
-		}
-	}
-
-	private def serializePointTypeOptions(point: MonitoringPoint): String = {
-		point.pointType match {
-			case MonitoringPointType.Meeting =>
-				"%s %s with the student's %s".format(
-					point.meetingQuantity,
-					if (point.meetingFormats.isEmpty)
-						"meeting of any format"
-					else
-						point.meetingFormats.map(_.getDescription).mkString(" or "),
-					point.meetingRelationships.map(_.agentRole).mkString(" or ")
-				)
-			case MonitoringPointType.SmallGroup =>
-				"Attend %s event%s for %s".format(
-					point.smallGroupEventQuantity,
-					if (point.smallGroupEventQuantity == 1) "" else "s",
-					if (point.smallGroupEventModules.isEmpty)
-						"any module"
-					else
-						point.smallGroupEventModules.map(_.code.toUpperCase).mkString(" or ")
-				)
-			case MonitoringPointType.AssignmentSubmission =>
-				point.assignmentSubmissionIsSpecificAssignments match {
-					case false =>
-						"Submit to %s assignment%s in %s".format(
-							point.assignmentSubmissionQuantity,
-							if (point.assignmentSubmissionQuantity != 1) "s" else "",
-							point.assignmentSubmissionModules.map(_.code.toUpperCase).mkString(" or ")
-						)
-					case true =>
-						"Submit to %s %s assignment%s: %s".format(
-							if (point.assignmentSubmissionIsDisjunction) "any" else "all",
-							point.assignmentSubmissionAssignments.size,
-							if (point.assignmentSubmissionAssignments.size != 1) "s" else "",
-							point.assignmentSubmissionAssignments.map(a => a.module.code.toUpperCase + " " + a.name).mkString(", ")
-						)
-				}
-			case _ =>
-				"None"
 		}
 	}
 
