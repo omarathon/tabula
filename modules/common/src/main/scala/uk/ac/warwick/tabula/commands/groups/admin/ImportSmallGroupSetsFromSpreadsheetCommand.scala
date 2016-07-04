@@ -173,7 +173,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							}
 
 							groupCommand.name = extractedGroup.name
-							groupCommand.maxGroupSize = extractedGroup.limit.getOrElse(SmallGroup.DefaultGroupSize)
+							groupCommand.maxGroupSize = JInteger(extractedGroup.limit)
 
 							val eventCommands = extractedGroup.events.map { extractedEvent =>
 								val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))

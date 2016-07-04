@@ -35,7 +35,7 @@ trait ModifySmallGroupCommandState extends CurrentSITSAcademicYear {
 	def set: SmallGroupSet
 
 	var name: String = _
-	var maxGroupSize: Int = SmallGroup.DefaultGroupSize
+	var maxGroupSize: JInteger = SmallGroup.DefaultGroupSize
 }
 
 trait CreateSmallGroupCommandState extends ModifySmallGroupCommandState
