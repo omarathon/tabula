@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, _}
 import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
-import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent, PersistenceTestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Features, FeaturesComponent}
 
 class EditMeetingRecordCommandTest extends TestBase with Mockito {
 

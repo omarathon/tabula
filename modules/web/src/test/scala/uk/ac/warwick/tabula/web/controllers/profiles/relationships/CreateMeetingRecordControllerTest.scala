@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MemberStudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings.CreateMeetingRecordController
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
+import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings._
 
 class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 

@@ -137,7 +137,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				startTime = timetableExam.startDateTime.toLocalTime,
 				endTime = timetableExam.endDateTime.toLocalTime,
 				location = None,
-				comments = Some("More information available on the <a href=\"%s\">exam timetable</a>".format(Routes.profile.examTimetable(universityId))),
+				comments = Some("More information available on the <a href=\"%s\">exam timetable</a>".format(Routes.Profile.examTimetable(universityId))),
 				parent = TimetableEvent.Parent(),
 				staff = Nil,
 				students = Nil,

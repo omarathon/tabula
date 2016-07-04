@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.profiles._
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
