@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import scala.collection.JavaConverters._
 
 object SmallGroupSetController {
-	type EditSmallGroupSetCommand = Appliable[SmallGroupSet] with EditSmallGroupSetCommandState with ModifySmallGroupSetValidation
+	type EditSmallGroupSetCommand = ModifySmallGroupSetCommand.Command
 }
 
 abstract class SmallGroupSetController extends ModuleSmallGroupSetsController with GetSmallGroupSetApiFullOutput {

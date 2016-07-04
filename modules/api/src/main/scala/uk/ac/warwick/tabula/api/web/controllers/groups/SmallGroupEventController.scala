@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import scala.beans.BeanProperty
 
 object SmallGroupEventController {
-	type DeleteSmallGroupEventCommand = Appliable[SmallGroupEvent] with DeleteSmallGroupEventCommandState with DeleteSmallGroupEventValidation
+	type DeleteSmallGroupEventCommand = DeleteSmallGroupEventCommand.Command
 	type ModifySmallGroupEventCommand = ModifySmallGroupEventCommand.Command
 }
 

@@ -4,14 +4,16 @@ import java.io.ByteArrayInputStream
 import java.util.UUID
 
 import org.joda.time.LocalTime
-import org.springframework.validation.{BindException, Errors}
+import org.springframework.validation.{BindException, BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Module, NamedLocation}
 import uk.ac.warwick.tabula.services.groups.docconversion._
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{MaintenanceModeService, SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -53,7 +55,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		binding.onBind(result)
 
 		result.hasErrors should be (false)
-		binding.commands should be (Nil)
+		binding.commands should be ('empty)
 	}
 
 	@Test def bind(): Unit = new BindingFixture {
@@ -117,9 +119,9 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 
 		result.hasErrors should be (false)
 		binding.commands should not be 'empty
-		binding.commands.length should be (1)
+		binding.commands.size() should be (1)
 
-		val commandHolder = binding.commands.head
+		val commandHolder = binding.commands.get(0)
 		commandHolder.commandType should be ("Create")
 		commandHolder.command.isInstanceOf[CreateSmallGroupSetCommandInternal] should be (true)
 
@@ -134,9 +136,9 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		setCommand.linkedDepartmentSmallGroupSet should be (null)
 		setCommand.collectAttendance should be (true)
 
-		commandHolder.groupCommands.length should be (4)
+		commandHolder.modifyGroupCommands.size() should be (4)
 
-		val groupCommandHolder = commandHolder.groupCommands.head
+		val groupCommandHolder = commandHolder.modifyGroupCommands.get(0)
 		groupCommandHolder.commandType should be ("Create")
 		groupCommandHolder.command.isInstanceOf[CreateSmallGroupCommandInternal] should be (true)
 
@@ -144,9 +146,9 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		groupCommand.name should be ("Group 1")
 		groupCommand.maxGroupSize should be (15)
 
-		groupCommandHolder.eventCommands.length should be (1)
+		groupCommandHolder.modifyEventCommands.size() should be (1)
 
-		val eventCommandHolder = groupCommandHolder.eventCommands.head
+		val eventCommandHolder = groupCommandHolder.modifyEventCommands.get(0)
 		eventCommandHolder.commandType should be ("Create")
 		eventCommandHolder.command.isInstanceOf[CreateSmallGroupEventCommandInternal] should be (true)
 
@@ -160,7 +162,8 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		eventCommand.location should be ("S0.27")
 	}
 
-	class SetCommand(set: SmallGroupSet) extends Appliable[SmallGroupSet] with SelfValidating {
+	class ModifySetCommand(val module: Module, set: SmallGroupSet) extends Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState {
+		val existingSet = None
 		var called = false
 		def apply() = {
 			called = true
@@ -169,7 +172,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		def validate(errors: Errors): Unit = {}
 	}
 
-	class GroupCommand(group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating {
+	class ModifyGroupCommand(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating with ModifySmallGroupCommandState {
 		var called = false
 		def apply() = {
 			called = true
@@ -178,7 +181,27 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		def validate(errors: Errors): Unit = {}
 	}
 
-	class EventCommand(event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating {
+	class DeleteGroupCommand(val set: SmallGroupSet, val group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState {
+		var called = false
+		def apply() = {
+			called = true
+			group
+		}
+		def validate(errors: Errors): Unit = {}
+	}
+
+	class ModifyEventCommand(val module: Module, val set: SmallGroupSet, val group: SmallGroup, event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating with ModifySmallGroupEventCommandState with BindListener {
+		val existingEvent = None
+		var called = false
+		def apply() = {
+			called = true
+			event
+		}
+		def validate(errors: Errors): Unit = {}
+		def onBind(result: BindingResult): Unit = {}
+	}
+
+	class DeleteEventCommand(val set: SmallGroupSet, val group: SmallGroup, val event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating with DeleteSmallGroupEventCommandState {
 		var called = false
 		def apply() = {
 			called = true
@@ -195,6 +218,8 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	}
 
 	@Test def itWorks(): Unit = new CommandFixture {
+		val module = Fixtures.module("in101")
+
 		val set1 = Fixtures.smallGroupSet("set 1")
 		val s1group1 = Fixtures.smallGroup("s1 group 1")
 		val s1g1e1 = Fixtures.smallGroupEvent("s1g1e1")
@@ -204,26 +229,33 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		val s2group1 = Fixtures.smallGroup("s1 group 1")
 		val s2group2 = Fixtures.smallGroup("s1 group 2")
 
-		command.commands = Seq(
-			new ModifySmallGroupSetCommandHolder(new SetCommand(set1), "Create", Seq(
-				new ModifySmallGroupCommandHolder(new GroupCommand(s1group1), "Create", Seq(
-					new ModifySmallGroupEventCommandHolder(new EventCommand(s1g1e1), "Create")
-				)),
-				new ModifySmallGroupCommandHolder(new GroupCommand(s1group2), "Create", Nil)
-			)),
-			new ModifySmallGroupSetCommandHolder(new SetCommand(set2), "Edit", Seq(
-				new ModifySmallGroupCommandHolder(new GroupCommand(s2group1), "Create", Nil),
-				new ModifySmallGroupCommandHolder(new GroupCommand(s2group2), "Delete", Nil)
+		command.commands = JList(
+			new ModifySmallGroupSetCommandHolder(new ModifySetCommand(module, set1), "Create", JList(
+				new ModifySmallGroupCommandHolder(new ModifyGroupCommand(module, set1, s1group1), "Create", JList(
+					new ModifySmallGroupEventCommandHolder(new ModifyEventCommand(module, set1, s1group1, s1g1e1), "Create")
+				), JArrayList()),
+				new ModifySmallGroupCommandHolder(new ModifyGroupCommand(module, set1, s1group2), "Create", JArrayList(), JArrayList())
+			), JArrayList()),
+			new ModifySmallGroupSetCommandHolder(new ModifySetCommand(module, set2), "Edit", JList(
+				new ModifySmallGroupCommandHolder(new ModifyGroupCommand(module, set2, s2group1), "Create", JArrayList(), JArrayList())
+			), JList(
+				new DeleteGroupCommand(set2, s2group2)
 			))
 		)
 
 		command.applyInternal() should be (Seq(set1, set2))
-		command.commands.foreach { sc =>
-			sc.command.asInstanceOf[SetCommand].called should be (true)
-			sc.groupCommands.foreach { gc =>
-				gc.command.asInstanceOf[GroupCommand].called should be (true)
-				gc.eventCommands.foreach { ec =>
-					ec.command.asInstanceOf[EventCommand].called should be (true)
+		command.commands.asScala.foreach { sc =>
+			sc.command.asInstanceOf[ModifySetCommand].called should be (true)
+			sc.deleteGroupCommands.asScala.foreach { command =>
+				command.asInstanceOf[DeleteGroupCommand].called should be (true)
+			}
+			sc.modifyGroupCommands.asScala.foreach { gc =>
+				gc.command.asInstanceOf[ModifyGroupCommand].called should be (true)
+				gc.deleteEventCommands.asScala.foreach { command =>
+					command.asInstanceOf[DeleteEventCommand].called should be (true)
+				}
+				gc.modifyEventCommands.asScala.foreach { ec =>
+					ec.command.asInstanceOf[ModifyEventCommand].called should be (true)
 				}
 			}
 		}

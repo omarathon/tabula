@@ -92,9 +92,11 @@ trait ModifySmallGroupValidation extends SelfValidating {
 		}
 
 		if (name.isEmpty) errors.rejectValue("name", "smallGroup.name.NotEmpty")
-			else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
-		}
+		else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
+
+		if (maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
 	}
+}
 
 trait CreateSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CreateSmallGroupCommandState =>

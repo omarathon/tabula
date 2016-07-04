@@ -8,21 +8,21 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.usermodel.XSSFComment
-import org.joda.time.{DateTime, LocalTime}
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, LocalTime}
 import org.springframework.stereotype.Service
 import org.springframework.validation.BindingResult
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Department, Location, Module}
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services.timetables.{AutowiringWAI2GoConfigurationComponent, LocationFetchingServiceComponent, WAI2GoHttpLocationFetchingServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.mutable
@@ -322,8 +322,8 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 
 	private def extractBoolean(sheetName: String, cell: Cell, result: BindingResult): Option[Boolean] =
 		cell.formattedValue.toLowerCase.trim match {
-			case "1" | "true" | "yes" | "on" =>	Some(true)
-			case "0" | "false" | "no" | "off" => Some(false)
+			case "1" | "1.0" | "true" | "yes" | "on" =>	Some(true)
+			case "0" | "0.0" | "false" | "no" | "off" => Some(false)
 			case v =>
 				result.reject(
 					"smallGroups.importSpreadsheet.invalidBoolean",

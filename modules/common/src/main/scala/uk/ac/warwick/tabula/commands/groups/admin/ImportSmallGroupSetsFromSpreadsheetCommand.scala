@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.ImportSmallGroupSetsFromSpreadsheetCommand._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -19,9 +20,11 @@ object ImportSmallGroupSetsFromSpreadsheetCommand {
 	val RequiredPermission = Permissions.SmallGroups.ImportFromExternalSystem
 	type CommandType = Appliable[Seq[SmallGroupSet]] with SelfValidating with BindListener
 
-	type SetCommand = Appliable[SmallGroupSet] with SelfValidating
-	type GroupCommand = Appliable[SmallGroup] with SelfValidating
-	type EventCommand = Appliable[SmallGroupEvent] with SelfValidating
+	type ModifySetCommand = ModifySmallGroupSetCommand.Command
+	type ModifyGroupCommand = ModifySmallGroupCommand.Command
+	type DeleteGroupCommand = DeleteSmallGroupCommand.Command
+	type ModifyEventCommand = ModifySmallGroupEventCommand.Command
+	type DeleteEventCommand = DeleteSmallGroupEventCommand.Command
 
 	def apply(department: Department, academicYear: AcademicYear): CommandType =
 		new ImportSmallGroupSetsFromSpreadsheetCommandInternal(department, academicYear)
@@ -37,10 +40,11 @@ object ImportSmallGroupSetsFromSpreadsheetCommand {
 abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department: Department, val academicYear: AcademicYear) extends CommandInternal[Seq[SmallGroupSet]]
 	with ImportSmallGroupSetsFromSpreadsheetRequest {
 
-	override def applyInternal(): Seq[SmallGroupSet] = commands.map { sHolder =>
+	override def applyInternal(): Seq[SmallGroupSet] = commands.asScala.map { sHolder =>
 		val set = sHolder.command.apply()
 
-		sHolder.groupCommands.foreach { gHolder =>
+		sHolder.deleteGroupCommands.asScala.foreach(_.apply())
+		sHolder.modifyGroupCommands.asScala.foreach { gHolder =>
 			gHolder.command match {
 				case c: CreateSmallGroupCommandInternal => c.set = set
 				case _ =>
@@ -48,7 +52,8 @@ abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department
 
 			val group = gHolder.command.apply()
 
-			gHolder.eventCommands.foreach { eHolder =>
+			gHolder.deleteEventCommands.asScala.foreach(_.apply())
+			gHolder.modifyEventCommands.asScala.foreach { eHolder =>
 				eHolder.command match {
 					case c: CreateSmallGroupEventCommandInternal =>
 						c.set = set
@@ -69,16 +74,32 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 	self: ImportSmallGroupSetsFromSpreadsheetRequest =>
 
 	override def validate(errors: Errors): Unit = {
-		commands.zipWithIndex.foreach { case (set, i) =>
+		commands.asScala.zipWithIndex.foreach { case (set, i) =>
 			errors.pushNestedPath(s"commands[$i]")
 
 			set.command.validate(errors)
-			set.groupCommands.zipWithIndex.foreach { case (group, j) =>
-				errors.pushNestedPath(s"groupCommands[$j]")
 
+			set.deleteGroupCommands.asScala.zipWithIndex.foreach { case (command, j) =>
+				errors.pushNestedPath(s"deleteGroupCommands[$j]")
+				command.validate(errors)
+				errors.popNestedPath()
+			}
+
+			set.modifyGroupCommands.asScala.zipWithIndex.foreach { case (group, j) =>
+				errors.pushNestedPath(s"modifyGroupCommands[$j]")
+
+				errors.pushNestedPath("command")
 				group.command.validate(errors)
-				group.eventCommands.zipWithIndex.foreach { case (event, k) =>
-					errors.pushNestedPath(s"eventCommands[$k]")
+				errors.popNestedPath()
+
+				group.deleteEventCommands.asScala.zipWithIndex.foreach { case (command, k) =>
+					errors.pushNestedPath(s"deleteEventCommands[$k]")
+					command.validate(errors)
+					errors.popNestedPath()
+				}
+
+				group.modifyEventCommands.asScala.zipWithIndex.foreach { case (event, k) =>
+					errors.pushNestedPath(s"modifyEventCommands[$k].command")
 					event.command.validate(errors)
 					errors.popNestedPath()
 				}
@@ -184,34 +205,34 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							val deleteEventCommands =
 								existingGroup.toSeq.flatMap(_.events.sorted)
 									.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
-									.map { e => new ModifySmallGroupEventCommandHolder(DeleteSmallGroupEventCommand(e.group, e), "Delete") }
+									.map { e => DeleteSmallGroupEventCommand(e.group, e) }
 
-							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands ++ deleteEventCommands)
+							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands.asJava, deleteEventCommands.asJava)
 						}
 
 						val deleteGroupCommands =
 							existing.toSeq.flatMap(_.groups.asScala.sorted)
 								.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
-								.map { g => new ModifySmallGroupCommandHolder(DeleteSmallGroupCommand(g.groupSet, g), "Delete", Nil) }
+								.map { g => DeleteSmallGroupCommand(g.groupSet, g) }
 
-						new ModifySmallGroupSetCommandHolder(setCommand, setCommandType, groupCommands ++ deleteGroupCommands)
+						new ModifySmallGroupSetCommandHolder(setCommand, setCommandType, groupCommands.asJava, deleteGroupCommands.asJava)
 					}
-				}
+				}.asJava
 			}
 		}
 	}
 }
 
-class ModifySmallGroupSetCommandHolder(var command: SetCommand, val commandType: String, var groupCommands: Seq[ModifySmallGroupCommandHolder])
-class ModifySmallGroupCommandHolder(var command: GroupCommand, val commandType: String, var eventCommands: Seq[ModifySmallGroupEventCommandHolder])
-class ModifySmallGroupEventCommandHolder(var command: EventCommand, val commandType: String)
+class ModifySmallGroupSetCommandHolder(var command: ModifySetCommand, val commandType: String, var modifyGroupCommands: JList[ModifySmallGroupCommandHolder], var deleteGroupCommands: JList[DeleteGroupCommand])
+class ModifySmallGroupCommandHolder(var command: ModifyGroupCommand, val commandType: String, var modifyEventCommands: JList[ModifySmallGroupEventCommandHolder], var deleteEventCommands: JList[DeleteEventCommand])
+class ModifySmallGroupEventCommandHolder(var command: ModifyEventCommand, val commandType: String)
 
 trait ImportSmallGroupSetsFromSpreadsheetRequest extends ImportSmallGroupSetsFromSpreadsheetState {
 	var file: UploadedFile = new UploadedFile
 	var confirm: Boolean = _
 
 	// Bound by BindListener (ImportSmallGroupSetsFromSpreadsheetBinding)
-	var commands: Seq[ModifySmallGroupSetCommandHolder] = Nil
+	var commands: JList[ModifySmallGroupSetCommandHolder] = JArrayList()
 }
 
 trait ImportSmallGroupSetsFromSpreadsheetState {

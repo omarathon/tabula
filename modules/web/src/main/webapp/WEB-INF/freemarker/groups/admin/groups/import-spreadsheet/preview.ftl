@@ -35,7 +35,7 @@
 			</div>
 
 			<div class="striped-section-contents">
-				<@f.errors path="*" cssClass="error form-errors" />
+				<@f.errors path="command.*" cssClass="error form-errors text-danger" />
 
 				<h4>Settings</h4>
 
@@ -69,9 +69,15 @@
 
 				<h4>Groups</h4>
 
-				<#list holder.groupCommands as gHolder>
-					<@spring.nestedPath path="groupCommands[${gHolder_index}]">
+				<#list holder.modifyGroupCommands as gHolder>
+					<@spring.nestedPath path="modifyGroupCommands[${gHolder_index}]">
 						<@group_command_details gHolder />
+					</@spring.nestedPath>
+				</#list>
+
+				<#list holder.deleteGroupCommands as deleteCommand>
+					<@spring.nestedPath path="deleteGroupCommands[${deleteCommand_index}]">
+						<@delete_group_command_details deleteCommand />
 					</@spring.nestedPath>
 				</#list>
 			</div>
@@ -94,30 +100,54 @@
 		</div>
 
 		<div class="col-md-8">
-			<@f.errors path="*" cssClass="error form-errors" />
+			<@f.errors path="command.*" cssClass="error form-errors text-danger" />
 
 			<h5>Events</h5>
 
 			<ul class="list-unstyled">
-				<#if holder.commandType == "Delete">
-					<#list holder.command.group.events as event>
-						<li>
-							<@command_type_label "Delete" />
-							<@components.eventShortDetails event />
+				<#list holder.modifyEventCommands as eHolder>
+					<@spring.nestedPath path="modifyEventCommands[${eHolder_index}]">
+						<li><@event_command_details eHolder /></li>
+					</@spring.nestedPath>
+				</#list>
 
-							<#local popoverContent><@components.eventDetails event /></#local>
-							<a class="use-popover"
-							   data-html="true"
-							   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
-						</li>
-					</#list>
-				<#else>
-					<#list holder.eventCommands as eHolder>
-						<@spring.nestedPath path="eventCommands[${eHolder_index}]">
-							<li><@event_command_details eHolder /></li>
-						</@spring.nestedPath>
-					</#list>
-				</#if>
+				<#list holder.deleteEventCommands as deleteCommand>
+					<@spring.nestedPath path="deleteEventCommands[${deleteCommand_index}]">
+						<li><@delete_event_command_details deleteCommand /></li>
+					</@spring.nestedPath>
+				</#list>
+			</ul>
+		</div>
+	</div>
+</#macro>
+
+<#macro delete_group_command_details command>
+	<div class="item-info row">
+		<div class="col-md-4">
+			<@command_type_label "Delete" />
+
+			<span class="h4 colour-h4 name">
+				${command.group.name}
+			</span>
+		</div>
+
+		<div class="col-md-8">
+			<@f.errors path="command.*" cssClass="error form-errors text-danger" />
+
+			<h5>Events</h5>
+
+			<ul class="list-unstyled">
+				<#list command.group.events as event>
+					<li>
+						<@command_type_label "Delete" />
+						<@components.eventShortDetails event />
+
+						<#local popoverContent><@components.eventDetails event /></#local>
+						<a class="use-popover"
+						   data-html="true"
+						   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+					</li>
+				</#list>
 			</ul>
 		</div>
 	</div>
@@ -125,53 +155,56 @@
 
 <#macro event_command_details holder>
 	<@command_type_label holder.commandType />
-	<@f.errors path="*" cssClass="error form-errors" />
+	<@f.errors path="command.*" cssClass="error form-errors text-danger" />
 
-	<#if holder.commandType == "Delete">
-		<#local event = holder.command.event />
-		<@components.eventShortDetails event />
+	<#if holder.command.title?has_content><span class="eventTitle">${holder.command.title} - </span></#if>
+	<#if holder.command.startTime??><@fmt.time holder.command.startTime /></#if> ${(holder.command.day.name)!""}
 
-		<#local popoverContent><@components.eventDetails event /></#local>
-		<a class="use-popover"
-		   data-html="true"
-		   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
-	<#else>
-		<#if holder.command.title?has_content><span class="eventTitle">${holder.command.title} - </span></#if>
-		<#if holder.command.startTime??><@fmt.time holder.command.startTime /></#if> ${(holder.command.day.name)!""}
-
-		<#local popoverContent>
-			<#if holder.command.title?has_content><div class="eventTitle">${holder.command.title}</div></#if>
-			<div class="day-time">
-				${(holder.command.day.name)!""}
-				<#if holder.command.startTime??><@fmt.time holder.command.startTime /><#else>[no start time]</#if>
-				-
-				<#if holder.command.endTime??><@fmt.time holder.command.endTime /><#else>[no end time]</#if>
+	<#local popoverContent>
+		<#if holder.command.title?has_content><div class="eventTitle">${holder.command.title}</div></#if>
+		<div class="day-time">
+			${(holder.command.day.name)!""}
+			<#if holder.command.startTime??><@fmt.time holder.command.startTime /><#else>[no start time]</#if>
+			-
+			<#if holder.command.endTime??><@fmt.time holder.command.endTime /><#else>[no end time]</#if>
+		</div>
+		<#if holder.command.tutors?size gt 0>
+			Tutor<#if holder.command.tutors?size gt 1>s</#if>:
+			<@fmt.user_list_csv holder.command.tutors />
+		</#if>
+		<#if ((holder.command.location)!"")?has_content>
+			<div class="location">
+				Room: <@fmt.location_decomposed holder.command.location holder.command.locationId!"" />
 			</div>
-			<#if holder.command.tutors?size gt 0>
-				Tutor<#if holder.command.tutors?size gt 1>s</#if>:
-				<@fmt.user_list_csv holder.command.tutors />
-			</#if>
-			<#if ((holder.command.location)!"")?has_content>
-				<div class="location">
-					Room: <@fmt.location_decomposed holder.command.location holder.command.locationId!"" />
-				</div>
-			</#if>
-			<div class="running">
-				Running: <#compress>
-					<#if holder.command.weekRanges?size gt 0 && holder.command.day??>
-						${weekRangesFormatter(holder.command.weekRanges, holder.command.day, academicYear, department)}
-					<#elseif holder.command.weekRanges?size gt 0>
-						[no day of week selected]
-					<#else>
-						[no dates selected]
-					</#if>
-				</#compress>
-			</div>
-		</#local>
-		<a class="use-popover"
-		   data-html="true"
-		   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
-	</#if>
+		</#if>
+		<div class="running">
+			Running: <#compress>
+				<#if holder.command.weekRanges?size gt 0 && holder.command.day??>
+					${weekRangesFormatter(holder.command.weekRanges, holder.command.day, academicYear, department)}
+				<#elseif holder.command.weekRanges?size gt 0>
+					[no day of week selected]
+				<#else>
+					[no dates selected]
+				</#if>
+			</#compress>
+		</div>
+	</#local>
+	<a class="use-popover"
+	   data-html="true"
+	   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+</#macro>
+
+<#macro delete_event_command_details command>
+	<@command_type_label "Delete" />
+	<@f.errors path="*" cssClass="error form-errors text-danger" />
+
+	<#local event = command.event />
+	<@components.eventShortDetails event />
+
+	<#local popoverContent><@components.eventDetails event /></#local>
+	<a class="use-popover"
+	   data-html="true"
+	   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 </#macro>
 
 <#escape x as x?html>
@@ -190,7 +223,9 @@
 			<#list errors.globalErrors as e>
 				<div><@spring.message message=e /></div>
 			</#list>
-		<#else>
+		</#if>
+
+		<#if errors.hasFieldErrors()>
 			<p>Some rows in your spreadsheet weren't valid. See the errors below.</p>
 		</#if>
 	</div>
@@ -204,7 +239,7 @@
 	<p>The following sets of small groups were successfully read from the spreadsheet:</p>
 
 	<#list command.commands as sHolder>
-		<@spring.nestedPath path="commands[${sHolder_index}]">
+		<@spring.nestedPath path="command.commands[${sHolder_index}]">
 			<@set_command_details sHolder />
 		</@spring.nestedPath>
 	</#list>

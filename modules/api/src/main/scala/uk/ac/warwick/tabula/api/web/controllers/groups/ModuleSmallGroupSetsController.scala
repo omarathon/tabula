@@ -29,7 +29,7 @@ import scala.collection.JavaConverters._
 
 object ModuleSmallGroupSetsController {
 	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
-	type CreateSmallGroupSetCommand = Appliable[SmallGroupSet] with CreateSmallGroupSetCommandState with ModifySmallGroupSetValidation
+	type CreateSmallGroupSetCommand = ModifySmallGroupSetCommand.CreateCommand
 }
 
 abstract class ModuleSmallGroupSetsController extends ApiController
