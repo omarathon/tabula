@@ -171,7 +171,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 		if (sets.nonEmpty) {
 			// Small group format validation
 			{
-				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 1, 1)
+				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 100, 1, 1)
 				val dvHelper = new XSSFDataValidationHelper(sheet)
 				val dvConstraint =
 					dvHelper.createFormulaListConstraint("Lookups!$A$2:$A$" + (SmallGroupFormat.members.size + 1))
@@ -183,7 +183,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 			// Small group allocation method validation
 			{
-				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 3, 3)
+				val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 100, 3, 3)
 				val dvHelper = new XSSFDataValidationHelper(sheet)
 				val dvConstraint =
 					dvHelper.createFormulaListConstraint("Lookups!$B$2:$B$" + (SmallGroupAllocationMethod.members.size + 1))
@@ -324,7 +324,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 		// Day of week validation
 		if (sets.flatMap(_.groups.asScala.sorted).flatMap(_.events.sorted).nonEmpty) {
-			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum, 6, 6)
+			val dropdownRange = new CellRangeAddressList(1, sheet.getLastRowNum + 1000, 6, 6)
 			val dvHelper = new XSSFDataValidationHelper(sheet)
 			val dvConstraint =
 				dvHelper.createFormulaListConstraint("Lookups!$C$2:$C$" + (DayOfWeek.members.size + 1))
