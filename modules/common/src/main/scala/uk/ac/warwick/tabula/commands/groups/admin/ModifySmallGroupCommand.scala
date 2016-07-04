@@ -94,7 +94,7 @@ trait ModifySmallGroupValidation extends SelfValidating {
 		if (name.isEmpty) errors.rejectValue("name", "smallGroup.name.NotEmpty")
 		else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 
-		if (maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
+		if (maxGroupSize != null && maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
 	}
 }
 
