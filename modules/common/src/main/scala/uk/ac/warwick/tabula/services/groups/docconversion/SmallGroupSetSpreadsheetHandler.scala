@@ -414,6 +414,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 
 		Try(LocalTime.parse(value, DateTimeFormat.forPattern("HH:mm:ss")))
 			.orElse(Try(LocalTime.parse(value, DateTimeFormat.forPattern("HH:mm"))))
+			.orElse(Try(LocalTime.parse(value, DateTimeFormat.forPattern("h:mm:ssa"))))
 			.orElse(Try(LocalTime.parse(value, DateTimeFormat.forPattern("h:mma"))))
 			.orElse(Try(new DateTime(DateUtil.getJavaDate(value.toDouble)).toLocalTime))
 			.map(Some.apply)

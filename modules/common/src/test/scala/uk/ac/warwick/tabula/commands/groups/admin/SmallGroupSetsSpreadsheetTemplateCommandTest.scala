@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.LocalTime
+import org.joda.time.{DateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupAllocationMethod, SmallGroupFormat, WeekRange}
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
@@ -102,12 +102,23 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 		val eventsSheet = workbook.getSheet("Events")
 		eventsSheet.getLastRowNum should be (2)
 
-		val eventRow1 = (0 to 9).map { col => eventsSheet.getRow(1).getCell(col).toString }
-		val eventRow2 = (0 to 9).map { col => eventsSheet.getRow(2).getCell(col).toString }
+		val eventRow1 = (0 to 9).map { col =>
+			if (col == 7 || col == 8) {
+				new DateTime(eventsSheet.getRow(1).getCell(col).getDateCellValue).toLocalTime.toString("HH:mm")
+			} else {
+				eventsSheet.getRow(1).getCell(col).toString
+			}
+		}
+		val eventRow2 = (0 to 9).map { col =>
+			if (col == 7 || col == 8) {
+				new DateTime(eventsSheet.getRow(2).getCell(col).getDateCellValue).toLocalTime.toString("HH:mm")
+			} else {
+				eventsSheet.getRow(2).getCell(col).toString
+			}
+		}
 
-		// Time-formatted columns are stored as floating point numbers between 0 and 1 where 0 is 00:00:00 and 1 is 24:00:00
-		eventRow1 should be (Seq("IN101", "IN101 Labs", "Alpha", "", "cuscav", "1-6,8-10", "Monday", "0.4583333333333333", "0.5208333333333334", "S0.27"))
-		eventRow2 should be (Seq("IN101", "IN101 Labs", "Alpha", "Class test", "cusfal,curef", "7", "Tuesday", "0.375", "0.4583333333333333", "Student break-out area"))
+		eventRow1 should be (Seq("IN101", "IN101 Labs", "Alpha", "", "cuscav", "1-6,8-10", "Monday", "11:00", "12:30", "S0.27"))
+		eventRow2 should be (Seq("IN101", "IN101 Labs", "Alpha", "Class test", "cusfal,curef", "7", "Tuesday", "09:00", "11:00", "Student break-out area"))
 	}
 
 }

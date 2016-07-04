@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.apache.poi.ss.usermodel.DateUtil
+import org.apache.poi.ss.usermodel.{DateUtil, Row}
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel._
 import uk.ac.warwick.tabula.AcademicYear
@@ -40,6 +41,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 	// Publicly visible for testing
 	def generateWorkbook() = {
 		val workbook = new XSSFWorkbook()
+		workbook.setMissingCellPolicy(Row.CREATE_NULL_AS_BLANK)
 
 		val sets = smallGroupService.getSmallGroupSets(department, academicYear).sorted
 
@@ -66,41 +68,54 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 		val sheet = workbook.createSheet("Lookups")
 
+		// set style on all columns
+		0 to 2 foreach  { col =>
+			sheet.setDefaultColumnStyle(col, style)
+		}
+
 		val header = sheet.createRow(0)
-		header.createCell(0).setCellValue("Small group set types")
-		header.createCell(1).setCellValue("Allocation methods")
-		header.createCell(2).setCellValue("Days of the week")
+
+		header.setRowStyle({
+			val bold = workbook.createCellStyle()
+			bold.cloneStyleFrom(style)
+
+			val font = workbook.createFont()
+			font.setFontHeightInPoints(11)
+			font.setFontName("Calibri")
+			font.setBold(true)
+			bold.setFont(font)
+
+			bold
+		})
+
+		header.getCell(0).setCellValue("Small group set types")
+		header.getCell(1).setCellValue("Allocation methods")
+		header.getCell(2).setCellValue("Days of the week")
+
+		(0 to 2).foreach { col =>
+			header.getCell(col).setCellStyle(header.getRowStyle)
+		}
 
 		val rows = 1 to (math.max(SmallGroupFormat.members.size, math.max(SmallGroupAllocationMethod.members.size, DayOfWeek.members.size)) + 1) map sheet.createRow
 
 		SmallGroupFormat.members.zipWithIndex.foreach { case (f, index) =>
 			val row = rows(index)
-			row.createCell(0).setCellValue(f.description)
+			row.getCell(0).setCellValue(f.description)
 		}
 
 		SmallGroupAllocationMethod.members.zipWithIndex.foreach { case (am, index) =>
 			val row = rows(index)
-			row.createCell(1).setCellValue(am.description)
+			row.getCell(1).setCellValue(am.description)
 		}
 
 		DayOfWeek.members.zipWithIndex.foreach { case (day, index) =>
 			val row = rows(index)
-			row.createCell(2).setCellValue(day.name)
+			row.getCell(2).setCellValue(day.name)
 		}
 
-		// set style on all columns
-		0 to 2 foreach  { col =>
-			sheet.setDefaultColumnStyle(col, style)
+		0 to 2 foreach { col =>
 			sheet.autoSizeColumn(col)
 		}
-
-		header.setRowStyle({
-			val style = workbook.createCellStyle()
-			val font = workbook.createFont()
-			font.setBold(true)
-			style.setFont(font)
-			style
-		})
 
 		sheet
 	}
@@ -121,22 +136,36 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 		val header = sheet.createRow(0)
 
+		header.setRowStyle({
+			val bold = workbook.createCellStyle()
+			bold.cloneStyleFrom(style)
+
+			val font = workbook.createFont()
+			font.setFontHeightInPoints(11)
+			font.setFontName("Calibri")
+			font.setBold(true)
+			bold.setFont(font)
+
+			bold
+		})
+
 		// set style on all columns
 		ExtractedSmallGroupSet.AllColumns.zipWithIndex foreach  { case (column, index) =>
-			header.createCell(index).setCellValue(column)
+			header.getCell(index).setCellValue(column)
+			header.getCell(index).setCellStyle(header.getRowStyle)
 		}
 
 		sets.zipWithIndex.foreach { case (set, index) =>
 			val row = sheet.createRow(index + 1)
-			row.createCell(0).setCellValue(set.module.code.toUpperCase)
-			row.createCell(1).setCellValue(set.format.description)
-			row.createCell(2).setCellValue(set.name)
-			row.createCell(3).setCellValue(set.allocationMethod.description)
-			row.createCell(4).setCellValue(set.studentsCanSeeTutorName)
-			row.createCell(5).setCellValue(set.studentsCanSeeOtherMembers)
-			row.createCell(6).setCellValue(set.allowSelfGroupSwitching)
-			row.createCell(7).setCellValue(Option(set.linkedDepartmentSmallGroupSet).map(_.name).orNull)
-			row.createCell(8).setCellValue(set.collectAttendance)
+			row.getCell(0).setCellValue(set.module.code.toUpperCase)
+			row.getCell(1).setCellValue(set.format.description)
+			row.getCell(2).setCellValue(set.name)
+			row.getCell(3).setCellValue(set.allocationMethod.description)
+			row.getCell(4).setCellValue(set.studentsCanSeeTutorName)
+			row.getCell(5).setCellValue(set.studentsCanSeeOtherMembers)
+			row.getCell(6).setCellValue(set.allowSelfGroupSwitching)
+			row.getCell(7).setCellValue(Option(set.linkedDepartmentSmallGroupSet).map(_.name).orNull)
+			row.getCell(8).setCellValue(set.collectAttendance)
 		}
 
 		if (sets.nonEmpty) {
@@ -171,23 +200,6 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.autoSizeColumn(index)
 		}
 
-		// Boolean columns
-		val booleanStyle = workbook.createCellStyle
-		booleanStyle.cloneStyleFrom(style)
-		booleanStyle.setDataFormat(format.getFormat("BOOLEAN"))
-		sheet.setDefaultColumnStyle(4, booleanStyle)
-		sheet.setDefaultColumnStyle(5, booleanStyle)
-		sheet.setDefaultColumnStyle(6, booleanStyle)
-		sheet.setDefaultColumnStyle(8, booleanStyle)
-
-		header.setRowStyle({
-			val style = workbook.createCellStyle()
-			val font = workbook.createFont()
-			font.setBold(true)
-			style.setFont(font)
-			style
-		})
-
 		sheet
 	}
 
@@ -207,19 +219,38 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 		val header = sheet.createRow(0)
 
+		header.setRowStyle({
+			val bold = workbook.createCellStyle()
+			bold.cloneStyleFrom(style)
+
+			val font = workbook.createFont()
+			font.setFontHeightInPoints(11)
+			font.setFontName("Calibri")
+			font.setBold(true)
+			bold.setFont(font)
+
+			bold
+		})
+
 		// set style on all columns
 		ExtractedSmallGroup.AllColumns.zipWithIndex foreach  { case (column, index) =>
-			header.createCell(index).setCellValue(column)
+			header.getCell(index).setCellValue(column)
+			header.getCell(index).setCellStyle(header.getRowStyle)
 		}
+
+		// Limit column
+		val intStyle = workbook.createCellStyle
+		intStyle.cloneStyleFrom(style)
+		intStyle.setDataFormat(format.getFormat("0"))
 
 		sets.flatMap(_.groups.asScala.sorted).zipWithIndex.foreach { case (group, index) =>
 			val row = sheet.createRow(index + 1)
-			row.createCell(0).setCellValue(group.groupSet.module.code.toUpperCase)
-			row.createCell(1).setCellValue(group.groupSet.name)
-			row.createCell(2).setCellValue(group.name)
-			row.createCell(3)
+			row.getCell(0).setCellValue(group.groupSet.module.code.toUpperCase)
+			row.getCell(1).setCellValue(group.groupSet.name)
+			row.getCell(2).setCellValue(group.name)
 
 			if (group.maxGroupSize != null) row.getCell(3).setCellValue(group.maxGroupSize.toInt)
+			row.getCell(3).setCellStyle(intStyle)
 		}
 
 		// set style on all columns
@@ -227,20 +258,7 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.setDefaultColumnStyle(index, style)
 			sheet.autoSizeColumn(index)
 		}
-
-		// Limit column
-		val intStyle = workbook.createCellStyle
-		intStyle.cloneStyleFrom(style)
-		intStyle.setDataFormat(format.getFormat("0"))
 		sheet.setDefaultColumnStyle(3, intStyle)
-
-		header.setRowStyle({
-			val style = workbook.createCellStyle()
-			val font = workbook.createFont()
-			font.setBold(true)
-			style.setFont(font)
-			style
-		})
 
 		sheet
 	}
@@ -261,23 +279,47 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 
 		val header = sheet.createRow(0)
 
+		header.setRowStyle({
+			val bold = workbook.createCellStyle()
+			bold.cloneStyleFrom(style)
+
+			val font = workbook.createFont()
+			font.setFontHeightInPoints(11)
+			font.setFontName("Calibri")
+			font.setBold(true)
+			bold.setFont(font)
+
+			bold
+		})
+
 		// set style on all columns
 		ExtractedSmallGroupEvent.AllColumns.zipWithIndex foreach  { case (column, index) =>
-			header.createCell(index).setCellValue(column)
+			header.getCell(index).setCellValue(column)
+			header.getCell(index).setCellStyle(header.getRowStyle)
 		}
+
+		// Time columns
+		val timeStyle = workbook.createCellStyle
+		timeStyle.cloneStyleFrom(style)
+		timeStyle.setDataFormat(format.getFormat("hh:mm"))
 
 		sets.flatMap(_.groups.asScala.sorted).flatMap(_.events.sorted).zipWithIndex.foreach { case (event, index) =>
 			val row = sheet.createRow(index + 1)
-			row.createCell(0).setCellValue(event.group.groupSet.module.code.toUpperCase)
-			row.createCell(1).setCellValue(event.group.groupSet.name)
-			row.createCell(2).setCellValue(event.group.name)
-			row.createCell(3).setCellValue(event.title)
-			row.createCell(4).setCellValue(event.tutors.knownType.members.mkString(","))
-			row.createCell(5).setCellValue(event.weekRanges.map(_.toString).mkString(","))
-			row.createCell(6).setCellValue(event.day.name)
-			row.createCell(7).setCellValue(DateUtil.convertTime(event.startTime.toString("HH:mm")))
-			row.createCell(8).setCellValue(DateUtil.convertTime(event.endTime.toString("HH:mm")))
-			row.createCell(9).setCellValue(event.location.name)
+			row.getCell(0).setCellValue(event.group.groupSet.module.code.toUpperCase)
+			row.getCell(1).setCellValue(event.group.groupSet.name)
+			row.getCell(2).setCellValue(event.group.name)
+			row.getCell(3).setCellValue(event.title)
+			row.getCell(4).setCellValue(event.tutors.knownType.members.mkString(","))
+			row.getCell(5).setCellValue(event.weekRanges.map(_.toString).mkString(","))
+			if (event.day != null) row.getCell(6).setCellValue(event.day.name)
+
+			if (event.startTime != null) row.getCell(7).setCellValue(DateUtil.convertTime(event.startTime.toString("HH:mm")))
+			row.getCell(7).setCellStyle(timeStyle)
+
+			if (event.endTime != null) row.getCell(8).setCellValue(DateUtil.convertTime(event.endTime.toString("HH:mm")))
+			row.getCell(8).setCellStyle(timeStyle)
+
+			if (event.location != null) row.getCell(9).setCellValue(event.location.name)
 		}
 
 		// Day of week validation
@@ -297,21 +339,8 @@ abstract class SmallGroupSetsSpreadsheetTemplateCommandInternal(val department: 
 			sheet.setDefaultColumnStyle(index, style)
 			sheet.autoSizeColumn(index)
 		}
-
-		// Time columns
-		val timeStyle = workbook.createCellStyle
-		timeStyle.cloneStyleFrom(style)
-		timeStyle.setDataFormat(format.getFormat("HH:MM"))
 		sheet.setDefaultColumnStyle(7, timeStyle)
 		sheet.setDefaultColumnStyle(8, timeStyle)
-
-		header.setRowStyle({
-			val style = workbook.createCellStyle()
-			val font = workbook.createFont()
-			font.setBold(true)
-			style.setFont(font)
-			style
-		})
 
 		sheet
 	}
