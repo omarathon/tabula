@@ -15,8 +15,6 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 	@JoinColumn(name="ATTACHMENT_ID")
 	var attachment: FileAttachment = _
 
-	def completed = similarity.exists(_ > -1)
-
 	var createdDate: DateTime = DateTime.now
 
 	@Column(name = "TURNITIN_ID")
@@ -54,6 +52,29 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	@Column(name = "PUBLICATION_OVERLAP")
 	var publicationOverlap: Option[Int] = None
+
+	// Urkund data
+
+	var nextSubmitAttempt: DateTime = _
+
+	var submitAttempts: JInteger = 0
+
+	var submittedDate: DateTime = _
+
+	var nextResponseAttempt: DateTime = _
+
+	var responseAttempts: JInteger = 0
+
+	var responseReceived: DateTime = _
+
+	var reportUrl: String = _
+
+	var significance: JFloat = _
+
+	var matchCount: JInteger = _
+
+	var sourceCount: JInteger = _
+
 
 	override def toEntityReference = new OriginalityReportEntityReference().put(this)
 }
