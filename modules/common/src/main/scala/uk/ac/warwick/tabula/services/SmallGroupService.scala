@@ -209,7 +209,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = {
 		// We need to only get back valid occurrences (event related), database does not delete occurrences later once created initially.
-		val weekRanges = smallGroup.events.flatMap { event => event.weekRanges}.flatMap { range => range.minWeek to range.maxWeek }
+		val weekRanges = smallGroup.events.flatMap { event => event.weekRanges }.flatMap { range => range.minWeek to range.maxWeek }
 		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup).filter { groupEventOccurrence => weekRanges.contains(groupEventOccurrence.week) }
 	}
 
