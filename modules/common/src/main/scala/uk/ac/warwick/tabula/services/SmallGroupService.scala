@@ -209,8 +209,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = {
 		// We need to only get back valid occurrences (event related), database does not delete occurrences later once created initially.
-		val weekRanges = smallGroup.events.flatMap { event => event.weekRanges }.flatMap { range => range.minWeek to range.maxWeek }
-		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup).filter { groupEventOccurrence => weekRanges.contains(groupEventOccurrence.week) }
+		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup).filter { groupEventOccurrence => groupEventOccurrence.event.allWeeks.contains(groupEventOccurrence.week) }
 	}
 
 	def removeFromSmallGroups(modReg: ModuleRegistration) {
@@ -304,45 +303,59 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 
 	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = {
-		benchmarkTask(s"possibleTimetableClashCheck[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
+		benchmarkTask(s"possibleTimetableClash[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
 	}
 
 	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
-		benchmarkTask(s"studentTimetableClashCheck[Group-${group.id}, Student - ${student.getUserId}]") {
+		benchmarkTask(s"studentTimetableClash[Group-${group.id}, Student - ${student.getUserId}]") {
 			val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
 			possibleClashes.exists { case(clashGroup, users) => group.id == clashGroup.id && users.exists { user => user.getUserId == student.getUserId } }
 		}
 	}
 
 	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(SmallGroup, Seq[User])] = {
-		val currentGroupsWithOccurrencesAndDateInfo = set.groups.asScala.map { group =>
-			(group, groupOccurrencesWithStartEndDateTimeInfo(group))
+		val currentGroupsWithOccurrencesAndDateInfo = benchmarkTask("currentGroupsWithOccurrencesAndDateInfo") {
+			set.groups.asScala.map { group =>
+				(group, groupOccurrencesWithStartEndDateTimeInfo(group))
+			}
 		}
 
-		val studentsWithOtherGroupOccurrenceAndDateInfo = students.map { groupSetStudent =>
-			val otherGroups = findSmallGroupsByStudent(groupSetStudent).filterNot { group => group.groupSet.id == set.id }
-			groupSetStudent -> otherGroups.flatMap { otherGrp => groupOccurrencesWithStartEndDateTimeInfo(otherGrp) }
+		val studentsWithOtherGroupOccurrenceAndDateInfo = benchmarkTask("studentsWithOtherGroupOccurrenceAndDateInfo") {
+			val groupsByStudent = benchmarkTask("groupsByStudent") {
+				students.map(student => student -> findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id })
+			}.toMap
+			val otherGroups = benchmarkTask("otherGroups") { groupsByStudent.values.flatten.toSeq.distinct }
+			val otherGroupOccurrencesWithTimes: Map[SmallGroup, Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]] =
+				otherGroups.map(group => group -> groupOccurrencesWithStartEndDateTimeInfo(group)).toMap
+			groupsByStudent.mapValues(groups => groups.flatMap(otherGroupOccurrencesWithTimes))
 		}
 		// let us get all clash info only once based on the possibility of students being allocated to various groups of this  groupset. At front end we can do JS magic to filter these students
 		// whenever we randomly allocate, shuffle, unallocate students to find real clashes.
-		currentGroupsWithOccurrencesAndDateInfo.map { case (group, groupOccurrencesWithdateInfo) =>
-			val groupStudentInfoWithPossibleClash = studentsWithOtherGroupOccurrenceAndDateInfo.par.filter { case (student, otherGroupOccurrencesWithDateInfo) =>
-				doesEventOccurrenceOverlap(groupOccurrencesWithdateInfo, otherGroupOccurrencesWithDateInfo)
-			}.seq
-			val groupStudentsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student }
-			(group, groupStudentsWithPossibleClash)
+		benchmarkTask("possibleTimetableClashesForStudents result") {
+			currentGroupsWithOccurrencesAndDateInfo.map { case (group, groupOccurrencesWithdateInfo) =>
+				val groupStudentInfoWithPossibleClash = studentsWithOtherGroupOccurrenceAndDateInfo.filter { case (student, otherGroupOccurrencesWithDateInfo) =>
+					doesEventOccurrenceOverlap(groupOccurrencesWithdateInfo, otherGroupOccurrencesWithDateInfo)
+				}.toSeq
+				val groupStudentsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student }
+				(group, groupStudentsWithPossibleClash)
+			}
 		}
 	}
 
 	private def groupOccurrencesWithStartEndDateTimeInfo(group: SmallGroup): Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])] = {
-		findAttendanceByGroup(group).map { groupOccurrence =>
-			val startDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
-			val endDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
-			(groupOccurrence, startDateTime, endDateTime)
+		benchmarkTask(s"groupOccurrencesWithStartEndDateTimeInfo[Group-${group.id}]") {
+			findAttendanceByGroup(group).map { groupOccurrence =>
+				val startDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
+				val endDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
+				(groupOccurrence, startDateTime, endDateTime)
+			}
 		}
 	}
 
-	private def doesEventOccurrenceOverlap(groupOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])], otherOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]): Boolean = {
+	private def doesEventOccurrenceOverlap(
+		groupOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])],
+		otherOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]
+	): Boolean = {
 		groupOccurrencesWithdateInfo.exists { case(groupOccurrence, startDateTime1, endDateTime1) =>
 			startDateTime1.isDefined && endDateTime1.isDefined && otherOccurrencesWithdateInfo.exists { case(occ, startDateTime2, endDateTime2) =>
 				startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
