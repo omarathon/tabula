@@ -56,7 +56,9 @@ class DepartmentDraftTimetablesController extends ProfilesController
 		Mav("profiles/timetables/department_draft",
 			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate,
 			"canFilterStudents" -> false,
-			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department))
+			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department)),
+			"canFilterRoute" -> false,
+			"canFilterYear" -> false
 		)
 	}
 
