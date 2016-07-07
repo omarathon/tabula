@@ -58,7 +58,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 			"canFilterStudents" -> false,
 			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department)),
 			"canFilterRoute" -> false,
-			"canFilterYear" -> false
+			"canFilterYearOfStudy" -> false
 		)
 	}
 

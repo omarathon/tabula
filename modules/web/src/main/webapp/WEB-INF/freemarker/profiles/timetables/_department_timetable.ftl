@@ -98,7 +98,7 @@
 		</@filter>
 	</#if>
 
-	<#if canFilterYear>
+	<#if canFilterYearOfStudy>
 		<#assign placeholder = "Year of study" />
 		<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
 		<@filter path="yearsOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=command.allYearsOfStudy prefix="Year "; yearOfStudy>
