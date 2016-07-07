@@ -19,8 +19,8 @@ object FiltersRelationships {
 		"course" -> Seq(
 			"course" -> AliasAndJoinType("course")
 		),
-		"route" -> Seq(
-			"route" -> AliasAndJoinType("route")
+		"currentRoute" -> Seq(
+			"currentRoute" -> AliasAndJoinType("currentRoute")
 		),
 		"statusOnRoute" -> Seq(
 			"statusOnRoute" -> AliasAndJoinType("statusOnRoute")
@@ -38,8 +38,8 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
 	import uk.ac.warwick.tabula.commands.FiltersRelationships._
 
 	def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-		"route.code", routes.asScala.map {_.code},
-		getAliasPaths("route") : _*
+		"currentRoute.code", routes.asScala.map {_.code},
+		getAliasPaths("currentRoute") : _*
 	)
 
 	def sprStatusRestriction: Option[ScalaRestriction] = inIfNotEmpty(
