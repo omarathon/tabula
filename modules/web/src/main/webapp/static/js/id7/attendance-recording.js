@@ -141,7 +141,7 @@ var checkForCheckpoints = function(){
 
 exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
 
-	$('#recordAttendance').find('tbody').on('click', 'div.btn-group button', function(e){
+	$('#recordAttendance').on('click', 'tbody div.btn-group button', function(e){
 		var $this = $(this);
 		updateAttendanceState(e, $this);
 		$this.trigger('checkform.areYouSure');
