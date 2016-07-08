@@ -131,6 +131,11 @@ object ImportMemberHelpers {
 			else None
 		}
 
+	def getInteger(resultSet: ResultSet, column: String): Option[Int] = {
+		val intValue = resultSet.getInt(column)
+		if (resultSet.wasNull()) None else Some(intValue)
+	}
+
 	def hasColumn(rs: ResultSet, columnName: String) = {
 		val metadata = rs.getMetaData
 		val cols = for (col <- 1 to metadata.getColumnCount)

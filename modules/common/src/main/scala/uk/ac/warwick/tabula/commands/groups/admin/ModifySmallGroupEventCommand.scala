@@ -76,7 +76,7 @@ trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState 
 	def existingEvent = Some(event)
 }
 
-class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup)
+class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGroupSet, var group: SmallGroup)
 	extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
 
 	self: SmallGroupServiceComponent =>

@@ -35,7 +35,7 @@ trait ModifySmallGroupCommandState extends CurrentSITSAcademicYear {
 	def set: SmallGroupSet
 
 	var name: String = _
-	var maxGroupSize: Int = SmallGroup.DefaultGroupSize
+	var maxGroupSize: JInteger = SmallGroup.DefaultGroupSize
 }
 
 trait CreateSmallGroupCommandState extends ModifySmallGroupCommandState
@@ -45,7 +45,7 @@ trait EditSmallGroupCommandState extends ModifySmallGroupCommandState {
 
 }
 
-class CreateSmallGroupCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
+class CreateSmallGroupCommandInternal(val module: Module, var set: SmallGroupSet) extends ModifySmallGroupCommandInternal with CreateSmallGroupCommandState {
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = transactional() {
@@ -92,9 +92,11 @@ trait ModifySmallGroupValidation extends SelfValidating {
 		}
 
 		if (name.isEmpty) errors.rejectValue("name", "smallGroup.name.NotEmpty")
-			else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
-		}
+		else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
+
+		if (maxGroupSize != null && maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
 	}
+}
 
 trait CreateSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CreateSmallGroupCommandState =>

@@ -110,6 +110,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.AssignmentFeedbackIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ExamFeedbackIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.MarkerFeedbackIdConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>

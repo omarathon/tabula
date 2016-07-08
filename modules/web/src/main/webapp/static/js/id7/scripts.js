@@ -712,6 +712,42 @@
 		$('.modal-body > iframe').height(height + 36);
 	};
 
+	exports.scrollableTableSetup = function() {
+		$('.scrollable-table .right').find('.table-responsive').on('scroll', function(){
+			var $this = $(this);
+			if($this.scrollLeft() > 0) {
+				$this.parent(':not(.left-shadow)').addClass('left-shadow');
+			} else {
+				$this.parent().removeClass('left-shadow');
+			}
+		});
+	};
+
+	exports.tableSortMatching = function(tableArray) {
+		var matchSorting = function($sourceTable, targetTables){
+			var $sourceRows = $sourceTable.find('tbody tr');
+			$.each(targetTables, function(i, $table){
+				var $tbody = $table.find('tbody');
+				var oldRows = $tbody.find('tr').detach();
+				$.each($sourceRows, function(j, row){
+					var $sourceRow = $(row);
+					oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+				});
+			});
+		};
+
+		if (tableArray.length < 2)
+			return;
+
+		$.each(tableArray, function(i){
+			var otherTables = tableArray.slice();
+			otherTables.splice(i, 1);
+			this.on('sortEnd', function(){
+				matchSorting($(this), otherTables);
+			}).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+		});
+	};
+
 	// on ready
 	$(function() {
 		// form behavioural hooks

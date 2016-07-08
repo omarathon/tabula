@@ -145,9 +145,23 @@
 								label-default
 							</#if>
 						</#assign>
-						<td><span class="label ${sitsClass} use-tooltip" <#if sitsWarning>title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again."</#if>>
-							${sitsStatus.status.description}<#if sitsWarning>  (!)</#if>
-						</span></td>
+						<td>
+							<#if sitsStatus.status.code == "failed">
+								<a href="<@routes.exams.checkSitsUpload feedback />" target="_blank" style="text-decoration: none;">
+									<span class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
+										${sitsStatus.status.description}
+									</span><#--
+								--></a>
+							<#elseif sitsWarning>
+								<span class="label label-danger use-tooltip" title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
+									${sitsStatus.status.description}
+								</span>
+							<#else>
+								<span class="label ${sitsClass}">
+									${sitsStatus.status.description}<#if sitsWarning>  (!)</#if>
+								</span>
+							</#if>
+						</td>
 						<td data-sortby="${(sitsStatus.dateOfUpload.millis?c)!""}"><#if sitsStatus.dateOfUpload??><@fmt.date sitsStatus.dateOfUpload /></#if></td>
 						<td>${sitsStatus.actualMarkLastUploaded!""}%</td>
 						<td>${sitsStatus.actualGradeLastUploaded!""}</td>

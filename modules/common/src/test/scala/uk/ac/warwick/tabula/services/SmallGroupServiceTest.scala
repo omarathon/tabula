@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.joda.time.{DateTimeConstants, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
@@ -111,7 +112,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		  with SecurityServiceComponent
 			with TermServiceComponent
 			with TermAwareWeekToDateConverterComponent
-			with Logging {
+			with Logging with TaskBenchmarking{
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
 				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
