@@ -18,7 +18,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 	private trait Fixture {
 		val module = Fixtures.module("cs118")
 		val studentId = "studentId"
-		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
+		val studentEvents = Seq(new TimetableEvent("test","test","test","test",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013),"",""))
 		val delegate = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns Future.successful(EventList.fresh(studentEvents))
@@ -48,7 +48,7 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 		// deliberately use the student ID to look up some staff events. The cache key should be the ID + the type of
 		// request (staff, student, room, etc) so we should get different results back for student and staff
 
-		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013)))
+		val staffEvents = Seq(new TimetableEvent("test2", "test2", "test2","test2",TimetableEventType.Lecture,Nil,DayOfWeek.Monday,new LocalTime,new LocalTime,None,TimetableEvent.Parent(None),None,Nil,Nil, AcademicYear(2013),"",""))
 		delegate.getTimetableForStaff(studentId) returns Future.successful(EventList.fresh(staffEvents))
 
 		cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
@@ -101,7 +101,9 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				Some("Comments!"),
 				Seq(tutor1, tutor2),
 				Seq(student),
-				AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
+				"",
+				""
 			),
 			TimetableEvent(
 				"event 2 uid",
@@ -118,7 +120,9 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 				None,
 				Nil,
 				Nil,
-				AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+				AcademicYear.guessSITSAcademicYearByDate(DateTime.now),
+				"",
+				""
 			)
 		)
 

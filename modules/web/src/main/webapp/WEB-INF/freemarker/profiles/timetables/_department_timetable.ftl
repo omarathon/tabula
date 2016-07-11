@@ -383,6 +383,12 @@
 						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
 					}
 
+					if (event.link && event.link.length > 0) {
+						var linkText = (event.linkText && event.linkText.length > 0) ? event.linkText : "More details"
+						content = content + "<tr><th>More details</th><td>" +
+								"<a href=" + event.link + ">" + linkText + "</a></td></tr>";
+					}
+
 					content = content + "</table>";
 					$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
 				}
