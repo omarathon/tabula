@@ -156,6 +156,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 						setCommand.studentsCanSeeOtherMembers = extracted.studentsSeeStudents
 						setCommand.collectAttendance = extracted.collectAttendance
 						setCommand.linkedDepartmentSmallGroupSet = extracted.linkedSmallGroupSet.orNull
+						setCommand.academicYear = academicYear
 
 						def matchesGroup(extractedGroup: ExtractedSmallGroup)(smallGroup: SmallGroup) =
 							smallGroup.name.equalsIgnoreCase(extractedGroup.name)
