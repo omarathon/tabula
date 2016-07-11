@@ -35,6 +35,14 @@
 		<@f.input path="location" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
+	<@bs3form.labelled_form_group path="link" labelText="Link">
+		<@f.input path="link" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
+
+	<@bs3form.labelled_form_group path="linkText" labelText="Link Text">
+		<@f.input path="linkText" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
+
 	<style type="text/css">
 		<#-- Hide the confusing dates in the header of the time picker -->
 		.datetimepicker-hours thead i { display: none !important; }

@@ -172,7 +172,9 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						groupedEvents.flatMap { _.comments }.headOption,
 						groupedEvents.flatMap { _.staff }.distinct,
 						groupedEvents.flatMap { _.students }.distinct,
-						event.year
+						event.year,
+						event.link,
+						event.linkText
 					)
 			}
 			.values.toSeq)
