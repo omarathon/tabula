@@ -35,11 +35,23 @@
 		<@f.input path="location" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="link" labelText="Link">
+	<#assign moreDetailsHelpText>
+		<p>An optional 'More Details' link to the specified webpage from the student's timetable.</p>
+	</#assign>
+	<#assign moreDetailsLabel>
+		Link <@fmt.help_popover id="linkHelp" content="${moreDetailsHelpText}" html=true />
+	</#assign>
+	<@bs3form.labelled_form_group path="link" labelText=moreDetailsLabel>
 		<@f.input path="link" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group path="linkText" labelText="Link Text">
+	<#assign moreDetailsLinkHelpText>
+		<p>If a More Details link is specified, you can also specify the link text for the link that is generated.</p>
+	</#assign>
+	<#assign moreDetailsLinkTextLabel>
+		Link text <@fmt.help_popover id="linkHelp" content="${moreDetailsLinkHelpText}" html=true />
+	</#assign>
+	<@bs3form.labelled_form_group path="linkText" labelText=moreDetailsLinkTextLabel>
 		<@f.input path="linkText" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
