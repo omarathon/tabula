@@ -26,7 +26,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		val smallGroupService = smartMock[SmallGroupService]
 
 		val department = Fixtures.department("in", "IT Services")
-		val academicYear = AcademicYear(2015)
+		val academicYear = AcademicYear(2012)
 	}
 
 	private trait BindingFixture {
@@ -135,6 +135,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		setCommand.allowSelfGroupSwitching should be (false)
 		setCommand.linkedDepartmentSmallGroupSet should be (null)
 		setCommand.collectAttendance should be (true)
+		setCommand.academicYear should be (binding.academicYear)
 
 		commandHolder.modifyGroupCommands.size() should be (4)
 
