@@ -63,7 +63,8 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 			"member" -> studentCourseDetails.student,
 			"courseDetails" -> (Seq(studentCourseDetails) ++ studentCourseDetails.student.freshStudentCourseDetails.filterNot(_ == studentCourseDetails)),
 			"memberNotes" -> memberNotes,
-			"extenuatingCircumstances" -> extenuatingCircumstances
+			"extenuatingCircumstances" -> extenuatingCircumstances,
+			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
 		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.identity(scyd)): _*)
 	}
