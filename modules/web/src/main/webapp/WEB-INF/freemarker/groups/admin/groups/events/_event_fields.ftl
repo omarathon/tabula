@@ -45,11 +45,11 @@
 		<@f.input path="link" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
-	<#assign moreDetailsLinkHelpText>
+	<#assign moreDetailsLinkTextHelpText>
 		<p>If a More Details link is specified, you can also specify the link text for the link that is generated.</p>
 	</#assign>
 	<#assign moreDetailsLinkTextLabel>
-		Link text <@fmt.help_popover id="linkHelp" content="${moreDetailsLinkHelpText}" html=true />
+		Link text <@fmt.help_popover id="linkHelp" content="${moreDetailsLinkTextHelpText}" html=true />
 	</#assign>
 	<@bs3form.labelled_form_group path="linkText" labelText=moreDetailsLinkTextLabel>
 		<@f.input path="linkText" cssClass="form-control" />
