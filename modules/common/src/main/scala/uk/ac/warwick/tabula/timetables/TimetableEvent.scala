@@ -23,8 +23,8 @@ case class TimetableEvent(
 	staff: Seq[User],
 	students: Seq[User],
 	year: AcademicYear,
-	link: String,
-	linkText: String
+	relatedUrl: String,
+	relatedUrlTitle: String
 )
 
 object TimetableEvent {
@@ -74,8 +74,8 @@ object TimetableEvent {
 			staff = sge.tutors.users,
 			students = sge.group.students.users,
 			year = sge.group.groupSet.academicYear,
-			link = sge.link,
-			linkText = sge.linkText
+			relatedUrl = sge.relatedUrl,
+			relatedUrlTitle = sge.relatedUrlTitle
 		)
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -139,8 +139,8 @@ case class EventOccurrence(
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
 	staff: Seq[User],
-	link: String,
-	linkText: String
+	relatedUrl: String,
+	relatedUrlTitle: String
 )
 
 object EventOccurrence {

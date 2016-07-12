@@ -528,10 +528,10 @@
 						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
 					}
 
-					if (event.link && event.link.length > 0) {
-						var linkText = (event.linkText && event.linkText.length > 0) ? event.linkText : "More details"
+					if (event.relatedUrl && event.relatedUrl.length > 0) {
+						var relatedUrlTitle = (event.relatedUrlTitle && event.relatedUrlTitle.length > 0) ? event.relatedUrlTitle : "More details"
 						content = content + "<tr><th>More details</th><td>" +
-							"<a href=" + event.link + ">" + linkText + "</a></td></tr>";
+							"<a href=" + event.relatedUrl + ">" + relatedUrlTitle + "</a></td></tr>";
 					}
 
 					content = content + "</table>";

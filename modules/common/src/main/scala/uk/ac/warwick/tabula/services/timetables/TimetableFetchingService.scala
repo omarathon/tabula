@@ -173,8 +173,8 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						groupedEvents.flatMap { _.staff }.distinct,
 						groupedEvents.flatMap { _.students }.distinct,
 						event.year,
-						event.link,
-						event.linkText
+						event.relatedUrl,
+						event.relatedUrlTitle
 					)
 			}
 			.values.toSeq)

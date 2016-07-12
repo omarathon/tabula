@@ -41,8 +41,8 @@
 	<#assign moreDetailsLabel>
 		Link <@fmt.help_popover id="linkHelp" content="${moreDetailsHelpText}" html=true />
 	</#assign>
-	<@bs3form.labelled_form_group path="link" labelText=moreDetailsLabel>
-		<@f.input path="link" cssClass="form-control" />
+	<@bs3form.labelled_form_group path="relatedUrl" labelText=moreDetailsLabel>
+		<@f.input path="relatedUrl" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
 	<#assign moreDetailsLinkTextHelpText>
@@ -51,8 +51,8 @@
 	<#assign moreDetailsLinkTextLabel>
 		Link text <@fmt.help_popover id="linkHelp" content="${moreDetailsLinkTextHelpText}" html=true />
 	</#assign>
-	<@bs3form.labelled_form_group path="linkText" labelText=moreDetailsLinkTextLabel>
-		<@f.input path="linkText" cssClass="form-control" />
+	<@bs3form.labelled_form_group path="relatedUrlTitle" labelText=moreDetailsLinkTextLabel>
+		<@f.input path="relatedUrlTitle" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
 	<style type="text/css">
