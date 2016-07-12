@@ -7,15 +7,13 @@
 
 <@fmt.id7_deptheader title="View reports for ${academicYear.toString}" route_function=route_function preposition="in" />
 
-<#if (academicYear.startYear >= 2014)>
-	<h2>Monitoring points</h2>
+<h2>Monitoring points</h2>
 
-	<ul>
-		<li><h3><a href="<@routes.reports.allAttendance department academicYear />">All attendance</a></h3></li>
-		<li><h3><a href="<@routes.reports.unrecordedAttendance department academicYear />">Unrecorded monitoring points</a></h3></li>
-		<li><h3><a href="<@routes.reports.missedAttendance department academicYear />">Missed monitoring points</a></h3></li>
-	</ul>
-</#if>
+<ul>
+	<li><h3><a href="<@routes.reports.allAttendance department academicYear />">All attendance</a></h3></li>
+	<li><h3><a href="<@routes.reports.unrecordedAttendance department academicYear />">Unrecorded monitoring points</a></h3></li>
+	<li><h3><a href="<@routes.reports.missedAttendance department academicYear />">Missed monitoring points</a></h3></li>
+</ul>
 
 <h2>Profiles</h2>
 
@@ -31,6 +29,7 @@
 	<li><h3><a href="<@routes.reports.unrecordedSmallGroupsByModule department academicYear />">Unrecorded event attendance by module</a></h3></li>
 	<li><h3><a href="<@routes.reports.missedSmallGroups department academicYear />">Missed event attendance</a></h3></li>
 	<li><h3><a href="<@routes.reports.missedSmallGroupsByModule department academicYear />">Missed event attendance by module</a></h3></li>
+	<li><h3><a href="<@routes.reports.events department academicYear />">All events</a></h3></li>
 </ul>
 
 
