@@ -52,6 +52,8 @@ object Routes {
 
 		def registers(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/registers"
 
+		def importSpreadsheet(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/import-spreadsheet"
+
 		object reusable {
 			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format encoded(department.code)
 			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format encoded(department.code)

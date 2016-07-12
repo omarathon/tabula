@@ -532,10 +532,14 @@ preposition: Text to relate the title to the department name in the second line,
 </#macro>
 
 <#macro location location>
-	<#if ((location.locationId)!)?has_content>
-		<span class="map-location" data-lid="${location.locationId}">${location.name}</span>
+	<@location_decomposed location.name location.locationId!"" />
+</#macro>
+
+<#macro location_decomposed name locationId>
+	<#if locationId?has_content>
+		<span class="map-location" data-lid="${locationId}">${name}</span>
 	<#else>
-		${location.name}
+		${name}
 	</#if>
 </#macro>
 

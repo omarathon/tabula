@@ -49,6 +49,17 @@
 						</@fmt.permission_button>
 					</li>
 					<li<#if !modules?has_content> class="disabled"</#if>>
+						<#assign import_url><@routes.groups.import_spreadsheet department adminCommand.academicYear /></#assign>
+						<@fmt.permission_button
+							permission='SmallGroups.ImportFromExternalSystem'
+							scope=department
+							action_descr='import small groups from a spreadsheet'
+							href=import_url
+						>
+							Import small groups from a spreadsheet
+						</@fmt.permission_button>
+					</li>
+					<li<#if !modules?has_content> class="disabled"</#if>>
 						<#assign copy_url><@routes.groups.copyDepartment department /></#assign>
 						<@fmt.permission_button
 							permission='SmallGroups.Create'

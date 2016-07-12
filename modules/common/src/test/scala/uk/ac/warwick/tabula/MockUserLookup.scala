@@ -94,10 +94,11 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 	 * Method to quickly add some mock users who exist and definitely
 	 * have genuine, real names.
 	 */
-	def registerUsers(userIds: String*) {
-		for (id <- userIds) {
+	def registerUsers(userIds: String*) = {
+		userIds.map { id =>
 			val user = mockUser(id)
 			users += (id -> user)
+			user
 		}
 	}
 

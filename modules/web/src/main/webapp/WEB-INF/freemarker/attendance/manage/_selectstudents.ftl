@@ -39,6 +39,7 @@
 
 	<#if summaryString?has_content>
 		<p><#noescape>${summaryString}</#noescape></p>
+		<p>To edit the current SITS filter use the 'Find/Edit students on this scheme' section below</p>
 	</#if>
 
 	<details class="all-students" data-href="<@routes.attendance.manageAddStudentsAllStudents scheme />">
@@ -54,7 +55,7 @@
 	<details class="find-students" <#if expandFind>open</#if> data-submitparam="${ManageSchemeMappingParameters.findStudents}">
 		<summary class="large-chevron collapsible">
 			<span class="legend">Find students
-				<small>Select students by route, year of study etc.</small>
+				<small>Select and edit students by route, year of study etc.</small>
 			</span>
 
 		</summary>
@@ -239,6 +240,11 @@
 					You have changed the filters for this search, to keep these results for the next time you sign in you must select Save at the bottom of the page. If you do not select Save the last filter will still apply next time you sign in.
 				</div>
 			</div>
+		</#if>
+
+		<#if findCommand.staticStudentIds?has_content>
+			<p>To remove the filter, click the button below. This will remove all students currently linked from this filter.</p>
+			<p><button class="btn btn-mini btn-default" type="submit" name="${ManageSchemeMappingParameters.resetFilter}" value="true">Remove filter</button></p>
 		</#if>
 
 		<#if (findCommandResult.membershipItems?size > 0)>

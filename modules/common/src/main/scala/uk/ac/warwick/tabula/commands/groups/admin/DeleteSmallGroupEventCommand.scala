@@ -11,7 +11,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object DeleteSmallGroupEventCommand {
-	def apply(group: SmallGroup, event: SmallGroupEvent) =
+	type Command = Appliable[SmallGroupEvent] with SelfValidating with DeleteSmallGroupEventCommandState
+
+	def apply(group: SmallGroup, event: SmallGroupEvent): Command =
 		new DeleteSmallGroupEventCommandInternal(group, event)
 			with ComposableCommand[SmallGroupEvent]
 			with DeleteSmallGroupEventPermissions

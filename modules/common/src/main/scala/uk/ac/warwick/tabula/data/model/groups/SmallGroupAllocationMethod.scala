@@ -4,13 +4,13 @@ import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class SmallGroupAllocationMethod(val dbValue: String)
+sealed abstract class SmallGroupAllocationMethod(val dbValue: String, val description: String)
 
 object SmallGroupAllocationMethod {
-	case object Manual extends SmallGroupAllocationMethod("Manual")
-	case object StudentSignUp extends SmallGroupAllocationMethod("StudentSignUp")
-	case object Linked extends SmallGroupAllocationMethod("Linked")
-	case object Random extends SmallGroupAllocationMethod("Random")
+	case object Manual extends SmallGroupAllocationMethod("Manual", "Manual")
+	case object StudentSignUp extends SmallGroupAllocationMethod("StudentSignUp", "Self sign-up")
+	case object Linked extends SmallGroupAllocationMethod("Linked", "Linked")
+	case object Random extends SmallGroupAllocationMethod("Random", "Random")
 
   val Default = Manual
 	// lame manual collection. Keep in sync with the case objects above

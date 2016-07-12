@@ -138,7 +138,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			comments=None,
 			staff=Seq(tutor),
 			students=Seq(student1, student2, student3),
-			year = AcademicYear(2012)
+			year = AcademicYear(2012),
+			link = "",
+			linkText = ""
 		)
 		val tEventModule1Seminar2 = TimetableEvent(
 			uid="uuid2",
@@ -155,7 +157,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			comments=None,
 			staff=Seq(tutor),
 			students=Seq(student4, student5, student6),
-			year = AcademicYear(2012)
+			year = AcademicYear(2012),
+			link = "",
+			linkText = ""
 		)
 
 		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
@@ -175,7 +179,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				comments=None,
 				staff=Seq(tutor),
 				students=Nil,
-				year = AcademicYear(2012)
+				year = AcademicYear(2012),
+				link="",
+				linkText=""
 			)
 		)))
 		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(EventList.fresh(Seq(
@@ -194,7 +200,9 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				comments=None,
 				staff=Seq(tutor),
 				students=Seq(student4, student5, student6),
-				year = AcademicYear(2013)
+				year = AcademicYear(2013),
+				link="",
+				linkText=""
 			)
 		)))
 	}

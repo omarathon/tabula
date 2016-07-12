@@ -11,4 +11,8 @@
 		<context:component-scan base-package="uk.ac.warwick.tabula.dev.web.controllers" />
 	</beans>
 
+	<beans profile="sandbox">
+		<context:component-scan base-package="uk.ac.warwick.tabula.sandbox.web.controllers" />
+	</beans>
+
 </beans>

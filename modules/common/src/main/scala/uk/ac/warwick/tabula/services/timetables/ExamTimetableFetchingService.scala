@@ -141,7 +141,9 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				parent = TimetableEvent.Parent(),
 				staff = Nil,
 				students = Nil,
-				year = timetableExam.academicYear
+				year = timetableExam.academicYear,
+				link = "",
+				linkText = ""
 			)
 		})
 	}
