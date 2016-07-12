@@ -142,8 +142,8 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				staff = Nil,
 				students = Nil,
 				year = timetableExam.academicYear,
-				link = "",
-				linkText = ""
+				relatedUrl = "",
+				relatedUrlTitle = ""
 			)
 		})
 	}
