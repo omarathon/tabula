@@ -140,7 +140,14 @@
 							<tbody>
 								<#list unallocated as studentData>
 									<tr>
-										<td class="check"><input type="checkbox" name="allocate" value="${studentData.universityId}" <#if singleUnallocated>checked</#if>></td>
+										<td class="check">
+											<input
+												type="checkbox"
+												name="allocate"
+												value="${studentData.universityId}"
+												<#if singleUnallocated || command.preselectStudents?has_content && command.preselectStudents?seq_contains(studentData.universityId)>checked</#if>
+											/>
+										</td>
 										<td class="single-name">${studentData.firstName}</td>
 										<td class="single-name">${studentData.lastName}</td>
 										<td class="universityid">${studentData.universityId} <@pl.profile_link studentData.universityId /></td>
