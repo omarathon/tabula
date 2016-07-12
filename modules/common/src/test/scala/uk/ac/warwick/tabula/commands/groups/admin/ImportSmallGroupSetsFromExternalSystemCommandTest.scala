@@ -195,7 +195,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				comments=None,
 				staff=Seq(tutor),
 				students=Seq(student4, student5, student6),
-				year = AcademicYear(2012),
+				year = AcademicYear(2013),
 				relatedUrl = RelatedUrl("", None)
 			)
 		)))

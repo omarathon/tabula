@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.api.web.controllers.timetables
 
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.timetables.RelatedUrl
 import uk.ac.warwick.tabula.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.{MockUserLookup, TestBase, Mockito}
 
@@ -18,11 +19,11 @@ class GetMemberCalendarJsonApiTest extends TestBase with Mockito {
 			i<- 1 until 21
 			j = i%3}
 			yield {
-				FullCalendarEvent(s"Test event $i", "", allDay = false, 0L,0L,"","","","","","","","","","","","Module",s"module$j",s"Module $j","", relatedUrl = "", relatedUrlTitle = "")
+				FullCalendarEvent(s"Test event $i", "", allDay = false, 0L,0L,"","","","","","","","","","","","Module",s"module$j",s"Module $j","", relatedUrl = RelatedUrl("", None))
 			}
 
 		// Add a Busy event at the end
-		val coloured = FullCalendarEvent.colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","","Empty", "", "", "", relatedUrl = "", relatedUrlTitle = ""))
+		val coloured = FullCalendarEvent.colourEvents(events :+ FullCalendarEvent("Busy", "", allDay = false, 0L,0L,"","","","","","","","","","","","Empty", "", "", "", relatedUrl = RelatedUrl("", None)))
 
 		// every event should have a colour
 		coloured.find(_.backgroundColor=="") should not be 'defined

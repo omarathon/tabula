@@ -385,7 +385,7 @@
 
 					if (event.relatedUrl && event.relatedUrl.url && event.relatedUrl.url.length > 0) {
 						var relatedUrlTitle = (event.relatedUrl.title && event.relatedUrl.title.length > 0) ? event.relatedUrl.title : "More details"
-						content = content + "<tr><th>More details</th><td>" +
+						content = content + "<tr><th></th><td>" +
 								"<a href=" + event.relatedUrl.url + ">" + relatedUrlTitle + "</a></td></tr>";
 					}
 
