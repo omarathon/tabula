@@ -201,7 +201,7 @@ object CelcatHttpTimetableFetchingService {
 				students = Nil,
 				year = year,
 				relatedUrl = "",
-				relatedUrlTitle = ""
+				relatedUrlTitle = None
 			))
 		}
 	}

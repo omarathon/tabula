@@ -107,7 +107,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
 			},
 			relatedUrl = "",
-			relatedUrlTitle = ""
+			relatedUrlTitle = None
 		))
 	}
 

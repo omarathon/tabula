@@ -93,7 +93,7 @@ object FullCalendarEvent {
 			parentFullName = source.parent.fullName.getOrElse(""),
 			comments = source.comments.getOrElse(""),
 			relatedUrl = source.relatedUrl,
-			relatedUrlTitle = source.relatedUrlTitle
+			relatedUrlTitle = source.relatedUrlTitle.getOrElse("More details")
 		)
 	}
 

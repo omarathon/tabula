@@ -143,7 +143,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				students = Nil,
 				year = timetableExam.academicYear,
 				relatedUrl = "",
-				relatedUrlTitle = ""
+				relatedUrlTitle = None
 			)
 		})
 	}

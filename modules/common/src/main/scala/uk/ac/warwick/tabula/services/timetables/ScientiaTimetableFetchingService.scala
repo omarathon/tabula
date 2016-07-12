@@ -242,7 +242,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 				}).values.collect { case FoundUser(u) => u }.toSeq,
 				year = year,
 				relatedUrl = "",
-				relatedUrlTitle = ""
+				relatedUrlTitle = None
 			)
 		}
 	}

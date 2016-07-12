@@ -92,7 +92,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			AcademicYear.parse("13/14"),
 			"",
-			""
+			None
 		))
 
 		/*
@@ -128,7 +128,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			AcademicYear.parse("13/14"),
 			"",
-			""
+			None
 		))
 	}
 
@@ -193,7 +193,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			AcademicYear.parse("14/15"),
 			"",
-			""
+			None
 		))
 	}
 
