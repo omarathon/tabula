@@ -70,8 +70,8 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	var title: String = _
 
 	@URL
-	var link: String = _
-	var linkText: String = _
+	var relatedUrl: String = _
+	var relatedUrlTitle: String = _
 
 	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek

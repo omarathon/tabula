@@ -55,8 +55,8 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var locationId: String = _
 	var title: String = _
 	var tutors: JList[String] = JArrayList()
-	var link: String = _
-	var linkText: String = _
+	var relatedUrl: String = _
+	var relatedUrlTitle: String = _
 
 	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
@@ -143,8 +143,8 @@ abstract class ModifySmallGroupEventCommandInternal
 		day = event.day
 		startTime = event.startTime
 		endTime = event.endTime
-		link = event.link
-		linkText = event.linkText
+		relatedUrl = event.relatedUrl
+		relatedUrlTitle = event.relatedUrlTitle
 
 		if (event.tutors != null) tutors.addAll(event.tutors.knownType.allIncludedIds.asJava)
 	}
@@ -174,8 +174,8 @@ abstract class ModifySmallGroupEventCommandInternal
 		event.day = day
 		event.startTime = startTime
 		event.endTime = endTime
-		event.link = link
-		event.linkText = linkText
+		event.relatedUrl = relatedUrl
+		event.relatedUrlTitle = relatedUrlTitle
 
 		if (event.tutors == null) event.tutors = UserGroup.ofUsercodes
 		event.tutors.knownType.includedUserIds = tutors.asScala
@@ -214,11 +214,11 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 			tutorsValidator.validate(errors)
 		}
 
-		if (link != null && link.nonEmpty) {
-				if (!link.toLowerCase.startsWith("http://")) {
-					link = s"http://$link"
+		if (relatedUrl != null && relatedUrl.nonEmpty) {
+				if (!relatedUrl.toLowerCase.startsWith("http://")) {
+					relatedUrl = s"http://$relatedUrl"
 				}
-				if (!new UrlValidator().isValid(link)) errors.rejectValue("link", "smallGroupEvent.url.invalid")
+				if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("link", "smallGroupEvent.url.invalid")
 		}
 
 		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
