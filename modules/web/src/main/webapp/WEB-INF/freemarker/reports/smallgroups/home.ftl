@@ -8,5 +8,6 @@
 	<li><h3><a href="<@routes.reports.unrecordedSmallGroupsByModule department academicYear />">Unrecorded event attendance by module</a></h3></li>
 	<li><h3><a href="<@routes.reports.missedSmallGroups department academicYear />">Missed event attendance</a></h3></li>
 	<li><h3><a href="<@routes.reports.missedSmallGroupsByModule department academicYear />">Missed event attendance by module</a></h3></li>
+	<li><h3><a href="<@routes.reports.events department academicYear />">All events</a></h3></li>
 </ul>
 </#escape>
