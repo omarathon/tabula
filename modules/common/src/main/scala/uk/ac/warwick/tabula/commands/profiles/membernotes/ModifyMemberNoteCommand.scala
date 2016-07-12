@@ -84,9 +84,14 @@ trait ModifyExtenuatingCircumstancesCommandRequest extends ModifyMemberNoteComma
 	var startDate: LocalDate = _
 	var endDate: LocalDate = _
 
-	def copyTo(circumstance: ExtenuatingCircumstances): Unit = {
-		circumstance.startDate = startDate
-		circumstance.endDate = endDate
-		super.copyTo(circumstance)
+	override def copyTo(memberNote: AbstractMemberNote): Unit = {
+		memberNote match {
+			case circumstance: ExtenuatingCircumstances =>
+				circumstance.startDate = startDate
+				circumstance.endDate = endDate
+			case _ =>
+		}
+
+		super.copyTo(memberNote)
 	}
 }
