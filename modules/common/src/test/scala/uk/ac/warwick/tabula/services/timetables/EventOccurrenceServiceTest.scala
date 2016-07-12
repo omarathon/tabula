@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import org.joda.time._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.{TermFactory, TermImpl}
@@ -30,8 +30,8 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val intervalIncludingTwoOccurrences = new Interval(week1Start,week2End)
 
 
-	val singleOccurrence = new TimetableEvent("test","test","test", "test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,TimetableEvent.Parent(Some(module)),None,Nil,Nil,year,"",None)
-	val doubleOccurrenence	= new TimetableEvent("test","test","test", "test", TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,TimetableEvent.Parent(Some(module)),None,Nil,Nil,year,"",None)
+	val singleOccurrence = new TimetableEvent("test","test","test", "test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,TimetableEvent.Parent(Some(module)),None,Nil,Nil,year,RelatedUrl("",None))
+	val doubleOccurrenence	= new TimetableEvent("test","test","test", "test", TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,TimetableEvent.Parent(Some(module)),None,Nil,Nil,year,RelatedUrl("",None))
 
 
 

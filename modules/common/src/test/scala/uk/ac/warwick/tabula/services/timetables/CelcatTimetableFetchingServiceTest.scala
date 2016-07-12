@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
@@ -91,8 +91,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("13/14"),
-			"",
-			None
+			relatedUrl = RelatedUrl("", None)
 		))
 
 		/*
@@ -127,8 +126,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("13/14"),
-			"",
-			None
+			relatedUrl = RelatedUrl("", None)
 		))
 	}
 
@@ -192,8 +190,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("14/15"),
-			"",
-			None
+			relatedUrl = RelatedUrl("", None)
 		))
 	}
 

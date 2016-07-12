@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{ClockComponent, FoundUser, Futures, Logging}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
 
 import scala.concurrent.Future
 import scala.xml.Elem
@@ -241,8 +241,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 					_.text
 				}).values.collect { case FoundUser(u) => u }.toSeq,
 				year = year,
-				relatedUrl = "",
-				relatedUrlTitle = None
+				relatedUrl = RelatedUrl("", None)
 			)
 		}
 	}

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -142,8 +142,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				staff = Nil,
 				students = Nil,
 				year = timetableExam.academicYear,
-				relatedUrl = "",
-				relatedUrlTitle = None
+				relatedUrl = RelatedUrl("", None)
 			)
 		})
 	}

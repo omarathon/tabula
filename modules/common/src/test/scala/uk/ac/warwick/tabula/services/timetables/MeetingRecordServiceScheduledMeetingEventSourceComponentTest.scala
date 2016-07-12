@@ -4,7 +4,7 @@ import org.joda.time.LocalDateTime
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, RelationshipService, RelationshipServiceComponent, SecurityService, SecurityServiceComponent}
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestBase with Mockito {
@@ -14,7 +14,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val user = mock[CurrentUser]
 	user.profile returns Some(student)
 
-	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, "", None)
+	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, RelatedUrl("", None))
 
 	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
 	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student))
