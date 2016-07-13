@@ -28,7 +28,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 		meeting.securityService = smartMock[SecurityService]
 
 		val cmd = new EditMeetingRecordCommandInternal(meeting)
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
 			with EditMeetingRecordCommandState
 			with MeetingRecordServiceComponent
 			with FeaturesComponent
@@ -99,7 +99,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 
 		// The tutor sees the rejection. They add a description about herons to placate the student.
 		val editCmd = new EditMeetingRecordCommandInternal(meeting)
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
 			with EditMeetingRecordCommandState
 			with MeetingRecordServiceComponent
 			with FeaturesComponent

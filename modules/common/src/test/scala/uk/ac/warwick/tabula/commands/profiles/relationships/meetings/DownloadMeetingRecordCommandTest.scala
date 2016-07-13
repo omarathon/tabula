@@ -35,7 +35,8 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		uploadedFile.attached.add(fileAttach)
 
 		val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, relationship)
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
+			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
 			with FeaturesComponent
 			with AttendanceMonitoringMeetingRecordServiceComponent

@@ -1,8 +1,14 @@
 <#escape x as x?html>
 
 <#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="">
+	<#if studentCourseDetails?has_content>
+		<#assign courseDetails=studentCourseDetails.urlSafeId>
+	<#else>
+		<#assign courseDetails="">
+	</#if>
+
 	<tr class="related_student">
-		<td><input class="collection-checkbox" type="checkbox" name="students" value="${student.universityId}"  /></td>
+		<td><input class="collection-checkbox" type="checkbox" name="students" data-fullname="${student.fullName}" value="${student.universityId}"  data-student-course-details ="${courseDetails}" /></td>
 		<td>
 			<@fmt.member_photo student "tinythumbnail" />
 		</td>
@@ -70,6 +76,7 @@
 
 	<#if !student_table_script_included??>
 		<script type="text/javascript">
+
 			(function($) {
 				$('.student-list').bigList({});
 				// add a custom parser for the date column
@@ -104,6 +111,7 @@
 						}
 					});
 				});
+
 			})(jQuery);
 		</script>
 		<#-- deliberately a global assign, so only the first macro includes script. -->

@@ -27,7 +27,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	
 	trait ValidationFixture {
 		val validator = new ModifyMeetingRecordValidation
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
 			with CreateMeetingRecordCommandState {
 			override val creator: Member = thisCreator
 			override val relationship: StudentRelationship = thisRelationship
@@ -104,7 +104,8 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 	@Test
 	def validMeeting() = withUser("cuscav") { withFakeTime(aprilFool) {
 		val cmd = new CreateMeetingRecordCommandInternal(thisCreator, thisRelationship)
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
+			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
 			with FeaturesComponent
 			with AttendanceMonitoringMeetingRecordServiceComponent

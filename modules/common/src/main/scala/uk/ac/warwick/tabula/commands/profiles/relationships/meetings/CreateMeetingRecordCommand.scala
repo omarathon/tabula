@@ -16,12 +16,12 @@ object CreateMeetingRecordCommand {
 			with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with ComposableCommand[MeetingRecord]
-			with ModifyMeetingRecordCommandBindListener
+			with MeetingRecordCommandBindListener
 			with ModifyMeetingRecordValidation
 			with CreateMeetingRecordDescription
 			with ModifyMeetingRecordPermissions
 			with CreateMeetingRecordCommandState
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
 			with CreateMeetingRecordCommandNotifications
 			with PopulateOnForm {
 			override def populate(): Unit = {}
@@ -32,7 +32,7 @@ object CreateMeetingRecordCommand {
 class CreateMeetingRecordCommandInternal(val creator: Member, var relationship: StudentRelationship)
 	extends AbstractModifyMeetingRecordCommand {
 
-	self: ModifyMeetingRecordCommandRequest with MeetingRecordServiceComponent
+	self: CreateMeetingRecordCommandState with MeetingRecordCommandRequest with MeetingRecordServiceComponent
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
 		with FileAttachmentServiceComponent =>
 
