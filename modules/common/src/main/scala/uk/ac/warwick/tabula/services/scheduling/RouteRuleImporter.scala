@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
 import uk.ac.warwick.tabula.data.model.{UpstreamRouteRule, UpstreamRouteRuleEntry}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.scheduling.RouteRuleImporter.{UpstreamRouteRuleQuery, UpstreamRouteRuleRow}
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringUpstreamModuleListServiceComponent}
 import uk.ac.warwick.tabula.data.Transactions._
+
 import scala.collection.JavaConverters._
 
 
@@ -116,20 +118,15 @@ object RouteRuleImporter {
 			}.map(AcademicYear.parse)
 			UpstreamRouteRuleRow(
 				rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
-				getInteger(rs, "year_of_study"),
+				ImportMemberHelpers.getInteger(rs, "year_of_study"),
 				academicYear,
 				rs.getString("module_list"),
 				Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),
 				Option(rs.getBigDecimal("max_cats")).map(BigDecimal.apply),
-				getInteger(rs, "min_modules"),
-				getInteger(rs, "max_modules")
+				ImportMemberHelpers.getInteger(rs, "min_modules"),
+				ImportMemberHelpers.getInteger(rs, "max_modules")
 			)
 		}
-	}
-
-	private def getInteger(resultSet: ResultSet, column: String): Option[Int] = {
-		val intValue = resultSet.getInt(column)
-		if (resultSet.wasNull()) None else Some(intValue)
 	}
 
 }

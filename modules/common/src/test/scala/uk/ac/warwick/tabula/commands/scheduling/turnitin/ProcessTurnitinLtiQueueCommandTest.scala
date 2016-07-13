@@ -415,9 +415,11 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			val fullyCompletedAssignment = Fixtures.assignment("done")
 			fullyCompletedAssignment.turnitinLtiNotifyUsers = Seq(user1, user2)
 			fullyCompletedAssignment.userLookup = mockUserLookup
+			fullyCompletedAssignment.submissions.add(Fixtures.submission())
 			val partiallyCompletedAssignment = Fixtures.assignment("nearly")
 			partiallyCompletedAssignment.turnitinLtiNotifyUsers = Seq(user1)
 			partiallyCompletedAssignment.userLookup = mockUserLookup
+			partiallyCompletedAssignment.submissions.add(Fixtures.submission())
 			val failedAssignment = Fixtures.assignment("nope")
 			failedAssignment.turnitinLtiNotifyUsers = Seq(user1)
 			failedAssignment.userLookup = mockUserLookup

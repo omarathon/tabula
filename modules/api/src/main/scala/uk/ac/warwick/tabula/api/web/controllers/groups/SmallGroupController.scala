@@ -21,7 +21,7 @@ import scala.beans.BeanProperty
 
 
 object SmallGroupController {
-	type DeleteSmallGroupCommand = Appliable[SmallGroup] with DeleteSmallGroupCommandState with DeleteSmallGroupValidation
+	type DeleteSmallGroupCommand = DeleteSmallGroupCommand.Command
 	type ModifySmallGroupCommand = ModifySmallGroupCommand.Command
 }
 

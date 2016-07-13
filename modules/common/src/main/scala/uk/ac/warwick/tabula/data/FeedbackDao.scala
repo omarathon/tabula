@@ -6,6 +6,7 @@ import uk.ac.warwick.userlookup.User
 
 trait FeedbackDao {
 	def getAssignmentFeedback(id: String): Option[AssignmentFeedback]
+	def getExamFeedback(id: String): Option[ExamFeedback]
 	def getAssignmentFeedbackByUniId(assignment: Assignment, uniId: String): Option[AssignmentFeedback]
 	def getMarkerFeedback(id: String): Option[MarkerFeedback]
 	def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback]
@@ -20,7 +21,9 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 	self: ExtendedSessionComponent =>
 
 	override def getAssignmentFeedback(id: String) = getById[AssignmentFeedback](id)
+	override def getExamFeedback(id: String) = getById[ExamFeedback](id)
 	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
+
 	override def getRejectedMarkerFeedbackByFeedback(feedback: Feedback): Seq[MarkerFeedback] =
 		session.newCriteria[MarkerFeedback]
 			.add(is("state", MarkingState.Rejected))

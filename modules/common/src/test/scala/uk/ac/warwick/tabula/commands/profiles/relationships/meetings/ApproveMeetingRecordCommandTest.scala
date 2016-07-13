@@ -6,15 +6,13 @@ import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MeetingReco
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent, SecurityService, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent}
 
 class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ApproveMeetingRecordState with MeetingRecordDaoComponent with ApproveMeetingRecordValidation
-		with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent
-		with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
+		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent with SecurityServiceComponent {
 		val meetingRecordDao = smartMock[MeetingRecordDao]
-		val monitoringPointMeetingRelationshipTermService = smartMock[MonitoringPointMeetingRelationshipTermService]
 		val features = smartMock[Features]
 		val attendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 		val securityService = smartMock[SecurityService]
@@ -46,7 +44,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 			cmd.applyInternal()
 			meetingRecord.isApproved should be {true}
 			verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
-			verify(cmd.monitoringPointMeetingRelationshipTermService, times(1)).updateCheckpointsForMeeting(meetingRecord)
+			verify(cmd.attendanceMonitoringMeetingRecordService, times(1)).updateCheckpoints(meetingRecord)
 		}
 	}
 
@@ -57,7 +55,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 			cmd.applyInternal()
 			meetingRecord.isApproved should be {false}
 			verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
-			verify(cmd.monitoringPointMeetingRelationshipTermService, times(1)).updateCheckpointsForMeeting(meetingRecord)
+			verify(cmd.attendanceMonitoringMeetingRecordService, times(1)).updateCheckpoints(meetingRecord)
 		}
 	}
 

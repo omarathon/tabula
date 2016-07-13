@@ -38,7 +38,9 @@ class DepartmentTimetablesController extends ProfilesController
 	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department) = {
 		Mav("profiles/timetables/department",
 			"canFilterStudents" -> securityService.can(user, DepartmentTimetablesCommand.FilterStudentPermission, mandatory(department)),
-			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department))
+			"canFilterStaff" -> securityService.can(user, DepartmentTimetablesCommand.FilterStaffPermission, mandatory(department)),
+			"canFilterRoute" -> true,
+			"canFilterYearOfStudy" -> true
 		)
 	}
 

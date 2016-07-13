@@ -5,11 +5,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme, MonitoringPoint, MonitoringPointType}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object CreateNewAttendancePointsFromCopyCommand {
@@ -86,23 +86,9 @@ trait GetsPointsToCreate {
 		academicYear: AcademicYear,
 		addToScheme: Boolean = true
 	): Seq[AttendanceMonitoringPoint] = {
-		val oldPoints = findPointsResult.termGroupedOldPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val weekPoints = findPointsResult.termGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
 		val datePoints = findPointsResult.monthGroupedPoints.flatMap(_._2).map(_.templatePoint).toSeq
-		if (oldPoints.nonEmpty) {
-			// Old points to new points
-			schemes.flatMap { scheme =>
-				oldPoints.map { oldPoint =>
-					val newPoint = new AttendanceMonitoringPoint
-					if (addToScheme)
-						newPoint.scheme = scheme
-					newPoint.createdDate = DateTime.now
-					newPoint.updatedDate = DateTime.now
-					copyFromOldPoint(oldPoint, newPoint, academicYear)
-					newPoint
-				}
-			}
-		} else if (pointStyle == AttendanceMonitoringPointStyle.Week) {
+		if (pointStyle == AttendanceMonitoringPointStyle.Week) {
 			// Week points
 			schemes.flatMap { scheme =>
 				val weeksForYear = termService.getAcademicWeeksForYear(scheme.academicYear.dateInTermOne).toMap
@@ -137,40 +123,6 @@ trait GetsPointsToCreate {
 				}
 			}
 		}
-	}
-
-	protected def copyFromOldPoint(oldPoint: MonitoringPoint, newPoint: AttendanceMonitoringPoint, newAcademicYear: AcademicYear): AttendanceMonitoringPoint = {
-		newPoint.name = oldPoint.name
-		val weeksForYear = termService.getAcademicWeeksForYear(newAcademicYear.dateInTermOne).toMap
-		newPoint.startWeek = oldPoint.validFromWeek
-		newPoint.endWeek = oldPoint.requiredFromWeek
-		newPoint.startDate = weeksForYear(oldPoint.validFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate
-		newPoint.endDate = weeksForYear(oldPoint.requiredFromWeek).getStart.withDayOfWeek(DayOfWeek.Monday.jodaDayOfWeek).toLocalDate.plusDays(6)
-		newPoint.pointType = oldPoint.pointType match {
-			case null => AttendanceMonitoringPointType.Standard
-			case MonitoringPointType.Meeting => AttendanceMonitoringPointType.Meeting
-			case MonitoringPointType.SmallGroup => AttendanceMonitoringPointType.SmallGroup
-			case MonitoringPointType.AssignmentSubmission => AttendanceMonitoringPointType.AssignmentSubmission
-		}
-		oldPoint.pointType match {
-			case MonitoringPointType.Meeting =>
-				newPoint.meetingRelationships = oldPoint.meetingRelationships
-				newPoint.meetingFormats = oldPoint.meetingFormats
-				newPoint.meetingQuantity = oldPoint.meetingQuantity
-			case MonitoringPointType.SmallGroup =>
-				newPoint.smallGroupEventQuantity = oldPoint.smallGroupEventQuantity
-				newPoint.smallGroupEventModules = oldPoint.smallGroupEventModules
-			case MonitoringPointType.AssignmentSubmission =>
-				newPoint.assignmentSubmissionType =
-					if (oldPoint.assignmentSubmissionIsSpecificAssignments) AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
-					else AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Modules
-				newPoint.assignmentSubmissionTypeModulesQuantity = oldPoint.assignmentSubmissionQuantity
-				newPoint.assignmentSubmissionModules = oldPoint.assignmentSubmissionModules
-				newPoint.assignmentSubmissionAssignments = oldPoint.assignmentSubmissionAssignments
-				newPoint.assignmentSubmissionIsDisjunction = oldPoint.assignmentSubmissionIsDisjunction
-			case _ =>
-		}
-		newPoint
 	}
 }
 

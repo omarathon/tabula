@@ -14,6 +14,8 @@ object StudentRelationshipAgent {
 		Profiles.Read.Usercode,
 		Profiles.Read.Timetable,
 
+		Profiles.Read.Disability, // TAB-4386
+
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), // Can read any relationship type for this student

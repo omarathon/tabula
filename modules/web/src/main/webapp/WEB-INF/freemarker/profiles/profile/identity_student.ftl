@@ -24,11 +24,30 @@
 					<#if member.gender??>
 						<strong>Gender:</strong> ${member.gender.description}<br/>
 					</#if>
+					<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
+						<strong>Tier 4 requirements:</strong>
+							<#if member.casUsed && member.hasTier4Visa>Yes
+							<#elseif !member.casUsed && !member.hasTier4Visa>No
+							<#else>
+								<#if !member.casUsed && member.hasTier4Visa>
+									<#assign inconsistency = "Tier 4 visa exists but no Confirmation of Acceptance for Studies" />
+								<#else>
+									<#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
+								</#if>
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+								requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
+							</#if>
+						<br/>
+					</#if>
 
-					<br/><br/>
+					<br/>
 
 					<#if member.email??>
 						<strong>Warwick email:</strong> <a href="mailto:${member.email}">${member.email}</a><br/>
+					</#if>
+					<#if member.mobileNumber??>
+						<strong>Mobile phone:</strong> ${phoneNumberFormatter(member.mobileNumber)}<br/>
 					</#if>
 					<#if member.universityId??>
 						<strong>University number: </strong> ${member.universityId}<br/>

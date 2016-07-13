@@ -9,10 +9,10 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{Appliable, TaskBenchmarking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDateTime}
 import scala.collection.JavaConverters._
 
 trait SmallGroupServiceComponent {
@@ -77,6 +77,8 @@ trait SmallGroupService {
 
 	def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(SmallGroup, Seq[User])]
+	def doesTimetableClashesForStudent(smallGroup: SmallGroup, student: User): Boolean
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -87,7 +89,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with UserGroupDaoComponent
 		with SecurityServiceComponent
 		with TermServiceComponent
-		with Logging =>
+		with WeekToDateConverterComponent
+		with Logging with TaskBenchmarking =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
@@ -204,8 +207,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		attendance
 	}
 
-	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] =
-		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup)
+	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = {
+		// We need to only get back valid occurrences (event related), database does not delete occurrences later once created initially.
+		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup).filter { groupEventOccurrence => groupEventOccurrence.event.allWeeks.contains(groupEventOccurrence.week) }
+	}
 
 	def removeFromSmallGroups(modReg: ModuleRegistration) {
 		if (modReg.module.adminDepartment.autoGroupDeregistration) {
@@ -296,6 +301,67 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			.flatMap(event => getOrCreateSmallGroupEventOccurrence(event, thisTermWeek))
 		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
+
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = {
+		benchmarkTask(s"possibleTimetableClash[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
+	}
+
+	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
+		benchmarkTask(s"studentTimetableClash[Group-${group.id}, Student - ${student.getUserId}]") {
+			val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
+			possibleClashes.exists { case(clashGroup, users) => group.id == clashGroup.id && users.exists { user => user.getUserId == student.getUserId } }
+		}
+	}
+
+	private def possibleTimetableClashesForStudents(set: SmallGroupSet, students: Seq[User]): Seq[(SmallGroup, Seq[User])] = {
+		val currentGroupsWithOccurrencesAndDateInfo = benchmarkTask("currentGroupsWithOccurrencesAndDateInfo") {
+			set.groups.asScala.map { group =>
+				(group, groupOccurrencesWithStartEndDateTimeInfo(group))
+			}
+		}
+
+		val studentsWithOtherGroupOccurrenceAndDateInfo = benchmarkTask("studentsWithOtherGroupOccurrenceAndDateInfo") {
+			val groupsByStudent = benchmarkTask("groupsByStudent") {
+				students.map(student => student -> findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id })
+			}.toMap
+			val otherGroups = benchmarkTask("otherGroups") { groupsByStudent.values.flatten.toSeq.distinct }
+			val otherGroupOccurrencesWithTimes: Map[SmallGroup, Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]] =
+				otherGroups.map(group => group -> groupOccurrencesWithStartEndDateTimeInfo(group)).toMap
+			groupsByStudent.mapValues(groups => groups.flatMap(otherGroupOccurrencesWithTimes))
+		}
+		// let us get all clash info only once based on the possibility of students being allocated to various groups of this  groupset. At front end we can do JS magic to filter these students
+		// whenever we randomly allocate, shuffle, unallocate students to find real clashes.
+		benchmarkTask("possibleTimetableClashesForStudents result") {
+			currentGroupsWithOccurrencesAndDateInfo.map { case (group, groupOccurrencesWithdateInfo) =>
+				val groupStudentInfoWithPossibleClash = studentsWithOtherGroupOccurrenceAndDateInfo.filter { case (student, otherGroupOccurrencesWithDateInfo) =>
+					doesEventOccurrenceOverlap(groupOccurrencesWithdateInfo, otherGroupOccurrencesWithDateInfo)
+				}.toSeq
+				val groupStudentsWithPossibleClash = groupStudentInfoWithPossibleClash.map { case (student, _) => student }
+				(group, groupStudentsWithPossibleClash)
+			}
+		}
+	}
+
+	private def groupOccurrencesWithStartEndDateTimeInfo(group: SmallGroup): Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])] = {
+		benchmarkTask(s"groupOccurrencesWithStartEndDateTimeInfo[Group-${group.id}]") {
+			findAttendanceByGroup(group).map { groupOccurrence =>
+				val startDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
+				val endDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
+				(groupOccurrence, startDateTime, endDateTime)
+			}
+		}
+	}
+
+	private def doesEventOccurrenceOverlap(
+		groupOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])],
+		otherOccurrencesWithdateInfo: Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]
+	): Boolean = {
+		groupOccurrencesWithdateInfo.exists { case(groupOccurrence, startDateTime1, endDateTime1) =>
+			startDateTime1.isDefined && endDateTime1.isDefined && otherOccurrencesWithdateInfo.exists { case(occ, startDateTime2, endDateTime2) =>
+				startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
+			}
+		}
+	}
 }
 
 trait SmallGroupMembershipHelpers {
@@ -333,4 +399,5 @@ class SmallGroupServiceImpl
 		with AutowiringUserGroupDaoComponent
 		with AutowiringSecurityServiceComponent
 		with AutowiringTermServiceComponent
-		with Logging
+		with TermAwareWeekToDateConverterComponent
+		with Logging with TaskBenchmarking

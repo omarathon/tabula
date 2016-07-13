@@ -29,7 +29,7 @@ object CreateExtenuatingCircumstancesCommand {
 class CreateExtenuatingCircumstancesCommandInternal(val member: Member, val user: CurrentUser)
 	extends ModifyMemberNoteCommandInternal {
 
-	self: ModifyMemberNoteCommandRequest with CreateMemberNoteCommandState
+	self: ModifyExtenuatingCircumstancesCommandRequest with CreateMemberNoteCommandState
 		with FileAttachmentServiceComponent with MemberNoteServiceComponent =>
 
 	val circumstances = new ExtenuatingCircumstances

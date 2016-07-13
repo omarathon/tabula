@@ -81,29 +81,33 @@
 		<@fmt.module_name module false />
 	</@filter>
 
-	<#assign placeholder = "Route" />
-	<#assign routesCustomPicker>
-		<div class="route-search input-group">
-			<input class="route-search-query route prevent-reload form-control" type="text" value="" placeholder="Search for a route" />
-			<span class="input-group-addon"><i class="fa fa-search"></i></span>
-		</div>
-	</#assign>
-	<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
-	<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes customPicker=routesCustomPicker; route>
-		<input type="checkbox" name="${status.expression}" value="${route.code}"  data-short-value="${route.code?upper_case}"
-		${contains_by_code(command.routes, route)?string('checked','')}
-		>
-		<@fmt.route_name route false />
-	</@filter>
+	<#if canFilterRoute>
+		<#assign placeholder = "Route" />
+		<#assign routesCustomPicker>
+			<div class="route-search input-group">
+				<input class="route-search-query route prevent-reload form-control" type="text" value="" placeholder="Search for a route" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+		<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes customPicker=routesCustomPicker; route>
+			<input type="checkbox" name="${status.expression}" value="${route.code}"  data-short-value="${route.code?upper_case}"
+			${contains_by_code(command.routes, route)?string('checked','')}
+			>
+			<@fmt.route_name route false />
+		</@filter>
+	</#if>
 
-	<#assign placeholder = "Year of study" />
-	<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
-	<@filter path="yearsOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=command.allYearsOfStudy prefix="Year "; yearOfStudy>
-		<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
-		${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}
-		>
-	${yearOfStudy}
-	</@filter>
+	<#if canFilterYearOfStudy>
+		<#assign placeholder = "Year of study" />
+		<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
+		<@filter path="yearsOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=command.allYearsOfStudy prefix="Year "; yearOfStudy>
+			<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
+			${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}
+			>
+		${yearOfStudy}
+		</@filter>
+	</#if>
 
 	<#if canFilterStudents>
 		<#assign placeholder = "Student" />

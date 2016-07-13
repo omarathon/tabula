@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.apache.commons.validator.UrlValidator
 import org.joda.time.LocalTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
@@ -54,6 +55,8 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var locationId: String = _
 	var title: String = _
 	var tutors: JList[String] = JArrayList()
+	var relatedUrl: String = _
+	var relatedUrlTitle: String = _
 
 	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
@@ -76,7 +79,7 @@ trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState 
 	def existingEvent = Some(event)
 }
 
-class CreateSmallGroupEventCommandInternal(val module: Module, val set: SmallGroupSet, val group: SmallGroup)
+class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGroupSet, var group: SmallGroup)
 	extends ModifySmallGroupEventCommandInternal with CreateSmallGroupEventCommandState {
 
 	self: SmallGroupServiceComponent =>
@@ -140,6 +143,8 @@ abstract class ModifySmallGroupEventCommandInternal
 		day = event.day
 		startTime = event.startTime
 		endTime = event.endTime
+		relatedUrl = event.relatedUrl
+		relatedUrlTitle = event.relatedUrlTitle
 
 		if (event.tutors != null) tutors.addAll(event.tutors.knownType.allIncludedIds.asJava)
 	}
@@ -169,6 +174,8 @@ abstract class ModifySmallGroupEventCommandInternal
 		event.day = day
 		event.startTime = startTime
 		event.endTime = endTime
+		event.relatedUrl = relatedUrl
+		event.relatedUrlTitle = relatedUrlTitle
 
 		if (event.tutors == null) event.tutors = UserGroup.ofUsercodes
 		event.tutors.knownType.includedUserIds = tutors.asScala
@@ -205,6 +212,13 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		} else {
 			val tutorsValidator = new UsercodeListValidator(tutors, "tutors")
 			tutorsValidator.validate(errors)
+		}
+
+		if (relatedUrl != null && relatedUrl.nonEmpty) {
+				if (!relatedUrl.toLowerCase.startsWith("http://")) {
+					relatedUrl = s"http://$relatedUrl"
+				}
+				if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("link", "smallGroupEvent.url.invalid")
 		}
 
 		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")

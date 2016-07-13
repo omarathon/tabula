@@ -3,7 +3,7 @@
 <h1>Published feedback for ${assignment.name}.</h1>
 
 <#assign module=assignment.module />
-<#assign department=module.department />
+<#assign department=module.adminDepartment />
 
 <p>
 The feedback has been published.

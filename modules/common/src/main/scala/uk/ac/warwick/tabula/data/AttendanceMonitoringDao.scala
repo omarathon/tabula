@@ -70,12 +70,12 @@ trait AttendanceMonitoringDao {
 	def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
 	def listAllSchemes(department: Department): Seq[AttendanceMonitoringScheme]
 	def listSchemes(department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringScheme]
-	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate]
 	def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate]
 	def listSchemesForMembershipUpdate: Seq[AttendanceMonitoringScheme]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def findReports(studentIds: Seq[String], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def listUnreportedReports: Seq[MonitoringPointReport]
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem]
 	def findPoints(
 		department: Department,
@@ -84,12 +84,6 @@ trait AttendanceMonitoringDao {
 		types: Seq[AttendanceMonitoringPointType],
 		styles: Seq[AttendanceMonitoringPointStyle]
 	): Seq[AttendanceMonitoringPoint]
-	def findOldPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		sets: Seq[MonitoringPointSet],
-		types: Seq[MonitoringPointType]
-	): Seq[MonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getAllCheckpoints(points: Seq[AttendanceMonitoringPoint]): Map[AttendanceMonitoringPoint, Seq[AttendanceMonitoringCheckpoint]]
 	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData]
@@ -185,14 +179,6 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 			.seq
 	}
 
-	def listOldSets(department: Department, academicYear: AcademicYear): Seq[MonitoringPointSet] = {
-		session.newCriteria[MonitoringPointSet]
-			.createAlias("route", "route")
-			.add(is("academicYear", academicYear))
-			.add(is("route.adminDepartment", department))
-			.seq
-	}
-
 	def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate] = {
 		session.newCriteria[AttendanceMonitoringTemplate]
 			.addOrder(Order.asc("position"))
@@ -259,6 +245,10 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 		)
 	}
 
+	def listUnreportedReports: Seq[MonitoringPointReport] = {
+		session.newCriteria[MonitoringPointReport].add(isNull("pushedDate")).seq
+	}
+
 	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
 		if (universityIds.isEmpty)
 			return Seq()
@@ -307,31 +297,6 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 			query.add(safeIn("pointType", types))
 		if (styles.nonEmpty)
 			query.add(safeIn("scheme.pointStyle", styles))
-
-		query.seq
-	}
-
-	def findOldPoints(
-		department: Department,
-		academicYear: AcademicYear,
-		sets: Seq[MonitoringPointSet],
-		types: Seq[MonitoringPointType]
-	): Seq[MonitoringPoint] = {
-		val query = session.newCriteria[MonitoringPoint]
-			.createAlias("pointSet", "pointSet")
-			.createAlias("pointSet.route", "route")
-			.add(is("route.adminDepartment", department))
-			.add(is("pointSet.academicYear", academicYear))
-
-		if (sets.nonEmpty)
-			query.add(safeIn("pointSet", sets))
-		if (types.nonEmpty) {
-			if (types.contains(null)) {
-				query.add(disjunction().add(safeIn("pointType", types)).add(isNull("pointType")))
-			} else {
-				query.add(safeIn("pointType", types))
-			}
-		}
 
 		query.seq
 	}
@@ -576,7 +541,9 @@ case class AttendanceMonitoringStudentData(
 	scdBeginDate: LocalDate,
 	scdEndDate: Option[LocalDate],
 	routeCode: String,
-	routeName: String
+	routeName: String,
+	yearOfStudy: String,
+	sprCode: String
 ) {
 	def fullName = s"$firstName $lastName"
 }
@@ -597,6 +564,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.add(min("studentCourseDetails.beginDate"))
 					.add(max("route.code"))
 					.add(max("route.name"))
+					.add(max("studentCourseYearDetails.yearOfStudy"))
+					.add(max("studentCourseDetails.sprCode"))
 			if (withEndDate) {
 				projections.add(max("studentCourseDetails.endDate"))
 			}
@@ -621,7 +590,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 		}
 		// The end date is either null, or if all are not null, the maximum end date, so get the nulls first
 		val nullEndDateData = setupCriteria(setupProjection(withEndDate = false)).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -630,12 +599,14 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					None,
 					routeCode,
-					routeName
+					routeName,
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then get the not-nulls
 		val hasEndDateData = setupCriteria(setupProjection(withEndDate = true), withEndDate = true).map {
-			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, scdEndDate: LocalDate) =>
+			case Array(firstName: String, lastName: String, universityId: String, userId: String, scdBeginDate: LocalDate, routeCode: String, routeName: String, yearOfStudy: Integer, sprCode: String, scdEndDate: LocalDate) =>
 				AttendanceMonitoringStudentData(
 					firstName,
 					lastName,
@@ -644,7 +615,9 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					scdBeginDate,
 					Option(scdEndDate),
 					routeCode,
-					routeName
+					routeName,
+					yearOfStudy.toString,
+					sprCode
 				)
 		}
 		// Then combine the two, but filter any ended found in the not-ended

@@ -610,20 +610,23 @@
 		}
 
 		$el.filter(':not(.collapsible-init)').each(function() {
-			var $section = $(this).addClass('collapsible-init');
-			var open = function() {
-				return $section.hasClass('expanded');
-			};
-
-			var $icon = $('<i />');
-			if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
-			else $icon.addClass('fa fa-fw fa-chevron-right');
-
-			var $title = $section.find('.section-title');
-			if ($title.find('.icon-container').length) {
-				$title.find('.icon-container').first().prepend(' ').prepend($icon);
-			} else {
-				$title.prepend(' ').prepend($icon);
+			var $section = $(this).addClass('collapsible-init'), 
+				checkboxToggle = $section.hasClass('checkbox-toggle'),
+				$icon = $('<i />'),
+				open = function() {
+					return $section.hasClass('expanded');
+				};
+			
+			if (!checkboxToggle) {
+				if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
+				else $icon.addClass('fa fa-fw fa-chevron-right');
+	
+				var $title = $section.find('.section-title');
+				if ($title.find('.icon-container').length) {
+					$title.find('.icon-container').first().prepend(' ').prepend($icon);
+				} else {
+					$title.prepend(' ').prepend($icon);
+				}
 			}
 
 			var populateContent = function(onComplete) { onComplete(); };
@@ -654,42 +657,57 @@
 				}
 			}
 
-			$title.css('cursor', 'pointer').on('click', function(e) {
-				// Ignore clicks where we are clearing a dropdown
-				if ($(this).parent().find('.dropdown-menu').is(':visible')) {
-					return;
-				}
-
-				if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
-					// Ignore if we're clicking a button
-					return;
-				}
-
-				if (open()) {
-					$section.removeClass('expanded');
-					$icon.removeClass().addClass('fa fa-fw fa-chevron-right');
-				} else {
-					populateContent(function() {
+			if (checkboxToggle) {
+				var $checkbox = $section.find('input.toggle-collapsible');
+				$checkbox.on('change', function(){
+					if ($(this).is(':checked')) {
 						$section.addClass('expanded');
-						$icon.removeClass().addClass('fa fa-fw fa-chevron-down');
+						$checkbox.parent().find('.toggle-collapsible-on').removeClass('hidden');
+						$checkbox.parent().find('.toggle-collapsible-off').addClass('hidden');
+					} else {
+						$section.removeClass('expanded');
+						$checkbox.parent().find('.toggle-collapsible-on').addClass('hidden');
+						$checkbox.parent().find('.toggle-collapsible-off').removeClass('hidden');
+					}
+				});
+			} else {
+				$title.css('cursor', 'pointer').on('click', function(e) {
+					// Ignore clicks where we are clearing a dropdown
+					if ($(this).parent().find('.dropdown-menu').is(':visible')) {
+						return;
+					}
 
-						if ($section.data('name')) {
-							// Use history.pushState here if supported as it stops the page jumping
-							if (window.history && window.history.pushState && window.location.hash !== ('#' + $section.data('name'))) {
-								window.history.pushState({}, document.title, window.location.pathname + '#' + $section.data('name'));
-							} else {
-								window.location.hash = $section.data('name');
+					if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
+						// Ignore if we're clicking a button
+						return;
+					}
+
+					if (open()) {
+						$section.removeClass('expanded');
+						$icon.removeClass().addClass('fa fa-fw fa-chevron-right');
+					} else {
+						populateContent(function() {
+							$section.addClass('expanded');
+							$icon.removeClass().addClass('fa fa-fw fa-chevron-down');
+
+							if ($section.data('name')) {
+								// Use history.pushState here if supported as it stops the page jumping
+								if (window.history && window.history.pushState && window.location.hash !== ('#' + $section.data('name'))) {
+									window.history.pushState({}, document.title, window.location.pathname + '#' + $section.data('name'));
+								} else {
+									window.location.hash = $section.data('name');
+								}
 							}
-						}
 
-						$section.wideTables();
-					});
+							$section.wideTables();
+						});
+					}
+				});
+
+				if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
+					// simulate a click
+					$title.trigger('click');
 				}
-			});
-
-			if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
-				// simulate a click
-				$title.trigger('click');
 			}
 		});
 	};
@@ -719,6 +737,42 @@
 			}
 			return url.substring(0, url.indexOf('?')) + '?' + newArgs.join('&');
 		}
+	};
+
+	exports.scrollableTableSetup = function() {
+		$('.scrollable-table .right').find('.table-responsive').on('scroll', function(){
+			var $this = $(this);
+			if($this.scrollLeft() > 0) {
+				$this.parent(':not(.left-shadow)').addClass('left-shadow');
+			} else {
+				$this.parent().removeClass('left-shadow');
+			}
+		});
+	};
+
+	exports.tableSortMatching = function(tableArray) {
+		var matchSorting = function($sourceTable, targetTables){
+			var $sourceRows = $sourceTable.find('tbody tr');
+			$.each(targetTables, function(i, $table){
+				var $tbody = $table.find('tbody');
+				var oldRows = $tbody.find('tr').detach();
+				$.each($sourceRows, function(j, row){
+					var $sourceRow = $(row);
+					oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+				});
+			});
+		};
+
+		if (tableArray.length < 2)
+			return;
+
+		$.each(tableArray, function(i){
+			var otherTables = tableArray.slice();
+			otherTables.splice(i, 1);
+			this.on('sortEnd', function(){
+				matchSorting($(this), otherTables);
+			}).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+		});
 	};
 
 	// on ready

@@ -45,9 +45,9 @@ class ViewTemplateSchemePointsController extends AttendanceController with HasMo
 	def getGroupedPointsFromTemplate(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): FindPointsResult = {
 		val points = attendanceService.generatePointsFromTemplateScheme(templateScheme, academicYear)
 		templateScheme.pointStyle match {
-			case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map(), Map())
-			case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points), Map())
-			case _ => FindPointsResult(groupByTerm(points), groupByMonth(points), Map())
+			case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map())
+			case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points))
+			case _ => FindPointsResult(groupByTerm(points), groupByMonth(points))
 		}
 	}
 }

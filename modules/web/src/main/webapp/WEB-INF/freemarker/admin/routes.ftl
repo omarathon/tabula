@@ -10,7 +10,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro home><@_u page="/" /></#macro>
 <#macro departmenthome department><@_u page="/department/${department.code}/" /></#macro>
-<#macro depthome module><@_u page="/department/${module.department.code}/#module-${module.code}" /></#macro>
+<#macro depthome module><@_u page="/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
 
 <#macro deptperms department><@_u page="/department/${department.code}/permissions" /></#macro>
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" /></#macro>

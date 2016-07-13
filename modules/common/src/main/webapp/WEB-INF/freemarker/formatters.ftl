@@ -221,7 +221,7 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro monitoringPointFormat point stripHtml=false><#--
 	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false) /><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.adminDepartment, false) /><#--
 		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
@@ -532,10 +532,14 @@ preposition: Text to relate the title to the department name in the second line,
 </#macro>
 
 <#macro location location>
-	<#if ((location.locationId)!)?has_content>
-		<span class="map-location" data-lid="${location.locationId}">${location.name}</span>
+	<@location_decomposed location.name location.locationId!"" />
+</#macro>
+
+<#macro location_decomposed name locationId>
+	<#if locationId?has_content>
+		<span class="map-location" data-lid="${locationId}">${name}</span>
 	<#else>
-		${location.name}
+		${name}
 	</#if>
 </#macro>
 

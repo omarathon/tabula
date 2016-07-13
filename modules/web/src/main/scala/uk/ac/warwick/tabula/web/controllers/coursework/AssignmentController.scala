@@ -6,15 +6,13 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.{SubmitAssignmentRequest, SubmitAssignmentCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{SubmitAssignmentCommand, SubmitAssignmentRequest}
 import uk.ac.warwick.tabula.commands.coursework.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import uk.ac.warwick.tabula.services.MonitoringPointProfileTermAssignmentService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 
@@ -29,8 +27,6 @@ class AssignmentController extends CourseworkController
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with CurrentUserSubmissionAndFeedbackCommandState
 	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest
-
-	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 
 	hideDeletedItems
 
@@ -49,13 +45,11 @@ class AssignmentController extends CourseworkController
 		@PathVariable assignment: Assignment,
 		user: CurrentUser
 	) = {
-			val submission = new Submission(user.universityId)
-			submission.assignment = assignment
-			submission.submittedDate = DateTime.now
-			submission.userId = user.userId
-			monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).nonEmpty || (
-				features.attendanceMonitoringVersion2 && attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
-			)
+		val submission = new Submission(user.universityId)
+		submission.assignment = assignment
+		submission.submittedDate = DateTime.now
+		submission.userId = user.userId
+		attendanceMonitoringCourseworkSubmissionService.getCheckpoints(submission).nonEmpty
 	}
 
 	/**

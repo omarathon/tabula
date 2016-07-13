@@ -16,10 +16,10 @@ class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 	student.universityId = "university ID"
 	val user = new User()
 
-	val ttEvent= TimetableEvent("", "From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013))
+	val ttEvent= TimetableEvent("", "From Timetable","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),"","")
 	val timetableEvents = Seq(ttEvent)
 
-	val sgEvent= TimetableEvent("", "From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013))
+	val sgEvent= TimetableEvent("", "From Group","", "",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,TimetableEvent.Parent(),None,Nil,Nil,AcademicYear(2013),"","")
 	val groupEvents = Seq(sgEvent)
 
 	val source = new CombinedStudentTimetableEventSourceComponent

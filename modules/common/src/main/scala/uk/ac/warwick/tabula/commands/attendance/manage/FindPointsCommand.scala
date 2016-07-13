@@ -1,23 +1,23 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointType, MonitoringPointSet, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme}
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.attendance.{GroupedPoint, GroupsPoints}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringPointType, AttendanceMonitoringScheme}
 import uk.ac.warwick.tabula.helpers.LazyLists
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.util.web.UriBuilder
-import uk.ac.warwick.tabula.commands.attendance.{GroupedOldPoint, GroupedPoint, GroupsPoints}
+
+import scala.collection.JavaConverters._
 
 case class FindPointsResult(
 	termGroupedPoints: Map[String, Seq[GroupedPoint]],
-	monthGroupedPoints: Map[String, Seq[GroupedPoint]],
-	termGroupedOldPoints: Map[String, Seq[GroupedOldPoint]]
+	monthGroupedPoints: Map[String, Seq[GroupedPoint]]
 )
 
 object FindPointsCommand {
@@ -42,18 +42,13 @@ class FindPointsCommandInternal(val department: Department, val academicYear: Ac
 		restrictedStyle match {
 			case Some(AttendanceMonitoringPointStyle.Date) =>
 				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-				FindPointsResult(Map(), groupByMonth(points), Map())
+				FindPointsResult(Map(), groupByMonth(points))
 			case Some(AttendanceMonitoringPointStyle.Week) =>
-				if (academicYear.startYear < 2014) {
-					val points = attendanceMonitoringService.findOldPoints(department, academicYear, sets.asScala, types.asScala)
-					FindPointsResult(Map(), Map(), groupOldByTerm(points, academicYear))
-				} else {
-					val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-					FindPointsResult(groupByTerm(points), Map(), Map())
-				}
+				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
+				FindPointsResult(groupByTerm(points), Map())
 			case _ =>
 				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
-				FindPointsResult(groupByTerm(points), groupByMonth(points), Map())
+				FindPointsResult(groupByTerm(points), groupByMonth(points))
 		}
 	}
 
@@ -75,19 +70,17 @@ trait FindPointsCommandState {
 	def restrictedStyle: Option[AttendanceMonitoringPointStyle]
 
 	// Bind variables
-	var findSchemes: JList[AttendanceMonitoringScheme] = LazyLists.create()
-	var sets: JList[MonitoringPointSet] = LazyLists.create()
-	var types: JList[AttendanceMonitoringPointType] = LazyLists.createWithFactory {
+	var findSchemes: JList[AttendanceMonitoringScheme] = LazyLists.create[AttendanceMonitoringScheme]()
+	var types: JList[AttendanceMonitoringPointType] = LazyLists.createWithFactory[AttendanceMonitoringPointType] {
 		() => null
 	}
-	var styles: JList[AttendanceMonitoringPointStyle] = LazyLists.createWithFactory {
+	var styles: JList[AttendanceMonitoringPointStyle] = LazyLists.createWithFactory[AttendanceMonitoringPointStyle] {
 		() => null
 	}
 
 	def serializeFilter = {
 		val result = new UriBuilder()
 		findSchemes.asScala.foreach(scheme => result.addQueryParameter("findSchemes", scheme.id))
-		sets.asScala.foreach(set => result.addQueryParameter("sets", set.id))
 		types.asScala.foreach(t => result.addQueryParameter("types", t.dbValue))
 		styles.asScala.foreach(style => result.addQueryParameter("styles", style.dbValue))
 		if (result.getQuery == null)

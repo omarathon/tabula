@@ -169,6 +169,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 object AssignmentImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 	var sqlStringCastFunction: String = "to_char"
+	var dialectRegexpLike = "regexp_like"
 
 	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
 	def castToString(orig: String) =
@@ -294,7 +295,7 @@ object AssignmentImporter {
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -323,7 +324,7 @@ object AssignmentImporter {
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -351,7 +352,7 @@ object AssignmentImporter {
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only

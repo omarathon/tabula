@@ -136,11 +136,14 @@ trait CompleteTimetableFetchingServiceComponent
 }
 
 trait CombinedHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
-	self: ScientiaConfigurationComponent with CelcatConfigurationComponent =>
+	self: ScientiaConfigurationComponent
+		with CelcatConfigurationComponent
+		with ExamTimetableConfigurationComponent =>
 
 	lazy val timetableFetchingService = new CombinedTimetableFetchingService(
 		ScientiaHttpTimetableFetchingService(scientiaConfiguration),
-		CelcatHttpTimetableFetchingService(celcatConfiguration)
+		CelcatHttpTimetableFetchingService(celcatConfiguration),
+		ExamTimetableHttpTimetableFetchingService(examTimetableConfiguration)
 	)
 
 }
@@ -169,7 +172,9 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						groupedEvents.flatMap { _.comments }.headOption,
 						groupedEvents.flatMap { _.staff }.distinct,
 						groupedEvents.flatMap { _.students }.distinct,
-						event.year
+						event.year,
+						event.relatedUrl,
+						event.relatedUrlTitle
 					)
 			}
 			.values.toSeq)

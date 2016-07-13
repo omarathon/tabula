@@ -22,7 +22,9 @@ case class TimetableEvent(
 	comments: Option[String],
 	staff: Seq[User],
 	students: Seq[User],
-	year: AcademicYear
+	year: AcademicYear,
+	relatedUrl: String,
+	relatedUrlTitle: String
 )
 
 object TimetableEvent {
@@ -71,7 +73,9 @@ object TimetableEvent {
 			comments = None,
 			staff = sge.tutors.users,
 			students = sge.group.students.users,
-			year = sge.group.groupSet.academicYear
+			year = sge.group.groupSet.academicYear,
+			relatedUrl = sge.relatedUrl,
+			relatedUrlTitle = sge.relatedUrlTitle
 		)
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -101,10 +105,11 @@ object TimetableEventType {
 	case object Seminar extends TimetableEventType("SEM", "Seminar")
 	case object Induction extends TimetableEventType("IND", "Induction")
 	case object Meeting extends TimetableEventType("MEE", "Meeting")
+	case object Exam extends TimetableEventType("EXA", "Exam")
 	case class Other(c: String) extends TimetableEventType(c, c, false)
 
 	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting)
+	val members = Seq(Lecture, Practical, Seminar, Induction, Meeting, Exam)
 
 	def unapply(code: String): Option[TimetableEventType] = code match {
 		case Lecture.code | Lecture.displayName => Some(Lecture)
@@ -112,6 +117,7 @@ object TimetableEventType {
 		case Seminar.code | Seminar.displayName => Some(Seminar)
 		case Induction.code | Induction.displayName => Some(Induction)
 		case Meeting.code | Meeting.displayName => Some(Meeting)
+		case Exam.code | Exam.displayName => Some(Exam)
 		case _ => None
 	}
 
@@ -150,7 +156,9 @@ object EventOccurrence {
 			None,
 			TimetableEvent.Parent(),
 			None,
-			Nil
+			Nil,
+			"",
+			""
 		)
 	}
 }

@@ -44,37 +44,41 @@
 							</h4>
 
 							<div id="${studentKey}" class="collapse">
-								<table class="related_students table table-striped table-condensed">
-									<thead>
-										<tr>
-											<th class="student-col">First name</th>
-											<th class="student-col">Last name</th>
-											<th class="id-col">ID</th>
-											<th class="type-col">Type</th>
-											<th class="year-col">Year</th>
-											<th class="course-col">Course</th>
-										</tr>
-									</thead>
-
-									<tbody>
-										<#list students as studentRelationship>
-											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
-											<tr class="student">
-												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
-												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
-												<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
-												<td>${studentCourseDetails.student.groupName!""}</td>
-												<td>${(mapGet(yearOfStudyMap, studentCourseDetails))!""}</td>
-												<td>${(mapGet(courseMap, studentCourseDetails).name)!""}</td>
+								<form action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
+									<table class="related_students table table-striped table-condensed">
+										<thead>
+											<tr>
+												<th><@bs3form.selector_check_all /></th>
+												<th class="student-col">First name</th>
+												<th class="student-col">Last name</th>
+												<th class="id-col">ID</th>
+												<th class="type-col">Type</th>
+												<th class="year-col">Year</th>
+												<th class="course-col">Course</th>
 											</tr>
-										</#list>
-									</tbody>
-								</table>
+										</thead>
 
-								<p>
-									<a href="<@routes.profiles.relationship_reallocate department relationshipType agentId />" class="btn btn-primary">Reallocate students</a>
-									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
-								</p>
+										<tbody>
+											<#list students as studentRelationship>
+												<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
+												<tr class="student">
+													<td><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></td>
+													<td><h6>${studentCourseDetails.student.firstName}</h6></td>
+													<td><h6>${studentCourseDetails.student.lastName}</h6></td>
+													<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
+													<td>${studentCourseDetails.student.groupName!""}</td>
+													<td>${(mapGet(yearOfStudyMap, studentCourseDetails))!""}</td>
+													<td>${(mapGet(courseMap, studentCourseDetails).name)!""}</td>
+												</tr>
+											</#list>
+										</tbody>
+									</table>
+
+									<p>
+										<button type="submit" class="btn btn-primary">Reallocate students</button>
+										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+									</p>
+								</form>
 							</div>
 						</td>
 					</tr>
@@ -98,21 +102,14 @@
 	(function($) {
 		$(function() {
 			$('.related_students').tablesorter({
-				sortList: [[1,0], [3,0], [4,0]]
-			});
+				sortList: [[2,0], [1,0], [3,0]],
+				headers: { 0: { sorter: false} }
+			}).bigList();
 	
 			$('#agents').on('hidden.bs.collapse', 'div', function() {
 				$('#' + this.id + '-trigger i').removeClass('fa-chevron-down').addClass('fa-chevron-right').parent().prop('title', 'Expand');
 			}).on('shown.bs.collapse', 'div', function() {
 				$('#' + this.id + '-trigger i').removeClass('fa-chevron-right').addClass('fa-chevron-down').parent().prop('title', 'Collapse');
-			});
-	
-			$('.student').on('mouseover', function(e) {
-				$(this).find('td').addClass('hover');
-			}).on('mouseout', function(e) {
-				$(this).find('td').removeClass('hover');
-			}).on('click', function(e) {
-				if (! $(e.target).is('a')) $(this).find('a.profile-link')[0].click();
 			});
 		});
 	})(jQuery);

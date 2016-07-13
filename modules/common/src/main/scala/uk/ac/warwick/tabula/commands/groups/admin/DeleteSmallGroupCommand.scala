@@ -13,7 +13,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object DeleteSmallGroupCommand {
-	def apply(set: SmallGroupSet, group: SmallGroup) =
+	type Command = Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState
+
+	def apply(set: SmallGroupSet, group: SmallGroup): Command =
 		new DeleteSmallGroupCommandInternal(set, group)
 			with ComposableCommand[SmallGroup]
 			with DeleteSmallGroupPermissions

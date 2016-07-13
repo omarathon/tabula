@@ -13,11 +13,6 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Staff Member"
 
 	GeneratesSubRole(SSOStaffRoleDefinition)
-
-	GrantsGlobalPermission(
-		// TAB-128 University Disability Services confirm disability status should be visible to staff generally
-		Profiles.Read.Disability
-	)
 }
 
 /**
@@ -53,7 +48,9 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.ViewSearchResults,
 
-		Profiles.Read.SmallGroups
+		Profiles.Read.SmallGroups,
+
+		Profiles.Read.Disability // TAB-4386
 	)
 
 }

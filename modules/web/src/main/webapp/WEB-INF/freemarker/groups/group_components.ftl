@@ -693,6 +693,7 @@
 				</#list>
 				<#if setItem.viewerMustSignUp>
 					<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
+					<a data-href="<@routes.groups.signup_to_group_timetableclash_info setItem.set />" class="timetable-clash-link"  data-toggle="modal" data-target="#timetable-clash-modal"></a>
 					</form>
 				</#if>
 				<#-- Only show warnings to users that can do somthing about them -->
@@ -848,19 +849,13 @@
 	${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
 </#compress></#macro>
 
-<#macro studentAttendanceRow student attendance notes instances group showStudent=true>
+<#macro studentAttendanceRow student attendance notes instances group>
 	<#local set = group.groupSet />
 	<#local module = set.module />
-	<#local department = module.department />
+	<#local department = module.adminDepartment />
 	<#local academicYear = set.academicYear />
-	<#local missedCount = 0 />
 
 	<tr>
-		<#if showStudent>
-			<td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">
-				${student.fullName}&nbsp;<@pl.profile_link student.warwickId! />
-			</td>
-		</#if>
 		<#list instances as instance>
 			<#local state = mapGet(attendance, instance) />
 			<#local title><@instanceFormat instance academicYear department /></#local>
@@ -874,7 +869,6 @@
 			<#elseif state.name == 'MissedUnauthorised'>
 				<#local class = "fa-times unauthorised" />
 				<#local title = "${student.fullName} did not attend (unauthorised): " + title />
-				<#local missedCount = missedCount + 1 />
 			<#elseif state.name == 'Late'>
 				<#local class = "fa-exclamation-triangle late" />
 				<#local title = "No data: " + title />
@@ -917,76 +911,120 @@
 				</span>
 			</td>
 		</#list>
-		<td>
-			<span class="badge progress-bar-<#if (missedCount > 2)>danger<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
-		</td>
 	</tr>
 </#macro>
 
-<#macro singleGroupAttendance group instances studentAttendance attendanceNotes singleStudent={} showRecordButtons=true>
+<#macro singleGroupAttendance group instances studentAttendance attendanceNotes showRecordButtons=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
-	<#local department = module.department />
+	<#local department = module.adminDepartment />
 	<#local academicYear = set.academicYear />
 
-	<table id="group_attendance_${group.id}" class="table table-striped table-condensed attendance-table">
-		<thead>
-			<tr>
-				<#if !singleStudent?has_content><th class="sortable nowrap">Student</th></#if>
-				<#list instances as instance>
-					<#local event = instance._1() />
-					<#local week = instance._2() />
+	<div class="group-attendance" id="group-attendance-${group.id}">
+		<div class="scrollable-table">
+			<div class="scrollable-table-row">
+				<div class="left">
+					<table class="table table-striped table-condensed attendance-table">
+						<thead>
+							<tr>
+								<th class="sortable student">Student</th>
+								<th class="sortable missed"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<#list studentAttendance?keys as student>
+								<#local attendance = mapGet(studentAttendance, student) />
+								<#local missedCount = 0 />
+								<#list instances as instance>
+									<#local state = mapGet(attendance, instance) />
+									<#if state.name == 'MissedUnauthorised'>
+										<#local missedCount = missedCount + 1 />
+									</#if>
+								</#list>
+								<tr>
+									<td data-sortBy="${student.lastName}, ${student.firstName}" title="${student.fullName}">
+										<div class="ellipsis">${student.firstName!}</div>
+										<div class="ellipsis">${student.lastName!}</div>
+										<@pl.profile_link student.warwickId! />
+									</td>
+									<td>
+										<span class="badge progress-bar-<#if (missedCount > 2)>danger<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+				</div>
+				<div class="right">
+					<table class="table table-striped table-condensed attendance-table sb-no-wrapper-table-popout">
+						<thead>
+						<tr>
+							<#list instances as instance>
+								<#local event = instance._1() />
+								<#local week = instance._2() />
 
-					<th class="instance-date-header">
-						<div class="instance-date use-tooltip" title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
-							<@instanceFormat instance academicYear department />
-						</div>
+								<th class="instance-date-header">
+									<div class="instance-date use-tooltip"
+										 data-container="body"
+										 title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
+										<@instanceFormat instance academicYear department />
+									</div>
 
-						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
-							<#if can.do("SmallGroupEvents.ViewRegister", event)>
-								<div class="eventRegister">
-									<a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>" href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>" data-html="true">
-										Record
-									</a>
-								</div>
-							</#if>
-						</#if>
-					</th>
-				</#list>
-				<th class="sortable"></th>
-			</tr>
-		</thead>
-		<tbody>
-			<#if singleStudent?has_content>
-				<@studentAttendanceRow student=singleStudent attendance=studentAttendance notes=attendanceNotes instances=instances group=group showStudent=false />
-			<#else>
-				<#list studentAttendance?keys as student>
-					<#local attendance = mapGet(studentAttendance, student) />
-					<#local notes = mapGet(attendanceNotes, student) />
-					<@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group showStudent=true />
-				</#list>
-			</#if>
-		</tbody>
-	</table>
+									<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
+										<#if can.do("SmallGroupEvents.ViewRegister", event)>
+											<div class="eventRegister">
+												<a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
+												   href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}"
+												   title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
+												   data-html="true"
+												   data-container="body"
+												>
+													Record
+												</a>
+											</div>
+										</#if>
+									</#if>
+								</th>
+							</#list>
+						</tr>
+						</thead>
+						<tbody>
+							<#list studentAttendance?keys as student>
+								<#local attendance = mapGet(studentAttendance, student) />
+								<#local notes = mapGet(attendanceNotes, student) />
+								<@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group />
+							</#list>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 
-	<#if !singleStudent?has_content && studentAttendance?keys?size gt 0>
-	<script type="text/javascript">
-		jQuery(function($){
-			$('#group_attendance_${group.id}')
-				.sortableTable({
-					sortList: [[$('#group_attendance_${group.id} th').length - 1,1]],
-					textExtraction: function(node) {
-						var $el = $(node);
-						if ($el.data('sortby')) {
-							return $el.data('sortby');
-						} else {
-							return $el.text().trim();
-						}
-					}
+		<#if studentAttendance?keys?size gt 0>
+			<script type="text/javascript">
+				jQuery(window).on('load', function(){
+					GlobalScripts.scrollableTableSetup();
 				});
-		});
-	</script>
-	</#if>
+				jQuery(function($){
+					var $leftTable = $('#group-attendance-${group.id} .left table');
+					GlobalScripts.tableSortMatching([
+						$leftTable,
+						$('#group-attendance-${group.id} .right table')
+					]);
+					$leftTable.sortableTable({
+						textExtraction: function(node) {
+							var $el = $(node);
+							if ($el.data('sortby')) {
+								return $el.data('sortby');
+							} else {
+								return $el.text().trim();
+							}
+						}
+					});
+				});
+			</script>
+		</#if>
+	</div>
 </#macro>
 
 <#macro single_groupset_attendance groupSet groups>
@@ -1385,11 +1423,11 @@
 					<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
 						<td
 								class="use-tooltip"
-								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department />"
+								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
 								data-html="true"
 								data-container="body">
 							<@f.checkbox path=path value="${weekNumber}" />
-							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.department true /></span>
+							<span class="week-number"><@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment true /></span>
 						</td>
 					</#list>
 				</tr>
@@ -1426,7 +1464,7 @@
 	<div class="running">
 		Running: <#compress>
 			<#if event.weekRanges?size gt 0 && event.day??>
-				${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.department)}
+				${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)}
 			<#elseif event.weekRanges?size gt 0>
 				[no day of week selected]
 			<#else>

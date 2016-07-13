@@ -16,7 +16,7 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 </#compress></#macro>
 <#macro modulehome module><@_u page="/admin/module/${module.code}/" /></#macro>
 <#macro depthome module academicYear=""><#compress>
-	<#local p>/admin/department/${module.department.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
+	<#local p>/admin/department/${module.adminDepartment.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
 	<@_u page=p />
 </#compress></#macro>
 <#macro single_set_info set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/" /></#macro>
@@ -82,6 +82,11 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 
 <#macro signup_to_group set><@_u page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@_u page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
+<#macro signup_to_group_timetableclash_info set><@_u page="/module/${set.module.code}/groups/${set.id}/signuptimetableclashinfo" /></#macro>
+
+<#macro timetableclashstudentslist set><@_u page="/${set.id}/timetableclashstudentspopup?clashStudentUsercodes=" /></#macro>
+<#macro studenttimetableconflict set><@_u page="/module/${set.module.code}/groups/${set.id}/timetableconflict" /></#macro>
+
 <#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg" context="/profiles" /><#else><@_u resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.urlPart}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
@@ -106,11 +111,14 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro import_groups department><@_u page="/admin/department/${department.code}/import-groups" /></#macro>
 <#macro import_groups_for_year department academicYear><@import_groups department />?academicYear=${academicYear.startYear?c}</#macro>
 
+<#macro import_spreadsheet department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/import-spreadsheet" /></#macro>
+<#macro import_spreadsheet_template department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/import-spreadsheet/template" /></#macro>
+
 <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
 
 <#macro deregisteredStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/deregistered" /></#macro>
 <#macro withdrawnStudents set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/withdrawn" /></#macro>
-<#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
+<#macro courseworkDeptHome module><@url context="/coursework" page="/admin/department/${module.adminDepartment.code}/#module-${module.code}" /></#macro>
 
 <#macro copyDepartment department><@_u page="/admin/department/${department.code}/groups/copy" /></#macro>
 <#macro copyModule module><@_u page="/admin/module/${module.code}/groups/copy" /></#macro>

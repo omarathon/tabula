@@ -336,4 +336,6 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
 	var additionalEntities: JList[String] = JArrayList()
 
 	var expanded: JMap[String, JBoolean] = JHashMap()
+
+	var preselectStudents: JList[String] = JArrayList()
 }
