@@ -114,6 +114,10 @@
 											Allocate ${relationshipType.description}s</a>
 										</li>
 									</#if>
+
+									<li><a href="<@routes.profiles.relationship_unconfirmed_meetings dept relationshipType />">
+										${relationshipType.description} meetings with no record</a>
+									</li>
 								</#list>
 
 								<li><a href="<@routes.profiles.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">

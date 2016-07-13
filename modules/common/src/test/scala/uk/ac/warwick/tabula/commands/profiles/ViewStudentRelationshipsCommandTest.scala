@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.commands.profiles
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{Department, MemberStudentRelationship, StaffMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.Tap
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, SortableAgentIdentifier}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+
+import scala.collection.immutable.TreeMap
 
 class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
-		val profileService = mock[ProfileService]
-		val relationshipService =  mock[RelationshipService]
+		val profileService = smartMock[ProfileService]
+		val relationshipService =  smartMock[RelationshipService]
 
 		val departmentOfXXX = new Department().tap(_.code = "xxx")
 		val tutorRelType = new StudentRelationshipType().tap(_.description = "tutor")
@@ -42,16 +43,11 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 	@Test //thisTestHasARidculouslyLongNameButICantThinkOfASensibleWayToShortenItWhichProbablyMeansTheCommandNeedsRefactoring...
 	def applyCombinesStudentsInDepartmentWithStudentsWhoHaveTutorsInDepartment() {
 		new Fixture {
+			relationshipService.listAgentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns TreeMap(
+				SortableAgentIdentifier(studentRel1) -> Seq(studentRel1),
+				SortableAgentIdentifier(studentRel2) -> Seq(studentRel2)
+			)(SortableAgentIdentifier.KeyOrdering)
 
-
-
-			// sprCode 1 is in the department, and has a tutor
-			relationshipService.listStudentRelationshipsByDepartment(tutorRelType, departmentOfXXX) returns Seq(studentRel1)
-
-			// sprCode 2 is not in the department, but does have a tutor in the department
-			relationshipService.listStudentRelationshipsByStaffDepartment(tutorRelType, departmentOfXXX) returns Seq(studentRel2)
-
-			//
 			relationshipService.listStudentsWithoutRelationship(tutorRelType, departmentOfXXX) returns Seq(student3)
 
 			val command = new ViewStudentRelationshipsCommand(departmentOfXXX, tutorRelType)

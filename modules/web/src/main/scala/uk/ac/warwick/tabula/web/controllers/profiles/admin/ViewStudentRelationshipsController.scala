@@ -25,7 +25,6 @@ class ViewStudentRelationshipsController extends ProfilesController {
 		val agentGraph = command.apply()
 		Mav("profiles/relationships/agent_view",
 			"agentRelationships" -> agentGraph.studentMap,
-			"studentCount" -> agentGraph.studentCount,
 			"missingCount" -> agentGraph.missingCount,
 			"courseMap" -> agentGraph.courseMap,
 			"yearOfStudyMap" -> agentGraph.yearOfStudyMap,

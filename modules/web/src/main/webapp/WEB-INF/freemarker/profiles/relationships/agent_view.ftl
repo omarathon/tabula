@@ -13,7 +13,7 @@
 
 <h1 class="with-settings">${relationshipType.description}s for ${department.name}</h1>
 
-<#if studentCount gt 0>
+<#if agentRelationships?has_content || (missingCount > 0)>
 	<#if agentRelationships?has_content>
 		<table id="agents" class="table table-bordered">
 			<#list agentRelationships?keys as key>
