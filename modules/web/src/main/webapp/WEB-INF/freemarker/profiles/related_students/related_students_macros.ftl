@@ -44,7 +44,7 @@
 	</tr>
 </#macro>
 
-<#macro tableWithMeetingsColumn items meetingsMap showSelectStudents>
+<#macro tableWithMeetingsColumn items meetingsMap showSelectStudents=false>
 	<@table items=items showMeetings=true meetingsMap=meetingsMap showSelectStudents=showSelectStudents/>
 </#macro>
 <#-- Print out a table of students/agents.-->
