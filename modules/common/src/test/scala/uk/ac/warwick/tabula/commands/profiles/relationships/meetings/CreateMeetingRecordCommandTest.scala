@@ -5,6 +5,7 @@ import org.springframework.validation.BindException
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.{FileDaoComponent, FileDao}
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
@@ -128,7 +129,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane.txt"
-
+ 		fileAttach.fileDao = smartMock[FileDao]
 		uploadedFile.attached.add(fileAttach)
 		cmd.file = uploadedFile
 
