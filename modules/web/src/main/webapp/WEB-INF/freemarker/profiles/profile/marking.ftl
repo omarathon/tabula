@@ -4,7 +4,7 @@
 
 <#if hasPermission>
 
-<div class="striped-section collapsible expanded">
+	<div class="striped-section collapsible expanded">
 		<h3 class="section-title">To do</h3>
 		<div class="striped-section-contents">
 			<#if result.todo?has_content>
