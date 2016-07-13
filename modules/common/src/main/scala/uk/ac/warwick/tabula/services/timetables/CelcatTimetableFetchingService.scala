@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingService._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
@@ -200,7 +200,7 @@ object CelcatHttpTimetableFetchingService {
 				staff = staff,
 				students = Nil,
 				year = year,
-				relatedUrl = RelatedUrl("", None)
+				relatedUrl = None
 			))
 		}
 	}
@@ -377,7 +377,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.staff,
 					event.students,
 					event.year,
-					relatedUrl = RelatedUrl("", None)
+					event.relatedUrl
 				)
 		}}.toList
 	}

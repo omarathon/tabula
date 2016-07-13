@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.{Http, Credentials}
+import dispatch.classic.{Credentials, Http}
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.Component
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.io.IOUtils
-import org.apache.http.entity.InputStreamEntity
-import org.apache.http.message.BasicHttpResponse
-import org.apache.http.{HttpVersion, HttpRequest, HttpHost}
 import org.apache.http.auth.AuthScope
 import org.apache.http.client.HttpClient
+import org.apache.http.entity.InputStreamEntity
+import org.apache.http.message.BasicHttpResponse
+import org.apache.http.{HttpHost, HttpRequest, HttpVersion}
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
@@ -91,7 +91,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("13/14"),
-			relatedUrl = RelatedUrl("", None)
+			relatedUrl = None
 		))
 
 		/*
@@ -126,7 +126,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("13/14"),
-			relatedUrl = RelatedUrl("", None)
+			relatedUrl = None
 		))
 	}
 
@@ -190,7 +190,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			Nil,
 			Nil,
 			AcademicYear.parse("14/15"),
-			relatedUrl = RelatedUrl("", None)
+			relatedUrl = None
 		))
 	}
 

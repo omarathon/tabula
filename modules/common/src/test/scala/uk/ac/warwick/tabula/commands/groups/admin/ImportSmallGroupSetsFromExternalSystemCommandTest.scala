@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.timetables.{ModuleTimetableFetchingService, ModuleTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
 import scala.concurrent.Future
@@ -137,7 +137,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			staff=Seq(tutor),
 			students=Seq(student1, student2, student3),
 			year = AcademicYear(2012),
-			relatedUrl = RelatedUrl("", None)
+			relatedUrl = None
 		)
 		val tEventModule1Seminar2 = TimetableEvent(
 			uid="uuid2",
@@ -155,7 +155,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 			staff=Seq(tutor),
 			students=Seq(student4, student5, student6),
 			year = AcademicYear(2012),
-			relatedUrl = RelatedUrl("", None)
+			relatedUrl = None
 		)
 
 		command.timetableFetchingService.getTimetableForModule("IN101") returns Future.successful(EventList.fresh(Seq(
@@ -176,7 +176,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				staff=Seq(tutor),
 				students=Nil,
 				year = AcademicYear(2012),
-				relatedUrl = RelatedUrl("", None)
+				relatedUrl = None
 			)
 		)))
 		command.timetableFetchingService.getTimetableForModule("IN102") returns Future.successful(EventList.fresh(Seq(
@@ -196,7 +196,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 				staff=Seq(tutor),
 				students=Seq(student4, student5, student6),
 				year = AcademicYear(2013),
-				relatedUrl = RelatedUrl("", None)
+				relatedUrl = None
 			)
 		)))
 	}

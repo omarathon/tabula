@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, EventOccurrence, TimetableEvent}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.helpers.Futures._
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 import scala.concurrent.Future
 
@@ -173,7 +173,7 @@ class CombinedTimetableFetchingService(services: PartialTimetableFetchingService
 						groupedEvents.flatMap { _.staff }.distinct,
 						groupedEvents.flatMap { _.students }.distinct,
 						event.year,
-						relatedUrl = RelatedUrl("", None)
+						event.relatedUrl
 					)
 			}
 			.values.toSeq)

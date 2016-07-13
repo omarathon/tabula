@@ -37,7 +37,7 @@ case class FullCalendarEvent(
 	parentShortName: String = "",
 	parentFullName: String = "",
 	comments: String = "",
-	relatedUrl: RelatedUrl = RelatedUrl("", None)
+	relatedUrl: Option[RelatedUrl] = None
 )
 
 object FullCalendarEvent {

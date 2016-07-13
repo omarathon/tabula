@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.{EventL
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.timetables.{RelatedUrl, EventOccurrence, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
 
 import scala.concurrent.Future
@@ -31,15 +31,15 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 		val user = mock[CurrentUser]
 
 		val event = {
-			TimetableEvent("", "", "", "", TimetableEventType.Induction, Nil, DayOfWeek.Monday, LocalTime.now, LocalTime.now, None, TimetableEvent.Parent(), None, Nil, Nil, AcademicYear(2012), RelatedUrl("", None))
+			TimetableEvent("", "", "", "", TimetableEventType.Induction, Nil, DayOfWeek.Monday, LocalTime.now, LocalTime.now, None, TimetableEvent.Parent(), None, Nil, Nil, AcademicYear(2012), None)
 		}
 		val timetableEvents = Seq(event)
 
-		val occurrence = EventOccurrence("","", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, RelatedUrl("", None))
+		val occurrence = EventOccurrence("","", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None)
 		val meetingOccurrences = Seq(occurrence)
 
-		val earlierEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.minusHours(1), LocalDateTime.now,None, TimetableEvent.Parent(), None, Nil, RelatedUrl("", None))
-		val laterEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, TimetableEvent.Parent(), None, Nil, RelatedUrl("", None))
+		val earlierEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.minusHours(1), LocalDateTime.now,None, TimetableEvent.Parent(), None, Nil, None)
+		val laterEvent = EventOccurrence("","","","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, TimetableEvent.Parent(), None, Nil, None)
 		val eventOccurences = Seq(laterEvent,earlierEvent) // deliberately put them the wrong way round so we can check sorting
 
 		val command = new ViewStudentEventsCommandInternal(testStudent, user) with CommandTestSupport
