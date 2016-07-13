@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.MapLocation
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{Hour12OptionalMins, IncludeDays}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import uk.ac.warwick.tabula.timetables.{RelatedUrl, EventOccurrence, TimetableEvent}
 
 /**
  * serialises to the JSON which FullCalendar likes.
@@ -37,8 +37,7 @@ case class FullCalendarEvent(
 	parentShortName: String = "",
 	parentFullName: String = "",
 	comments: String = "",
-	relatedUrl: String,
-	relatedUrlTitle: String
+	relatedUrl: Option[RelatedUrl] = None
 )
 
 object FullCalendarEvent {
@@ -92,8 +91,7 @@ object FullCalendarEvent {
 			parentShortName = source.parent.shortName.getOrElse(""),
 			parentFullName = source.parent.fullName.getOrElse(""),
 			comments = source.comments.getOrElse(""),
-			relatedUrl = source.relatedUrl,
-			relatedUrlTitle = source.relatedUrlTitle
+			relatedUrl = source.relatedUrl
 		)
 	}
 
