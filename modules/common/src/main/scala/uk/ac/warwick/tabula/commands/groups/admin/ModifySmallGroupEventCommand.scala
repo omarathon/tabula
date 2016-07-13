@@ -215,10 +215,10 @@ trait ModifySmallGroupEventValidation extends SelfValidating {
 		}
 
 		if (relatedUrl != null && relatedUrl.nonEmpty) {
-				if (!relatedUrl.toLowerCase.startsWith("http://")) {
+				if (!relatedUrl.toLowerCase.startsWith("http://") && !relatedUrl.toLowerCase.startsWith("https://")) {
 					relatedUrl = s"http://$relatedUrl"
 				}
-				if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("link", "smallGroupEvent.url.invalid")
+				if (!new UrlValidator().isValid(relatedUrl)) errors.rejectValue("relatedUrl", "smallGroupEvent.url.invalid")
 		}
 
 		if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
