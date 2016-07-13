@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
+
 import scala.collection.JavaConverters._
 
 object BulkMeetingRecordCommand {
@@ -30,14 +31,14 @@ object BulkMeetingRecordCommand {
 
 
 class BulkMeetingRecordCommandInternal(val studentRelationships: Seq[StudentRelationship], val creator: Member) extends AbstractMeetingRecordCommand
-	with CommandInternal[Seq[MeetingRecord]] with  TaskBenchmarking {
+	with CommandInternal[Seq[MeetingRecord]] with TaskBenchmarking {
 
 	self: BulkMeetingRecordCommandState with MeetingRecordCommandRequest with MeetingRecordServiceComponent
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
 		with FileAttachmentServiceComponent =>
 
 	override def applyInternal() = {
-		val meetingRecords = studentRelationships.map {studentRelationship =>
+		val meetingRecords = studentRelationships.map { studentRelationship =>
 			new MeetingRecord(creator, studentRelationship)
 		}
 		benchmarkTask("BulkMeetingRecord") {
@@ -52,10 +53,10 @@ trait BulkMeetingRecordCommandNotifications extends Notifies[Seq[MeetingRecord],
 	self: BulkMeetingRecordCommandState =>
 
 	def emit(meetingRecords: Seq[MeetingRecord]) = meetingRecords.map { meetingRecord =>
-		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, meetingRecords, meetingRecord.relationship)
+		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, meetingRecord, meetingRecord.relationship)
 	}
 
-	override def transformResult(meetingRecord: Seq[MeetingRecord]) = meetingRecord
+	override def transformResult(meetingRecords: Seq[MeetingRecord]) = meetingRecords
 
 	override def scheduledNotifications(meetingRecord: MeetingRecord) = Seq(
 		new ScheduledNotification[MeetingRecord]("newMeetingRecordApproval", meetingRecord, DateTime.now.plusWeeks(1))
@@ -90,6 +91,6 @@ trait BulkMeetingRecordDescription extends Describable[Seq[MeetingRecord]] {
 	}
 }
 
-trait BulkMeetingRecordCommandState extends MeetingRecordCommandState  {
+trait BulkMeetingRecordCommandState extends MeetingRecordCommandState {
 	def studentRelationships: Seq[StudentRelationship]
 }

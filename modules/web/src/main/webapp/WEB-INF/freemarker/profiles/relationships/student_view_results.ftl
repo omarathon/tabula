@@ -7,7 +7,7 @@
 		<div id="meeting-modal" class="modal fade"></div>
 		<div class="submit-buttons fix-footer">
 			<section class="meetings">
-				<a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" data-student-course-detail-list="" class="btn btn-default new-meeting-record disabled">Record meeting for selected students</a>
+				<a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for selected students</a>
 				<@fmt.bulk_email_students students=students />
 			</section>
 		</div>

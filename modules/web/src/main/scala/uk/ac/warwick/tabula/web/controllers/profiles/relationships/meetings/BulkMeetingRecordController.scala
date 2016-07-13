@@ -5,17 +5,18 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.BulkMeetingRecordCommand
-import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
-import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/bulk/create"))
-class BulkMeetingRecordController extends  ProfilesController with  TaskBenchmarking  {
+class BulkMeetingRecordController extends ProfilesController with TaskBenchmarking {
 
 	validatesSelf[SelfValidating]
 
@@ -42,8 +43,8 @@ class BulkMeetingRecordController extends  ProfilesController with  TaskBenchmar
 		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("studentRelationships") studentRelationships: Seq[StudentRelationship]
 	) = {
-				BulkMeetingRecordCommand(mandatory(studentRelationships), currentMember)
-		}
+		BulkMeetingRecordCommand(mandatory(studentRelationships), currentMember)
+	}
 
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
@@ -56,14 +57,13 @@ class BulkMeetingRecordController extends  ProfilesController with  TaskBenchmar
 	}
 
 
-
 	@RequestMapping(method = Array(GET, HEAD))
 	def get(
 		@ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
 		@PathVariable relationshipType: StudentRelationshipType,
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
 	) = {
-		form(cmd, relationshipType,studentCourseDetails)
+		form(cmd, relationshipType, studentCourseDetails)
 	}
 
 	private def form(
@@ -114,7 +114,7 @@ class BulkMeetingRecordController extends  ProfilesController with  TaskBenchmar
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, relationshipType,studentCourseDetails)
+			form(cmd, relationshipType, studentCourseDetails)
 		} else {
 			cmd.apply()
 			Redirect(Routes.students(relationshipType))

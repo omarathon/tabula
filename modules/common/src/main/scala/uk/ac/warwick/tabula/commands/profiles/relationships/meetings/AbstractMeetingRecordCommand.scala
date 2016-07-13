@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.ValidationUtils._
-import org.springframework.validation.{Errors, BindingResult}
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.FeaturesComponent
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
 
-abstract class AbstractMeetingRecordCommand  {
+abstract class AbstractMeetingRecordCommand {
 
 	self: MeetingRecordCommandRequest with MeetingRecordServiceComponent
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
@@ -49,20 +49,20 @@ abstract class AbstractMeetingRecordCommand  {
 	private def persistAttachments(meeting: MeetingRecord) {
 
 		// delete attachments that have been removed
-		if (meeting.attachments != null) {
+		if (meeting.attachments != null && meeting.attachments.size() > 0) {
 			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
 			val filesToRemove = meeting.attachments.asScala -- filesToKeep
 			meeting.attachments = JArrayList[FileAttachment](filesToKeep)
 			fileAttachmentService.deleteAttachments(filesToRemove)
 		}
 
-		val newAttachments = file.attached.asScala.map ( _.duplicate() )
+		val newAttachments = file.attached.asScala.map(_.duplicate())
 		newAttachments.foreach(meeting.addAttachment)
 	}
 
-	private def updateMeetingApproval(meetingRecord: MeetingRecord) : Option[MeetingRecordApproval] = {
+	private def updateMeetingApproval(meetingRecord: MeetingRecord): Option[MeetingRecordApproval] = {
 
-		def getMeetingRecord(approver: Member) : MeetingRecordApproval = {
+		def getMeetingRecord(approver: Member): MeetingRecordApproval = {
 
 			val meetingRecordApproval = meetingRecord.approvals.asScala.find(_.approver == approver).getOrElse {
 				val newMeetingRecordApproval = new MeetingRecordApproval()
@@ -85,7 +85,7 @@ trait MeetingRecordCommandBindListener extends BindListener {
 
 	self: MeetingRecordCommandRequest =>
 
-	override def onBind(result:BindingResult) = transactional() {
+	override def onBind(result: BindingResult) = transactional() {
 		file.onBind(result)
 	}
 }
@@ -96,7 +96,7 @@ trait MeetingRecordValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		if (title.length > MeetingRecord.MaxTitleLength){
+		if (title.length > MeetingRecord.MaxTitleLength) {
 			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
 		}
 

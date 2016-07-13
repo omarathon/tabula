@@ -76,7 +76,6 @@
 
 	<#if !student_table_script_included??>
 		<script type="text/javascript">
-
 			(function($) {
 				$('.student-list').bigList({});
 				// add a custom parser for the date column
@@ -111,7 +110,6 @@
 						}
 					});
 				});
-
 			})(jQuery);
 		</script>
 		<#-- deliberately a global assign, so only the first macro includes script. -->

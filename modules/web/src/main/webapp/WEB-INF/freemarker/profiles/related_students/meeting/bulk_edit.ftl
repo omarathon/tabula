@@ -6,13 +6,13 @@
 	<#else>
 		<@modal.wrapper enabled=(isModal!false)>
 			<#assign heading>
-			<h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
-			<h6 <#if isModal!false>class="modal-title"</#if>>
-				<span class="very-subtle">between ${relationshipType.agentRole}</span> ${command.creator.fullName!""}
-				<span class="very-subtle">and ${relationshipType.studentRole}(s)</span>
-				<a class ="studentList" href="#" title="Bulk Students" data-content="Some content inside the popover">Show</a>
-				<div class ="hide studentList"></div>
-			</h6>
+				<h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
+				<h6 <#if isModal!false>class="modal-title"</#if>>
+					<span class="very-subtle">between ${relationshipType.agentRole}</span> ${command.creator.fullName!""}
+					<span class="very-subtle">and ${relationshipType.studentRole}(s)</span>
+					<a class ="studentList" href="#" title="Bulk Students" data-content="Some content inside the popover">Show</a>
+					<div class ="hide studentList"></div>
+				</h6>
 			</#assign>
 
 			<#if isModal!false>
@@ -20,24 +20,22 @@
 					<#noescape>${heading}</#noescape>
 				</@modal.header>
 			<#elseif isIframe!false>
-			<div id="container">
+				<div id="container">
 			<#else>
 				<#noescape>${heading}</#noescape>
 			</#if>
 			<#if isModal!false>
 				<div class="modal-body"></div>
-				<@modal.footer>
-					<form class="double-submit-protection">
-						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-							Submit for approval
-						</button>
-						<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
-					</form>
-				</@modal.footer>
+					<@modal.footer>
+						<form class="double-submit-protection">
+							<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+								Submit for approval
+							</button>
+							<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+						</form>
+					</@modal.footer>
 			<#else>
-				<!-- blank action = post to current path. needs to be left blank so we know if we should post to create or edit -->
-				<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
-
+				<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" commandName="command" class="double-submit-protection">
 					<#list studentList as student>
 						<input  type = "hidden" name="studentCourseDetails11"  value = "${student.urlSafeId}"/ >
 					</#list>
@@ -69,7 +67,6 @@
 						</@f.select>
 					</@bs3form.labelled_form_group>
 
-				<#-- file upload (TAB-359) -->
 					<#assign fileTypes=command.attachmentTypes />
 					<@bs3form.filewidget basename="file" types=fileTypes />
 
@@ -80,7 +77,7 @@
 					<#if isIframe!false>
 						<input type="hidden" name="modal" value="true" />
 					<#else>
-					<#-- separate page, not modal -->
+						<#-- separate page, not modal -->
 						<div class="form-actions">
 							<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 								Submit for approval
@@ -92,9 +89,8 @@
 			</#if>
 
 			<#if isIframe!false>
-			</div> <#--container -->
+				</div> <#--container -->
 			</#if>
-
 		</@modal.wrapper>
 	</#if>
 <script>
