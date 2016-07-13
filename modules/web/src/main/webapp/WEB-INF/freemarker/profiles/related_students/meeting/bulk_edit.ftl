@@ -36,10 +36,6 @@
 					</@modal.footer>
 			<#else>
 				<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" commandName="command" class="double-submit-protection">
-					<#list studentList as student>
-						<input  type = "hidden" name="studentCourseDetails11"  value = "${student.urlSafeId}"/ >
-					</#list>
-
 					<@bs3form.labelled_form_group path="title" labelText="Title">
 						<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />
 					</@bs3form.labelled_form_group>

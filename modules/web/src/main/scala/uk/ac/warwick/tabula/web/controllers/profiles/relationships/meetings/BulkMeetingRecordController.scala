@@ -27,16 +27,12 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 	): Seq[StudentRelationship] = {
 		benchmarkTask("Get StudentRelationships") {
 			studentCourseDetails.asScala.flatMap { studentCourse =>
-				val allRelationShips = relationshipService.findCurrentRelationships(mandatory(relationshipType), studentCourse)
-				chosenStudentRelationship(allRelationShips)
+				relationshipService.getCurrentRelationship(relationshipType, studentCourse.student, currentMember)
 			}
 		}
 	}
 
 
-	private def chosenStudentRelationship(studentRelationShips: Seq[StudentRelationship]): Option[StudentRelationship] = {
-		studentRelationShips.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
-	}
 
 	@ModelAttribute("command")
 	def getCommand(

@@ -86,7 +86,7 @@ trait BulkMeetingRecordDescription extends Describable[Seq[MeetingRecord]] {
 
 	override def describeResult(d: Description, meetings: Seq[MeetingRecord]) {
 		d.property("meetingTitle" -> meetings.head.title)
-		d.property("meeting" -> meetings.map(_.id))
+		d.property("meetings" -> meetings.map(_.id))
 		d.fileAttachments(meetings.flatMap(_.attachments.asScala))
 	}
 }
