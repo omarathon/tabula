@@ -3,7 +3,7 @@
 
 <#escape x as x?html>
 	<#if studentCourseDetails?has_content>
-		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap/>
+		<@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap showSelectStudents=true/>
 		<div id="meeting-modal" class="modal fade"></div>
 		<div class="submit-buttons fix-footer">
 			<section class="meetings">

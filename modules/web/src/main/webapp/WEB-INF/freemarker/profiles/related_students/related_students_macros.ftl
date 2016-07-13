@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="">
+<#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="" showSelectStudents=false>
 	<#if studentCourseDetails?has_content>
 		<#assign courseDetails=studentCourseDetails.urlSafeId>
 	<#else>
@@ -8,7 +8,9 @@
 	</#if>
 
 	<tr class="related_student">
-		<td><input class="collection-checkbox" type="checkbox" name="students" data-fullname="${student.fullName}" value="${student.universityId}"  data-student-course-details ="${courseDetails}" /></td>
+		<#if showSelectStudents>
+			<td><input class="collection-checkbox" type="checkbox" name="students" data-fullname="${student.fullName}" value="${student.universityId}"  data-student-course-details ="${courseDetails}" /></td>
+		</#if>
 		<td>
 			<@fmt.member_photo student "tinythumbnail" />
 		</td>
@@ -42,16 +44,18 @@
 	</tr>
 </#macro>
 
-<#macro tableWithMeetingsColumn items meetingsMap>
-	<@table items=items showMeetings=true meetingsMap=meetingsMap />
+<#macro tableWithMeetingsColumn items meetingsMap showSelectStudents>
+	<@table items=items showMeetings=true meetingsMap=meetingsMap showSelectStudents=showSelectStudents/>
 </#macro>
 <#-- Print out a table of students/agents.-->
-<#macro table items showMeetings=false meetingsMap="">
+<#macro table items showMeetings=false meetingsMap="" showSelectStudents=false>
 	<table class="related_students student-list table table-striped table-condensed">
 		<thead>
 			<tr>
 			<tr>
-				<th class ="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
+				<#if showSelectStudents>
+					<th class ="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
+				</#if>
 				<th class="photo-col">Photo</th>
 				<th class="student-col">First name</th>
 				<th class="student-col">Last name</th>
@@ -65,7 +69,7 @@
 		<tbody>
 			<#list items as item>
 				<#if item.scjCode??>
-					<@row item.student item showMeetings=showMeetings meetingsMap[item.student.universityId]/>
+					<@row item.student item showMeetings=showMeetings meetingsMap[item.student.universityId] showSelectStudents=showSelectStudents/>
 				<#else>
 					<@row item />
 				</#if>
@@ -90,14 +94,38 @@
 					type: 'numeric'
 				});
 
-				$(function() {
-					$('.related_students').tablesorter({
-						sortList: [[3,0], [5,0], [6,0]],
-						headers: {
+				var tableSorterSortList = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return [[3,0], [5,0], [6,0]];
+					}
+					return [[2,0], [4,0], [5,0]];
+				};
+				var tableSorterHeaders = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return {
 							8:{sorter: 'customdate'},
 							0:{sorter:false}
-						},
-						sortForce: [[3,0]]
+						};
+					}
+					return { 7:{sorter: 'customdate'} };
+				};
+
+				var tableSorterForce = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return [[3,0]];
+					}
+					return [[2,0]];
+				};
+				$(function() {
+					var showSelectStudentCheckBox = false;
+					if($(".collection-check-all").length) {
+						showSelectStudentCheckBox = true;
+					}
+
+					$('.related_students').tablesorter({
+						sortList: tableSorterSortList(showSelectStudentCheckBox),
+						headers: tableSorterHeaders(showSelectStudentCheckBox),
+						sortForce: tableSorterForce(showSelectStudentCheckBox)
 					});
 
 					$('.related_student').on('mouseover', function(e) {
