@@ -272,7 +272,7 @@
 				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
-			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', function(data) {
+			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', {ts: new Date().getTime()}, function(data) {
 				jQuery.each(data.students, function(i, val) {
 					var groupId = val[0];
 					var userIds = val[1];
