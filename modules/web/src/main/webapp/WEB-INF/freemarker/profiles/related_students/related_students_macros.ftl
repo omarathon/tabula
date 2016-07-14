@@ -117,11 +117,7 @@
 					return [[2,0]];
 				};
 				$(function() {
-					var showSelectStudentCheckBox = false;
-					if($(".collection-check-all").length) {
-						showSelectStudentCheckBox = true;
-					}
-
+					var showSelectStudentCheckBox = !!$(".collection-check-all").length;
 					$('.related_students').tablesorter({
 						sortList: tableSorterSortList(showSelectStudentCheckBox),
 						headers: tableSorterHeaders(showSelectStudentCheckBox),
@@ -133,7 +129,7 @@
 					}).on('mouseout', function(e) {
 						$(this).find('td').removeClass('hover');
 					}).on('click', function(e) {
-						if (!$(e.target).is('a') && !$(e.target).is('img') && !$(e.target).is('input')) {
+						if (!$(e.target).is('a') && !$(e.target).is('img') && !$(e.target).is('input.collection-checkbox:checkbox')) {
 							window.location = $(this).find('a.profile-link').attr('href');
 						}
 					});

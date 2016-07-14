@@ -95,7 +95,7 @@
 			$(this).closest("li.attachment").remove();
 			return false;
 		});
-		$("a.studentList").click(function() {
+		$("a.studentList").on("click", function() {
 			var $studentList = $("div.studentList");
 			var $selectedStudents = $("input.collection-checkbox:checked");
 			if($studentList.hasClass("hide")) {
@@ -105,11 +105,11 @@
 					$studentList.append('<div><span>' + $selectedStudent.data("fullname") + '</span><div>');
 				});
 				$studentList.removeClass("hide");
-				$("a.studentList").prop("text", "Hide");
+				$("a.studentList").text("Hide");
 				$studentList.slideDown();
 			} else {
 				$studentList.addClass("hide");
-				$("a.studentList").prop("text", "Show");
+				$("a.studentList").text("text", "Show");
 				$studentList.slideUp("fast");
 			}
 			return false;
