@@ -82,6 +82,8 @@ trait SmallGroupService {
 	def doesTimetableClashesForStudent(smallGroup: SmallGroup, student: User): Boolean
 
 	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -368,6 +370,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData] =
 		smallGroupDao.listSmallGroupEventsForReport(department, academicYear)
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData] =
+		smallGroupDao.listMemberDataForAllocation(members, academicYear)
 }
 
 trait SmallGroupMembershipHelpers {

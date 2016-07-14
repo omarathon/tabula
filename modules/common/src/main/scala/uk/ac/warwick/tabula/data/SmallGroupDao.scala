@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Department, Location, Module, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
@@ -36,6 +36,12 @@ case class SmallGroupEventReportData(
 	size: Int,
 	weeks: String,
 	staff: String
+)
+
+case class MemberAllocationData(
+	routeCode: String,
+	routeName: String,
+	yearOfStudy: Int
 )
 
 trait SmallGroupDao {
@@ -86,6 +92,8 @@ trait SmallGroupDao {
 	def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance]
 
 	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 }
 
 @Repository
@@ -420,6 +428,31 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			staff = tutors.getOrElse(objArray(0).asInstanceOf[String], Seq()).map(u => s"${u.getFullName} (${u.getUserId})").mkString(", ")
 		))
 
+	}
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData] = {
+		val data = safeInSeqWithProjection[Member, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[Member]
+					.createAlias("mostSignificantCourse", "course")
+					.createAlias("course.currentRoute", "route")
+					.createAlias("course.studentCourseYearDetails", "studentCourseYearDetails")
+					.add(is("studentCourseYearDetails.academicYear", academicYear))
+			},
+			Projections.projectionList()
+				.add(Projections.property("universityId"))
+				.add(Projections.property("route.code"))
+				.add(Projections.property("route.name"))
+				.add(Projections.property("studentCourseYearDetails.yearOfStudy"))
+			,
+			"universityId",
+			members.map(_.universityId)
+		).seq.map(objArray => objArray(0).asInstanceOf[String] -> MemberAllocationData(
+			routeCode = objArray(1).asInstanceOf[String],
+			routeName = objArray(2).asInstanceOf[String],
+			yearOfStudy = objArray(3).asInstanceOf[Int]
+		)).toMap
+		members.map(member => member -> data.getOrElse(member.universityId, MemberAllocationData("", "", 0))).toMap
 	}
 
 }
