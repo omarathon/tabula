@@ -31,6 +31,7 @@ trait MeetingRecordService {
 	def getAcademicYear(meeting: AbstractMeetingRecord)(implicit termService: TermService): Option[AcademicYear]
 	def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear]
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
+	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
 }
 
 
@@ -61,6 +62,8 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
   def getAcademicYear(id: String)(implicit termService: TermService): Option[AcademicYear] = Option(id).flatMap(get).flatMap(getAcademicYear)
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit =
 		meetingRecordDao.migrate(from, to)
+	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int] =
+		meetingRecordDao.unconfirmedScheduledCount(relationships)
 }
 
 @Service("meetingRecordService")
