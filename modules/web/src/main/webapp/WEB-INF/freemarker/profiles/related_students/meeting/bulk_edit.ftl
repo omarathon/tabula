@@ -109,7 +109,7 @@
 				$studentList.slideDown();
 			} else {
 				$studentList.addClass("hide");
-				$("a.studentList").text("text", "Show");
+				$("a.studentList").text("Show");
 				$studentList.slideUp("fast");
 			}
 			return false;
