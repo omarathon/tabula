@@ -43,14 +43,9 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="all" target="1.8" />
-      <module name="api" target="1.5" />
-      <module name="attendance" target="1.8" />
-      <module name="common" target="1.5" />
-      <module name="courses" target="1.8" />
-      <module name="functional-test" target="1.5" />
-      <module name="profiles" target="1.8" />
-      <module name="scheduling" target="1.8" />
+      <module name="api" target="1.8" />
+      <module name="common" target="1.8" />
+      <module name="functional-test" target="1.8" />
       <module name="tabula-project" target="1.8" />
       <module name="web" target="1.8" />
     </bytecodeTargetLevel>
