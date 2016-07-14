@@ -35,6 +35,26 @@
 		<@f.input path="location" cssClass="form-control" />
 	</@bs3form.labelled_form_group>
 
+	<#assign moreDetailsHelpText>
+		<p>An optional 'More Details' link to the specified webpage from the student's timetable.</p>
+	</#assign>
+	<#assign moreDetailsLabel>
+		Link <@fmt.help_popover id="linkHelp" content="${moreDetailsHelpText}" html=true />
+	</#assign>
+	<@bs3form.labelled_form_group path="relatedUrl" labelText=moreDetailsLabel>
+		<@f.input path="relatedUrl" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
+
+	<#assign moreDetailsLinkTextHelpText>
+		<p>If a More Details link is specified, you can also specify the link text for the link that is generated.</p>
+	</#assign>
+	<#assign moreDetailsLinkTextLabel>
+		Link text <@fmt.help_popover id="linkHelp" content="${moreDetailsLinkTextHelpText}" html=true />
+	</#assign>
+	<@bs3form.labelled_form_group path="relatedUrlTitle" labelText=moreDetailsLinkTextLabel>
+		<@f.input path="relatedUrlTitle" cssClass="form-control" />
+	</@bs3form.labelled_form_group>
+
 	<style type="text/css">
 		<#-- Hide the confusing dates in the header of the time picker -->
 		.datetimepicker-hours thead i { display: none !important; }

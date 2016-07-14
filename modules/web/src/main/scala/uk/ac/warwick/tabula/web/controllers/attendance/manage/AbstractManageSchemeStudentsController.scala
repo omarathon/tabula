@@ -5,12 +5,12 @@ import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
+import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 import scala.collection.JavaConverters._
 
@@ -170,11 +170,23 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
+	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.resetFilter))
+	def resetFilter(
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+		@PathVariable scheme: AttendanceMonitoringScheme
+	) = {
+		findCommand.deserializeFilter("")
+		findCommand.staticStudentIds.clear()
+		val editMembershipCommandResult = editMembershipCommand.apply()
+		render(scheme, FindStudentsForSchemeCommandResult(findCommand.staticStudentIds, Seq()), editMembershipCommandResult, expandFind = true)
+	}
+
 	@RequestMapping(method = Array(POST), params = Array("persist"))
 	def save(
 		@Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
 		errors: Errors,
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
 	) = {

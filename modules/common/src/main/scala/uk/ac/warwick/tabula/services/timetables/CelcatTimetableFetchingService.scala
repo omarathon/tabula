@@ -199,7 +199,8 @@ object CelcatHttpTimetableFetchingService {
 				parent = TimetableEvent.Parent(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
 				staff = staff,
 				students = Nil,
-				year = year
+				year = year,
+				relatedUrl = None
 			))
 		}
 	}
@@ -375,7 +376,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.comments,
 					event.staff,
 					event.students,
-					event.year
+					event.year,
+					event.relatedUrl
 				)
 		}}.toList
 	}

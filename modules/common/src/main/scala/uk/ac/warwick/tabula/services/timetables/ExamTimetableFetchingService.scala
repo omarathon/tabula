@@ -2,27 +2,26 @@ package uk.ac.warwick.tabula.services.timetables
 
 import dispatch.classic.url
 import org.apache.commons.codec.digest.DigestUtils
-import org.joda.time.{DateTime, Period}
 import org.joda.time.format.{DateTimeFormat, PeriodFormatterBuilder}
+import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.trusted.TrustedApplicationUtils
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.Futures._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
-import scala.xml.Elem
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.profiles.web.Routes
-
 import scala.util.Try
+import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
 	val examTimetableUrl: String
@@ -141,7 +140,8 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
 				parent = TimetableEvent.Parent(),
 				staff = Nil,
 				students = Nil,
-				year = timetableExam.academicYear
+				year = timetableExam.academicYear,
+				relatedUrl = None
 			)
 		})
 	}

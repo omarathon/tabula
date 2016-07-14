@@ -4,6 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence._
 
 import org.hibernate.annotations.Type
+import org.hibernate.validator.constraints.URL
 import org.joda.time.LocalTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ToString
@@ -67,6 +68,10 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	var location: Location = _
 
 	var title: String = _
+
+	@URL
+	var relatedUrl: String = _
+	var relatedUrlTitle: String = _
 
 	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek

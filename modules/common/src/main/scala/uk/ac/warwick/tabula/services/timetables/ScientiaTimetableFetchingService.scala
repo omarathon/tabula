@@ -240,7 +240,8 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 				students = userLookup.getUsersByWarwickUniIds((activity \\ "student") map {
 					_.text
 				}).values.collect { case FoundUser(u) => u }.toSeq,
-				year = year
+				year = year,
+				relatedUrl = None
 			)
 		}
 	}

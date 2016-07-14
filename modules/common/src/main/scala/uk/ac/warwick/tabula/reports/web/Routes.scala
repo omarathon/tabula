@@ -37,6 +37,8 @@ object Routes {
 			context + "/%s/%s/groups/missed" format(encoded(department.code), encoded(academicYear.startYear.toString))
 		def missedByModule(department: Department, academicYear: AcademicYear) =
 			context + "/%s/%s/groups/missed/bymodule" format(encoded(department.code), encoded(academicYear.startYear.toString))
+		def events(department: Department, academicYear: AcademicYear) =
+			context + "/%s/%s/groups/events" format(encoded(department.code), encoded(academicYear.startYear.toString))
 	}
 
 	object Profiles {

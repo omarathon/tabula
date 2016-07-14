@@ -29,10 +29,12 @@ class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
 	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
 	override def applyInternal() = {
+		val previousUniversityIds = scheme.members.members
+
 		attendanceMonitoringService.deleteScheme(scheme)
 
 		generateNotifications(Seq(scheme))
-		updateCheckpointTotals(scheme)
+		updateCheckpointTotals(previousUniversityIds, scheme.department, scheme.academicYear)
 
 		scheme
 	}

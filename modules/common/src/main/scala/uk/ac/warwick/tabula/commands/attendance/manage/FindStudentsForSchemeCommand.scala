@@ -99,7 +99,7 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 			doFind = true
 		}
 		// Default to current students
-		if (filterQueryString == null || filterQueryString.size == 0)
+		if (filterQueryString == null || filterQueryString.length == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
 		else
 			deserializeFilter(filterQueryString)
@@ -115,7 +115,7 @@ trait UpdatesFindStudentsForSchemeCommand {
 		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
 		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
 		// Default to current students
-		if (filterQueryString == null || filterQueryString.size == 0)
+		if (filterQueryString == null || filterQueryString.length == 0)
 			allSprStatuses.find(_.code == "C").map(sprStatuses.add)
 		else
 			deserializeFilter(filterQueryString)
@@ -159,7 +159,7 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
-	lazy val outOfDepartmentRoutes = routes.asScala.toSeq.diff(allRoutes)
+	lazy val outOfDepartmentRoutes = routes.asScala.diff(allRoutes)
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
