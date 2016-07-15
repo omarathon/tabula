@@ -158,17 +158,21 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 
 	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = {
-		val groups =
-			studentGroupHelper.findBy(user)
-				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
-
-		val linkedGroups =
-			departmentStudentGroupHelper.findBy(user)
-				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
-				.flatMap { _.linkedGroups.asScala }
-				.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
-
-		(groups ++ linkedGroups).distinct
+		benchmarkTask("findSmallGroupsByStudent") {
+			val groups = benchmarkTask("studentGroupHelper") {
+				studentGroupHelper.findBy(user)
+					.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+			}
+			val linkedGroups = benchmarkTask("departmentStudentGroupHelper") {
+				departmentStudentGroupHelper.findBy(user)
+					.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+					.flatMap {
+						_.linkedGroups.asScala
+					}
+					.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
+			}
+			(groups ++ linkedGroups).distinct
+		}
 	}
 
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false) {
