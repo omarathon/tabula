@@ -18,13 +18,14 @@
 		<#local profile = membersById[student.warwickId]!{} />
 		<li class="student well well-sm"
 			data-f-gender="${(profile.gender.dbValue)!}"
-			data-f-route="${(profile.mostSignificantCourseDetails.currentRoute.code)!}"
-			data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
+			data-f-route="${(mapGet(command.memberAllocationData, profile).routeCode)!}"
+			data-f-year="${(mapGet(command.memberAllocationData, profile).yearOfStudy)!}"
+		>
 			<div class="profile clearfix">
 				<@fmt.member_photo profile "tinythumbnail" false />
 				<div class="name">
 					<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student.warwickId! /></h6>
-				${(profile.mostSignificantCourseDetails.currentRoute.name)!student.shortDepartment!""}
+					${(mapGet(command.memberAllocationData, profile).routeName)!student.shortDepartment!""}
 				</div>
 			</div>
 			<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -123,16 +124,16 @@
 												<div class="filter" id="filter-by-year-controls">
 													<select data-filter-attr="fYear" class="form-control">
 														<option data-filter-value="*">Any Year of study</option>
-														<#list command.allMembersYears as year>
-															<option data-filter-value="${year}">Year ${year}</option>
+														<#list command.allMembersYears as data>
+															<option data-filter-value="${data.yearOfStudy}">Year ${data.yearOfStudy}</option>
 														</#list>
 													</select>
 												</div>
 												<div class="filter" id="filter-by-route-controls">
 													<select data-filter-attr="fRoute" class="form-control">
 														<option data-filter-value="*">Any Route</option>
-														<#list command.allMembersRoutes as route>
-															<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
+														<#list command.allMembersRoutes as data>
+															<option data-filter-value="${data.routeCode}"><@fmt.route_name route="" routeCode=data.routeCode routeName=data.routeName /></option>
 														</#list>
 													</select>
 												</div>
@@ -272,7 +273,7 @@
 				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
-			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', function(data) {
+			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', {ts: new Date().getTime()}, function(data) {
 				jQuery.each(data.students, function(i, val) {
 					var groupId = val[0];
 					var userIds = val[1];

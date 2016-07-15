@@ -45,8 +45,7 @@ abstract class TermBasedEventOccurrenceService extends EventOccurrenceService {
 				event.parent,
 				event.comments,
 				event.staff,
-				event.relatedUrl,
-				event.relatedUrlTitle
+				event.relatedUrl
 			)
 		}
 

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{AssessmentMembershipDao, AssessmentMembershipDaoComponent, AutowiringAssessmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, TaskBenchmarking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.{DateTime, LocalDateTime}
+
 import scala.collection.JavaConverters._
 
 trait SmallGroupServiceComponent {
@@ -79,6 +80,10 @@ trait SmallGroupService {
 	def findTodaysEventOccurrences(tutors: Seq[User], modules: Seq[Module], departments: Seq[Department]): Seq[SmallGroupEventOccurrence]
 	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(SmallGroup, Seq[User])]
 	def doesTimetableClashesForStudent(smallGroup: SmallGroup, student: User): Boolean
+
+	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -362,6 +367,12 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			}
 		}
 	}
+
+	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData] =
+		smallGroupDao.listSmallGroupEventsForReport(department, academicYear)
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData] =
+		smallGroupDao.listMemberDataForAllocation(members, academicYear)
 }
 
 trait SmallGroupMembershipHelpers {

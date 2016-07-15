@@ -5,27 +5,12 @@ import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Location}
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.userlookup.User
 
-case class TimetableEvent(
-	uid: String,
-	name: String,
-  title: String,
-	description: String,
-	eventType: TimetableEventType,
-	weekRanges: Seq[WeekRange],
-	day: DayOfWeek,
-	startTime: LocalTime,
-	endTime: LocalTime,
-	location: Option[Location],
-	parent: TimetableEvent.Parent,
-	comments: Option[String],
-	staff: Seq[User],
-	students: Seq[User],
-	year: AcademicYear,
-	relatedUrl: String,
-	relatedUrlTitle: String
-)
+case class TimetableEvent(uid: String, name: String, title: String, description: String, eventType: TimetableEventType, weekRanges: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], parent: Parent, comments: Option[String], staff: Seq[User], students: Seq[User], year: AcademicYear, relatedUrl: Option[RelatedUrl])
+
+case class RelatedUrl(urlString: String, title: Option[String])
 
 object TimetableEvent {
 
@@ -74,8 +59,7 @@ object TimetableEvent {
 			staff = sge.tutors.users,
 			students = sge.group.students.users,
 			year = sge.group.groupSet.academicYear,
-			relatedUrl = sge.relatedUrl,
-			relatedUrlTitle = sge.relatedUrlTitle
+			relatedUrl = Option(RelatedUrl(sge.relatedUrl, Option(sge.relatedUrlTitle)))
 		)
 
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = sgf match {
@@ -139,8 +123,7 @@ case class EventOccurrence(
 	parent: TimetableEvent.Parent,
 	comments: Option[String],
 	staff: Seq[User],
-	relatedUrl: String = "",
-	relatedUrlTitle: String = ""
+	relatedUrl: Option[RelatedUrl]
 )
 
 object EventOccurrence {
@@ -157,8 +140,7 @@ object EventOccurrence {
 			TimetableEvent.Parent(),
 			None,
 			Nil,
-			"",
-			""
+			None
 		)
 	}
 }

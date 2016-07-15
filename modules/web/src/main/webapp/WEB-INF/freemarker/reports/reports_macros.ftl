@@ -1,21 +1,24 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#macro reportLoader reportUrl commandName="command">
+<#macro reportLoader reportUrl commandName="command" hasDatePicker=true>
 	<script>
 		window.ReportBuilder = {};
+		window.ReportBuilder.rowKey = 'students';
 	</script>
-	<@f.form method="get" action="" commandName="${commandName}" cssClass="form-inline double-submit-protection">
-		<div class="form-group">
-			<label>Start date</label>
-			<@f.input id="startDate" path="startDate" cssClass="date-picker input-small form-control" />
-		</div>
-		<div class="form-group">
-			<label>End date</label>
-			<@f.input id="endDate" path="endDate" cssClass="date-picker input-small form-control" />
-		</div>
-		<div class="form-group">
-			<button type="submit" class="btn btn-default">Submit</button>
-		</div>
-	</@f.form>
+	<#if hasDatePicker>
+		<@f.form method="get" action="" commandName="${commandName}" cssClass="form-inline double-submit-protection">
+			<div class="form-group">
+				<label>Start date</label>
+				<@f.input id="startDate" path="startDate" cssClass="date-picker input-small form-control" />
+			</div>
+			<div class="form-group">
+				<label>End date</label>
+				<@f.input id="endDate" path="endDate" cssClass="date-picker input-small form-control" />
+			</div>
+			<div class="form-group">
+				<button type="submit" class="btn btn-default">Submit</button>
+			</div>
+		</@f.form>
+	</#if>
 	<div class="loading">
 		<p><em>Building report&hellip;</em></p>
 
@@ -55,10 +58,12 @@
 		jQuery(function($){
 			$.ajax('${reportUrl}', {
 				type: 'POST',
-				data: {
-					'startDate' : $('#startDate').val(),
-					'endDate' : $('#endDate').val()
-				},
+				<#if hasDatePicker>
+					data: {
+						'startDate' : $('#startDate').val(),
+						'endDate' : $('#endDate').val()
+					},
+				</#if>
 				success: function(data) {
 					clearTimeout(progressStepperTimeout);
 					var $mainContent = $('.id7-main-content');
@@ -92,7 +97,7 @@
 								})
 								.append($('<thead/>').append(window.ReportBuilder.buildHeader()));
 
-							var rows = $.map(window.ReportBuilder.reportData.students, function(student) {
+							var rows = $.map(window.ReportBuilder.reportData[window.ReportBuilder.rowKey], function(student) {
 								return window.ReportBuilder.buildRow(student);
 							});
 							table.append($('<tbody />').append(rows));
@@ -102,7 +107,16 @@
 							}
 
 							$('.report-target').append(table);
-							table.sortableTable();
+							table.sortableTable({
+								textExtraction: function(node) {
+									var $el = $(node);
+									if ($el.data('sortby')) {
+										return $el.data('sortby');
+									} else {
+										return $el.text().trim();
+									}
+								}
+							});
 							$(window).trigger('load'); // Wrap the wide table
 
 							$('th.rotated').each(function() {

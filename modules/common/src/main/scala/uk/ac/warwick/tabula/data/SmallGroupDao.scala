@@ -1,14 +1,19 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
+import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.{Order, Projections}
+import org.hibernate.sql.JoinType
+import org.joda.time.LocalTime
+import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
-import org.hibernate.criterion.{Order, Projections}
-import org.hibernate.criterion.Restrictions._
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -19,6 +24,25 @@ trait SmallGroupDaoComponent {
 trait AutowiringSmallGroupDaoComponent extends SmallGroupDaoComponent {
 	val smallGroupDao = Wire[SmallGroupDao]
 }
+
+case class SmallGroupEventReportData(
+	departmentName: String,
+	eventName: String,
+	moduleTitle: String,
+	day: String,
+	start: String,
+	finish: String,
+	location: String,
+	size: Int,
+	weeks: String,
+	staff: String
+)
+
+case class MemberAllocationData(
+	routeCode: String,
+	routeName: String,
+	yearOfStudy: Int
+)
 
 trait SmallGroupDao {
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet]
@@ -66,10 +90,16 @@ trait SmallGroupDao {
 	def delete(occurrence: SmallGroupEventOccurrence)
 
 	def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance]
+
+	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 }
 
 @Repository
-class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
+class SmallGroupDaoImpl extends SmallGroupDao
+	with Daoisms with TaskBenchmarking with AutowiringUserLookupComponent {
+
 	import Order._
 
 	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
@@ -277,5 +307,152 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("universityId", studentId))
 			.add(is("state", AttendanceState.Attended))
 			.seq
+
+	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData] = {
+		// First get all the IDs
+		val eventIDs = benchmarkTask("eventIDs") {
+			session.newCriteria[SmallGroupEvent]
+				.createAlias("group", "group")
+				.createAlias("group.groupSet", "groupSet")
+				.createAlias("groupSet.module", "module")
+				.add(is("module.adminDepartment", department))
+				.add(is("groupSet.academicYear", academicYear))
+				.project[Array[java.lang.Object]](Projections.projectionList()
+					.add(Projections.property("id"))
+					.add(Projections.property("group.id"))
+				).seq
+				.map(array => (array(0).asInstanceOf[String], array(1).asInstanceOf[String]))
+		}
+
+		// Now get the non-linked group sizes
+		val nonLinkedGroupSizes: Map[String, Int] = benchmarkTask("nonLinkedGroupSizes") {
+			safeInSeqWithProjection[SmallGroup, Array[java.lang.Object]](
+				() => {
+					session.newCriteria[SmallGroup]
+						.createAlias("_studentsGroup", "usergroup")
+						.createAlias("usergroup.includeUsers", "users")
+						.add(isNull("linkedDepartmentSmallGroup"))
+				},
+				Projections.projectionList()
+					.add(Projections.groupProperty("id"))
+					.add(Projections.count("id")),
+				"id",
+				eventIDs.map(_._2)
+			).seq
+			.map(objArray => (objArray(0).asInstanceOf[String], objArray(1).asInstanceOf[Long].toInt)).toMap
+		}
+
+		// Now get the linked group sizes
+		val linkedGroupSizes: Map[String, Int] = benchmarkTask("linkedGroupSizes") {
+			safeInSeqWithProjection[SmallGroup, Array[java.lang.Object]](
+				() => {
+					session.newCriteria[SmallGroup]
+						.createAlias("linkedDepartmentSmallGroup", "linkedGroup")
+						.createAlias("linkedGroup._studentsGroup", "usergroup")
+						.createAlias("usergroup.includeUsers", "users")
+				},
+				Projections.projectionList()
+					.add(Projections.groupProperty("id"))
+					.add(Projections.count("id")),
+				"id",
+				eventIDs.map(_._2)
+			).seq
+			.map(objArray => (objArray(0).asInstanceOf[String], objArray(1).asInstanceOf[Long].toInt)).toMap
+		}
+
+		// Now get the tutors for each event
+		val tutors: Map[String, Seq[User]] = benchmarkTask("tutors") {
+			safeInSeqWithProjection[SmallGroupEvent, Array[java.lang.Object]](
+				() => {
+					session.newCriteria[SmallGroupEvent]
+						.createAlias("_tutors", "usergroup")
+						.createAlias("usergroup.includeUsers", "users")
+				},
+				Projections.projectionList()
+					.add(Projections.property("id"))
+					.add(Projections.property("users.elements")),
+				"id",
+				eventIDs.map(_._1)
+			).seq
+			.map(objArray => (objArray(0).asInstanceOf[String], userLookup.getUserByUserId(objArray(1).asInstanceOf[String])))
+			.groupBy(_._1).mapValues(_.map(_._2))
+		}
+
+		// Now get the data and mix in the group sizes and tutors
+		safeInSeqWithProjection[SmallGroupEvent, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[SmallGroupEvent]
+					.createAlias("group", "group")
+					.createAlias("group.groupSet", "groupSet")
+					.createAlias("groupSet.module", "module")
+					.createAlias("group.linkedDepartmentSmallGroup", "linkedGroup", JoinType.LEFT_OUTER_JOIN)
+					.add(is("module.adminDepartment", department))
+					.add(is("groupSet.academicYear", academicYear))
+			},
+			Projections.projectionList()
+				.add(Projections.property("id"))
+				.add(Projections.property("group.id"))
+				.add(Projections.property("groupSet.name"))
+				.add(Projections.property("group.uk$ac$warwick$tabula$data$model$groups$SmallGroup$$_name")) // Fuck you Hibernate
+				.add(Projections.property("linkedGroup.name")) // Fuck you Hibernate
+				.add(Projections.property("title"))
+				.add(Projections.property("module.name"))
+				.add(Projections.property("day"))
+				.add(Projections.property("startTime"))
+				.add(Projections.property("endTime"))
+				.add(Projections.property("location"))
+				.add(Projections.property("weekRanges"))
+			,
+			"id",
+			eventIDs.map(_._1)
+		).seq.map(objArray => SmallGroupEventReportData(
+			departmentName = department.name,
+			eventName = Seq(
+				Option(objArray(2).asInstanceOf[String]),
+				Seq(Option(objArray(4).asInstanceOf[String]), Option(objArray(3).asInstanceOf[String])).flatten.headOption,
+				Option(objArray(5).asInstanceOf[String])
+			).flatten.mkString(" - "),
+			moduleTitle = objArray(6).asInstanceOf[String],
+			day = Option(objArray(7)).map(_.asInstanceOf[DayOfWeek].getName).getOrElse(""),
+			start = Option(objArray(8)).map(_.asInstanceOf[LocalTime].toString("HH:mm")).getOrElse(""),
+			finish = Option(objArray(9)).map(_.asInstanceOf[LocalTime].toString("HH:mm")).getOrElse(""),
+			location = Option(objArray(10)).map(_.asInstanceOf[Location].name).getOrElse(""),
+			size = linkedGroupSizes.getOrElse(
+				objArray(1).asInstanceOf[String],
+				nonLinkedGroupSizes.getOrElse(
+					objArray(1).asInstanceOf[String],
+					0
+				)
+			),
+			weeks = Option(objArray(11)).map(_.asInstanceOf[Seq[WeekRange]].mkString(", ")).getOrElse(""),
+			staff = tutors.getOrElse(objArray(0).asInstanceOf[String], Seq()).map(u => s"${u.getFullName} (${u.getUserId})").mkString(", ")
+		))
+
+	}
+
+	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData] = {
+		val data = safeInSeqWithProjection[Member, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[Member]
+					.createAlias("mostSignificantCourse", "course")
+					.createAlias("course.currentRoute", "route")
+					.createAlias("course.studentCourseYearDetails", "studentCourseYearDetails")
+					.add(is("studentCourseYearDetails.academicYear", academicYear))
+			},
+			Projections.projectionList()
+				.add(Projections.property("universityId"))
+				.add(Projections.property("route.code"))
+				.add(Projections.property("route.name"))
+				.add(Projections.property("studentCourseYearDetails.yearOfStudy"))
+			,
+			"universityId",
+			members.map(_.universityId)
+		).seq.map(objArray => objArray(0).asInstanceOf[String] -> MemberAllocationData(
+			routeCode = objArray(1).asInstanceOf[String],
+			routeName = objArray(2).asInstanceOf[String],
+			yearOfStudy = objArray(3).asInstanceOf[Int]
+		)).toMap
+		members.map(member => member -> data.getOrElse(member.universityId, MemberAllocationData("", "", 0))).toMap
+	}
 
 }

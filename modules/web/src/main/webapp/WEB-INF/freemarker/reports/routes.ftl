@@ -56,6 +56,11 @@
 <#macro missedSmallGroupsByModuleDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xlsx" /></#macro>
 <#macro missedSmallGroupsByModuleDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/missed/bymodule/download.xml" /></#macro>
 
+<#macro events department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events" /></#macro>
+<#macro eventsDownloadCsv department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events/download.csv" /></#macro>
+<#macro eventsDownloadXlsx department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events/download.xlsx" /></#macro>
+<#macro eventsDownloadXml department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/groups/events/download.xml" /></#macro>
+
 <#macro profileExport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export" /></#macro>
 <#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
 <#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>

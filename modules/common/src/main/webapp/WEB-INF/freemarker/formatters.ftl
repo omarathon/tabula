@@ -164,11 +164,11 @@ preposition: Text to relate the title to the department name in the second line,
 	</a>
 </#macro>
 
-<#macro route_name route withFormatting=false>
+<#macro route_name route withFormatting=false routeCode=route.code routeName=route.name>
 	<#if withFormatting>
-		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
+		<span class="route-code">${routeCode?upper_case}</span> <span class="route-name">${routeName}</span>
 	<#else>
-		${route.code?upper_case} ${route.name}
+		${routeCode?upper_case} ${routeName}
 	</#if>
 </#macro>
 

@@ -200,8 +200,7 @@ object CelcatHttpTimetableFetchingService {
 				staff = staff,
 				students = Nil,
 				year = year,
-				relatedUrl = "",
-				relatedUrlTitle = ""
+				relatedUrl = None
 			))
 		}
 	}
@@ -378,8 +377,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 					event.staff,
 					event.students,
 					event.year,
-					event.relatedUrl,
-					event.relatedUrlTitle
+					event.relatedUrl
 				)
 		}}.toList
 	}

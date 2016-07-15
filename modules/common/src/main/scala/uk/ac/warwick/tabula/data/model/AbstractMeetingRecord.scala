@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
+import uk.ac.warwick.tabula.{DateFormats, ToString}
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -119,12 +120,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.asSsoUser }.toSeq
 				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
 			},
-			relatedUrl = Routes.Profile.relationshipType(
-				relationship.studentCourseDetails,
-				AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime),
-				relationship.relationshipType
-			),
-			relatedUrlTitle = "Meeting records"
+			relatedUrl = ???
 		))
 	}
 

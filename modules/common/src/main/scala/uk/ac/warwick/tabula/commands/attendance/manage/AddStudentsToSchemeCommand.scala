@@ -38,7 +38,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
 	override def applyInternal() = {
 		val previousUniversityIds = scheme.members.members
 
-		if (doFind && linkToSits && !scheme.academicYear.isSITSInFlux(DateTime.now)) {
+		if (linkToSits && !scheme.academicYear.isSITSInFlux(DateTime.now)) {
 			scheme.members.staticUserIds = staticStudentIds.asScala
 			scheme.members.includedUserIds = includedStudentIds.asScala
 			scheme.members.excludedUserIds = excludedStudentIds.asScala

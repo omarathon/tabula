@@ -350,7 +350,7 @@
 		<#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}'>View attendance note</a></p></#if>
 	</#local>
 	<span class="icon-stack icon-stack-original-size icon-stack-right icon-fixed-width use-popover" data-content="${popoverContent}" data-html="true">
-		<i class="use-popover icon-fixed-width icon-stack-base ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
+		<i class="icon-fixed-width icon-stack-base ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>" ></i>
 		<#if formatResult.noteUrl?has_content><i class="icon-fixed-width icon-stack-small icon-envelope-alt icon-filled-white"></i></#if>
 	</span>
 </#macro>

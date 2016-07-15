@@ -4,7 +4,7 @@
 (function ($) { 'use strict';
 
 	var exports = {};
-	
+
 	// Timetable calendar exports
 
 	function toTimestamp(now, then) {
@@ -22,14 +22,14 @@
 		}
 	}
 	exports.toTimestamp = toTimestamp;
-	
+
 	function onViewUpdate(view, weeks, $calendar){
 		updateCalendarTitle(view, weeks);
 		updateDownloadButton(view, $calendar);
 		$('.popover').hide();
 		$calendar.find('table').attr('role','presentation');
 	}
-	
+
 	function updateCalendarTitle(view, weeks){
 		if (view.name == 'agendaWeek') {
 			var start = view.start.getTime();
@@ -64,7 +64,7 @@
 			);
 		}
 	}
-	
+
 	function renderCalendarEvents(event, element) {
 		var content = "<table class='event-info'>";
 		if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
@@ -108,7 +108,7 @@
 		content = content + "</table>";
 		$(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content});
 	}
-	
+
 	exports.renderCalendarEvents = renderCalendarEvents;
 
 	function createCalendar(container, defaultViewName, weeks, eventsCallback, hasStartDate, year, month, date, defaultDate) {
@@ -298,7 +298,7 @@
 				.modal('show');
 			e.preventDefault();
 			e.stopPropagation();
-			
+
 		}).on('click', 'ul.dropdown-menu a:not(.edit)', function(e) {
 			// Bind click events for dropdown
 
@@ -337,9 +337,9 @@
 		});
 
 		// END OF MEMBER NOTE / EXTENUATING CIRCUMSTANCES STUFF
-		
+
 		// Add in People search data
-		
+
 		$('.peoplesearch-info').each(function(){
 			var $this = $(this);
 			$.getJSON($this.data('href'), function(data) {
@@ -355,7 +355,7 @@
 		});
 
 		// End Add in People search data
-		
+
 		// Meeting records
 
 		var $meetingModal = $("#meeting-modal");
@@ -421,7 +421,7 @@
 				}
 			});
 		}
-		
+
 		$('section.meetings').on('click', '.new-meeting-record, .edit-meeting-record', function(e){
 			var $this = $(this);
 			prepareMeetingModal($this, $this.attr('href'));
@@ -494,7 +494,7 @@
 		$('section.meetings .approval').parent().tabulaAjaxSubmit(function() {
 			document.location.reload(true);
 		});
-		
+
 		// End Meeting records
 
 		// Seminars
