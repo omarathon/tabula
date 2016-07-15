@@ -121,7 +121,7 @@ trait PermissionsCheckingMethods extends Logging {
 			throw new ItemNotFoundException(submission, "Not displaying file attachment as it doesn't belong to specified submission")
 		}
 
-	def mustBeLinked(memberNote: MemberNote, member: Member) =
+	def mustBeLinked(memberNote: AbstractMemberNote, member: Member) =
 		if (mandatory(memberNote).member.id != mandatory(member).id) {
 			logger.info("Not displaying member note as it doesn't belong to specified member")
 			throw new ItemNotFoundException(memberNote, "Not displaying member note as it doesn't belong to specified member")

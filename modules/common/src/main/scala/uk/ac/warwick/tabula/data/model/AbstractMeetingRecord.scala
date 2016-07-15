@@ -8,12 +8,15 @@ import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.TermService
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
-import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{DateFormats, ToString}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -39,6 +42,9 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
 
 	type Entity = AbstractMeetingRecord
+
+	@transient
+	implicit var termService = Wire[TermService]
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -74,6 +80,13 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 
+	def addAttachment(attachment: FileAttachment) {
+		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+		attachment.temporary = false
+		attachment.meetingRecord = this
+		attachments.add(attachment)
+	}
+
 	@RestrictionProvider("readPermissions")
 	var title: String = _
 
@@ -106,7 +119,14 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.asSsoUser }.toSeq
 				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
 			},
-			relatedUrl = None
+			relatedUrl = Some(RelatedUrl(
+				urlString = Routes.Profile.relationshipType(
+					relationship.studentCourseDetails,
+					AcademicYear.findAcademicYearContainingDate(meetingDate.toDateTime),
+					relationship.relationshipType
+				),
+				title = Some("Meeting records")
+			))
 		))
 	}
 

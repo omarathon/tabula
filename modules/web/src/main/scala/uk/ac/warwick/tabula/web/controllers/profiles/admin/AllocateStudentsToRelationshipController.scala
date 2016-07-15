@@ -6,14 +6,16 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, StudentAssociationResult}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
-import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
-import uk.ac.warwick.tabula.web.views.{JSONView, ExcelView}
+import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 
 @Controller
 @RequestMapping(value=Array("/profiles/department/{department}/{relationshipType}/allocate"))
 class AllocateStudentsToRelationshipController extends ProfilesController {
+
+	@ModelAttribute("activeDepartment")
+	def activeDepartment(@PathVariable department: Department) = department
 
 	@ModelAttribute("commandActions")
 	def commandActions = FetchDepartmentRelationshipInformationCommand.Actions

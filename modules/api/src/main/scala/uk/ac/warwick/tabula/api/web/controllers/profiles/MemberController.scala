@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.MemberToJsonConverter
-import uk.ac.warwick.tabula.commands.profiles.ViewProfileCommand
+import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONView}
 

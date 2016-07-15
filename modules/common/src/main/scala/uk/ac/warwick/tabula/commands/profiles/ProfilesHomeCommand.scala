@@ -50,7 +50,7 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 
 			// A map from each type to a boolean for whether the current member has downward relationships of that type
 			val relationshipTypesMap = benchmarkTask("Map relationship types to existing ones") { allRelationshipTypes.map { t =>
-				(t, downwardRelationshipTypes.exists(_ == t))
+				(t, downwardRelationshipTypes.contains(t))
 			}.toMap }
 
 			val adminDepartments = benchmarkTask("Get all departments with permissions to manage profiles") {

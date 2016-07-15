@@ -31,7 +31,7 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	def url: String = {
 		recipientRole match {
-			case UserRoleOnGroup.Student =>Routes.profiles.profile.mine
+			case UserRoleOnGroup.Student => Routes.profiles.Profile.seminars(recipient.getWarwickId)
 			case UserRoleOnGroup.Tutor => Routes.groups.tutor.mygroups
 		}
 	}

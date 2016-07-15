@@ -274,29 +274,29 @@
 	</a>
 </#macro>
 
-<#function formatResult department checkpoint="" point="" student="" note="">
+<#function formatResult department checkpoint="" point="" student="" note="", urlProfile=false>
 	<#if checkpoint?has_content>
 		<#if note?has_content>
-			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint, note) />
+			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint, note, urlProfile) />
 		<#else>
-			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint) />
+			<#return attendanceMonitoringCheckpointFormatter(department, checkpoint, urlProfile) />
 		</#if>
 	<#else>
 		<#if note?has_content>
-			<#return attendanceMonitoringCheckpointFormatter(department, point, student, note) />
+			<#return attendanceMonitoringCheckpointFormatter(department, point, student, note, urlProfile) />
 		<#else>
-			<#return attendanceMonitoringCheckpointFormatter(department, point, student) />
+			<#return attendanceMonitoringCheckpointFormatter(department, point, student, urlProfile) />
 		</#if>
 	</#if>
 </#function>
 
-<#macro checkpointDescription department checkpoint="" point="" student="" note="">
-	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+<#macro checkpointDescription department checkpoint="" point="" student="" note="" urlProfile=false>
+	<#local formatResult = formatResult(department, checkpoint, point, student, note, urlProfile) />
 	<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>
 </#macro>
 
-<#macro checkpointLabel department checkpoint="" point="" student="" note="">
-	<#local formatResult = formatResult(department, checkpoint, point, student, note) />
+<#macro checkpointLabel department checkpoint="" point="" student="" note="" urlProfile=false>
+	<#local formatResult = formatResult(department, checkpoint, point, student, note, urlProfile) />
 	<#local popoverContent>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>
 		<#if formatResult.metadata?has_content><p>${formatResult.metadata}</p></#if>

@@ -12,7 +12,9 @@ import freemarker.core.Environment
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember, Department}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.profiles.web.{Routes => ProfileRoutes}
+import uk.ac.warwick.tabula.attendance.web.{Routes => AttendanceRoutes}
+
 
 case class AttendanceMonitoringCheckpointFormatterResult(
 	labelText: String,
@@ -38,14 +40,14 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 			model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
 		}
 		args match {
-			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, _*) =>
-				result(department, checkpoint, None)
-			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, note: AttendanceNote, _*) =>
-				result(department, checkpoint, Option(note))
-			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, _*) =>
-				result(department, point, student, None)
-			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, note: AttendanceNote, _*) =>
-				result(department, point, student, Option(note))
+			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, urlProfile: JBoolean, _*) =>
+				result(department, checkpoint, None, urlProfile)
+			case Seq(department: Department, checkpoint: AttendanceMonitoringCheckpoint, note: AttendanceNote, urlProfile: JBoolean, _*) =>
+				result(department, checkpoint, Option(note), urlProfile)
+			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, urlProfile: JBoolean, _*) =>
+				result(department, point, student, None, urlProfile)
+			case Seq(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, note: AttendanceNote, urlProfile: JBoolean, _*) =>
+				result(department, point, student, Option(note), urlProfile)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
@@ -92,13 +94,21 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 		}
 	}
 
-	private def result(department: Department, checkpoint: AttendanceMonitoringCheckpoint, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
+	private def generateUrl(point: AttendanceMonitoringPoint, student: StudentMember, urlProfile: Boolean): String = {
+		if (urlProfile) {
+			ProfileRoutes.Note(student, point)
+		} else {
+			AttendanceRoutes.Note.view(point.scheme.academicYear, student, point)
+		}
+	}
+
+	private def result(department: Department, checkpoint: AttendanceMonitoringCheckpoint, noteOption: Option[AttendanceNote], urlProfile:Boolean): AttendanceMonitoringCheckpointFormatterResult = {
 		val point = checkpoint.point
 		val (noteType, noteText, noteUrl) = (noteOption match {
 			case None => attendanceMonitoringService.getAttendanceNote(checkpoint.student, point)
 			case Some(note) => Option(note)
 		}).fold(("", "", ""))(note =>
-			(note.absenceType.description, note.truncatedNote, Routes.Note.view(point.scheme.academicYear, checkpoint.student, point))
+			(note.absenceType.description, note.truncatedNote, generateUrl(point, checkpoint.student, urlProfile))
 		)
 
 		checkpoint.state match {
@@ -124,10 +134,11 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 					noteText,
 					noteUrl
 				)
+			// Monitoring point still use Id6 -label-important can be removed when we later migrate that
 			case AttendanceState.MissedUnauthorised =>
 				AttendanceMonitoringCheckpointFormatterResult(
 					"Missed (unauthorised)",
-					"label-important",
+					"label-danger label-important",
 					"icon-remove fa fa-times unauthorised",
 					s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
 					describeCheckpoint(checkpoint),
@@ -140,12 +151,12 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
 		}
 	}
 
-	private def result(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, noteOption: Option[AttendanceNote]): AttendanceMonitoringCheckpointFormatterResult = {
+	private def result(department: Department, point: AttendanceMonitoringPoint, student: StudentMember, noteOption: Option[AttendanceNote], urlProfile:Boolean): AttendanceMonitoringCheckpointFormatterResult = {
 		val (noteType, noteText, noteUrl) = (noteOption match {
 			case None => attendanceMonitoringService.getAttendanceNote(student, point)
 			case Some(note) => Option(note)
 		}).fold(("", "", ""))(note =>
-			(note.absenceType.description, note.truncatedNote, Routes.Note.view(point.scheme.academicYear, student, point))
+			(note.absenceType.description, note.truncatedNote, generateUrl(point, student, urlProfile))
 		)
 
 		if (point.endDate.isBefore(DateTime.now.toLocalDate)) {

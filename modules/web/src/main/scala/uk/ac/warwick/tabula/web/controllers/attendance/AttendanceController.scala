@@ -26,9 +26,16 @@ trait HasMonthNames {
 
 	@ModelAttribute("monthNames")
 	def monthNames(@PathVariable academicYear: AcademicYear) = {
-		val monthNames = new DateFormatSymbols().getMonths.array
-		(8 to 11).map{ i => monthNames(i) + " " + academicYear.startYear.toString } ++
-			(0 to 9).map{ i => monthNames(i) + " " + academicYear.endYear.toString }
+		MonthNames(academicYear)
 	}
 
+}
+
+object MonthNames {
+
+	private val monthNames = new DateFormatSymbols().getMonths.array
+
+	def apply(academicYear: AcademicYear) =
+		(8 to 11).map{ i => monthNames(i) + " " + academicYear.startYear.toString } ++
+		(0 to 9).map{ i => monthNames(i) + " " + academicYear.endYear.toString }
 }

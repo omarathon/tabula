@@ -64,19 +64,19 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		search in indexName / indexType query queryStringQuery("mat*") should containResult(m.universityId)
 		search in indexName / indexType query termQuery("userType", "S") should containResult(m.universityId)
 
-		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
-		queryService.find("Mathew", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("mat", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("mannion", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("mann", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("m mannion", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("mat mannion", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("m m", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("m m", Seq(m.homeDepartment), Set(Student, Staff), isGod = false).head should be (m)
-		queryService.find("m m", Seq(Fixtures.department("OT", "Some other department"), m.homeDepartment), Set(Student, Staff), isGod = false).head should be (m)
-		queryService.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), isGod = false) should be ('empty)
-		queryService.find("m m", Seq(m.homeDepartment), Set(Staff), isGod = false) should be ('empty)
+		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false) should be ('empty)
+		queryService.find("Mathew", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("mat", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("mann", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("m mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("mat mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("m m", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("m m", Seq(m.homeDepartment), Set(Student, Staff), searchAllDepts = false).head should be (m)
+		queryService.find("m m", Seq(Fixtures.department("OT", "Some other department"), m.homeDepartment), Set(Student, Staff), searchAllDepts = false).head should be (m)
+		queryService.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), searchAllDepts = false) should be ('empty)
+		queryService.find("m m", Seq(m.homeDepartment), Set(Staff), searchAllDepts = false) should be ('empty)
 	}}
 
 	@Test def findCopesWithApostrophes(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
@@ -97,16 +97,16 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
 		blockUntilCount(1, indexName, indexType)
 
-		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
-		queryService.find("joconnell", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
-		queryService.find("o'connell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("connell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("johnny connell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("johnny o'connell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("j o connell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("j oconnell", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("j o'c", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("j o c", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
+		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false) should be ('empty)
+		queryService.find("joconnell", Seq(m.homeDepartment), Set(), searchAllDepts = false) should be ('empty)
+		queryService.find("o'connell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("connell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("johnny connell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("johnny o'connell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("j o connell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("j oconnell", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("j o'c", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("j o c", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
 	}}
 
 	@Test def asciiFolding(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
@@ -130,13 +130,13 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		// General sanity that this is working before we go into the tests of the query service
 		search in indexName / indexType should containResult(m.universityId)
 
-		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), isGod = false) should be ('empty)
-		queryService.find("Aist\u0117", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("aist", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("aiste", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("a kiltinavi\u010Di\u016Ba", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("aiste kiltinavi\u010Di\u016Ba", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
-		queryService.find("aiste kiltinaviciua", Seq(m.homeDepartment), Set(), isGod = false).head should be (m)
+		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false) should be ('empty)
+		queryService.find("Aist\u0117", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("aist", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("aiste", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("a kiltinavi\u010Di\u016Ba", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("aiste kiltinavi\u010Di\u016Ba", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
+		queryService.find("aiste kiltinaviciua", Seq(m.homeDepartment), Set(), searchAllDepts = false).head should be (m)
 	}}
 
 	@Test def stripTitles(): Unit = new ProfileQuerySanitisation {

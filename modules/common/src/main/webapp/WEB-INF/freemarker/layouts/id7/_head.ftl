@@ -24,7 +24,17 @@
 <meta name="theme-color" content="#239b92">
 <!-- Use the brand colour of the site -->
 
-<title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}<#if breadcrumbs??><#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}</#if></title>
+<title><#compress>
+	<#if component.subsite>Tabula - </#if>
+	${component.title?default('Tabula')}
+	<#if breadcrumbs??>
+		<#if siblingBreadcrumbs!false>
+			- ${breadcrumbs?first.title}
+		<#else>
+			<#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}
+		</#if>
+	</#if>
+</#compress></title>
 
 <!-- Lato web font -->
 <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"

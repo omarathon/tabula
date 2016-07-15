@@ -275,38 +275,43 @@
 			$(this).addClass('tabulaAjaxSubmit-init')
 		}
 
+		var errorHandler = function($form, data) {
+			var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
+			if ($form.is('.double-submit-protection')) {
+				$form.find('.submit-buttons .btn').removeClass('disabled');
+				$form.removeData('submitOnceSubmitted');
+			}
+
+			// delete any old errors
+			$(scopeSelector + "div.error").remove();
+			$(scopeSelector + '.has-error').removeClass('has-error');
+			var error;
+			for(error in data.result){
+				if (data.result.hasOwnProperty(error)) {
+					var message = data.result[error];
+					var inputSelector = scopeSelector + "input[name='" + error + "']";
+					var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
+
+					var $field = $(inputSelector + ", " + textareaSelector);
+					$field.closest(".form-group").addClass("has-error");
+
+					// insert error message
+					$field.last().after('<div class="error help-block">' + message + '</div>');
+				}
+			}
+		};
+
 		$(this).on('submit', 'form', function(e){
 			e.preventDefault();
 			var $form = $(this);
 			$.post($form.attr('action'), $form.serialize(), function(data){
-				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
-
-				if(data.status == "error"){
-					if ($form.is('.double-submit-protection')) {
-						$form.find('.submit-buttons .btn').removeClass('disabled');
-						$form.removeData('submitOnceSubmitted');
-					}
-
-					// delete any old errors
-					$(scopeSelector + "span.error").remove();
-					$(scopeSelector + '.error').removeClass('error');
-					var error;
-					for(error in data.result){
-						if (data.result.hasOwnProperty(error)) {
-							var message = data.result[error];
-							var inputSelector = scopeSelector + "input[name='" + error + "']";
-							var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
-
-							var $field = $(inputSelector + ", " + textareaSelector);
-							$field.closest(".control-group").addClass("error");
-
-							// insert error message
-							$field.last().after('<span class="error help-inline">' + message + '</span>');
-						}
-					}
+				if(data.status == "error") {
+					errorHandler($form, data);
 				} else {
 					successCallback(data)
 				}
+			}).fail(function(response){
+				errorHandler($form, response.responseJSON);
 			});
 		});
 	};
@@ -711,6 +716,28 @@
 		//Adding extra height for 'browser knows iframe size' purposes
 		$('.modal-body > iframe').height(height + 36);
 	};
+	
+	exports.setArgOnUrl = function(url, argName, argValue){
+		if(url.indexOf('?') === -1) {
+			return url + '?' + argName + '=' + argValue;
+		} else {
+			var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),
+				found = false,
+				newArgs = $.map(args, function(pair){
+					var arg = pair.split('=');
+					if (arg[0] === argName) {
+						found = true;
+						return argName + '=' + argValue;
+					} else {
+						return pair;
+					}
+				});
+			if (!found) {
+				newArgs.push(argName + '=' + argValue);
+			}
+			return url.substring(0, url.indexOf('?')) + '?' + newArgs.join('&');
+		}
+	};
 
 	exports.scrollableTableSetup = function() {
 		$('.scrollable-table .right').find('.table-responsive').on('scroll', function(){
@@ -886,12 +913,13 @@
 			$container.find(".close-all-details").hide();
 			$container.find(".open-all-details").show();
 		});
+		$tabulaPage.find('section .close-all-details').hide();
 
 		exports.initCollapsible();
 
 		// Form dirty checking
 		$('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty':true, 'renamedFieldsMarksDirty':true});
-		$('a.dirty-check-ignore').on('click', function() {
+		$('.dirty-check-ignore').on('click', function() {
 			$('form.dirty-check').trigger('reinitialize.areYouSure');
 		});
 

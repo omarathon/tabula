@@ -147,12 +147,14 @@
 				</nav>
 			</#if>
 			<#if breadcrumbs?has_content>
-				<nav class="navbar navbar-secondary" role="navigation">
+				<nav class="navbar navbar-secondary <#if siblingBreadcrumbs!false>sibling-breadcrumbs</#if>" role="navigation">
 					<ul class="nav navbar-nav">
 						<li class="nav-breadcrumb"><a href="/${component.name}">${component.title}</a></li>
 						<#list breadcrumbs as crumb>
 							<#if crumb.linked!false>
-								<li class="nav-breadcrumb"><a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
+								<li class="nav-breadcrumb <#if crumb.active!false>active</#if>">
+									<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>
+								</li>
 							</#if>
 						</#list>
 					</ul>
@@ -162,7 +164,7 @@
 				<nav class="navbar navbar-tertiary" role="navigation">
 					<ul class="nav navbar-nav">
 						<#list secondBreadcrumbs as crumb>
-							<li <#if activeAcademicYear?has_content && activeAcademicYear.label == crumb.title>class="active"</#if>><a href="<@url page=crumb.url!"" />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
+							<li <#if crumb.active>class="active"</#if>><a href="<@url page=crumb.url!"" />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
 						</#list>
 					</ul>
 				</nav>

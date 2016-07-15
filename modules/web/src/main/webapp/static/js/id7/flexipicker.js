@@ -10,17 +10,24 @@
 var RichResultField = function (input) {
 	var self = this;
 	this.$input = $(input);
-	this.$uneditable = $('<span><span class=val></span>'+
-		'<a href=# class="clear-field" title="Clear">&times;</a></span>');
-	this.$uneditable.attr({
-		'class': 'uneditable-input rich-result-field ' + this.$input.attr('class'),
-		'disabled': true
-	});
-	this.$input.after(this.$uneditable);
-	// Attempt to match the original widths; defined width needed for text-overflow to work
-	this.$input.css('width', this.$input.css('width'));
-	this.$uneditable.css('width', this.$input.css('width'));
-	this.$uneditable.find('a').click(function () {
+	this.$uneditable = this.$input.parent().find('.uneditable-input.rich-result-field');
+	if (this.$uneditable.length === 0) {
+		this.$uneditable = $('<span><span class=val></span>'+
+			'<a href=# class="clear-field" title="Clear">&times;</a></span>');
+		this.$uneditable.attr({
+			'class': 'uneditable-input rich-result-field ' + this.$input.attr('class'),
+			'disabled': true
+		});
+		this.$input.after(this.$uneditable);
+	}
+
+	this.resetWidth = function(){
+		// Attempt to match the original widths; defined width needed for text-overflow to work
+		this.$input.css('width', this.$input.css('width'));
+		this.$uneditable.css('width', this.$input.css('width'));
+	};
+	this.resetWidth();
+	this.$uneditable.find('a').off('click.tabula.RichResultField').on('click.tabula.RichResultField', function () {
 		self.edit();
 		return false;
 	});
@@ -29,20 +36,23 @@ var RichResultField = function (input) {
 
 /** Clear field, focus for typing */
 RichResultField.prototype.edit = function () {
-  this.$input.val('').show().trigger('change').focus();
-  this.$uneditable.hide().find('.val').text('').attr('title', '');
+	this.resetWidth();
+	this.$input.val('').show().trigger('change').focus();
+	this.$uneditable.hide().find('.val').text('').attr('title', '');
 };
 
 /** Hide input field and show the rich `text` instead */
 RichResultField.prototype.storeText = function (text) {
-  this.$input.hide();
-  this.$uneditable.show().find('.val').text(text).attr('title', text);
+	this.resetWidth();
+	this.$input.hide();
+	this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /** Set value of input field, hide it and show the rich `text` instead */
 RichResultField.prototype.store = function (value, text) {
-  this.$input.val(value).trigger('change').hide();
-  this.$uneditable.show().find('.val').text(text).attr('title', text);
+	this.resetWidth();
+	this.$input.val(value).trigger('change').hide();
+	this.$uneditable.show().find('.val').text(text).attr('title', text);
 };
 
 /**
@@ -141,8 +151,11 @@ var FlexiPicker = function (options) {
 	// Disable browser autocomplete dropdowns, it gets in the way.
 	$element.attr('autocomplete', 'off');
 
-	var $spinner = $('<div />').addClass('spinner-container');
-	$element.before($spinner);
+	var $spinner = $element.parent().find('.spinner-container');
+	if ($spinner.length === 0) {
+		$spinner = $('<div />').addClass('spinner-container');
+		$element.before($spinner);
+	}
 
 	this.includeUsers = options.includeUsers !== false;
 	this.includeGroups = options.includeGroups || false;
@@ -397,8 +410,8 @@ jQuery(function($){
 			$collection.append(
 				$('<button />')
 					.attr({'type':'button'})
-					.addClass('btn').addClass('btn-mini btn-xs btn-default')
-					.html('<i class="icon-plus"></i> Add another')
+					.addClass('btn btn-xs btn-default')
+					.html('Add another')
 					.on('click', function() {
 						var input = $blankInput.clone();
 						$(this).before(input);

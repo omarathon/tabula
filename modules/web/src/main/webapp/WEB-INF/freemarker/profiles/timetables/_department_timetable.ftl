@@ -3,18 +3,18 @@
 	<@f.hidden path="from" />
 	<@f.hidden path="to" />
 
-<div class="student-filter btn-group-group well well-small">
+<div class="student-filter btn-group-group well well-small well-sm">
 	<button type="button" class="clear-all-filters btn btn-link">
-			<span class="icon-stack">
-				<i class="icon-filter"></i>
-				<i class="icon-ban-circle icon-stack-base"></i>
-			</span>
+		<span class="fa-stack">
+			<i class="fa fa-filter fa-stack-1x"></i>
+			<i class="fa fa-ban fa-stack-2x"></i>
+		</span>
 	</button>
 
 	<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 		<@spring.bind path=path>
 			<div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+				<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 					<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 					<span class="caret"></span>
 				</a>
@@ -68,9 +68,9 @@
 
 	<#assign placeholder = "Module" />
 	<#assign modulesCustomPicker>
-		<div class="module-search input-append">
-			<input class="module-search-query module prevent-reload" type="text" value="" placeholder="Search for a module" />
-			<span class="add-on"><i class="icon-search"></i></span>
+		<div class="module-search input-group">
+			<input class="module-search-query module prevent-reload form-control" type="text" value="" placeholder="Search for a module" />
+			<span class="input-group-addon"><i class="fa fa-search"></i></span>
 		</div>
 	</#assign>
 	<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
@@ -81,36 +81,40 @@
 		<@fmt.module_name module false />
 	</@filter>
 
-	<#assign placeholder = "Route" />
-	<#assign routesCustomPicker>
-		<div class="route-search input-append">
-			<input class="route-search-query route prevent-reload" type="text" value="" placeholder="Search for a route" />
-			<span class="add-on"><i class="icon-search"></i></span>
-		</div>
-	</#assign>
-	<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
-	<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes customPicker=routesCustomPicker; route>
-		<input type="checkbox" name="${status.expression}" value="${route.code}"  data-short-value="${route.code?upper_case}"
-		${contains_by_code(command.routes, route)?string('checked','')}
-		>
-		<@fmt.route_name route false />
-	</@filter>
+	<#if canFilterRoute>
+		<#assign placeholder = "Route" />
+		<#assign routesCustomPicker>
+			<div class="route-search input-group">
+				<input class="route-search-query route prevent-reload form-control" type="text" value="" placeholder="Search for a route" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
+			</div>
+		</#assign>
+		<#assign currentfilter><@current_filter_value "routes" placeholder; route>${route.code?upper_case}</@current_filter_value></#assign>
+		<@filter path="routes" placeholder=placeholder currentFilter=currentfilter allItems=command.allRoutes customPicker=routesCustomPicker; route>
+			<input type="checkbox" name="${status.expression}" value="${route.code}"  data-short-value="${route.code?upper_case}"
+			${contains_by_code(command.routes, route)?string('checked','')}
+			>
+			<@fmt.route_name route false />
+		</@filter>
+	</#if>
 
-	<#assign placeholder = "Year of study" />
-	<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
-	<@filter path="yearsOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=command.allYearsOfStudy prefix="Year "; yearOfStudy>
-		<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
-		${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}
-		>
-	${yearOfStudy}
-	</@filter>
+	<#if canFilterYearOfStudy>
+		<#assign placeholder = "Year of study" />
+		<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
+		<@filter path="yearsOfStudy" placeholder=placeholder currentFilter=currentfilter allItems=command.allYearsOfStudy prefix="Year "; yearOfStudy>
+			<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
+			${command.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}
+			>
+		${yearOfStudy}
+		</@filter>
+	</#if>
 
 	<#if canFilterStudents>
 		<#assign placeholder = "Student" />
 		<#assign studentsCustomPicker>
-			<div class="student-search input-append">
-				<input class="student-search-query student prevent-reload" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
-				<span class="add-on"><i class="icon-search"></i></span>
+			<div class="student-search input-group">
+				<input class="student-search-query student prevent-reload form-control" type="text" value="" placeholder="Search for a student" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
 			</div>
 		</#assign>
 		<#assign currentfilter><@current_filter_value "studentMembers" placeholder; student>${student.universityId}</@current_filter_value></#assign>
@@ -125,9 +129,9 @@
 	<#if canFilterStaff>
 		<#assign placeholder = "Staff" />
 		<#assign staffCustomPicker>
-			<div class="staff-search input-append">
-				<input class="staff-search-query staff prevent-reload" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
-				<span class="add-on"><i class="icon-search"></i></span>
+			<div class="staff-search input-group">
+				<input class="staff-search-query staff prevent-reload form-control" type="text" value="" placeholder="Search for staff" data-include-groups="false" data-include-email="false" data-members-only="true" data-universityid="true" />
+				<span class="input-group-addon"><i class="fa fa-search"></i></span>
 			</div>
 		</#assign>
 		<#assign currentfilter><@current_filter_value "staffMembers" placeholder; staffMember>${staffMember.universityId}</@current_filter_value></#assign>
@@ -150,11 +154,11 @@
 </div>
 </@f.form>
 
-<div class="alert alert-error" style="display: none;"></div>
+<div class="alert alert-danger" style="display: none;"></div>
 
 <div class="calendar-outer">
 	<div class="calendar-loading hidden-print">
-		<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+		<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 	</div>
 	<div class="calendar" data-viewname="month"></div>
 </div>
@@ -230,11 +234,11 @@
 							var time = moment(data.lastUpdated);
 
 							$container.append(
-									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + toTimestamp(now, time))
+									$('<div />').addClass('fc-last-updated').addClass('pull-right').html('Last updated: ' + Profiles.toTimestamp(now, time))
 							);
 						}
 
-						var events = data.events, errorDiv = $('div.alert-error');
+						var events = data.events, errorDiv = $('div.alert-danger');
 						// TAB-3008 - Change times to Europe/London
 						$.each(events, function(i, event){
 							event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
@@ -256,41 +260,6 @@
 					}
 				});
 			};
-		}
-		function toTimestamp(now, then) {
-			var yesterday = now.clone().subtract(1, 'day');
-			if (now.diff(then) < 60000) { // less than a minute ago
-				return then.from(now);
-			} else if (now.isSame(then, 'day')) {
-				return then.format('LT [Today]');
-			} else if (yesterday.isSame(then, 'day')) {
-				return then.format('LT [Yesterday]');
-			} else if (now.isSame(then, 'year')) {
-				return then.format('ddd Do MMM LT');
-			} else {
-				return then.format('ddd Do MMM YYYY LT');
-			}
-		}
-		function onViewUpdate(view, element){
-			updateCalendarTitle(view, element);
-			$('.popover').hide();
-		}
-		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
-		function updateCalendarTitle(view,element){
-			if (view.name == 'agendaWeek') {
-				var start = view.start.getTime();
-				var end = view.end.getTime();
-				var week = $.grep(weeks, function(week) {
-					return (week.start >= start) && (week.end <= end);
-				});
-				if (week.length > 0) {
-					var decodedTitle = $("<div/>").html(week[0].desc).text();
-					view.title = decodedTitle;
-					view.calendar.updateTitle();
-				} // We should have an entry for every week; in the event that one's missing
-				// we'll just leave it blank. The day columns still have the date on them.
-				return true;
-			}
 		}
 
 		function createCalendar(container, defaultViewName){
@@ -326,7 +295,7 @@
 				},
 				defaultEventMinutes: 30,
 				weekends: showWeekends,
-				viewRender: onViewUpdate,
+				viewRender: Profiles.onViewUpdate,
 				header: {
 					left:   'title',
 					center: 'month,agendaWeek,agendaDay',
@@ -348,55 +317,14 @@
 					return '';
 				},
 				eventAfterRender: function(event, element, view) {
-					var content = "<table class='event-info'>";
-					if (event.parentType && event.parentFullName && event.parentShortName && event.parentType === "Module") {
-						content = content + "<tr><th>Module</th><td>" + event.parentShortName + " " + event.parentFullName + "</td></tr>";
-					}
-
-					if (event.fullTitle && event.fullTitle.length > 0) {
-						content = content + "<tr><th>Title</th><td>" + event.fullTitle + "</td></tr>";
-					}
-
-					if (event.name && event.name.length > 0) {
-						content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
-					}
-
-					content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
-
-					if (event.location && event.location.length > 0) {
-						content = content + "<tr><th>Where</th><td>";
-
-						if (event.locationId && event.locationId.length > 0) {
-							content = content + "<span class='map-location' data-lid='" + event.locationId + "'>" + event.location + "</span>";
-						} else {
-							content = content + event.location;
-						}
-
-						content = content + "</td></tr>";
-					}
-
-					if (event.tutorNames.length > 0){
-						content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
-					}
-
-					if (event.comments && event.comments.length > 0) {
-						content = content + "<tr><th>Comments</th><td>" + event.comments + "</td></tr>";
-					}
-
-					if (event.relatedUrl && event.relatedUrl.url && event.relatedUrl.url.length > 0) {
-						var relatedUrlTitle = (event.relatedUrl.title && event.relatedUrl.title.length > 0) ? event.relatedUrl.title : "More details"
-						content = content + "<tr><th></th><td>" +
-								"<a href=" + event.relatedUrl.url + ">" + relatedUrlTitle + "</a></td></tr>";
-					}
-
-					content = content + "</table>";
-					$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+					Profiles.renderCalendarEvents(event, element);
 				}
 			});
 		}
 
 		var $calendar = $(".calendar");
 		createCalendar($calendar, $calendar.data('viewname'));
+		$calendar.find('table').attr('role','presentation');
 
 		var prependClearLink = function($list) {
 			if (!$list.find('input:checked').length) {
@@ -404,21 +332,21 @@
 			} else {
 				if (!$list.find('.clear-this-filter').length) {
 					$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-									.append(
-											$('<button />').attr('type', 'button')
-													.addClass('btn btn-link')
-													.html('<i class="icon-ban-circle"></i> Clear selected items')
-													.on('click', function(e) {
-														$list.find('input:checked').each(function() {
-															var $checkbox = $(this);
-															$checkbox.prop('checked', false);
-															updateFilter($checkbox);
-														});
+						$('<li />').addClass('clear-this-filter')
+							.append(
+								$('<button />').attr('type', 'button')
+									.addClass('btn btn-link')
+									.html('<i class="fa fa-ban"></i> Clear selected items')
+									.on('click', function(e) {
+										$list.find('input:checked').each(function() {
+											var $checkbox = $(this);
+											$checkbox.prop('checked', false);
+											updateFilter($checkbox);
+										});
 
-														doRequest($list.closest('form'));
-													})
-									).append($('<hr />'))
+										doRequest($list.closest('form'));
+									})
+							).append($('<hr />'))
 					);
 				}
 			}

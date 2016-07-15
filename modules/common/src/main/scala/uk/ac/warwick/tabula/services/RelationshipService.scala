@@ -5,12 +5,14 @@ import org.hibernate.sql.JoinType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{StudentAssociationEntityData, TaskBenchmarking, FiltersStudents, StudentAssociationData}
+import uk.ac.warwick.tabula.commands.{FiltersStudents, StudentAssociationData, StudentAssociationEntityData, TaskBenchmarking}
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.immutable.TreeMap
 
 trait RelationshipServiceComponent {
 	def relationshipService: RelationshipService
@@ -18,6 +20,16 @@ trait RelationshipServiceComponent {
 
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent {
 	var relationshipService = Wire[RelationshipService]
+}
+
+case class SortableAgentIdentifier(agentId: String, lastName: Option[String]){
+	val sortkey = lastName.getOrElse("") + agentId
+	override def toString = sortkey
+}
+object SortableAgentIdentifier{
+	def apply(r:StudentRelationship): SortableAgentIdentifier = SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
+
+	val KeyOrdering = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
 }
 
 /**
@@ -74,6 +86,7 @@ trait RelationshipService {
 	def applyStudentRelationships(relationshipType: StudentRelationshipType, agentId: String, studentIDs: Seq[String]): Seq[StudentRelationship]
 	def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course]
 	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int]
+	def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]]
 }
 
 abstract class AbstractRelationshipService extends RelationshipService with Logging with TaskBenchmarking {
@@ -371,6 +384,27 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
 		relationshipDao.latestYearsOfStudyForStudentCourseDetails(scds)
+	}
+
+	def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]] = {
+		// all students in department X
+		val unsortedAgentRelationshipsByStudentDept = listStudentRelationshipsByDepartment(relationshipType, department)
+
+		// all students with a tutor in department X
+		val unsortedAgentRelationshipsByStaffDept = listStudentRelationshipsByStaffDepartment(relationshipType, department)
+
+		// combine the two and remove the dups
+		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
+			// TAB-2750 treat relationships between the same agent and student COURSE as identical
+			.groupBy { rel => (rel.agent, rel.studentCourseDetails) }
+			.map { case (_, rels) => rels.maxBy { rel => rel.startDate.getMillis } }
+			.toSeq
+
+		// group into map by agent lastname, or id if the lastname is unavailable
+		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(r=>SortableAgentIdentifier(r))
+
+		// alpha sort by constructing a TreeMap
+		TreeMap(groupedAgentRelationships.toSeq:_*)(SortableAgentIdentifier.KeyOrdering)
 	}
 }
 

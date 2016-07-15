@@ -28,62 +28,121 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		testRoute2.name = "102 Clearing up"
 
 		val courseDetails1, courseDetails2 = new StudentCourseDetails
+		val student1 = new StudentMember
+		student1.universityId = "0110011"
+
+		val student2 = new StudentMember
+		student2.universityId = "0110022"
 
 		courseDetails1.department = testDepartment
 		courseDetails1.currentRoute = testRoute1
 		courseDetails1.course = course
+		courseDetails1.student = student1
 
 		courseDetails2.department = testDepartment
 		courseDetails2.currentRoute = testRoute2
 		courseDetails2.course = course
+		courseDetails2.student = student2
 	}
 
 	@Test
 	def listsAllStudentsWithTutorRelationship() { new Fixture {
 		val mockProfileService = mock[ProfileService]
+		val mockMeetingRecordService = mock[MeetingRecordService]
+		val mockRelationshipService = mock[RelationshipService]
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val restrictions : Seq[ScalaRestriction] = Seq()
 
+		val relationship1 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails1.student))
+		val relationship2 = Seq(StudentRelationship(staffMember, relationshipType, courseDetails2.student))
+
 		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, restrictions) returns Seq(courseDetails1, courseDetails2)
 
-		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
+		mockRelationshipService.getRelationships(relationshipType, courseDetails1.student) returns relationship1
+		mockRelationshipService.getRelationships(relationshipType, courseDetails2.student) returns relationship2
+
+		mockMeetingRecordService.list(relationship1.toSet, Some(staffMember)) returns Seq()
+		mockMeetingRecordService.list(relationship2.toSet, Some(staffMember)) returns Seq()
+
+		mockMeetingRecordService.countPendingApprovals(courseDetails1.student.universityId) returns 0
+		mockMeetingRecordService.countPendingApprovals(courseDetails2.student.universityId) returns 0
+
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
 			var profileService = mockProfileService
+			var meetingRecordService = mockMeetingRecordService
+			var relationshipService = mockRelationshipService
 		}
 
 		val result = command.applyInternal()
 
-		result should be (Seq(courseDetails1, courseDetails2))
+		result.entities should be (Seq(courseDetails1, courseDetails2))
 	}}
 
 	@Test
-	def listsAllStudentsWithSupervisorRelationship() { new Fixture {
+	def listsAllStudentsWithSupervisorRelationshipWithMeetingRecord() { new Fixture {
 		val mockProfileService = mock[ProfileService]
+		val mockMeetingRecordService = mock[MeetingRecordService]
+		val mockRelationshipService = mock[RelationshipService]
 
 		val restrictions : Seq[ScalaRestriction] = Seq()
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
+		val relationship1 = StudentRelationship(staffMember, relationshipType, courseDetails1.student)
+		val relationship2 = StudentRelationship(staffMember, relationshipType, courseDetails2.student)
+
+		val meetingRecord = new MeetingRecord
+		meetingRecord.relationship = relationship1
+
+		val proposedApproval = new MeetingRecordApproval
+		proposedApproval.meetingRecord = meetingRecord
+		proposedApproval.approver = courseDetails1.student
+		proposedApproval.state = MeetingApprovalState.Pending
+
+		meetingRecord.approvals.add(proposedApproval)
+
 		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, restrictions) returns Seq(courseDetails1, courseDetails2)
 
-		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
+		mockRelationshipService.getRelationships(relationshipType, courseDetails1.student) returns Seq(relationship1)
+		mockRelationshipService.getRelationships(relationshipType, courseDetails2.student) returns Seq(relationship2)
+
+
+		mockMeetingRecordService.list(Seq(relationship1).toSet, Some(staffMember)) returns Seq(meetingRecord)
+		mockMeetingRecordService.list(Seq(relationship2).toSet, Some(staffMember)) returns Seq()
+
+		mockMeetingRecordService.countPendingApprovals(courseDetails1.student.universityId) returns 1
+		mockMeetingRecordService.countPendingApprovals(courseDetails2.student.universityId) returns 0
+
+
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent {
 			var profileService = mockProfileService
+			var meetingRecordService = mockMeetingRecordService
+			var relationshipService = mockRelationshipService
 		}
 
 		val result = command.applyInternal()
 
-		result should be (Seq(courseDetails1, courseDetails2))
-
+		result.entities should be (Seq(courseDetails1, courseDetails2))
+		val studentMeetingRecord = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._1
+		val studentPendingApprovalCount = result.lastMeetingWithTotalPendingApprovalsMap.get(courseDetails1.student.universityId).get._2
+		studentMeetingRecord should be (Some(meetingRecord))
+		studentPendingApprovalCount should be (1)
 	}}
 
 	@Test
 	def helperFunctions() { new Fixture {
 		val mockProfileService = mock[ProfileService]
+		val mockMeetingRecordService = mock[MeetingRecordService]
+		val mockRelationshipService = mock[RelationshipService]
 
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
 		mockProfileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, staffMember, Nil) returns Seq(courseDetails1, courseDetails2)
 
-		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent {
+		val command = new ViewRelatedStudentsCommandInternal(staffMember, relationshipType) with ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent{
 			var profileService = mockProfileService
+			var meetingRecordService = mockMeetingRecordService
+			var relationshipService = mockRelationshipService
 		}
 
 		command.allCourses should be (Seq(courseDetails1, courseDetails2))

@@ -1,9 +1,9 @@
 <#escape x as x?html>
-	<#macro deptheaderroutemacro dept>
-		<@routes.profiles.draft_department_timetables dept academicYear endpoint />
-	</#macro>
-	<#assign deptheaderroute = deptheaderroutemacro in routes/>
-	<@fmt.deptheader "Draft timetable" "for" department routes "deptheaderroute" />
+	<#function route_function dept>
+		<#local result><@routes.profiles.draft_department_timetables dept academicYear endpoint /></#local>
+		<#return result />
+	</#function>
+	<@fmt.id7_deptheader "Draft timetable" route_function "for" />
 
 	<#assign submitUrl><@routes.profiles.draft_department_timetables department academicYear endpoint /></#assign>
 	<#include "_department_timetable.ftl" />

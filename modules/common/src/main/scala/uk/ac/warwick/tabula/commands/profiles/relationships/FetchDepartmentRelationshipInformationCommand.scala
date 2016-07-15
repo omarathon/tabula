@@ -18,7 +18,8 @@ import scala.collection.JavaConverters._
 object FetchDepartmentRelationshipInformationCommand {
 
 	object Actions {
-		val Distribute = "Distribute"
+		val DistributeAll = "DistributeAll"
+		val DistributeSelected = "DistributeSelected"
 		val RemoveSingle = "RemoveSingle"
 		val RemoveFromAll = "RemoveFromAll"
 		val AddAdditionalEntities = "AddAdditionalEntities"
@@ -49,8 +50,11 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 	override def applyInternal() = {
 		val initialState = fetchResult
 		action match {
-			case Actions.Distribute =>
-				distribute(initialState)
+			case Actions.DistributeAll =>
+				distributeAll(initialState)
+				fetchResult
+			case Actions.DistributeSelected =>
+				distributeSelected(initialState)
 				fetchResult
 			case Actions.RemoveSingle =>
 				removeSingle(initialState)
@@ -129,7 +133,11 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 		(allocatedWithAdditionsAndRemovals, newUnallocated)
 	}
 
-	private def distribute(initialState: StudentAssociationResult): Unit = {
+	private def distributeAll(initialState: StudentAssociationResult): Unit = {
+		distribute(initialState.unallocated, initialState.allocated.filter(e => entities.contains(e.entityId)))
+	}
+
+	private def distributeSelected(initialState: StudentAssociationResult): Unit = {
 		distribute(initialState.unallocated.filter(s => allocate.contains(s.universityId)), initialState.allocated.filter(e => entities.contains(e.entityId)))
 	}
 
@@ -328,4 +336,6 @@ trait FetchDepartmentRelationshipInformationCommandRequest extends PermissionsCh
 	var additionalEntities: JList[String] = JArrayList()
 
 	var expanded: JMap[String, JBoolean] = JHashMap()
+
+	var preselectStudents: JList[String] = JArrayList()
 }

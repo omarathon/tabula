@@ -1,137 +1,143 @@
+<#import "*/modal_macros.ftl" as modal />
+<#escape x as x?html>
 <#assign student = studentCourseDetails.student/>
 <#assign agent_role = relationshipType.agentRole />
 <#assign member_role = relationshipType.studentRole />
-<#assign agent_name><#if !command.considerAlternatives!false>${command.relationship.agentName}</#if></#assign>
 
-<#assign heading>
-	<h2>Schedule a meeting</h2>
-	<h6>
-		<span class="muted">between ${agent_role}</span> ${agent_name!""}
-		<span class="muted">and ${member_role}</span> ${student.fullName}
-	</h6>
-</#assign>
+<#if success!false>
 
-<#if isModal!false>
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		${heading}
-	</div>
-<#elseif iframe!false>
-	<div id="container">
+	<p>The meeting was successfully scheduled.</p>
+
 <#else>
-	${heading}
-</#if>
-<#if isModal!false>
-	<div class="modal-body" id="meeting-record-modal-body"></div>
-	<div class="modal-footer">
-		<form class="double-submit-protection">
-			<span class="submit-buttons">
-				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Schedule
-				</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-			</span>
-		</form>
-	</div>
-<#else>
-	<!-- blank action = post to current path. needs to be left blank so we know if we should post to create or edit -->
-	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
 
-		<@form.labelled_row "title" "Title">
-			<@f.input type="text" path="title" cssClass="input-xxlarge" maxlength="255" placeholder="Subject of meeting" />
-		</@form.labelled_row>
+	<@modal.wrapper enabled=(isModal!false)>
 
-		<#if allRelationships?? && allRelationships?size gt 1>
-			<#assign isCreatorAgent = creator?? && creator.id == command.relationship.agent />
-			<#if !isCreatorAgent>
-				<#assign cssClass = "warning" />
-			</#if>
+		<#assign heading>
+			<h3 <#if isModal!false>class="modal-title"</#if>>Schedule a meeting</h3>
+			<h6 <#if isModal!false>class="modal-title"</#if>>
+				<span class="very-subtle">between ${agent_role}</span> ${command.relationship.agentName!""}
+				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
+			</h6>
+		</#assign>
 
-			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
-				<@f.select path="relationship" cssClass="input-large">
-					<@f.option disabled=true selected="true" label="Please select one..." />
-					<@f.options items=allRelationships itemLabel="agentName" />
-				</@f.select>
-				<small class="help-block">
-					<#if isCreatorAgent>
-						You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
-					<#else>
-						The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="icon-ok"></i>
-					</#if>
-				</small>
-			</@form.labelled_row>
+		<#if isModal!false>
+			<@modal.header>
+				<#noescape>${heading}</#noescape>
+			</@modal.header>
+		<#elseif isIframe!false>
+			<div id="container">
+		<#else>
+			<#noescape>${heading}</#noescape>
 		</#if>
+		<#if isModal!false>
+			<div class="modal-body"></div>
+			<@modal.footer>
+				<form class="double-submit-protection">
+					<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+						Schedule
+					</button>
+					<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				</form>
+			</@modal.footer>
+		<#else>
+			<!-- blank action = post to current path. needs to be left blank so we know if we should post to create or edit -->
+			<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
 
-		<script>
-			jQuery(function($) {
-				$("#supervisor-ok, #relationship").on("focus click keyup", function() {
-					$(this).closest(".warning").removeClass("warning");
-					$("#supervisor-ok").remove();
-				}).addClass("clickable-cursor");
-			});
-		</script>
+				<@bs3form.labelled_form_group path="title" labelText="Title">
+					<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />
+				</@bs3form.labelled_form_group>
 
-		<@form.labelled_row "meetingDate" "Date of meeting">
-			<div class="input-append">
-				<@f.input type="text" path="meetingDate" cssClass="input-medium date-time-minute-picker" placeholder="Pick the date" />
-				<span class="add-on"><i class="icon-calendar"></i></span>
-			</div>
-		</@form.labelled_row>
+				<#if allRelationships?? && allRelationships?size gt 1>
+					<#assign isCreatorAgent = command.creator?? && command.creator.id == command.relationship.agent />
+					<@bs3form.labelled_form_group path="relationship" labelText=agent_role?cap_first>
+						<@f.select path="relationship" cssClass="form-control">
+							<@f.option disabled=true selected="true" label="Please select one..." />
+							<@f.options items=allRelationships itemLabel="agentName" />
+						</@f.select>
+						<div class="help-block <#if !isCreatorAgent>alert alert-info</#if>">
+							<#if isCreatorAgent>
+								You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
+							<#else>
+								The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="fa fa-check"></i>
+							</#if>
+						</div>
+					</@bs3form.labelled_form_group>
+				</#if>
 
-		<@form.labelled_row "format" "Format">
-			<@f.select path="format" cssClass="input-large">
-				<@f.option disabled=true selected="true" label="Please select one..." />
-				<@f.options items=formats itemLabel="description" itemValue="code" />
-			</@f.select>
-		</@form.labelled_row>
-
-		<#-- file upload (TAB-359) -->
-		<#assign fileTypes=command.attachmentTypes />
-		<@form.filewidget basename="file" types=fileTypes />
-
-		<#if command.attachedFiles?has_content >
-			<@form.labelled_row "attachedFiles" "Previously uploaded files">
-				<ul class="unstyled">
-					<#list command.attachedFiles as attachment>
-						<li id="attachment-${attachment.id}" class="attachment">
-							<span>${attachment.name}</span>&nbsp;
-							<@f.hidden path="attachedFiles" value="${attachment.id}" />
-							<a class="remove-attachment" href="">Remove</a>
-						</li>
-					</#list>
-				</ul>
 				<script>
-					jQuery(function($){
-						$(".remove-attachment").on("click", function(e){
-							$(this).closest("li.attachment").remove();
-							return false;
+					jQuery(function($) {
+						$('#supervisor-ok, #relationship').on('focus click keyup', function() {
+							$('#supervisor-ok').closest('.alert-info').removeClass('alert-info').end()
+								.remove();
 						});
 					});
 				</script>
-				<small class="subtle help-block">
-					This is a list of all supporting documents that have been attached to this meeting record.
-					Click the remove link next to a document to delete it.
-				</small>
-			</@form.labelled_row>
+
+				<@bs3form.labelled_form_group path="meetingDate" labelText="Date of meeting">
+					<div class="input-group">
+						<@f.input type="text" path="meetingDate" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
+						<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+					</div>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group path="format" labelText="Format">
+					<@f.select path="format" cssClass="form-control">
+						<@f.option disabled=true selected="true" label="Please select one..." />
+						<@f.options items=formats itemLabel="description" itemValue="code" />
+					</@f.select>
+				</@bs3form.labelled_form_group>
+
+				<#-- file upload (TAB-359) -->
+				<#assign fileTypes=command.attachmentTypes />
+				<@bs3form.filewidget basename="file" types=fileTypes />
+
+				<#if command.attachedFiles?has_content>
+					<@bs3form.labelled_form_group path="attachedFiles" labelText="Previously uploaded files">
+						<ul class="unstyled">
+							<#list command.attachedFiles as attachment>
+								<li id="attachment-${attachment.id}" class="attachment">
+									<span>${attachment.name}</span>&nbsp;
+									<@f.hidden path="attachedFiles" value="${attachment.id}" />
+									<a class="remove-attachment" href="">Remove</a>
+								</li>
+							</#list>
+						</ul>
+						<script>
+							jQuery(function($){
+								$('.remove-attachment').on('click', function(e){
+									$(this).closest("li.attachment").remove();
+									return false;
+								});
+							});
+						</script>
+						<P class="very-subtle help-block">
+							This is a list of all supporting documents that have been attached to this meeting record.
+							Click the remove link next to a document to delete it.
+						</P>
+					</@bs3form.labelled_form_group>
+				</#if>
+
+				<@bs3form.labelled_form_group path="description" labelText="Description (optional)">
+					<@f.textarea rows="6" path="description" cssClass="form-control" />
+				</@bs3form.labelled_form_group>
+
+				<#if !isIframe!false>
+					<#-- separate page, not modal -->
+					<div class="form-actions">
+						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Schedule
+						</button>
+						<a class="btn btn-default" href="<@routes.profiles.profile student />">Cancel</a>
+					</div>
+				</#if>
+			</@f.form>
 		</#if>
 
-<#-- TODO: TinyMCE editor, bleh -->
-<@form.labelled_row "description" "Description (optional)">
-<@f.textarea rows="6" path="description" cssClass="input-xxlarge" />
-</@form.labelled_row>
-
-		<#if !iframe!false>
-			<#-- separate page, not modal -->
-			<div class="form-actions">
-				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Schedule
-				</button>
-				<a class="btn" href="<@routes.profiles.profile student />">Cancel</a>
-			</div>
+		<#if isIframe!false>
+			</div> <#--container -->
 		</#if>
-	</@f.form>
-</#if>
 
-<#if iframe!false>
-	</div> <#--container -->
+	</@modal.wrapper>
+
 </#if>
+</#escape>

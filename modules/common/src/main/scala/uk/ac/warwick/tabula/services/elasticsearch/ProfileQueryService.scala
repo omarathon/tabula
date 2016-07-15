@@ -7,6 +7,7 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.{Department, Member, MemberUserType}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -27,14 +28,14 @@ trait ProfileQueryMethods {
 		searchAcrossAllDepartments: Boolean
 	): Seq[Member]
 
-	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member] = {
+	def find(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member] = {
 		if (!query.hasText) Nil
-		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = isGod)
+		else findWithQuery(query, departments, includeTouched = true, userTypes = userTypes, searchAcrossAllDepartments = searchAllDepts)
 	}
 
 	def find(ownDepartment: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] =
 		findWithQuery("", Seq(ownDepartment), includeTouched, userTypes, searchAcrossAllDepartments = false)
-}
+	}
 
 @Service
 class ProfileQueryServiceImpl extends AbstractQueryService
@@ -140,4 +141,12 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 		} catch {
 			case _: TimeoutException => Seq() // Invalid query string or timeout
 		}
+}
+
+trait ProfileQueryServiceComponent {
+	def profileQueryService: ProfileQueryService
+}
+
+trait AutowiringProfileQueryServiceComponent extends ProfileQueryServiceComponent {
+	var profileQueryService = Wire[ProfileQueryService]
 }

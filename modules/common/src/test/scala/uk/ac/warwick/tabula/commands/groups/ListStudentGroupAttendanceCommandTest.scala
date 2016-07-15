@@ -4,7 +4,7 @@ import org.joda.time._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{MemberUserType, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, Mockito, TestBase}
@@ -35,6 +35,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val set = new SmallGroupSet
 		set.academicYear = academicYear
 		set.releasedToStudents = true
+		set.format = SmallGroupFormat.Seminar
 
 		val group = new SmallGroup(set)
 		wireUserLookup(group.students)

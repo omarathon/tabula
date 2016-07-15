@@ -273,7 +273,6 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>profiles-render.js</include>
-								<include>profiles-admin.js</include>
 								<include>fullcalendar.js</include>
 								<include>allocate-associations.js</include>
 							</includes>
@@ -370,6 +369,7 @@
 								<include>js/id7/jquery-expandingTable.js</include>
 								<include>js/jquery.form.js</include>
 								<include>js/id7/jquery-tableform.js</include>
+								<include>js/select-deselect-checkboxes.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -423,6 +423,17 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
 								<include>exams-admin.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/profiles.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>profiles-render.js</include>
+								<include>fullcalendar.js</include>
+								<include>id7/allocate-associations.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

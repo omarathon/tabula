@@ -34,9 +34,11 @@ trait AssessmentService {
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
@@ -87,12 +89,18 @@ abstract class AbstractAssessmentService extends AssessmentService {
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
+	def getAssignmentsWithFeedback(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		assessmentDao.getAssignmentsWithFeedback(universityId, academicYearOption)
+
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(universityId).filter { _.isVisibleToStudentsHistoric }
 
 	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
 		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.universityId)
 		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
+
+	def getAssignmentsWithSubmission(universityId: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+		assessmentDao.getAssignmentsWithSubmission(universityId, academicYearOption)
 
 	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
 		assessmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)

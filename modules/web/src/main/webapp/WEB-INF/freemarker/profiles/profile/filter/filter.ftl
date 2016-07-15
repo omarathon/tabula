@@ -1,6 +1,8 @@
 <#escape x as x?html>
-	<h1>View students</h1>
-	<h4><span class="muted">in</span> ${department.name}</h4>
+	<div class="deptheader">
+		<h1>View students</h1>
+		<h4 class="with-related"><span class="muted">in</span> ${department.name}</h4>
+	</div>
 
 	<#assign filterCommand = filterStudentsCommand />
 	<#assign filterCommandName = "filterStudentsCommand" />

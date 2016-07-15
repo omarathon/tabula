@@ -30,7 +30,7 @@ trait ProfileService {
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getMemberByTimetableHash(timetableHash: String): Option[Member]
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
 	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def countStudentsByDepartment(department: Department): Int
@@ -122,8 +122,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def regenerateTimetableHash(member: Member) = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
 
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
-		profileQueryService.find(query, departments, userTypes, isGod)
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean) = transactional(readOnly = true) {
+		profileQueryService.find(query, departments, userTypes, searchAllDepts)
 	}
 
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
