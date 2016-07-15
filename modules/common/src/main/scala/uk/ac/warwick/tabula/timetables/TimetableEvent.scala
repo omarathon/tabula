@@ -8,7 +8,24 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.userlookup.User
 
-case class TimetableEvent(uid: String, name: String, title: String, description: String, eventType: TimetableEventType, weekRanges: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], parent: Parent, comments: Option[String], staff: Seq[User], students: Seq[User], year: AcademicYear, relatedUrl: Option[RelatedUrl])
+case class TimetableEvent(
+	uid: String,
+	name: String,
+	title: String,
+	description: String,
+	eventType: TimetableEventType,
+	weekRanges: Seq[WeekRange],
+	day: DayOfWeek,
+	startTime: LocalTime,
+	endTime: LocalTime,
+	location: Option[Location],
+	parent: Parent,
+	comments: Option[String],
+	staff: Seq[User],
+	students: Seq[User],
+	year: AcademicYear,
+	relatedUrl: Option[RelatedUrl]
+)
 
 case class RelatedUrl(urlString: String, title: Option[String])
 
