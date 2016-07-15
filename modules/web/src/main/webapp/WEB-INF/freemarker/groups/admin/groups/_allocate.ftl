@@ -202,13 +202,19 @@
 												</ul>
 											</div>
 										</#list>
-										<div class="well clearfix clash-info hide">
-											<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
-												<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+										<div class="well clearfix">
+											<div class="loading">
+												</p><i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any timetable conflicts for all students&hellip;</em>
 											</div>
-											<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
-												<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+											<div class="clash-info hide">
+												<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
+													<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+												</div>
+												<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
+													<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+												</div>
 											</div>
+											<div class="no-clash-info hide">No students have timetable conflicts with the current allocation.</div>
 											<div class="student-clash-info hide">
 												<span class="possibleclash-group-info"></span>
 												<span class="actualclash-userIds"></span>
@@ -279,6 +285,7 @@
 					var userIds = val[1];
 					$('.possibleclash-group-info').append( $('<span/>').prop("id",'clash-group-info-' + groupId).append(userIds.join(',')));
 				});
+				$('.loading').addClass("hide");
 				clashInfo();
 			});
 
@@ -310,16 +317,18 @@
 				if(totalClashes > 0) {
 					var $timtableClashLink = $('a.timetable-clash-link');
 					if(totalClashes > 1) {
-						$( '.clash-plural-info').removeClass("hide");
-						$( '.clash-singular-info').addClass("hide");
+						$('.clash-plural-info').removeClass("hide");
+						$('.clash-singular-info').addClass("hide");
 					} else {
-						$( '.clash-singular-info').removeClass("hide");
-						$( '.clash-plural-info').addClass("hide");
+						$('.clash-singular-info').removeClass("hide");
+						$('.clash-plural-info').addClass("hide");
 				    }
-					$( '.clash-info').removeClass("hide");
-					$timtableClashLink.prop('href', $timtableClashLink.data('href')  + clashUserIds);
+					$('.no-clash-info').addClass("hide");
+					$('.clash-info').removeClass("hide");
+					$timtableClashLink.attr('href', $timtableClashLink.data('href')  + clashUserIds);
 				} else {
-					$( '.clash-info').addClass("hide");
+					$('.clash-info').addClass("hide");
+					$('.no-clash-info').removeClass("hide");
 			 	}
 			};
 		})(jQuery);
