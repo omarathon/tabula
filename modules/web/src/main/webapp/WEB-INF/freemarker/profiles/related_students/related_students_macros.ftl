@@ -1,7 +1,16 @@
 <#escape x as x?html>
 
-<#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="">
+<#macro row student studentCourseDetails="" showMeetings=false meetingInfoPair="" showSelectStudents=false>
+	<#if studentCourseDetails?has_content>
+		<#assign courseDetails=studentCourseDetails.urlSafeId>
+	<#else>
+		<#assign courseDetails="">
+	</#if>
+
 	<tr class="related_student">
+		<#if showSelectStudents>
+			<td><input class="collection-checkbox" type="checkbox" name="students" data-fullname="${student.fullName}" value="${student.universityId}"  data-student-course-details ="${courseDetails}" /></td>
+		</#if>
 		<td>
 			<@fmt.member_photo student "tinythumbnail" />
 		</td>
@@ -35,14 +44,18 @@
 	</tr>
 </#macro>
 
-<#macro tableWithMeetingsColumn items meetingsMap>
-	<@table items=items showMeetings=true meetingsMap=meetingsMap />
+<#macro tableWithMeetingsColumn items meetingsMap showSelectStudents=false>
+	<@table items=items showMeetings=true meetingsMap=meetingsMap showSelectStudents=showSelectStudents/>
 </#macro>
 <#-- Print out a table of students/agents.-->
-<#macro table items showMeetings=false meetingsMap="">
-	<table class="related_students table table-striped table-condensed">
+<#macro table items showMeetings=false meetingsMap="" showSelectStudents=false>
+	<table class="related_students student-list table table-striped table-condensed">
 		<thead>
 			<tr>
+			<tr>
+				<#if showSelectStudents>
+					<th class ="check-col no-sort"><input type="checkbox" class="collection-check-all use-tooltip" title="Select/unselect all"></th>
+				</#if>
 				<th class="photo-col">Photo</th>
 				<th class="student-col">First name</th>
 				<th class="student-col">Last name</th>
@@ -56,7 +69,7 @@
 		<tbody>
 			<#list items as item>
 				<#if item.scjCode??>
-					<@row item.student item showMeetings=showMeetings meetingsMap[item.student.universityId]/>
+					<@row item.student item showMeetings=showMeetings meetingsMap[item.student.universityId] showSelectStudents=showSelectStudents/>
 				<#else>
 					<@row item />
 				</#if>
@@ -68,6 +81,7 @@
 	<#if !student_table_script_included??>
 		<script type="text/javascript">
 			(function($) {
+				$('.student-list').bigList({});
 				// add a custom parser for the date column
 				$.tablesorter.addParser({
 					id: 'customdate',
@@ -80,13 +94,34 @@
 					type: 'numeric'
 				});
 
+				var tableSorterSortList = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return [[3,0], [5,0], [6,0]];
+					}
+					return [[2,0], [4,0], [5,0]];
+				};
+				var tableSorterHeaders = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return {
+							8:{sorter: 'customdate'},
+							0:{sorter:false}
+						};
+					}
+					return { 7:{sorter: 'customdate'} };
+				};
+
+				var tableSorterForce = function(showSelectStudentCheckBox) {
+					if (showSelectStudentCheckBox) {
+						return [[3,0]];
+					}
+					return [[2,0]];
+				};
 				$(function() {
+					var showSelectStudentCheckBox = !!$(".collection-check-all").length;
 					$('.related_students').tablesorter({
-						sortList: [[2,0], [4,0], [5,0]],
-						headers: {
-							7:{sorter: 'customdate'}
-						},
-						sortForce: [[2,0]]
+						sortList: tableSorterSortList(showSelectStudentCheckBox),
+						headers: tableSorterHeaders(showSelectStudentCheckBox),
+						sortForce: tableSorterForce(showSelectStudentCheckBox)
 					});
 
 					$('.related_student').on('mouseover', function(e) {
@@ -94,7 +129,7 @@
 					}).on('mouseout', function(e) {
 						$(this).find('td').removeClass('hover');
 					}).on('click', function(e) {
-						if (!$(e.target).is('a') && !$(e.target).is('img')) {
+						if (!$(e.target).is('a') && !$(e.target).is('img') && !$(e.target).is('input.collection-checkbox:checkbox')) {
 							window.location = $(this).find('a.profile-link').attr('href');
 						}
 					});

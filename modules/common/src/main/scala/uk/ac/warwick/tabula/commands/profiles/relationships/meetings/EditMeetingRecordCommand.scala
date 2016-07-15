@@ -19,12 +19,12 @@ object EditMeetingRecordCommand {
 			with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with ComposableCommand[MeetingRecord]
-			with ModifyMeetingRecordCommandBindListener
+			with MeetingRecordCommandBindListener
 			with ModifyMeetingRecordValidation
 			with EditMeetingRecordDescription
 			with ModifyMeetingRecordPermissions
 			with EditMeetingRecordCommandState
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
 			with EditMeetingRecordCommandNotifications
 			with PopulateMeetingRecordCommand
 }
@@ -33,7 +33,7 @@ object EditMeetingRecordCommand {
 class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 	extends AbstractModifyMeetingRecordCommand {
 
-	self: ModifyMeetingRecordCommandRequest with EditMeetingRecordCommandState
+	self: MeetingRecordCommandRequest with EditMeetingRecordCommandState
 		with MeetingRecordServiceComponent with FeaturesComponent
 		with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
@@ -45,7 +45,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 
 trait PopulateMeetingRecordCommand extends PopulateOnForm {
 
-	self: ModifyMeetingRecordCommandRequest with EditMeetingRecordCommandState =>
+	self: MeetingRecordCommandRequest with EditMeetingRecordCommandState =>
 
 	override def populate(): Unit = {
 		title = meetingRecord.title

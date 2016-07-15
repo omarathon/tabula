@@ -4,6 +4,7 @@ import org.joda.time.DateTimeConstants
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, FileAttachment, StudentRelationshipType}
 import uk.ac.warwick.tabula.services._
@@ -32,10 +33,12 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane.txt"
+		fileAttach.fileDao = smartMock[FileDao]
 		uploadedFile.attached.add(fileAttach)
 
 		val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, relationship)
-			with ModifyMeetingRecordCommandRequest
+			with MeetingRecordCommandRequest
+			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
 			with FeaturesComponent
 			with AttendanceMonitoringMeetingRecordServiceComponent

@@ -405,13 +405,13 @@
 		}
 
 		function prepareMeetingModal($this, targetUrl) {
-			$.get(targetUrl + '?modal', function(data) {
+			$.get(GlobalScripts.setArgOnUrl(targetUrl, 'modal', ''), function(data) {
 				$meetingModal.html(data);
 				var $mb = $meetingModal.find('.modal-body').empty();
 				var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
 				$(iframeMarkup)
 					.off('load').on('load', meetingRecordIframeHandler)
-					.attr('src', targetUrl + '?iframe')
+					.attr('src', GlobalScripts.setArgOnUrl(targetUrl, 'iframe', ''))
 					.appendTo($mb);
 			}).fail(function() {
 				if (!$('#meeting-modal-failure').length) {

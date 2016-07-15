@@ -44,6 +44,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>
 <#macro edit_meeting_record scd academicYear meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/edit/${meeting_record.id}" /></#macro>
+<#macro create_bulk_meeting_record relationshipType><@_u page="/${relationshipType.urlPart}/meeting/bulk/create?studentCourseDetails=" /></#macro>
 
 <#macro delete_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
 <#macro restore_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
