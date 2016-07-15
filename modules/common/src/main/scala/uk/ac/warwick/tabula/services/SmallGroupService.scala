@@ -159,11 +159,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = {
 		benchmarkTask("findSmallGroupsByStudent") {
-			val groups = benchmarkTask("studentGroupHelper") {
+			val groups = benchmarkTask("findByStudentGroupHelper") {
 				studentGroupHelper.findBy(user)
 					.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
 			}
-			val linkedGroups = benchmarkTask("departmentStudentGroupHelper") {
+			val linkedGroups = benchmarkTask("findBydepartmentStudentGroupHelper") {
 				departmentStudentGroupHelper.findBy(user)
 					.filterNot { group => group.groupSet.deleted || group.groupSet.archived }
 					.flatMap {
