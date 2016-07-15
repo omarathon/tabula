@@ -1270,10 +1270,10 @@
 					$this.closest('.popover').find('button.close').trigger('click');
 					$m.find('.modal-footer .btn-primary').on('click', function(e){
 						e.preventDefault();
-						var link = $(this).attr('href');
+						var $target = $(this);
 						$m.modal('hide').on('hidden', function(){
 							$m.off('hidden');
-							attendanceNoteClickHandler(link);
+							attendanceNoteClickHandler($target.attr('href'), $target);
 						});
 					});
 				});
