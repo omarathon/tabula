@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.services.groups.docconversion.{AutowiringGroupsExtractorComponent, GroupsExtractorComponent, GroupsExtractor}
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.groups.docconversion.{AutowiringGroupsExtractorComponent, GroupsExtractor, GroupsExtractorComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object AllocateStudentsToGroupsCommand {
 	def apply(module: Module, set: SmallGroupSet, viewer: CurrentUser) =
@@ -25,7 +26,7 @@ object AllocateStudentsToGroupsCommand {
 			with AllocateStudentsToGroupsPermissions
 			with AllocateStudentsToGroupsDescription
 			with AllocateStudentsToGroupsValidation
-			with AllocateStudentsToGroupsViewHelpers
+			with AllocateStudentsToGroupsViewHelpers[SmallGroup]
 			with NotifiesAffectedGroupMembers
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServiceComponent
@@ -34,7 +35,9 @@ object AllocateStudentsToGroupsCommand {
 			with AutowiringGroupsExtractorComponent
 }
 
-class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser) extends CommandInternal[SmallGroupSet] with AllocateStudentsToGroupsCommandState {
+class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
+	extends CommandInternal[SmallGroupSet] with AllocateStudentsToGroupsCommandState {
+
 	self: GroupsObjects[User, SmallGroup] with SmallGroupServiceComponent =>
 
 	override def applyInternal() = transactional() {
@@ -73,7 +76,7 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
 		val fileNames = file.fileNames map (_.toLowerCase)
 		val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
 
-		if (invalidFiles.size > 0) {
+		if (invalidFiles.nonEmpty) {
 			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
 			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
 		}
@@ -96,11 +99,12 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
 	}
 }
 
-trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand {
+trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand with HasAcademicYear {
 	def module: Module
 	def set: SmallGroupSet
 	def viewer: CurrentUser
 	def apparentUser = viewer.apparentUser
+	override def academicYear: AcademicYear = set.academicYear
 
 	def isStudentSignup = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
@@ -166,8 +170,9 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 	}
 }
 
-trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
-	self: AllocateStudentsToGroupsCommandState with GroupsObjects[User, SmallGroup] with ProfileServiceComponent with SecurityServiceComponent =>
+trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends TaskBenchmarking {
+	self: HasAcademicYear with GroupsObjects[User, A]
+		with ProfileServiceComponent with SmallGroupServiceComponent =>
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
@@ -178,7 +183,7 @@ trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
 			case (group, users) => (group.id, users)
 		}.toMap
 
-	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
+	// For use by Freemarker to get a simple map of university IDs to Member objects
 	lazy val membersById = loadMembersById
 
 	def loadMembersById = {
@@ -186,17 +191,26 @@ trait AllocateStudentsToGroupsViewHelpers extends MemberCollectionHelper {
 
 		val allUsers = unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten
 		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
-		val members = profileService.getAllMembersWithUniversityIds(allUniversityIds)
-			.filter(member => securityService.can(viewer, Permissions.Profiles.Read.Core, member))
-			.map(member => (member.universityId, member)).toMap
+		val members = benchmarkTask("members") {
+			profileService.getAllMembersWithUniversityIds(allUniversityIds)
+				.map(member => (member.universityId, member)).toMap
+		}
 		members
 	}
 
-	def allMembersRoutes() = {
-		allMembersRoutesSorted(membersById.values)
+	lazy val memberAllocationData = smallGroupService.listMemberDataForAllocation(membersById.values.toSeq, academicYear)
+
+	lazy val allMembersRoutes = {
+		memberAllocationData.values
+			.filter(_.routeCode.nonEmpty)
+			.map(data => data.copy(yearOfStudy = 0))
+			.toSeq.distinct.sortBy(_.routeCode)
 	}
 
-	def allMembersYears(): Seq[JInteger] = {
-		allMembersYears(membersById.values)
+	lazy val allMembersYears = {
+		memberAllocationData.values
+			.filter(_.yearOfStudy > 0)
+			.map(data => data.copy(routeCode = "", routeName = ""))
+			.toSeq.distinct.sortBy(_.yearOfStudy)
 	}
 }
