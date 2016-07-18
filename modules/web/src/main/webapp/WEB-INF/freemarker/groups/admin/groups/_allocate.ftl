@@ -300,36 +300,39 @@
 			});
 
 			var clashInfo =  function() {
-				var userIds = [];
-				var students = $('input[name^="mapping"]').each(function() {
-					var inputName = this.name;
-					var inputValue = this.value;
-					var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
-					var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
-					if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
-						userIds.push(inputValue);
-					}
-				});
-				var clashUserIds = userIds.join(',');
-				$('.actualclash-userIds').append(clashUserIds);
-				var totalClashes = userIds.length;
-				$( '.clash-count').html(totalClashes);
-				if(totalClashes > 0) {
-					var $timtableClashLink = $('a.timetable-clash-link');
-					if(totalClashes > 1) {
-						$('.clash-plural-info').removeClass("hide");
-						$('.clash-singular-info').addClass("hide");
+				// check if we have got json result back, if not then no need to check at this stage
+				if ($('.loading').hasClass('hide')) {
+					var userIds = [];
+					var students = $('input[name^="mapping"]').each(function() {
+						var inputName = this.name;
+						var inputValue = this.value;
+						var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
+						var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
+						if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
+							userIds.push(inputValue);
+						}
+					});
+					var clashUserIds = userIds.join(',');
+					$('.actualclash-userIds').append(clashUserIds);
+					var totalClashes = userIds.length;
+					$('.clash-count').html(totalClashes);
+					if (totalClashes > 0) {
+						var $timtableClashLink = $('a.timetable-clash-link');
+						if (totalClashes > 1) {
+							$('.clash-plural-info').removeClass("hide");
+							$('.clash-singular-info').addClass("hide");
+						} else {
+							$('.clash-singular-info').removeClass("hide");
+							$('.clash-plural-info').addClass("hide");
+						}
+						$('.no-clash-info').addClass("hide");
+						$('.clash-info').removeClass("hide");
+						$timtableClashLink.attr('href', $timtableClashLink.data('href') + clashUserIds);
 					} else {
-						$('.clash-singular-info').removeClass("hide");
-						$('.clash-plural-info').addClass("hide");
-				    }
-					$('.no-clash-info').addClass("hide");
-					$('.clash-info').removeClass("hide");
-					$timtableClashLink.attr('href', $timtableClashLink.data('href')  + clashUserIds);
-				} else {
-					$('.clash-info').addClass("hide");
-					$('.no-clash-info').removeClass("hide");
-			 	}
+						$('.clash-info').addClass("hide");
+						$('.no-clash-info').removeClass("hide");
+					}
+				}
 			};
 		})(jQuery);
 	</script>
