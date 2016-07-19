@@ -42,9 +42,10 @@ class OvercattedYearMarkColumnOption extends ExamGridColumnOption with Autowirin
 				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
 			} else {
 				if (entity.cats > state.normalLoad) {
-					if (state.overcatSubsets(entity).size <= 1) {
-						// If the student has overcatted, but there's only one valid subset, just show the mean mark
-						moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
+					val overcatSubsets = state.overcatSubsets(entity)
+					if (overcatSubsets.size == 1) {
+						// If the student has overcatted, but there's only one valid subset, just show the mark for that subset
+						Option(overcatSubsets.head._1)
 					} else if (entity.overcattingModules.isDefined) {
 						// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
 						// calculate the overcatted mark from that subset
