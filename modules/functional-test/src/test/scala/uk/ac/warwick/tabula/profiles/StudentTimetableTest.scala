@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.web.FeaturesDriver
-import uk.ac.warwick.tabula.profiles.pages.ProfilePage
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import com.gargoylesoftware.htmlunit.BrowserVersion
@@ -46,12 +45,11 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 
 		When("Student1 views their profile")
 		signIn as P.Student1 to Path("/profiles")
-		val profilePage = new ProfilePage()
-		profilePage should be('currentPage)
+		currentUrl should endWith (s"/profiles/view/${P.Student1.warwickId}")
 
-		profilePage.timetablePane should be ('defined)
-		val timetable = profilePage.timetablePane().get
-		timetable should be('showingCalendar)
+		click on linkText("Timetable")
+
+		currentUrl should endWith (s"/profiles/view/course/${P.Student1.warwickId}_1/2014/timetable")
 
 	}
 

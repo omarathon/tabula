@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.profiles.pages.SubDepartmentFixture
-
 /**
  * Tests for the pages that list students with and without tutors and supervisors for a given department
  *
@@ -35,7 +33,7 @@ class TuteesListTest extends SubDepartmentFixture{
 		Given("Student3 has Marker 1 for a personal tutor")
 
 		When("The marker goes to the profiles home page")
-		signIn as(P.Marker1) to(Path("/profiles/tutor/students"))
+		signIn as P.Marker1 to Path("/profiles/tutor/students")
 
 		Then("There is a tutee")
 		pageSource should include("related_student")

@@ -5,8 +5,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentMember}
-import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, MemberDao, MemberDaoImpl, ModuleDao, ModuleDaoImpl, SessionComponent, TransactionalComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 

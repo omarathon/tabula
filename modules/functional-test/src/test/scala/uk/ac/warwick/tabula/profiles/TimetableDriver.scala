@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.profiles
 
-import scala.xml.Elem
-import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, AcademicDateHelper, LoginDetails, FunctionalTestProperties}
 import dispatch.classic._
-import scala.language.postfixOps
 import dispatch.classic.thread.ThreadSafeHttpClient
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import scala.util.parsing.json.JSON
+import org.apache.http.client.params.{ClientPNames, CookiePolicy}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.web.FixturesDriver
+import uk.ac.warwick.tabula.{AcademicDateHelper, FunctionalTestAcademicYear, FunctionalTestProperties, LoginDetails}
 import uk.ac.warwick.util.termdates.TermFactoryImpl
+
+import scala.language.postfixOps
+import scala.util.parsing.json.JSON
+import scala.xml.Elem
 
 trait TimetableDriver extends FixturesDriver  {
 
@@ -22,7 +23,7 @@ trait TimetableDriver extends FixturesDriver  {
 	def requestWholeYearsTimetableFeedFor(user:LoginDetails, asUser:Option[LoginDetails]=None ):Seq[Map[String,Any]]={
 		val http: Http = new Http with thread.Safety {
 			override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-				getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+				getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 			}
 		}
 		try {

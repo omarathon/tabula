@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.scheduling.ModuleInfo
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data.model.{DegreeType, Module}
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.scheduling.ModuleInfo
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.data.model.{DegreeType, Module}
 
 class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 

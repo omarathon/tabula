@@ -134,15 +134,17 @@
 							<tr <#if memberNote.deleted>class="deleted subtle"</#if>>
 								<td data-sortby="${memberNote.creationDate.millis?c}"><@fmt.date date=memberNote.creationDate includeTime=false /></td>
 								<td>
-									<#if canEditMemberNote>
+									<#if canEditMemberNote || canDeletePurgeMemberNote>
 										<div class="pull-right">
 											<i class="fa fa-spinner fa-spin invisible"></i>
 											<span class="dropdown">
 												<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
 												<ul class="dropdown-menu pull-right">
-													<li>
-														<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note memberNote />" class="edit <#if memberNote.deleted>disabled</#if>" title="Edit note">Edit</a>
-													</li>
+													<#if canEditMemberNote>
+														<li>
+															<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_member_note memberNote />" class="edit <#if memberNote.deleted>disabled</#if>" title="Edit note">Edit</a>
+														</li>
+													</#if>
 													<#if canDeletePurgeMemberNote>
 														<li>
 															<a href="<@routes.profiles.delete_member_note memberNote />" class="delete <#if memberNote.deleted>disabled</#if>">Delete</a>

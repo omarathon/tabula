@@ -1,7 +1,7 @@
-package uk.ac.warwick.tabula.profiles.pages
+package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FixturesDriver
 
 trait SubDepartmentFixture  extends BrowserTest with GivenWhenThen with FixturesDriver{

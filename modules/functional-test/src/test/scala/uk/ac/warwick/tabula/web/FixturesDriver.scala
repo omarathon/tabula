@@ -20,15 +20,17 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >| )
 	}
 
-	def createSmallGroupSet(moduleCode:String,
-													groupSetName:String,
-													groupCount:Int= 1,
-													formatName:String="tutorial",
-													allocationMethodName:String="Manual",
-													openForSignups:Boolean = true,
-													maxGroupSize:Int = 0,
-													releasedToStudents:Boolean = true,
-													allowSelfGroupSwitching:Boolean  = true):String  = {
+	def createSmallGroupSet(
+		moduleCode:String,
+		groupSetName:String,
+		groupCount:Int= 1,
+		formatName:String="tutorial",
+		allocationMethodName:String="Manual",
+		openForSignups:Boolean = true,
+		maxGroupSize:Int = 0,
+		releasedToStudents:Boolean = true,
+		allowSelfGroupSwitching:Boolean  = true
+	):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
@@ -71,13 +73,15 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
-	def createStudentMember(userId:String,
-													genderCode:String = "M",
-													routeCode:String="",
-													yearOfStudy:Int=1,
-													courseCode:String="",
-													deptCode:String="",
-													academicYear:String = "2014"){
+	def createStudentMember(
+		userId:String,
+		genderCode:String = "M",
+		routeCode:String="",
+		yearOfStudy:Int=1,
+		courseCode:String="",
+		deptCode:String="",
+		academicYear:String = "2014"
+	){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
@@ -102,10 +106,10 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def updateAssignment(deptCode:String, assignmentName:String, openDate:Option[DateTime] = None, closeDate:Option[DateTime] = None){
-		val datesToUpdate:Seq[(String,String)] = Seq("openDate"->openDate,"closeDate"->closeDate).map(t=>t._2 match {
-			case None=>None
-			case Some(d)=>Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
-		}).flatten
+		val datesToUpdate:Seq[(String,String)] = Seq("openDate" -> openDate, "closeDate" -> closeDate).flatMap(t => t._2 match {
+			case None => None
+			case Some(d) => Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
+		})
 		val params:Seq[(String,String)] = Seq("deptCode"->deptCode,"assignmentName"->assignmentName) ++ datesToUpdate
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/assignment"
 		val req = url(uri).POST << Map(
@@ -221,6 +225,17 @@ trait FixturesDriver extends SimpleHttpFetching {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/premarkedAssignment"
 		val args = Map("moduleCode" -> moduleCode)
 		val req = url(uri).POST << args
+		http.when(_==200)(req >|)
+	}
+
+	def createMemberNote(memberId: String, creatorId: String, note: String, title: String = ""): Unit = {
+		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/memberNote"
+		val req = url(uri).POST << Map(
+			"memberId" -> memberId,
+			"creatorId" -> creatorId,
+			"note" -> note,
+			"title" -> title
+		)
 		http.when(_==200)(req >|)
 	}
 

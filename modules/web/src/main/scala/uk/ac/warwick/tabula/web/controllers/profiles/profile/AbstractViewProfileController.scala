@@ -107,16 +107,24 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 	@Autowired var conversionService: ConversionService = _
 
+	private def convertOrNull[A >: Null](source: Object, targetType: Class[A]): A = {
+		try {
+			conversionService.convert(source, targetType)
+		} catch {
+			case _: Exception => null
+		}
+	}
+
 	@ModelAttribute("viewProfileCommand")
 	protected def viewProfileCommand(@PathVariable pvs: JMap[String, String]) = {
 		val pathVariables = pvs.asScala
 		if (pathVariables.contains("member")) {
 			new ViewProfileCommand(user, mandatory(
-				conversionService.convert(pathVariables("member"), classOf[Member])
+				convertOrNull(pathVariables("member"), classOf[Member])
 			))
 		} else if (pathVariables.contains("studentCourseDetails")) {
 			new ViewProfileCommand(user, mandatory(
-				conversionService.convert(pathVariables("studentCourseDetails"), classOf[StudentCourseDetails])
+				convertOrNull(pathVariables("studentCourseDetails"), classOf[StudentCourseDetails])
 			).student)
 		}
 	}

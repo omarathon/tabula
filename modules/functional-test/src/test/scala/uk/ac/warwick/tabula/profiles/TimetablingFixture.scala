@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.profiles
 
-import org.scalatest.selenium.WebBrowser.go
+import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
-import org.scalatest.GivenWhenThen
 
 
 trait TimetablingFixture extends BrowserTest with TimetableDriver  with FeaturesDriver with GivenWhenThen{

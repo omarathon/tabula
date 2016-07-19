@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.profiles.pages.SubDepartmentFixture
-
 class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 	/**
 	 * These tests all assume that:
 	 *
-	 *  - you need to have explicit permissions (Permissions.Profiles.Read.Timetable) for the timetable
+	 *  - you need to have explicit permissions (Profiles.Read.MobileNumber) for the mobile number
 	 *  to be displayed when you view another user's profile
 	 *
 	 *  - the DepartmentAdmin role grants the holder that permission on any student who touches the department
@@ -27,7 +25,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 		Then("Admin1 can view Student1's timetable")
 		signIn as P.Admin1 to Path(s"/profiles/view/${P.Student1.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 	}
 
 	"A departmental administrator" should "have admin rights on students on modules in their sub-departments" in {
@@ -37,18 +35,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 		Then("Admin1 can view Student2's profile")
 		signIn as P.Admin1 to Path(s"/profiles/view/${P.Student2.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
-	}
-
-
-	"A sub-departmental administrator" should "be able to view timetables for students in their parent department" in {
-		Given("Student3 is a postgraduate, registered on a module in xxx")
-		createModule("xxx","xpg12","Postgrad module")
-		registerStudentsOnModule(Seq(P.Student3),"xpg12")
-
-		Then("Admin3 can view Student3's profile, in a different department, and see their timetable")
-		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student3.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students who match their sub-departments" in {
@@ -59,7 +46,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 		Then("Admin3 can view Student1's profile")
 		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student1.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students on modules in their sub-department" in {
@@ -70,7 +57,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 		Then("Admin3 can view Student2's profile")
 		signIn as P.Admin3 to Path(s"/profiles/view/${P.Student2.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 	}
 
 	"A sub-sub-departmental administrator" should "have admin rights on students who match their sub-sub-department" in{
@@ -90,7 +77,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 		And("Admin4 can also view student2's timetable, in a different department")
 
 		go to Path(s"/profiles/view/${P.Student2.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 	}
 
 }

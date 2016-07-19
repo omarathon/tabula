@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 class ModuleCreationFixturesController {
 
 	@ModelAttribute("createModuleCommand")
-	def getCreateModuleCommand(): Appliable[Module] = {
+	def command(): Appliable[Module] = {
 		ModuleFixtureCommand()
 	}
 
@@ -32,7 +32,7 @@ class ModuleCreationFixturesController {
 class SmallGroupSetCreationFixturesController {
 
 	@ModelAttribute("createGroupSetCommand")
-	def getCreateModuleCommand(): Appliable[SmallGroupSet] = {
+	def command(): Appliable[SmallGroupSet] = {
 		SmallGroupSetFixtureCommand()
 	}
 
@@ -48,7 +48,7 @@ class SmallGroupSetCreationFixturesController {
 class SmallGroupSetMembershipCreationFixturesController {
 
 	@ModelAttribute("createMembershipCommand")
-	def getCreateModuleCommand(): Appliable[SmallGroupSet] = {
+	def command(): Appliable[SmallGroupSet] = {
 		GroupsetMembershipFixtureCommand()
 
 	}
@@ -64,7 +64,7 @@ class SmallGroupSetMembershipCreationFixturesController {
 class SmallGroupEventCreationFixturesController {
 
 	@ModelAttribute("createEventCommand")
-	def getCreateEventCommand(): Appliable[SmallGroupEvent] = {
+	def command(): Appliable[SmallGroupEvent] = {
 		SmallGroupEventFixtureCommand()
 	}
 
@@ -78,7 +78,7 @@ class SmallGroupEventCreationFixturesController {
 class SmallGroupMembershipCreationFixturesController {
 
 	@ModelAttribute("createMembershipCommand")
-	def getCreateModuleCommand(): Appliable[SmallGroup] = {
+	def command(): Appliable[SmallGroup] = {
 		GroupMembershipFixtureCommand()
 
 	}
@@ -94,7 +94,7 @@ class SmallGroupMembershipCreationFixturesController {
 class StaffMemberCreationFixturesController {
 
 	@ModelAttribute("createMemberCommand")
-	def getCreateModuleCommand(): Appliable[StaffMember] = {
+	def command(): Appliable[StaffMember] = {
 		StaffMemberFixtureCommand()
 	}
 
@@ -109,7 +109,7 @@ class StaffMemberCreationFixturesController {
 class StudentMemberCreationFixturesController {
 
 	@ModelAttribute("createMemberCommand")
-	def getCreateModuleCommand(): Appliable[StudentMember] = {
+	def command(): Appliable[StudentMember] = {
 		StudentMemberFixtureCommand()
 	}
 
@@ -124,7 +124,7 @@ class StudentMemberCreationFixturesController {
 class RouteCreationFixturesController {
 
 	@ModelAttribute("createRouteCommand")
-	def getCreateRouteCommand(): Appliable[Route] = {
+	def command(): Appliable[Route] = {
 		RouteCreationFixtureCommand()
 	}
 
@@ -139,7 +139,7 @@ class RouteCreationFixturesController {
 class CourseCreationFixturesController {
 
 	@ModelAttribute("createCourseCommand")
-	def getCreatecourseCommand(): Appliable[Course] = {
+	def command(): Appliable[Course] = {
 		CourseCreationFixtureCommand()
 	}
 
@@ -154,7 +154,7 @@ class CourseCreationFixturesController {
 class AssessmentComponentCreationFixturesController {
 
 	@ModelAttribute("createAssessmentComponentCommand")
-	def getAssessmentComponentCommand(): Appliable[AssessmentComponent] = {
+	def command(): Appliable[AssessmentComponent] = {
 		AssessmentComponentCreationFixtureCommand()
 	}
 
@@ -169,7 +169,7 @@ class AssessmentComponentCreationFixturesController {
 class UpstreamAssessmentGroupCreationFixturesController {
 
 	@ModelAttribute("createUpstreamAssessmentGroupCommand")
-	def getUpstreamAssessmentGroupCommand(): Appliable[UpstreamAssessmentGroup] = {
+	def command(): Appliable[UpstreamAssessmentGroup] = {
 		UpstreamAssessmentGroupCreationFixtureCommand()
 	}
 
@@ -184,7 +184,7 @@ class UpstreamAssessmentGroupCreationFixturesController {
 class RelationshipCreationFixturesController {
 
 	@ModelAttribute("createRelationship")
-	def getCreateRelationshipCommand(): Appliable[MemberStudentRelationship] = {
+	def command(): Appliable[MemberStudentRelationship] = {
 		RelationshipFixtureCommand()
 	}
 
@@ -199,7 +199,7 @@ class RelationshipCreationFixturesController {
 class ModuleRegistrationFixturesController {
 
 	@ModelAttribute("moduleRegistrationCommand")
-	def getModuleRegistrationCommand(): Appliable[Seq[ModuleRegistration]] = {
+	def command(): Appliable[Seq[ModuleRegistration]] = {
 		ModuleRegistrationFixtureCommand()
 	}
 
@@ -214,7 +214,7 @@ class ModuleRegistrationFixturesController {
 class UpdateAssignmentFixturesController {
 
 	@ModelAttribute("updateAssignmentCommand")
-	def getUpdateAssignmentCommand(): Appliable[Seq[Assignment]] = {
+	def command(): Appliable[Seq[Assignment]] = {
 		UpdateAssignmentCommand()
 	}
 
@@ -229,7 +229,7 @@ class UpdateAssignmentFixturesController {
 class CreateExtensionFixturesController {
 
 	@ModelAttribute("createExtensionCommand")
-	def getCreateExtensionCommand(): Appliable[Extension] = {
+	def command(): Appliable[Extension] = {
 		CreateExtensionFixtureCommand()
 	}
 
@@ -244,7 +244,7 @@ class CreateExtensionFixturesController {
 class UpdateExtensionSettingsFixturesController {
 
 	@ModelAttribute("updateExtensionSettingsFixtureCommand")
-	def getUpdateExtensionSettingsFixtureCommand(): Appliable[Department] = {
+	def command(): Appliable[Department] = {
 		UpdateExtensionSettingsFixtureCommand()
 	}
 
@@ -259,7 +259,7 @@ class UpdateExtensionSettingsFixturesController {
 class CreateAttendanceMonitoringSchemeFixturesController {
 
 	@ModelAttribute("createAttendanceMonitoringSchemeFixtureCommand")
-	def getCreateAttendanceMonitoringSchemeFixtureCommand(): Appliable[AttendanceMonitoringScheme] = {
+	def command(): Appliable[AttendanceMonitoringScheme] = {
 		AttendanceMonitoringSchemeFixtureCommand()
 	}
 
@@ -274,12 +274,27 @@ class CreateAttendanceMonitoringSchemeFixturesController {
 class CreatePremarkedAssignmentFixtureController {
 
 	@ModelAttribute("createPremarkedAssignmentFixtureCommand")
-	def getCreatePremarkedAssignmentFixtureCommand(): Appliable[Assignment] = {
+	def command(): Appliable[Assignment] = {
 		CreatePremarkedAssignmentFixtureCommand()
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("createPremarkedAssignmentFixtureCommand") cmd: Appliable[Assignment]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/memberNote"))
+class MemberNoteCreationFixturesController {
+
+	@ModelAttribute("createMemberNoteCommand")
+	def command(): Appliable[MemberNote] = {
+		MemberNoteCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMemberNoteCommand") cmd: Appliable[MemberNote]) {
 		cmd.apply()
 	}
 }
