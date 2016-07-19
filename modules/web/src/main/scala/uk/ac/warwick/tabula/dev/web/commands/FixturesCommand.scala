@@ -4,18 +4,17 @@ import org.hibernate.criterion.Restrictions
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.commands.{Command, Description}
-import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, UserAccessMgrRoleDefinition}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.scheduling.{DepartmentInfo, ModuleInfo}
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 
 import scala.collection.JavaConverters._
@@ -294,34 +293,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			for (modInfo <- moduleInfos)
 				session.save(newModuleFrom(modInfo, department))
 			session.save(newModuleFrom(Fixtures.TestModule4, subDepartment))
-		}
-
-		// create a small group on the first module in the list
-		transactional() {
-			val firstModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule1.code).get
-			val groupSet = new SmallGroupSet()
-			groupSet.name = "Test Lab"
-			groupSet.format = SmallGroupFormat.Lab
-			groupSet.module = firstModule
-			groupSet.allocationMethod= SmallGroupAllocationMethod.Manual
-			val group  = new SmallGroup
-			group.name ="Test Lab Group 1"
-			groupSet.groups = JArrayList(group)
-			session.save(groupSet)
-		}
-
-		// and another, with AllocationMethod = "StudentSignUp", on the second
-		transactional() {
-			val secondModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule2.code).get
-			val groupSet = new SmallGroupSet()
-			groupSet.name = "Module 2 Tutorial"
-			groupSet.format = SmallGroupFormat.Tutorial
-			groupSet.module = secondModule
-			groupSet.allocationMethod= SmallGroupAllocationMethod.StudentSignUp
-			val group  = new SmallGroup
-			group.name ="Group 1"
-			groupSet.groups = JArrayList(group)
-			session.save(groupSet)
 		}
 
 		session.flush()

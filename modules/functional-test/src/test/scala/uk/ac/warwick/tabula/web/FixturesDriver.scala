@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.web
 
 import dispatch.classic._
-import uk.ac.warwick.tabula.{LoginDetails, FunctionalTestProperties}
-import scala.util.parsing.json.JSON
-import scala.language.postfixOps
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.{FunctionalTestProperties, LoginDetails}
+
+import scala.language.postfixOps
+import scala.util.parsing.json.JSON
 
 trait FixturesDriver extends SimpleHttpFetching {
 
@@ -20,26 +21,30 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >| )
 	}
 
-	def createSmallGroupSet(moduleCode:String,
-													groupSetName:String,
-													groupCount:Int= 1,
-													formatName:String="tutorial",
-													allocationMethodName:String="Manual",
-													openForSignups:Boolean = true,
-													maxGroupSize:Int = 0,
-													releasedToStudents:Boolean = true,
-													allowSelfGroupSwitching:Boolean  = true):String  = {
+	def createSmallGroupSet(
+		moduleCode:String,
+		groupSetName:String,
+		groupCount:Int= 1,
+		formatName:String="tutorial",
+		allocationMethodName:String="Manual",
+		openForSignups:Boolean = true,
+		maxGroupSize:Int = 0,
+		releasedToStudents:Boolean = true,
+		allowSelfGroupSwitching:Boolean  = true,
+		academicYear: String
+	):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
 			"groupSetName" -> groupSetName,
-		  "formatName"->formatName,
-		  "allocationMethodName"->allocationMethodName,
-		  "groupCount"->groupCount.toString,
-		  "openForSignups"->openForSignups.toString,
-		  "releasedToStudents"->releasedToStudents.toString,
-		  "maxGroupSize"->maxGroupSize.toString,
-		  "allowSelfGroupSwitching"->allowSelfGroupSwitching.toString
+		  "formatName" -> formatName,
+		  "allocationMethodName" -> allocationMethodName,
+		  "groupCount" -> groupCount.toString,
+		  "openForSignups" -> openForSignups.toString,
+		  "releasedToStudents" -> releasedToStudents.toString,
+		  "maxGroupSize" -> maxGroupSize.toString,
+		  "allowSelfGroupSwitching" -> allowSelfGroupSwitching.toString,
+			"academicYear" -> academicYear
 		)
 		val resp = http.when(_==200)(req as_str)
 
@@ -71,13 +76,15 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
-	def createStudentMember(userId:String,
-													genderCode:String = "M",
-													routeCode:String="",
-													yearOfStudy:Int=1,
-													courseCode:String="",
-													deptCode:String="",
-													academicYear:String = "2014"){
+	def createStudentMember(
+		userId:String,
+		genderCode:String = "M",
+		routeCode:String="",
+		yearOfStudy:Int=1,
+		courseCode:String="",
+		deptCode:String="",
+		academicYear:String = "2014"
+	){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
@@ -102,10 +109,10 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def updateAssignment(deptCode:String, assignmentName:String, openDate:Option[DateTime] = None, closeDate:Option[DateTime] = None){
-		val datesToUpdate:Seq[(String,String)] = Seq("openDate"->openDate,"closeDate"->closeDate).map(t=>t._2 match {
-			case None=>None
-			case Some(d)=>Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
-		}).flatten
+		val datesToUpdate:Seq[(String,String)] = Seq("openDate" -> openDate, "closeDate" -> closeDate).flatMap(t => t._2 match {
+			case None => None
+			case Some(d) => Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
+		})
 		val params:Seq[(String,String)] = Seq("deptCode"->deptCode,"assignmentName"->assignmentName) ++ datesToUpdate
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/update/assignment"
 		val req = url(uri).POST << Map(
