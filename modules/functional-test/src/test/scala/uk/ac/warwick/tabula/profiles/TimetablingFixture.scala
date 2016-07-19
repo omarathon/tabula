@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.profiles
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.web.FeaturesDriver
-import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.web.FeaturesDriver
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
 
