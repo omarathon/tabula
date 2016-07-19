@@ -1,15 +1,10 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
-import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.web.FeaturesDriver
-import uk.ac.warwick.tabula.profiles.pages.ProfilePage
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import com.gargoylesoftware.htmlunit.BrowserVersion
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.ie.InternetExplorerDriver
+import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.profiles.pages.ProfilePage
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+
 import scala.util.{Failure, Success, Try}
 
 /**

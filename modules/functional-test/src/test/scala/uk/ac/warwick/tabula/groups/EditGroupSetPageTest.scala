@@ -9,7 +9,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		Given("I am logged in as admin")
 			signIn as P.Admin1  to Path("/groups/")
 		And("I view the small group page for test services")
-			val groupsPage = new SmallGroupTeachingPage("xxx", "2014")
+			val groupsPage = new SmallGroupTeachingPage("xxx", academicYearString)
 			go to groupsPage.url
 
 		When("I click on the 'Actions' dropdown for module xxx01/Test Lab")
@@ -21,7 +21,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 	}
 
 	"Department Admin" should "be able to view and set information visibility options" in {
-		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", "2014")
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", academicYearString)
 
 		Given("The smallGroupTeachingStudentSignUp feature is enabled")
 			enableFeature("smallGroupTeachingStudentSignUp")
@@ -55,7 +55,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 	}
 
 	"Department Admin" should "be able to set a maximum group size" in {
-		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", "2014")
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", academicYearString)
 
 		When("I log in as admin")
 			signIn as P.Admin1  to Path("/groups/")

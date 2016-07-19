@@ -12,7 +12,14 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 	"A student" should "not be able to see unreleased groups" in {
 		Given("A small groupset exists with 2 small groups, an allocation method of Manual, but is not released to students")
 		createModule("xxx",TEST_MODULE_CODE,"Manually-allocated Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2, releasedToStudents = false, academicYear = "2014")
+		val setId = createSmallGroupSet(
+			TEST_MODULE_CODE,
+			TEST_GROUPSET_NAME,
+			allocationMethodName = "Manual",
+			groupCount = 2,
+			releasedToStudents = false,
+			academicYear = academicYearString
+		)
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -70,7 +77,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 	}
 
 	it should "be able to open batches of groups" in {
-		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", "2014")
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", academicYearString)
 		val TEST_MODULE_CODE = "xxx999"
 		val TEST_GROUPSET_NAME="Test Tutorial"
 
@@ -79,7 +86,13 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 		And("There is a a groupset with an allocation method of StudentSignUp")
 			createModule("xxx",TEST_MODULE_CODE,"Batch Opening Groupsets test")
-		  createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", openForSignups = false, academicYear = "2014")
+		  createSmallGroupSet(
+				TEST_MODULE_CODE,
+				TEST_GROUPSET_NAME,
+				allocationMethodName = "StudentSignUp",
+				openForSignups = false,
+				academicYear = academicYearString
+			)
 
 		And("The administrator is logged in and viewing the groups home page")
 		  signIn as P.Admin1  to groupsetSummaryPage.url
@@ -114,7 +127,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
   		batchOpen.checkboxForGroupSet(setInfo) should not be 'enabled
 
 		When("I go back to the groups home page")
-		val updatedSummary = new SmallGroupTeachingPage("xxx", "2014")
+		val updatedSummary = new SmallGroupTeachingPage("xxx", academicYearString)
 		  go to updatedSummary.url
 
 		Then("The option to open the groupset is absent")
