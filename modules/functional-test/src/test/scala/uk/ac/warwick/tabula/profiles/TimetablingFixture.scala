@@ -33,7 +33,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 		And("a module exists with a related SmallGroupSet")
 		createModule(TEST_DEPARTMENT_CODE, TEST_MODULE_CODE, TEST_MODULE_NAME)
-		testGroupSetId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
+		testGroupSetId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME, academicYear = "2014")
 
 		And("marker1 has a membership record")
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)

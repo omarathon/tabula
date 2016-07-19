@@ -10,12 +10,13 @@ import org.scalatest.Matchers
 import uk.ac.warwick.tabula.EventuallyAjax
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with Matchers  with GroupSetList {
+class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String)(implicit val webDriver:WebDriver)
+	extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with Matchers  with GroupSetList {
 
-	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
+	val url = "%s/groups/admin/department/%s/%s".format(FunctionalTestProperties.SiteRoot, departmentCode, academicYear)
 
 	def isCurrentPage: Boolean = {
-		currentUrl should include ("/groups/admin/department/" + departmentCode)
+		currentUrl should include ("/groups/admin/department/" + departmentCode + "/" + academicYear)
 		pageTitle == "Tabula - Small Group Teaching"
 	}
 

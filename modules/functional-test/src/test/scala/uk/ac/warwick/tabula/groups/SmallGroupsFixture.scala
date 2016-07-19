@@ -1,16 +1,27 @@
 package uk.ac.warwick.tabula.groups
 
-import uk.ac.warwick.tabula.{BreadcrumbsMatcher, LoginDetails, BrowserTest}
-import org.openqa.selenium.By
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
+import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
   before{
     go to Path("/fixtures/setup")
 		pageSource should include("Fixture setup successful")
+		createSmallGroupSet(
+			moduleCode = "xxx01",
+			groupSetName = "Test Lab",
+			formatName = "lab",
+			allocationMethodName = "Manual",
+			academicYear = "2014"
+		)
+		createSmallGroupSet(
+			moduleCode = "xxx02",
+			groupSetName = "Module 2 Tutorial",
+			formatName = "tutorial",
+			allocationMethodName = "StudentSignUp",
+			academicYear = "2014"
+		)
   }
 
   def as[T](user: LoginDetails)(fn: =>T) = {
