@@ -22,6 +22,8 @@ import org.springframework.util.Assert
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringStyle, ToStringBuilder}
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
 	def findBy(user: User): Seq[A]
@@ -52,7 +54,7 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 	with UserGroupMembershipHelperLookup
 	with Daoisms
 	with AutowiringUserLookupComponent
-	with Logging {
+	with Logging with TaskBenchmarking {
 
 	val runtimeClass = classTag[A].runtimeClass
 
@@ -61,8 +63,9 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 
 	def findBy(user: User): Seq[A] = {
 		val ids = cache match {
-			case Some(c) =>
+			case Some(c) => benchmarkTask("findByUsingCache") {
 				c.get(user.getUserId).toSeq
+			}
 			case None =>
 				logger.warn(s"Couldn't find a cache bean named $cacheName")
 				findByInternal(user)
@@ -161,11 +164,13 @@ trait UserGroupMembershipHelperLookup {
 }
 
 class UserGroupMembershipCacheFactory(val runtimeClass: Class[_], val path: String, val checkUniversityIds: Boolean = true)
-	extends SingularCacheEntryFactory[String, Array[String]] with UserGroupMembershipHelperLookup with Daoisms with AutowiringUserLookupComponent {
+	extends SingularCacheEntryFactory[String, Array[String]] with UserGroupMembershipHelperLookup with Daoisms with AutowiringUserLookupComponent  with TaskBenchmarking {
 
 	def create(usercode: String) = {
 		val user = getUser(usercode)
-		findByInternal(user).toArray
+		benchmarkTask("findByInternal") {
+			findByInternal(user).toArray
+		}
 	}
 
 	def shouldBeCached(value: Array[String]) = true
