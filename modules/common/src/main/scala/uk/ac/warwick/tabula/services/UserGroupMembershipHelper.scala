@@ -24,7 +24,6 @@ import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponen
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
-
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
 	def findBy(user: User): Seq[A]
 	def cache: Option[Cache[String, Array[String]]]
