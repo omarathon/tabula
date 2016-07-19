@@ -62,8 +62,8 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 	"A sub-sub-departmental administrator" should "have admin rights on students who match their sub-sub-department" in{
 
-		Given("Student1 is a first-year undergraduate, registered on a module in xxx")
-		createModule("xxx","xxx198","Top level module")
+		Given("Student1 is a first-year undergraduate, registered on a module in xxx-ug1")
+		createModule("xxx-ug1","xxx198","Top level module")
 		registerStudentsOnModule(Seq(P.Student1),"xxx198")
 
 		And("Student2 is a second-year undergraduate, registered on a module in xxx-ug")
@@ -72,12 +72,12 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture {
 
 		Then("Admin4 can view Student1's profile")
 		signIn as P.Admin4 to Path(s"/profiles/view/${P.Student1.warwickId}")
-		find(cssSelector("#timetable-pane")) should be ('defined)
+		pageSource.contains("Mobile phone:") should be {true}
 
-		And("Admin4 can also view student2's timetable, in a different department")
+		And("Admin4 cannot view student2's profile")
 
 		go to Path(s"/profiles/view/${P.Student2.warwickId}")
-		pageSource.contains("Mobile phone:") should be {true}
+		pageSource.contains("Mobile phone:") should be {false}
 	}
 
 }
