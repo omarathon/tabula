@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.web
 
 import dispatch.classic._
-import uk.ac.warwick.tabula.{LoginDetails, FunctionalTestProperties}
-import scala.util.parsing.json.JSON
-import scala.language.postfixOps
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.{FunctionalTestProperties, LoginDetails}
+
+import scala.language.postfixOps
+import scala.util.parsing.json.JSON
 
 trait FixturesDriver extends SimpleHttpFetching {
 
@@ -29,19 +30,21 @@ trait FixturesDriver extends SimpleHttpFetching {
 		openForSignups:Boolean = true,
 		maxGroupSize:Int = 0,
 		releasedToStudents:Boolean = true,
-		allowSelfGroupSwitching:Boolean  = true
+		allowSelfGroupSwitching:Boolean  = true,
+		academicYear: String
 	):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
 			"groupSetName" -> groupSetName,
-		  "formatName"->formatName,
-		  "allocationMethodName"->allocationMethodName,
-		  "groupCount"->groupCount.toString,
-		  "openForSignups"->openForSignups.toString,
-		  "releasedToStudents"->releasedToStudents.toString,
-		  "maxGroupSize"->maxGroupSize.toString,
-		  "allowSelfGroupSwitching"->allowSelfGroupSwitching.toString
+		  "formatName" -> formatName,
+		  "allocationMethodName" -> allocationMethodName,
+		  "groupCount" -> groupCount.toString,
+		  "openForSignups" -> openForSignups.toString,
+		  "releasedToStudents" -> releasedToStudents.toString,
+		  "maxGroupSize" -> maxGroupSize.toString,
+		  "allowSelfGroupSwitching" -> allowSelfGroupSwitching.toString,
+			"academicYear" -> academicYear
 		)
 		val resp = http.when(_==200)(req as_str)
 

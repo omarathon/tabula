@@ -11,7 +11,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "be able to sign up for a group" in {
 		Given("A small groupset exists with 2 small groups and an allocation method of StudentSignUp")
 		createModule("xxx",TEST_MODULE_CODE,"Self Sign Up Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, academicYear = "2014")
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -61,7 +61,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "be able to leave a group they signed up for" in {
 		Given("A small groupset exists with 2 small groups and an allocation method of StudentSignUp")
 		createModule("xxx",TEST_MODULE_CODE,"Self Sign Up Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, academicYear = "2014")
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -108,7 +108,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "not see a non-self-sign-up groupset for which they have not been allocated a group" in {
 		Given("A small groupset exists with 2 small groups and an allocation method of Manual")
 		createModule("xxx",TEST_MODULE_CODE,"Non Self Sign Up Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2, academicYear = "2014")
 
 		And("The student is a member of the groupset") // but is not allocated to any group!
  		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -127,7 +127,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "not be able to leave a non-self-sign-up group" in {
 		Given("A small groupset exists with 2 small groups and an allocation method of Manual")
 		createModule("xxx",TEST_MODULE_CODE,"Non Self Sign Up Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2, academicYear = "2014")
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -153,7 +153,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "not see a self-sign-up groupset which is not open if they aren't allocated" in {
 		Given("A small groupset exists which is not open for signup, with 2 small groups and an allocation method of StudentSignUp")
 		createModule("xxx",TEST_MODULE_CODE,"Closed Self Sign Up Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, openForSignups = false)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, openForSignups = false, academicYear = "2014")
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
 
@@ -169,7 +169,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "see a self-sign-up groupset which is not open if they are allocated to a group" in {
 		Given("A small groupset exists which is not open for signup, with 2 small groups and an allocation method of StudentSignUp")
 		createModule("xxx",TEST_MODULE_CODE,"Closed Self Sign Up Module with allocation")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, openForSignups = false)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, openForSignups = false, academicYear = "2014")
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
@@ -194,7 +194,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "not be able to select a group which is full" in {
 		Given("A small groupset exists with a group size of 1, with 2 small groups and an allocation method of StudentSignUp")
 		createModule("xxx",TEST_MODULE_CODE,"Full group test")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, maxGroupSize = 1)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, maxGroupSize = 1, academicYear = "2014")
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
 		And("Another student is a member of the groupset and allocated to group1")
@@ -226,7 +226,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	"A student" should "not be able to leave a self-signup group which doesn't allow switching" in{
 		Given("A small groupset exists with 2 small groups and an allocation method of Manual and allowSwitching is false")
 		createModule("xxx",TEST_MODULE_CODE,"No Switching Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, allowSelfGroupSwitching = false)
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, allowSelfGroupSwitching = false, academicYear = "2014")
 
 		And("The student is a member of the groupset")
 		addStudentToGroupSet(P.Student1.usercode,setId)
