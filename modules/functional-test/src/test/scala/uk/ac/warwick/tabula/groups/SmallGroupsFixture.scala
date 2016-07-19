@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.groups
 
 import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
 
 trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
+
+	val academicYearString = FunctionalTestAcademicYear.current.startYear.toString
 
   before{
     go to Path("/fixtures/setup")
@@ -13,14 +15,14 @@ trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDr
 			groupSetName = "Test Lab",
 			formatName = "lab",
 			allocationMethodName = "Manual",
-			academicYear = "2014"
+			academicYear = academicYearString
 		)
 		createSmallGroupSet(
 			moduleCode = "xxx02",
 			groupSetName = "Module 2 Tutorial",
 			formatName = "tutorial",
 			allocationMethodName = "StudentSignUp",
-			academicYear = "2014"
+			academicYear = academicYearString
 		)
   }
 

@@ -11,7 +11,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 	"Department admin" should "Be able to filter students" in {
 		Given("A small group set exists with 1 small group")
 		createModule("xxx", TEST_MODULE_CODE, "Allocation Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME, academicYear = "2014")
+		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME, academicYear = academicYearString)
 
 		And("Two routes exist")
 		createCourse("Ux123","AllocCourse")
@@ -26,7 +26,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 			(P.Student3.usercode, "F", 1, "xx456"),
 			(P.Student4.usercode, "M", 2, "xx123"),
 			(P.Student5.usercode, "F", 3, "xx123"))) {
-			createStudentMember(studentId, gender, route, year,"Ux123",academicYear = "2014")
+			createStudentMember(studentId, gender, route, year,"Ux123",academicYear = academicYearString)
 			addStudentToGroupSet(studentId, setId)
 		}
 
@@ -37,7 +37,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		signIn as P.Admin1 to Path("/groups/")
 
 		And(" I view the 'allocate students' page for xxx987/Allocation Test Groupset")
-		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", "2014")
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx", academicYearString)
 		go to groupsetSummaryPage.url
 		val allocatePage = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get.goToAllocate
 

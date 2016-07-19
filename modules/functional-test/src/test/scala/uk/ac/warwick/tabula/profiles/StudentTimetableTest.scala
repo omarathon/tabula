@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
+import com.gargoylesoftware.htmlunit.BrowserVersion
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.profiles.pages.ProfilePage
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+
 import uk.ac.warwick.tabula.web.FeaturesDriver
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
