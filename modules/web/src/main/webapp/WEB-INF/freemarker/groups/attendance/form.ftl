@@ -155,7 +155,7 @@
 										class="btn btn-default use-tooltip attendance-note edit"
 										title="Edit attendance note"
 										data-container="body"
-										href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+										href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />&dt=${.now?string('iso')}"
 									>
 										<i class="fa fa-pencil-square-o attendance-note-icon"></i>
 									</a>
