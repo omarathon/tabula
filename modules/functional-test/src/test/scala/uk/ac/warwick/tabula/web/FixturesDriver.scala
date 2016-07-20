@@ -98,7 +98,7 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
-	def createStaffMember(userId:String, genderCode:String = "M", deptCode:String=""){
+	def createStaffMember(userId:String, genderCode:String = "M", deptCode:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/staffMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,

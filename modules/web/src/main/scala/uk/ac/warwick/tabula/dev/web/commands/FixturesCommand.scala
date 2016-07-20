@@ -105,6 +105,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			sessionWithoutFreshFilters.newQuery("delete from FileAttachment where member_note_id in (select id from MemberNote where memberId like '3000%')").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from MemberNote where memberId like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from StaffMember where universityId like '3000%'").executeUpdate()
 		}
 
 		// Blitz the test department

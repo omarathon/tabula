@@ -30,8 +30,8 @@
 								<i class="fa fa-chevron-right fa-fw"></i>
 								<#if agentMember??>
 									${agentMember.fullName}
-									<#if agentMember.homeDepartment.code != department.code>
-										<span class="very-subtle">${agentMember.homeDepartment.name}</span>
+									<#if ((agentMember.homeDepartment.code)!'') != department.code>
+										<span class="very-subtle">${(agentMember.homeDepartment.name)!''}</span>
 									</#if>
 									<#assign agentId = agentMember.universityId />
 								<#else>

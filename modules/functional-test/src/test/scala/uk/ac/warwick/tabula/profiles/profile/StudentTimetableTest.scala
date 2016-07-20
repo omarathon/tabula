@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles
+package uk.ac.warwick.tabula.profiles.profile
 
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import org.scalatest.GivenWhenThen
@@ -24,9 +24,6 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 	// in any real browsers that I've tested with.
 	// Using Firefox JS emulation avoids the problem.
 	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
-
-	// TODO provide the functional tests with a TermFactory so we can work out what week we're in right now,
-	// and create the events in that week. Then we can verify that they actually show up on the calendar
 
 	"A student" should "be able to view their timetable" in {
 
