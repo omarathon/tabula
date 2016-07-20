@@ -190,7 +190,7 @@
 										<#if mapGet(mapGet(command.attendanceNoteMap, student), point)??>
 											<#assign note = mapGet(mapGet(command.attendanceNoteMap, student), point) />
 											<#if note.hasContent>
-												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />?dt=${.now?string('iso')}">
+												<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note edit" title="Edit attendance note" href="<@routes.attendance.noteEdit academicYear.startYear?c student point />">
 													<i class="icon-edit attendance-note-icon"></i>
 												</a>
 											<#else>
