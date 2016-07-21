@@ -333,7 +333,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		val studentsWithOtherGroupOccurrenceAndDateInfo = benchmarkTask("studentsWithOtherGroupOccurrenceAndDateInfo") {
 			//TAB-4425 - Aiming for performance improvement using parallel threads
 			val groupsByStudent = benchmarkTask("groupsByStudent") {
-				students.par.map(student => student -> transactional() { findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id }})
+				students.par.map(student => student -> transactional(readOnly = true) { findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id }})
 			}.seq.toMap
 			val otherGroups = benchmarkTask("otherGroups") { groupsByStudent.values.flatten.toSeq.distinct }
 			val otherGroupOccurrencesWithTimes: Map[SmallGroup, Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]] =
