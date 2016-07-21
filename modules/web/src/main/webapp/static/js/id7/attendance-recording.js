@@ -373,7 +373,7 @@ $(function(){
 						sorter: function(items) { return items; }, // use 'as-returned' sort
 						highlighter: function(item) {
 							var member = item.split("|");
-							return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
+							return '<div class="photo size-tinythumbnail pull-right"><img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail"></div><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
 						},
 
 						updater: function(memberString) {
