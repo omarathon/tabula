@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, TaskBenchmarking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.{DateTime, LocalDateTime}
+import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -312,7 +313,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 
 	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = {
-		benchmarkTask(s"possibleTimetableClash[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
+ 		benchmarkTask(s"possibleTimetableClash[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
 	}
 
 	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
@@ -330,9 +331,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		}
 
 		val studentsWithOtherGroupOccurrenceAndDateInfo = benchmarkTask("studentsWithOtherGroupOccurrenceAndDateInfo") {
+			//TAB-4425 - Aiming for performance improvement using parallel threads
 			val groupsByStudent = benchmarkTask("groupsByStudent") {
-				students.map(student => student -> findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id })
-			}.toMap
+				students.par.map(student => student -> transactional(readOnly = true) { findSmallGroupsByStudent(student).filterNot { group => group.groupSet.id == set.id }})
+			}.seq.toMap
 			val otherGroups = benchmarkTask("otherGroups") { groupsByStudent.values.flatten.toSeq.distinct }
 			val otherGroupOccurrencesWithTimes: Map[SmallGroup, Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])]] =
 				otherGroups.map(group => group -> groupOccurrencesWithStartEndDateTimeInfo(group)).toMap
