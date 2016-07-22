@@ -17,15 +17,16 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 
 	this: ModuleAndDepartmentServiceComponent with SessionComponent with TermServiceComponent =>
 
-	var moduleCode:String = _
-	var groupSetName:String = _
-	var formatName:String = _
-	var openForSignups:Boolean = true
-	var allocationMethodName:String = _
-	var groupCount:Int = _
-	var maxGroupSize:Int = 0
-	var allowSelfGroupSwitching:Boolean = true
-	var releasedToStudents:Boolean = true
+	var moduleCode: String = _
+	var groupSetName: String = _
+	var formatName: String = _
+	var openForSignups: Boolean = true
+	var allocationMethodName: String = _
+	var groupCount: Int = _
+	var maxGroupSize: Int = 0
+	var allowSelfGroupSwitching: Boolean = true
+	var releasedToStudents: Boolean = true
+	var academicYear: AcademicYear = _
 
 	protected def applyInternal() = {
 		transactional() {
@@ -34,7 +35,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.name = groupSetName
 			groupSet.format = SmallGroupFormat.fromCode(formatName)
 			groupSet.module = module
-			groupSet.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+			groupSet.academicYear = academicYear
 			groupSet.allocationMethod = SmallGroupAllocationMethod.fromDatabase(allocationMethodName)
 			if (groupSet.allocationMethod == StudentSignUp ){
 				groupSet.allowSelfGroupSwitching = allowSelfGroupSwitching

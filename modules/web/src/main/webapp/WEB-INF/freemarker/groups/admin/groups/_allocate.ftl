@@ -18,13 +18,14 @@
 		<#local profile = membersById[student.warwickId]!{} />
 		<li class="student well well-sm"
 			data-f-gender="${(profile.gender.dbValue)!}"
-			data-f-route="${(profile.mostSignificantCourseDetails.currentRoute.code)!}"
-			data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
+			data-f-route="${(mapGet(command.memberAllocationData, profile).routeCode)!}"
+			data-f-year="${(mapGet(command.memberAllocationData, profile).yearOfStudy)!}"
+		>
 			<div class="profile clearfix">
 				<@fmt.member_photo profile "tinythumbnail" false />
 				<div class="name">
 					<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student.warwickId! /></h6>
-				${(profile.mostSignificantCourseDetails.currentRoute.name)!student.shortDepartment!""}
+					${(mapGet(command.memberAllocationData, profile).routeName)!student.shortDepartment!""}
 				</div>
 			</div>
 			<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -123,16 +124,16 @@
 												<div class="filter" id="filter-by-year-controls">
 													<select data-filter-attr="fYear" class="form-control">
 														<option data-filter-value="*">Any Year of study</option>
-														<#list command.allMembersYears as year>
-															<option data-filter-value="${year}">Year ${year}</option>
+														<#list command.allMembersYears as data>
+															<option data-filter-value="${data.yearOfStudy}">Year ${data.yearOfStudy}</option>
 														</#list>
 													</select>
 												</div>
 												<div class="filter" id="filter-by-route-controls">
 													<select data-filter-attr="fRoute" class="form-control">
 														<option data-filter-value="*">Any Route</option>
-														<#list command.allMembersRoutes as route>
-															<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
+														<#list command.allMembersRoutes as data>
+															<option data-filter-value="${data.routeCode}"><@fmt.route_name route="" routeCode=data.routeCode routeName=data.routeName /></option>
 														</#list>
 													</select>
 												</div>
@@ -201,13 +202,19 @@
 												</ul>
 											</div>
 										</#list>
-										<div class="well clearfix clash-info hide">
-											<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
-												<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+										<div class="well clearfix">
+											<div class="loading">
+												</p><i class="fa fa-spinner fa-spin"></i><em> Checking possibility of any timetable conflicts for all students&hellip;</em>
 											</div>
-											<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
-												<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+											<div class="clash-info hide">
+												<div class="clash-singular-info"><span class="clash-count"></span> student has timetable conflict with this allocation.
+													<a href= "#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See student</a>
+												</div>
+												<div class="clash-plural-info"><span class="clash-count"></span> students have timetable conflicts with this allocation.
+													<a href=#" data-href="<@routes.groups.timetableclashstudentslist command.set />" class="ajax-modal timetable-clash-link" data-target="#timetable-clash-modal">See students</a>
+												</div>
 											</div>
+											<div class="no-clash-info hide">No students have timetable conflicts with the current allocation.</div>
 											<div class="student-clash-info hide">
 												<span class="possibleclash-group-info"></span>
 												<span class="actualclash-userIds"></span>
@@ -272,12 +279,13 @@
 				Groups.fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
-			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', function(data) {
+			$.getJSON('/groups/${smallGroupSet.id}/timetableclash', {ts: new Date().getTime()}, function(data) {
 				jQuery.each(data.students, function(i, val) {
 					var groupId = val[0];
 					var userIds = val[1];
 					$('.possibleclash-group-info').append( $('<span/>').prop("id",'clash-group-info-' + groupId).append(userIds.join(',')));
 				});
+				$('.loading').addClass("hide");
 				clashInfo();
 			});
 
@@ -292,34 +300,39 @@
 			});
 
 			var clashInfo =  function() {
-				var userIds = [];
-				var students = $('input[name^="mapping"]').each(function() {
-					var inputName = this.name;
-					var inputValue = this.value;
-					var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
-					var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
-					if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
-						userIds.push(inputValue);
-					}
-				});
-				var clashUserIds = userIds.join(',');
-				$('.actualclash-userIds').append(clashUserIds);
-				var totalClashes = userIds.length;
-				$( '.clash-count').html(totalClashes);
-				if(totalClashes > 0) {
-					var $timtableClashLink = $('a.timetable-clash-link');
-					if(totalClashes > 1) {
-						$( '.clash-plural-info').removeClass("hide");
-						$( '.clash-singular-info').addClass("hide");
+				// check if we have got json result back, if not then no need to check at this stage
+				if ($('.loading').hasClass('hide')) {
+					var userIds = [];
+					var students = $('input[name^="mapping"]').each(function() {
+						var inputName = this.name;
+						var inputValue = this.value;
+						var grpId = inputName.substring(inputName.indexOf('[') + 1, inputName.indexOf(']'));
+						var possibleClashGrpInfo = $('#clash-group-info-' + grpId).text();
+						if (possibleClashGrpInfo.length > 0 && possibleClashGrpInfo.indexOf(inputValue) >= 0) {
+							userIds.push(inputValue);
+						}
+					});
+					var clashUserIds = userIds.join(',');
+					$('.actualclash-userIds').append(clashUserIds);
+					var totalClashes = userIds.length;
+					$('.clash-count').html(totalClashes);
+					if (totalClashes > 0) {
+						var $timtableClashLink = $('a.timetable-clash-link');
+						if (totalClashes > 1) {
+							$('.clash-plural-info').removeClass("hide");
+							$('.clash-singular-info').addClass("hide");
+						} else {
+							$('.clash-singular-info').removeClass("hide");
+							$('.clash-plural-info').addClass("hide");
+						}
+						$('.no-clash-info').addClass("hide");
+						$('.clash-info').removeClass("hide");
+						$timtableClashLink.attr('href', $timtableClashLink.data('href') + clashUserIds);
 					} else {
-						$( '.clash-singular-info').removeClass("hide");
-						$( '.clash-plural-info').addClass("hide");
-				    }
-					$( '.clash-info').removeClass("hide");
-					$timtableClashLink.prop('href', $timtableClashLink.data('href')  + clashUserIds);
-				} else {
-					$( '.clash-info').addClass("hide");
-			 	}
+						$('.clash-info').addClass("hide");
+						$('.no-clash-info').removeClass("hide");
+					}
+				}
 			};
 		})(jQuery);
 	</script>

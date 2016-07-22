@@ -16,7 +16,7 @@
 
 <#assign adjustments = feedback.studentViewableAdjustments />
 
-<#if feedback.hasMarkOrGrade>
+<#if feedback.latestMark?? || feedback.latestGrade??>
 	<div class="mark-and-grade">
 		<#if adjustments?has_content && feedback.latestMark??>
 			<h3>Adjusted mark: ${feedback.latestMark}%</h3>
@@ -48,8 +48,16 @@
 				<#if adjustments[adjustment_index + 1].mark??><div>Mark: ${adjustments[adjustment_index + 1].mark}%</div></#if>
 				<#if adjustments[adjustment_index + 1].grade??><div>Grade: ${adjustments[adjustment_index + 1].grade}</div></#if>
 			<#else>
-				<#if feedback.actualMark??><div>Mark: ${feedback.actualMark}%</div></#if>
-				<#if feedback.actualGrade??><div>Grade: ${feedback.actualGrade}</div></#if>
+				<#if feedback.actualMark??>
+					<div>Mark: ${feedback.actualMark}%</div>
+				<#else>
+					There was no mark before adjustment.
+				</#if>
+				<#if feedback.actualGrade??>
+					<div>Grade: ${feedback.actualGrade}</div>
+				<#else>
+					There was no grade before adjustment.
+				</#if>
 			</#if>
 		</div>
 	</#if>
