@@ -1,7 +1,7 @@
-package uk.ac.warwick.tabula.profiles
+package uk.ac.warwick.tabula.profiles.profile
 
-import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {

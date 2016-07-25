@@ -74,9 +74,10 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 			)
 
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
+				"studentCourseDetails" -> studentCourseDetails,
 				"member" -> studentCourseDetails.student,
 				"currentMember" -> currentMember,
-				"activeAcademicYear" -> thisAcademicYear,
+				"thisAcademicYear" -> thisAcademicYear,
 				"relationships" -> studentCourseDetails.relationships(relationshipType),
 				"meetings" -> meetings,
 				"meetingApprovalWillCreateCheckpoint" -> meetings.map {

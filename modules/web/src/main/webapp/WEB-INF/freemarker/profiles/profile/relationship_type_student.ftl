@@ -41,7 +41,7 @@
 			<#if relationship.agentMember??>
 				<p>
 					<strong>Name:</strong> ${relationship.agentMember.fullName!relationshipType.agentRole?cap_first}<br />
-					<strong>Warwick email:</strong> <a href="mailto:${relationship.agentMember.email}">${relationship.agentMember.email}</a><br />
+					<#if relationship.agentMember.email?has_content><strong>Warwick email:</strong> <a href="mailto:${relationship.agentMember.email}">${relationship.agentMember.email}</a><br /></#if>
 					<strong>University number:</strong> ${relationship.agentMember.universityId}<br />
 					<#if relationship.agentMember.userId??><strong>IT code:</strong> ${relationship.agentMember.userId}<br /></#if>
 					<span class="peoplesearch-info" data-href="<@routes.profiles.peoplesearchData relationship.agentMember />"></span>
@@ -120,11 +120,11 @@
 
 <#if !(canReadMeetings!true)>
 	<div class="alert alert-error">You do not have permission to view the meetings for this student</div>
-<#elseif !meetings?has_content>
-	<div class="alert alert-info">No meeting records exist for this academic year</div>
 <#else>
 	<section class="meetings">
-		<#if meetings?has_content>
+		<#if !meetings?has_content>
+			<div class="alert alert-info">No meeting records exist for this academic year</div>
+		<#else>
 			<table class="table table-striped table-condensed expanding-row-pairs">
 				<thead>
 					<tr>
@@ -139,9 +139,9 @@
 							<td data-sortby="${meeting.meetingDate.millis?c}"><@fmt.date date=meeting.meetingDate includeTime=false /></td>
 							<td>
 								<#if meeting.scheduled>
-									<#assign editUrl><@routes.profiles.edit_scheduled_meeting_record meeting studentCourseDetails academicYear relationshipType /></#assign>
+									<#assign editUrl><@routes.profiles.edit_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear relationshipType /></#assign>
 								<#else>
-									<#assign editUrl><@routes.profiles.edit_meeting_record studentCourseDetails academicYear meeting /></#assign>
+									<#assign editUrl><@routes.profiles.edit_meeting_record studentCourseDetails thisAcademicYear meeting /></#assign>
 								</#if>
 								<#if ((meeting.scheduled && can.do_with_selector("Profiles.ScheduledMeetingRecord.Manage", meeting, relationshipType)) ||
 									(!meeting.scheduled && user.universityId! == meeting.creator.universityId && !meeting.approved))
@@ -199,16 +199,16 @@
 			<p>
 				<#if canCreateScheduledMeetings && features.scheduledMeetings>
 					<#if isSelf>
-						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails activeAcademicYear relationshipType />">Request new meeting</a>
+						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Request new meeting</a>
 					<#else>
-						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails activeAcademicYear relationshipType />">New meeting</a>
+						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">New meeting</a>
 					</#if>
 				</#if>
 				<#if canCreateMeetings>
 					<#if isSelf>
-						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails activeAcademicYear relationshipType />">Add new</a>
+						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Add new</a>
 					<#else>
-						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails activeAcademicYear relationshipType />">New record</a>
+						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">New record</a>
 					</#if>
 				</#if>
 			</p>
@@ -273,7 +273,7 @@
 				<blockquote>${rejectedApproval.comments}</blockquote>
 				<p>Please edit the record and submit it for approval again.</p>
 			</#list>
-			<a class="edit-meeting-record btn btn-primary" href="<@routes.profiles.edit_meeting_record studentCourseDetails activeAcademicYear meeting/>">Edit</a>
+			<a class="edit-meeting-record btn btn-primary" href="<@routes.profiles.edit_meeting_record studentCourseDetails thisAcademicYear meeting/>">Edit</a>
 		</div>
 	<#else>
 		<p class="very-subtle">
@@ -306,10 +306,10 @@
 				Please confirm whether this scheduled meeting took place.
 			</div>
 
-			<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails activeAcademicYear meeting.relationship.relationshipType />" >
+			<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationship.relationshipType />" >
 				<@bs3form.form_group>
 					<@bs3form.radio>
-						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.profiles.confirm_scheduled_meeting_record meeting studentCourseDetails activeAcademicYear meeting.relationship.relationshipType />">
+						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.profiles.confirm_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationship.relationshipType />">
 						Confirm
 					</@bs3form.radio>
 					<@bs3form.radio>

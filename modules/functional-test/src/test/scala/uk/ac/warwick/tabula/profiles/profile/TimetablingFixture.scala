@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles
+package uk.ac.warwick.tabula.profiles.profile
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.web.FeaturesDriver

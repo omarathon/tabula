@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles
+package uk.ac.warwick.tabula.profiles.profile
 
 import dispatch.classic._
 import dispatch.classic.thread.ThreadSafeHttpClient
