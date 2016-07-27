@@ -3,9 +3,11 @@ package uk.ac.warwick.tabula.services.turnitinlti
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 
 import scala.collection.JavaConverters._
@@ -47,7 +49,9 @@ trait TurnitinLtiQueueService {
 	
 
 abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService with Logging {
-	self: TurnitinLtiQueueDaoComponent with OriginalityReportServiceComponent =>
+	self: TurnitinLtiQueueDaoComponent
+		with OriginalityReportServiceComponent
+		with FeaturesComponent =>
 
 	def findAssignmentToProcess: Option[Assignment] = {
 		turnitinLtiQueueDao.findAssignmentToProcess
@@ -74,7 +78,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 	}
 
 	def createEmptyOriginalityReports(assignment: Assignment): Seq[OriginalityReport] = {
-		assignment.submissions.asScala.flatMap(_.allAttachments).filter(attachment =>
+		val reports = assignment.submissions.asScala.flatMap(_.allAttachments).filter(attachment =>
 			attachment.originalityReport == null &&
 				TurnitinLtiService.validFileType(attachment) &&
 				TurnitinLtiService.validFileSize(attachment)
@@ -88,6 +92,18 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 			originalityReportService.saveOrUpdate(report)
 			report
 		})
+
+		if (features.urkundSubmissions) {
+			reports.filter(report =>
+				UrkundService.validFileType(report.attachment)
+					&& UrkundService.validFileSize(report.attachment)
+			).foreach(report => {
+				report.nextSubmitAttempt = DateTime.now
+				originalityReportService.saveOrUpdate(report)
+			})
+		}
+
+		reports
 	}
 
 	def getAssignmentStatus(assignment: Assignment): TurnitinLtiQueueService.AssignmentStatus = {
@@ -169,6 +185,7 @@ class AutowiringEventServiceImpl
 	extends AbstractTurnitinLtiQueueService
 	with AutowriringTurnitinLtiQueueDaoComponent
 	with AutowiringOriginalityReportServiceComponent
+	with AutowiringFeaturesComponent
 
 trait TurnitinLtiQueueServiceComponent {
 	def turnitinLtiQueueService: TurnitinLtiQueueService

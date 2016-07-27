@@ -116,6 +116,7 @@ abstract class Features {
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
 	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
+	@Value("${features.urkund.submissions:false}") var urkundSubmissions = defaults.urkundSubmissions
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
@@ -206,6 +207,7 @@ class FeaturesMessage {
 	@BeanProperty var disabilityOnSubmission = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var queueFeedbackForSits = true
+	@BeanProperty var urkundSubmissions = false
 
 	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true
