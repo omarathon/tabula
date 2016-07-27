@@ -45,7 +45,7 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 
 		val response = urkundService.submit(report)
 		response match {
-			case Success(urkundRespone) => urkundRespone match {
+			case Success(urkundResponse) => urkundResponse match {
 				case success: UrkundSuccessResponse =>
 					report.nextSubmitAttempt = null
 					report.nextResponseAttempt = DateTime.now.plusMinutes(UrkundService.reportTimeoutInMinutes)
@@ -67,7 +67,7 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 
 		val response = urkundService.retrieveReport(report)
 		response match {
-			case Success(urkundRespone: UrkundResponse) => urkundRespone match {
+			case Success(urkundResponse: UrkundResponse) => urkundResponse match {
 				case success: UrkundSuccessResponse =>
 					success.status match {
 						case UrkundSubmissionStatus.Analyzed =>

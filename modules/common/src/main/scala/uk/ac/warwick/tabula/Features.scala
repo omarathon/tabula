@@ -207,7 +207,7 @@ class FeaturesMessage {
 	@BeanProperty var disabilityOnSubmission = false
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var queueFeedbackForSits = true
-	@BeanProperty var urkundSubmissions = true
+	@BeanProperty var urkundSubmissions = false
 
 	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true
