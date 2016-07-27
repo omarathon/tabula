@@ -48,10 +48,12 @@ case class UrkundReport(
 
 trait UrkundResponse {
 	val statusCode: Int
+	val response: String
 }
 
 case class UrkundSuccessResponse(
 	statusCode: Int,
+	response: String,
 	submissionId: Option[Int],
 	externalId: String,
 	timestamp: DateTime,
@@ -63,7 +65,7 @@ case class UrkundSuccessResponse(
 
 ) extends UrkundResponse
 
-case class UrkundErrorResponse(statusCode: Int) extends UrkundResponse
+case class UrkundErrorResponse(statusCode: Int, response: String) extends UrkundResponse
 
 object UrkundResponse {
 	private def parseIntOption(json: Map[String, Any], field: String): Option[Int] =
@@ -83,9 +85,10 @@ object UrkundResponse {
 	private def parseDateTime(json: Map[String, Any], field: String): DateTime =
 		new DateTime(parseString(json, field))
 
-	private def parseResponse(statusCode: Int, submissionJson: Map[String, Any]): UrkundSuccessResponse = {
+	private def parseResponse(statusCode: Int, response: String, submissionJson: Map[String, Any]): UrkundSuccessResponse = {
 		UrkundSuccessResponse(
 			statusCode = statusCode,
+			response = response,
 			submissionId = parseIntOption(submissionJson, "SubmissionId"),
 			externalId = parseString(submissionJson, "ExternalId"),
 			timestamp = parseDateTime(submissionJson, "Timestamp"),
@@ -138,11 +141,11 @@ object UrkundResponse {
 	def fromSuccessJson(statusCode: Int, json: String): UrkundSuccessResponse = {
 		JSON.parseFull(json) match {
 			case Some(submissionJson: Map[String, Any] @unchecked) =>
-				parseResponse(statusCode, submissionJson)
+				parseResponse(statusCode, json, submissionJson)
 			case Some(submissionJsonSeq: Seq[Map[String, Any]] @unchecked) =>
 				// If the same report has been submitted multiple times we get a list of responses
 				// Use the last one
-				submissionJsonSeq.map(submissionJson => parseResponse(statusCode, submissionJson)).sortBy(_.timestamp).last
+				submissionJsonSeq.map(submissionJson => parseResponse(statusCode, "", submissionJson)).sortBy(_.timestamp).last.copy(response = json)
 			case unknownJson => throw new IllegalArgumentException(s"Cannot parse JSON; unexpected type: ${unknownJson.getClass.toString}")
 		}
 	}

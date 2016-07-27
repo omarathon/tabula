@@ -77,21 +77,34 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 								report.matchCount = urkundReport.matchCount
 								report.sourceCount = urkundReport.sourceCount
 								report.responseReceived = DateTime.now
+								report.urkundResponse = success.response
+								report.urkundResponseCode = success.statusCode.toString
 								report
-							}).getOrElse(
+							}).getOrElse {
 								logger.error(s"Report ${report.id} has status ${UrkundSubmissionStatus.Analyzed.status} but no Report was defined")
-							)
+								report.urkundResponse = success.response
+								report.urkundResponseCode = success.statusCode.toString
+								report
+							}
 						case UrkundSubmissionStatus.Rejected =>
 							logger.error(s"Report ${report.id} was rejected by Urkund")
+							report.urkundResponse = success.response
+							report.urkundResponseCode = success.statusCode.toString
 						case UrkundSubmissionStatus.Error =>
 							logger.error(s"There was an error processing report ${report.id} by Urkund")
+							report.urkundResponse = success.response
+							report.urkundResponseCode = success.statusCode.toString
 						case UrkundSubmissionStatus.Accepted =>
 							logger.info(s"Report ${report.id} has been accepted by Urkund, but report is not yet ready (attempt ${report.responseAttempts})")
+							report.urkundResponse = success.response
+							report.urkundResponseCode = success.statusCode.toString
 						case _ =>
 							logger.info(s"Report ${report.id} has been submitted to Urkund, but has not yet been accepted (attempt ${report.responseAttempts})")
+							report.urkundResponse = success.response
+							report.urkundResponseCode = success.statusCode.toString
 					}
 					success.status match {
-						case UrkundSubmissionStatus.Analyzed | UrkundSubmissionStatus.Rejected | UrkundSubmissionStatus.Error=>
+						case UrkundSubmissionStatus.Analyzed | UrkundSubmissionStatus.Rejected | UrkundSubmissionStatus.Error =>
 							report.nextResponseAttempt = null
 						case _ =>
 							UrkundService.setNextResponseAttempt(report)
@@ -99,6 +112,7 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 				case error =>
 					report.nextResponseAttempt = null
 					logger.error(s"Client error when retrieving report ${report.id} from Urkund: ${error.statusCode}")
+					report.urkundResponseCode = error.statusCode.toString
 			}
 			case Failure(e) =>
 				logger.error(s"Server error when submitting report ${report.id} to Urkund: ${e.getMessage}")

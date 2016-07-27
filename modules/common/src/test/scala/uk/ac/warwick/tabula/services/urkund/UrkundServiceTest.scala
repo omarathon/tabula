@@ -4,15 +4,16 @@ import java.io.ByteArrayInputStream
 
 import dispatch.classic.Http
 import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpRequestBase
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.message.BasicHttpResponse
 import org.apache.http.{HttpHost, HttpRequest, HttpVersion}
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.ac.warwick.tabula.data.{UrkundDao, UrkundDaoComponent}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport}
+import uk.ac.warwick.tabula.data.{UrkundDao, UrkundDaoComponent}
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, JsonObjectMapperFactory, Mockito, TestBase}
 
 import scala.util.{Failure, Success}
 
@@ -30,8 +31,9 @@ class UrkundServiceTest extends TestBase with Mockito {
 		}
 		service.username = "username"
 		service.password = "password"
-		service.receiver = "receiver"
-		service.documentBaseUrl = "https://tabula-test.warwick.ac.uk"
+		service.unit = 0
+		service.analysisPrefix = "dev"
+		service.objectMapper = JsonObjectMapperFactory.instance
 
 		val report = new OriginalityReport
 		report.id = "2345"
@@ -48,13 +50,36 @@ class UrkundServiceTest extends TestBase with Mockito {
 		report.attachment = attachment
 		attachment.submissionValue = submissionValue
 		submissionValue.submission = submission
+		val assignment = Fixtures.assignment("test")
+		assignment.id = "2345"
+		submission.assignment = assignment
+		val module = Fixtures.module("its01")
+		assignment.module = module
 	}
 
 	@Test
-	def submitSuccess(): Unit = new Fixture {
+	def submitSuccessNewReceiver(): Unit = new Fixture {
+		// Mock the receiver check
+		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 404, "Not Found")
+
+		// Mock the receiver created response
+		val createReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 201, "Created")
+		createReceiverHttpResponse.setEntity(new StringEntity(
+			"""
+				{
+					"Id": 123425,
+					"UnitId": 5,
+					"FullName": "John Doe",
+					"EmailAddress": "john.doe@school.com",
+					"AnalysisAddress": "2345.its01.tabula.dev@analysis.urkund.com",
+					"Organization": null,
+					"SubOrganization": null
+				}
+			""", ContentType.APPLICATION_JSON))
+
 		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
-		httpResponse.setEntity(new StringEntity(
+		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
+		submitHttpResponse.setEntity(new StringEntity(
 			"""
 				{
 					"SubmissionId": 3456,
@@ -74,7 +99,78 @@ class UrkundServiceTest extends TestBase with Mockito {
 				}
 			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		// Handle each request
+		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
+			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
+				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "")) => createReceiverHttpResponse
+				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
+				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
+			}
+		}
+
+		val response = service.submit(report) match {
+			case success: Success[UrkundSuccessResponse] @unchecked => success.value
+			case _ => fail(s"Not a success response")
+		}
+		response.statusCode should be (202)
+		response.submissionId should be (Some(3456))
+		response.externalId should be (report.id)
+		response.timestamp.getMillis should be (new DateTime(2016, 7, 5, 12, 24, 36, DateTimeZone.UTC).getMillis)
+		response.filename should be (attachment.name)
+		response.contentType should be ("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+		response.status should be (UrkundSubmissionStatus.Submitted)
+		response.document should be (None)
+		response.report should be (None)
+	}
+
+	@Test
+	def submitSuccessExistingReceiver(): Unit = new Fixture {
+		// Mock the receiver check
+		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		findReceiverHttpResponse.setEntity(new StringEntity(
+			"""
+				{
+					"Id": 123425,
+					"UnitId": 5,
+					"FullName": "John Doe",
+					"EmailAddress": "john.doe@school.com",
+					"AnalysisAddress": "2345.its01.tabula.dev@analysis.urkund.com",
+					"Organization": null,
+					"SubOrganization": null
+				}
+			""", ContentType.APPLICATION_JSON))
+
+		// Mock the request
+		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 202, "OK")
+		submitHttpResponse.setEntity(new StringEntity(
+			"""
+				{
+					"SubmissionId": 3456,
+					"ExternalId": "2345",
+					"Timestamp": "2016-07-05T12:24:36Z",
+					"Filename": "submission.docx",
+					"MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+					"Status": {
+						"State": "Submitted",
+						"Message": ""
+					},
+					"Document": null,
+					"Report": null,
+					"Subject": null,
+					"Message": null,
+					"Anonymous": null
+				}
+			""", ContentType.APPLICATION_JSON))
+
+		// Handle each request
+		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
+			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
+				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
+				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
+			}
+		}
 
 		val response = service.submit(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
@@ -93,10 +189,32 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 	@Test
 	def submitClientError(): Unit = new Fixture {
-		// Mock the request
-		val httpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 400, "Bad Request")
+		// Mock the receiver check
+		val findReceiverHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 200, "OK")
+		findReceiverHttpResponse.setEntity(new StringEntity(
+			"""
+				{
+					"Id": 123425,
+					"UnitId": 5,
+					"FullName": "John Doe",
+					"EmailAddress": "john.doe@school.com",
+					"AnalysisAddress": "2345.its01.tabula.dev@analysis.urkund.com",
+					"Organization": null,
+					"SubOrganization": null
+				}
+			""", ContentType.APPLICATION_JSON))
 
-		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
+		// Mock the request
+		val submitHttpResponse = new BasicHttpResponse(HttpVersion.HTTP_1_1, 400, "Bad Request")
+
+		// Handle each request
+		service.http.client.execute(any[HttpHost], any[HttpRequest]) answers { args =>
+			args.asInstanceOf[Array[_]](1).asInstanceOf[HttpRequestBase].getURI.getPath match {
+				case uri if uri.contains(UrkundService.receiversBaseUrl.replace(UrkundService.baseUrl, "") + "/2345.its01.tabula.dev@analysis.urkund.com") => findReceiverHttpResponse
+				case uri if uri.contains(UrkundService.documentBaseUrl.replace(UrkundService.baseUrl, "")) => submitHttpResponse
+				case uri => throw new IllegalArgumentException(s"Unexpected request URI: $uri")
+			}
+		}
 
 		val response = service.submit(report) match {
 			case success: Success[UrkundErrorResponse] @unchecked => success.value
