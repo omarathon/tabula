@@ -202,7 +202,7 @@
 	</section>
 </#if>
 
-<#if extenuatingCircumstances?has_content || canCreateMemberNote>
+<#if features.profilesCircumstances && (extenuatingCircumstances?has_content || canCreateMemberNote)>
 	<section class="circumstances">
 		<div class="row">
 			<div class="col-md-12">
