@@ -38,7 +38,7 @@
 			<thead>
 				<tr>
 					<th class="photo-col">Photo</th>
-					<th class="student-col ${sortClass("firstName")}" dasta-field="firstName">First name</th>
+					<th class="student-col ${sortClass("firstName")}" data-field="firstName">First name</th>
 					<th class="student-col ${sortClass("lastName")}" data-field="lastName">Last name</th>
 					<th class="id-col ${sortClass("universityId")}" data-field="universityId">ID</th>
 					<th class="type-col ${sortClass("groupName")}" data-field="groupName">Type</th>
