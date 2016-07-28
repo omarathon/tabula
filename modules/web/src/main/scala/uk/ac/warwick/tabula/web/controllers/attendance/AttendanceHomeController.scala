@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.web.controllers.attendance
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, Features, CurrentUser}
-import uk.ac.warwick.tabula.commands.attendance.HomeCommand
-import uk.ac.warwick.tabula.commands.Appliable
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.commands.attendance.HomeInformation
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeInformation}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
  * Displays the Attendance home screen.
@@ -20,9 +20,9 @@ import uk.ac.warwick.tabula.data.model.Department
  */
 @Controller
 @RequestMapping(Array("/attendance"))
-class AttendanceHomeController extends AttendanceController {
-
-	@Autowired var features: Features = _
+class AttendanceHomeController extends AttendanceController
+	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("command")
 	def createCommand(user: CurrentUser) = HomeCommand(user)
@@ -44,12 +44,7 @@ class AttendanceHomeController extends AttendanceController {
 					case Some(year) =>
 						year
 					case _ =>
-						if (features.attendanceMonitoringAcademicYear2015)
-							AcademicYear(2015)
-						else if (features.attendanceMonitoringAcademicYear2014)
-							AcademicYear(2014)
-						else
-							AcademicYear(2013)
+						retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 				}
 				Mav("attendance/home",
 					"hasProfile" -> info.hasProfile,
