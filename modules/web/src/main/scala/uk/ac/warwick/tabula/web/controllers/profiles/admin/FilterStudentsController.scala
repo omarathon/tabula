@@ -19,6 +19,9 @@ class FilterStudentsAcademicYearController extends ProfilesController
 	with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+
 	@ModelAttribute("filterStudentsCommand")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
 		FilterStudentsCommand(mandatory(department), mandatory(academicYear))
@@ -44,10 +47,17 @@ class FilterStudentsAcademicYearController extends ProfilesController
 
 @Controller
 @RequestMapping(value = Array("/profiles/department/{department}/students"))
-class FilterStudentsController extends ProfilesController with CurrentSITSAcademicYear {
+class FilterStudentsController extends ProfilesController
+	with  AcademicYearScopedController
+	with AutowiringUserSettingsServiceComponent
+	with AutowiringMaintenanceModeServiceComponent
+	with CurrentSITSAcademicYear {
+
+	@ModelAttribute("activeAcademicYear")
+	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def filter(@PathVariable department: Department) = {
-		Redirect(Routes.Profile.students(department, academicYear))
+	def filter(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) = {
+		Redirect(Routes.Profile.students(department, activeAcademicYear.getOrElse(academicYear)))
 	}
 }
