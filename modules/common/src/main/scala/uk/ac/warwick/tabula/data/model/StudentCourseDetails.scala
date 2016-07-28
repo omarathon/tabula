@@ -61,7 +61,7 @@ class StudentCourseDetails
 	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).toSeq.sorted
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
-	def freshOrStaleStudentCourseYearDetailsForYear(academicYear:AcademicYear): Option[StudentCourseYearDetails] =  {
+	def freshOrStaleStudentCourseYearDetailsForYear(academicYear: AcademicYear): Option[StudentCourseYearDetails] =  {
 		studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
 	}
 
