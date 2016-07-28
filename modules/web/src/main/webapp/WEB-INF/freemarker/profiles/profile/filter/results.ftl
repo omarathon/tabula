@@ -13,7 +13,7 @@
 		<#return "" />
 	</#function>
 
-	<#macro row student>
+	<#macro row student academicYear="">
 		<tr class="student">
 			<td>
 				<@fmt.member_photo student "tinythumbnail" />
@@ -22,17 +22,23 @@
 			<td><h6>${student.lastName}</h6></td>
 			<td><a class="profile-link" href="<@routes.profiles.profile student />">${student.universityId}</a></td>
 			<td>${student.groupName}</td>
-			<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
-			<td>${(student.mostSignificantCourseDetails.currentRoute.name)!""}</td>
+			<#if academicYear?has_content>
+				<#assign courseYearDetails=student.freshOrStaleStudentCourseYearDetailsForYear(academicYear) />
+				<td>${(courseYearDetails.yearOfStudy)!""}</td>
+				<td>${(courseYearDetails.route.name)!""}</td>
+			<#else>
+				<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
+				<td>${(student.mostSignificantCourseDetails.currentRoute.name)!""}</td>
+			</#if>
 		</tr>
 	</#macro>
 
-	<#macro table students>
+	<#macro table students academicYear="">
 		<table class="related_students table table-striped table-condensed">
 			<thead>
 				<tr>
 					<th class="photo-col">Photo</th>
-					<th class="student-col ${sortClass("firstName")}" data-field="firstName">First name</th>
+					<th class="student-col ${sortClass("firstName")}" dasta-field="firstName">First name</th>
 					<th class="student-col ${sortClass("lastName")}" data-field="lastName">Last name</th>
 					<th class="id-col ${sortClass("universityId")}" data-field="universityId">ID</th>
 					<th class="type-col ${sortClass("groupName")}" data-field="groupName">Type</th>
@@ -43,7 +49,7 @@
 
 			<tbody>
 				<#list students as item>
-					<@row item />
+					<@row item academicYear/>
 				</#list>
 			</tbody>
 		</table>
@@ -150,7 +156,12 @@
 				</p>
 			</div>
 
-			<@table students />
+			<#if academicYear??>
+				<@table students academicYear/>
+			<#else>
+				<@table students/>
+			</#if>
+
 
 			<div class="clearfix">
 				<#if totalResults lte filterStudentsCommand.studentsPerPage>

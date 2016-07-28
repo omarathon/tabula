@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
@@ -117,4 +118,16 @@ object ProfileBreadcrumbs {
 		}
 
 	}
+
+	object DepartmentalStudentProfiles {
+
+		abstract class Abstract extends BreadCrumb
+
+		case class Students(department: model.Department, academicYear: AcademicYear) extends Abstract {
+			val title = "Departmental Students"
+			val url = Some(Routes.Profile.students(department, academicYear))
+		}
+	}
+
+
 }

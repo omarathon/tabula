@@ -36,11 +36,13 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
 
 		val totalResults = benchmarkTask("countStudentsByRestrictions") { profileService.countStudentsByRestrictions(
 			department = department,
+			academicYear = year,
 			restrictions = restrictions
 		)}
 
 		val (offset, students) = benchmarkTask("findStudentsByRestrictions") { profileService.findStudentsByRestrictions(
 			department = department,
+			academicYear = year,
 			restrictions = restrictions,
 			orders = buildOrders(),
 			maxResults = studentsPerPage,

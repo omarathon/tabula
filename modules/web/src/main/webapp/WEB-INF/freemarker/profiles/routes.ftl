@@ -20,7 +20,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@_u page="/view/photo/${profile.universityId}/${relationship.relationshipType.urlPart}/${relationship.agent}.jpg"/></#macro>
 
-<#macro filter_students department><@_u page="/department/${department.code}/students" /></#macro>
+<#macro filter_students department academicYear=""><#if academicYear?has_content><@_u page="/department/${department.code}/students/${academicYear.startYear?c}" /><#else><@_u page="/department/${department.code}/students" /></#if></#macro>
 <#macro department_timetables department><@_u page="/department/${department.code}/timetables" /></#macro>
 <#macro draft_department_timetables department academicYear endpoint><@_u page="/department/${department.code}/timetables/drafts/${academicYear.startYear?c}/${endpoint}" /></#macro>
 
