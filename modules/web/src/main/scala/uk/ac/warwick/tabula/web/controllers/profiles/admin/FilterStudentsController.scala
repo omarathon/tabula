@@ -10,19 +10,13 @@ import uk.ac.warwick.tabula.commands.profiles.{FilterStudentsCommand, FilterStud
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
-import uk.ac.warwick.tabula.web.controllers.profiles.{ProfileBreadcrumbs, ProfilesController}
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 abstract class AbstractFilterStudentsAcademicYearController extends ProfilesController
 	with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
-
-	protected def breadcrumbs(academicYear: AcademicYear, department: Department): Seq[BreadCrumb] =
-		Seq(
-			ProfileBreadcrumbs.DepartmentalStudentProfiles.Students(department, academicYear)
-		)
 
 	@ModelAttribute("filterStudentsCommand")
 	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
@@ -41,7 +35,7 @@ abstract class AbstractFilterStudentsAcademicYearController extends ProfilesCont
 				"academicYear" -> year
 			)
 			if (ajax) Mav("profiles/profile/filter/results", modelMap).noLayout()
-			else Mav("profiles/profile/filter/filter", modelMap).crumbs(breadcrumbs(year, department): _*)
+			else Mav("profiles/profile/filter/filter", modelMap)
 				.secondCrumbs(academicYearBreadcrumbs(year)(year => Routes.Profile.students(department, year)): _*)
 		}
 	}

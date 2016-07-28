@@ -119,14 +119,4 @@ object ProfileBreadcrumbs {
 
 	}
 
-	object DepartmentalStudentProfiles {
-
-		abstract class Abstract extends BreadCrumb
-
-		case class Students(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title = "Departmental Students"
-			val url = Some(Routes.Profile.students(department, academicYear))
-		}
-	}
-
 }
