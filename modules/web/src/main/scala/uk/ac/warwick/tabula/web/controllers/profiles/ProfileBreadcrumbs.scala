@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.BreadCrumb

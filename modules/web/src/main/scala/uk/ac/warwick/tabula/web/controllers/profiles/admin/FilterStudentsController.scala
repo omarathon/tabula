@@ -1,61 +1,53 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.admin
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.{FilterStudentsCommand, FilterStudentsResults}
+import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
-abstract class AbstractFilterStudentsAcademicYearController extends ProfilesController
+@Controller
+@RequestMapping(value = Array("/profiles/department/{department}/students/{academicYear}"))
+class FilterStudentsAcademicYearController extends ProfilesController
 	with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent
 	with AutowiringMaintenanceModeServiceComponent {
 
 	@ModelAttribute("filterStudentsCommand")
-	def command(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		FilterStudentsCommand(mandatory(department), academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
+	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+		FilterStudentsCommand(mandatory(department), mandatory(academicYear))
+
 
 	@RequestMapping
-	def filter(@ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) = {
+	def filter(@ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
 		if (errors.hasErrors) {
 			Mav("profiles/profile/filter/filter").noLayout()
 		} else {
-			val year = academicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 			val results = cmd.apply()
 			val modelMap = Map(
 				"students" -> results.students,
 				"totalResults" -> results.totalResults,
-				"academicYear" -> year
+				"academicYear" -> academicYear
 			)
 			if (ajax) Mav("profiles/profile/filter/results", modelMap).noLayout()
 			else Mav("profiles/profile/filter/filter", modelMap)
-				.secondCrumbs(academicYearBreadcrumbs(year)(year => Routes.Profile.students(department, year)): _*)
+				.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Profile.students(department, year)): _*)
 		}
 	}
 }
 
 @Controller
-@RequestMapping(value = Array("/profiles/department/{department}/students/{academicYear}"))
-class FilterStudentsAcademicYearController extends AbstractFilterStudentsAcademicYearController {
-
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(mandatory(academicYear)))
-
-}
-
-@Controller
 @RequestMapping(value = Array("/profiles/department/{department}/students"))
-class FilterStudentsController extends AbstractFilterStudentsAcademicYearController {
+class FilterStudentsController extends ProfilesController with CurrentSITSAcademicYear {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] =
-		retrieveActiveAcademicYear(None)
+	@RequestMapping
+	def filter(@PathVariable department: Department) = {
+		Redirect(Routes.Profile.students(department, academicYear))
+	}
 }
