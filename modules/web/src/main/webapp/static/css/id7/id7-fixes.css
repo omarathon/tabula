@@ -5,3 +5,7 @@
 .checkbox-inline input[type="checkbox"] {
 	margin-top: 7px;
 }
+
+.popover.account-information .popover-content {
+	overflow: visible;
+}
