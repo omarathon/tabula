@@ -4,16 +4,16 @@
 	<details class="indent">
 		<summary>${member.officialName}</summary>
 		<#if member.userId??>
-		${member.userId}<br/>
+			${member.userId}<br/>
 		</#if>
 		<#if member.email??>
 			<a href="mailto:${member.email}">${member.email}</a><br/>
 		</#if>
 		<#if member.phoneNumber??>
-		${phoneNumberFormatter(member.phoneNumber)}<br/>
+			${phoneNumberFormatter(member.phoneNumber)}<br/>
 		</#if>
 		<#if member.mobileNumber??>
-		${phoneNumberFormatter(member.mobileNumber)}<br/>
+			${phoneNumberFormatter(member.mobileNumber)}<br/>
 		</#if>
 	</details>
 </#if>
@@ -165,7 +165,7 @@
 							<#if enhancedAssignment.submissionDeadline?has_content>
 								Closed <@fmt.date date=enhancedAssignment.submissionDeadline relative=false />
 							</#if>
-							<#if enhancedAssignment.submission.late>
+							<#if enhancedAssignment.submission?? && enhancedAssignment.submission.late>
 								<#assign context>
 									<#if enhancedAssignment.extension?? && enhancedAssignment.extension.approved>
 										extended deadline
@@ -175,7 +175,7 @@
 								</#assign>
 								<#assign lateness>
 									<@fmt.p enhancedAssignment.submission.workingDaysLate "working day" /> overdue,
-								${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
+									${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
 									(<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
 								</#assign>
 

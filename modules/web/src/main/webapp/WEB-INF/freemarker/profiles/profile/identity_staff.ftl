@@ -18,7 +18,9 @@
 			<div class="col-md-8">
 				<strong>Official name:</strong> ${member.officialName}<br/>
 				<strong>Preferred name:</strong> ${member.fullName}<br/>
-				<strong>Job title:</strong> ${member.jobTitle}<br/>
+				<#if member.jobTitle??>
+					<strong>Job title:</strong> ${member.jobTitle}<br/>
+				</#if>
 				<#if member.gender??>
 					<strong>Gender:</strong> ${member.gender.description}<br/>
 				</#if>
