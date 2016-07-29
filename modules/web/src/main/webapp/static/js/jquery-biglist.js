@@ -12,6 +12,9 @@
         onChange($checkbox): callback when a row is selected/unselected.
 */
 $.fn.bigList = function(options) {
+
+	options = options || {};
+
     this.each(function(){
         var $this = $(this);
 

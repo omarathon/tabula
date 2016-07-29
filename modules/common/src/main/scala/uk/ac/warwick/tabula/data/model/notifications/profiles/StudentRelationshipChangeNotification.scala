@@ -39,7 +39,7 @@ abstract class StudentRelationshipChangeNotification
 
 		))
 
-	def url: String = Routes.profile.view(relationship.studentMember.get)
+	def url: String = Routes.Profile.relationshipType(relationship.studentMember.get, relationshipType)
 }
 
 
@@ -70,7 +70,7 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 
 	def title: String = s"Change to ${relationshipType.studentRole}s"
 	def templateLocation = StudentRelationshipChangeNotification.OldAgentTemplate
-	def recipients = oldAgents.map { _.asSsoUser }.toSeq
+	def recipients = oldAgents.map { _.asSsoUser }
 }
 
 @Entity

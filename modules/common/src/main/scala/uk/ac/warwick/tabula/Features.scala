@@ -81,6 +81,7 @@ abstract class Features {
 	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.personalTimetables.exams:false}") var personalExamTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
+	@Value("${features.profiles.circumstances:false}") var profilesCircumstances = defaults.profilesCircumstances
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 
 	@Value("${features.smallGroupTeaching.lectures:true}") var smallGroupTeachingLectures = defaults.smallGroupTeachingLectures
@@ -90,7 +91,7 @@ abstract class Features {
 	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:true}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:true}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
-	@Value("${features.disability.rendering.submissions:false}") var disabilityOnSubmission = defaults.disabilityOnSubmission
+	@Value("${features.disability.rendering.submissions:true}") var disabilityOnSubmission = defaults.disabilityOnSubmission
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 	@Value("${features.newSeenSecondMarkingWorkflows:true}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 	@Value("${features.activityStreams:true}") var activityStreams = defaults.activityStreams
@@ -116,6 +117,7 @@ abstract class Features {
 	@Value("${features.celcatTimetablesChemistry:true}") var celcatTimetablesChemistry = defaults.celcatTimetablesChemistry
 	@Value("${features.smallGroupTeaching.autoMarkMissedMonitoringPoints:true}") var autoMarkMissedMonitoringPoints = defaults.autoMarkMissedMonitoringPoints
 	@Value("${features.notificationListeners.start:false}") var startNotificationListener = defaults.startNotificationListener
+	@Value("${features.urkund.submissions:false}") var urkundSubmissions = defaults.urkundSubmissions
 
 	@Value("${features.scheduling.academicInformationImport:true}") var schedulingAcademicInformationImport = defaults.schedulingAcademicInformationImport
 	@Value("${features.scheduling.profilesImport:true}") var schedulingProfilesImport = defaults.schedulingProfilesImport
@@ -203,9 +205,10 @@ class FeaturesMessage {
 	@BeanProperty var summativeFilter = true
 	@BeanProperty var dissertationFilter = true
 	@BeanProperty var disabilityRenderingInExtensions = true
-	@BeanProperty var disabilityOnSubmission = false
+	@BeanProperty var disabilityOnSubmission = true
 	@BeanProperty var newSeenSecondMarkingWorkflows = true
 	@BeanProperty var queueFeedbackForSits = true
+	@BeanProperty var urkundSubmissions = false
 
 	@BeanProperty var profiles = true
 	@BeanProperty var meetingRecordApproval = true
@@ -215,6 +218,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTimetables = true
 	@BeanProperty var personalExamTimetables = false
 	@BeanProperty var profilesMemberNotes = true
+	@BeanProperty var profilesCircumstances = false
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true

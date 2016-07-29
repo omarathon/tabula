@@ -60,8 +60,8 @@ $(function(){
     // enable/disable the "sign up" buttons on the student groups homepage
     $('#student-groups-view .sign-up-button').addClass('disabled use-tooltip').prop('disabled',true).prop('title','Please select a group');
     $('#student-groups-view input.group-selection-radio').change(function(){
-			$(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
-		});
+		$(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
+	});
 });
 
 

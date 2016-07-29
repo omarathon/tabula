@@ -9,29 +9,31 @@
 <#if hasFileErrors>
 
 	<@spring.bind path="command">
-		<div class="alert alert-block alert-error">
+		<div class="alert alert-danger">
 			<#list status.errors.allErrors as error>
 				<@spring.message message=error />
 			</#list>
 		</div>
 
-		<a class="btn" href="<@routes.profiles.relationship_allocate department relationshipType />">Cancel</a>
+		<a class="btn btn-default" href="<@routes.profiles.relationship_allocate department relationshipType />">Cancel</a>
 	</@spring.bind>
 
 <#else>
 
 	<#assign hasRows = validRows?has_content />
 
-	<@f.form class="form-horizontal" method="post" action="${previewFormAction}" commandName="command">
+	<@f.form method="post" action="${previewFormAction}" commandName="command">
 		<div class="fix-area">
-			<h1>Spreadsheet upload of ${relationshipType.description} changes</h1>
-			<h4><span class="muted">for</span> ${department.name}</h4>
+			<div class="deptheader">
+				<h1>Spreadsheet upload of ${relationshipType.description} changes</h1>
+				<h4 class="with-related"><span class="muted">for</span> ${department.name}</h4>
+			</div>
 
 			<#if invalidRows?has_content>
 				<h2>Invalid rows</h2>
 				<h6>The following rows had errors which prevent them being uploaded</h6>
 
-				<table class="table table-bordered table-condensed table-striped">
+				<table class="table table-condensed table-striped">
 					<thead>
 					<tr>
 						<th>${relationshipType.studentRole?cap_first} ID</th>
@@ -58,7 +60,7 @@
 			<#if hasRows>
 				<h2>Valid rows</h2>
 
-				<table class="table table-bordered table-condensed table-striped">
+				<table class="table table-condensed table-striped">
 					<thead>
 					<tr>
 						<th>${relationshipType.studentRole?cap_first} ID</th>
@@ -81,11 +83,11 @@
 			<#elseif invalidRows?has_content>
 				<h2>Valid rows</h2>
 
-				<div class="alert alert-block alert-error">
-					<i class="icon-warning-sign"></i> There were no valid rows in the spreadsheet. Please review your spreadsheet data.
+				<div class="alert alert-danger">
+					There were no valid rows in the spreadsheet. Please review your spreadsheet data.
 				</div>
 			<#else>
-				<div class="alert alert-block alert-error">
+				<div class="alert alert-danger">
 					<h2>No information was found in the spreadsheet</h2>
 
 					<p>In order for students to be allocated or unallocated from their ${relationshipType.agentRole}, there must be
@@ -96,18 +98,18 @@
 			</#if>
 			<div class="fix-footer">
 				<#if hasRows>
-					<@form.labelled_row "allocationType" "Choose allocation type">
-						<@form.label clazz="radio" checkbox=true>
+					<@bs3form.labelled_form_group path="allocationType" labelText="Choose allocation type">
+						<@bs3form.radio>
 							<@f.radiobutton path="allocationType" value="${allocationTypes.Replace}" />
 							Replace existing ${relationshipType.agentRole}s
 							<@fmt.help_popover id="allocationType-replace" content="For any student with a ${relationshipType.agentRole} defined in the spreadsheet, remove any existing ${relationshipType.agentRole}s and add the new ${relationshipType.agentRole}" />
-						</@form.label>
-						<@form.label clazz="radio" checkbox=true>
+						</@bs3form.radio>
+						<@bs3form.radio>
 							<@f.radiobutton path="allocationType" value="${allocationTypes.Add}" />
 							Add additional ${relationshipType.agentRole}s
 							<@fmt.help_popover id="allocationType-replace" content="For any student with a ${relationshipType.agentRole} defined in the spreadsheet, add the new ${relationshipType.agentRole}. Any existing ${relationshipType.agentRole}s will remain" />
-						</@form.label>
-					</@form.labelled_row>
+						</@bs3form.radio>
+					</@bs3form.labelled_form_group>
 				</#if>
 
 				<div class="submit-buttons">
@@ -123,7 +125,7 @@
 						<button type="submit" class="btn btn-primary">Continue</button>
 					</#if>
 
-					<a class="btn" href="<@routes.profiles.relationship_allocate department relationshipType />">Cancel</a>
+					<a class="btn btn-default" href="<@routes.profiles.relationship_allocate department relationshipType />">Cancel</a>
 				</div>
 			</div>
 		</div>

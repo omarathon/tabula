@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.profiles.ViewRelatedStudentsCommand.Result
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, FiltersRelationships, ReadOnly, TaskBenchmarking, Unaudited, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -15,10 +16,21 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 
 object ViewRelatedStudentsCommand{
-	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Seq[StudentCourseDetails]] = {
+
+	type LastMeetingWithTotalPendingApprovalsMap = Map[String, (Option[MeetingRecord], Int)]
+	type CommandType = Appliable[Result]
+
+	case class Result(
+		entities: Seq[StudentCourseDetails],
+		lastMeetingWithTotalPendingApprovalsMap: LastMeetingWithTotalPendingApprovalsMap
+	)
+
+	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Result] = {
 		new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
-			with ComposableCommand[Seq[StudentCourseDetails]]
+			with ComposableCommand[Result]
 			with AutowiringProfileServiceComponent
+			with AutowiringMeetingRecordServiceComponent
+			with AutowiringRelationshipServiceComponent
 			with ViewRelatedStudentsCommandPermissions
 			with Unaudited with ReadOnly
 	}
@@ -52,12 +64,25 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
-	extends CommandInternal[Seq[StudentCourseDetails]] with TaskBenchmarking with ViewRelatedStudentsCommandState with BindListener {
-	self: ProfileServiceComponent =>
+	extends CommandInternal[Result] with TaskBenchmarking with ViewRelatedStudentsCommandState with BindListener {
+	self: ProfileServiceComponent with MeetingRecordServiceComponent with RelationshipServiceComponent =>
 
-	def applyInternal(): Seq[StudentCourseDetails] =  {
+	def applyInternal(): Result =  {
 		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
+		val studentCourseDetails = profileService.getSCDsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions(year))
+
+		val lastMeetingWithTotalPendingApprovalsMap: Map[String, (Option[MeetingRecord], Int)] = studentCourseDetails.map(scd => {
+			val rels = relationshipService.getRelationships(relationshipType, scd.student)
+			val lastMeeting = benchmarkTask("lastMeeting"){
+				meetingRecordService.list(rels.toSet, Some(currentMember)).headOption
+			}
+			val totalPendingApprovals = benchmarkTask("totalPendingStudentApprovals"){
+				meetingRecordService.countPendingApprovals(scd.student.universityId)
+			}
+			scd.student.universityId -> (lastMeeting, totalPendingApprovals)
+		}).toMap
+
+		Result(studentCourseDetails, lastMeetingWithTotalPendingApprovalsMap)
 	}
 
 	def onBind(result: BindingResult) {

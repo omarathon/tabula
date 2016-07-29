@@ -35,9 +35,12 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var smallGroupService = Wire[SmallGroupService]
 	var permissionsService = Wire[PermissionsService]
 	var feedbackForSitsService = Wire[FeedbackForSitsService]
+	var memberNoteService = Wire[MemberNoteService]
 
 	def applyInternal() {
-		setupDepartmentAndModules()
+		benchmarkTask("setupDepartmentAndModules") {
+			setupDepartmentAndModules()
+		}
 
 		val department = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).get
 		val subDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubDepartment.code).get
@@ -99,7 +102,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			sessionWithoutFreshFilters.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from FileAttachment where member_note_id in (select id from MemberNote where memberId like '3000%')").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from MemberNote where memberId like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from StaffMember where universityId like '3000%'").executeUpdate()
 		}
 
 		// Blitz the test department
@@ -108,17 +114,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 
 				val schemes = attendanceMonitoringDao.listAllSchemes(dept)
-
-				val deptScds = scdDao.findByDepartment(dept)
-				val scds = deptScds.distinct
-
-				for (scd <- scds) {
-					for (mr <- scd.moduleRegistrations) {
-						session.delete(mr)
-					}
-					scd.clearModuleRegistrations()
-				}
-				session.flush()
 
 				for (scheme <- schemes) {
 					for (point <- scheme.points.asScala){
@@ -141,11 +136,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				}
 				session.flush()
 				assert(smallGroupService.getAllSmallGroupSets(dept).isEmpty)
-
-			  for (student <- scds.map{ _.student}.distinct) {
-					//should cascade delete SCDs too
-					session.delete(student)
-				}
 
 				for (staff <- memberDao.getStaffByDepartment(dept)) {
 					session.delete(staff)

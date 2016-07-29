@@ -76,12 +76,61 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 	}
 
 	@Test
-	def distribute(): Unit = {
+	def distributeAll(): Unit = {
+		new Fixture {
+			command.entities.addAll(Seq("1", "2", "3").asJava)
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
+			val result = command.applyInternal()
+			result.unallocated.size should be (0)
+			result.allocated.size should be (4)
+			result.allocated.flatMap(_.students).distinct.size should be (11)
+			val sizes = result.allocated.map(_.students.size)
+			sizes.count(_ == 3) should be (3)
+			sizes.count(_ == 2) should be (1)
+			mockDbUnallocated.map(_.universityId).foreach(id => {
+				command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {true}
+			})
+		}
+
+		new Fixture {
+			command.entities.addAll(Seq("1", "2", "3", "4").asJava)
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
+			val result = command.applyInternal()
+			result.unallocated.size should be (0)
+			result.allocated.size should be (4)
+			result.allocated.flatMap(_.students).distinct.size should be (11)
+			val sizes = result.allocated.map(_.students.size)
+			sizes.count(_ == 3) should be (3)
+			sizes.count(_ == 2) should be (1)
+			mockDbUnallocated.map(_.universityId).foreach(id => {
+				command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {true}
+			})
+		}
+
+		new Fixture {
+			command.entities.addAll(Seq("3", "4").asJava)
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeAll
+			val result = command.applyInternal()
+			result.unallocated.size should be (0)
+			result.allocated.size should be (4)
+			result.allocated.flatMap(_.students).distinct.size should be (11)
+			result.allocated.find(_.entityId == "1").get.students.size should be (0)
+			result.allocated.find(_.entityId == "2").get.students.size should be (2)
+			result.allocated.find(_.entityId == "3").get.students.size should be (5)
+			result.allocated.find(_.entityId == "4").get.students.size should be (4)
+			mockDbUnallocated.map(_.universityId).foreach(id => {
+				command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {true}
+			})
+		}
+	}
+
+	@Test
+	def distributeSelected(): Unit = {
 		new Fixture {
 			val allocated = Seq("8", "9", "10", "11")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
 			val result = command.applyInternal()
 			result.unallocated.size should be (0)
 			result.allocated.size should be (4)
@@ -98,7 +147,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			val allocated = Seq("8", "9", "10")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("1", "2", "3", "4").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
 			val result = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
@@ -115,7 +164,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			val allocated = Seq("8", "9", "10")
 			command.allocate.addAll(allocated.asJava)
 			command.entities.addAll(Seq("3", "4").asJava)
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
 			val result = command.applyInternal()
 			result.unallocated.size should be (1)
 			result.allocated.size should be (4)
@@ -180,7 +229,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			// Re-add
 			command.allocate = Seq("1").asJava
 			command.entities = Seq("2").asJava
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
 			val result2 = command.applyInternal()
 			result2.unallocated.size should be (4)
 			result2.allocated.size should be (4)
@@ -197,7 +246,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
 			// Add
 			command.allocate = JArrayList("8")
 			command.entities = JArrayList("2")
-			command.action = FetchDepartmentRelationshipInformationCommand.Actions.Distribute
+			command.action = FetchDepartmentRelationshipInformationCommand.Actions.DistributeSelected
 			val result = command.applyInternal()
 			result.unallocated.size should be (3)
 			result.allocated.size should be (4)

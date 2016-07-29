@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 /*
  * Allow creators of administrative notes to update/remove them
  */
-case class MemberNoteCreator(note: model.MemberNote) extends BuiltInRole(MemberNoteCreatorRoleDefinition, note)
+case class MemberNoteCreator(note: model.AbstractMemberNote) extends BuiltInRole(MemberNoteCreatorRoleDefinition, note)
 
 case object MemberNoteCreatorRoleDefinition extends UnassignableBuiltInRoleDefinition {
 

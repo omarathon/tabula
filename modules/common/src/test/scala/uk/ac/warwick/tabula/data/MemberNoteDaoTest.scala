@@ -18,12 +18,12 @@ class MemberNoteDaoTest extends PersistenceTestBase {
 			val student = Fixtures.student("123", "abc")
 			val note = Fixtures.memberNoteWithId("the note", student, "123")
 
-			memberNoteDao.getById(note.id) should be (None)
+			memberNoteDao.getNoteById(note.id) should be (None)
 
 			memberNoteDao.saveOrUpdate(note)
 
-			memberNoteDao.getById(note.id) should be (Option(note))
-			memberNoteDao.getById(note.id).get.note should be ("the note")
+			memberNoteDao.getNoteById(note.id) should be (Option(note))
+			memberNoteDao.getNoteById(note.id).get.note should be ("the note")
 
 		}
 	}
@@ -35,16 +35,16 @@ class MemberNoteDaoTest extends PersistenceTestBase {
 			session.saveOrUpdate(student)
 			val note = Fixtures.memberNote("another note", student )
 
-			memberNoteDao.list(student).size should be (0)
+			memberNoteDao.listNotes(student).size should be (0)
 
 			memberNoteDao.saveOrUpdate(note)
 
-			memberNoteDao.list(student, false).size should be (1)
+			memberNoteDao.listNotes(student, false).size should be (1)
 
 			note.deleted = true
 			memberNoteDao.saveOrUpdate(note)
-			memberNoteDao.list(student, false).size should be (0)
-			memberNoteDao.list(student, true).size should be (1)
+			memberNoteDao.listNotes(student, false).size should be (0)
+			memberNoteDao.listNotes(student, true).size should be (1)
 
 		}
 	}
@@ -56,11 +56,11 @@ class MemberNoteDaoTest extends PersistenceTestBase {
 			session.saveOrUpdate(student)
 			val note = Fixtures.memberNote("another note", student )
 
-			memberNoteDao.list(student).size should be (0)
+			memberNoteDao.listNotes(student).size should be (0)
 
 			memberNoteDao.saveOrUpdate(note)
 
-			memberNoteDao.list(student, false).size should be (1)
+			memberNoteDao.listNotes(student, false).size should be (1)
 
 		}
 	}

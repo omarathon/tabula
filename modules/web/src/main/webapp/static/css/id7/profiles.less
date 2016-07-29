@@ -1,0 +1,116 @@
+@import "../../bower_components/warwick-id7/less/bootstrap/variables.less";
+@import "../../bower_components/warwick-id7/less/bootstrap/mixins/gradients.less";
+@import "../../bower_components/warwick-id7/less/bootstrap/mixins/clearfix.less";
+@import "../../bower_components/warwick-id7/less/bootstrap/mixins/vendor-prefixes.less";
+@import "colours.less";
+@import "../css3.less";
+
+.profile-search {
+	@line-height-large-computed: ceil(@font-size-large / @font-size-base) * @line-height-computed;
+
+	form {
+		margin: 0;
+	}
+
+	.form-control, .input-group-btn {
+		font-size: @font-size-large;
+		height: @line-height-large-computed;
+		.btn {
+			line-height: 1em;
+			height: @line-height-large-computed;
+			font-size: @font-size-large;
+		}
+	}
+
+	div.spinner-container {
+		position: absolute;
+		right: 40px;
+		height: 40px;
+		width: 40px;
+		top: 1px;
+		z-index: 10;
+	}
+}
+
+.profile-search-results .dropdown-menu {
+	li > a {
+		padding: 3px 8px;
+		.clearfix();
+	}
+	h3 {
+		margin-bottom: 0;
+		margin-top: 0; }
+	.photo {
+		max-height: 50px;
+	}
+	.description {
+		white-space: normal;
+	}
+	h3, .description {
+		margin-right: 50px;
+	}
+	.active > a, .active > a:hover {
+		#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
+	}
+	.pull-right a {
+		text-align: left;
+	}
+}
+
+table.event-info {
+	// Reset
+	th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+
+	width: 100%;
+
+	th {
+		text-align: right;
+		color: @tabulaGrayLight;
+		white-space: nowrap;
+
+		&:after { content: ''; margin-right: 3px; }
+	}
+
+	td {
+		color: #0c0c0c;
+		width: 99%;
+		sup { font-size:0.8em }
+		padding-bottom: 0.5em;
+	}
+	tbody {
+		border-bottom: 15px solid transparent;
+	}
+
+}
+
+details.indent {
+	padding-left: 20px;
+	summary {
+		margin-left: -20px;
+	}
+}
+
+table.expanding-row-pairs {
+	td.can-expand {
+		i.fa-caret-down, i.fa-caret-right {
+			font-size: 1.5em;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+	}
+	.deleted {
+		text-decoration: line-through;
+	}
+	.disabled {
+		text-decoration: none;
+		color: @tabulaGrayLight;
+		cursor: not-allowed;
+	}
+}
+
+section.identity, section.member-notes, section.circumstances {
+	margin-bottom: 16px;
+}
+
+@import "allocate-associations.less";
+@import "profile-attendance.less";

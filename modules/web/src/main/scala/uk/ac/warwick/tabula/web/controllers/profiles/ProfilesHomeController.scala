@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 	var departmentService = Wire[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
-		restricted(new SearchProfilesCommand(currentMember, user)).orNull
+		restricted(SearchProfilesCommand(currentMember, user)).orNull
 
 	@ModelAttribute("command")
 	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 	@RequestMapping(Array("/profiles")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
 
 		if (!user.isPGR && !isAgent(user.universityId) && optionalCurrentMember.exists(_.userType == Student)) {
-			Redirect(Routes.profile.view(currentMember))
+			Redirect(Routes.Profile.identity(currentMember))
 		} else {
 			val info = cmd.apply()
 

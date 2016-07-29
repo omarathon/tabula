@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMemberNoteDaoComponent, MemberNoteDaoComponent}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{Member, MemberNote}
+import uk.ac.warwick.tabula.data.model.{ExtenuatingCircumstances, Member, MemberNote}
 
 trait MemberNoteServiceComponent {
 	def memberNoteService: MemberNoteService
@@ -16,10 +16,16 @@ trait AutowiringMemberNoteServiceComponent extends MemberNoteServiceComponent {
 trait MemberNoteService {
 
 	def getNoteById(id: String): Option[MemberNote]
-	def list(student: Member): Seq[MemberNote]
-	def listNonDeleted(student: Member): Seq[MemberNote]
+	def listNotes(student: Member): Seq[MemberNote]
+	def listNonDeletedNotes(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
-	def deleteNote(note: MemberNote)
+	def delete(note: MemberNote)
+
+	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances]
+	def listExtenuatingCircumstances(student: Member): Seq[ExtenuatingCircumstances]
+	def listNonDeletedExtenuatingCircumstances(student: Member): Seq[ExtenuatingCircumstances]
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances)
+	def delete(circumstances: ExtenuatingCircumstances)
 
 }
 
@@ -27,11 +33,35 @@ trait MemberNoteService {
 abstract class AbstractMemberNoteService extends MemberNoteService {
 	self: MemberNoteDaoComponent =>
 
-	def getNoteById(id: String): Option[MemberNote] = memberNoteDao.getById(id)
-	def list(student: Member): Seq[MemberNote] = memberNoteDao.list(student, true)
-	def listNonDeleted(student: Member): Seq[MemberNote] = memberNoteDao.list(student, false)
-	def saveOrUpdate(memberNote: MemberNote) = memberNoteDao.saveOrUpdate(memberNote)
-	def deleteNote(memberNote: MemberNote) = memberNoteDao.delete(memberNote)
+	def getNoteById(id: String): Option[MemberNote] =
+		memberNoteDao.getNoteById(id)
+
+	def listNotes(student: Member): Seq[MemberNote] =
+		memberNoteDao.listNotes(student, includeDeleted = true)
+
+	def listNonDeletedNotes(student: Member): Seq[MemberNote] =
+		memberNoteDao.listNotes(student, includeDeleted = false)
+
+	def saveOrUpdate(memberNote: MemberNote) =
+		memberNoteDao.saveOrUpdate(memberNote)
+
+	def delete(memberNote: MemberNote) =
+		memberNoteDao.delete(memberNote)
+
+	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances] =
+		memberNoteDao.getExtenuatingCircumstancesById(id)
+
+	def listExtenuatingCircumstances(student: Member): Seq[ExtenuatingCircumstances] =
+		memberNoteDao.listExtenuatingCircumstances(student, includeDeleted = true)
+
+	def listNonDeletedExtenuatingCircumstances(student: Member): Seq[ExtenuatingCircumstances] =
+		memberNoteDao.listExtenuatingCircumstances(student, includeDeleted = false)
+
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances) =
+		memberNoteDao.saveOrUpdate(circumstances)
+
+	def delete(circumstances: ExtenuatingCircumstances) =
+		memberNoteDao.delete(circumstances)
 
 }
 

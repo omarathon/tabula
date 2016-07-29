@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.profiles.pages.SubDepartmentFixture
-
 /**
  * Tests for the pages that list students with and without tutors and supervisors for a given department
  *

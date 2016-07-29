@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.{Order, Projections, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
@@ -16,13 +17,15 @@ trait MeetingRecordDao {
 	def list(rel: Set[StudentRelationship], currentUser: Option[Member]): Seq[MeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
 	def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord]
+	def countPendingApprovals(universityId: String): Int
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
+	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
 }
 
 @Repository
-class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
+class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchmarking {
 
 	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
 
@@ -85,6 +88,12 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			.seq
 	}
 
+	def countPendingApprovals(universityId: String): Int = {
+		session.newCriteria[MeetingRecordApproval]
+			.add(is("approver.universityId", universityId))
+			.add(is("state", MeetingApprovalState.Pending))
+			.count.intValue()
+	}
 
 	def get(id: String) = getById[AbstractMeetingRecord](id)
 
@@ -102,6 +111,22 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			.setParameter("from", from)
 			.setParameter("to", to)
 			.executeUpdate()
+	}
+
+	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int] = benchmarkTask("unconfirmedScheduledCount") {
+		safeInSeqWithProjection[ScheduledMeetingRecord, Array[java.lang.Object]](
+			() => {
+				session.newCriteria[ScheduledMeetingRecord]
+					.add(Restrictions.lt("meetingDate", DateTime.now))
+			},
+			Projections.projectionList()
+				.add(Projections.groupProperty("relationship"))
+				.add(Projections.count("relationship")),
+			"relationship",
+			relationships
+		).map { objArray =>
+			objArray(0).asInstanceOf[StudentRelationship] -> objArray(1).asInstanceOf[Long].toInt
+		}.toMap
 	}
 }
 

@@ -14,18 +14,23 @@ trait AutowiringMemberNoteDaoComponent extends MemberNoteDaoComponent {
 }
 
 trait MemberNoteDao {
-	def getById(id: String): Option[MemberNote]
-	def list(student: Member, includeDeleted: Boolean = false): Seq[MemberNote]
+	def getNoteById(id: String): Option[MemberNote]
+	def listNotes(student: Member, includeDeleted: Boolean = false): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
 	def delete(memberNote: MemberNote)
+
+	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances]
+	def listExtenuatingCircumstances(student: Member, includeDeleted: Boolean = false): Seq[ExtenuatingCircumstances]
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances)
+	def delete(circumstances: ExtenuatingCircumstances)
 
 }
 
 @Repository
 class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
-	def getById(id: String): Option[MemberNote] = getById[MemberNote](id)
+	def getNoteById(id: String): Option[MemberNote] = getById[MemberNote](id)
 
-	def list(student: Member, includeDeleted: Boolean): Seq[MemberNote] =	{
+	def listNotes(student: Member, includeDeleted: Boolean): Seq[MemberNote] =	{
 			val criteria = session.newCriteria[MemberNote].add(is("member", student))
 			if (!includeDeleted) {
 				criteria.add(is("deleted", false))
@@ -36,5 +41,19 @@ class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 	def saveOrUpdate(memberNote: MemberNote) = session.saveOrUpdate(memberNote)
 
 	def delete(memberNote: MemberNote) = session.delete(memberNote)
+
+	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances] = getById[ExtenuatingCircumstances](id)
+
+	def listExtenuatingCircumstances(student: Member, includeDeleted: Boolean): Seq[ExtenuatingCircumstances] =	{
+		val criteria = session.newCriteria[ExtenuatingCircumstances].add(is("member", student))
+		if (!includeDeleted) {
+			criteria.add(is("deleted", false))
+		}
+		criteria.addOrder(desc("lastUpdatedDate")).seq
+	}
+
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances) = session.saveOrUpdate(circumstances)
+
+	def delete(circumstances: ExtenuatingCircumstances) = session.delete(circumstances)
 
 }

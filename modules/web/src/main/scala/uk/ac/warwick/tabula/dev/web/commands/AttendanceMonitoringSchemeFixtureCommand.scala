@@ -82,14 +82,14 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
 			}
 		}.asJava
 
-		profileService.getMemberByUniversityId(warwickId).map {
+		profileService.getMemberByUniversityId(warwickId).foreach {
 			case studentMember: StudentMember =>
 				val checkpointTotal = new AttendanceMonitoringCheckpointTotal
 				checkpointTotal.student = studentMember
 				checkpointTotal.academicYear = academicYear
 				checkpointTotal.unrecorded = pointCount
 				checkpointTotal.updatedDate = new DateTime()
-				checkpointTotal.department = moduleAndDepartmentService.getDepartmentByCode(deptCode).getOrElse(null)
+				checkpointTotal.department = moduleAndDepartmentService.getDepartmentByCode(deptCode).orNull
 				session.saveOrUpdate(checkpointTotal)
 		}
 

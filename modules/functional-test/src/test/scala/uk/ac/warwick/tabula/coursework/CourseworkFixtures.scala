@@ -3,9 +3,8 @@ package uk.ac.warwick.tabula.coursework
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.BrowserTest
-import uk.ac.warwick.tabula.LoginDetails
-import uk.ac.warwick.tabula.web.{FixturesDriver, FeaturesDriver}
+import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear, LoginDetails}
+import uk.ac.warwick.tabula.web.{FeaturesDriver, FixturesDriver}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.GivenWhenThen
 
@@ -16,6 +15,9 @@ import scala.concurrent.duration.Duration
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
 	val TEST_MODULE_CODE = "xxx02"
+	val TEST_ROUTE_CODE="xx123"
+	val TEST_DEPARTMENT_CODE="xxx"
+	val TEST_COURSE_CODE="Ux123"
 
 	before {
 		Given("The test department exists")
@@ -33,13 +35,46 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		And("student1-4 are members")
+		createRoute(TEST_ROUTE_CODE, TEST_DEPARTMENT_CODE, "Test Route")
+		createCourse(TEST_COURSE_CODE, "Test Course")
+		createStudentMember(
+			P.Student1.usercode,
+			routeCode = TEST_ROUTE_CODE,
+			courseCode = TEST_COURSE_CODE,
+			deptCode = TEST_DEPARTMENT_CODE,
+			academicYear = FunctionalTestAcademicYear.current.startYear.toString
+		)
 		// Make them at the same time.
 		val concurrentJobs = Seq(
 			assessmentFuture,
-			Future { createStudentMember(P.Student1.usercode) },
-			Future { createStudentMember(P.Student2.usercode) },
-			Future { createStudentMember(P.Student3.usercode) },
-			Future { createStudentMember(P.Student4.usercode) }
+			Future { createStudentMember(
+				P.Student1.usercode,
+				routeCode = TEST_ROUTE_CODE,
+				courseCode = TEST_COURSE_CODE,
+				deptCode = TEST_DEPARTMENT_CODE,
+				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			) },
+			Future { createStudentMember(
+				P.Student2.usercode,
+				routeCode = TEST_ROUTE_CODE,
+				courseCode = TEST_COURSE_CODE,
+				deptCode = TEST_DEPARTMENT_CODE,
+				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			) },
+			Future { createStudentMember(
+				P.Student3.usercode,
+				routeCode = TEST_ROUTE_CODE,
+				courseCode = TEST_COURSE_CODE,
+				deptCode = TEST_DEPARTMENT_CODE,
+				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			) },
+			Future { createStudentMember(
+				P.Student4.usercode,
+				routeCode = TEST_ROUTE_CODE,
+				courseCode = TEST_COURSE_CODE,
+				deptCode = TEST_DEPARTMENT_CODE,
+				academicYear = FunctionalTestAcademicYear.current.startYear.toString
+			) }
 		)
 
 		// Wait to complete
@@ -70,7 +105,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		click on linkText("Show")
 
-		if ((assistants ++ managers).size > 0) {
+		if ((assistants ++ managers).nonEmpty) {
 			// Optionally add module assistants/managers if requested
 			val info = getModuleInfo(moduleCode)
 			click on info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage"))

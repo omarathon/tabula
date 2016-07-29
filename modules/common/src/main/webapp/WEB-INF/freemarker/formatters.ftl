@@ -199,9 +199,10 @@ preposition: Text to relate the title to the department name in the second line,
 	--></#noescape><#--
 --></#macro>
 
-<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false><#--
+<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false stripHtml=false><#--
 	--><#noescape><#--
-		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, short)}<#--
+		--><#local result = wholeWeekFormatter(startWeek, endWeek, academicYear, short) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
@@ -249,10 +250,10 @@ preposition: Text to relate the title to the department name in the second line,
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
 
-<#macro interval start end=""><#--
+<#macro interval start end="" stripHtml=false><#--
 --><#noescape><#--
-	--><#if end?has_content>${intervalFormatter(start, end)}<#--
-	--><#else>${intervalFormatter(start)}</#if><#--
+	--><#if stripHtml><#if end?has_content>${intervalFormatter(start, end)?replace('<sup>','')?replace('</sup>','')}<#else>${intervalFormatter(start)?replace('<sup>','')?replace('</sup>','')}</#if><#--
+	--><#else><#if end?has_content>${intervalFormatter(start, end)}<#else>${intervalFormatter(start)}</#if></#if><#--
 --></#noescape><#--
 --></#macro>
 
@@ -424,9 +425,9 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro relation_photo member relationship resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
 		<#if (member.universityId)??>
-			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
+			<#local fullsize_img><@routes.relationshipPhoto member relationship /></#local>
 			<@lightbox_link lightbox fullsize_img>
-			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
+			<img src="<@routes.relationshipPhoto member relationship />?size=${resize}" />
 			</@lightbox_link>
 		<#else>
 			<img src="<@url resource="/static/images/no-photo${resize}.jpg" />" />

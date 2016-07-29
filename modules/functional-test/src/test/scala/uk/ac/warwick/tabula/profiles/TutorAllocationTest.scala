@@ -58,8 +58,8 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 			findAll(cssSelector(".entities tbody tr td.check input")).toSeq.forall(_.isSelected) should be {true}
 		}
 
-		And("I choose to distribute")
-		click on cssSelector("button[name=action][value=Distribute]")
+		And("I choose to distribute selected")
+		click on cssSelector("button[name=action][value=DistributeSelected]")
 
 		Then("All the students are allocated")
 		eventually{
@@ -90,9 +90,9 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 
 		And("I choose to distribute to a single entity")
 		eventually{
-			find(cssSelector("button[name=action][value=Distribute]")).get.isEnabled should be {true}
+			find(cssSelector("button[name=action][value=DistributeSelected]")).get.isEnabled should be {true}
 		}
-		click on cssSelector("button[name=action][value=Distribute]")
+		click on cssSelector("button[name=action][value=DistributeSelected]")
 
 		Then("There is one fewer unallocated")
 		eventually{

@@ -119,6 +119,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.ExtenuatingCircumstancesIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.UserConverter"/>

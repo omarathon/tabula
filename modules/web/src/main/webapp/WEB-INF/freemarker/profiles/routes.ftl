@@ -31,31 +31,20 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/template" /></#macro>
 <#macro relationship_allocate_upload department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/upload" /></#macro>
 <#macro relationship_allocate_preview department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate/preview" /></#macro>
-<#macro relationship_allocate_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old" /></#macro>
-<#macro relationship_template_old department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate-old/template" /></#macro>
+<#macro relationship_reallocate department relationshipType agentId><@_u page="/department/${department.code}/${relationshipType.urlPart}/reallocate/${agentId}" /></#macro>
+<#macro relationship_unconfirmed_meetings department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/unconfirmed" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode currentAgent>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
-</#macro>
-
-<#macro relationship_edit_set relationshipType scjCode newAgent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?agent=${newAgent.universityId}" />
-</#macro>
-
-<#macro relationship_edit_replace relationshipType scjCode currentAgent newAgent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}&agent=${newAgent.universityId}" />
 </#macro>
 
 <#macro relationship_edit_no_agent relationshipType scjCode>
 	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 
-<#macro meeting_record scjCode relationshipType>
-	<@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/create" />
-</#macro>
-<#macro edit_meeting_record scjCode meeting_record>
-	<@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scjCode}/edit/${meeting_record.id}" />
-</#macro>
+<#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>
+<#macro edit_meeting_record scd academicYear meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/edit/${meeting_record.id}" /></#macro>
+<#macro create_bulk_meeting_record relationshipType><@_u page="/${relationshipType.urlPart}/meeting/bulk/create?studentCourseDetails=" /></#macro>
 
 <#macro delete_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
 <#macro restore_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
@@ -64,13 +53,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro download_meeting_record_attachment relationshipType meeting><@_u page="/${relationshipType.urlPart}/meeting/${meeting.id}/"/></#macro>
 
-<#macro create_scheduled_meeting_record scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
-<#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
-<#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
-<#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
+<#macro create_scheduled_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/create" /></#macro>
+<#macro edit_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/edit" /></#macro>
+<#macro choose_action_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
+<#macro confirm_scheduled_meeting_record meetingRecord scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/schedule/${meetingRecord.id}/confirm" /></#macro>
 <#macro missed_scheduled_meeting_record meetingRecord relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
 
-<#macro relationship_search><@_u page="/relationships/agents/search" /></#macro>
 <#macro relationship_search_json><@_u page="/relationships/agents/search.json" /></#macro>
 
 <#macro smallgroup group><@_u page="/groups/${group.id}/view" /></#macro>
@@ -81,6 +69,15 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro restore_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
 <#macro purge_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
 <#macro download_member_note_attachment memberNote><@_u page="/notes/${memberNote.id}/" /></#macro>
+
+<#macro create_circumstances profile><@_u page="/${profile.universityId}/circumstances/add" /></#macro>
+<#macro edit_circumstances circumstances><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/edit" /></#macro>
+<#macro delete_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/delete" /></#macro>
+<#macro restore_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/restore" /></#macro>
+<#macro purge_circumstances circumstances ><@_u page="/${circumstances.member.universityId}/circumstances/${circumstances.id}/purge" /></#macro>
+<#macro download_circumstances_attachment circumstances><@_u page="/circumstances/${circumstances.id}/" /></#macro>
+
+<#macro edit_monitoringpoint_attendance_note student point><@_u page="/attendance/note/${student.universityId}/${point.id}/edit" /></#macro>
 
 <#macro meeting_will_create_checkpoint><@_u page="/check/meeting" context="/attendance" /></#macro>
 
@@ -94,6 +91,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	</#if>
 </#compress></#macro>
 <#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
+<#macro timetable_download profile><@_u page="/view/${profile.universityId}/timetable/download"/></#macro>
 
 <#macro mrm_link studentCourseDetails studentCourseYearDetails>
 	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">

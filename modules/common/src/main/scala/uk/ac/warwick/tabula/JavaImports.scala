@@ -3,7 +3,6 @@ import collection.JavaConverters._
 import collection.mutable
 import language.implicitConversions
 import scala.collection.GenTraversableOnce
-import scala.collection.SortedMap
 import java.math.MathContext
 
 /**
@@ -31,6 +30,7 @@ trait JavaImports {
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
 	type JBigDecimal = java.math.BigDecimal
+	type JFloat = java.lang.Float
 
 	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
 	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
@@ -40,30 +40,37 @@ trait JavaImports {
 	def JInteger(i: Option[Int]) = ToJInteger(i)
 	def JLong(l: Option[Long]) = ToJLong(l)
 	def JBigDecimal(bd: Option[BigDecimal]) = ToJBigDecimal(bd)
+	def JFloat(f: Option[Float]) = ToJFloat(f)
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJBoolean(b: Option[Boolean]) = (b map (b => b: JBoolean)).orNull
+	protected implicit def ToJBoolean(b: Option[Boolean]): JBoolean = (b map (b => b: JBoolean)).orNull
 
 	/**
 	 * Converts an Option[Int] to a Java Integer, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJInteger(i: Option[Int]) = (i map (i => i: JInteger)).orNull
+	protected implicit def ToJInteger(i: Option[Int]): JInteger = (i map (i => i: JInteger)).orNull
 
 	/**
 	 * Converts an Option[Long] to a Java Long, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJLong(l: Option[Long]) = (l map (l => l: JLong)).orNull
+	protected implicit def ToJLong(l: Option[Long]): JLong = (l map (l => l: JLong)).orNull
 
 	/**
 	 * Converts an Option[BigDecimal] to a Java BigDecimal, by interpreting
 	 * None as null.
 	 */
-	protected implicit def ToJBigDecimal(bd: Option[BigDecimal]) = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
+	protected implicit def ToJBigDecimal(bd: Option[BigDecimal]): JBigDecimal = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
+
+	/**
+		* Converts an Option[Float] to a Java Float, by interpreting
+		* None as null.
+		*/
+	protected implicit def ToJFloat(f: Option[Float]): JFloat = (f map (f => f: JFloat)).orNull
 
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial
@@ -72,13 +79,13 @@ trait JavaImports {
 	object JArrayList {
 		def apply[A](elements: A*): java.util.ArrayList[A] = {
 			val list = new java.util.ArrayList[A]()
-			if (!elements.isEmpty) list.addAll(elements.asJavaCollection)
+			if (elements.nonEmpty) list.addAll(elements.asJavaCollection)
 			list
 		}
 
 		def apply[A](orig: List[A]): java.util.ArrayList[A] = {
 			val list = new java.util.ArrayList[A]()
-			if (!orig.isEmpty) list.addAll(orig.asJavaCollection)
+			if (orig.nonEmpty) list.addAll(orig.asJavaCollection)
 			list
 		}
 
@@ -103,13 +110,13 @@ trait JavaImports {
 	object JHashSet {
 		def apply[A](elements: A*): java.util.HashSet[A] = {
 			val set = new java.util.HashSet[A]()
-			if (!elements.isEmpty) set.addAll(elements.asJavaCollection)
+			if (elements.nonEmpty) set.addAll(elements.asJavaCollection)
 			set
 		}
 
 		def apply[A](orig: Set[A]): java.util.HashSet[A] = {
 			val set = new java.util.HashSet[A]()
-			if (!orig.isEmpty) set.addAll(orig.asJavaCollection)
+			if (orig.nonEmpty) set.addAll(orig.asJavaCollection)
 			set
 		}
 
@@ -133,7 +140,7 @@ trait JavaImports {
 
 		def apply[K, V](orig: Map[K, V]): java.util.HashMap[K, V] = {
 			val map = new java.util.HashMap[K, V]()
-			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			if (orig.nonEmpty) map.putAll(orig.asJava)
 			map
 		}
 
@@ -157,7 +164,7 @@ trait JavaImports {
 
 		def apply[K, V](orig: Map[K, V]): java.util.LinkedHashMap[K, V] = {
 			val map = new java.util.LinkedHashMap[K, V]()
-			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			if (orig.nonEmpty) map.putAll(orig.asJava)
 			map
 		}
 
@@ -181,7 +188,7 @@ trait JavaImports {
 
 		def apply[K, V](orig: Map[K, V]): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
 			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
-			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			if (orig.nonEmpty) map.putAll(orig.asJava)
 			map
 		}
 
@@ -199,12 +206,11 @@ trait ScalaConcurrentMapHelpers[K, V] {
 	def getOrElseUpdate(key: K, op: => V): V =
 		Option(get(key)) match {
 			case Some(v) => v
-      case None => {
-    	  op match {
-    	 	  case null => null.asInstanceOf[V] // We can't put a null in here. Sigh
-    	 	  case d => Option(putIfAbsent(key, d)).getOrElse(d)
-    	  }
-      }
+      case None =>
+				op match {
+					 case null => null.asInstanceOf[V] // We can't put a null in here. Sigh
+					 case d => Option(putIfAbsent(key, d)).getOrElse(d)
+				}
 		}
 }
 

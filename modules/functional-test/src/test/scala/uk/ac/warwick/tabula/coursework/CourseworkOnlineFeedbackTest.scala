@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework
 
-import org.openqa.selenium.By
-import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{Download, BrowserTest}
 import org.joda.time.DateTime
+import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.{BrowserTest, Download}
 
 class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 	final val moduleCode = "XXX01"
