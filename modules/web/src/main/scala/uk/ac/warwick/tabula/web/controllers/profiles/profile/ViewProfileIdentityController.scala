@@ -58,10 +58,17 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 				(Seq(), Seq())
 			}
 		}
+		val courseDetails = {
+			if (!securityService.can(user, Permissions.Profiles.Read.StudentCourseDetails.Core, studentCourseDetails)) {
+				Seq()
+			} else {
+				Seq(studentCourseDetails) ++ studentCourseDetails.student.freshStudentCourseDetails.filterNot(_ == studentCourseDetails)
+			}
+		}
 
 		Mav("profiles/profile/identity_student",
 			"member" -> studentCourseDetails.student,
-			"courseDetails" -> (Seq(studentCourseDetails) ++ studentCourseDetails.student.freshStudentCourseDetails.filterNot(_ == studentCourseDetails)),
+			"courseDetails" -> courseDetails,
 			"memberNotes" -> memberNotes,
 			"extenuatingCircumstances" -> extenuatingCircumstances,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)

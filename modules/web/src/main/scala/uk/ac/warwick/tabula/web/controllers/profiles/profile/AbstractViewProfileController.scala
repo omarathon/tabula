@@ -76,7 +76,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 					ProfileBreadcrumbs.Profile.AttendanceForScyd(scyd).setActive(activeIdentifier)
 				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser) match {
 					case Nil => Nil
-					case Seq(assignments) => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
+					case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
 				})
 		}
 
@@ -96,7 +96,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 				BaseBreadcumbs.Standard(
 					"%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
 					Some(urlGenerator(scyd)),
-					"%s %s %s".format(scyd.studentCourseDetails.course.code, scyd.studentCourseDetails.currentRoute.code.toUpperCase, scyd.academicYear.getLabel)
+					"%s %s %s".format(scyd.studentCourseDetails.course.code, Option(scyd.studentCourseDetails.currentRoute).map(_.code.toUpperCase).getOrElse(""), scyd.academicYear.getLabel)
 				).setActive(scyd == chooseScyd)
 			)
 		}).getOrElse(Nil)

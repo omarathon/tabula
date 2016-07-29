@@ -73,43 +73,45 @@
 			</#if>
 		</div>
 
-		<div class="col-md-6">
-			<h2>Course</h2>
-			<#list courseDetails as scd>
-				<details class="indent" <#if courseDetails?first.scjCode == scd.scjCode>open</#if>>
-					<summary>
-						<strong>Course:</strong> ${scd.course.name}, ${scd.course.code}
-							(${(scd.beginYear?string("0000"))!} - ${(scd.endYear?string("0000"))!})
-					</summary>
-					<#if scd.department??>
-						<strong>Department:</strong> ${(scd.department.name)!} (${((scd.department.code)!)?upper_case})<br />
-					</#if>
-					<#if scd.currentRoute?? && scd.currentRoute.degreeType??>
-						<strong>UG.PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
-					</#if>
-					<#if scd.award??>
-						<strong>Intended award:</strong> ${(scd.award.name)!}<br />
-					</#if>
-					<#if scd.beginDate??>
-						<strong>Start date:</strong> <@fmt.date date=scd.beginDate includeTime=false /><br />
-					</#if>
-					<#if scd.endDate?? || scd.expectedEndDate??>
-						<#if scd.endDate??>
-							<strong>End date:</strong> <@fmt.date date=scd.endDate includeTime=false /><br />
-						<#elseif scd.expectedEndDate??>
-							<strong>Expected end date:</strong> <@fmt.date date=scd.expectedEndDate includeTime=false/><br />
+		<#if courseDetails?has_content>
+			<div class="col-md-6">
+				<h2>Course</h2>
+				<#list courseDetails as scd>
+					<details class="indent" <#if courseDetails?first.scjCode == scd.scjCode>open</#if>>
+						<summary>
+							<strong>Course:</strong> ${scd.course.name}, ${scd.course.code}
+								(${(scd.beginYear?string("0000"))!} - ${(scd.endYear?string("0000"))!})
+						</summary>
+						<#if scd.department??>
+							<strong>Department:</strong> ${(scd.department.name)!} (${((scd.department.code)!)?upper_case})<br />
 						</#if>
-					</#if>
-					<#if scd.sprCode??>
-						<strong>Programme route code:</strong> ${scd.sprCode}<br />
-					</#if>
-					<#if scd.scjCode??>
-						<strong>Course join code:</strong> ${scd.scjCode}<br />
-					</#if>
-				</details>
-				<br />
-			</#list>
-		</div>
+						<#if scd.currentRoute?? && scd.currentRoute.degreeType??>
+							<strong>UG.PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
+						</#if>
+						<#if scd.award??>
+							<strong>Intended award:</strong> ${(scd.award.name)!}<br />
+						</#if>
+						<#if scd.beginDate??>
+							<strong>Start date:</strong> <@fmt.date date=scd.beginDate includeTime=false /><br />
+						</#if>
+						<#if scd.endDate?? || scd.expectedEndDate??>
+							<#if scd.endDate??>
+								<strong>End date:</strong> <@fmt.date date=scd.endDate includeTime=false /><br />
+							<#elseif scd.expectedEndDate??>
+								<strong>Expected end date:</strong> <@fmt.date date=scd.expectedEndDate includeTime=false/><br />
+							</#if>
+						</#if>
+						<#if scd.sprCode??>
+							<strong>Programme route code:</strong> ${scd.sprCode}<br />
+						</#if>
+						<#if scd.scjCode??>
+							<strong>Course join code:</strong> ${scd.scjCode}<br />
+						</#if>
+					</details>
+					<br />
+				</#list>
+			</div>
+		</#if>
 	</div>
 </section>
 
