@@ -76,7 +76,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 					ProfileBreadcrumbs.Profile.AttendanceForScyd(scyd).setActive(activeIdentifier)
 				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser) match {
 					case Nil => Nil
-					case Seq(assignments) => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
+					case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
 				})
 		}
 
