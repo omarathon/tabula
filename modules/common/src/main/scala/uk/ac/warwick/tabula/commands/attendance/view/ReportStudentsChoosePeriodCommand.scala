@@ -33,7 +33,7 @@ class ReportStudentsChoosePeriodCommandInternal(val department: Department, val 
 	self: TermServiceComponent with ReportStudentsChoosePeriodCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		studentReportCounts
+		studentMissedReportCounts
 	}
 
 }
@@ -115,8 +115,10 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
 					&& !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
 			)
 			StudentReportCount(student, missedAndUnreported, unrecorded)
-		}}.filter(_.missed > 0)
+		}}
 	}
+
+	lazy val studentMissedReportCounts = studentReportCounts.filter(_.missed > 0)
 
 	// Bind variables
 

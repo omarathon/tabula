@@ -45,10 +45,10 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		if(errors.hasErrors) {
 			form(cmd, department, academicYear)
 		} else {
-			val studentReportCounts = cmd.apply()
+			val studentMissedReportCounts = cmd.apply()
 			Mav("attendance/view/reportstudents",
-				"studentReportCounts" -> studentReportCounts,
-				"unrecordedStudentsCount" -> studentReportCounts.count(_.unrecorded > 0)
+				"studentMissedReportCounts" -> studentMissedReportCounts,
+				"unrecordedStudentsCount" -> studentMissedReportCounts.count(_.unrecorded > 0)
 			).crumbs(
 				Breadcrumbs.View.Home,
 				Breadcrumbs.View.Department(department),

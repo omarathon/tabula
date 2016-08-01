@@ -10,7 +10,11 @@
 
 	<#if studentReportCounts?size == 0>
 		<div class="alert alert-info">
-			All students with missed monitoring points during this period have already been uploaded to SITS:eVision.
+			All of the selected students have already been uploaded to SITS:eVision for this period.
+		</div>
+	<#elseif studentMissedReportCounts?size == 0>
+		<div class="alert alert-info">
+			None of the selected students have missed monitoring points for this period.
 		</div>
 	<#else>
 		<#if (unrecordedStudentsCount > 0)>
@@ -33,7 +37,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list studentReportCounts as studentReportCount>
+				<#list studentMissedReportCounts as studentReportCount>
 					<#assign student = studentReportCount.student />
 					<#assign missed = studentReportCount.missed />
 					<#assign unrecorded = studentReportCount.unrecorded />
