@@ -50,6 +50,8 @@ object Routes {
 			context + "/view/course/%s/%s/attendance" format (encoded(scyd.studentCourseDetails.urlSafeId), encoded(scyd.academicYear.value.toString))
 		def students(member: Member) = context + "/view/%s/students" format encoded(member.universityId)
 
+		def students(department: Department, academicYear: AcademicYear) = context + "/department/%s/students/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
 		def examTimetable(universityId: String) = context + "/view/%s/exams" format encoded(universityId)
 	}
 

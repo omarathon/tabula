@@ -22,7 +22,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val profileService = mock[ProfileService]
 
 		// this seems to need the 'anArgThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
-		profileService.findStudentsByRestrictions(anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything)) returns ((0, Seq(new StudentMember)))
+		profileService.findStudentsByRestrictions(anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything)) returns ((0, Seq(new StudentMember)))
 	}
 
 	trait Fixture {
@@ -79,6 +79,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
+			isEq(year),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(Seq(ScalaOrder(Order.asc("lastName").nulls(NullPrecedence.LAST)), ScalaOrder(Order.asc("firstName").nulls(NullPrecedence.LAST))))),
 			isEq(50),
@@ -144,6 +145,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
+			isEq(year),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(Seq(ScalaOrder(Order.asc("lastName").nulls(NullPrecedence.LAST)), ScalaOrder(Order.asc("firstName").nulls(NullPrecedence.LAST))))),
 			isEq(10),
@@ -173,6 +175,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		verify(command.profileService, times(1)).findStudentsByRestrictions(
 			isEq(department),
+			isEq(year),
 			anArgThat(seqToStringMatches(expectedRestrictions)),
 			anArgThat(seqToStringMatches(expectedOrders)),
 			isEq(50),
