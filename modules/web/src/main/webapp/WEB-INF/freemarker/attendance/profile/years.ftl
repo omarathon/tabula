@@ -8,11 +8,14 @@
 			<#if years?seq_contains(2013)>
 				<h3><a href="<@routes.attendance.profileForYear student '2013' />">13/14</a></h3>
 			</#if>
-			<#if years?seq_contains(2014) && features.attendanceMonitoringAcademicYear2014>
+			<#if years?seq_contains(2014) && features.academicYear2014>
 				<h3><a href="<@routes.attendance.profileForYear student '2014' />">14/15</a></h3>
 			</#if>
-			<#if years?seq_contains(2015) && features.attendanceMonitoringAcademicYear2015>
+			<#if years?seq_contains(2015) && features.academicYear2015>
 				<h3><a href="<@routes.attendance.profileForYear student '2015' />">15/16</a></h3>
+			</#if>
+			<#if years?seq_contains(2016) && features.academicYear2016>
+				<h3><a href="<@routes.attendance.profileForYear student '2016' />">16/17</a></h3>
 			</#if>
 		</li>
 	</ul>

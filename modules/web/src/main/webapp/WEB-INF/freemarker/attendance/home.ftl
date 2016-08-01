@@ -9,11 +9,14 @@
 		</a>
 		<ul class="dropdown-menu pull-right">
 			<li><a href="<@routes.attendance.home '2013' />"><#if academicYear.startYear == 2013><strong>13/14</strong><#else>13/14</#if></a></li>
-			<#if features.attendanceMonitoringAcademicYear2014>
+			<#if features.academicYear2014>
 				<li><a href="<@routes.attendance.home '2014' />"><#if academicYear.startYear == 2014><strong>14/15</strong><#else>14/15</#if></a></li>
 			</#if>
-			<#if features.attendanceMonitoringAcademicYear2015>
+			<#if features.academicYear2015>
 				<li><a href="<@routes.attendance.home '2015' />"><#if academicYear.startYear == 2015><strong>15/16</strong><#else>15/16</#if></a></li>
+			</#if>
+			<#if features.academicYear2016>
+				<li><a href="<@routes.attendance.home '2016' />"><#if academicYear.startYear == 2016><strong>16/17</strong><#else>16/17</#if></a></li>
 			</#if>
 		</ul>
 	</div>

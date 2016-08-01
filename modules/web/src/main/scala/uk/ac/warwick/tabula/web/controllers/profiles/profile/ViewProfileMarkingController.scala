@@ -19,7 +19,7 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
 		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
 	): Mav = {
 		mandatory(member) match {
-			case student: StudentMember =>
+			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
 				commonView(member).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.MarkingIdentifier): _*)
