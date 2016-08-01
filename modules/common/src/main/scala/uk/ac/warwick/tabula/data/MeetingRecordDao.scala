@@ -90,8 +90,10 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
 
 	def countPendingApprovals(universityId: String): Int = {
 		session.newCriteria[MeetingRecordApproval]
+			.createAlias("meetingRecord", "meetingRecord")
 			.add(is("approver.universityId", universityId))
 			.add(is("state", MeetingApprovalState.Pending))
+			.add(is("meetingRecord.deleted", false))
 			.count.intValue()
 	}
 
