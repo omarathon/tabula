@@ -92,7 +92,7 @@
 							<strong>Intended award:</strong> ${(scd.award.name)!}<br />
 						</#if>
 						<#if !isSelf && scd.statusOnCourse??>
-							<strong>Status on Course:</strong> <@fmt.status_on_course studentCourseDetails /><br />
+							<strong>Status on Course:</strong> <@fmt.status_on_course scd /><br />
 						</#if>
 						<#if scd.beginDate??>
 							<strong>Start date:</strong> <@fmt.date date=scd.beginDate includeTime=false /><br />
