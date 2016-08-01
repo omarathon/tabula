@@ -183,9 +183,14 @@
 							</#if>
 						</div>
 						<div class="col-md-2">
-							<#if isSelf>
-								<a href="<@routes.coursework.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View feedback</a>
-							</#if>
+							<#assign assignmentLink><#compress>
+								<#if isSelf>
+									<@routes.coursework.assignment enhancedAssignment.assignment />
+								<#else>
+									<@routes.coursework.assignment_in_profile enhancedAssignment.assignment member />
+								</#if>
+							</#compress></#assign>
+							<a href="${assignmentLink}?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View feedback</a>
 						</div>
 					</div>
 				</#list>

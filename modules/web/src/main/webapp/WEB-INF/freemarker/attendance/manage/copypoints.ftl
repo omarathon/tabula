@@ -193,9 +193,8 @@
 
 				<#include "_displayfindpointresults.ftl" />
 
-				<#if !findResult.termGroupedOldPoints?keys?has_content
-					&& !findResult.termGroupedPoints?keys?has_content
-					&& !findResult.monthGroupedPoints?keys?has_content >
+				<#if !findResult.termGroupedPoints?keys?has_content
+					&& !findResult.monthGroupedPoints?keys?has_content>
 					<div class="alert alert-info">
 						No points found for the specified filter
 					</div>
