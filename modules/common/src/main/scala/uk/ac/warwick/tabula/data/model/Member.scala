@@ -252,6 +252,10 @@ class StudentMember extends Member with StudentProperties {
 			.filter(_.academicYear == year)
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def freshOrStaleStudentCourseYearDetailsForYear(year: AcademicYear): Option[StudentCourseYearDetails] =
+		freshOrStaleStudentCourseYearDetails(year).lastOption
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshOrStaleStudentCourseYearDetailsFrom(year: AcademicYear) =
 		freshOrStaleStudentCourseDetails
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
