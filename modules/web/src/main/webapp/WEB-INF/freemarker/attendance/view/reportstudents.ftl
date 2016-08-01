@@ -8,7 +8,7 @@
 	<input type="hidden" name="period" value="${command.period}" />
 	<input type="hidden" name="filterString" value="${command.serializeFilter}" />
 
-	<#if studentReportCounts?size == 0>
+	<#if command.studentReportCounts?size == 0>
 		<div class="alert alert-info">
 			All of the selected students have already been uploaded to SITS:eVision for this period.
 		</div>
