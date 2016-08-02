@@ -66,8 +66,6 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 			}
 		}
 
-
-
 		Mav("profiles/profile/identity_student",
 			"member" -> studentCourseDetails.student,
 			"courseDetails" -> courseDetails,
