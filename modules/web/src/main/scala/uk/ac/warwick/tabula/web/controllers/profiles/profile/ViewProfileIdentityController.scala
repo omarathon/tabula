@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -69,7 +70,7 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 		Mav("profiles/profile/identity_student",
 			"member" -> studentCourseDetails.student,
 			"courseDetails" -> courseDetails,
-			"scyd" -> studentCourseYearDetailsForYear(studentCourseDetails, activeAcademicYear.get),
+			"scyd" -> studentCourseYearDetailsForYear(studentCourseDetails, activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))),
 			"memberNotes" -> memberNotes,
 			"extenuatingCircumstances" -> extenuatingCircumstances,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
