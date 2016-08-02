@@ -102,7 +102,7 @@
 							<strong>Department:</strong> ${(scd.department.name)!} (${((scd.department.code)!)?upper_case})<br />
 						</#if>
 						<#if scd.currentRoute?? && scd.currentRoute.degreeType??>
-							<strong>UG.PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
+							<strong>UG/PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
 						</#if>
 						<#if scd.award??>
 							<strong>Intended award:</strong> ${(scd.award.name)!}<br />
@@ -119,6 +119,9 @@
 							<#elseif scd.expectedEndDate??>
 								<strong>Expected end date:</strong> <@fmt.date date=scd.expectedEndDate includeTime=false/><br />
 							</#if>
+						</#if>
+						<#if scyd.yearOfStudy??>
+							<strong>Year of study:</strong> ${(scyd.yearOfStudy)!}<br/>
 						</#if>
 						<#if scd.sprCode??>
 							<strong>Programme route code:</strong> ${scd.sprCode}<br />
