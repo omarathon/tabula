@@ -146,6 +146,7 @@
 						<tr>
 							<th>Date</th>
 							<th>Title</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -153,7 +154,8 @@
 							<#assign canDeletePurgeMemberNote = can.do("MemberNotes.Delete", memberNote) />
 							<#assign canEditMemberNote = can.do("MemberNotes.Update", memberNote) />
 							<tr <#if memberNote.deleted>class="deleted subtle"</#if>>
-								<td data-sortby="${memberNote.creationDate.millis?c}"><@fmt.date date=memberNote.creationDate includeTime=false /></td>
+								<td data-sortby="${memberNote.creationDate.millis?c}"><@fmt.date date=memberNote.creationDate includeTime=true /></td>
+								<td>${memberNote.title!}</td>
 								<td>
 									<#if canEditMemberNote || canDeletePurgeMemberNote>
 										<div class="pull-right">
@@ -170,7 +172,7 @@
 														<li>
 															<a href="<@routes.profiles.delete_member_note memberNote />" class="delete <#if memberNote.deleted>disabled</#if>">Delete</a>
 														</li>
-															<li>
+														<li>
 															<a href="<@routes.profiles.restore_member_note memberNote />" class="restore <#if !memberNote.deleted>disabled</#if>">Restore</a>
 														</li>
 														<li>
@@ -181,7 +183,7 @@
 											</span>
 										</div>
 									</#if>
-									${memberNote.title!}
+									<small class="muted clearfix">Student note created by ${memberNote.creator.fullName}</small>
 								</td>
 							</tr>
 							<tr>
