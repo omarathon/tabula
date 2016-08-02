@@ -49,14 +49,14 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		click on linkText("Personal tutor")
 		currentUrl should endWith ("/tutor")
 
-		And("There is a New record button")
+		And("There is a Record meeting button")
 		cssSelector("a.new-meeting-record").findAllElements.size should be (2)
 
 		Then("They create a new record")
 		// Modals don't work in HtmlUnit, so screw them
 		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
 
-		click on linkText("New record")
+		click on linkText("Record meeting")
 
 		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(true))
 		textField("title").value = "Created meeting"
@@ -68,7 +68,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 			currentUrl should endWith ("/tutor")
 		}
 
-		Then("They new record is displayed")
+		Then("The new record is displayed")
 		cssSelector("section.meetings table tbody tr").findAllElements.size should be (1)
 		pageSource should include ("Created meeting")
 
