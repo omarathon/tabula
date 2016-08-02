@@ -179,7 +179,7 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-			$('.pagination ul a').on('click', function(e) {
+			$('nav ul.pagination a').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 

@@ -66,7 +66,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 			.filter(a => academicYearOption.isEmpty || academicYearOption.contains(a.academicYear))
 			.filter(a => a.submittable(studentUser))
 			.map(_.enhance(studentUser))
-			.sortBy(_.submissionDeadline.getOrElse(new DateTime(Long.MaxValue))) // Sort open-ended assignments to the bottom
+			.sortBy(_.submissionDeadline.getOrElse(new DateTime().plusYears(500))) // Sort open-ended assignments to the bottom
 
 		StudentAssignmentsSummaryCommand.Result(todo, doing, done)
 	}
