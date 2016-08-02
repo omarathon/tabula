@@ -66,14 +66,20 @@ class ViewProfileIdentityController extends AbstractViewProfileController
 			}
 		}
 
+
+
 		Mav("profiles/profile/identity_student",
 			"member" -> studentCourseDetails.student,
 			"courseDetails" -> courseDetails,
+			"scyd" -> studentCourseYearDetailsForYear(studentCourseDetails, activeAcademicYear.get),
 			"memberNotes" -> memberNotes,
 			"extenuatingCircumstances" -> extenuatingCircumstances,
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
 		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.identity(scyd)): _*)
 	}
+
+	def studentCourseYearDetailsForYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =
+		studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == year).seq.headOption
 
 }
