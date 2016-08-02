@@ -198,18 +198,10 @@
 		<#if relationships?has_content>
 			<p>
 				<#if canCreateScheduledMeetings && features.scheduledMeetings>
-					<#if isSelf>
-						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Request new meeting</a>
-					<#else>
-						<a class="btn btn-primary new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">New meeting</a>
-					</#if>
+					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Schedule meeting</a>
 				</#if>
 				<#if canCreateMeetings>
-					<#if isSelf>
-						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Add new</a>
-					<#else>
-						<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">New record</a>
-					</#if>
+					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Record meeting</a>
 				</#if>
 			</p>
 		</#if>
