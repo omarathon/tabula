@@ -21,11 +21,26 @@
 				<div class="col-md-7 col-lg-8">
 					<strong>Official name:</strong> ${member.officialName}<br/>
 					<strong>Preferred name:</strong> ${member.fullName}<br/>
-					<#if member.gender??>
-						<strong>Gender:</strong> ${member.gender.description}<br/>
-					</#if>
-					<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
-						<strong>Tier 4 requirements:</strong>
+					<details class="indent">
+						<summary>
+							<strong>More info</strong>
+						</summary>
+						<#if member.gender??>
+							<strong>Gender:</strong> ${member.gender.description}<br/>
+						</#if>
+						<#if member.dateOfBirth??>
+							<strong>Date of birth:</strong> <@warwick.formatDate value=member.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /><br/>
+						</#if>
+						<#if member.nationality??>
+							<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>
+						</#if>
+						<#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
+							<strong>Disability:</strong>
+							<a class="use-popover cue-popover" id="popover-disability" data-html="true" data-original-title="Disability"
+							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a><br/>
+						</#if>
+						<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
+							<strong>Tier 4 requirements:</strong>
 							<#if member.casUsed && member.hasTier4Visa>Yes
 							<#elseif !member.casUsed && !member.hasTier4Visa>No
 							<#else>
@@ -38,13 +53,14 @@
 								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
 								requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
 							</#if>
-						<br/>
-					</#if>
-
-					<br/>
-
+							<br/>
+						</#if>
+					</details>
 					<#if member.email??>
 						<strong>Warwick email:</strong> <a href="mailto:${member.email}">${member.email}</a><br/>
+					</#if>
+					<#if member.homeEmail??>
+						<strong>Alternative email:</strong> <a href="mailto:${member.homeEmail}">${member.homeEmail}</a><br/>
 					</#if>
 					<#if member.mobileNumber??>
 						<strong>Mobile phone:</strong> ${phoneNumberFormatter(member.mobileNumber)}<br/>
