@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web
 
 import dispatch.classic._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{FunctionalTestProperties, LoginDetails}
+import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, FunctionalTestProperties, LoginDetails}
 
 import scala.language.postfixOps
 import scala.util.parsing.json.JSON
@@ -149,12 +149,14 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
-	def registerStudentsOnModule(students:Seq[LoginDetails], moduleCode:String){
+	def registerStudentsOnModule(students: Seq[LoginDetails], moduleCode: String, academicYear: Option[String] = None) {
 		val uniIds = students.map(_.warwickId).mkString(",")
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/moduleRegistration"
 		val req = url(uri).POST << Map(
 			"universityIds" -> uniIds,
-			"moduleCode" -> moduleCode)
+			"moduleCode" -> moduleCode,
+			"academicYear" -> academicYear.getOrElse(FunctionalTestAcademicYear.currentSITS.startYear.toString))
+
 		http.when(_==200)(req >|)
 	}
 
