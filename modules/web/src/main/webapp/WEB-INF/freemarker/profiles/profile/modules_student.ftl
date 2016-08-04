@@ -46,16 +46,16 @@
 			<div class="striped-section collapsible">
 				<h3 class="section-title">
 					<@fmt.module_name moduleRegistration.module />
-					<small class="pull-right">
-						<strong>CATS:</strong> ${(moduleRegistration.cats)!}
-						<strong>Assess:</strong> ${(moduleRegistration.assessmentGroup)!}
-						<strong>Status:</strong>
+					<span class="mod-reg-summary">
+						<span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
+						<span class="mod-reg-summary-item"><strong>Assess:</strong> ${(moduleRegistration.assessmentGroup)!}</span>
+						<span class="mod-reg-summary-item"><strong>Status:</strong></span>
 						<#if moduleRegistration.selectionStatus??>
 							${(moduleRegistration.selectionStatus.description)!}
 							<#else>
 								-
 							</#if>
-					</small>
+					</span>
 				</h3>
 				<div class="striped-section-contents">
 					<div class="row item-info">
