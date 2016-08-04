@@ -35,7 +35,7 @@ class ReportStudentsConfirmCommandInternal(val department: Department, val acade
 	self: ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		studentReportCounts.map{ src => {
+		studentMissedReportCounts.map{ src => {
 			val scd = src.student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException())
 			val report = new MonitoringPointReport
 			report.academicYear = academicYear
@@ -61,8 +61,8 @@ trait ReportStudentsConfirmValidation extends SelfValidating {
 		if (!availablePeriods.filter(_._2).map(_._1).contains(period)) {
 			errors.rejectValue("availablePeriods", "attendanceMonitoringReport.invalidPeriod")
 		}
-		if (studentReportCounts.isEmpty) {
-			errors.rejectValue("studentReportCounts", "attendanceMonitoringReport.noStudents")
+		if (studentMissedReportCounts.isEmpty) {
+			errors.rejectValue("studentMissedReportCounts", "attendanceMonitoringReport.noStudents")
 		}
 		if (!confirm) {
 			errors.rejectValue("confirm", "attendanceMonitoringReport.confirm")
@@ -90,7 +90,7 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
 	override def describe(d: Description) {
 		d.property("monitoringPeriod", period)
 		d.property("academicYear", academicYear)
-		d.property("students", studentReportCounts.map{src => src.student.universityId -> src.missed}.toMap)
+		d.property("students", studentMissedReportCounts.map{src => src.student.universityId -> src.missed}.toMap)
 	}
 }
 

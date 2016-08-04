@@ -31,9 +31,8 @@ abstract class AbstractViewProfileController extends ProfilesController
 	protected def relationshipTypesToDisplay(scd: StudentCourseDetails): Seq[StudentRelationshipType] =
 		cachedBy(s"relationshipTypesToDisplay-${scd.id}") {
 			relationshipService.allStudentRelationshipTypes.filter(relationshipType =>
-				(scd.hasRelationship(relationshipType) ||
-					relationshipType.displayIfEmpty(scd)) &&
-					scd.isStudentRelationshipTypeForDisplay(relationshipType)
+				scd.hasRelationship(relationshipType) ||
+					relationshipType.displayIfEmpty(scd) &&	scd.isStudentRelationshipTypeForDisplay(relationshipType)
 			)
 		} match {
 			case relationshipTypes: Seq[StudentRelationshipType]@unchecked => relationshipTypes

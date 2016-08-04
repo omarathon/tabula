@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
+import scala.collection.JavaConverters._
 
 case class ProfilesHomeInformation(
 	smallGroups: Seq[SmallGroup] = Nil,
 	relationshipTypesMap: Map[StudentRelationshipType, Boolean] = Map(),
-	adminDepartments: Set[Department] = Set()
+	adminDepartments: Seq[Department] = Seq()
 )
 
 object ProfilesHomeCommand {
@@ -53,8 +54,11 @@ abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Opt
 				(t, downwardRelationshipTypes.contains(t))
 			}.toMap }
 
+			def withSubDepartments(d: Department): Seq[Department] = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName).flatMap(withSubDepartments)
+
 			val adminDepartments = benchmarkTask("Get all departments with permissions to manage profiles") {
-				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Department.ManageProfiles)
+				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Department.ManageProfiles).toSeq
+					.sortBy(_.fullName).flatMap(withSubDepartments).distinct
 			}
 
 			ProfilesHomeInformation(

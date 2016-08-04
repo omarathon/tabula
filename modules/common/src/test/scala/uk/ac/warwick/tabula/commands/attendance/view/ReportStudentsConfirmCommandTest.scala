@@ -20,7 +20,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 	def validateInvalidPeriod() {
 		val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
 			override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
-			override lazy val studentReportCounts = Seq()
+			override lazy val studentMissedReportCounts = Seq()
 		}
 		validator.period = "Summer"
 		val errors = new BindException(validator, "command")
@@ -33,7 +33,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 	def validateUnavailablePeriod() {
 		val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
 			override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
-			override lazy val studentReportCounts = Seq()
+			override lazy val studentMissedReportCounts = Seq()
 		}
 		validator.period = "Spring"
 		val errors = new BindException(validator, "command")
@@ -46,20 +46,20 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 	def validateNoStudents() {
 		val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
 			override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
-			override lazy val studentReportCounts = Seq()
+			override lazy val studentMissedReportCounts = Seq()
 		}
 		validator.period = "Autumn"
 		val errors = new BindException(validator, "command")
 		validator.validate(errors)
 		errors.hasFieldErrors should be {true}
-		errors.getFieldErrors("studentReportCounts").size() should be (1)
+		errors.getFieldErrors("studentMissedReportCounts").size() should be (1)
 	}
 
 	@Test
 	def validateNotConfirmed() {
 		val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
 			override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
-			override lazy val studentReportCounts = Seq()
+			override lazy val studentMissedReportCounts = Seq()
 		}
 		validator.period = "Autumn"
 		val errors = new BindException(validator, "command")
@@ -72,7 +72,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 	def validateValid() {
 		val validator = new ReportStudentsConfirmValidation with CommandTestSupport {
 			override lazy val availablePeriods = Seq(("Autumn", true), ("Spring", false))
-			override lazy val studentReportCounts = Seq(StudentReportCount(null, 1, 0))
+			override lazy val studentMissedReportCounts = Seq(StudentReportCount(null, 1, 0))
 		}
 		validator.period = "Autumn"
 		validator.confirm = true

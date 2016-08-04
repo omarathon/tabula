@@ -15,17 +15,32 @@
 			<h2>${member.fullName}</h2>
 
 			<div class="row">
-				<div class="col-md-4">
+				<div class="col-md-5 col-lg-4">
 					<@fmt.member_photo member />
 				</div>
-				<div class="col-md-8">
+				<div class="col-md-7 col-lg-8">
 					<strong>Official name:</strong> ${member.officialName}<br/>
 					<strong>Preferred name:</strong> ${member.fullName}<br/>
-					<#if member.gender??>
-						<strong>Gender:</strong> ${member.gender.description}<br/>
-					</#if>
-					<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
-						<strong>Tier 4 requirements:</strong>
+					<details class="indent">
+						<summary>
+							<strong>More info</strong>
+						</summary>
+						<#if member.gender??>
+							<strong>Gender:</strong> ${member.gender.description}<br/>
+						</#if>
+						<#if member.dateOfBirth??>
+							<strong>Date of birth:</strong> <@warwick.formatDate value=member.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /><br/>
+						</#if>
+						<#if member.nationality??>
+							<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>
+						</#if>
+						<#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
+							<strong>Disability:</strong>
+							<a class="use-popover cue-popover" id="popover-disability" data-html="true" data-original-title="Disability"
+							   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a><br/>
+						</#if>
+						<#if features.visaInStudentProfile && !isSelf && member.hasTier4Visa?? && member.casUsed??>
+							<strong>Tier 4 requirements:</strong>
 							<#if member.casUsed && member.hasTier4Visa>Yes
 							<#elseif !member.casUsed && !member.hasTier4Visa>No
 							<#else>
@@ -38,13 +53,14 @@
 								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
 								requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
 							</#if>
-						<br/>
-					</#if>
-
-					<br/>
-
+							<br/>
+						</#if>
+					</details>
 					<#if member.email??>
 						<strong>Warwick email:</strong> <a href="mailto:${member.email}">${member.email}</a><br/>
+					</#if>
+					<#if member.homeEmail??>
+						<strong>Alternative email:</strong> <a href="mailto:${member.homeEmail}">${member.homeEmail}</a><br/>
 					</#if>
 					<#if member.mobileNumber??>
 						<strong>Mobile phone:</strong> ${phoneNumberFormatter(member.mobileNumber)}<br/>
@@ -86,10 +102,13 @@
 							<strong>Department:</strong> ${(scd.department.name)!} (${((scd.department.code)!)?upper_case})<br />
 						</#if>
 						<#if scd.currentRoute?? && scd.currentRoute.degreeType??>
-							<strong>UG.PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
+							<strong>UG/PG:</strong> ${(scd.currentRoute.degreeType.toString)!}<br />
 						</#if>
 						<#if scd.award??>
 							<strong>Intended award:</strong> ${(scd.award.name)!}<br />
+						</#if>
+						<#if !isSelf && scd.statusOnCourse??>
+							<strong>Status on Course:</strong> <@fmt.status_on_course scd /><br />
 						</#if>
 						<#if scd.beginDate??>
 							<strong>Start date:</strong> <@fmt.date date=scd.beginDate includeTime=false /><br />
@@ -100,6 +119,9 @@
 							<#elseif scd.expectedEndDate??>
 								<strong>Expected end date:</strong> <@fmt.date date=scd.expectedEndDate includeTime=false/><br />
 							</#if>
+						</#if>
+						<#if scyd.yearOfStudy??>
+							<strong>Year of study:</strong> ${(scyd.yearOfStudy)!}<br/>
 						</#if>
 						<#if scd.sprCode??>
 							<strong>Programme route code:</strong> ${scd.sprCode}<br />
@@ -127,6 +149,7 @@
 						<tr>
 							<th>Date</th>
 							<th>Title</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -134,7 +157,8 @@
 							<#assign canDeletePurgeMemberNote = can.do("MemberNotes.Delete", memberNote) />
 							<#assign canEditMemberNote = can.do("MemberNotes.Update", memberNote) />
 							<tr <#if memberNote.deleted>class="deleted subtle"</#if>>
-								<td data-sortby="${memberNote.creationDate.millis?c}"><@fmt.date date=memberNote.creationDate includeTime=false /></td>
+								<td data-sortby="${memberNote.creationDate.millis?c}"><@fmt.date date=memberNote.creationDate includeTime=true /></td>
+								<td>${memberNote.title!}</td>
 								<td>
 									<#if canEditMemberNote || canDeletePurgeMemberNote>
 										<div class="pull-right">
@@ -151,7 +175,7 @@
 														<li>
 															<a href="<@routes.profiles.delete_member_note memberNote />" class="delete <#if memberNote.deleted>disabled</#if>">Delete</a>
 														</li>
-															<li>
+														<li>
 															<a href="<@routes.profiles.restore_member_note memberNote />" class="restore <#if !memberNote.deleted>disabled</#if>">Restore</a>
 														</li>
 														<li>
@@ -162,7 +186,7 @@
 											</span>
 										</div>
 									</#if>
-									${memberNote.title!}
+									<small class="muted clearfix">Student note created by ${memberNote.creator.fullName}</small>
 								</td>
 							</tr>
 							<tr>

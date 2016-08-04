@@ -74,7 +74,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 		val lastMeetingWithTotalPendingApprovalsMap: Map[String, (Option[MeetingRecord], Int)] = studentCourseDetails.map(scd => {
 			val rels = relationshipService.getRelationships(relationshipType, scd.student)
 			val lastMeeting = benchmarkTask("lastMeeting"){
-				meetingRecordService.list(rels.toSet, Some(currentMember)).headOption
+				meetingRecordService.list(rels.toSet, Some(currentMember)).filterNot(_.deleted).headOption
 			}
 			val totalPendingApprovals = benchmarkTask("totalPendingStudentApprovals"){
 				meetingRecordService.countPendingApprovals(scd.student.universityId)

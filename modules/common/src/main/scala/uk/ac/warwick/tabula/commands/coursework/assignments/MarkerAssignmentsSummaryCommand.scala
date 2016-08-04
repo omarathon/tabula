@@ -50,7 +50,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 					Nil,
 					Seq(MarkerAssignmentsSummaryCommand.AssignmentInfo(
 						assignment,
-						assignment.feedbackDeadline.getOrElse(new LocalDate(Long.MaxValue)).toDateTimeAtStartOfDay,
+						assignment.feedbackDeadline.getOrElse(new LocalDate().plusYears(500)).toDateTimeAtStartOfDay,
 						""
 					))
 				)
@@ -58,7 +58,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 				MarkerAssignmentsSummaryCommand.Result(
 					Seq(MarkerAssignmentsSummaryCommand.AssignmentInfo(
 						assignment,
-						assignment.feedbackDeadline.getOrElse(new LocalDate(Long.MaxValue)).toDateTimeAtStartOfDay,
+						assignment.feedbackDeadline.getOrElse(new LocalDate().plusYears(500)).toDateTimeAtStartOfDay,
 						""
 					)),
 					Nil,
@@ -71,7 +71,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 					Nil,
 					Seq(MarkerAssignmentsSummaryCommand.AssignmentInfo(
 						assignment,
-						assignment.feedbackDeadline.getOrElse(new LocalDate(Long.MaxValue)).toDateTimeAtStartOfDay,
+						assignment.feedbackDeadline.getOrElse(new LocalDate().plusYears(500)).toDateTimeAtStartOfDay,
 						s"Sent to $status"
 					)),
 					Nil

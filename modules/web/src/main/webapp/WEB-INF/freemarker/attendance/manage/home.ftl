@@ -10,11 +10,14 @@
 		<#list managePermissions as department>
 			<li>
 				<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2013'/>">${department.name} 13/14</a></h3>
-				<#if features.attendanceMonitoringAcademicYear2014>
+				<#if features.academicYear2014>
 					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2014'/>">${department.name} 14/15</a></h3>
 				</#if>
-				<#if features.attendanceMonitoringAcademicYear2015>
+				<#if features.academicYear2015>
 					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2015'/>">${department.name} 15/16</a></h3>
+				</#if>
+				<#if features.academicYear2016>
+					<h3><a id="manage-department-${department.code}" href="<@routes.attendance.manageHomeForYear department '2016'/>">${department.name} 16/17</a></h3>
 				</#if>
 			</li>
 		</#list>

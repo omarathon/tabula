@@ -38,10 +38,11 @@ trait ProfileService {
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember]
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
-	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
+	def countStudentsByRestrictions(department: Department, academicYear: AcademicYear, restrictions: Seq[ScalaRestriction]): Int
 	def countStudentsByRestrictionsInAffiliatedDepartments(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(
 		department: Department,
+		academicYear: AcademicYear,
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq(),
 		maxResults: Int = 50,
@@ -168,6 +169,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	 */
 	def findStudentsByRestrictions(
 		department: Department,
+		academicYear: AcademicYear,
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq(),
 		maxResults: Int = 50,
@@ -175,6 +177,9 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
 		val allRestrictions = ScalaRestriction.is(
 			"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+		) ++ ScalaRestriction.is(
+			"studentCourseYearDetails.academicYear", academicYear,
 			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 		) ++ department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department)) ++ restrictions
 
@@ -320,9 +325,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.findAllStudentDataByRestrictions(allRestrictions, academicYear: AcademicYear)
 	}
 
-	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
+	def countStudentsByRestrictions(department: Department, academicYear: AcademicYear, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
 		val allRestrictions = ScalaRestriction.is(
 			"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+		) ++ ScalaRestriction.is(
+			"studentCourseYearDetails.academicYear", academicYear,
 			FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 		) ++ department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department)) ++ restrictions
 

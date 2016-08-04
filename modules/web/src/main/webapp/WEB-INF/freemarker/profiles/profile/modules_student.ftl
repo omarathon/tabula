@@ -4,16 +4,16 @@
 	<details class="indent">
 		<summary>${member.officialName}</summary>
 		<#if member.userId??>
-		${member.userId}<br/>
+			${member.userId}<br/>
 		</#if>
 		<#if member.email??>
 			<a href="mailto:${member.email}">${member.email}</a><br/>
 		</#if>
 		<#if member.phoneNumber??>
-		${phoneNumberFormatter(member.phoneNumber)}<br/>
+			${phoneNumberFormatter(member.phoneNumber)}<br/>
 		</#if>
 		<#if member.mobileNumber??>
-		${phoneNumberFormatter(member.mobileNumber)}<br/>
+			${phoneNumberFormatter(member.mobileNumber)}<br/>
 		</#if>
 	</details>
 </#if>
@@ -21,6 +21,14 @@
 <h1>Modules</h1>
 
 <#if hasPermission>
+
+	<#if user.staff>
+		<div class="pull-right">
+			<@routes.profiles.mrm_link studentCourseDetails command.studentCourseYearDetails />
+				View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/>
+			</a>
+		</div>
+	</#if>
 
 	<p>Module Registration Status:
 		<#if command.studentCourseYearDetails.moduleRegistrationStatus??>

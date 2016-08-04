@@ -36,7 +36,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
 		val autumnTerm = new TermImpl(null, DateTime.now, null, TermType.autumn)
 		val springTerm = new TermImpl(null, DateTime.now, null, TermType.spring)
-		val christmasVacation = new Vacation(autumnTerm, null)
+		val christmasVacation = Vacation(autumnTerm, null)
 
 		val fakeNow = new LocalDate(2015, 1, 1).toDateTimeAtStartOfDay
 
@@ -121,10 +121,10 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 			Map(student1 -> Map(point1 -> student1point1missed),
 				student2 -> Map(point1 -> student2point1missed))
 
-		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student1, point1) returns (true)
-		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student2, point1) returns (false)
+		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student1, point1) returns true
+		state.attendanceMonitoringService.studentAlreadyReportedThisTerm(student2, point1) returns false
 
-		val result = state.studentReportCounts
+		val result = state.studentMissedReportCounts
 		result.size should be (1)
 		result.head.student should be (student2)
 	}}
