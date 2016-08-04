@@ -92,7 +92,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 		}
 		department.autoMarkMissedMonitoringPoints = autoMarkMissedMonitoringPoints
 
-		moduleAndDepartmentService.save(department)
+		moduleAndDepartmentService.saveOrUpdate(department)
 		department
 	}
 
