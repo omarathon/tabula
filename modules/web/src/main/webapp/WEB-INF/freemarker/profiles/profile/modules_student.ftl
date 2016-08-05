@@ -47,14 +47,10 @@
 				<h3 class="section-title">
 					<@fmt.module_name moduleRegistration.module />
 					<span class="mod-reg-summary">
-						<span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
-						<span class="mod-reg-summary-item"><strong>Assess:</strong> ${(moduleRegistration.assessmentGroup)!}</span>
-						<span class="mod-reg-summary-item"><strong>Status:</strong></span>
-						<#if moduleRegistration.selectionStatus??>
-							${(moduleRegistration.selectionStatus.description)!}
-							<#else>
-								-
-							</#if>
+						<#if showModuleResults>
+							<span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!}</span>
+							<span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span>
+						</#if>
 					</span>
 				</h3>
 				<div class="striped-section-contents">
