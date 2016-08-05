@@ -31,7 +31,7 @@ class SortRoutesCommandInternal(val department: Department) extends CommandInter
 			dept.routes.clear()
 			dept.routes.addAll(routes)
 			for (m <- routes.asScala) m.adminDepartment = dept
-			moduleAndDepartmentService.save(dept)
+			moduleAndDepartmentService.saveOrUpdate(dept)
 		}
 	}
 }

@@ -31,7 +31,7 @@ class SortModulesCommandInternal(val department: Department) extends CommandInte
 			dept.modules.clear()
 			dept.modules.addAll(modules)
 			for (m <- modules.asScala) m.adminDepartment = dept
-			moduleAndDepartmentService.save(dept)
+			moduleAndDepartmentService.saveOrUpdate(dept)
 		}
 	}
 }

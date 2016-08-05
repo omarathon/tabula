@@ -118,7 +118,7 @@ class NotificationSettingsCommandInternal(val department: Department) extends Co
 
 		finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value = finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly
 
-		moduleAndDepartmentService.save(department)
+		moduleAndDepartmentService.saveOrUpdate(department)
 		department
 	}
 }
