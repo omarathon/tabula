@@ -8,7 +8,14 @@
 </div>
 
 <p>
-	<a class="btn btn-default calendar-download" href="<@routes.profiles.timetable_download member />">Download as PDF</a>
+	<a class="btn btn-default calendar-download" href="<@routes.profiles.timetable_calendar_download member />">Download calendar as PDF</a>
+	<#if academicYear??>
+		<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
+	<#elseif academicYears?has_content>
+		<#list academicYears as academicYear>
+			<a class="btn btn-default timetable-download" href="<@routes.profiles.timetable_download member academicYear />">Download timetable as PDF (${academicYear.toString})</a>
+		</#list>
+	</#if>
 	<#if member.timetableHash?has_content>
 		<a class="btn btn-default timetable-ical-link" href="<@routes.profiles.timetable_ical member />">Export as iCal</a>
 	</#if>

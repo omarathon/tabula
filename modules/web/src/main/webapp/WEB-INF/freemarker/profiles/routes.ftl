@@ -92,7 +92,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	</#if>
 </#compress></#macro>
 <#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
-<#macro timetable_download profile><@_u page="/view/${profile.universityId}/timetable/download"/></#macro>
+<#macro timetable_calendar_download profile><@_u page="/view/${profile.universityId}/timetable/download-calendar"/></#macro>
+<#macro timetable_download profile academicYear><@_u page="/view/${profile.universityId}/timetable/download/${academicYear.startYear?c}"/></#macro>
 
 <#macro mrm_link studentCourseDetails studentCourseYearDetails>
 	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
