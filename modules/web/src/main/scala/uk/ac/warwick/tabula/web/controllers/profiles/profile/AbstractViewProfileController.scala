@@ -47,7 +47,12 @@ abstract class AbstractViewProfileController extends ProfilesController
 					None
 				case scyds =>
 					val thisAcademicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-					Option(scd.freshStudentCourseYearDetails.find(_.academicYear == thisAcademicYear).getOrElse(scd.freshStudentCourseYearDetails.last))
+					Option(scd.freshStudentCourseYearDetails.find(_.academicYear == thisAcademicYear).getOrElse {
+						if (thisAcademicYear > scd.freshStudentCourseYearDetails.last.academicYear)
+							scd.freshStudentCourseYearDetails.last
+						else
+							scd.freshStudentCourseYearDetails.head
+					})
 			}
 		} match {
 			case scyd: Option[StudentCourseYearDetails]@unchecked => scyd
