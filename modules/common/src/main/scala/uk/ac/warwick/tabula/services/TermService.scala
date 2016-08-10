@@ -154,5 +154,5 @@ trait TermServiceComponent {
 }
 
 trait AutowiringTermServiceComponent extends TermServiceComponent {
-	override implicit val termService: TermService = Wire[TermService]
+	@transient override implicit val termService: TermService = Wire[TermService]
 }
