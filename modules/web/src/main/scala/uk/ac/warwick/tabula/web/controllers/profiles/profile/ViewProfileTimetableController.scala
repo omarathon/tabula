@@ -4,13 +4,16 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.timetables.AutowiringScientiaConfigurationComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
-class ViewProfileTimetableController extends AbstractViewProfileController {
+class ViewProfileTimetableController extends AbstractViewProfileController
+	with AutowiringScientiaConfigurationComponent with SystemClockComponent {
 
 	@RequestMapping(Array("/{member}/timetable"))
 	def viewByMemberMapping(
@@ -21,7 +24,9 @@ class ViewProfileTimetableController extends AbstractViewProfileController {
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
-				Mav("profiles/profile/timetable_staff").crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
+				Mav("profiles/profile/timetable_staff",
+					"academicYears" -> scientiaConfiguration.academicYears
+				).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
 		}
 	}
 

@@ -166,7 +166,7 @@ trait ViewMemberEventsState {
 
 // Request parameters
 trait ViewMemberEventsRequest extends ViewMemberEventsState {
-	var academicYear: AcademicYear = null
+	var academicYear: AcademicYear = _
 	var from: LocalDate = LocalDate.now.minusMonths(12)
 	var to: LocalDate = from.plusMonths(13)
 	def start = from
