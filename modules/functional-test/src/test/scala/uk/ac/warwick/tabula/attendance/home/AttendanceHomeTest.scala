@@ -34,7 +34,6 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 		pageSource should include("View and record monitoring points")
 		pageSource should include("Create and edit monitoring schemes")
 
-		And("I should see current academic year")
 		findAll(id(s"view-department-$TEST_DEPARTMENT_CODE-$yearSITS")).toList.size should be (1)
 		findAll(id(s"manage-department-$TEST_DEPARTMENT_CODE-$yearSITS")).toList.size should be (1)
 	}
