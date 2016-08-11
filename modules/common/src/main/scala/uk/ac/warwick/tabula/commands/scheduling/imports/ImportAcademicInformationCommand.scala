@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 object ImportAcademicInformationCommand {
 	def apply() =
 		new ImportAcademicInformationCommandInternal
-			with ComposableCommand[ImportAcademicInformationResults]
+			with ComposableCommandWithoutTransaction[ImportAcademicInformationResults]
 			with ImportDepartments
 			with ImportModules
 			with ImportModuleTeachingDepartments
@@ -135,22 +135,20 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 			ImportDisabilities with
 			ImportLevels =>
 
-	def applyInternal() = transactional() {
-		ImportAcademicInformationResults(
-			departments = benchmarkTask("Import departments") { importDepartments() },
-			modules = benchmarkTask("Import modules") { importModules() },
-			moduleTeachingDepartments = benchmarkTask("Import module teaching departments") { importModuleTeachingDepartments() },
-			routes = benchmarkTask("Import routes") { importRoutes() },
-			routeTeachingDepartments = benchmarkTask("Import route teaching departments") { importRouteTeachingDepartments() },
-			courses = benchmarkTask("Import courses") { importCourses() },
-			courseYearWeightings = benchmarkTask("Import course year weightings") { importCourseYearWeightings() },
-			sitsStatuses = benchmarkTask("Import SITS status codes") { importSitsStatuses() },
-			modesOfAttendance = benchmarkTask("Import modes of attendance") { importModesOfAttendance() },
-			awards = benchmarkTask("Import awards") { importAwards() },
-			disabilities = benchmarkTask("Import disabilities") { importDisabilities() },
-			levels = benchmarkTask("Import levels") { importLevels() }
-		)
-	}
+	def applyInternal() = ImportAcademicInformationResults(
+		departments = benchmarkTask("Import departments") { transactional() { importDepartments() } },
+		modules = benchmarkTask("Import modules") { transactional() { importModules() } },
+		moduleTeachingDepartments = benchmarkTask("Import module teaching departments") { transactional() { importModuleTeachingDepartments() } },
+		routes = benchmarkTask("Import routes") { transactional() { importRoutes() } },
+		routeTeachingDepartments = benchmarkTask("Import route teaching departments") { transactional() { importRouteTeachingDepartments() } },
+		courses = benchmarkTask("Import courses") { transactional() { importCourses() } },
+		courseYearWeightings = benchmarkTask("Import course year weightings") { transactional() { importCourseYearWeightings() } },
+		sitsStatuses = benchmarkTask("Import SITS status codes") { transactional() { importSitsStatuses() } },
+		modesOfAttendance = benchmarkTask("Import modes of attendance") { transactional() { importModesOfAttendance() } },
+		awards = benchmarkTask("Import awards") { transactional() { importAwards() } },
+		disabilities = benchmarkTask("Import disabilities") { transactional() { importDisabilities() } },
+		levels = benchmarkTask("Import levels") { transactional() { importLevels() } }
+	)
 }
 
 trait ImportDepartments {
@@ -162,13 +160,18 @@ trait ImportDepartments {
 		val results = for (dept <- moduleImporter.getDepartments()) yield {
 			moduleAndDepartmentService.getDepartmentByCode(dept.code) match {
 				case None =>
-					moduleAndDepartmentService.save(newDepartmentFrom(dept, moduleAndDepartmentService))
+					moduleAndDepartmentService.saveOrUpdate(newDepartmentFrom(dept, moduleAndDepartmentService))
 
 					ImportResult(added = 1)
 				case Some(department) =>
-					debug("Skipping %s as it is already in the database", department.code)
-
-					ImportResult()
+					if (department.fullName != dept.fullName || department.shortName != dept.shortName) {
+						department.fullName = dept.fullName
+						department.shortName = dept.shortName
+						moduleAndDepartmentService.saveOrUpdate(department)
+						ImportResult(changed = 1)
+					} else {
+						ImportResult()
+					}
 			}
 		}
 
@@ -389,7 +392,7 @@ trait ImportRouteTeachingDepartments {
 				}
 			}
 
-		combineResults(additions.toSeq)
+		combineResults(additions)
 	}
 }
 

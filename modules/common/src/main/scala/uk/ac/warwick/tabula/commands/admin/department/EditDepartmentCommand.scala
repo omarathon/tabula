@@ -47,7 +47,7 @@ class EditDepartmentCommandInternal(val department: Department) extends CommandI
 			department.filterRule = filterRule
 		}
 
-		moduleAndDepartmentService.save(department)
+		moduleAndDepartmentService.saveOrUpdate(department)
 		department
 	}
 }

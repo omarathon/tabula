@@ -123,8 +123,8 @@ class ModuleAndDepartmentService extends Logging {
 		permissionsService.clearCachesForUser((owner, classTag[Module]))
 	}
 
-	def save(dept: Department) = transactional() {
-		departmentDao.save(dept)
+	def saveOrUpdate(dept: Department) = transactional() {
+		departmentDao.saveOrUpdate(dept)
 	}
 
 	def saveOrUpdate(module: Module) = transactional() {

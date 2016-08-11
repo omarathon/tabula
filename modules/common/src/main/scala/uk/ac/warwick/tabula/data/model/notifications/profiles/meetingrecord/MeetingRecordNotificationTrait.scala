@@ -1,16 +1,23 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.TermServiceComponent
 
 trait MeetingRecordNotificationTrait {
+
+	self: TermServiceComponent =>
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/meeting_record_notification_template.ftl"
 
 	def meeting: MeetingRecord
 
+	def academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+
 	def url = Routes.Profile.relationshipType(
-		meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(s"Student member for relationship ${meeting.relationship.id} not found")),
+		meeting.relationship.studentCourseDetails,
+		academicYear,
 		meeting.relationship.relationshipType
 	)
 

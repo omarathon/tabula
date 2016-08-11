@@ -106,9 +106,9 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 		ugDepartment.routes.asScala.toSet should be (Set(route1, route3, route4, route5))
 		pgDepartment.routes.asScala.toSet should be (Set(route2, route6, route7))
 
-		verify(command.moduleAndDepartmentService, times(1)).save(department)
-		verify(command.moduleAndDepartmentService, times(1)).save(ugDepartment)
-		verify(command.moduleAndDepartmentService, times(1)).save(pgDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(department)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(ugDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(pgDepartment)
 	}}
 
 	trait ValidationFixture extends SortRoutesWorld {

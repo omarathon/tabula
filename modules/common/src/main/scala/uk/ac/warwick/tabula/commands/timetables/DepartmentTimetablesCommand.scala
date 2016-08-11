@@ -244,5 +244,11 @@ trait DepartmentTimetablesCommandRequest extends PermissionsCheckingMethods {
 		relationshipService.listCurrentRelationshipsWithAgent(personalTutorRelationshipType, user.universityId).flatMap { _.studentMember }
 	).distinct.sortBy { m => (m.lastName, m.firstName) }
 
-	lazy val allEventTypes: Seq[TimetableEventType] = TimetableEventType.members
+	lazy val allEventTypes: Seq[TimetableEventType] = {
+		val r = TimetableEventType.members
+		if (r.contains(null)) {
+			logger.error(s"Somehow some of TimetableEventType.members are null. The not-null members are: ${r.filter(_ != null).map(_.code).mkString(", ")}. Skipping the null members...")
+		}
+		r.filter(_ != null)
+	}
 }

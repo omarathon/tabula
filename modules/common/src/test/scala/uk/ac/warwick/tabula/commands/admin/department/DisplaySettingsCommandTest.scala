@@ -94,7 +94,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		new Fixture {
 
 			commandInternal.applyInternal()
-			verify(commandInternal.moduleAndDepartmentService, times(1)).save(testDepartment)
+			verify(commandInternal.moduleAndDepartmentService, times(1)).saveOrUpdate(testDepartment)
 		}
 	}
 

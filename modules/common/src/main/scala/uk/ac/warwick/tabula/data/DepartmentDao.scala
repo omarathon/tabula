@@ -10,7 +10,7 @@ trait DepartmentDao {
 	def allRootDepartments: Seq[Department]
 	def getByCode(code: String): Option[Department]
 	def getById(id: String): Option[Department]
-	def save(department: Department)
+	def saveOrUpdate(department: Department)
 }
 
 @Repository
@@ -34,6 +34,6 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 
 	def getById(id: String) = getById[Department](id)
 
-	def save(department: Department) = session.saveOrUpdate(department)
+	def saveOrUpdate(department: Department) = session.saveOrUpdate(department)
 
 }

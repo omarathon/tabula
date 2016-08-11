@@ -44,7 +44,15 @@
 
 		<#list moduleRegistrations as moduleRegistration>
 			<div class="striped-section collapsible">
-				<h3 class="section-title"><@fmt.module_name moduleRegistration.module /></h3>
+				<h3 class="section-title">
+					<@fmt.module_name moduleRegistration.module />
+					<span class="mod-reg-summary">
+						<#if showModuleResults>
+							<span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!}</span>
+							<span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span>
+						</#if>
+					</span>
+				</h3>
 				<div class="striped-section-contents">
 					<div class="row item-info">
 						<div class="col-md-4">

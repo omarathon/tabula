@@ -106,9 +106,9 @@ class SortModulesCommandTest extends TestBase with Mockito {
 		ugDepartment.modules.asScala.toSet should be (Set(mod1, mod3, mod4, mod5))
 		pgDepartment.modules.asScala.toSet should be (Set(mod2, mod6, mod7))
 
-		verify(command.moduleAndDepartmentService, times(1)).save(department)
-		verify(command.moduleAndDepartmentService, times(1)).save(ugDepartment)
-		verify(command.moduleAndDepartmentService, times(1)).save(pgDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(department)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(ugDepartment)
+		verify(command.moduleAndDepartmentService, times(1)).saveOrUpdate(pgDepartment)
 	}}
 
 	trait ValidationFixture extends SortModulesWorld {

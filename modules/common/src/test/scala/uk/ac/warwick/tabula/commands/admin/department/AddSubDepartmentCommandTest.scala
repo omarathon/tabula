@@ -60,7 +60,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		dept.autoGroupDeregistration should be (false)
 		dept.extensionManagers.knownType.includedUserIds should contain("cuslaj")
 
-		verify(command.moduleAndDepartmentService, times(2)).save(dept)
+		verify(command.moduleAndDepartmentService, times(2)).saveOrUpdate(dept)
 	}}}
 
 	@Test def validateNoErrors() { new Fixture {

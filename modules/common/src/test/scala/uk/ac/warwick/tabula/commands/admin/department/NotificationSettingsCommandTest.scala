@@ -87,7 +87,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 	def commandApplyInvokesSaveOnDepartmentService() {
 		new Fixture {
 			commandInternal.applyInternal()
-			verify(commandInternal.moduleAndDepartmentService, times(1)).save(testDepartment)
+			verify(commandInternal.moduleAndDepartmentService, times(1)).saveOrUpdate(testDepartment)
 		}
 	}
 

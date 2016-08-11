@@ -3,13 +3,15 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MeetingRecordApproval, Notification, SingleItemNotification}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 
 @Entity
 @DiscriminatorValue("meetingRecordApproved")
 class MeetingRecordApprovedNotification
 	extends Notification[MeetingRecordApproval, Unit]
 	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval] {
+	with SingleItemNotification[MeetingRecordApproval]
+	with AutowiringTermServiceComponent {
 
 	def approval = item.entity
 	def meeting = approval.meetingRecord
