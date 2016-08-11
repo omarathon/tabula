@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.attendance.home
 
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
@@ -27,6 +28,7 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 
 		When("I go to /attendance")
 		go to Path("/attendance")
+		openDisplayAcademicYearSettings()
 
 		Then("I see the attendance admin sections")
 		pageSource should include("View and record monitoring points")
@@ -34,6 +36,18 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 
 		findAll(id(s"view-department-$TEST_DEPARTMENT_CODE-$yearSITS")).toList.size should be (1)
 		findAll(id(s"manage-department-$TEST_DEPARTMENT_CODE-$yearSITS")).toList.size should be (1)
+	}
+
+	def openDisplayAcademicYearSettings() = {
+		eventually {
+			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
+		}
+		click on cssSelector(".dept-settings a.dropdown-toggle")
+		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText(s"${FunctionalTestAcademicYear.currentSITS.toString}"))
+		eventually {
+			displayLink.isDisplayed should be {true}
+		}
+		click on displayLink
 	}
 
 	"A member of staff with a relationship" should "see the monitoring points home page" in {
