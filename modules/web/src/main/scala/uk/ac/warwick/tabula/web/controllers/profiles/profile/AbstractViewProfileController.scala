@@ -98,9 +98,12 @@ abstract class AbstractViewProfileController extends ProfilesController
 			val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails)
 			scyds.map(scyd =>
 				BaseBreadcumbs.Standard(
-					"%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
-					Some(urlGenerator(scyd)),
-					"%s %s %s".format(scyd.studentCourseDetails.course.code, Option(scyd.studentCourseDetails.currentRoute).map(_.code.toUpperCase).getOrElse(""), scyd.academicYear.getLabel)
+					title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
+					url = Some(urlGenerator(scyd)),
+					tooltip = "%s %s".format(
+						scyd.studentCourseDetails.course.name,
+						scyd.academicYear.getLabel
+					)
 				).setActive(scyd == chooseScyd)
 			)
 		}).getOrElse(Nil)
