@@ -25,9 +25,9 @@ class UpdateAttendanceMonitoringCheckpointTotalsCommandInternal extends CommandI
 	self: AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringCheckpointTotalsState =>
 
 	override def applyInternal() = {
-		totalsToUpdate.map(total =>
-			attendanceMonitoringService.updateCheckpointTotal(total.student, total.department, total.academicYear)
-		)
+			totalsToUpdate.map(total =>
+				attendanceMonitoringService.updateCheckpointTotal(total.student, total.department, total.academicYear)
+			)
 	}
 
 }

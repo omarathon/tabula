@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view
 
-import uk.ac.warwick.tabula.web.controllers.attendance.{HasMonthNames, AttendanceController}
+import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.{SelfValidating, PopulateOnForm, Appliable}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.commands.attendance.view.RecordStudentAttendanceCommand
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
 import uk.ac.warwick.tabula.attendance.web.Routes
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
@@ -62,7 +63,7 @@ class RecordStudentAttendanceController extends AttendanceController
 
 	@RequestMapping(method = Array(GET))
 	def form(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
+		@ModelAttribute("command") cmd: Appliable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] with PopulateOnForm,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
@@ -85,7 +86,7 @@ class RecordStudentAttendanceController extends AttendanceController
 
 	@RequestMapping(method = Array(POST))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,

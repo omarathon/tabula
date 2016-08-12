@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.attendance
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.attendance.view.FiltersCheckpointMapChanges
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.commands.attendance.view.{FiltersCheckpointMapChanges, MissedAttendanceMonitoringCheckpointsNotifications}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal, AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -14,23 +14,33 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 
+trait StudentRecordCommandHelper
+	extends ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
+	with PopulatesStudentRecordCommand
+	with AutowiringAttendanceMonitoringServiceComponent
+	with AutowiringTermServiceComponent
+	with StudentRecordValidation
+	with StudentRecordPermissions
+	with StudentRecordCommandRequest
+	with MissedAttendanceMonitoringCheckpointsNotifications {
+
+	self: CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
+		with StudentRecordCommandRequest
+		with StudentRecordCommandState =>
+}
+
 object StudentRecordCommand {
 	def apply(academicYear: AcademicYear, student: StudentMember, user: CurrentUser) =
 		new StudentRecordCommandInternal(academicYear, student, user)
-			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
-			with PopulatesStudentRecordCommand
-			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
-			with StudentRecordValidation
+			with StudentRecordCommandHelper
 			with StudentRecordDescription
-			with StudentRecordPermissions
 			with StudentRecordCommandState
-			with StudentRecordCommandRequest
+
 }
 
 
 class StudentRecordCommandInternal(val academicYear: AcademicYear, val student: StudentMember, val user: CurrentUser)
-	extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
+	extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: StudentRecordCommandRequest with StudentRecordCommandState with AttendanceMonitoringServiceComponent =>
 
@@ -98,7 +108,7 @@ trait StudentRecordPermissions extends RequiresPermissionsChecking with Permissi
 
 }
 
-trait StudentRecordDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
+trait StudentRecordDescription extends Describable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: StudentRecordCommandState =>
 

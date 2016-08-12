@@ -34,6 +34,9 @@ trait AttendanceMonitoringService {
 	def saveOrUpdate(note: AttendanceMonitoringNote): Unit
 	def saveOrUpdate(report: MonitoringPointReport): Unit
 	def saveOrUpdateDangerously(checkpoint: AttendanceMonitoringCheckpoint): Unit
+	def updateCheckpointTotalLow(total: AttendanceMonitoringCheckpointTotal): Unit
+	def updateCheckpointTotalMedium(total: AttendanceMonitoringCheckpointTotal): Unit
+	def updateCheckpointTotalHigh(total: AttendanceMonitoringCheckpointTotal): Unit
 	def deleteScheme(scheme: AttendanceMonitoringScheme)
 	def deletePoint(point: AttendanceMonitoringPoint)
 	def deleteTemplate(template: AttendanceMonitoringTemplate)
@@ -75,8 +78,17 @@ trait AttendanceMonitoringService {
 	def getAllAttendance(studentId: String): Seq[AttendanceMonitoringCheckpoint]
 	def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
 	def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
-	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
-	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint]
+	def setAttendance(
+		student: StudentMember,
+		attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState],
+		user: CurrentUser
+	): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
+	def setAttendance(
+		student: StudentMember,
+		attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState],
+		usercode: String,
+		autocreated: Boolean = false
+	): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal
 	def generatePointsFromTemplateScheme(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
@@ -118,8 +130,22 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 	def saveOrUpdate(report: MonitoringPointReport): Unit =
 		attendanceMonitoringDao.saveOrUpdate(report)
 
-	def saveOrUpdateDangerously(checkpoint: AttendanceMonitoringCheckpoint): Unit=
+	def saveOrUpdateDangerously(checkpoint: AttendanceMonitoringCheckpoint): Unit =
 		attendanceMonitoringDao.saveOrUpdateCheckpoints(Seq(checkpoint))
+
+	def updateCheckpointTotalLow(total: AttendanceMonitoringCheckpointTotal): Unit = {
+		total.unauthorisedLowLevelNotified = DateTime.now
+		attendanceMonitoringDao.saveOrUpdate(total)
+	}
+	def updateCheckpointTotalMedium(total: AttendanceMonitoringCheckpointTotal): Unit = {
+		total.unauthorisedMediumLevelNotified = DateTime.now
+		attendanceMonitoringDao.saveOrUpdate(total)
+	}
+
+	def updateCheckpointTotalHigh(total: AttendanceMonitoringCheckpointTotal): Unit = {
+		total.unauthorisedHighLevelNotified = DateTime.now
+		attendanceMonitoringDao.saveOrUpdate(total)
+	}
 
 	def deleteScheme(scheme: AttendanceMonitoringScheme) =
 		attendanceMonitoringDao.delete(scheme)
@@ -282,11 +308,20 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.getAttendanceNoteMap(student)
 	}
 
-	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint] = {
+	def setAttendance(
+		student: StudentMember,
+		attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState],
+		user: CurrentUser
+	): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		setAttendance(student, attendanceMap, user.apparentId)
 	}
 
-	def setAttendance(student: StudentMember, attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState], usercode: String, autocreated: Boolean = false): Seq[AttendanceMonitoringCheckpoint] = {
+	def setAttendance(
+		student: StudentMember,
+		attendanceMap: Map[AttendanceMonitoringPoint, AttendanceState],
+		usercode: String,
+		autocreated: Boolean = false
+	): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
 		val existingCheckpoints = getCheckpoints(attendanceMap.keys.toSeq, student)
 		val checkpointsToDelete: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 == null).keys.flatMap(existingCheckpoints.get).toSeq
 		val checkpointsToUpdate: Seq[AttendanceMonitoringCheckpoint] = attendanceMap.filter(_._2 != null).flatMap{case(point, state) =>
@@ -309,12 +344,11 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		attendanceMonitoringDao.removeCheckpoints(checkpointsToDelete)
 		attendanceMonitoringDao.saveOrUpdateCheckpoints(checkpointsToUpdate)
 
-		if (attendanceMap.keys.nonEmpty) {
-			val scheme = attendanceMap.keys.head.scheme
-			updateCheckpointTotal(student, scheme.department, scheme.academicYear)
+		val totals = attendanceMap.keys.toSeq.map(point => (point.scheme.department, point.scheme.academicYear)).distinct.map { case (department, academicYear) =>
+			updateCheckpointTotal(student, department, academicYear)
 		}
 
-		checkpointsToUpdate
+		(checkpointsToUpdate, totals)
 	}
 
 	def updateCheckpointTotal(student: StudentMember, department: Department, academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {

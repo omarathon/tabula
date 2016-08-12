@@ -69,7 +69,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		mockAttendanceMonitoringService.getCheckpoints(Seq(assignmentPoint), Seq(student)) returns Map()
 		mockAttendanceMonitoringService.studentAlreadyReportedThisTerm(student, assignmentPoint) returns false
 		mockAttendanceMonitoringService.setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
-			Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended))
+			((Seq(Fixtures.attendanceMonitoringCheckpoint(assignmentPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
 
 		mockAssignmentService.getSubmissionsForAssignmentsBetweenDates(
 			student.universityId,
