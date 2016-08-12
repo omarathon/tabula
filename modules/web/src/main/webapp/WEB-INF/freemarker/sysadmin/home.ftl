@@ -74,7 +74,7 @@
 
 		<p>
 			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
-				<textarea id="import-profiles-specific" name="members" class="input-block-level" placeholder="University IDs (one per line)" rows="2"></textarea>
+				<textarea id="import-profiles-specific" name="members" class="form-control" placeholder="University IDs (one per line)" rows="2"></textarea>
 				<input class="btn btn-danger" type="submit" value="Specific profile(s)">
 			</@f.form>
 		</p>
