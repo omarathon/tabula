@@ -215,7 +215,8 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 						location.fold("") {
 							_.name
 						},
-						parent.shortName.getOrElse("")
+						parent.shortName.getOrElse(""),
+						(activity \\ "weeks").text
 					).mkString
 				)
 
