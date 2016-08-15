@@ -2,31 +2,25 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.attendance._
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpoint
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringServiceComponent
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
 
 object RecordStudentAttendanceCommand {
+
 	def apply(department: Department, academicYear: AcademicYear, student: StudentMember, user: CurrentUser) =
 		new RecordStudentAttendanceCommandInternal(department, academicYear, student, user)
-			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
-			with PopulatesStudentRecordCommand
-			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringTermServiceComponent
-			with StudentRecordValidation
+			with StudentRecordCommandHelper
 			with RecordStudentAttendanceDescription
-			with StudentRecordPermissions
 			with RecordStudentAttendanceCommandState
-			with StudentRecordCommandRequest
 }
 
 
 class RecordStudentAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val student: StudentMember, val user: CurrentUser)
-	extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
+	extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: StudentRecordCommandRequest with AttendanceMonitoringServiceComponent =>
 
@@ -36,7 +30,7 @@ class RecordStudentAttendanceCommandInternal(val department: Department, val aca
 
 }
 
-trait RecordStudentAttendanceDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
+trait RecordStudentAttendanceDescription extends Describable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: RecordStudentAttendanceCommandState =>
 

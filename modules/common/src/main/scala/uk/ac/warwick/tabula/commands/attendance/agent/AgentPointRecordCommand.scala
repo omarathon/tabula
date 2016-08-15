@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.commands.attendance.agent
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.attendance.GroupsPoints
-import uk.ac.warwick.tabula.commands.attendance.view.GroupedPointRecordValidation
+import uk.ac.warwick.tabula.commands.attendance.view.{GroupedPointRecordValidation, MissedAttendanceMonitoringCheckpointsNotifications}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPointStyle, AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint, AttendanceState}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -23,17 +23,18 @@ object AgentPointRecordCommand {
 		templatePoint: AttendanceMonitoringPoint,
 		user: CurrentUser,
 		member: Member
-	) =		new AgentPointRecordCommandInternal(relationshipType, academicYear, templatePoint, user, member)
+	) =	new AgentPointRecordCommandInternal(relationshipType, academicYear, templatePoint, user, member)
 			with AutowiringRelationshipServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringSecurityServiceComponent
-			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
+			with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
 			with AgentPointRecordValidation
 			with AgentPointRecordDescription
 			with AgentPointRecordPermissions
 			with AgentPointRecordCommandState
 			with PopulateAgentPointRecordCommand
+			with MissedAttendanceMonitoringCheckpointsNotifications
 }
 
 
@@ -43,14 +44,18 @@ class AgentPointRecordCommandInternal(
 	val templatePoint: AttendanceMonitoringPoint,
 	val user: CurrentUser,
 	val member: Member
-) extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
+) extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: AgentPointRecordCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		checkpointMap.asScala.flatMap{ case(student, pointMap) =>
+		checkpointMap.asScala.map { case(student, pointMap) =>
 			attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user)
-		}.toSeq
+		}.toSeq.foldLeft(
+			(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
+		){
+			case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
+		}
 	}
 
 }
@@ -100,7 +105,7 @@ trait AgentPointRecordPermissions extends RequiresPermissionsChecking with Permi
 
 }
 
-trait AgentPointRecordDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
+trait AgentPointRecordDescription extends Describable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: AgentPointRecordCommandState =>
 

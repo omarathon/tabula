@@ -2,23 +2,24 @@ package uk.ac.warwick.tabula.commands.attendance.view
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringNote, AttendanceState, AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import uk.ac.warwick.tabula.data.model.attendance._
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
 import uk.ac.warwick.tabula.services._
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.LazyMaps
 
 object RecordMonitoringPointCommand {
 	def apply(department: Department, academicYear: AcademicYear, templatePoint: AttendanceMonitoringPoint, user: CurrentUser) =
 		new RecordMonitoringPointCommandInternal(department, academicYear, templatePoint, user)
-			with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
+			with ComposableCommand[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringTermServiceComponent
@@ -29,18 +30,23 @@ object RecordMonitoringPointCommand {
 			with RecordMonitoringPointCommandState
 			with PopulateRecordMonitoringPointCommand
 			with SetFilterPointsResultOnRecordMonitoringPointCommand
+			with MissedAttendanceMonitoringCheckpointsNotifications
 }
 
 
 class RecordMonitoringPointCommandInternal(val department: Department, val academicYear: AcademicYear, val templatePoint: AttendanceMonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
+	extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: RecordMonitoringPointCommandState with AttendanceMonitoringServiceComponent =>
 
 	override def applyInternal() = {
-		checkpointMap.asScala.flatMap{ case(student, pointMap) =>
+		checkpointMap.asScala.map { case(student, pointMap) =>
 			attendanceMonitoringService.setAttendance(student, pointMap.asScala.toMap, user)
-		}.toSeq
+		}.toSeq.foldLeft(
+			(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
+		){
+			case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
+		}
 	}
 
 }
@@ -101,7 +107,7 @@ trait RecordMonitoringPointPermissions extends RequiresPermissionsChecking with 
 
 }
 
-trait RecordMonitoringPointDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
+trait RecordMonitoringPointDescription extends Describable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
 	self: RecordMonitoringPointCommandState =>
 

@@ -31,21 +31,21 @@ class Department extends GeneratedId
 	type Entity = Department
 
 	@Column(unique = true)
-	var code: String = null
+	var code: String = _
 
 	@Column(name = "name")
-	var fullName: String = null
+	var fullName: String = _
 
 	def name = shortName.maybeText.getOrElse(fullName)
 
-	var shortName: String = null
+	var shortName: String = _
 
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
 	@BatchSize(size=200)
 	var children:JSet[Department] = JHashSet()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent: Department = null
+	var parent: Department = _
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
@@ -222,6 +222,19 @@ class Department extends GeneratedId
 
 	def autoMarkMissedMonitoringPoints = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
 	def autoMarkMissedMonitoringPoints_=(enabled: Boolean) { settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled) }
+
+	def missedMonitoringPointsNotificationLevels: Department.Settings.MissedMonitoringPointsNotificationLevels =
+		Department.Settings.MissedMonitoringPointsNotificationLevels(
+			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelLow, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Low),
+			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelMedium, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Medium),
+			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelHigh, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.High)
+		)
+
+	def missedMonitoringPointsNotificationLevels_=(levels: Department.Settings.MissedMonitoringPointsNotificationLevels) {
+		settings += (Settings.MissedMonitoringPointsNotificationLevelLow -> levels.low)
+		settings += (Settings.MissedMonitoringPointsNotificationLevelMedium -> levels.medium)
+		settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
+	}
 
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
@@ -463,6 +476,17 @@ object Department {
 		val AssignmentGradeValidation = "assignmentGradeValidation"
 
 		val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
+		val MissedMonitoringPointsNotificationLevelLow = "missedMonitoringPointsNotificationLevelLow"
+		val MissedMonitoringPointsNotificationLevelMedium = "missedMonitoringPointsNotificationLevelMedium"
+		val MissedMonitoringPointsNotificationLevelHigh = "missedMonitoringPointsNotificationLevelHigh"
+		object MissedMonitoringPointsNotificationLevels {
+			object Defaults {
+				val Low = 3
+				val Medium = 6
+				val High = 8
+			}
+		}
+		case class MissedMonitoringPointsNotificationLevels(low: Int, medium: Int, high: Int)
 	}
 }
 

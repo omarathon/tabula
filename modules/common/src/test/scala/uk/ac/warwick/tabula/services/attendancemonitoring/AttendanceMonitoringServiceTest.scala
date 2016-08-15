@@ -61,8 +61,8 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
 			Map(point1 -> AttendanceState.Attended, point2 -> AttendanceState.Attended, point3 -> null),
 			currentUser
 		)
-		result.size should be (1)
-		result.head should be (missedCheckpoint)
+		result._1.size should be (1)
+		result._1.head should be (missedCheckpoint)
 		verify(service.attendanceMonitoringDao, times(1)).removeCheckpoints(Seq(authorisedCheckpoint))
 		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdateCheckpoints(Seq(missedCheckpoint))
 		verify(service.attendanceMonitoringDao, times(1)).saveOrUpdate(any[AttendanceMonitoringCheckpointTotal])

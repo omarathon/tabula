@@ -22,9 +22,9 @@ trait AutowiringAttendanceMonitoringEventAttendanceServiceComponent extends Atte
 
 trait AttendanceMonitoringEventAttendanceService {
 	def getCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint]
-	def updateCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpoints(attendances: Seq[SmallGroupEventAttendance]): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 	def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])]
-	def updateMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint]
+	def updateMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], user: CurrentUser): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
 
 abstract class AbstractAttendanceMonitoringEventAttendanceService extends AttendanceMonitoringEventAttendanceService {
@@ -57,10 +57,14 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		}).flatten
 	}
 
-	def updateCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint] = {
-		getCheckpoints(attendances).flatMap(checkpoint => {
+	def updateCheckpoints(attendances: Seq[SmallGroupEventAttendance]): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
+		getCheckpoints(attendances).map(checkpoint => {
 			attendanceMonitoringService.setAttendance(checkpoint.student, Map(checkpoint.point -> checkpoint.state), checkpoint.updatedBy, autocreated = true)
 		})
+	}.foldLeft(
+		(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
+	){
+		case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
 	}
 
 	def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])] = {
@@ -100,8 +104,8 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 	}
 
 
-	def updateMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], user: CurrentUser): Seq[AttendanceMonitoringCheckpoint] = {
-		getMissedCheckpoints(attendances).flatMap { case (checkpoint, eventNotes) =>
+	def updateMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], user: CurrentUser): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
+		getMissedCheckpoints(attendances).map { case (checkpoint, eventNotes) =>
 			val eventNoteContents = eventNotes.map(note => s"[Reference Id- ${note.occurrence.id}, Event - ${note.occurrence.event.title}, Details: ${note.note}] ")
 
 			if (eventNoteContents.nonEmpty) {
@@ -124,6 +128,10 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 				attendanceMonitoringService.saveOrUpdate(attendanceNote)
 			}
 			attendanceMonitoringService.setAttendance(checkpoint.student, Map(checkpoint.point -> checkpoint.state), checkpoint.updatedBy, autocreated = true)
+		}.foldLeft(
+			(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
+		){
+			case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
 		}
 	}
 
