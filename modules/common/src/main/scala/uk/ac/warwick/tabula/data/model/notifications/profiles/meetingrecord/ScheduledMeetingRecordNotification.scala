@@ -10,14 +10,17 @@ import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.property._
 import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.timetables.{TermBasedEventOccurrenceService, EventOccurrenceService}
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 abstract class ScheduledMeetingRecordNotification
 	extends NotificationWithTarget[ScheduledMeetingRecord, StudentRelationship]
-	with SingleItemNotification[ScheduledMeetingRecord] {
+	with SingleItemNotification[ScheduledMeetingRecord]
+	with AutowiringTermServiceComponent {
 
 	def meeting = item.entity
 
@@ -26,10 +29,15 @@ abstract class ScheduledMeetingRecordNotification
 
 	def studentNotFoundMessage = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
 	def agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"
+
+	def academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+
 	def url = Routes.Profile.relationshipType(
-		meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)),
+		meeting.relationship.studentCourseDetails,
+		academicYear,
 		meeting.relationship.relationshipType
 	)
+
 	def urlTitle = "view this meeting"
 
 	def agentRole = meeting.relationship.relationshipType.agentRole
