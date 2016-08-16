@@ -25,28 +25,33 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 	// Using Firefox JS emulation avoids the problem.
 	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_38
 
+	val year = FunctionalTestAcademicYear.currentSITS.startYear
+
 	"A student" should "be able to view their timetable" in {
 
+	 Given("The timetabling service knows of a single event for student1")
+	 setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.current,singleEvent)
+
+	 And("Student1 is a member of a small group with a single event")
+
+	 addStudentToGroup(P.Student1.usercode,testGroupSetId, "Group 1")
+	 createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
+
+	 When("Student1 views their profile")
+	 signIn as P.Student1 to Path("/profiles")
+	 currentUrl should endWith (s"/profiles/view/${P.Student1.warwickId}")
+
+	 click on linkText("Timetable")
+
+	 currentUrl should endWith (s"/profiles/view/course/${P.Student1.warwickId}_1/$year/timetable")
+
+	 }
+
+	"A student" should "be able to request a JSON feed-xxx of timetable events" in {
 		Given("The timetabling service knows of a single event for student1")
-		setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.current,singleEvent)
-
-		And("Student1 is a member of a small group with a single event")
-
-		addStudentToGroup(P.Student1.usercode,testGroupSetId, "Group 1")
-		createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
-
-		When("Student1 views their profile")
-		signIn as P.Student1 to Path("/profiles")
-		currentUrl should endWith (s"/profiles/view/${P.Student1.warwickId}")
-
-		click on linkText("Timetable")
-
-		currentUrl should endWith (s"/profiles/view/course/${P.Student1.warwickId}_1/2014/timetable")
-
-	}
-
-	"A student" should "be able to request a JSON feed of timetable events" in {
-		Given("The timetabling service knows of a single event for student1")
+		//Note -For month of Aug we have condition of checking past timetable via ScientiaTimetableFetchingService related with TAB-3074 (fetch the previous academic year if the month is >= AUGUST and < OCTOBER)
+		//TimetableEmptyException is thrown for past academic year if we don't have any event via this test so make sure you have set event for that (FunctionalTestAcademicYear.current)
+		// That exception further results in 0 events.Can create events for 2 academic year(curent/past) so that we always have event for past year and test event size as 3
 		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
@@ -93,7 +98,6 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 			case _:Success[Seq[Map[String,Any]]]=> //OK
 		}
 	}
-
 	val singleEvent = <Data>
 		<Activities>
 			<Activity>
