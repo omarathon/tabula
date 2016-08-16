@@ -47,7 +47,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 
 	 }
 
-	"A student" should "be able to request a JSON feed-xxx of timetable events" in {
+	"A student" should "be able to request a JSON feed of timetable events" in {
 		Given("The timetabling service knows of a single event for student1")
 		//Note -For month of Aug we have condition of checking past timetable via ScientiaTimetableFetchingService related with TAB-3074 (fetch the previous academic year if the month is >= AUGUST and < OCTOBER)
 		//TimetableEmptyException is thrown for past academic year if we don't have any event via this test so make sure you have set event for that (FunctionalTestAcademicYear.current)
