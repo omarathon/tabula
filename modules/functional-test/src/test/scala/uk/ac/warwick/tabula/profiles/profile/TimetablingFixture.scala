@@ -16,6 +16,8 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 	var testGroupSetId:String=_
 
+	val academicYear = FunctionalTestAcademicYear.current
+
 	before {
 		Given("The test department exists")
 		go to Path("/fixtures/setup")
@@ -33,7 +35,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 			routeCode = TEST_ROUTE_CODE,
 			courseCode = TEST_COURSE_CODE,
 			deptCode = TEST_DEPARTMENT_CODE,
-			academicYear = FunctionalTestAcademicYear.currentSITS.startYear.toString
+			academicYear = academicYear.startYear.toString
 		)
 
 		And("a module exists with a related SmallGroupSet")
@@ -41,7 +43,7 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 		testGroupSetId = createSmallGroupSet(
 			TEST_MODULE_CODE,
 			TEST_GROUPSET_NAME,
-			academicYear = FunctionalTestAcademicYear.currentSITS.startYear.toString
+			academicYear = academicYear.startYear.toString
 		)
 
 		And("marker1 has a membership record")
