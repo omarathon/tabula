@@ -31,7 +31,6 @@ class UrkundServiceTest extends TestBase with Mockito {
 		}
 		service.username = "username"
 		service.password = "password"
-		service.unit = 0
 		service.analysisPrefix = "dev"
 		service.objectMapper = JsonObjectMapperFactory.instance
 

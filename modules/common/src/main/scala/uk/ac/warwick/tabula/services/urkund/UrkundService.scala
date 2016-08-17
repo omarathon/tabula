@@ -24,6 +24,7 @@ import uk.ac.warwick.util.core.StringUtils
 
 import scala.util.parsing.json.JSON
 import scala.util.{Failure, Success, Try}
+import uk.ac.warwick.tabula.JavaImports._
 
 object UrkundService {
 	final val responseTimeout = 60 * 1000
@@ -132,7 +133,9 @@ abstract class AbstractUrkundService extends UrkundService
 
 	@Value("${Urkund.username}") var username: String = _
 	@Value("${Urkund.password}") var password: String = _
-	@Value("${Urkund.unit}") var unit: Int = _
+	@Value("${Urkund.unit}") var unit: JInteger = _
+	@Value("${Urkund.organization}") var organization: JInteger = _
+	@Value("${Urkund.subOrganization}") var subOrganization: JInteger = _
 	@Value("${Urkund.analysisPrefix}") var analysisPrefix: String = _
 
 	private def documentUrl(report: OriginalityReport): String = "%s/%s/%s".format(
@@ -185,6 +188,8 @@ abstract class AbstractUrkundService extends UrkundService
 		logger.info(s"Could not find existing Urkund receiver $expectedReceiverAddress, so creating new receiver")
 		val postData: String = objectMapper.writeValueAsString(Map(
 			"UnitId" -> unit,
+			"OrganizationId" -> organization,
+			"SubOrganizationId" -> subOrganization,
 			"FullName" -> "Tabula Receiver",
 			"EmailAddress" -> UrkundService.receiverEmailAddress(report),
 			"AnalysisAddress" -> expectedReceiverAddress
