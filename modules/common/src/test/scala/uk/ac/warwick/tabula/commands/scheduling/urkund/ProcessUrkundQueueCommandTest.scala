@@ -45,7 +45,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 	def submitReportSuccess(): Unit = withFakeTime(now) { new Fixture {
 		report.nextSubmitAttempt = DateTime.now.minusMinutes(1)
 		command.urkundService.findReportToSubmit returns Some(report)
-		command.urkundService.submit(report) returns Success(UrkundSuccessResponse(202, None, null, null, null, null, null, null, null))
+		command.urkundService.submit(report) returns Success(UrkundSuccessResponse(202, "The response", None, null, null, null, null, null, null, null))
 		command.applyInternal() should be (None)
 		report.nextSubmitAttempt should be (null)
 		report.nextResponseAttempt should be (now.plusMinutes(UrkundService.reportTimeoutInMinutes))
@@ -59,7 +59,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 	def submitReportClientError(): Unit = withFakeTime(now) { new Fixture {
 		report.nextSubmitAttempt = DateTime.now.minusMinutes(1)
 		command.urkundService.findReportToSubmit returns Some(report)
-		command.urkundService.submit(report) returns Success(UrkundErrorResponse(0))
+		command.urkundService.submit(report) returns Success(UrkundErrorResponse(0, "The response"))
 		command.urkundService.listOriginalityReports(assignment) returns Seq(report)
 		command.applyInternal() should be (Option(assignment))
 		report.nextSubmitAttempt should be (null)
@@ -92,6 +92,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
@@ -121,6 +122,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
@@ -146,6 +148,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
@@ -171,6 +174,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
@@ -196,6 +200,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
@@ -219,7 +224,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		report.nextResponseAttempt = DateTime.now.minusMinutes(1)
 		command.urkundService.findReportToSubmit returns None
 		command.urkundService.findReportToRetreive returns Some(report)
-		command.urkundService.retrieveReport(report) returns Success(UrkundErrorResponse(statusCode = 400))
+		command.urkundService.retrieveReport(report) returns Success(UrkundErrorResponse(statusCode = 400, response = "The response"))
 		command.urkundService.listOriginalityReports(assignment) returns Seq(report)
 		command.applyInternal() should be (Some(assignment))
 		report.nextResponseAttempt should be (null)
@@ -251,6 +256,7 @@ class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 		command.urkundService.findReportToRetreive returns Some(report)
 		command.urkundService.retrieveReport(report) returns Success(UrkundSuccessResponse(
 			statusCode = 200,
+			response = "The response",
 			submissionId = Some(1234),
 			externalId = "2345",
 			timestamp = now,
