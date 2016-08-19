@@ -63,7 +63,8 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		service.attendanceMonitoringService.getCheckpoints(Seq(meetingPoint), Seq(student)) returns Map()
 		service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, meetingPoint) returns false
 		service.attendanceMonitoringService.setAttendance(student, Map(meetingPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
-			Seq(Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.Attended))
+			((Seq(Fixtures.attendanceMonitoringCheckpoint(meetingPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
+
 	}
 
 	@Test

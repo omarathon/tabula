@@ -195,7 +195,7 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 
 	@RequestMapping(method = Array(POST), params = Array("members"))
 	def importSpecificProfiles(@RequestParam members: String) = {
-		val jobInstance = jobService.add(None, ImportMembersJob(members.split('\n')))
+		val jobInstance = jobService.add(None, ImportMembersJob(members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)))
 		Redirect(Routes.sysadmin.jobs.status(jobInstance))
 	}
 

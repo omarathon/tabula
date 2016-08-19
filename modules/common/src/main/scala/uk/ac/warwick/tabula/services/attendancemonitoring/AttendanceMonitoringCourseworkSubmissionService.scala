@@ -17,7 +17,7 @@ trait AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent extends
 
 trait AttendanceMonitoringCourseworkSubmissionService {
 	def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint]
-	def updateCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint]
+	def updateCheckpoints(submission: Submission): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
 
 abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends AttendanceMonitoringCourseworkSubmissionService {
@@ -48,10 +48,14 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 		}.getOrElse(Seq())
 	}
 
-	def updateCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
-		getCheckpoints(submission).flatMap(checkpoint => {
+	def updateCheckpoints(submission: Submission): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
+		getCheckpoints(submission).map(checkpoint => {
 			attendanceMonitoringService.setAttendance(checkpoint.student, Map(checkpoint.point -> checkpoint.state), checkpoint.updatedBy, autocreated = true)
-		})
+		}).foldLeft(
+			(Seq[AttendanceMonitoringCheckpoint](), Seq[AttendanceMonitoringCheckpointTotal]())
+		){
+			case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
+		}
 	}
 
 	private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], submission: Submission, studentMember: StudentMember): Seq[AttendanceMonitoringPoint] = {

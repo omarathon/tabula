@@ -1,15 +1,17 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import javax.persistence.{Table, Column, JoinColumn, FetchType, ManyToOne, Entity}
-import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, StudentMember}
+import javax.persistence._
+
+import uk.ac.warwick.tabula.data.model._
 import javax.validation.constraints.NotNull
+
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.annotations.Type
 
 @Entity
 @Table(name="ATTENDANCEMONITORINGTOTAL")
-class AttendanceMonitoringCheckpointTotal extends GeneratedId {
+class AttendanceMonitoringCheckpointTotal extends GeneratedId with ToEntityReference {
 
 	def this(student: StudentMember, department: Department, academicYear: AcademicYear) {
 		this()
@@ -17,6 +19,8 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 		this.department = department
 		this.academicYear = academicYear
 	}
+
+	type Entity = AttendanceMonitoringCheckpointTotal
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
@@ -49,11 +53,15 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId {
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
-	def reset(): Unit = {
-		unrecorded = 0
-		authorised = 0
-		unauthorised = 0
-		attended = 0
-	}
+	@Column(name = "low_level_notified")
+	var unauthorisedLowLevelNotified: DateTime = _
+
+	@Column(name = "medium_level_notified")
+	var unauthorisedMediumLevelNotified: DateTime = _
+
+	@Column(name = "high_level_notified")
+	var unauthorisedHighLevelNotified: DateTime = _
+
+	override def toEntityReference = new AttendanceMonitoringCheckpointTotalEntityReference().put(this)
 
 }

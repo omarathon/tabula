@@ -153,7 +153,7 @@
 										</#if>
 										<div class="col-md-2">
 											<div class="input-group">
-												<input class="form-control" name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
+												<input class="form-control" name="marks[${markItem_index}].actualMark" class="mark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>" type="text" />
 												<span class="input-group-addon">%</span>
 											</div>
 										</div>
@@ -252,7 +252,7 @@
 								, $thisSelect = $selects.find('select').filter(function(){
 									return $(this).data('universityid') == universityId;
 								});
-							if ($thisSelect.length > 0) {
+							if ($thisSelect.length > 0 && ($thisSelect.find('option').length > 1 || $markRow.find('input.mark').val() == "")) {
 								$markRow.find('input.grade').hide().prop('disabled', true);
 								$markRow.find('select').html($thisSelect.html()).prop('disabled', false).show();
 							} else {

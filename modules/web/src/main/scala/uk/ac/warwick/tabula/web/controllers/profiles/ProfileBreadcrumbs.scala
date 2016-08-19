@@ -41,12 +41,14 @@ object ProfileBreadcrumbs {
 			val identifier = IdentityIdentifier
 			val title = member.userId
 			val url = Some(Routes.Profile.identity(member))
+			override val tooltip: String = member.fullName.getOrElse("")
 		}
 
 		case class IdentityForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
 			val identifier = IdentityIdentifier
 			val title = scyd.studentCourseDetails.student.userId
 			val url = Some(Routes.Profile.identity(scyd))
+			override val tooltip: String = scyd.studentCourseDetails.student.fullName.getOrElse("")
 		}
 
 		case class Timetable(member: Member) extends ProfileBreadcrumb {

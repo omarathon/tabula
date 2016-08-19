@@ -90,7 +90,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()
 		service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns false
 		service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true) returns
-			Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended))
+			((Seq(Fixtures.attendanceMonitoringCheckpoint(smallGroupPoint, student, AttendanceState.Attended)), Seq[AttendanceMonitoringCheckpointTotal]()))
 
 	}
 
