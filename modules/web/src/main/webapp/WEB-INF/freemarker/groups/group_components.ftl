@@ -66,8 +66,11 @@
 			 data-name="${set_anchor(set)}">
 			<div class="clearfix">
 				<div class="section-title row">
-					<div class="col-md-4 icon-container">
-						<span class="h6 colour-h6"><@fmt.groupset_name set /></span>
+					<div class="col-md-4">
+						<span class="h4">
+							<span class="icon-container"></span>
+							<@fmt.groupset_name set />
+						</span>
 					</div>
 
 					<div class="col-md-1">
@@ -370,6 +373,8 @@
 			</#if>
 		</div>
 	</div>
+	<#-- Fix nth-of-type zebra striping -->
+	<div></div>
 
 	<#if has_groups>
 		<#list setItem.groups as groupItem>
@@ -546,9 +551,9 @@
 <#macro groupsets_info moduleItem>
 	<#list moduleItem.setItems as setItem>
 		<span id="groupset-container-${setItem.set.id}">
-      <@single_groupset setItem moduleItem/>
-    </span>
-  </#list>
+			<@single_groupset setItem moduleItem/>
+		</span>
+	</#list>
 </#macro>
 
 <#macro single_groupset setItem moduleItem>
@@ -561,7 +566,7 @@
 			<div class="col-md-2">
 				<h3 class="name">
 					<small>
-					${groupSet.name}
+						${groupSet.name}
 						<#if groupSet.archived>
 							(Archived)
 						</#if>
@@ -571,7 +576,7 @@
 							 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
 							 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
 						>
-							<span class="use-tooltip" title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
+							<span class="use-tooltip" title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i class="fa fa-lock"></i></span>
 						<#else>
 							<span class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
 						</#if>
@@ -1030,10 +1035,10 @@
 <#macro single_groupset_attendance groupSet groups>
 	<#local module = groupSet.module />
 
-	<div class="striped-section"
+	<div class="striped-section <#if groups?keys?has_content>collapsible expanded</#if>"
 		 data-name="${module_anchor(module)}">
 		<div class="clearfix">
-			<h2 class="section-title">${groupSet.name}</h2>
+			<h4 class="section-title">${groupSet.name}</h4>
 
 			<div class="striped-section-contents">
 				<#list groups?keys as group>
@@ -1058,19 +1063,6 @@
 				</#list>
 			</div>
 		</div>
-	</div> <!-- attendance-info striped-section-->
-</#macro>
-
-<#macro single_module_attendance module sets>
-	<div class="striped-section"
-		 data-name="${module_anchor(module)}">
-		<div class="clearfix">
-			<h2 class="section-title"><@fmt.module_name module /></h2>
-
-			<div class="striped-section-contents">
-				<@single_module_attendance_contents module sets />
-	    </div>
-	  </div>
 	</div> <!-- attendance-info striped-section-->
 </#macro>
 

@@ -79,11 +79,11 @@ class TutorReallocationTest extends BrowserTest with GivenWhenThen with Features
 		go to Path("/profiles/department/xxx/tutor")
 
 		Then("They see 2 tutors with 1 tutee each")
-		cssSelector("#agents > tbody").findAllElements.size should be (2)
-		cssSelector("#agents table.related_students tr.student").findAllElements.size should be (2)
+		cssSelector(".striped-section").findAllElements.size should be (2)
+		cssSelector(".striped-section table.related_students tr.student").findAllElements.size should be (2)
 
 		When("They select a student to reallocate")
-		click on cssSelector(s"#rel-user${P.Marker2.warwickId}-students-trigger")
+		click on cssSelector(s"#rel-user${P.Marker2.warwickId}-students-title")
 		cssSelector("input[name=preselectStudents]").findAllElements.filter(e =>
 			e.attribute("value").get == P.Student2.warwickId
 		).foreach(_.underlying.click())

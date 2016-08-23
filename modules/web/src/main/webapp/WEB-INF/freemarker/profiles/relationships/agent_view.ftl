@@ -15,76 +15,73 @@
 
 <#if agentRelationships?has_content || (missingCount > 0)>
 	<#if agentRelationships?has_content>
-		<table id="agents" class="table table-bordered">
+		<div id="agents">
 			<#list agentRelationships?keys as key>
 				<#assign students = mapGet(agentRelationships,key) />
 				<#assign agent = students?first.agent /><#-- always a string. -->
 				<#assign agentMember = students?first.agentMember />
 				<#assign studentKey = "rel-" + sanitise(key.sortkey) + "-students" />
 
-				<tbody>
-					<tr>
-						<td>
-							<h4 class="collapse-trigger" id="${studentKey}-trigger" data-toggle="collapse" data-target="#${studentKey}" title="Expand">
-								<span class="very-subtle pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
-								<i class="fa fa-chevron-right fa-fw"></i>
-								<#if agentMember??>
-									${agentMember.fullName}
-									<#if ((agentMember.homeDepartment.code)!'') != department.code>
-										<span class="very-subtle">${(agentMember.homeDepartment.name)!''}</span>
-									</#if>
-									<#assign agentId = agentMember.universityId />
-								<#else>
-									${agent}
-									<#if !agent?starts_with("Not ")>
-										<span class="very-subtle">External to Warwick</span>
-									</#if>
-									<#assign agentId = agent />
-								</#if>
-							</h4>
+				<div class="striped-section collapsible">
+					<h4 class="section-title" id="${studentKey}-title" title="Expand">
+						<span class="very-subtle pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
+						<#if agentMember??>
+							${agentMember.fullName}
+							<#if ((agentMember.homeDepartment.code)!'') != department.code>
+								<span class="very-subtle">${(agentMember.homeDepartment.name)!''}</span>
+							</#if>
+							<#assign agentId = agentMember.universityId />
+						<#else>
+							${agent}
+							<#if !agent?starts_with("Not ")>
+								<span class="very-subtle">External to Warwick</span>
+							</#if>
+							<#assign agentId = agent />
+						</#if>
+					</h4>
 
-							<div id="${studentKey}" class="collapse">
-								<form action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
-									<table class="related_students table table-striped table-condensed">
-										<thead>
-											<tr>
-												<th><@bs3form.selector_check_all /></th>
-												<th class="student-col">First name</th>
-												<th class="student-col">Last name</th>
-												<th class="id-col">ID</th>
-												<th class="type-col">Type</th>
-												<th class="year-col">Year</th>
-												<th class="course-col">Course</th>
+					<div id="${studentKey}" class="striped-section-contents">
+						<div class="item-info">
+							<form action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
+								<table class="related_students table table-striped table-condensed">
+									<thead>
+										<tr>
+											<th><@bs3form.selector_check_all /></th>
+											<th class="student-col">First name</th>
+											<th class="student-col">Last name</th>
+											<th class="id-col">ID</th>
+											<th class="type-col">Type</th>
+											<th class="year-col">Year</th>
+											<th class="course-col">Course</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										<#list students as studentRelationship>
+											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
+											<tr class="student">
+												<td><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></td>
+												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
+												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
+												<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
+												<td>${studentCourseDetails.student.groupName!""}</td>
+												<td>${(mapGet(yearOfStudyMap, studentCourseDetails))!""}</td>
+												<td>${(mapGet(courseMap, studentCourseDetails).name)!""}</td>
 											</tr>
-										</thead>
+										</#list>
+									</tbody>
+								</table>
 
-										<tbody>
-											<#list students as studentRelationship>
-												<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
-												<tr class="student">
-													<td><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></td>
-													<td><h6>${studentCourseDetails.student.firstName}</h6></td>
-													<td><h6>${studentCourseDetails.student.lastName}</h6></td>
-													<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
-													<td>${studentCourseDetails.student.groupName!""}</td>
-													<td>${(mapGet(yearOfStudyMap, studentCourseDetails))!""}</td>
-													<td>${(mapGet(courseMap, studentCourseDetails).name)!""}</td>
-												</tr>
-											</#list>
-										</tbody>
-									</table>
-
-									<p>
-										<button type="submit" class="btn btn-primary">Reallocate students</button>
-										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
-									</p>
-								</form>
-							</div>
-						</td>
-					</tr>
-				</tbody>
+								<p>
+									<button type="submit" class="btn btn-primary">Reallocate students</button>
+									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+								</p>
+							</form>
+						</div>
+					</div>
+				</div>
 			</#list>
-		</table>
+		</div>
 	<#else>
 		<p class="alert alert-info">No ${relationshipType.agentRole}s are currently visible for ${department.name} in Tabula.</p>
 	</#if>
@@ -105,12 +102,6 @@
 				sortList: [[2,0], [1,0], [3,0]],
 				headers: { 0: { sorter: false} }
 			}).bigList();
-	
-			$('#agents').on('hidden.bs.collapse', 'div', function() {
-				$('#' + this.id + '-trigger i').removeClass('fa-chevron-down').addClass('fa-chevron-right').parent().prop('title', 'Expand');
-			}).on('shown.bs.collapse', 'div', function() {
-				$('#' + this.id + '-trigger i').removeClass('fa-chevron-right').addClass('fa-chevron-down').parent().prop('title', 'Collapse');
-			});
 		});
 	})(jQuery);
 </script>
