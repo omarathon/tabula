@@ -45,9 +45,9 @@
 	<div class="striped-section collapsible checkbox-toggle <#if command.smallGroupEventAttendanceReminderEnabled>expanded</#if>">
 		<div class="row">
 			<div class="col-md-10">
-				<h2 class="section-title" style="display: inline-block;">
+				<h4 class="section-title" style="display: inline-block;">
 					Small group attendance notifications
-				</h2>
+				</h4>
 				<a data-toggle="modal" data-target="#small-group-attendance-modal"><i class="fa fa-question-circle"></i></a>
 			</div>
 			<div class="col-md-2">
@@ -129,9 +129,9 @@
 	<div class="striped-section collapsible checkbox-toggle <#if command.finaliseFeedbackNotificationEnabled>expanded</#if>">
 		<div class="row">
 			<div class="col-md-10">
-				<h2 class="section-title" style="display: inline-block;">
+				<h4 class="section-title" style="display: inline-block;">
 					Coursework marking workflow "send to administrator" notifications
-				</h2>
+				</h4>
 				<a data-toggle="modal" data-target="#coursework-marking-workflow-admin-modal"><i class="fa fa-question-circle"></i></a>
 			</div>
 			<div class="col-md-2">

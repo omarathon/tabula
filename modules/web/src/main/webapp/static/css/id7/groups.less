@@ -102,32 +102,14 @@ input.deleted {
 .small-group-modules-list .item-info {
 	h4.name { margin-bottom: 0; }
 
-	//Change margins for ul,h6 in module view group list.
+	//Change margins for ul,h4 in module view group list.
 	.margin-fix {
 		margin: 0 0 14px 0;
-		h6 { margin: 0; }
+		h4 { margin: 0; }
 	}
 	h3 i {
 		margin-left: 0.2em;
 		font-size: 0.8em;
-	}
-}
-
-.small-group-sets-list {
-	.mod-code, .group-name {
-		color: #93225f;
-		font-size: 100%;
-		font-weight: bold;
-	}
-	.group-name {
-		font-size: 85%;
-		font-weight: normal;
-		&:before {
-			color: #93225f;
-			content: '// ';
-			position: relative;
-			font-weight: bold;
-		}
 	}
 }
 
@@ -217,6 +199,12 @@ table.week-selector {
 		text-align: center;
 	}
 	.scrollable-table(150px, 86px, 90px);
+}
+
+.striped-section-contents {
+	i.fa-unlock-alt, i.fa-lock, i.fa-link, i.fa-random {
+		color: #606060 !important;
+	}
 }
 
 @import "record-attendance.less";

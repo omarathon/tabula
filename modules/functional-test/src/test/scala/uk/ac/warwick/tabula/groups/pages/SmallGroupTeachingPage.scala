@@ -129,7 +129,7 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 	}
 
 	def showsGroupLockedIcon(): Boolean = {
-		underlying.findElements(By.className("icon-lock")).asScala.nonEmpty
+		underlying.findElements(By.className("fa-lock")).asScala.nonEmpty
 
 	}
 
@@ -171,7 +171,8 @@ trait GroupSetList {
 		}
 
 		val setInfoElements = findAll(className("set-info")).filter { el =>
-			el.underlying.findElement(By.className("colour-h6")).getText.trim == s"${moduleCode.toUpperCase} $groupsetName"
+			el.underlying.findElement(By.className("mod-code")).getText.trim == moduleCode.toUpperCase &&
+				el.underlying.findElement(By.className("group-name")).getText.trim == groupsetName
 		}
 
 		if (setInfoElements.isEmpty) {

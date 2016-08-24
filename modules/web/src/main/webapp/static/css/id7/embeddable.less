@@ -308,6 +308,11 @@ summary {
 			margin-top: 6px;
 			margin-bottom: 6px;
 		}
+
+		i.fa-chevron-right, i.fa-chevron-down, i.fa-refresh {
+			.opacity-one(0.6);
+			color: #606060 !important;
+		}
 	}
 
 	.button-list .btn {
@@ -323,6 +328,7 @@ summary {
 			.section-title {
 				margin-bottom: 11px;
 			}
+			padding-bottom: 0;
 		}
 	}
 
@@ -337,28 +343,28 @@ summary {
 	float:right;
 }
 
-.module-info {
-	// Position module title and its Manage dropdown on the same line.
-	.module-manage-button {
-		i { .opacity-one(1); }
+.striped-section-contents {
+	.item-info {
+		border-top: 2px groove white;
+
+		padding: 0.5em;
+		&.row {
+			padding-left: 0;
+			padding-right: 0;
+		}
+		margin-left: -0.5em;
+		margin-right: -0.5em;
+
+		&:nth-of-type(odd) {
+			background-color: @zebra-pale;
+		}
 	}
-
-	// fade out glypicons a bit, too dark
-	i, .caret { .opacity-one(0.6); }
-}
-
-.striped-section-contents .item-info {
-	border-top: 2px groove white;
-
-	padding: 0.5em;
-	&.row {
-		padding-left: 0;
-		padding-right: 0;
+	:nth-of-type(odd) .item-info {
+		background-color: @zebra-pale;
 	}
-	margin-left: -0.5em;
-	margin-right: -0.5em;
-
-	&:nth-of-type(odd) { background-color: @zebra-pale; }
+	:nth-of-type(even) .item-info {
+		background-color: @zebra-dark;
+	}
 }
 
 .striped-section.no-title {
@@ -558,11 +564,11 @@ input.flexi-picker {
 table.tablesorter {
 	> thead > tr {
 		th {
-			background-color: white;
+			background-color: transparent;
 			padding-right: 20px;
 
 			&.header {
-				background: white url(/static/images/tablesorter/bg.gif) no-repeat center right;
+				background: transparent url(/static/images/tablesorter/bg.gif) no-repeat center right;
 				cursor: pointer;
 				.user-select(none);
 			}
@@ -733,16 +739,16 @@ table.tablesorter {
 	color: #606060;
 }
 
-h3 .mod-code, h3 .route-code,
-h4 .mod-code, h4 .route-code,
-h5 .mod-code, h5 .route-code,
-h6 .mod-code, h6 .route-code {
+h3 .mod-code, h3 .route-code, .h3 .mod-code, .h3 .route-code,
+h4 .mod-code, h4 .route-code, .h4 .mod-code, .h4 .route-code,
+h5 .mod-code, h5 .route-code, .h5 .mod-code, .h5 .route-code,
+h6 .mod-code, h6 .route-code, .h6 .mod-code, .h6 .route-code {
 	letter-spacing: 0.5px;
 	margin-left: 4px;
 	font-size: 100%;
 }
 
-.mod-name, .route-name {
+.mod-name, .route-name, .group-name {
 	color: #666;
 	font-size: 85%;
 	&:before {
