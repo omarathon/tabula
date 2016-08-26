@@ -18,6 +18,8 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 	val academicYear = FunctionalTestAcademicYear.current
 
+	val examTimetablesWasEnabled = isFeatureEnabled("personalExamTimetables")
+
 	before {
 		Given("The test department exists")
 		go to Path("/fixtures/setup")
@@ -26,6 +28,9 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 		And("the personal timetables feature is enabled")
 		enableFeature("personalTimetables")
+
+		And("exam timetables are disabled")
+		if (examTimetablesWasEnabled) disableFeature("personalExamTimetables")
 
 		And("student1 has a membership record")
 		createRoute(TEST_ROUTE_CODE, TEST_DEPARTMENT_CODE, "TimetableTest Route")
@@ -48,6 +53,10 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 
 		And("marker1 has a membership record")
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
+	}
+
+	after {
+		if (examTimetablesWasEnabled) enableFeature("personalExamTimetables")
 	}
 
 }

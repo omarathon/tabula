@@ -107,9 +107,19 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 	def getTimetableForModule(moduleCode: String) = doRequest(moduleUris, moduleCode)
 	def getTimetableForCourse(courseCode: String) = doRequest(courseUris, courseCode)
 	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
-	def getTimetableForStaff(universityId: String) = doRequest(staffUris, universityId, excludeSmallGroupEventsInTabula = true)
+	def getTimetableForStaff(universityId: String) = doRequest(
+		staffUris,
+		universityId,
+		excludeSmallGroupEventsInTabula = true,
+		excludeEventTypes = Seq(TimetableEventType.Seminar, TimetableEventType.Practical)
+	)
 
-	def doRequest(uris: Seq[(String, AcademicYear)], param: String, excludeSmallGroupEventsInTabula: Boolean = false): Future[EventList] = {
+	def doRequest(
+		uris: Seq[(String, AcademicYear)],
+		param: String,
+		excludeSmallGroupEventsInTabula: Boolean = false,
+		excludeEventTypes: Seq[TimetableEventType] = Seq()
+	): Future[EventList] = {
 		// fetch the events from each of the supplied URIs, and flatmap them to make one big list of events
 		val results: Seq[Future[EventList]] = uris.map { case (uri, year) =>
 			// add ?p0={param} to the URL's get parameters
@@ -142,7 +152,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 							hasSmallGroups(event.parent.shortName, year)
 					})
 				else EventList.fresh(events)
-			}
+			}.map(events => events.filterNot(e => excludeEventTypes.contains(e.eventType)))
 		}
 
 		Futures.combine(results, EventList.combine)

@@ -120,6 +120,11 @@
 								<strong>Expected end date:</strong> <@fmt.date date=scd.expectedEndDate includeTime=false/><br />
 							</#if>
 						</#if>
+						<#if scyd.route??>
+							<strong>Route:</strong> ${(scyd.route.name)!} (${(scyd.route.code?upper_case)!})<br/>
+						<#elseif scd.currentRoute??>
+							<strong>Route:</strong> ${(scd.currentRoute.name)!} (${(scd.currentRoute.code?upper_case)!})<br/>
+						</#if>
 						<#if scyd.yearOfStudy??>
 							<strong>Year of study:</strong> ${(scyd.yearOfStudy)!}<br/>
 						</#if>

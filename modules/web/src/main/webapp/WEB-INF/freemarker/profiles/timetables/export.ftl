@@ -75,8 +75,8 @@
 											</#if>
 										</#list>
 										<td colspan="${eventLength}" class="event <#if row_index == 0>dayRow</#if>">
-											${event.parent.shortName} ${event.eventType.displayName}<br />
-											${event.parent.fullName}<br />
+											${event.parent.shortName!} ${event.eventType.displayName}<br />
+											${event.parent.fullName!}<br />
 											${(event.location.name)!}<br />
 											<#list event.staff as staff>${staff.fullName}<#if staff_has_next>, </#if></#list><br />
 											<#list event.weekRanges as weekRange>${weekRange.toString}<#if weekRange_has_next>, </#if></#list><br />
