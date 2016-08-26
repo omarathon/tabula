@@ -21,7 +21,7 @@
 
 		<@bs3form.form_group>
 			<input type="submit" value="Delete" class="btn btn-danger">
-			<a href="<@routes.groups.crossmodulegroups department />" class="btn btn-default">Cancel</a>
+			<a href="<@routes.groups.crossmodulegroups department academicYear />" class="btn btn-default">Cancel</a>
 		</@bs3form.form_group>
 	</@f.form>
 

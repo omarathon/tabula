@@ -61,7 +61,7 @@ class CopyModuleSmallGroupSetsController extends CopySmallGroupSetsController {
 		CopySmallGroupSetsCommand(mandatory(module).adminDepartment, Seq(mandatory(module)))
 
 	override def crumbsList(cmd: CopySmallGroupSetsCommand) =
-		Seq(Breadcrumbs.DepartmentForYear(cmd.department, cmd.targetAcademicYear), Breadcrumbs.ModuleForYear(cmd.modules.head, cmd.targetAcademicYear))
+		Seq(Breadcrumbs.Department(cmd.department, cmd.targetAcademicYear), Breadcrumbs.ModuleForYear(cmd.modules.head, cmd.targetAcademicYear))
 
 }
 
@@ -83,6 +83,6 @@ class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsControlle
 	}
 
 	override def crumbsList(cmd: CopySmallGroupSetsCommand) =
-		Seq(Breadcrumbs.DepartmentForYear(cmd.department, cmd.targetAcademicYear))
+		Seq(Breadcrumbs.Department(cmd.department, cmd.targetAcademicYear))
 
 }

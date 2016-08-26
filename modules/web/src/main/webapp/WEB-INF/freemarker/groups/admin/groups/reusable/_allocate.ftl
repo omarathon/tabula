@@ -177,7 +177,7 @@
 
 						<div class="fix-footer">
 							<input type="submit" class="btn btn-primary" value="Save">
-							<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department />">Cancel</a>
+							<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department smallGroupSet.academicYear />">Cancel</a>
 						</div>
 					</@f.form>
 				</div>

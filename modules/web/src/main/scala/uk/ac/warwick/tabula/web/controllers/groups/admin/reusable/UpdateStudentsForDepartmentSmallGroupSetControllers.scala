@@ -78,8 +78,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 			"expandManual" -> expandManual,
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Department(set.department),
-			Breadcrumbs.Reusable(set.department)
+			Breadcrumbs.Department(set.department, set.academicYear),
+			Breadcrumbs.Reusable(set.department, set.academicYear)
 		)
 	}
 
@@ -120,8 +120,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		Mav("groups/admin/groups/reusable/manuallyaddstudents",
 			"returnTo" -> getReturnTo("")
 		).crumbs(
-			Breadcrumbs.Department(set.department),
-			Breadcrumbs.Reusable(set.department)
+			Breadcrumbs.Department(set.department, set.academicYear),
+			Breadcrumbs.Reusable(set.department, set.academicYear)
 		)
 	}
 
@@ -164,7 +164,14 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		render(set, findStudentsCommandResult, editMembershipCommandResult, expandManual = true)
 	}
 
-	protected def submit(cmd: UpdateStudentsForDepartmentSmallGroupSetCommand, errors: Errors, findCommand: FindStudentsForDepartmentSmallGroupSetCommand, editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand, set: DepartmentSmallGroupSet, route: String) = {
+	protected def submit(
+		cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+		errors: Errors,
+		findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
+		editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+		set: DepartmentSmallGroupSet,
+		route: String
+	) = {
 		if (errors.hasErrors) {
 			val findStudentsCommandResult =
 				if (findCommand.filterQueryString.length > 0)
@@ -186,11 +193,11 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 		@ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable(set.department))
+	) = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable(set.department, set.academicYear))
 
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/new/{smallGroupSet}/students"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/new/{smallGroupSet}/students"))
 @Controller
 class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsForDepartmentSmallGroupSetController {
 
@@ -225,7 +232,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/edit/{smallGroupSet}/students"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/edit/{smallGroupSet}/students"))
 @Controller
 class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsForDepartmentSmallGroupSetController {
 

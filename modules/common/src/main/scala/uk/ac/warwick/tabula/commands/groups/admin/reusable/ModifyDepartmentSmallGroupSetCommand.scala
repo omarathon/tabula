@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -12,16 +13,16 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ModifyDepartmentSmallGroupSetCommand {
-	def create(department: Department) =
-		new CreateDepartmentSmallGroupSetCommandInternal(department)
+	def create(department: Department, academicYear: AcademicYear) =
+		new CreateDepartmentSmallGroupSetCommandInternal(department, academicYear)
 			with ComposableCommand[DepartmentSmallGroupSet]
 			with ModifyDepartmentSmallGroupSetCommandValidation
 			with CreateDepartmentSmallGroupSetPermissions
 			with CreateDepartmentSmallGroupSetDescription
 			with AutowiringSmallGroupServiceComponent
 
-	def edit(department: Department, set: DepartmentSmallGroupSet) =
-		new EditDepartmentSmallGroupSetCommandInternal(department, set)
+	def edit(department: Department, academicYear: AcademicYear, set: DepartmentSmallGroupSet) =
+		new EditDepartmentSmallGroupSetCommandInternal(department, academicYear, set)
 			with ComposableCommand[DepartmentSmallGroupSet]
 			with ModifyDepartmentSmallGroupSetCommandValidation
 			with EditDepartmentSmallGroupSetPermissions
@@ -29,8 +30,9 @@ object ModifyDepartmentSmallGroupSetCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifyDepartmentSmallGroupSetState extends CurrentSITSAcademicYear {
+trait ModifyDepartmentSmallGroupSetState {
 	def department: Department
+	def academicYear: AcademicYear
 	def existingSet: Option[DepartmentSmallGroupSet]
 
 	var name: String = _
@@ -40,11 +42,14 @@ trait CreateDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGro
 	val existingSet = None
 }
 
-class CreateDepartmentSmallGroupSetCommandInternal(val department: Department) extends ModifyDepartmentSmallGroupSetCommandInternal with CreateDepartmentSmallGroupSetCommandState {
+class CreateDepartmentSmallGroupSetCommandInternal(val department: Department, val academicYear: AcademicYear)
+	extends ModifyDepartmentSmallGroupSetCommandInternal with CreateDepartmentSmallGroupSetCommandState {
+
 	self: SmallGroupServiceComponent =>
 
 	def applyInternal() = transactional() {
 		val set = new DepartmentSmallGroupSet(department)
+		set.academicYear = academicYear
 		copyTo(set)
 
 		smallGroupService.saveOrUpdate(set)
@@ -58,7 +63,9 @@ trait EditDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroup
 	lazy val existingSet = Some(smallGroupSet)
 }
 
-class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val smallGroupSet: DepartmentSmallGroupSet) extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
+class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val academicYear: AcademicYear, val smallGroupSet: DepartmentSmallGroupSet)
+	extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
+
 	self: SmallGroupServiceComponent =>
 
 	copyFrom(smallGroupSet)
@@ -77,12 +84,10 @@ abstract class ModifyDepartmentSmallGroupSetCommandInternal
 
 	def copyFrom(set: DepartmentSmallGroupSet) {
 		name = set.name
-		academicYear = set.academicYear
 	}
 
 	def copyTo(set: DepartmentSmallGroupSet) {
 		set.name = name
-		set.academicYear = academicYear
 
 		if (set.members == null) set.members = UserGroup.ofUniversityIds
 	}
@@ -94,10 +99,6 @@ trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
 		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
-
-		existingSet.foreach { set =>
-			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
-		}
 	}
 }
 
