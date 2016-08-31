@@ -32,28 +32,32 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 	private def process(cmd: AdminSmallGroupsHomeCommand, department: Department, view: String) = {
 		val info = cmd.apply()
 
+		val setsToDisplay = info.setsWithPermission.take(AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
+
 		val hasModules = info.modulesWithPermission.nonEmpty
-		val hasGroups = info.setsWithPermission.nonEmpty
-		val hasGroupAttendance = info.setsWithPermission.exists { _.set.showAttendanceReports }
-		val isFiltered = !(cmd.moduleFilters.isEmpty && cmd.statusFilters.isEmpty && cmd.allocationMethodFilters.isEmpty && cmd.termFilters.isEmpty)
+		val hasGroups = setsToDisplay.nonEmpty
+		val hasGroupAttendance = setsToDisplay.exists { _.set.showAttendanceReports }
+		val isFiltered = !(cmd.moduleFilters.isEmpty && cmd.formatFilters.isEmpty && cmd.statusFilters.isEmpty && cmd.allocationMethodFilters.isEmpty && cmd.termFilters.isEmpty)
 
 		val model = Map(
 			"viewedAcademicYear" -> cmd.academicYear,
 			"department" -> department,
 			"canAdminDepartment" -> info.canAdminDepartment,
 			"modules" -> info.modulesWithPermission,
-			"sets" -> info.setsWithPermission,
-			"hasUnreleasedGroupsets" -> info.setsWithPermission.exists { !_.set.fullyReleased },
-			"hasOpenableGroupsets" -> info.setsWithPermission.exists { sv => (!sv.set.openForSignups) && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
-			"hasCloseableGroupsets" -> info.setsWithPermission.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
+			"sets" -> setsToDisplay,
+			"hasUnreleasedGroupsets" -> setsToDisplay.exists { !_.set.fullyReleased },
+			"hasOpenableGroupsets" -> setsToDisplay.exists { sv => (!sv.set.openForSignups) && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
+			"hasCloseableGroupsets" -> setsToDisplay.exists { sv => sv.set.openForSignups && sv.set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp },
 			"hasModules" -> hasModules,
 			"hasGroups" -> hasGroups,
 			"hasGroupAttendance" -> hasGroupAttendance,
 			"allStatusFilters" -> SmallGroupSetFilters.Status.all,
+			"allFormatFilters" -> SmallGroupSetFilters.allFormatFilters,
 			"allModuleFilters" -> SmallGroupSetFilters.allModuleFilters(info.modulesWithPermission),
 			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService),
-			"isFiltered" -> isFiltered
+			"isFiltered" -> isFiltered,
+			"hasMoreSets" -> (info.setsWithPermission.size > AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
 		)
 
 		Mav(view, model)

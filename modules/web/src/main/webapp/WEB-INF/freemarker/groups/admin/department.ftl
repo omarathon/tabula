@@ -275,6 +275,16 @@
 							${f.description}
 						</@filter>
 
+						<#assign placeholder = "All types" />
+						<#assign currentfilter><@current_filter_value "formatFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+						<@filter "formatFilters" placeholder currentfilter allFormatFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.formatFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
+
 						<#assign placeholder = "All statuses" />
 						<#assign currentfilter><@current_filter_value "statusFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
 						<@filter "statusFilters" placeholder currentfilter allStatusFilters; f>
