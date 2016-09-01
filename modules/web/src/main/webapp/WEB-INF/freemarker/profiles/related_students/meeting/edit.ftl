@@ -80,7 +80,34 @@
 							<@f.input type="text" path="meetingDateTime" cssClass="form-control date-time-minute-picker" placeholder="Pick the date" />
 							<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 						</div>
+						<div class="help-block alert alert-info hidden">
+							This meeting takes place in the <span class="year"></span> academic year.
+							You will be able to find this meeting under the <span class="year"></span> tab.
+						</div>
 					</@bs3form.labelled_form_group>
+					<script>
+						jQuery(function($){
+							var $xhr = null;
+							$('#meetingDateTime').on('change', function(){
+								if ($xhr) $xhr.abort();
+								var $this = $(this), meetingDateTime = $this.val();
+								if (meetingDateTime.length > 0) {
+									$xhr = jQuery.get('/ajax/academicyearfromdate', { date: meetingDateTime }, function(data){
+										if (data.startYear != '${academicYear.startYear?c}') {
+											$this.closest('.form-group').find('.help-block')
+												.find('span.year').text(data.string).end()
+												.removeClass('hidden');
+										} else {
+											$this.closest('.form-group').find('.help-block').addClass('hidden');
+										}
+									});
+								} else {
+									$this.closest('.form-group').find('.help-block').addClass('hidden');
+								}
+
+							});
+						});
+					</script>
 				<#else>
 					<@bs3form.labelled_form_group path="meetingDate" labelText="Date of meeting">
 						<div class="input-group">
