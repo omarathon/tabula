@@ -35,9 +35,6 @@
 
 			</div>
 			<br/>
-			<p>
-				<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
-			</p>
 			<#if relationship.agentMember??>
 				<p>
 					<strong>Name:</strong> ${relationship.agentMember.fullName!relationshipType.agentRole?cap_first}<br />
@@ -54,6 +51,14 @@
 			</#if>
 		</div>
 	</#list>
+</div>
+
+<div class="row">
+	<div class="col-md-12">
+		<p>
+			<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
+		</p>
+	</div>
 </div>
 
 <div id="timeline" class="modal fade">
