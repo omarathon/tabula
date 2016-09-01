@@ -32,7 +32,7 @@
 		<h2>Teaching</h2>
 
 		<ul class="links">
-			<li><a href="<@url context='/groups' page="/tutor" />">My small groups</a></li>
+			<li><a href="<@routes.groups.tutor academicYear />">My small groups in ${academicYear.toString}</a></li>
 		</ul>
 	</#if>
 

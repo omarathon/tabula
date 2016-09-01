@@ -42,7 +42,7 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 	@RequestMapping
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("groups/admin/groups/import-spreadsheet/form")
-			.crumbs(Breadcrumbs.DepartmentForYear(department, academicYear))
+			.crumbs(Breadcrumbs.Department(department, academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
 	}
 
@@ -53,7 +53,7 @@ class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	) = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
-		.crumbs(Breadcrumbs.DepartmentForYear(department, academicYear))
+		.crumbs(Breadcrumbs.Department(department, academicYear))
 		.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
 
 	@RequestMapping(method = Array(POST), params = Array("confirm=true"))

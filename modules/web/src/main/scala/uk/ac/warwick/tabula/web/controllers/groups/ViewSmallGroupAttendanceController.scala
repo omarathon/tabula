@@ -26,7 +26,7 @@ class ViewSmallGroupAttendanceController extends GroupsController {
 			"instances" -> attendanceInfo.instances,
 			"studentAttendance" -> attendanceInfo.attendance,
 			"attendanceNotes" -> attendanceInfo.notes
-		).crumbs(Breadcrumbs.DepartmentForYear(module.adminDepartment, group.groupSet.academicYear), Breadcrumbs.ModuleForYear(module, group.groupSet.academicYear))
+		).crumbs(Breadcrumbs.Department(module.adminDepartment, group.groupSet.academicYear), Breadcrumbs.ModuleForYear(module, group.groupSet.academicYear))
 	}
 
 }

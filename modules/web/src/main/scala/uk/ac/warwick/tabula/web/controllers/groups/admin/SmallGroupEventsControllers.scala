@@ -41,7 +41,7 @@ trait SmallGroupEventsController extends GroupsController {
 					(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
 				}
 				.toSeq
-				.sortBy { case (_, weekRange) => weekRange.minWeek.toInt }
+				.sortBy { case (_, weekRange) => weekRange.minWeek }
 
 		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => NamedTerm(name, term, weekRange) }
 	}
@@ -63,7 +63,7 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
 	@RequestMapping
 	def form(@ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand) = {
 		Mav("groups/admin/groups/events/new", "cancelUrl" -> cancelUrl(cmd.set))
-			.crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+			.crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	protected def submit(cmd: CreateSmallGroupEventCommand, errors: Errors, route: String) = {
@@ -119,7 +119,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 	@RequestMapping
 	def form(@ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand) = {
 		Mav("groups/admin/groups/events/edit", "cancelUrl" -> cancelUrl(cmd.set))
-			.crumbs(Breadcrumbs.DepartmentForYear(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+			.crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
 	}
 
 	protected def submit(cmd: EditSmallGroupEventCommand, errors: Errors, route: String) = {
@@ -178,7 +178,7 @@ abstract class AbstractUpdateSmallGroupEventFromExternalSystemController extends
 		val set = event.group.groupSet
 
 		Mav("groups/admin/groups/events/update", "cancelUrl" -> postSaveRoute(event))
-			.crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+			.crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	protected def postSaveRoute(event: SmallGroupEvent): String

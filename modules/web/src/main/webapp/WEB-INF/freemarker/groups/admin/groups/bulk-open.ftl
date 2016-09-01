@@ -8,8 +8,11 @@
 	<#assign stateChange = true />
 </#if>
 
+<div class="deptheader">
+	<h1>${setState?cap_first} groups for ${academicYear.toString}</h1>
+	<h4 class="with-related"><span class="muted">in</span> ${department.name}</h4>
+</div>
 
-<h1>${setState?cap_first} groups in ${department.name}</h1>
 <#if info.requestParameters.batchOpenSuccess?? && setState == "open">
 	<div class="alert alert-info">
 		Students have been notified that these groups are now ${setState} for self-sign-up

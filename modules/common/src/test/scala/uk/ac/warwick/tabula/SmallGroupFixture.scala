@@ -7,13 +7,12 @@ import org.mockito.Mockito.when
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService}
+import uk.ac.warwick.tabula.services.{SmallGroupService, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 
 trait SmallGroupFixture extends Mockito {
-
 
   val requestingUser = new User
 
@@ -36,7 +35,7 @@ trait SmallGroupFixture extends Mockito {
 	val tutor3 = new User
 	tutor3.setUserId("tutor3")
 
-  val userLookup = mock[UserLookupService]
+  val userLookup = smartMock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
 	when(userLookup.getUserByUserId(student1.getUserId)).thenReturn(student1)
@@ -61,6 +60,7 @@ trait SmallGroupFixture extends Mockito {
 	when(userLookup.getUserByUserId(recipient.getUserId)).thenReturn(recipient)
 
   val department = Fixtures.department("in")
+	val academicYear = AcademicYear(2015)
 
   val (group1,groupSet1) = createGroupSet("A Groupset 1","small group 1",SmallGroupFormat.Lab, "la101")
 	val (group2,groupSet2) = createGroupSet("A Groupset 2","small group 2",SmallGroupFormat.Seminar, "la102")
@@ -68,6 +68,8 @@ trait SmallGroupFixture extends Mockito {
   val (group4,groupSet4) = createGroupSet("A Groupset 4","small group 4",SmallGroupFormat.Tutorial, "la104")
   val (group5,groupSet5) = createGroupSet("A Groupset 5","small group 5",SmallGroupFormat.Lab, "la105")
 
+	val mockSmallGroupService = smartMock[SmallGroupService]
+	mockSmallGroupService.getSmallGroupSets(department, academicYear) returns Seq(groupSet1, groupSet2, groupSet3, groupSet4, groupSet5)
 
 
   def createGroupSet(groupSetName:String, groupName:String, format: SmallGroupFormat, moduleCode:String):(SmallGroup, SmallGroupSet) = {

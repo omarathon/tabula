@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.groups.pages
 
-import org.openqa.selenium.{WebElement, WebDriver, By}
-import uk.ac.warwick.tabula.{FunctionalTestProperties, BreadcrumbsMatcher}
+import org.openqa.selenium.{By, WebDriver, WebElement}
+import uk.ac.warwick.tabula.{BreadcrumbsMatcher, EventuallyAjax, FunctionalTestAcademicYear, FunctionalTestProperties}
 import org.scalatest.selenium.Page
 import org.scalatest.selenium.WebBrowser
+
 import scala.collection.JavaConverters._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.Matchers
-import uk.ac.warwick.tabula.EventuallyAjax
 
 
 class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String)(implicit val webDriver:WebDriver)
@@ -142,12 +142,12 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 	}
 }
 
-class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
+class BatchOpenPage(val departmentCode: String, val academicYear: FunctionalTestAcademicYear)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
 	val url = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/$departmentCode/groups/open"
 
 	def isCurrentPage: Boolean = {
-		currentUrl should include (s"/groups/admin/department/$departmentCode/groups/selfsignup/open")
-		find(cssSelector(".id7-main-content h1")).get.text.startsWith("Open groups in ")
+		currentUrl should include (s"/groups/admin/department/$departmentCode/${academicYear.startYear.toString}/groups/selfsignup/open")
+		find(cssSelector(".id7-main-content h1")).get.text.startsWith(s"Open groups for ${academicYear.toString}")
 	}
 
 	def checkboxForGroupSet(groupset: GroupSetInfoSummarySection) = {

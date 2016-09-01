@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/department/{department}/groups/reusable/{smallGroupSet}/template"))
+@RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/{smallGroupSet}/template"))
 class AllocateStudentsToDepartmentalSmallGroupsTemplateController extends BaseController {
 
 	type AllocateStudentsToDepartmentalSmallGroupsTemplateCommand = Appliable[ExcelView]

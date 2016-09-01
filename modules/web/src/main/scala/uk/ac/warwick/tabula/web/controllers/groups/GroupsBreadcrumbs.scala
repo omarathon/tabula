@@ -15,17 +15,9 @@ object GroupsBreadcrumbs {
 	case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
 	/**
-	 * Special case breadcrumb for the department admin page.
-	 */
-	case class Department(department: model.Department) extends Abstract {
-		val title = department.name
-		val url = Some(Routes.admin(department, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
-	}
-
-	/**
 	 * Special case breadcrumb for the department admin page, for a particular academic year.
 	 */
-	case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends Abstract {
+	case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
 		val title = department.name
 		val url = Some(Routes.admin(department, academicYear))
 	}
@@ -50,9 +42,9 @@ object GroupsBreadcrumbs {
 		override val tooltip = module.name
 	}
 
-	case class Reusable(department: model.Department) extends Abstract {
+	case class Reusable(department: model.Department, academicYear: AcademicYear) extends Abstract {
 		val title = "Reusable small groups"
-		val url = Some(Routes.admin.reusable(department))
+		val url = Some(Routes.admin.reusable(department, academicYear))
 	}
 
 	/**

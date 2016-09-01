@@ -17,6 +17,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	private trait Fixture {
 		val department = Fixtures.department("in", "IT Services")
+		val academicYear = AcademicYear(2015)
 	}
 
 	private trait ExistingSetFixture extends Fixture {
@@ -26,44 +27,41 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	private trait CreateCommandFixture extends Fixture {
-		val command = new CreateDepartmentSmallGroupSetCommandInternal(department) with CommandTestSupport
+		val command = new CreateDepartmentSmallGroupSetCommandInternal(department, academicYear) with CommandTestSupport
 	}
 
 	private trait EditCommandFixture extends ExistingSetFixture {
-		val command = new EditDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
+		val command = new EditDepartmentSmallGroupSetCommandInternal(department, academicYear, set) with CommandTestSupport
 	}
 
-	@Test def create { new CreateCommandFixture {
+	@Test def create() { new CreateCommandFixture {
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val set = command.applyInternal()
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		set.members should not be (null)
+		set.members should not be null
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
-	@Test def edit { new EditCommandFixture {
+	@Test def edit() { new EditCommandFixture {
 		command.name should be (set.name)
-		command.academicYear should be (set.academicYear)
 
 		command.name = "Set name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		command.applyInternal() should be (set)
 		set.name should be ("Set name")
-		set.academicYear should be (AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
-		set.members should not be (null)
+		set.members should not be null
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(set)
 	}}
 
-	@Test def createPermissions { new Fixture {
+	@Test def createPermissions() { new Fixture {
 		val theDepartment = department
+		val theAcademicYear = academicYear
 		val command = new CreateDepartmentSmallGroupSetPermissions with CreateDepartmentSmallGroupSetCommandState {
 			val department = theDepartment
+			val academicYear = theAcademicYear
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -72,20 +70,22 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Create, department)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def createNoDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def createNoDepartment() {
 		val command = new CreateDepartmentSmallGroupSetPermissions with CreateDepartmentSmallGroupSetCommandState {
 			val department = null
+			val academicYear = null
 		}
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 	}
 
-	@Test def editPermissions { new ExistingSetFixture {
-		val (d, s) = (department, set)
+	@Test def editPermissions() { new ExistingSetFixture {
+		val (d, a, s) = (department, academicYear, set)
 
 		val command = new EditDepartmentSmallGroupSetPermissions with EditDepartmentSmallGroupSetCommandState {
 			val department = d
+			val academicYear = a
 			val smallGroupSet = s
 		}
 
@@ -95,9 +95,10 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
 	}}
 
-	@Test(expected = classOf[ItemNotFoundException]) def editNoDepartment {
+	@Test(expected = classOf[ItemNotFoundException]) def editNoDepartment() {
 		val command = new EditDepartmentSmallGroupSetPermissions with EditDepartmentSmallGroupSetCommandState {
 			val department = null
+			val academicYear = null
 			val smallGroupSet = new DepartmentSmallGroupSet
 		}
 
@@ -105,9 +106,10 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def editNoSet {
+	@Test(expected = classOf[ItemNotFoundException]) def editNoSet() {
 		val command = new EditDepartmentSmallGroupSetPermissions with EditDepartmentSmallGroupSetCommandState {
 			val department = Fixtures.department("in")
+			val academicYear = null
 			val smallGroupSet = null
 		}
 
@@ -115,9 +117,10 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		command.permissionsCheck(checking)
 	}
 
-	@Test(expected = classOf[ItemNotFoundException]) def editUnlinkedSet {
+	@Test(expected = classOf[ItemNotFoundException]) def editUnlinkedSet() {
 		val command = new EditDepartmentSmallGroupSetPermissions with EditDepartmentSmallGroupSetCommandState {
 			val department = Fixtures.department("in")
+			val academicYear = null
 			department.id = "set id"
 
 			val smallGroupSet = new DepartmentSmallGroupSet(Fixtures.department("other"))
@@ -130,6 +133,7 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 	private trait ValidationFixture extends Fixture {
 		val command = new ModifyDepartmentSmallGroupSetCommandValidation with ModifyDepartmentSmallGroupSetState {
 			val department = ValidationFixture.this.department
+			val academicYear = ValidationFixture.this.academicYear
 			val existingSet = None
 		}
 	}
@@ -137,13 +141,13 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 	private trait ValidationFixtureExistingSet extends ExistingSetFixture {
 		val command = new ModifyDepartmentSmallGroupSetCommandValidation with ModifyDepartmentSmallGroupSetState {
 			val department = ValidationFixtureExistingSet.this.department
+			val academicYear = ValidationFixtureExistingSet.this.academicYear
 			val existingSet = Some(ValidationFixtureExistingSet.this.set)
 		}
 	}
 
-	@Test def validationPasses { new ValidationFixture {
+	@Test def validationPasses() { new ValidationFixture {
 		command.name = "That's not my name"
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -151,9 +155,8 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		errors.hasErrors should be (false)
 	}}
 
-	@Test def validateNoName { new ValidationFixture {
+	@Test def validateNoName() { new ValidationFixture {
 		command.name = "             "
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -164,9 +167,8 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("smallGroupSet.name.NotEmpty")
 	}}
 
-	@Test def validateNameTooLong { new ValidationFixture {
+	@Test def validateNameTooLong() { new ValidationFixture {
 		command.name = (1 to 300).map { _ => "a" }.mkString("")
-		command.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		val errors = new BindException(command, "command")
 		command.validate(errors)
@@ -177,26 +179,13 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("smallGroupSet.name.Length")
 	}}
 
-	@Test def validateCantChangeAcademicYear { new ValidationFixtureExistingSet {
-		set.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-
-		command.name = "That's not my name"
-		command.academicYear = set.academicYear + 1
-
-		val errors = new BindException(command, "command")
-		command.validate(errors)
-
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("academicYear")
-		errors.getFieldError.getCodes should contain ("smallGroupSet.academicYear.cantBeChanged")
-	}}
-
-	@Test def describeCreate { new Fixture {
+	@Test def describeCreate() { new Fixture {
 		val dept = department
+		val year = academicYear
 		val command = new CreateDepartmentSmallGroupSetDescription with CreateDepartmentSmallGroupSetCommandState {
 			override val eventName = "test"
 			val department = dept
+			val academicYear = year
 		}
 
 		command.name = "new name"
@@ -210,11 +199,12 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		))
 	}}
 
-	@Test def describeEdit { new ExistingSetFixture {
-		val (dept, s) = (department, set)
+	@Test def describeEdit() { new ExistingSetFixture {
+		val (dept, year, s) = (department, academicYear, set)
 		val command = new EditDepartmentSmallGroupSetDescription with EditDepartmentSmallGroupSetCommandState {
 			override val eventName = "test"
 			val department = dept
+			val academicYear = year
 			val smallGroupSet = s
 		}
 
@@ -227,8 +217,8 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		))
 	}}
 
-	@Test def wiresCreate { new Fixture {
-		val command = ModifyDepartmentSmallGroupSetCommand.create(department)
+	@Test def wiresCreate() { new Fixture {
+		val command = ModifyDepartmentSmallGroupSetCommand.create(department, academicYear)
 
 		command should be (anInstanceOf[Appliable[DepartmentSmallGroupSet]])
 		command should be (anInstanceOf[Describable[DepartmentSmallGroupSet]])
@@ -237,8 +227,8 @@ class ModifyDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
 		command should be (anInstanceOf[CreateDepartmentSmallGroupSetCommandState])
 	}}
 
-	@Test def wiresEdit { new ExistingSetFixture {
-		val command = ModifyDepartmentSmallGroupSetCommand.edit(department, set)
+	@Test def wiresEdit() { new ExistingSetFixture {
+		val command = ModifyDepartmentSmallGroupSetCommand.edit(department, academicYear, set)
 
 		command should be (anInstanceOf[Appliable[DepartmentSmallGroupSet]])
 		command should be (anInstanceOf[Describable[DepartmentSmallGroupSet]])

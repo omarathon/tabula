@@ -39,7 +39,7 @@ abstract class AbstractAllocateStudentsToGroupsController extends GroupsControll
 	protected val renderPath: String
 
 	protected def render(set: SmallGroupSet) = {
-		Mav(renderPath).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+		Mav(renderPath).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	protected def submit(cmd: AllocateStudentsToGroupsCommand, errors: Errors, set: SmallGroupSet, route: String, objects: (String, _)*) = {

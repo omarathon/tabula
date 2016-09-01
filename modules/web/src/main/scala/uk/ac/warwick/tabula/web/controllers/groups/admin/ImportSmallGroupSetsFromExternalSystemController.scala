@@ -6,16 +6,16 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
-import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
+import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupSetsFromExternalSystemCommand, ImportSmallGroupSetsFromExternalSystemCommandState, ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState, LookupEventsFromModuleTimetables}
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupSetsFromExternalSystemPermissionsRestrictedState, LookupEventsFromModuleTimetables, ImportSmallGroupSetsFromExternalSystemCommandState, ImportSmallGroupSetsFromExternalSystemCommand}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
+import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 @Controller
 @RequestMapping(value = Array("/groups/admin/department/{department}/import-groups"))
@@ -48,7 +48,7 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
 	def showForm(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) = {
 		Mav("groups/admin/groups/import_loading",
 			"academicYear" -> command.academicYear
-		).crumbs(Breadcrumbs.Department(command.department))
+		).crumbs(Breadcrumbs.Department(command.department, command.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=populate"))
@@ -62,7 +62,7 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
 			"academicYear" -> command.academicYear,
 			"modules" -> command.modules,
 			"timetabledEvents" -> command.timetabledEvents
-		).crumbs(Breadcrumbs.Department(command.department))
+		).crumbs(Breadcrumbs.Department(command.department, command.academicYear))
 
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
