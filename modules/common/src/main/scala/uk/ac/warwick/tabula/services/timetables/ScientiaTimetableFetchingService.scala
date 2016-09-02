@@ -134,7 +134,6 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 				if (ev.isEmpty) {
 					logger.info(s"Timetable request successful but no events returned: ${req.to_uri.toString}")
-					throw new TimetableEmptyException(uri, param)
 				}
 
 				ev
@@ -155,13 +154,20 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			}.map(events => events.filterNot(e => excludeEventTypes.contains(e.eventType)))
 		}
 
-		Futures.combine(results, EventList.combine)
+		Futures.combine(results, EventList.combine).map(eventsList =>
+			if (eventsList.events.isEmpty) {
+				logger.info(s"All timetable years are empty for $param")
+				throw new TimetableEmptyException(uris, param)
+			} else {
+				eventsList
+			}
+		)
 	}
 
 }
 
-class TimetableEmptyException(val uri: String, val param: String)
-	extends IllegalStateException(s"Received an empty timetable from $uri for $param")
+class TimetableEmptyException(val uris: Seq[(String, AcademicYear)], val param: String)
+	extends IllegalStateException(s"Received empty timetables for $param using: ${uris.map { case (uri, _) => uri}.mkString(", ") }")
 
 object ScientiaHttpTimetableFetchingService extends Logging {
 

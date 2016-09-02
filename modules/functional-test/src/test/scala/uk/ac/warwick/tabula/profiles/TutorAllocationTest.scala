@@ -105,8 +105,8 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 		Then("I see a preview of the changes")
 		eventually{
 			currentUrl should include("/profiles/department/xxx/tutor/allocate/preview")
-			findAll(cssSelector("details.removals table tbody tr")).size should be (1)
-			findAll(cssSelector("details.additions table tbody tr")).size should be (2)
+			findAll(cssSelector(".removals table tbody tr")).size should be (1)
+			findAll(cssSelector(".additions table tbody tr")).size should be (2)
 			findAll(cssSelector("input[name^=removals]")).size should be (1)
 			findAll(cssSelector("input[name^=additions]")).size should be (2)
 		}

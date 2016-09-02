@@ -553,7 +553,7 @@ class Assignment
 	def canPublishFeedback: Boolean =
 		fullFeedback.nonEmpty &&
 			unreleasedFeedback.nonEmpty &&
-			(closeDate.isBeforeNow || openEnded)
+			(openEnded || closeDate.isBeforeNow)
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {

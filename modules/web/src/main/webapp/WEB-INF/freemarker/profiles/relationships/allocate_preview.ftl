@@ -66,28 +66,31 @@
 		</table>
 	</#macro>
 
-	<details class="removals">
-		<summary class="large-chevron collapsible">
-			<h3 class="relationship-change-summary" style="display: inline;">
-				<span class="emphasis">${command.renderRemovals?keys?size}</span>
-				<@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} removed
-			</h3>
-		</summary>
+	<div class="striped-section removals collapsible">
+		<h4 class="relationship-change-summary section-title">
+			<span class="emphasis">${command.renderRemovals?keys?size}</span>
+			<@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} removed
+		</h4>
 
+		<div class="striped-section-contents">
+			<div class="item-info">
+				<@student_table command.renderRemovals />
+			</div>
+		</div>
+	</div>
 
-		<@student_table command.renderRemovals />
-	</details>
+	<div class="striped-section additions collapsible">
+		<h4 class="relationship-change-summary section-title">
+			<span class="emphasis">${command.renderAdditions?keys?size}</span>
+			<@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} added
+		</h4>
 
-	<details class="additions">
-		<summary class="large-chevron collapsible">
-			<h3 class="relationship-change-summary" style="display: inline;">
-				<span class="emphasis">${command.renderAdditions?keys?size}</span>
-				<@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} added
-			</h3>
-		</summary>
-
-		<@student_table command.renderAdditions />
-	</details>
+		<div class="striped-section-contents">
+			<div class="item-info">
+				<@student_table command.renderAdditions />
+			</div>
+		</div>
+	</div>
 
 	<script>
 		jQuery('table.sortable').sortableTable();
