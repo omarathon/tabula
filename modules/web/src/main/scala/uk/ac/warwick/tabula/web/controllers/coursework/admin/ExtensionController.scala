@@ -3,20 +3,23 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
 import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
-import org.springframework.validation.{ BindingResult, Errors }
-import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
-import uk.ac.warwick.tabula.{JsonHelper, CurrentUser}
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, UserLookupService}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, JsonHelper}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
+
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 abstract class ExtensionController extends CourseworkController {
 	var json = Wire[ObjectMapper]
@@ -86,13 +89,16 @@ class ListAllExtensionsController extends ExtensionController {
 	def crumbed(mav: Mav, department: Department)
 	= mav.crumbs(Breadcrumbs.Department(department))
 
-	@ModelAttribute
-	def listCommand(
-		@PathVariable department:Department
-		) = new ListAllExtensionsCommand(department)
+	@ModelAttribute("command")
+	def listCommand(@PathVariable department:Department, @RequestParam(value="academicYear", required=false) academicYear: AcademicYear) =
+		new ListAllExtensionsCommand(department, Option(academicYear).getOrElse(AcademicYear.guessSITSAcademicYearByDate(new DateTime)))
+
+	@ModelAttribute("academicYears")
+	def academicYearChoices: JList[AcademicYear] =
+		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
+	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav("coursework/admin/assignments/extensions/departmentSummary",
