@@ -12,7 +12,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.AssessmentDao
 import uk.ac.warwick.tabula.helpers.coursework.ExtensionGraph
 
-class ListAllExtensionsCommand(val department: Department)
+class ListAllExtensionsCommand(val department: Department, val academicYear: AcademicYear)
 	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
 
 	// This permissions check limits this to anyone who has extension read permission over the whole department.
@@ -25,10 +25,9 @@ class ListAllExtensionsCommand(val department: Department)
 	var userLookup = Wire[UserLookupService]
 
 	def applyInternal(): Seq[ExtensionGraph] = {
-		val year = AcademicYear.guessSITSAcademicYearByDate(new DateTime())
 
 		// get all extensions for assignments in modules in the department for the current year
-		assignmentDao.getAssignments(department, year)
+		assignmentDao.getAssignments(department, academicYear)
 			.flatMap { _.extensions.asScala }
 			.map { extension => ExtensionGraph(extension, userLookup.getUserByUserId(extension.userId)) }
 	}
