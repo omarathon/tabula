@@ -7,8 +7,6 @@
 
 <#if requestPath == '/attendance' || requestPath?starts_with('/attendance/')>
 	<#assign brand_name = "id6" />
-<#elseif requestPath == '/coursework' || requestPath?starts_with('/coursework/')>
-	<#assign brand_name = "id6" />
 </#if>
 
 <#-- Query string overrides -->
