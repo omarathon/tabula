@@ -72,12 +72,7 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 		existingGroups.asScala.values.filter { _.delete }.foreach { props =>
 			val group = props.group
 
-			group.events.foreach {
-				event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
-					eventOccurrence => eventOccurrence.attendance.asScala.exists {
-						attendance => attendance.state != AttendanceState.NotRecorded
-					}).foreach(smallGroupService.delete)
-			}
+			group.preDelete()
 
 			set.groups.remove(group)
 		}
