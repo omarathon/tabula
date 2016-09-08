@@ -555,7 +555,7 @@ class Assignment
 			unreleasedFeedback.nonEmpty &&
 			(openEnded || closeDate.isBeforeNow)
 
-	def canSubmit(user: User): Boolean = {
+	def canSubmit(user: User): Boolean = { user.isFoundUser && (
 		if (restrictSubmissions) {
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
@@ -563,7 +563,7 @@ class Assignment
 				assessmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 		} else {
 			true
-		}
+		})
 	}
 
 	def extensionsPossible: Boolean = allowExtensions && !openEnded && module.adminDepartment.allowExtensionRequests
