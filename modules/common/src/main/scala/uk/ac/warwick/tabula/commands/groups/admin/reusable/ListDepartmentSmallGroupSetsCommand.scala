@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
-import uk.ac.warwick.tabula.commands.{ComposableCommand, ReadOnly, Unaudited, CommandInternal}
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -26,22 +27,24 @@ case class DepartmentSmallGroupSetMembershipItem(
 }
 
 object ListDepartmentSmallGroupSetsCommand {
-	def apply(department: Department) =
-		new ListDepartmentSmallGroupSetsCommandInternal(department)
+	def apply(department: Department, academicYear: AcademicYear) =
+		new ListDepartmentSmallGroupSetsCommandInternal(department, academicYear)
 			with ComposableCommand[Seq[DepartmentSmallGroupSet]]
 			with ListDepartmentSmallGroupSetsPermissions
 			with AutowiringSmallGroupServiceComponent
 			with ReadOnly with Unaudited
 }
 
-class ListDepartmentSmallGroupSetsCommandInternal(val department: Department) extends CommandInternal[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState {
+class ListDepartmentSmallGroupSetsCommandInternal(val department: Department, val academicYear: AcademicYear)
+	extends CommandInternal[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState {
 	self: SmallGroupServiceComponent =>
 
-	def applyInternal() = smallGroupService.getDepartmentSmallGroupSets(department)
+	def applyInternal() = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
 }
 
 trait ListDepartmentSmallGroupSetsCommandState {
 	def department: Department
+	def academicYear: AcademicYear
 }
 
 trait ListDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

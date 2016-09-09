@@ -37,7 +37,7 @@ abstract class AbstractViewModuleAttendanceController extends GroupsController
 		else
 			Mav("groups/attendance/view_module",
 				"sets" -> sets
-			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+			).crumbs(Breadcrumbs.Department(module.adminDepartment, command.academicYear), Breadcrumbs.Module(module))
 				.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(year => Routes.admin.moduleAttendance(command.module, year)):_*)
 	}
 

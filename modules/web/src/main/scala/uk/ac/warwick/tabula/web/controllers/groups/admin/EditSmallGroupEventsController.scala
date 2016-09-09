@@ -45,7 +45,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 	protected def renderPath: String
 
 	protected def render(set: SmallGroupSet, model: Map[String, _] = Map()) = {
-		Mav(renderPath, model ++ Map("groups" -> set.groups.asScala.sorted)).crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+		Mav(renderPath, model ++ Map("groups" -> set.groups.asScala.sorted)).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping

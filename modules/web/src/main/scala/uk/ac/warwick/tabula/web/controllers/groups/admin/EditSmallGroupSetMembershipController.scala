@@ -5,13 +5,12 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{InitBinder, RequestMapping, PathVariable, ModelAttribute}
-import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, Appliable, SelfValidating}
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.groups.admin.{EditSmallGroupSetMembershipCommand, ModifiesSmallGroupSetMembership}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.{ModifiesSmallGroupSetMembership, EditSmallGroupSetMembershipCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 abstract class AbstractEditSmallGroupSetMembershipController extends GroupsController {
@@ -34,7 +33,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> cmd.assessmentGroups))
-			.crumbs(Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+			.crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(GET, HEAD))

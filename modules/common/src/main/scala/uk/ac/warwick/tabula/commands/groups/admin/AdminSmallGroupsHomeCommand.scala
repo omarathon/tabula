@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.groups.admin.AdminSmallGroupsHomeCommand._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSetFilter}
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.{AutowiringSmallGroupSetWorkflowServiceComponent, SmallGroupSetWorkflowServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Module, Department}
-import uk.ac.warwick.tabula.permissions.Permissions
-import AdminSmallGroupsHomeCommand._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
 
 case class AdminSmallGroupsHomeInformation(
 	canAdminDepartment: Boolean,
@@ -23,6 +23,7 @@ case class AdminSmallGroupsHomeInformation(
 
 object AdminSmallGroupsHomeCommand {
 	val RequiredPermission = Permissions.Module.ManageSmallGroups
+	val MaxSetsToDisplay = 10
 
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser, calculateProgress: Boolean) =
 		new AdminSmallGroupsHomeCommandInternal(department, academicYear, user, calculateProgress)
@@ -42,6 +43,7 @@ trait AdminSmallGroupsHomeCommandState {
 	def academicYear: AcademicYear
 
 	var moduleFilters: JList[SmallGroupSetFilter] = JArrayList()
+	var formatFilters: JList[SmallGroupSetFilter] = JArrayList()
 	var statusFilters: JList[SmallGroupSetFilter] = JArrayList()
 	var allocationMethodFilters: JList[SmallGroupSetFilter] = JArrayList()
 	var termFilters: JList[SmallGroupSetFilter] = JArrayList()
@@ -63,13 +65,34 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 			else modulesWithPermission
 
 		val sets = benchmarkTask("Fetch, filter and sort sets") {
-			smallGroupService.getSmallGroupSets(department, academicYear)
-				.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
-				.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
-				.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
-				.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
-				.filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
-				.sortBy(set => (set.archived, set.module.code, set.nameWithoutModulePrefix))
+			val allSets = benchmarkTask("getSmallGroupSets") {
+				smallGroupService.getSmallGroupSets(department, academicYear)
+			}
+			val moduleFiltered = benchmarkTask("moduleFilters") {
+				allSets.filter { set => moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists { _(set) } }
+			}
+			val formatFiltered = benchmarkTask("formatFilters") {
+				moduleFiltered.filter { set => formatFilters.asScala.isEmpty || formatFilters.asScala.exists { _(set) } }
+			}
+			val statusFiltered = benchmarkTask("statusFilters") {
+				formatFiltered.filter { set => statusFilters.asScala.isEmpty || statusFilters.asScala.exists { _(set) } }
+			}
+			val allocationMethodFiltered = benchmarkTask("allocationMethodFilters") {
+				statusFiltered.filter { set => allocationMethodFilters.asScala.isEmpty || allocationMethodFilters.asScala.exists { _(set) } }
+			}
+			val termFiltered = benchmarkTask("termFilters") {
+				allocationMethodFiltered.filter { set => termFilters.asScala.isEmpty || termFilters.asScala.exists { _(set) } }
+			}
+			val sortedSets = benchmarkTask("sortedSets") {
+				termFiltered.sortBy(set => (set.archived, set.module.code, set.nameWithoutModulePrefix))
+			}
+
+			benchmarkTask("Permissions checks") {
+				sortedSets
+					.toStream
+					.filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
+					.take(MaxSetsToDisplay + 1)
+			}
 		}
 
 		val setViews: Seq[ViewSetMethods] =

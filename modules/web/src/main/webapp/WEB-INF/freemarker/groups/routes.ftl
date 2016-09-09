@@ -21,13 +21,15 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 </#compress></#macro>
 <#macro single_set_info set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/" /></#macro>
 
+<#macro tutor academicYear><@_u page="/tutor/${academicYear.startYear?c}" /></#macro>
+
 <#macro moduleperms module><@_u page="/module/${module.code}/permissions" context="/admin" /></#macro>
 
 <#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 <#macro notificationsettings department><@_u page="/department/${department.code}/settings/notification" context="/admin" /></#macro>
-<#macro batchnotify department academicYear><@_u page="/admin/department/${department.code}/groups/release/${academicYear.startYear?c}"  /></#macro>
-<#macro batchopen department><@_u page="/admin/department/${department.code}/groups/selfsignup/open"  /></#macro>
-<#macro batchclose department><@_u page="/admin/department/${department.code}/groups/selfsignup/close"  /></#macro>
+<#macro batchnotify department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/groups/release"  /></#macro>
+<#macro batchopen department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/groups/selfsignup/open"  /></#macro>
+<#macro batchclose department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/groups/selfsignup/close"  /></#macro>
 
 <#macro createset module><@_u page="/admin/module/${module.code}/groups/new" /></#macro>
 <#macro editset set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/edit" /></#macro>
@@ -94,17 +96,17 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro studentsinsetlist groupset><@_u page="/${groupset.id}/studentspopup" /></#macro>
 <#macro unallocatedstudentslist groupset><@_u page="/${groupset.id}/unallocatedstudentspopup" /></#macro>
 
-<#macro crossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable"  /></#macro>
-<#macro createcrossmodulegroups department><@_u page="/admin/department/${department.code}/groups/reusable/new"  /></#macro>
-<#macro createcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/students"  /></#macro>
-<#macro createcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/groups"  /></#macro>
-<#macro createcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/new/${set.id}/allocate"  /></#macro>
-<#macro editcrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}"  /></#macro>
-<#macro editcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/students"  /></#macro>
-<#macro editcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/groups"  /></#macro>
-<#macro editcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/groups/reusable/edit/${set.id}/allocate"  /></#macro>
-<#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/groups/reusable/delete/${set.id}"  /></#macro>
-<#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/groups/reusable/${set.id}/template"  /></#macro>
+<#macro crossmodulegroups department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/groups/reusable"  /></#macro>
+<#macro createcrossmodulegroups department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/groups/reusable/new"  /></#macro>
+<#macro createcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/new/${set.id}/students"  /></#macro>
+<#macro createcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/new/${set.id}/groups"  /></#macro>
+<#macro createcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/new/${set.id}/allocate"  /></#macro>
+<#macro editcrossmodulegroups set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/edit/${set.id}"  /></#macro>
+<#macro editcrossmodulegroupsstudents set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/edit/${set.id}/students"  /></#macro>
+<#macro editcrossmodulegroupsgroups set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/edit/${set.id}/groups"  /></#macro>
+<#macro editcrossmodulegroupsallocate set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/edit/${set.id}/allocate"  /></#macro>
+<#macro deletecrossmodulegroups set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/delete/${set.id}"  /></#macro>
+<#macro crossmodulegroupstemplate set><@_u page="/admin/department/${set.department.code}/${set.academicYear.startYear?c}/groups/reusable/${set.id}/template"  /></#macro>
 
 <#macro students_json set><@_u page="/module/${set.module.code}/groups/${set.id}/students/search.json" /></#macro>
 

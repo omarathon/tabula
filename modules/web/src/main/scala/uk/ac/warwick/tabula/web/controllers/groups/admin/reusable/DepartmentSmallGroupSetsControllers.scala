@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.groups.admin.reusable
 
 import javax.validation.Valid
 
-import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
@@ -20,9 +19,6 @@ trait DepartmentSmallGroupSetsController extends GroupsController {
 
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("academicYearChoices") def academicYearChoices =
-		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)
-
 	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
 	override final def binding[A](binder: WebDataBinder, cmd: A) {
@@ -34,18 +30,19 @@ trait DepartmentSmallGroupSetsController extends GroupsController {
 
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/new"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/new"))
 @Controller
 class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsController {
 
 	type CreateDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with CreateDepartmentSmallGroupSetCommandState
 
-	@ModelAttribute("createDepartmentSmallGroupSetCommand") def cmd(@PathVariable department: Department): CreateDepartmentSmallGroupSetCommand =
-		ModifyDepartmentSmallGroupSetCommand.create(department)
+	@ModelAttribute("createDepartmentSmallGroupSetCommand")
+	def cmd(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CreateDepartmentSmallGroupSetCommand =
+		ModifyDepartmentSmallGroupSetCommand.create(department, academicYear)
 
 	@RequestMapping
 	def form(@ModelAttribute("createDepartmentSmallGroupSetCommand") cmd: CreateDepartmentSmallGroupSetCommand) = {
-		Mav("groups/admin/groups/reusable/new").crumbs(Breadcrumbs.Department(cmd.department), Breadcrumbs.Reusable(cmd.department))
+		Mav("groups/admin/groups/reusable/new").crumbs(Breadcrumbs.Department(cmd.department, cmd.academicYear), Breadcrumbs.Reusable(cmd.department, cmd.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -53,7 +50,7 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable(cmd.department))
+			Redirect(Routes.admin.reusable(cmd.department, cmd.academicYear))
 		}
 	}
 
@@ -85,18 +82,23 @@ class CreateDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCo
 	}
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/edit/{smallGroupSet}"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/edit/{smallGroupSet}"))
 @Controller
 class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsController {
 
 	type EditDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet] with EditDepartmentSmallGroupSetCommandState
 
-	@ModelAttribute("editDepartmentSmallGroupSetCommand") def cmd(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetCommand =
-		ModifyDepartmentSmallGroupSetCommand.edit(department, set)
+	@ModelAttribute("editDepartmentSmallGroupSetCommand")
+	def cmd(
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
+	): EditDepartmentSmallGroupSetCommand =
+		ModifyDepartmentSmallGroupSetCommand.edit(department, academicYear, set)
 
 	@RequestMapping
 	def form(@ModelAttribute("editDepartmentSmallGroupSetCommand") cmd: EditDepartmentSmallGroupSetCommand, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet) = {
-		Mav("groups/admin/groups/reusable/edit").crumbs(Breadcrumbs.DepartmentForYear(set.department, set.academicYear), Breadcrumbs.Reusable(set.department))
+		Mav("groups/admin/groups/reusable/edit").crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.Reusable(set.department, set.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -104,7 +106,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable(set.department))
+			Redirect(Routes.admin.reusable(set.department, set.academicYear))
 		}
 	}
 
@@ -136,7 +138,7 @@ class EditDepartmentSmallGroupSetController extends DepartmentSmallGroupSetsCont
 	}
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/delete/{smallGroupSet}"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/delete/{smallGroupSet}"))
 @Controller
 class DeleteDepartmentSmallGroupSetController extends GroupsController {
 
@@ -148,15 +150,20 @@ class DeleteDepartmentSmallGroupSetController extends GroupsController {
 		DeleteDepartmentSmallGroupSetCommand(department, set)
 
 	@RequestMapping
-	def form(@PathVariable department: Department) =
-		Mav("groups/admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department), Breadcrumbs.Reusable(department))
+	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+		Mav("groups/admin/groups/reusable/delete").crumbs(Breadcrumbs.Department(department, academicYear), Breadcrumbs.Reusable(department, academicYear))
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand, errors: Errors, @PathVariable department: Department) =
-		if (errors.hasErrors) form(department)
+	def submit(
+		@Valid @ModelAttribute("command") cmd: DeleteDepartmentSmallGroupSetCommand,
+		errors: Errors,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear
+	) =
+		if (errors.hasErrors) form(department, academicYear)
 		else {
 			cmd.apply()
-			Redirect(Routes.admin.reusable(department))
+			Redirect(Routes.admin.reusable(department, academicYear))
 		}
 
 }

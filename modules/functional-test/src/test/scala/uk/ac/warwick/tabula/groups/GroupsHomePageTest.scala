@@ -29,6 +29,8 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 		When("I Log in as the student and view the groups page")
 		signIn as P.Student1 to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText(academicYear.toString)
 
 		Then("I should not see the unreleased groupset")
 		val groupsPage = new GroupsHomePage
@@ -50,6 +52,8 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 		When("I Log in as the student and view the groups page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText("14/15")
 
 		Then("I should see the released groupset")
 		val groupsPage = new GroupsHomePage
@@ -110,7 +114,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  groupsetSummaryPage.getBatchOpenButton.click()
 
 		Then("The open page is displayed")
-      val batchOpen = new BatchOpenPage("xxx")
+      val batchOpen = new BatchOpenPage("xxx", academicYear)
 		  batchOpen.isCurrentPage should be {true}
 
 		When("I check the checkbox next to the groupset")

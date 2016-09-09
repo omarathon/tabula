@@ -28,7 +28,7 @@ class ViewSmallGroupSetAttendanceController extends GroupsController {
 
 		Mav("groups/attendance/view_set",
 			"groups" -> groups
-		).crumbs(Breadcrumbs.DepartmentForYear(module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(module, set.academicYear))
+		).crumbs(Breadcrumbs.Department(module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(module, set.academicYear))
 	}
 
 }

@@ -12,25 +12,27 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/release/{academicYear}"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/release"))
 @Controller
 class ReleaseAllSmallGroupSetsController extends GroupsController {
 
-	@ModelAttribute("moduleList") def newViewModel(@PathVariable academicYear:AcademicYear):ModuleListViewModel={
+	@ModelAttribute("moduleList") def newViewModel(@PathVariable academicYear: AcademicYear):ModuleListViewModel={
 		new ModuleListViewModel(academicYear)
 	}
 
 	@RequestMapping
-	def form(@ModelAttribute("moduleList") model: ModuleListViewModel,
-					 @PathVariable department:Department,
-					 @PathVariable academicYear:AcademicYear,
-					 showFlash:Boolean=false) = {
+	def form(
+		@ModelAttribute("moduleList") model: ModuleListViewModel,
+		@PathVariable department: Department,
+		@PathVariable academicYear: AcademicYear,
+		showFlash: Boolean=false
+	) = {
 		Mav("groups/admin/groups/bulk-release",
 			"department"->department,
 			"modules"->department.modules,
 			"showFlash"->showFlash,
 			"academicYear" -> academicYear
-		).crumbs(Breadcrumbs.Department(department))
+		).crumbs(Breadcrumbs.Department(department, academicYear))
 	}
 
   @RequestMapping(method = Array(POST))
