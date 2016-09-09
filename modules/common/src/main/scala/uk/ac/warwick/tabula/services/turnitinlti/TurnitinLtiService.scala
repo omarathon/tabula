@@ -159,6 +159,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 
 		s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
 		Map(
+			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
 			"custom_xmlresponse" -> "1",
@@ -204,6 +205,7 @@ class TurnitinLtiService extends Logging with DisposableBean with InitializingBe
 	def getOriginalityReportParams(endpoint: String, assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String):Map[String, String] = {
 		getSignedParams(
 			Map(
+			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
 			"roles" -> "Instructor",
 			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
 			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
