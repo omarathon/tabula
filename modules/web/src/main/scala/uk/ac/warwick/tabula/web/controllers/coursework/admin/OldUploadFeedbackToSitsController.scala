@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/upload-to-sits"))
-class UploadFeedbackToSitsController extends OldCourseworkController {
+class OldUploadFeedbackToSitsController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =

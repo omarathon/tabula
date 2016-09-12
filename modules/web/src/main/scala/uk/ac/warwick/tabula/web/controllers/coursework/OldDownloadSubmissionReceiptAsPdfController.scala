@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, Subm
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/submission-receipt.pdf"))
-class DownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
+class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems
 
@@ -43,7 +43,7 @@ class DownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
-class DownloadSubmissionReceiptForStudentAsPdfController extends OldCourseworkController {
+class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems
 

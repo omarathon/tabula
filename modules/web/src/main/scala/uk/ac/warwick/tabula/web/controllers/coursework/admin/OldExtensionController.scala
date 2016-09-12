@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
 abstract class OldExtensionController extends OldCourseworkController {

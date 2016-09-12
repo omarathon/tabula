@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import org.joda.time.DateTimeConstants
 
 // scalastyle:off magic.number
-class SubmissionsInfoControllerTest extends TestBase with Mockito {
+class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest with AuditEventQueryServiceComponent {
 		self: CommandInternal[Seq[SubmissionListItem]] =>
@@ -34,7 +34,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	 * the correct thing.
 	 */
 	@Test def isoTimeFormat(): Unit = {
-		val controller = new SubmissionsInfoController()
+		val controller = new OldSubmissionsInfoController()
 
 		/**
 		 * DST and non-DST dates are formatted with the relevant timezone
@@ -52,7 +52,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	}
 
 	@Test def csvTimeFormat(): Unit = {
-		val controller = new SubmissionsInfoController()
+		val controller = new OldSubmissionsInfoController()
 
 		/**
 		 * For CSV, we don't specify timezone. Instead the format mirrors that
@@ -63,7 +63,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	}
 
 	@Test def xml(): Unit = {
-		val controller = new SubmissionsInfoController()
+		val controller = new OldSubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
 
@@ -82,7 +82,7 @@ class SubmissionsInfoControllerTest extends TestBase with Mockito {
 	}
 
 	@Test def csv(): Unit = {
-		val controller = new SubmissionsInfoController()
+		val controller = new OldSubmissionsInfoController()
 		controller.securityService = mock[SecurityService]
 		controller.checkIndex = false
 

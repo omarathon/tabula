@@ -15,7 +15,7 @@ class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/module/{module}/"))
-class ModuleController extends OldCourseworkController {
+class OldModuleController extends OldCourseworkController {
 
 	hideDeletedItems
 

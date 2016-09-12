@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Profile
 
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/publish"))
 @Profile(Array("cm1Enabled")) @Controller
-class PublishFeedbackController extends OldCourseworkController {
+class OldPublishFeedbackController extends OldCourseworkController {
 
 	type PublishFeedbackCommand = Appliable[PublishFeedbackCommand.PublishFeedbackResults] with PublishFeedbackCommandState
 	validatesSelf[SelfValidating]

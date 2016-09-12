@@ -17,7 +17,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online"))
-class OnlineFeedbackController extends OldCourseworkController with AutowiringUserLookupComponent {
+class OldOnlineFeedbackController extends OldCourseworkController with AutowiringUserLookupComponent {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
@@ -48,7 +48,7 @@ class OnlineFeedbackController extends OldCourseworkController with AutowiringUs
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
-class OnlineFeedbackFormController extends OldCourseworkController {
+class OldOnlineFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineFeedbackFormCommand]
 

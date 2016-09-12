@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
-class PlagiarismInvestigationController extends OldCourseworkController {
+class OldPlagiarismInvestigationController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)

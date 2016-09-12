@@ -21,7 +21,7 @@ import uk.ac.warwick.spring.Wire
 
 @RequestMapping(Array("/abccoursework/module/{module}/{assignment}/rate"))
 @Profile(Array("cm1Enabled")) @Controller
-class FeedbackRatingController extends OldCourseworkController {
+class OldFeedbackRatingController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 

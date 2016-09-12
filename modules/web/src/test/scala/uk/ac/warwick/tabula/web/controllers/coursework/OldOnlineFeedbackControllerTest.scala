@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.web.controllers.coursework
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.coursework.feedback.{OnlineFeedbackCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackFormCommand}
-import uk.ac.warwick.tabula.web.controllers.coursework.admin.{OnlineFeedbackController, OnlineFeedbackFormController}
+import uk.ac.warwick.tabula.web.controllers.coursework.admin.{OldOnlineFeedbackController, OldOnlineFeedbackFormController}
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentMember}
 import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-class OnlineFeedbackControllerTest extends TestBase with Mockito {
+class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = new Department
@@ -27,7 +27,7 @@ class OnlineFeedbackControllerTest extends TestBase with Mockito {
 	@Test def controllerShowsList() = withUser("cusdx") {
 
 		new Fixture {
-			val controller = new OnlineFeedbackController
+			val controller = new OldOnlineFeedbackController
 			controller.userLookup = new MockUserLookup
 			val mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
@@ -39,7 +39,7 @@ class OnlineFeedbackControllerTest extends TestBase with Mockito {
 
 }
 
-class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
+class OldOnlineFeedbackFormControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = new Department
@@ -56,7 +56,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 
 		val command = mock[OnlineFeedbackFormCommand]
 		command.module returns module
-		val controller = new OnlineFeedbackFormController
+		val controller = new OldOnlineFeedbackFormController
 	}
 
 	@Test def controllerShowsForm() {

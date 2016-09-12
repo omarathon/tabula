@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.coursework
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
-import uk.ac.warwick.tabula.web.controllers.coursework.admin.GenericFeedbackController
+import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldGenericFeedbackController
 import org.springframework.validation.Errors
 
-class GenericFeedbackControllerTest extends TestBase with Mockito {
+class OldGenericFeedbackControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = Fixtures.department("hz", "Heron studies")
@@ -21,7 +21,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 
 	@Test def controllerShowsForm() {
 		new Fixture {
-			val controller = new GenericFeedbackController
+			val controller = new OldGenericFeedbackController
 			val mav = controller.showForm(assignment, command, null)
 			mav.map("command") should be(command)
 			mav.viewName should be ("coursework/admin/assignments/feedback/generic_feedback")
@@ -30,7 +30,7 @@ class GenericFeedbackControllerTest extends TestBase with Mockito {
 
 	@Test def controllerAppliesCommand() {
 		new Fixture {
-			val controller = new GenericFeedbackController { override val ajax = true }
+			val controller = new OldGenericFeedbackController { override val ajax = true }
 			val errors = mock[Errors]
 
 			val mav = controller.submit(assignment, command, errors)

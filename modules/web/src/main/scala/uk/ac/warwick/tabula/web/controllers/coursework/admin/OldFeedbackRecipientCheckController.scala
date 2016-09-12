@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
  */
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/check-recipients"))
-class FeedbackRecipientCheckController extends OldCourseworkController {
+class OldFeedbackRecipientCheckController extends OldCourseworkController {
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new FeedbackRecipientCheckCommand(module, assignment)

@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 
-class HomeControllerTest extends TestBase with Mockito{
+class OldHomeControllerTest extends TestBase with Mockito{
 
 	import GroupsDisplayHelper._
 

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMark
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
-class OnlineMarkerFeedbackFormController extends OldCourseworkController {
+class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
@@ -76,7 +76,7 @@ class OnlineMarkerFeedbackFormController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
-class OnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
+class OldOnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser) = {

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Profile
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/generic"))
-class GenericFeedbackController extends OldCourseworkController {
+class OldGenericFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =

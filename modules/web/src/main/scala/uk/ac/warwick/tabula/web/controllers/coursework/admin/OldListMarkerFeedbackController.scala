@@ -14,7 +14,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
-class ListMarkerFeedbackController extends OldCourseworkController {
+class OldListMarkerFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def createCommand(
@@ -66,7 +66,7 @@ class ListMarkerFeedbackController extends OldCourseworkController {
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/list"))
-class ListCurrentUsersMarkerFeedbackController extends OldCourseworkController {
+class OldListCurrentUsersMarkerFeedbackController extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser))

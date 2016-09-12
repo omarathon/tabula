@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkFullScreenCommand, StudentCourseworkGadgetCommand}
 
-abstract class StudentCourseworkController extends OldCourseworkController {
+abstract class OldStudentCourseworkController extends OldCourseworkController {
 	def getMav(member: Member, info: StudentAssignments) =
 		Mav("coursework/home/_student",
 			"student" -> member,
@@ -23,7 +23,7 @@ abstract class StudentCourseworkController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/student/{member}"))
-class StudentCourseworkFullScreenController extends StudentCourseworkController {
+class OldStudentCourseworkFullScreenController extends OldStudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable member: Member) =
 		StudentCourseworkFullScreenCommand(MemberOrUser(member))
@@ -36,7 +36,7 @@ class StudentCourseworkFullScreenController extends StudentCourseworkController 
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/student/bycourseandyear/{studentCourseYearDetails}"))
-class StudentCourseworkGadgetController extends StudentCourseworkController {
+class OldStudentCourseworkGadgetController extends OldStudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable studentCourseYearDetails: StudentCourseYearDetails) =
 		StudentCourseworkGadgetCommand(mandatory(studentCourseYearDetails))

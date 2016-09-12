@@ -18,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marks-template"))
-class AssignmentMarksTemplateController extends OldCourseworkController {
+class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
 	var assignmentMembershipService = Wire[AssessmentMembershipService]
 
@@ -39,7 +39,7 @@ class AssignmentMarksTemplateController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
-class AssignmentMarkerMarksTemplateController extends OldCourseworkController {
+class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(
@@ -61,7 +61,7 @@ class AssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
-class CurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
+class OldCurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

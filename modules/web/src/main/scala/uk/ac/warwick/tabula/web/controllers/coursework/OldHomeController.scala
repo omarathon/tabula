@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 
-@Profile(Array("cm1Enabled")) @Controller class HomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
+@Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
 
 	hideDeletedItems
 
@@ -36,7 +36,7 @@ import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceCom
 		}
 }
 
-@Profile(Array("cm1Enabled")) @Controller class HomeActivitiesPageletController extends OldCourseworkController {
+@Profile(Array("cm1Enabled")) @Controller class OldHomeActivitiesPageletController extends OldCourseworkController {
 
 	hideDeletedItems
 

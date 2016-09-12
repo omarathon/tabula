@@ -20,14 +20,14 @@ import scala.collection.JavaConversions._
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin", "/coursework/admin/department", "/coursework/admin/module"))
-class CourseworkAdminHomeController extends OldCourseworkController {
+class OldCourseworkAdminHomeController extends OldCourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/admin/department/{dept}"))
-class CourseworkAdminDepartmentHomeController extends OldCourseworkController {
+class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController {
 
 	hideDeletedItems
 
@@ -54,7 +54,7 @@ class CourseworkAdminDepartmentHomeController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/admin/module/{module}"))
-class CourseworkAdminModuleHomeController extends OldCourseworkController {
+class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 
 	hideDeletedItems
 

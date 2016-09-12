@@ -19,7 +19,7 @@ import collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-completed"))
-class MarkingCompletedController extends OldCourseworkController {
+class OldMarkingCompletedController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
 	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with CreatesNextMarkerFeedback
@@ -104,7 +104,7 @@ class MarkingCompletedController extends OldCourseworkController {
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
-class MarkingCompletedControllerCurrentUser extends OldCourseworkController {
+class OldMarkingCompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

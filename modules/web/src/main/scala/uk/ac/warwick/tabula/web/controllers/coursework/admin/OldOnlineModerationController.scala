@@ -17,7 +17,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/moderation/{student}"))
-class OnlineModerationController extends OldCourseworkController {
+class OldOnlineModerationController extends OldCourseworkController {
 
 	validatesSelf[OnlineModerationCommand]
 
@@ -66,7 +66,7 @@ class OnlineModerationController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/moderation/{student}"))
-class OnlineModerationControllerCurrentUser extends OldCourseworkController {
+class OldOnlineModerationControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser) = {

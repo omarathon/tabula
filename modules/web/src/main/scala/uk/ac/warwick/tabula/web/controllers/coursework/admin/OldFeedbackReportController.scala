@@ -20,7 +20,7 @@ import uk.ac.warwick.spring.Wire
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/reports/feedback"))
-class FeedbackReportController extends OldCourseworkController {
+class OldFeedbackReportController extends OldCourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
 

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.web.controllers.AbstractGenerateGradeFromMarkControl
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/generate-grade"))
-class GenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Assignment] {
+class OldGenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Assignment] {
 
 	@ModelAttribute("command")
 	override def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =

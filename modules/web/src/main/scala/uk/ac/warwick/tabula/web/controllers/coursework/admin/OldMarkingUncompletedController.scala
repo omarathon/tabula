@@ -17,7 +17,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
-class MarkingUncompletedController extends OldCourseworkController {
+class OldMarkingUncompletedController extends OldCourseworkController {
 
 	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
 
@@ -85,7 +85,7 @@ class MarkingUncompletedController extends OldCourseworkController {
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
-class MarkingUncompletedControllerCurrentUser extends OldCourseworkController {
+class OldMarkingUncompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

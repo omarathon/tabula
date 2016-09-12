@@ -23,7 +23,7 @@ import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}"))
-class SubmissionAndFeedbackController extends OldCourseworkController {
+class OldSubmissionAndFeedbackController extends OldCourseworkController {
 
 	var features = Wire[Features]
 

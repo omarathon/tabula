@@ -20,7 +20,7 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
-class MarkerAddMarksController extends OldCourseworkController {
+class OldMarkerAddMarksController extends OldCourseworkController {
 
 	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var userLookup: UserLookupService = _
@@ -126,7 +126,7 @@ class MarkerAddMarksController extends OldCourseworkController {
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks"))
-class MarkerAddMarksControllerCurrentUser extends OldCourseworkController {
+class OldMarkerAddMarksControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))

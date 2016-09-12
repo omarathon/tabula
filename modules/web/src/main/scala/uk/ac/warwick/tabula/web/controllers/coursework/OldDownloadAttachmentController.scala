@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/blah/courseworkkkk/module/{module}/{assignment}"))
-class DownloadAttachmentController extends OldCourseworkController {
+class OldDownloadAttachmentController extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
 
@@ -29,7 +29,7 @@ class DownloadAttachmentController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{studentMember}"))
-class DownloadAttachmentForStudentController extends OldCourseworkController {
+class OldDownloadAttachmentForStudentController extends OldCourseworkController {
 
 	var submissionService = Wire[SubmissionService]
 

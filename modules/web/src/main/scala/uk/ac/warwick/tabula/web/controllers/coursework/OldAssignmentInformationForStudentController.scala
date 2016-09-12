@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackComm
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/module/{module}/{assignment}/{studentMember}"))
-class AssignmentInformationForStudentController extends OldCourseworkController {
+class OldAssignmentInformationForStudentController extends OldCourseworkController {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState
 

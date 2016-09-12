@@ -64,7 +64,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/bulk-adjustment/template"))
-class BulkFeedbackAdjustmentTemplateController extends OldCourseworkController {
+class OldBulkFeedbackAdjustmentTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[ExcelView] =

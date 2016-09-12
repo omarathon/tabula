@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
-class DownloadFeedbackController extends OldCourseworkController {
+class OldDownloadFeedbackController extends OldCourseworkController {
 
 	var feedbackService = Wire[FeedbackService]
 

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.Mav
 	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/report/{attachment}",
 	"/coursework/admin/module/{module}/assignments/{assignment}/turnitin/lti-report/{attachment}"
 ))
-class TurnitinReportController extends OldCourseworkController {
+class OldTurnitinReportController extends OldCourseworkController {
 
 	type ViewPlagiarismReportCommand = ViewPlagiarismReportCommand.CommandType
 

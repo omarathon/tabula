@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.SubmissionService
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/resend-receipt"))
-class ResendSubmissionEmail extends OldCourseworkController {
+class OldResendSubmissionEmail extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
 

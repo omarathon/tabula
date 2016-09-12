@@ -20,7 +20,7 @@ import uk.ac.warwick.spring.Wire
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/module/{module}/{assignment}/extension"))
-class ExtensionRequestController extends OldCourseworkController{
+class OldExtensionRequestController extends OldCourseworkController{
 
 	var profileService = Wire.auto[ProfileService]
 

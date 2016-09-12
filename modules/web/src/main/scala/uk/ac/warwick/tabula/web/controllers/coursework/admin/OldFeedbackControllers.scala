@@ -173,7 +173,7 @@ class OldDownloadFirstMarkersFeedbackController extends OldCourseworkController 
 // A read only view of all feedback fields and attachments
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
-class FeedbackSummaryController extends OldCourseworkController {
+class OldFeedbackSummaryController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)

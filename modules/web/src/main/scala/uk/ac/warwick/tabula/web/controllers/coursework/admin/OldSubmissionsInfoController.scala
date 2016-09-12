@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
  * Download submissions metadata.
  */
 @Profile(Array("cm1Enabled")) @Controller
-class SubmissionsInfoController extends OldCourseworkController {
+class OldSubmissionsInfoController extends OldCourseworkController {
 
 	val isoFormatter = DateFormats.IsoDateTime
 	val csvFormatter = DateFormats.CSVDateTime

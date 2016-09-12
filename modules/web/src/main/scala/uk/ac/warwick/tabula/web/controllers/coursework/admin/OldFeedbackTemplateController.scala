@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates"))
-class FeedbackTemplateController extends OldCourseworkController {
+class OldFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable dept:Department)
 		= new BulkFeedbackTemplateCommand(dept)
@@ -45,7 +45,7 @@ class FeedbackTemplateController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
-class EditFeedbackTemplateController extends OldCourseworkController {
+class OldEditFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new EditFeedbackTemplateCommand(dept, template)
@@ -82,7 +82,7 @@ class EditFeedbackTemplateController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
-class DeleteFeedbackTemplateController extends OldCourseworkController {
+class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new DeleteFeedbackTemplateCommand(dept, template)

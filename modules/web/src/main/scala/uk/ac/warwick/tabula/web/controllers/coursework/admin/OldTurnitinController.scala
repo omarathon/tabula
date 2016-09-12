@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/turnitin"))
-class TurnitinController extends OldCourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
+class OldTurnitinController extends OldCourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
 	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
 

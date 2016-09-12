@@ -28,7 +28,7 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions-report"))
-class SubmissionReportController extends OldCourseworkController {
+class OldSubmissionReportController extends OldCourseworkController {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _
