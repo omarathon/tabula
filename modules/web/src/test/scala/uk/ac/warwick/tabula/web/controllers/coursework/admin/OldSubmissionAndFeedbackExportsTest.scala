@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsComma
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
-class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
+class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
 	val assignment = newDeepAssignment()
 	assignment.id = "123"
