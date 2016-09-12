@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
@@ -17,16 +18,16 @@ import scala.collection.JavaConversions._
  * Screens for department and module admins.
  */
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin", "/coursework/admin/department", "/coursework/admin/module"))
-class CourseworkAdminHomeController extends CourseworkController {
+class CourseworkAdminHomeController extends OldCourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/admin/department/{dept}"))
-class CourseworkAdminDepartmentHomeController extends CourseworkController {
+class CourseworkAdminDepartmentHomeController extends OldCourseworkController {
 
 	hideDeletedItems
 
@@ -51,9 +52,9 @@ class CourseworkAdminDepartmentHomeController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/admin/module/{module}"))
-class CourseworkAdminModuleHomeController extends CourseworkController {
+class CourseworkAdminModuleHomeController extends OldCourseworkController {
 
 	hideDeletedItems
 

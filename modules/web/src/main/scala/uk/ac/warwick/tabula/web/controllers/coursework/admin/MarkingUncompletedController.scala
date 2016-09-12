@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.validation.Errors
 import javax.validation.Valid
+
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedState, MarkingUncompletedCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedCommand, MarkingUncompletedState}
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
-class MarkingUncompletedController extends CourseworkController {
+class MarkingUncompletedController extends OldCourseworkController {
 
 	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
 
@@ -81,9 +83,9 @@ class MarkingUncompletedController extends CourseworkController {
 
 
 // Redirects users trying to access a marking workflow using the old style URL
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
-class MarkingUncompletedControllerCurrentUser extends CourseworkController {
+class MarkingUncompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

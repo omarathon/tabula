@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
-import uk.ac.warwick.tabula.data.model.{Member, Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module, Submission}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser}
+import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
-import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, AutowiringSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/submission-receipt.pdf"))
-class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
+class DownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems
 
@@ -40,9 +41,9 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
-class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkController {
+class DownloadSubmissionReceiptForStudentAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems
 

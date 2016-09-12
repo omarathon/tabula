@@ -3,13 +3,14 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import javax.validation.Valid
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentService
 import uk.ac.warwick.tabula.services.jobs.JobService
@@ -19,9 +20,9 @@ import uk.ac.warwick.tabula.{CurrentUser, Features}
 
 import scala.collection.JavaConverters._
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/turnitin"))
-class TurnitinController extends CourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
+class TurnitinController extends OldCourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
 	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
 

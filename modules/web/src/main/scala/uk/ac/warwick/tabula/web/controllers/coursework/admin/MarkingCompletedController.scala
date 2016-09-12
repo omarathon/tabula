@@ -2,23 +2,24 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import javax.validation.Valid
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UserAware}
-import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingCompletedCommand, MarkingCompletedState, CreatesNextMarkerFeedback}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, CreatesNextMarkerFeedback, MarkingCompletedCommand, MarkingCompletedState}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 import collection.JavaConverters._
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-completed"))
-class MarkingCompletedController extends CourseworkController {
+class MarkingCompletedController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
 	type MarkingCompletedCommand = Appliable[Unit] with MarkingCompletedState with UserAware with CreatesNextMarkerFeedback
@@ -101,9 +102,9 @@ class MarkingCompletedController extends CourseworkController {
 }
 
 // Redirects users trying to access a marking workflow using the old style URL
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
-class MarkingCompletedControllerCurrentUser extends CourseworkController {
+class MarkingCompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

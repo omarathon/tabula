@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
@@ -9,9 +10,9 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
-class DownloadFeedbackController extends CourseworkController {
+class DownloadFeedbackController extends OldCourseworkController {
 
 	var feedbackService = Wire[FeedbackService]
 

@@ -2,21 +2,22 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import javax.validation.Valid
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
-import uk.ac.warwick.tabula.data.model.{MarkingMethod, Assignment, Module}
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkingMethod, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineMarkerFeedbackFormCommand}
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
-class OnlineMarkerFeedbackFormController extends CourseworkController {
+class OnlineMarkerFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
@@ -73,9 +74,9 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
-class OnlineMarkerFeedbackFormControllerCurrentUser extends CourseworkController {
+class OnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable student: User, currentUser: CurrentUser) = {

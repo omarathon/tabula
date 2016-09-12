@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.web.Mav
@@ -10,15 +10,17 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.coursework.assignments.extensions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.validation.Valid
+
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/coursework/module/{module}/{assignment}/extension"))
-class ExtensionRequestController extends CourseworkController{
+class ExtensionRequestController extends OldCourseworkController{
 
 	var profileService = Wire.auto[ProfileService]
 

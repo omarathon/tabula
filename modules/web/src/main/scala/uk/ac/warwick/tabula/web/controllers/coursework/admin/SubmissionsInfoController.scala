@@ -1,19 +1,22 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import java.io.StringWriter
+
 import scala.collection.JavaConversions.asScalaSet
 import scala.collection.JavaConversions.seqAsJavaList
 import org.joda.time.ReadableInstant
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.views.CSVView
 import uk.ac.warwick.util.csv.CSVLineWriter
 import uk.ac.warwick.util.csv.GoodCsvDocument
+
 import scala.collection.immutable.ListMap
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -23,8 +26,8 @@ import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 /**
  * Download submissions metadata.
  */
-@Controller
-class SubmissionsInfoController extends CourseworkController {
+@Profile(Array("cm1Enabled")) @Controller
+class SubmissionsInfoController extends OldCourseworkController {
 
 	val isoFormatter = DateFormats.IsoDateTime
 	val csvFormatter = DateFormats.CSVDateTime

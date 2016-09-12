@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 import java.io.StringWriter
 import javax.validation.Valid
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
@@ -13,16 +14,16 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}"))
-class SubmissionAndFeedbackController extends CourseworkController {
+class SubmissionAndFeedbackController extends OldCourseworkController {
 
 	var features = Wire[Features]
 

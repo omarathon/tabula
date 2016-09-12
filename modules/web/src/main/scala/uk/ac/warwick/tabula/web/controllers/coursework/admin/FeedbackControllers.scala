@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
@@ -16,9 +17,9 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
-class DownloadSelectedFeedbackController extends CourseworkController {
+class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
@@ -35,9 +36,9 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
-class DownloadSelectedFeedbackFileController extends CourseworkController {
+class OldDownloadSelectedFeedbackFileController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
@@ -57,9 +58,9 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback.zip"))
-class DownloadAllFeedbackController extends CourseworkController {
+class OldDownloadAllFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def selectedFeedbacksCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
@@ -76,9 +77,9 @@ class DownloadAllFeedbackController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
-class DownloadMarkerFeedbackController extends CourseworkController {
+class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 
@@ -99,17 +100,17 @@ class DownloadMarkerFeedbackController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
-class DownloadMarkerFeedbackControllerCurrentUser extends CourseworkController {
+class OldDownloadMarkerFeedbackControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.marker(assignment, currentUser.apparentUser, feedbackId, filename))
 	}
 }
 
-@Controller
-class DownloadMarkerFeebackFilesController extends BaseController {
+@Profile(Array("cm1Enabled")) @Controller
+class OldDownloadMarkerFeebackFilesController extends BaseController {
 
 	@ModelAttribute def command(
 		@PathVariable module: Module,
@@ -144,9 +145,9 @@ class DownloadMarkerFeebackFilesController extends BaseController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedback.zip"))
-class DownloadFirstMarkersFeedbackController extends CourseworkController {
+class OldDownloadFirstMarkersFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def downloadFirstMarkersFeedbackCommand(
@@ -170,9 +171,9 @@ class DownloadFirstMarkersFeedbackController extends CourseworkController {
 }
 
 // A read only view of all feedback fields and attachments
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
-class FeedbackSummaryController extends CourseworkController {
+class FeedbackSummaryController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)

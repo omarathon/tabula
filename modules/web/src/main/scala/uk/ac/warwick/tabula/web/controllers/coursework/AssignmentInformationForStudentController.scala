@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping, PathVariable}
-import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.{StudentMemberSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/module/{module}/{assignment}/{studentMember}"))
-class AssignmentInformationForStudentController extends CourseworkController {
+class AssignmentInformationForStudentController extends OldCourseworkController {
 
 	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState
 

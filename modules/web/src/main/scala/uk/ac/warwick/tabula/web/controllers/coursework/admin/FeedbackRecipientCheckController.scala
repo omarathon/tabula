@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackRecipientCheckCommand
@@ -16,9 +17,9 @@ import uk.ac.warwick.tabula.data.model.Assignment
  * the recipients for any published feedback, noting ones that appear empty or
  * invalid.
  */
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/check-recipients"))
-class FeedbackRecipientCheckController extends CourseworkController {
+class FeedbackRecipientCheckController extends OldCourseworkController {
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new FeedbackRecipientCheckCommand(module, assignment)

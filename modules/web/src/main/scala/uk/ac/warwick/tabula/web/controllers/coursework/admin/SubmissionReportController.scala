@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -25,9 +26,9 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions-report"))
-class SubmissionReportController extends CourseworkController {
+class SubmissionReportController extends OldCourseworkController {
 
 	@Autowired var features: Features = _
 	@Autowired var userLookup: UserLookupService = _

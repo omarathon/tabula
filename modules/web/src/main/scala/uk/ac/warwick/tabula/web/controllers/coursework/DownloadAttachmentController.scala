@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestMethod}
 import uk.ac.warwick.spring.Wire
@@ -10,9 +11,9 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
-@Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
-class DownloadAttachmentController extends CourseworkController {
+@Profile(Array("cm1Enabled")) @Controller
+@RequestMapping(value = Array("/blah/courseworkkkk/module/{module}/{assignment}"))
+class DownloadAttachmentController extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
 
@@ -26,9 +27,9 @@ class DownloadAttachmentController extends CourseworkController {
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{studentMember}"))
-class DownloadAttachmentForStudentController extends CourseworkController {
+class DownloadAttachmentForStudentController extends OldCourseworkController {
 
 	var submissionService = Wire[SubmissionService]
 

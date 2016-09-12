@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, Member}
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails}
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkGadgetCommand, StudentCourseworkFullScreenCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkFullScreenCommand, StudentCourseworkGadgetCommand}
 
-abstract class StudentCourseworkController extends CourseworkController {
+abstract class StudentCourseworkController extends OldCourseworkController {
 	def getMav(member: Member, info: StudentAssignments) =
 		Mav("coursework/home/_student",
 			"student" -> member,
@@ -20,7 +21,7 @@ abstract class StudentCourseworkController extends CourseworkController {
 		).noLayoutIf(ajax)
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/student/{member}"))
 class StudentCourseworkFullScreenController extends StudentCourseworkController {
 
@@ -33,7 +34,7 @@ class StudentCourseworkFullScreenController extends StudentCourseworkController 
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/student/bycourseandyear/{studentCourseYearDetails}"))
 class StudentCourseworkGadgetController extends StudentCourseworkController {
 

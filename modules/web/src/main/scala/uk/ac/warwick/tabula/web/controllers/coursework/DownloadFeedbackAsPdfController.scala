@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
@@ -13,9 +14,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{student}/feedback.pdf"))
-class DownloadFeedbackAsPdfController extends CourseworkController {
+class DownloadFeedbackAsPdfController extends OldCourseworkController {
 
 	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
 	var feedbackService = Wire[FeedbackService]

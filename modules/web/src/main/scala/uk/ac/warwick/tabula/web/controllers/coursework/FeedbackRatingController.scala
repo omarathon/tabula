@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.Features
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.web.bind.annotation.RequestMethod._
 import org.springframework.validation.Errors
@@ -18,9 +19,9 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 
-@RequestMapping(Array("/coursework/module/{module}/{assignment}/rate"))
-@Controller
-class FeedbackRatingController extends CourseworkController {
+@RequestMapping(Array("/abccoursework/module/{module}/{assignment}/rate"))
+@Profile(Array("cm1Enabled")) @Controller
+class FeedbackRatingController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
 

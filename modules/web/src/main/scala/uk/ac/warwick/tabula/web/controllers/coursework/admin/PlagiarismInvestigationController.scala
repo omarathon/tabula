@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Assignment
 import javax.validation.Valid
+
+import org.springframework.context.annotation.Profile
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestigationCommandValidation, PlagiarismInvestigationCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestigationCommand, PlagiarismInvestigationCommandValidation}
 import uk.ac.warwick.tabula.commands.Appliable
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
-class PlagiarismInvestigationController extends CourseworkController {
+class PlagiarismInvestigationController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)

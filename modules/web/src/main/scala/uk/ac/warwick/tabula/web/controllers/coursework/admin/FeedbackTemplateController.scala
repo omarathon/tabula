@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
-import uk.ac.warwick.tabula.data.model.{FeedbackTemplate, Department}
-import uk.ac.warwick.tabula.commands.coursework.departments.{DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand, BulkFeedbackTemplateCommand}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.data.model.{Department, FeedbackTemplate}
+import uk.ac.warwick.tabula.commands.coursework.departments.{BulkFeedbackTemplateCommand, DeleteFeedbackTemplateCommand, EditFeedbackTemplateCommand}
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates"))
-class FeedbackTemplateController extends CourseworkController {
+class FeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable dept:Department)
 		= new BulkFeedbackTemplateCommand(dept)
@@ -42,9 +43,9 @@ class FeedbackTemplateController extends CourseworkController {
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
-class EditFeedbackTemplateController extends CourseworkController {
+class EditFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new EditFeedbackTemplateCommand(dept, template)
@@ -79,9 +80,9 @@ class EditFeedbackTemplateController extends CourseworkController {
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
-class DeleteFeedbackTemplateController extends CourseworkController {
+class DeleteFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
 		= new DeleteFeedbackTemplateCommand(dept, template)

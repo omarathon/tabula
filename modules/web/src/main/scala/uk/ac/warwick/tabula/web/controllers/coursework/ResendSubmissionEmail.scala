@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
+import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.coursework.assignments.SendSubmissionReceiptCommand
@@ -13,9 +14,9 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/resend-receipt"))
-class ResendSubmissionEmail extends CourseworkController {
+class ResendSubmissionEmail extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
 

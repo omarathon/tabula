@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.CurrentUser
@@ -11,7 +12,7 @@ import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
 
-@Controller class HomeController extends CourseworkController with AutowiringModuleAndDepartmentServiceComponent {
+@Profile(Array("cm1Enabled")) @Controller class HomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
 
 	hideDeletedItems
 
@@ -35,7 +36,7 @@ import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceCom
 		}
 }
 
-@Controller class HomeActivitiesPageletController extends CourseworkController {
+@Profile(Array("cm1Enabled")) @Controller class HomeActivitiesPageletController extends OldCourseworkController {
 
 	hideDeletedItems
 

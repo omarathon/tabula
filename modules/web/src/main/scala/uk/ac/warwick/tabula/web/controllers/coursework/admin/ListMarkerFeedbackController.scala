@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, ListMarkerFeedbackCommand, MarkerFeedbackStage}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
-class ListMarkerFeedbackController extends CourseworkController {
+class ListMarkerFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def createCommand(
@@ -63,9 +64,9 @@ class ListMarkerFeedbackController extends CourseworkController {
 }
 
 // Redirects users trying to access a marking workflow using the old style URL
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/list"))
-class ListCurrentUsersMarkerFeedbackController extends CourseworkController {
+class ListCurrentUsersMarkerFeedbackController extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser))

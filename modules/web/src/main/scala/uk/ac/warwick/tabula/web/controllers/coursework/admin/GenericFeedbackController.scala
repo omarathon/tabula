@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 
-@Controller
+import org.springframework.context.annotation.Profile
+
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/generic"))
-class GenericFeedbackController extends CourseworkController {
+class GenericFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =

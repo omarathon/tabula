@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
-import uk.ac.warwick.tabula.{DateFormats, CurrentUser}
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping, PathVariable}
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
@@ -14,11 +14,13 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.jobs.JobService
 import javax.validation.Valid
+
+import org.springframework.context.annotation.Profile
 import uk.ac.warwick.spring.Wire
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/department/{dept}/reports/feedback"))
-class FeedbackReportController extends CourseworkController {
+class FeedbackReportController extends OldCourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
 

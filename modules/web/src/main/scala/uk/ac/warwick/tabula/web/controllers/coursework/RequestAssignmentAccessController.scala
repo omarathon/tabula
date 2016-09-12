@@ -1,19 +1,21 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
-import org.springframework.web.bind.annotation.{ ModelAttribute, RequestMapping }
+import org.springframework.context.annotation.Profile
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.coursework.assignments.RequestAssignmentAccessCommand
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
+
 import collection.mutable
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/module/{module}/{assignment}/request-access"))
-class RequestAssignmentAccessController extends CourseworkController {
+class RequestAssignmentAccessController extends OldCourseworkController {
 
 	hideDeletedItems
 

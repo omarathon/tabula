@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
@@ -9,15 +10,15 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.feedback.MarksTemplateCommand._
 import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateMarksTemplateCommand, GenerateOwnMarksTemplateCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marks-template"))
-class AssignmentMarksTemplateController extends CourseworkController {
+class AssignmentMarksTemplateController extends OldCourseworkController {
 
 	var assignmentMembershipService = Wire[AssessmentMembershipService]
 
@@ -36,9 +37,9 @@ class AssignmentMarksTemplateController extends CourseworkController {
 }
 
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
-class AssignmentMarkerMarksTemplateController extends CourseworkController {
+class AssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")
 	def command(
@@ -58,9 +59,9 @@ class AssignmentMarkerMarksTemplateController extends CourseworkController {
 	}
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
-class CurrentAssignmentMarkerMarksTemplateController extends CourseworkController {
+class CurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

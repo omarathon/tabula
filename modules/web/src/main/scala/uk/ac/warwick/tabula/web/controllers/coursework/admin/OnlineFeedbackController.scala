@@ -2,21 +2,22 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 import javax.validation.Valid
 
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineFeedbackCommand, OnlineFeedbackFormCommand}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online"))
-class OnlineFeedbackController extends CourseworkController with AutowiringUserLookupComponent {
+class OnlineFeedbackController extends OldCourseworkController with AutowiringUserLookupComponent {
 
 	@ModelAttribute
 	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, submitter: CurrentUser) =
@@ -45,9 +46,9 @@ class OnlineFeedbackController extends CourseworkController with AutowiringUserL
 
 }
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
-class OnlineFeedbackFormController extends CourseworkController {
+class OnlineFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineFeedbackFormCommand]
 

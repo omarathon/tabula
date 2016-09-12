@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -11,15 +12,15 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkerAdd
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenerateGradesFromMarkCommand
 import uk.ac.warwick.tabula.services.coursework.docconversion.MarkItem
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.CourseworkController
+import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.services.{AssessmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
-class MarkerAddMarksController extends CourseworkController {
+class MarkerAddMarksController extends OldCourseworkController {
 
 	@Autowired var assignmentService: AssessmentService = _
 	@Autowired var userLookup: UserLookupService = _
@@ -123,9 +124,9 @@ class MarkerAddMarksController extends CourseworkController {
 }
 
 // Redirects users trying to access a marking workflow using the old style URL
-@Controller
+@Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks"))
-class MarkerAddMarksControllerCurrentUser extends CourseworkController {
+class MarkerAddMarksControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
 		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
