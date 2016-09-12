@@ -34,8 +34,8 @@ class StudentSignUpController extends GroupsController {
 		if (errors.hasErrors) {
 			Mav("groups/signup/problems", "action" -> "signup")
 		} else {
-			command.apply()
-			Redirect(Routes.home)
+			val set = command.apply()
+			Redirect(Routes.homeForYear(set.academicYear))
 		}
 	}
 }
@@ -70,8 +70,8 @@ class StudentUnSignUpController extends GroupsController {
 		if (errors.hasErrors) {
 			Mav("groups/signup/problems", "action" -> "leave")
 		} else {
-			command.apply()
-			Redirect(Routes.home)
+			val set = command.apply()
+			Redirect(Routes.homeForYear(set.academicYear))
 		}
 	}
 }

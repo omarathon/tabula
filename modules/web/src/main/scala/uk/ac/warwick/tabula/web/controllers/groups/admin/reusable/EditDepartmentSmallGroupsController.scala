@@ -4,13 +4,12 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{RequestMapping, PathVariable, ModelAttribute}
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, DepartmentSmallGroup}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.groups.admin.reusable.EditDepartmentSmallGroupsCommand
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 abstract class AbstractEditDepartmentSmallGroupsController extends GroupsController {
@@ -25,7 +24,7 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 		EditDepartmentSmallGroupsCommand(department, set)
 
 	protected def render(set: DepartmentSmallGroupSet) =
-		Mav(renderPath).crumbs(Breadcrumbs.Department(set.department), Breadcrumbs.Reusable(set.department))
+		Mav(renderPath).crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.Reusable(set.department, set.academicYear))
 
 	protected val renderPath: String
 
@@ -51,11 +50,11 @@ abstract class AbstractEditDepartmentSmallGroupsController extends GroupsControl
 		@Valid @ModelAttribute("command") cmd: EditDepartmentSmallGroupsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.reusable(set.department))
+	) = submit(cmd, errors, set, Routes.admin.reusable(set.department, set.academicYear))
 
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/new/{smallGroupSet}/groups"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/new/{smallGroupSet}/groups"))
 @Controller
 class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartmentSmallGroupsController {
 
@@ -84,7 +83,7 @@ class CreateDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepar
 
 }
 
-@RequestMapping(Array("/groups/admin/department/{department}/groups/reusable/edit/{smallGroupSet}/groups"))
+@RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/edit/{smallGroupSet}/groups"))
 @Controller
 class EditDepartmentSmallGroupSetAddGroupsController extends AbstractEditDepartmentSmallGroupsController {
 

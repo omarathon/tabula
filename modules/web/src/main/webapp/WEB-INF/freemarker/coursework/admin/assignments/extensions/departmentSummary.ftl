@@ -49,7 +49,7 @@
 <#escape x as x?html>
 
 	<div class="row-fluid extension-metadata">
-		<div class="span7">
+		<div class="span5">
 			<h1>Manage extensions</h1>
 			<h5><span class="muted">for</span> ${department.name} (${department.code?upper_case})</h5>
 		</div>
@@ -58,6 +58,26 @@
 				<i class="icon-envelope-alt"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
 			</p>
 		</div>
+		<div class="span2">
+			<div class="btn-group">
+				<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+					<i class="icon-calendar"></i>
+					${command.academicYear.label}
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu pull-right">
+					<#list academicYears as year>
+						<li><a href="<@routes.coursework.manage_extensions department year />">
+							<#if command.academicYear.startYear == year.startYear><strong>${year.toString}</strong><#else>${year.toString}</#if>
+						</a></li>
+					</#list>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="btn-toolbar dept-toolbar">
+
 	</div>
 
 	<#if extensionGraphs?size gt 0>

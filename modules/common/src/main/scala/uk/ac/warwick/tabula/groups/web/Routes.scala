@@ -16,9 +16,11 @@ object Routes {
 	import RoutesUtils._
 	private val context = "/groups"
 	def home = context + "/"
+	def homeForYear(academicYear: AcademicYear) = context + "/%s" format encoded(academicYear.startYear.toString)
 
 	object tutor {
 		def mygroups = context + "/tutor"
+		def mygroupsForYear(academicYear: AcademicYear) = context + "/tutor/%s" format encoded(academicYear.startYear.toString)
 		def registerForWeek (event: SmallGroupEvent, week: WeekNumber): String = context + "/event/%s/register?week=%s" format (encoded(event.id), encoded(week.toString))
 	}
 
@@ -27,8 +29,9 @@ object Routes {
 
 		def module(module: Module, year: AcademicYear): String = apply(module.adminDepartment, year) + s"?moduleFilters=Module(${module.code})"
 
-		def release(department: Department, year: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/groups/release/${year.startYear.toString}"
-		def selfsignup(department: Department, action: String) = context + "/admin/department/%s/groups/selfsignup/%s" format (encoded(department.code), encoded(action))
+		def release(department: Department, year: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${year.startYear.toString}/groups/release"
+		def selfsignup(department: Department, year: AcademicYear, action: String) =
+			context + "/admin/department/%s/%s/groups/selfsignup/%s".format(encoded(department.code), encoded(year.startYear.toString), encoded(action))
 
 		def create(module: Module) = context + "/admin/module/%s/groups/new" format encoded(module.code)
 		def create(set: SmallGroupSet) = context + "/admin/module/%s/groups/new/%s" format (encoded(set.module.code), encoded(set.id))
@@ -55,17 +58,28 @@ object Routes {
 		def importSpreadsheet(department: Department, academicYear: AcademicYear) = context + s"/admin/department/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/import-spreadsheet"
 
 		object reusable {
-			def apply(department: Department) = context + "/admin/department/%s/groups/reusable" format encoded(department.code)
-			def create(department: Department) = context + "/admin/department/%s/groups/reusable/new" format encoded(department.code)
-			def create(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s" format (encoded(set.department.code), encoded(set.id))
-			def createAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/students" format (encoded(set.department.code), encoded(set.id))
-			def createAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/groups" format (encoded(set.department.code), encoded(set.id))
-			def createAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/new/%s/allocate" format (encoded(set.department.code), encoded(set.id))
-			def edit(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s" format (encoded(set.department.code), encoded(set.id))
-			def editAddStudents(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/students" format (encoded(set.department.code), encoded(set.id))
-			def editAddGroups(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/groups" format (encoded(set.department.code), encoded(set.id))
-			def editAllocate(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/edit/%s/allocate" format (encoded(set.department.code), encoded(set.id))
-			def delete(set: DepartmentSmallGroupSet) = context + "/admin/department/%s/groups/reusable/delete/%s" format (encoded(set.department.code), encoded(set.id))
+			def apply(department: Department, academicYear: AcademicYear) =
+				context + "/admin/department/%s/%s/groups/reusable".format(encoded(department.code), encoded(academicYear.startYear.toString))
+			def create(department: Department, academicYear: AcademicYear) =
+				context + "/admin/department/%s/%s/groups/reusable/new".format(encoded(department.code), encoded(academicYear.startYear.toString))
+			def create(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/new/%s".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def createAddStudents(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/new/%s/students".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def createAddGroups(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/new/%s/groups".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def createAllocate(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/new/%s/allocate".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def edit(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/edit/%s".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def editAddStudents(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/edit/%s/students".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def editAddGroups(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/edit/%s/groups".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def editAllocate(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/edit/%s/allocate".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
+			def delete(set: DepartmentSmallGroupSet) =
+				context + "/admin/department/%s/%s/groups/reusable/delete/%s".format(encoded(set.department.code), encoded(set.academicYear.startYear.toString), encoded(set.id))
 		}
 	}
 }

@@ -28,7 +28,7 @@ trait MemberToJsonConverter {
 		}
 
 		def str(name: String, propertyName: String): Option[(String, String)] =
-			eval(s"$${$propertyName!}").map { name -> _ }
+			eval(s"$${($propertyName)!}").map { name -> _ }
 
 		def date(name: String, propertyName: String): Option[(String, String)] =
 			eval(s"$${($propertyName.toString())!}").map { name -> _ }

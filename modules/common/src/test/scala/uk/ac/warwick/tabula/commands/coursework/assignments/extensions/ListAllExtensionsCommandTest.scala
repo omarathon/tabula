@@ -29,7 +29,7 @@ class ListAllExtensionsCommandTest extends TestBase with Mockito {
 	@Test
 	def testApply() {
 		new Environment {
-			val command = new ListAllExtensionsCommand(dept)
+			val command = new ListAllExtensionsCommand(dept, year)
 			command.assignmentDao = assignmentDao
 			command.userLookup = userLookup
 

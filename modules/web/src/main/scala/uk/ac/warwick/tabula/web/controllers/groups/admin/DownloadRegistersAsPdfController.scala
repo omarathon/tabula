@@ -43,7 +43,7 @@ class DownloadRegistersAsPdfController extends GroupsController with DepartmentS
 	@RequestMapping(value = Array("/registers"))
 	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("groups/admin/groups/print")
-			.crumbs(Breadcrumbs.DepartmentForYear(department, academicYear))
+			.crumbs(Breadcrumbs.Department(department, academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.registers(department, year)):_*)
 	}
 

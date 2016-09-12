@@ -59,7 +59,7 @@
 					name="persist"
 					value="Save and exit"
 					/>
-				<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department />">Cancel</a>
+				<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department smallGroupSet.academicYear />">Cancel</a>
 			</p>
 		</div>
 	</div>

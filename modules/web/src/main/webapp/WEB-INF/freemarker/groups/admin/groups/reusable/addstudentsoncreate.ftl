@@ -60,7 +60,7 @@
 				title="Save your groups and add students and groups to it later"
 				data-container="body"
 			/>
-			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department />">Cancel</a>
+			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department smallGroupSet.academicYear />">Cancel</a>
 		</div>
 	</div>
 </form>

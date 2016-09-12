@@ -4,9 +4,12 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.groups._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class StudentSignUpControllerTest extends TestBase with Mockito {
+
+	val smallGroupSet = Fixtures.smallGroupSet("test")
+	smallGroupSet.academicYear = AcademicYear(2015)
 
 	@Test
 	def signupControllerConstructsAppropriateCommand() {
@@ -24,8 +27,9 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 	def signUpAppliesCommand(){
 		val controller = new StudentSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
-		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/groups/")
-		verify(command, times(1)).apply
+		command.apply() returns smallGroupSet
+		controller.signUp(command, new BindException(command, "command")).viewName should be(s"redirect:/groups/${smallGroupSet.academicYear.startYear.toString}")
+		verify(command, times(1)).apply()
 	}
 
 	@Test
@@ -44,7 +48,8 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 	def unSignUpAppliesCommand(){
 		val controller = new StudentUnSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
-		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/groups/")
-		verify(command, times(1)).apply
+		command.apply() returns smallGroupSet
+		controller.signUp(command, new BindException(command, "command")).viewName should be(s"redirect:/groups/${smallGroupSet.academicYear.startYear.toString}")
+		verify(command, times(1)).apply()
 	}
 }

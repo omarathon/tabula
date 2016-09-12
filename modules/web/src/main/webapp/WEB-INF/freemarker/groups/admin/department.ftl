@@ -72,7 +72,7 @@
 					</li>
 					<#if features.smallGroupCrossModules>
 						<li>
-							<#assign cross_module_url><@routes.groups.crossmodulegroups department /></#assign>
+							<#assign cross_module_url><@routes.groups.crossmodulegroups department adminCommand.academicYear /></#assign>
 							<@fmt.permission_button
 								permission='SmallGroups.Create'
 								scope=department
@@ -88,7 +88,7 @@
 
 					<#if features.smallGroupTeachingStudentSignUp>
 						<li ${hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")}>
-							<#assign open_url><@routes.groups.batchopen department /></#assign>
+							<#assign open_url><@routes.groups.batchopen department adminCommand.academicYear /></#assign>
 							<@fmt.permission_button
 								permission='SmallGroups.Update'
 								scope=department
@@ -99,7 +99,7 @@
 							</@fmt.permission_button>
 						</li>
 						<li ${hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")}>
-							<#assign close_url><@routes.groups.batchclose department /></#assign>
+							<#assign close_url><@routes.groups.batchclose department adminCommand.academicYear /></#assign>
 							<@fmt.permission_button
 								permission='SmallGroups.Update'
 								scope=department
@@ -272,6 +272,16 @@
 								   value="${f.name}"
 								   data-short-value="${f.description}"
 							${contains_by_filter_name(adminCommand.moduleFilters, f)?string('checked','')}>
+							${f.description}
+						</@filter>
+
+						<#assign placeholder = "All types" />
+						<#assign currentfilter><@current_filter_value "formatFilters" placeholder; f>${f.description}</@current_filter_value></#assign>
+						<@filter "formatFilters" placeholder currentfilter allFormatFilters; f>
+							<input type="checkbox" name="${status.expression}"
+								   value="${f.name}"
+								   data-short-value="${f.description}"
+							${contains_by_filter_name(adminCommand.formatFilters, f)?string('checked','')}>
 							${f.description}
 						</@filter>
 

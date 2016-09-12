@@ -4,15 +4,15 @@ import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.commands.{PopulateOnForm, MemberOrUser, Appliable}
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.groups.admin.DeregisteredStudentsForSmallGroupSetCommand
 import uk.ac.warwick.tabula.commands.groups.admin.DeregisteredStudentsForSmallGroupSetCommand.StudentNotInMembership
+import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser, PopulateOnForm}
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
-import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 @Controller
@@ -46,7 +46,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 	private def renderForm(set: SmallGroupSet, cmd: DeregisteredStudentsForSmallGroupSetCommand) =
 		Mav("groups/admin/groups/deregistered/form")
 			.crumbs(
-				Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear),
+				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
 				Breadcrumbs.ModuleForYear(set.module, set.academicYear)
 			)
 
@@ -64,7 +64,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 				"removed" -> removed,
 				"returnTo" -> Breadcrumbs.ModuleForYear(set.module, set.academicYear).url
 			).crumbs(
-				Breadcrumbs.DepartmentForYear(set.module.adminDepartment, set.academicYear),
+				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
 				Breadcrumbs.ModuleForYear(set.module, set.academicYear)
 			)
 		}

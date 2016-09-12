@@ -24,6 +24,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 	  signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText(academicYear.toString)
 
 		Then("I should see the groupset listed with a radio button beside each group")
 		val groupsPage = new GroupsHomePage
@@ -77,7 +79,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I Log in as the student and view the groups page")
 		signIn as P.Student1  to Path("/groups/")
-
+		// Ensure correct academic year
+		click on linkText("14/15")
 
 		val groupsPage = new GroupsHomePage
 
@@ -128,6 +131,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText(academicYear.toString)
 
 		Then("The groupset is not displayed")
 		val groupsPage = new GroupsHomePage
@@ -149,6 +154,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText("14/15")
 
 		Then("The groupset is displayed, and group 1's information is present")
 		val groupsPage = new GroupsHomePage
@@ -178,6 +185,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText(academicYear.toString)
 
 		Then("The groupset is not displayed")
 		val groupsPage = new GroupsHomePage
@@ -198,6 +207,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText("14/15")
 
 		Then("The groupset is displayed, and group 1's information is present")
 		val groupsPage = new GroupsHomePage
@@ -230,6 +241,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText(academicYear.toString)
 
 		Then("I should see the groupset listed with a radio button beside each group")
 		val groupsPage = new GroupsHomePage
@@ -262,6 +275,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I log in as the student and visit the groups home page")
 		signIn as P.Student1  to Path("/groups/")
+		// Ensure correct academic year
+		click on linkText("14/15")
 
 		Then("The groupset is displayed, and group 1's information is present")
 		val groupsPage = new GroupsHomePage

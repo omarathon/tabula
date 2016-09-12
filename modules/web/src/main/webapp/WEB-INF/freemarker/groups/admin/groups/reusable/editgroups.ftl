@@ -24,7 +24,7 @@
 				title="Save your groups and allocate students later"
 				data-container="body"
 			/>
-			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department />">Cancel</a>
+			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups smallGroupSet.department smallGroupSet.academicYear />">Cancel</a>
 		</@bs3form.form_group>
 	</@f.form>
 </#escape>

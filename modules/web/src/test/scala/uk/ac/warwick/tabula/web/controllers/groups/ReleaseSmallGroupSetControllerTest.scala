@@ -131,7 +131,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
       val formView = controller.submit(model, department, year)
 
-      formView.viewName should be("redirect:/groups/admin/department/xyz/groups/release/2014")
+      formView.viewName should be("redirect:/groups/admin/department/xyz/2014/groups/release")
       formView.map.get("batchReleaseSuccess") should be(Some(true))
     }
   }

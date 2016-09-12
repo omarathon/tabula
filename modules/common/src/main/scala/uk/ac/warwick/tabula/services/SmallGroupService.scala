@@ -72,7 +72,6 @@ trait SmallGroupService {
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
-	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
@@ -280,7 +279,6 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = smallGroupDao.hasSmallGroups(module, academicYear)
 
-	def getDepartmentSmallGroupSets(department: Department) = smallGroupDao.getDepartmentSmallGroupSets(department)
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.getDepartmentSmallGroupSets(department, year)
 
 	def delete(occurrence: SmallGroupEventOccurrence) {

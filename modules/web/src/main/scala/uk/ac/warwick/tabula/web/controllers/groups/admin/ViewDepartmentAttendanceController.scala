@@ -4,16 +4,14 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.groups.admin.{ViewDepartmentAttendanceCommandState, ViewDepartmentAttendanceCommand}
+import uk.ac.warwick.tabula.commands.groups.admin.{ViewDepartmentAttendanceCommand, ViewDepartmentAttendanceCommandState}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.groups.{GroupsDepartmentsAndModulesWithPermission, GroupsController}
+import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-
-import scala.collection.JavaConverters._
 
 abstract class AbstractViewDepartmentAttendanceController extends GroupsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
@@ -30,7 +28,7 @@ abstract class AbstractViewDepartmentAttendanceController extends GroupsControll
 	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]] with ViewDepartmentAttendanceCommandState) = {
 		Mav("groups/attendance/view_department",
 			"modules" -> cmd.apply()
-		).crumbs(Breadcrumbs.DepartmentForYear(cmd.department, cmd.academicYear))
+		).crumbs(Breadcrumbs.Department(cmd.department, cmd.academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(cmd.academicYear)(year => Routes.admin.departmentAttendance(cmd.department, year)):_*)
 	}
 

@@ -15,9 +15,9 @@
 		</@bs3form.labelled_form_group>
 
 		<@bs3form.labelled_form_group path="academicYear" labelText="Academic year">
-			<@f.select path="academicYear" id="academicYear" cssClass="form-control">
-				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
-			</@f.select>
+			<@spring.bind path="academicYear">
+			<p class="form-control-static">${status.actualValue.label} <span class="very-subtle">(can't be changed)</span></p>
+			</@spring.bind>
 		</@bs3form.labelled_form_group>
 
 		<@bs3form.form_group>
@@ -37,7 +37,7 @@
 				title="Save your groups and add students and groups to it later"
 				data-container="body"
 			/>
-			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups department />">Cancel</a>
+			<a class="btn btn-default" href="<@routes.groups.crossmodulegroups department academicYear />">Cancel</a>
 		</@bs3form.form_group>
 	</@f.form>
 </#escape>

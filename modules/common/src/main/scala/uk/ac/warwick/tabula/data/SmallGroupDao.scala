@@ -84,7 +84,6 @@ trait SmallGroupDao {
 	def hasSmallGroups(module: Module): Boolean
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
-	def getDepartmentSmallGroupSets(department: Department): Seq[DepartmentSmallGroupSet]
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
@@ -279,15 +278,6 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.add(is("academicYear", academicYear))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
-	}
-
-	def getDepartmentSmallGroupSets(department: Department) = {
-		session.newCriteria[DepartmentSmallGroupSet]
-			.add(is("department", department))
-			.add(is("deleted", false))
-			.add(is("archived", false))
-			.addOrder(asc("name"))
-			.seq
 	}
 
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = {

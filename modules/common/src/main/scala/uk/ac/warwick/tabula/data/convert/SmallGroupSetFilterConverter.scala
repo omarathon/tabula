@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.data.convert
 
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupSetFilters, SmallGroupSetFilter}
-import uk.ac.warwick.tabula.services.{SmallGroupService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupSetFilter, SmallGroupSetFilters, WeekRange}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, SmallGroupService}
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import scala.util.Try
 
 class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSetFilter] {
 
@@ -18,7 +20,11 @@ class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSet
 			SmallGroupSetFilters.AllocationMethod.Linked(smallGroupService.getDepartmentSmallGroupSetById(id).getOrElse { throw new IllegalArgumentException })
 		case r"Term\(([^\)]+)${name}, ([0-9]+)${minWeek}, ([0-9]+)${maxWeek}\)" =>
 			SmallGroupSetFilters.Term(name, WeekRange(minWeek.toInt, maxWeek.toInt))
-		case _ => SmallGroupSetFilters.of(source)
+		case _ =>
+			Try(SmallGroupFormat.fromCode(source)).map(SmallGroupSetFilters.Format).getOrElse(
+				SmallGroupSetFilters.of(source)
+			)
+
 	}
 
 	override def convertLeft(source: SmallGroupSetFilter) = Option(source).map { _.getName }.orNull

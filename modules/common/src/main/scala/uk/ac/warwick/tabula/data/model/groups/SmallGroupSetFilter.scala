@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.services.TermService
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model
 
 sealed trait SmallGroupSetFilter {
 	def description: String
@@ -36,7 +35,15 @@ object SmallGroupSetFilters {
 		def apply(set: SmallGroupSet) = set.module == module
 	}
 
-	def allModuleFilters(modules: Seq[model.Module]) = modules.map { Module(_) }
+	def allModuleFilters(modules: Seq[model.Module]) = modules.map { Module }
+
+	case class Format(format: SmallGroupFormat) extends SmallGroupSetFilter {
+		val description = format.description
+		override val getName = format.code
+		def apply(set: SmallGroupSet) = set.format == format
+	}
+
+	def allFormatFilters = SmallGroupFormat.members.map { Format }
 
 	object Status {
 		case object NeedsGroupsCreating extends SmallGroupSetFilter {
@@ -86,12 +93,12 @@ object SmallGroupSetFilters {
 			def apply(set: SmallGroupSet) = set.linked && set.linkedDepartmentSmallGroupSet == linked
 		}
 
-		def all(linked: Seq[DepartmentSmallGroupSet]) = Seq(ManuallyAllocated, StudentSignUp) ++ linked.map { Linked(_) }
+		def all(linked: Seq[DepartmentSmallGroupSet]) = Seq(ManuallyAllocated, StudentSignUp) ++ linked.map { Linked }
 	}
 
 	case class Term(termName: String, weekRange: WeekRange) extends SmallGroupSetFilter {
 		val description = termName
-		override val getName = s"Term(${termName}, ${weekRange.minWeek}, ${weekRange.maxWeek})"
+		override val getName = s"Term($termName, ${weekRange.minWeek}, ${weekRange.maxWeek})"
 		def apply(set: SmallGroupSet) =
 			set.groups.asScala
 				.flatMap { _.events }
@@ -112,7 +119,7 @@ object SmallGroupSetFilters {
 					(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
 				}
 				.toSeq
-				.sortBy { case (_, weekRange) => weekRange.minWeek.toInt }
+				.sortBy { case (_, weekRange) => weekRange.minWeek }
 
 		TermService.orderedTermNames.zip(terms).map { case (name, (term, weekRange)) => Term(name, weekRange) }
 	}
