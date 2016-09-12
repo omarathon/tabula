@@ -9,7 +9,6 @@ import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
 import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
-import org.apache.http.auth.AuthScope
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module
@@ -39,8 +38,6 @@ object FilenameGenerationStrategy {
 
 trait CelcatConfiguration {
 	val departmentConfiguration: Map[String, CelcatDepartmentConfiguration]
-	val authScope: AuthScope
-	val credentials: Credentials
 	val cacheEnabled: Boolean
 }
 
@@ -53,7 +50,8 @@ case class CelcatDepartmentConfiguration(
 	excludedEventTypes: Seq[TimetableEventType] = Nil,
 	staffFilenameLookupStrategy: FilenameGenerationStrategy = FilenameGenerationStrategy.Default,
 	staffListInBSV: Boolean = false,
-	enabledFn: () => Boolean = { () => true }
+	enabledFn: () => Boolean = { () => true },
+	credentials: Credentials
 ) {
 	def enabled = enabledFn()
 }
@@ -67,12 +65,18 @@ trait AutowiringCelcatConfigurationComponent extends CelcatConfigurationComponen
 				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
 				staffFilenameLookupStrategy = FilenameGenerationStrategy.BSV,
 				staffListInBSV = true,
-				enabledFn = { () => features.celcatTimetablesChemistry }
+				enabledFn = { () => features.celcatTimetablesChemistry },
+				credentials = Credentials(Wire.property("${celcat.fetcher.ch.username}"), Wire.property("${celcat.fetcher.ch.password}"))
+			),
+			"ib" -> CelcatDepartmentConfiguration(
+				baseUri = "https://137.205.14.38:443",
+				staffFilenameLookupStrategy = FilenameGenerationStrategy.Default,
+				staffListInBSV = false,
+				enabledFn = { () => features.celcatTimetablesWBS },
+				credentials = Credentials(Wire.property("${celcat.fetcher.ib.username}"), Wire.property("${celcat.fetcher.ib.password}"))
 			)
 		)
 
-		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
-		lazy val credentials = Credentials(Wire.property("${celcat.fetcher.username}"), Wire.property("${celcat.fetcher.password}"))
 		val cacheEnabled = true
 	}
 }
@@ -275,9 +279,13 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 	type BSVCacheEntry = Seq[(UniversityId, CelcatStaffInfo)] with java.io.Serializable
 	val bsvCacheEntryFactory = new SingularCacheEntryFactory[String, BSVCacheEntry] {
 		def create(baseUri: String) = {
+			val config = configs.filter { case (_, deptConfig) => deptConfig.baseUri == baseUri }
+				.map { case (_, deptConfig) => deptConfig }
+				.headOption.getOrElse(throw new IllegalArgumentException(s"No such config with baseUri $baseUri"))
+
 			val req =
 				(url(baseUri) / "staff.bsv" <<? Map("forcebasic" -> "true"))
-					.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
+					.as_!(config.credentials.username, config.credentials.password)
 
 			def bsvHandler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 				req >- { _.split('\n').flatMap { _.split("\\|", 4) match {
@@ -325,7 +333,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		// Add {universityId}.ics to the URL
 		val req =
 			(url(config.baseUri) / filename <<? Map("forcebasic" -> "true"))
-				.as_!(celcatConfiguration.credentials.username, celcatConfiguration.credentials.password)
+				.as_!(config.credentials.username, config.credentials.password)
 
 		// Execute the request
 		// If the status is OK, pass the response to the handler function for turning into TimetableEvents
