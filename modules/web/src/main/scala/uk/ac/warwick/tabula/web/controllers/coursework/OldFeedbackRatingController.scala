@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 
-@RequestMapping(Array("/abccoursework/module/{module}/{assignment}/rate"))
+@RequestMapping(Array("/coursework/module/{module}/{assignment}/rate"))
 @Profile(Array("cm1Enabled")) @Controller
 class OldFeedbackRatingController extends OldCourseworkController {
 

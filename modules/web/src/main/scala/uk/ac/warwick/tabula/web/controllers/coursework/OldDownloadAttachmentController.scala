@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/blah/courseworkkkk/module/{module}/{assignment}"))
+@RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
 class OldDownloadAttachmentController extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
