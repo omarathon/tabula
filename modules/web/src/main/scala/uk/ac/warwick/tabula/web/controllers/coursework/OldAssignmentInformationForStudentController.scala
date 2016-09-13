@@ -25,7 +25,7 @@ class OldAssignmentInformationForStudentController extends OldCourseworkControll
 		val info = command.apply()
 
 		Mav(
-			"coursework/submit/assignment",
+			s"$urlPrefix/submit/assignment",
 			"feedback" -> info.feedback,
 			"submission" -> info.submission,
 			"justSubmitted" -> false,
