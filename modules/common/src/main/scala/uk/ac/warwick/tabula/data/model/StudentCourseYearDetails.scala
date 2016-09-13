@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence._
 
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
-import org.hibernate.annotations.{Filter, FilterDef, FilterDefs, Filters, Type}
+import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
 import org.joda.time.{DateTime, Duration}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService, UserLookupService}
@@ -19,6 +19,8 @@ import uk.ac.warwick.util.termdates.TermNotFoundException
 import scala.beans.BeanProperty
 
 object StudentCourseYearDetails {
+	type YearOfStudy = Int
+
 	final val FreshCourseYearDetailsOnlyFilter = "freshStudentCourseYearDetailsOnly"
 
 	object Overcatting {
@@ -35,7 +37,7 @@ object StudentCourseYearDetails {
 @Filters(Array(
 	new Filter(name = StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
 ))
-@Entity
+@javax.persistence.Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
 	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
@@ -43,7 +45,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@transient
 	var termService = Wire.auto[TermService]
 
-	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger,year:AcademicYear) {
+	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger, year:AcademicYear) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
 		this.sceSequenceNumber = sceSequenceNumber
@@ -170,17 +172,14 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	final var agreedMarkUploadedDate: DateTime = _
 
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
-	final var agreedMarkUploadedBy: User = null
+	final var agreedMarkUploadedBy: User = _
 
-	def toGenerateExamGridEntity(identifier: Option[String] = None) = GenerateExamGridEntity(
-		identifier.getOrElse(id),
-		studentCourseDetails.student.fullName.getOrElse("[Unknown]"),
-		studentCourseDetails.student.universityId,
-		moduleRegistrations,
-		moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
-		overcattingModules,
-		None,
-		Some(this)
+	def toExamGridEntityYear = ExamGridEntityYear(
+		moduleRegistrations = moduleRegistrations,
+		cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+		overcattingModules = overcattingModules,
+		markOverrides = None,
+		studentCourseYearDetails = Some(this)
 	)
 
 	override def postLoad {
@@ -207,7 +206,7 @@ trait BasicStudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4Visa: JBoolean = _
 
-	var agreedMark: JBigDecimal = null
+	var agreedMark: JBigDecimal = _
 
 }
 

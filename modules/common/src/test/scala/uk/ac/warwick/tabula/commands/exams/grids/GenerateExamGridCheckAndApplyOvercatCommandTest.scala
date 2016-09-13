@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula._
 
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
@@ -38,125 +37,123 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterNotOvercat(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad, null, null, null)
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
-		}
-		state.selectCourseCommand = selectCourseCommand
-		state.filteredEntities.isEmpty should be {true}
-	}}
-
-	@Test
-	def stateFilterNoValidSubset(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, null, None, null)
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad, None, None, None)))
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq()
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(null)
 		state.filteredEntities.isEmpty should be {true}
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def stateFilterNoOvercatSelection(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, None, None, null)
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, None, None, None)))
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(null)
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(null, null)
 		state.filteredEntities.isEmpty should be {false}
-		state.filteredEntities.head._1 should be (entity)
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		state.filteredEntities.head should be (entity)
+		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def stateFilterSameModule(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1)), None, null)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1)), None, None)))
 
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
 
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr1)))
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr1)))
 
 		state.filteredEntities.isEmpty should be {true}
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def stateFilterDifferentModule(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module2)), None, null)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module2)), None, None)))
 
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
 
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr1)))
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(
+			(BigDecimal(50), Seq(mr1)),
+			(BigDecimal(40), Seq(mr2))
+		)
 
 		state.filteredEntities.isEmpty should be {false}
-		state.filteredEntities.head._1 should be (entity)
-		state.filteredEntities.head._2 should be (Seq((BigDecimal(0), Seq(mr1))))
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		state.filteredEntities.head should be (entity)
+		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1))
+		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def stateFilterExtraModule(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1)), None, null)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1)), None, None)))
 
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
 
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr1, mr2)))
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(
+			(BigDecimal(50), Seq(mr1, mr2)),
+			(BigDecimal(40), Seq(mr1))
+		)
 
 		state.filteredEntities.isEmpty should be {false}
-		state.filteredEntities.head._1 should be (entity)
-		state.filteredEntities.head._2 should be (Seq((BigDecimal(0), Seq(mr1, mr2))))
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		state.filteredEntities.head should be (entity)
+		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def stateFilterRemovedModule(): Unit = { new StateFixture {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1, module2)), None, null)
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, Some(Seq(module1, module2)), None, None)))
 
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = Seq(entity)
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
 			yearOfStudy = thisYearOfStudy
 		}
 		state.selectCourseCommand = selectCourseCommand
 
-		state.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr2)))
+		state.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(
+			(BigDecimal(50), Seq(mr2)),
+			(BigDecimal(40), Seq(mr1, mr2))
+		)
 
 		state.filteredEntities.isEmpty should be {false}
-		state.filteredEntities.head._1 should be (entity)
-		state.filteredEntities.head._2 should be (Seq((BigDecimal(0), Seq(mr2))))
-		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		state.filteredEntities.head should be (entity)
+		state.overcatSubsets(state.filteredEntities.head).head should be (BigDecimal(50), Seq(mr2))
+		verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 	}}
 
 	@Test
 	def apply(): Unit = {
-		val entity = GenerateExamGridEntity(null, null, null, null, ModuleRegistrationService.DefaultNormalLoad + 15, None, None, Option(scyd))
+		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, ModuleRegistrationService.DefaultNormalLoad + 15, None, None, Option(scyd))))
 
 		var fetchCount = 0
 
-		val selectCourseCommand = new Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
-			override def apply(): Seq[GenerateExamGridEntity] = {
+		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
+			override def apply(): Seq[ExamGridEntity] = {
 				fetchCount = fetchCount + 1
 				Seq(entity)
 			}
@@ -175,18 +172,21 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 		cmd.upstreamRouteRuleService.findNormalLoad(thisRoute, thisAcademicYear, thisYearOfStudy) returns None
 		cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, thisYearOfStudy) returns Seq()
 		cmd.selectCourseCommand = selectCourseCommand
-		cmd.moduleRegistrationService.overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq((BigDecimal(0), Seq(mr1, mr2)))
+		cmd.moduleRegistrationService.overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq()) returns Seq(
+			(BigDecimal(50), Seq(mr1, mr2)),
+			(BigDecimal(40), Seq(mr1))
+		)
 		cmd.filteredEntities.isEmpty should be {false}
-		cmd.filteredEntities.head._1 should be (entity)
-		cmd.filteredEntities.head._2 should be (Seq((BigDecimal(0), Seq(mr1, mr2))))
-		verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity, Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
+		cmd.filteredEntities.head should be (entity)
+		cmd.overcatSubsets(cmd.filteredEntities.head).head should be (BigDecimal(50), Seq(mr1, mr2))
+		verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.years(thisYearOfStudy), Map(), ModuleRegistrationService.DefaultNormalLoad, Seq())
 
 		val result = cmd.applyInternal()
 		result.entities.size should be (1)
 		result.entities.head should be (entity)
 		result.updatedEntities.keys.head should be (entity)
-		entity.studentCourseYearDetails.get.overcattingModules.nonEmpty should be {true}
-		entity.studentCourseYearDetails.get.overcattingModules.get should be (Seq(module1, module2))
+		entity.years(thisYearOfStudy).studentCourseYearDetails.get.overcattingModules.nonEmpty should be {true}
+		entity.years(thisYearOfStudy).studentCourseYearDetails.get.overcattingModules.get should be (Seq(module1, module2))
 		assert(fetchCount == 2)
 	}
 

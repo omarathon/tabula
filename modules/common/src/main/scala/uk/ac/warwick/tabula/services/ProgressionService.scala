@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{UpstreamRouteRule, CourseYearWeighting, ModuleRegistration, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, ModuleRegistration, StudentCourseYearDetails, UpstreamRouteRule}
 import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, CourseDaoComponent}
 
 import scala.math.BigDecimal.RoundingMode
@@ -111,14 +111,15 @@ abstract class AbstractProgressionService extends ProgressionService {
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FirstYearRequiredCredits
 		val passedCoreRequired = coreRequiredModules.forall(cr => passedModuleRegistrations.exists(_.module == cr.module))
-		val overallMarkSatisfied = getYearMark(scyd, normalLoad, routeRules).map(mark => mark >= ProgressionService.FirstYearPassMark)
+		val overallMark = getYearMark(scyd, normalLoad, routeRules)
 
-		if (overallMarkSatisfied.isEmpty) {
-			ProgressionResult.Unknown("Over Catted Mark not yet chosen")
+		if (overallMark.isLeft) {
+			ProgressionResult.Unknown(overallMark.left.get)
 		} else {
-			if (passedCredits && passedCoreRequired && overallMarkSatisfied.get) {
+			val overallMarkSatisfied = overallMark.right.get >= ProgressionService.FirstYearPassMark
+			if (passedCredits && passedCoreRequired && overallMarkSatisfied) {
 				ProgressionResult.Proceed
-			} else if (passedCoreRequired && overallMarkSatisfied.get) {
+			} else if (passedCoreRequired && overallMarkSatisfied) {
 				ProgressionResult.PossiblyProceed
 			} else {
 				ProgressionResult.Resit
@@ -132,12 +133,13 @@ abstract class AbstractProgressionService extends ProgressionService {
 	private def suggestedResultIntermediateYear(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): ProgressionResult = {
 		val passedModuleRegistrations = scyd.moduleRegistrations.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
 		val passedCredits = passedModuleRegistrations.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.IntermediateRequiredCredits
-		val overallMarkSatisfied = getYearMark(scyd, normalLoad, routeRules).map(mark => mark >= ProgressionService.IntermediateYearPassMark)
+		val overallMark = getYearMark(scyd, normalLoad, routeRules)
 
-		if (overallMarkSatisfied.isEmpty) {
+		if (overallMark.isLeft) {
 			ProgressionResult.Unknown("Over Catted Mark not yet chosen")
 		} else {
-			if (passedCredits && overallMarkSatisfied.get) {
+			val overallMarkSatisfied = overallMark.right.get >= ProgressionService.IntermediateYearPassMark
+			if (passedCredits && overallMarkSatisfied) {
 				ProgressionResult.Proceed
 			} else {
 				ProgressionResult.Resit
@@ -164,22 +166,22 @@ abstract class AbstractProgressionService extends ProgressionService {
 					(year, Option(scyd))
 				}
 			})
-			lazy val markPerYear: Seq[(Int, Option[BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad, routeRules)
+			lazy val markPerYear: Seq[(Int, Either[String, BigDecimal])] = getMarkPerYear(scyd, scydPerYear, finalYearOfStudy, normalLoad, routeRules)
 			lazy val yearWeightings: Seq[(Int, Option[CourseYearWeighting])] = markPerYear.map { case (year, _) =>
 				(year, courseDao.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.academicYear, year))
 			}
-			if (markPerYear.exists(_._2.isEmpty)) {
-				FinalYearGrade.Unknown(s"Could not find agreed mark for years: ${markPerYear.filter(_._2.isEmpty).map(_._1).mkString(", ")}")
-			} else if (yearWeightings.exists(_._2.isEmpty)) {
+			if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
+				FinalYearGrade.Unknown(markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }.map { case (_, possibleMark) => possibleMark.left.get}.mkString(", "))
+			} else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty } ) {
 				FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
 					yearWeightings.filter(_._2.isEmpty).map(_._1).map(year => s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.academicYear.toString} Year $year").mkString(", ")
 				))
 			} else {
 				weightedFinalYearGrade(
 					scyd,
-					scydPerYear.map{case (year, option) => (year, option.get)},
-					markPerYear.map{case (year, option) => (year, option.get)},
-					yearWeightings.map{case (year, option) => (year, option.get)}
+					scydPerYear.map { case (year, option) => (year, option.get)},
+					markPerYear.map { case (year, possibleMark) => (year, possibleMark.right.get)},
+					yearWeightings.map { case (year, option) => (year, option.get)}
 				)
 			}
 		} else {
@@ -193,40 +195,39 @@ abstract class AbstractProgressionService extends ProgressionService {
 		finalYearOfStudy: Int,
 		normalLoad: BigDecimal,
 		routeRules: Seq[UpstreamRouteRule]
-	): Seq[(Int, Option[BigDecimal])] = {
+	): Seq[(Int, Either[String, BigDecimal])] = {
 		scydPerYear.map{ case (year, scydOption) =>
-			(year, scydOption.flatMap(thisScyd => {
+			(year, scydOption.map(thisScyd => {
 				if (year != finalYearOfStudy) {
-					Option(thisScyd.agreedMark).map(mark => BigDecimal(mark))
+					Option(thisScyd.agreedMark) match {
+						case Some(mark) => Right(BigDecimal(mark))
+						case _ => Left(s"Could not find agreed mark for year $year")
+					}
 				} else {
 					getYearMark(scyd, normalLoad, routeRules)
 				}
-			}))
+			}).getOrElse(Left(s"Could not find course details for year $year")))
 		}
 	}
 
-	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Option[BigDecimal] = {
-		val weightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
-		val cats = scyd.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum
-		if (cats > normalLoad) {
-			if (moduleRegistrationService.overcattedModuleSubsets(scyd.toGenerateExamGridEntity(None), Map(), normalLoad, routeRules).size <= 1) {
-				// If the student has overcatted, but there's only one valid subset, just choose the mean mark
-				weightedMeanMark
-			} else if (scyd.overcattingModules.isDefined) {
-				// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
-				// calculate the overcatted mark from that subset
-				val overcatMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations.filter(mr => scyd.overcattingModules.get.contains(mr.module)), Map())
-				// Providing they're both defined, return the larger
-				if (weightedMeanMark.isDefined && overcatMark.isDefined) {
-					Option(Seq(weightedMeanMark.get, overcatMark.get).max)
-				} else {
-					None
+	private def getYearMark(scyd: StudentCourseYearDetails, normalLoad: BigDecimal, routeRules: Seq[UpstreamRouteRule]): Either[String, BigDecimal] = {
+		val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, Map())
+		val entityYear = scyd.toExamGridEntityYear
+		val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
+		if (overcatSubsets.size <= 1) {
+			// If the there's only one valid subset, just choose the mean mark
+			possibleWeightedMeanMark
+		} else if (scyd.overcattingModules.isDefined) {
+			// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
+			// find the subset that matches those modules, and show that mark if found
+			overcatSubsets.find { case (_, subset) => subset.size == entityYear.overcattingModules.get.size && subset.map(_.module).forall(entityYear.overcattingModules.get.contains) }
+				.map { case (overcatMark, _) => possibleWeightedMeanMark match {
+					case Right(mark) => Right(Seq(mark, overcatMark).max)
+					case Left(message) => Left(message)
 				}
-			}  else {
-				None
-			}
+			}.getOrElse(Left("Could not find valid module registration subset matching chosen subset"))
 		} else {
-			weightedMeanMark
+			Left("The overcat adjusted mark subset has not been chosen")
 		}
 	}
 

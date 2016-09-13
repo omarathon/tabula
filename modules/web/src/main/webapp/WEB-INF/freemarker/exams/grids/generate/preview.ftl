@@ -1,5 +1,4 @@
 <#escape x as x?html>
-<#import "grid_macros.ftl" as grid />
 
 <#function route_function dept>
 	<#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
@@ -21,6 +20,7 @@
 		<#list gridOptionsCommand.customColumnTitles as column>
 			<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
 		</#list>
+		<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 
 		<h2>Preview and download</h2>
 
@@ -111,7 +111,7 @@
 					</tr>
 					<tr>
 						<th>Student Count:</th>
-						<td>${scyds?size}</td>
+						<td>${entities?size}</td>
 					</tr>
 					<tr>
 						<th>Grid Generated:</th>
@@ -136,12 +136,24 @@
 						<td>Used in overcatting calculation</td>
 					</tr>
 					<tr>
-						<td>#?</td>
-						<td>Agreed mark missing (using actual mark)</td>
+						<td><span class="exam-grid-actual-mark">#</span></td>
+						<td>Agreed mark missing, using actual</td>
 					</tr>
 					<tr>
-						<td>?</td>
-						<td>Agreed mark and actual mark missing</td>
+						<td><span class="exam-grid-actual-mark">X</span></td>
+						<td>Agreed and actual mark missing</td>
+					</tr>
+					<tr>
+						<td><span class="exam-grid-actual-mark exam-grid-overcat">#</span></td>
+						<td>Actual mark used in overcatting calculation</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>Blank indicates module not taken by student</td>
+					</tr>
+					<tr>
+						<td><strong>AB</strong></td>
+						<td>Bold module name indicates a duplicate table entry</td>
 					</tr>
 				</tbody>
 			</table>
@@ -149,21 +161,103 @@
 
 		<table class="table table-condensed grid">
 			<tbody>
-				<#if categories?keys?has_content>
-					<tr class="category">
-						<@grid.categoryRow categories columns />
-					</tr>
-					<tr class="title-in-category">
-						<@grid.titleInCategoryRow categories columns />
-					</tr>
-				</#if>
-				<tr>
-					<@grid.headerRow columns />
+				<#-- Year row -->
+				<tr class="year">
+					<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
+					<td class="spacer">&nbsp;</td>
+					<#list perYearColumns?keys?sort as year>
+						<th colspan="${mapGet(perYearColumns, year)?size}">Year ${year}</th>
+						<td class="spacer">&nbsp;</td>
+					</#list>
+					<#list summaryColumns as column><td class="borderless">&nbsp;</td></#list>
 				</tr>
-				<#list scyds as scyd>
+				<#-- Category row -->
+				<tr class="category">
+					<#assign currentCategory = '' />
+					<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
+					<td class="spacer">&nbsp;</td>
+					<#list perYearColumns?keys?sort as year>
+						<#list mapGet(perYearColumns, year) as column>
+							<#if column.category?has_content>
+								<#if currentCategory != column.category>
+									<#assign currentCategory = column.category />
+									<th class="rotated" colspan="${mapGet(perYearColumnCategories, year)[column.category]?size}"><div class="rotate">${column.category}</div></th>
+								</#if>
+							<#else>
+								<td>&nbsp;</td>
+							</#if>
+						</#list>
+						<td class="spacer">&nbsp;</td>
+					</#list>
+					<#list summaryColumns as column>
+						<#if column.category?has_content>
+							<#if currentCategory != column.category>
+								<#assign currentCategory = column.category />
+								<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+							</#if>
+						<#else>
+							<td>&nbsp;</td>
+						</#if>
+					</#list>
+				</tr>
+				<#-- Header row -->
+				<tr class="header">
+					<#list studentInformationColumns as column>
+						<th <#if !column.secondaryValue?has_content>rowspan="2"</#if>>${column.title}</th>
+					</#list>
+					<td class="spacer">&nbsp;</td>
+					<#list perYearColumns?keys?sort as year>
+						<#list mapGet(perYearColumns, year) as column>
+							<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+						</#list>
+						<td class="spacer">&nbsp;</td>
+					</#list>
+					<#list summaryColumns as column>
+						<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+					</#list>
+				</tr>
+				<#-- Secondary value row -->
+				<tr class="secondary">
+					<td class="spacer">&nbsp;</td>
+					<#list perYearColumns?keys?sort as year>
+						<#list mapGet(perYearColumns, year) as column>
+							<#if column.secondaryValue?has_content><th <#if column.category?has_content>class="has-category"</#if>>${column.secondaryValue}</th></#if>
+						</#list>
+						<td class="spacer">&nbsp;</td>
+					</#list>
+				</tr>
+
+				<#-- Entities -->
+				<#list entities as entity>
 					<tr class="student">
-						<#assign isFirstSCYD = scyd_index == 0 />
-						<@grid.entityRows scyd isFirstSCYD scyds?size columns columnValues />
+						<#list studentInformationColumns as column>
+							<td>
+								<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+								<#if hasValue>
+									<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+								</#if>
+							</td>
+						</#list>
+						<td class="spacer">&nbsp;</td>
+						<#list perYearColumns?keys?sort as year>
+							<#list mapGet(perYearColumns, year) as column>
+								<td>
+									<#assign hasValue = mapGet(perYearColumnValues, column)?? && mapGet(mapGet(perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year)?? />
+									<#if hasValue>
+										<#noescape>${mapGet(mapGet(mapGet(perYearColumnValues, column), entity), year).toHTML}</#noescape>
+									</#if>
+								</td>
+							</#list>
+							<td class="spacer">&nbsp;</td>
+						</#list>
+						<#list summaryColumns as column>
+							<td>
+								<#assign hasValue = mapGet(chosenYearColumnValues, column)?? && mapGet(mapGet(chosenYearColumnValues, column), entity)?? />
+								<#if hasValue>
+									<#noescape>${mapGet(mapGet(chosenYearColumnValues, column), entity).toHTML}</#noescape>
+								</#if>
+							</td>
+						</#list>
 					</tr>
 				</#list>
 			</tbody>
