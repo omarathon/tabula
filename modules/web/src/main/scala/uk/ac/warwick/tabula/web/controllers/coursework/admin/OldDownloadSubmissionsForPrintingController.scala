@@ -53,7 +53,7 @@ class OldDownloadAdminSubmissionsForPrintingController extends OldDownloadSubmis
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.pdf"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.pdf"))
 class OldDownloadMarkerSubmissionsForPrintingController extends OldDownloadSubmissionsForPrintingController {
 
 	@ModelAttribute("command")

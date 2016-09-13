@@ -56,7 +56,7 @@ object OldAssignMarkersController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/assign-markers"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/assign-markers"))
 class OldAssignmentAssignMarkersController extends OldCourseworkController {
 
 	import OldAssignMarkersController._

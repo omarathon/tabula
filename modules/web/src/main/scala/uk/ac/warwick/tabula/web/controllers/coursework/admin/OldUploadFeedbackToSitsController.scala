@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/upload-to-sits"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/upload-to-sits"))
 class OldUploadFeedbackToSitsController extends OldCourseworkController {
 
 	@ModelAttribute("command")

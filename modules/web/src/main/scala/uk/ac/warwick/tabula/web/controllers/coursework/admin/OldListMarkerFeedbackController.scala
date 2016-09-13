@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/list"))
 class OldListMarkerFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -65,7 +65,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/list"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/list"))
 class OldListCurrentUsersMarkerFeedbackController extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/submission-receipt.pdf"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/submission-receipt.pdf"))
 class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems
@@ -42,7 +42,7 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
 class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCourseworkController {
 
 	hideDeletedItems

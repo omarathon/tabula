@@ -13,7 +13,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/archive-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/archive-assignments"))
 class OldArchiveModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
@@ -37,7 +37,7 @@ class OldArchiveModuleAssignmentsController extends OldCourseworkController with
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/department/{department}/archive-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/archive-assignments"))
 class OldArchiveDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute

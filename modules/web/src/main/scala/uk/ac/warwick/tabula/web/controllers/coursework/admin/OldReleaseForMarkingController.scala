@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
 class OldReleaseForMarkingController extends OldCourseworkController {
 
 	type ReleaseForMarkingCommand = Appliable[List[Feedback]] with ReleaseForMarkingState

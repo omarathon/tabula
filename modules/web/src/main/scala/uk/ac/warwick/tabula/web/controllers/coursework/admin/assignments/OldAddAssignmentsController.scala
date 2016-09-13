@@ -31,7 +31,7 @@ import scala.collection.JavaConversions._
  * - Finally we submit everything to submit().
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/department/{department}/setup-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/setup-assignments"))
 class OldAddAssignmentsController extends OldCourseworkController {
 
 	type AddAssignmentsCommand = Appliable[Seq[Assignment]]

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.CopyAssignmentsComma
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/copy-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/copy-assignments"))
 class OldCopyModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
@@ -38,7 +38,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/department/{department}/copy-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/copy-assignments"))
 class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute

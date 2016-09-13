@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.{CurrentUser, Features}
 import scala.collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/turnitin"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin"))
 class OldTurnitinController extends OldCourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
 	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType

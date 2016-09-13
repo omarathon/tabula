@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/new"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/new"))
 class OldAddFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute

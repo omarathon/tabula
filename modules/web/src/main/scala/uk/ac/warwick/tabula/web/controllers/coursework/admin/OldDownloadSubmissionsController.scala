@@ -18,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions.zip"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.zip"))
 class OldDownloadSubmissionsController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -37,7 +37,7 @@ class OldDownloadSubmissionsController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
 class OldDownloadMarkerSubmissionsController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -56,7 +56,7 @@ class OldDownloadMarkerSubmissionsController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
 class OldDownloadMarkerSubmissionsControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
@@ -65,7 +65,7 @@ class OldDownloadMarkerSubmissionsControllerCurrentUser extends OldCourseworkCon
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
 class OldDownloadAllSubmissionsController extends OldCourseworkController {
 
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(
@@ -99,7 +99,7 @@ class OldDownloadSingleSubmissionController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}"))
 class OldDownloadSingleSubmissionFileController extends OldCourseworkController {
 	var userLookup = Wire[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
@@ -121,7 +121,7 @@ class OldDownloadSingleSubmissionFileController extends OldCourseworkController 
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}"))
 class OldDownloadFeedbackSheetsController extends OldCourseworkController {
 
 	var userLookup = Wire.auto[UserLookupService]

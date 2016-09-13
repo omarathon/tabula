@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
  * original HTML page.
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/department/{department}/shared-options"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/shared-options"))
 class OldAssignmentSharedOptionsController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET))

@@ -75,7 +75,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
 class OldOnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

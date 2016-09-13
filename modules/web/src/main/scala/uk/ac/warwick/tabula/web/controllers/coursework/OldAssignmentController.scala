@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
  */
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}"))
 class OldAssignmentController extends OldCourseworkController
 	with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent with AutowiringFeaturesComponent {
 

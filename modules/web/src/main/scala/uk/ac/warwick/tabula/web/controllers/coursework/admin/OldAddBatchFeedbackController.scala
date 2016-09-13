@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/batch"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class OldAddBatchFeedbackController extends OldCourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(module, assignment, user.apparentUser, user)

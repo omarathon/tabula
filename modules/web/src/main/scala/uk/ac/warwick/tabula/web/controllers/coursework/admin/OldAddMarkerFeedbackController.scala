@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback"))
 class OldAddMarkerFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute def command(@PathVariable module: Module,
@@ -78,7 +78,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback"))
 class OldAddMarkerFeedbackControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

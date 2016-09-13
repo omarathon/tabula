@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestiga
 import uk.ac.warwick.tabula.commands.Appliable
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class OldPlagiarismInvestigationController extends OldCourseworkController {
 
 	@ModelAttribute("command")

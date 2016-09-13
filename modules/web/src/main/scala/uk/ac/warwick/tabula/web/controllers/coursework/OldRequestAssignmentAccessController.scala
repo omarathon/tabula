@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/request-access"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/request-access"))
 class OldRequestAssignmentAccessController extends OldCourseworkController {
 
 	hideDeletedItems

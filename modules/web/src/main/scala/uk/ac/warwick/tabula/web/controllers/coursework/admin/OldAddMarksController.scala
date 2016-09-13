@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 import uk.ac.warwick.tabula.services.FeedbackService
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marks"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marks"))
 class OldAddMarksController extends OldCourseworkController {
 
 	@Autowired var feedbackService: FeedbackService = _

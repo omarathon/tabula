@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/edit"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/edit"))
 class OldEditAssignmentController extends OldCourseworkController {
 
 	validatesSelf[EditAssignmentCommand]

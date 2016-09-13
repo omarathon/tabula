@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUn
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
 class OldMarkingUncompletedController extends OldCourseworkController {
 
 	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
@@ -84,7 +84,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
 class OldMarkingUncompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

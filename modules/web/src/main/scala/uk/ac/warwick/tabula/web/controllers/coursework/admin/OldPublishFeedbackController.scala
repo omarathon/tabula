@@ -15,7 +15,7 @@ import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
 
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/publish"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/publish"))
 @Profile(Array("cm1Enabled")) @Controller
 class OldPublishFeedbackController extends OldCourseworkController {
 
