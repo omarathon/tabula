@@ -17,10 +17,10 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
-	@RequestMapping(Array("/coursework")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser) =
+	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser) =
 		cmd.apply() match {
 			case Some(info) =>
-				Mav("coursework/home/view",
+				Mav(s"$urlPrefix/home/view",
 					"student" -> MemberOrUser(user.profile, user.apparentUser),
 					"enrolledAssignments" -> info.enrolledAssignments,
 					"historicAssignments" -> info.historicAssignments,
@@ -31,7 +31,7 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 					"ajax" -> ajax,
 					"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
 				)
-			case _ => Mav("coursework/home/view")
+			case _ => Mav(s"$urlPrefix/home/view")
 		}
 }
 
@@ -44,19 +44,19 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 		@PathVariable lastUpdatedDate: Long) =
 			CourseworkHomepageActivityPageletCommand(user, new DateTime(lastUpdatedDate))
 
-	@RequestMapping(Array("/coursework/api/activity/pagelet/{lastUpdatedDate}"))
+	@RequestMapping(Array("/${cm1.prefix}/api/activity/pagelet/{lastUpdatedDate}"))
 	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]) = {
 		try {
 			cmd.apply() match {
 				case Some(pagedActivities) =>
-					Mav("coursework/home/activities",
+					Mav(s"$urlPrefix/home/activities",
 						"activities" -> pagedActivities,
 						"async" -> true).noLayout()
-				case _ => Mav("coursework/home/empty").noLayout()
+				case _ => Mav(s"$urlPrefix/home/empty").noLayout()
 			}
 		} catch {
 			case e: IllegalStateException =>
-				Mav("coursework/home/activities",
+				Mav(s"$urlPrefix/home/activities",
 				"expired" -> true).noLayout()
 		}
 	}

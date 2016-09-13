@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
 class OldReleaseForMarkingController extends OldCourseworkController {
 
 	type ReleaseForMarkingCommand = Appliable[List[Feedback]] with ReleaseForMarkingState
@@ -28,7 +28,7 @@ class OldReleaseForMarkingController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
 
-	def confirmView(assignment: Assignment) = Mav("coursework/admin/assignments/submissionsandfeedback/release-submission",
+	def confirmView(assignment: Assignment) = Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
 		.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 

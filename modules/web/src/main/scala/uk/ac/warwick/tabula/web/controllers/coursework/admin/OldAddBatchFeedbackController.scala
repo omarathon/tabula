@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/batch"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class OldAddBatchFeedbackController extends OldCourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
 		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
@@ -25,7 +25,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadZipForm(@ModelAttribute cmd: AddFeedbackCommand): Mav = {
-		crumbed(Mav("coursework/admin/assignments/feedback/zipform"), cmd.module)
+		crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipform"), cmd.module)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
@@ -35,7 +35,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 			uploadZipForm(cmd)
 		} else {
 			cmd.postExtractValidation(errors)
-			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
+			crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipreview"), cmd.module)
 		}
 	}
 
@@ -44,7 +44,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 		cmd.preExtractValidation(errors)
 		cmd.postExtractValidation(errors)
 		if (errors.hasErrors) {
-			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
+			crumbed(Mav(s"$urlPrefix/admin/assignments/feedback/zipreview"), cmd.module)
 		} else {
 			// do apply, redirect back
 			cmd.apply()

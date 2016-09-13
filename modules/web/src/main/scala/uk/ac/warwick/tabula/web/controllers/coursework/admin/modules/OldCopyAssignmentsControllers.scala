@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.CopyAssignmentsComma
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/copy-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/copy-assignments"))
 class OldCopyModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
@@ -22,7 +22,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand) = {
 
-		Mav("coursework/admin/modules/copy_assignments",
+		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
 			"map" -> moduleAssignmentMap(cmd.modules)
@@ -38,7 +38,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/department/{department}/copy-assignments"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/copy-assignments"))
 class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
@@ -50,7 +50,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand) = {
 
-		Mav("coursework/admin/modules/copy_assignments",
+		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),

@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import uk.ac.warwick.tabula.helpers.EnvironmentAwareness
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 /**
@@ -23,7 +22,7 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
  */
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}"))
 class OldAssignmentController extends OldCourseworkController
 	with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent with AutowiringFeaturesComponent {
 
@@ -75,7 +74,7 @@ class OldAssignmentController extends OldCourseworkController
 
 		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
 		Mav(
-			"coursework/submit/assignment",
+			s"$urlPrefix/submit/assignment",
 			"errors" -> errors,
 			"feedback" -> info.feedback,
 			"submission" -> info.submission,

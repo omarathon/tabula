@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.{CurrentUser, Features}
 import scala.collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/turnitin"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/turnitin"))
 class OldTurnitinController extends OldCourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
 	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
@@ -42,7 +42,7 @@ class OldTurnitinController extends OldCourseworkController with AutowiringTurni
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def confirm(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors) = {
-		Mav("coursework/admin/assignments/turnitin/form", "errors" -> errors)
+		Mav(s"$urlPrefix/admin/assignments/turnitin/form", "errors" -> errors)
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -61,7 +61,7 @@ class OldTurnitinController extends OldCourseworkController with AutowiringTurni
 		if (ajax) {
 			Mav(new JSONView(assignmentStatus.toMap))
 		} else {
-			Mav("coursework/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+			Mav(s"$urlPrefix/admin/assignments/turnitin/status", "status" -> assignmentStatus)
 		}
 	}
 

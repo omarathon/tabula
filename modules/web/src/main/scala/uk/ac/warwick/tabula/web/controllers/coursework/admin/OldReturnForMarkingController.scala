@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/return-submissions"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/return-submissions"))
 class OldReturnForMarkingController extends OldCourseworkController {
 
 	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState
@@ -44,7 +44,7 @@ class OldReturnForMarkingController extends OldCourseworkController {
 								errors: Errors
 								) = {
 
-		Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-uncomplete",
 			"assignment" -> assignment,
 			"formAction" -> Routes.admin.assignment.markerFeedback.returnsubmissions(assignment),
 			"marker" -> form.user,

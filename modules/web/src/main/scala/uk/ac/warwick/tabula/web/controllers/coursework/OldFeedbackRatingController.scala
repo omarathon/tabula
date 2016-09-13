@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 
-@RequestMapping(Array("/coursework/module/{module}/{assignment}/rate"))
+@RequestMapping(Array("/${cm1.prefix}/module/{module}/{assignment}/rate"))
 @Profile(Array("cm1Enabled")) @Controller
 class OldFeedbackRatingController extends OldCourseworkController {
 
@@ -35,7 +35,7 @@ class OldFeedbackRatingController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form(command: RateFeedbackCommand): Mav =
-		Mav("coursework/submit/rating").noLayoutIf(ajax)
+		Mav(s"$urlPrefix/submit/rating").noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(command: RateFeedbackCommand, errors: Errors): Mav = {
@@ -44,7 +44,7 @@ class OldFeedbackRatingController extends OldCourseworkController {
 			form(command)
 		} else {
 			command.apply()
-			Mav("coursework/submit/rating", "rated" -> true).noLayoutIf(ajax)
+			Mav(s"$urlPrefix/submit/rating", "rated" -> true).noLayoutIf(ajax)
 		}
 	}
 

@@ -18,7 +18,7 @@ import uk.ac.warwick.userlookup.User
 import collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-completed"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-completed"))
 class OldMarkingCompletedController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -68,7 +68,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 			.flatMap(_.requestParameters.get("nextStageRole"))
 			.flatMap(_.headOption)
 
-		Mav("coursework/admin/assignments/markerfeedback/marking-complete",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-complete",
 			"assignment" -> assignment,
 			"onlineMarking" -> form.onlineMarking,
 			"marker" -> form.user,
@@ -103,7 +103,7 @@ class OldMarkingCompletedController extends OldCourseworkController {
 
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
 class OldMarkingCompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

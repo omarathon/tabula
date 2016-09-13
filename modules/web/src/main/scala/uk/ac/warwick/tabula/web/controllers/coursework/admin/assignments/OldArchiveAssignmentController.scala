@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/archive"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/archive"))
 class OldArchiveAssignmentController extends OldCourseworkController {
 
 	@ModelAttribute("command") def model(module: Module, assignment: Assignment) =
@@ -17,7 +17,7 @@ class OldArchiveAssignmentController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def confirmation(@ModelAttribute("command") cmd: ArchiveAssignmentCommandInternal) = {
-		Mav("coursework/admin/assignments/archive").noLayoutIf(ajax)
+		Mav(s"$urlPrefix/admin/assignments/archive").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST))

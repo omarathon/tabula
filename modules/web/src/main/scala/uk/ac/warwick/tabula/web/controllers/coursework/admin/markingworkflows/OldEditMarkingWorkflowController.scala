@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{department}/markingworkflows/edit/{markingworkflow}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/edit/{markingworkflow}"))
 class OldEditMarkingWorkflowController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -25,7 +25,7 @@ class OldEditMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav("coursework/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
+		Mav(s"$urlPrefix/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
 	}
 
 	@RequestMapping(method=Array(POST))

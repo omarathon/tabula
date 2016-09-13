@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{student}"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}"))
 class OldDownloadFeedbackInProfileController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]

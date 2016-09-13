@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.permissions._
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/picker"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/picker"))
 class OldAssignmentPickerController extends OldCourseworkController {
 	@Autowired var json: ObjectMapper = _
 

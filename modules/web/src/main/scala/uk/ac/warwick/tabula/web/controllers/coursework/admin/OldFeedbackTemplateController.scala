@@ -11,7 +11,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/settings/feedback-templates"))
 class OldFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def bulkFeedbackTemplateCommand(@PathVariable dept:Department)
@@ -24,7 +24,7 @@ class OldFeedbackTemplateController extends OldCourseworkController {
 	def list(cmd:BulkFeedbackTemplateCommand, errors:Errors) = {
 		val dept = cmd.department
 
-		val model = Mav("coursework/admin/feedbackforms/manage-feedback-templates",
+		val model = Mav(s"$urlPrefix/admin/feedbackforms/manage-feedback-templates",
 			"department" -> dept
 		)
 		crumbed(model, dept)
@@ -44,7 +44,7 @@ class OldFeedbackTemplateController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/settings/feedback-templates/edit/{template}"))
 class OldEditFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def editFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
@@ -59,7 +59,7 @@ class OldEditFeedbackTemplateController extends OldCourseworkController {
 		cmd.name = template.name
 		cmd.description = template.description
 
-		val model = Mav("coursework/admin/feedbackforms/edit-feedback-template",
+		val model = Mav(s"$urlPrefix/admin/feedbackforms/edit-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()
@@ -81,7 +81,7 @@ class OldEditFeedbackTemplateController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/settings/feedback-templates/delete/{template}"))
 class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 
 	@ModelAttribute def deleteFeedbackTemplateCommand(@PathVariable dept:Department, @PathVariable template:FeedbackTemplate)
@@ -93,7 +93,7 @@ class OldDeleteFeedbackTemplateController extends OldCourseworkController {
 		val dept = cmd.department
 
 		cmd.id = template.id
-		val model = Mav("coursework/admin/feedbackforms/delete-feedback-template",
+		val model = Mav(s"$urlPrefix/admin/feedbackforms/delete-feedback-template",
 			"department" -> dept,
 			"template" -> template
 		).noNavigation()

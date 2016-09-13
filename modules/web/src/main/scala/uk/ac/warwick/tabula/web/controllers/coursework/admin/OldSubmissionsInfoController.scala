@@ -40,7 +40,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable assignment: Assignment): ListSubmissionsCommand.CommandType =
 		ListSubmissionsCommand(module, assignment)
 
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
 	def xml(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType, @PathVariable assignment: Assignment) = {
 		command.checkIndex = checkIndex
 
@@ -79,7 +79,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
 			Nil //empty Node seq, no element
 
 
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
 	def csv(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType) = {
 		command.checkIndex = checkIndex
 

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/adjustments"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/adjustments"))
 class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 
 	type FeedbackAdjustmentListCommand = Appliable[Seq[StudentInfo]]
@@ -31,7 +31,7 @@ class OldFeedbackAdjustmentsListController extends OldCourseworkController {
 	) = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
-		Mav("coursework/admin/assignments/feedback/adjustments_list",
+		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments_list",
 			"studentInfo" -> studentInfo,
 			"noFeedbackStudentInfo" -> noFeedbackStudentInfo,
 			"assignment" -> assignment,
@@ -53,7 +53,7 @@ object OldFeedbackAdjustmentsController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/adjustments/{student}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/adjustments/{student}"))
 class OldFeedbackAdjustmentsController extends OldCourseworkController with AutowiringProfileServiceComponent {
 
 	validatesSelf[SelfValidating]
@@ -90,7 +90,7 @@ class OldFeedbackAdjustmentsController extends OldCourseworkController with Auto
 			}
 		}
 
-		Mav("coursework/admin/assignments/feedback/adjustments", Map(
+		Mav(s"$urlPrefix/admin/assignments/feedback/adjustments", Map(
 			"daysLate" -> daysLate,
 			"marksSubtracted" -> marksSubtracted,
 			"proposedAdjustment" -> proposedAdjustment,
