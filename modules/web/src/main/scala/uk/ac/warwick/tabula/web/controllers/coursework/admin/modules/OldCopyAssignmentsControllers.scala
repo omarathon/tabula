@@ -22,7 +22,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand) = {
 
-		Mav("coursework/admin/modules/copy_assignments",
+		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> module.name,
 			"cancel" -> Routes.admin.module(module),
 			"map" -> moduleAssignmentMap(cmd.modules)
@@ -50,7 +50,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand) = {
 
-		Mav("coursework/admin/modules/copy_assignments",
+		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> department.name,
 			"cancel" -> Routes.admin.department(department),
 			"map" -> moduleAssignmentMap(cmd.modules),

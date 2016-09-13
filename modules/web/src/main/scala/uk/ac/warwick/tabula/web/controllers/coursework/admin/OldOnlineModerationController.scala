@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/moderation/{student}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/moderation/{student}"))
 class OldOnlineModerationController extends OldCourseworkController {
 
 	validatesSelf[OnlineModerationCommand]
@@ -42,7 +42,7 @@ class OldOnlineModerationController extends OldCourseworkController {
 			case None => (false, null, None)
 		}
 
-		Mav("coursework/admin/assignments/feedback/marker_moderation" ,
+		Mav(s"$urlPrefix/admin/assignments/feedback/marker_moderation" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"completedDate" -> completedDate,

@@ -51,7 +51,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 			.flatMap(_.requestParameters.get("previousStageRole"))
 			.flatMap(_.headOption)
 
-		Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-uncomplete",
 			"assignment" -> assignment,
 			"formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
 			"marker" -> form.user,

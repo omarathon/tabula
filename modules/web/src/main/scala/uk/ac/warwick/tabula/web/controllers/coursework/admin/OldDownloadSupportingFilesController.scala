@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/module/{module}/{assignment}/extension"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/extension"))
 class OldDownloadSupportingFilesController extends OldCourseworkController {
 
 	@ModelAttribute def command(
@@ -28,7 +28,7 @@ class OldDownloadSupportingFilesController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/review-request/{universityId}"))
 class OldAdminDownloadSupportingFilesController extends OldCourseworkController {
 
 	@ModelAttribute def command(

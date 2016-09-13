@@ -57,7 +57,7 @@ class OldAddMarksController extends OldCourseworkController {
 			noteMarkItem(member, feedback)
 		}.sortBy(_.universityId)
 
-		crumbed(Mav("coursework/admin/assignments/marks/marksform",
+		crumbed(Mav(s"$urlPrefix/admin/assignments/marks/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation
 		), module)
@@ -92,7 +92,7 @@ class OldAddMarksController extends OldCourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
-			crumbed(Mav("coursework/admin/assignments/marks/markspreview"), module)
+			crumbed(Mav(s"$urlPrefix/admin/assignments/marks/markspreview"), module)
 		}
 	}
 

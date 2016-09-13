@@ -31,7 +31,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 		@PathVariable marker: User
 	): Mav = {
 		if(assignment.markingWorkflow == null) {
-			Mav("coursework/errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+			Mav(s"$urlPrefix/errors/no_workflow", "assignmentUrl" -> Routes.admin.assignment.submissionsandfeedback.summary(assignment))
 		} else {
 			val markerFeedback = command.apply()
 			val feedbackItems = markerFeedback.flatMap(_.feedbackItems)
@@ -41,7 +41,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 			val hasFirstMarkerFeedback = maxFeedbackCount > 1
 			val hasSecondMarkerFeedback = maxFeedbackCount > 2
 
-			Mav("coursework/admin/assignments/markerfeedback/list",
+			Mav(s"$urlPrefix/admin/assignments/markerfeedback/list",
 				"assignment" -> assignment,
 				"markerFeedback" -> markerFeedback,
 				"feedbackToDoCount" -> markerFeedback.map(_.feedbackItems.size).sum,

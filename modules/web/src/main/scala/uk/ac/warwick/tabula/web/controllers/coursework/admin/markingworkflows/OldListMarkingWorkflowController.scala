@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{department}/markingworkflows"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows"))
 class OldListMarkingWorkflowController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -18,7 +18,7 @@ class OldListMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping
 	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable department: Department): Mav = {
-		Mav("coursework/admin/markingworkflows/list",
+		Mav(s"$urlPrefix/admin/markingworkflows/list",
 		    "markingWorkflowInfo" -> cmd.apply(),
 				"isExams" -> false
 		).crumbs(Breadcrumbs.Department(department))

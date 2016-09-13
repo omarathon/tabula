@@ -64,7 +64,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 			}
 		}.sortBy(_.universityId)
 
-		Mav("coursework/admin/assignments/markerfeedback/marksform",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation,
 			"isProxying" -> cmd.isProxying,
@@ -99,7 +99,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
-			Mav("coursework/admin/assignments/markerfeedback/markspreview",
+			Mav(s"$urlPrefix/admin/assignments/markerfeedback/markspreview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
 			)

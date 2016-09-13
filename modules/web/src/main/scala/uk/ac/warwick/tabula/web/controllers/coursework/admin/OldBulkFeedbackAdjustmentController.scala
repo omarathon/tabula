@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/bulk-adjustment"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/bulk-adjustment"))
 class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -32,7 +32,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def form = {
-		Mav("coursework/admin/assignments/feedback/bulk/bulk_adjustment",
+		Mav(s"$urlPrefix/admin/assignments/feedback/bulk/bulk_adjustment",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
 			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
@@ -44,7 +44,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
-			Mav("coursework/admin/assignments/feedback/bulk/preview")
+			Mav(s"$urlPrefix/admin/assignments/feedback/bulk/preview")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
@@ -63,7 +63,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/bulk-adjustment/template"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/bulk-adjustment/template"))
 class OldBulkFeedbackAdjustmentTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")

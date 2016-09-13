@@ -28,7 +28,7 @@ class OldReleaseForMarkingController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
 
-	def confirmView(assignment: Assignment) = Mav("coursework/admin/assignments/submissionsandfeedback/release-submission",
+	def confirmView(assignment: Assignment) = Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/release-submission",
 		"assignment" -> assignment)
 		.crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 

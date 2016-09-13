@@ -19,14 +19,14 @@ import scala.collection.JavaConversions._
  */
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin", "/coursework/admin/department", "/coursework/admin/module"))
+@RequestMapping(Array("/${cm1.prefix}/admin", "/${cm1.prefix}/admin/department", "/${cm1.prefix}/admin/module"))
 class OldCourseworkAdminHomeController extends OldCourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{dept}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{dept}"))
 class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController {
 
 	hideDeletedItems
@@ -38,7 +38,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val info = cmd.apply()
 
-		Mav("coursework/admin/department",
+		Mav(s"$urlPrefix/admin/department",
 			"department" -> cmd.department,
 			"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
 		)
@@ -53,7 +53,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/module/{module}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}"))
 class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 
 	hideDeletedItems
@@ -65,8 +65,8 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]) = {
 		val module = cmd.apply()
 
-		if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()
-		else Mav("coursework/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
+		if (ajax) Mav(s"$urlPrefix/admin/modules/admin_partial").noLayout()
+		else Mav(s"$urlPrefix/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
 	}
 }
 

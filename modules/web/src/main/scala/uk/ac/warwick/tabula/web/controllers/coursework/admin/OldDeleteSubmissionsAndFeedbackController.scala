@@ -26,7 +26,7 @@ class OldDeleteSubmissionsAndFeedback extends OldCourseworkController {
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 
 	def formView(assignment: Assignment) =
-		Mav("coursework/admin/assignments/submissionsandfeedback/delete",
+		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/delete",
 			"assignment" -> assignment)
 			.crumbs(
 					Breadcrumbs.Department(assignment.module.adminDepartment),

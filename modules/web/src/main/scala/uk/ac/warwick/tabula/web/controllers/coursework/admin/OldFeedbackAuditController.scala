@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, MarkingMethod}
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/audit/{student}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/audit/{student}"))
 class OldFeedbackAuditController extends OldCourseworkController {
 
 	@ModelAttribute("auditCommand")
@@ -23,7 +23,7 @@ class OldFeedbackAuditController extends OldCourseworkController {
 					 @ModelAttribute("auditCommand") auditCommand: Appliable[FeedbackAuditData]
 						) = {
 		val auditData = auditCommand.apply()
-		Mav("coursework/admin/assignments/feedback_audit",
+		Mav(s"$urlPrefix/admin/assignments/feedback_audit",
 			"command" -> auditCommand,
 			"auditData" -> auditData,
 			"assignment" -> assignment,

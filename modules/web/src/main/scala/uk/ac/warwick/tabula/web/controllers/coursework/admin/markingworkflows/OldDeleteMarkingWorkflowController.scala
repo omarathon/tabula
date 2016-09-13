@@ -20,7 +20,7 @@ object OldDeleteMarkingWorkflowController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{department}/markingworkflows/delete/{markingworkflow}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/delete/{markingworkflow}"))
 class OldDeleteMarkingWorkflowController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -31,7 +31,7 @@ class OldDeleteMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
-		Mav("coursework/admin/markingworkflows/delete").noLayoutIf(ajax)
+		Mav(s"$urlPrefix/admin/markingworkflows/delete").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))

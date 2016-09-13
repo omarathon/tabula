@@ -35,7 +35,7 @@ class OldResendSubmissionEmail extends OldCourseworkController {
 	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
 		val sent = form.apply()
 
-		Mav("coursework/submit/receipt",
+		Mav(s"$urlPrefix/submit/receipt",
 			"submission" -> form.submission,
 			"module" -> form.module,
 			"assignment" -> form.assignment,

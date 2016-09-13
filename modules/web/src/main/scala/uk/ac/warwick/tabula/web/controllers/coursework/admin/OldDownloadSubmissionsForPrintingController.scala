@@ -43,7 +43,7 @@ trait OldDownloadSubmissionsForPrintingController extends OldCourseworkControlle
 
 }
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions.pdf"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.pdf"))
 class OldDownloadAdminSubmissionsForPrintingController extends OldDownloadSubmissionsForPrintingController {
 
 	@ModelAttribute("command")

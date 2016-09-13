@@ -22,7 +22,7 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}"))
 class OldSubmissionAndFeedbackController extends OldCourseworkController {
 
 	var features = Wire[Features]
@@ -57,12 +57,12 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
-				Mav("coursework/admin/assignments/submissionsandfeedback/progress")
+				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress")
 					.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			} else {
 				val results = command.apply()
 
-				Mav("coursework/admin/assignments/submissionsandfeedback/progress",
+				Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/progress",
 					resultMap(results)
 				).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			}
@@ -72,12 +72,12 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	@RequestMapping(Array("/table"))
 	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
 		if (errors.hasErrors) {
-			Mav("coursework/admin/assignments/submissionsandfeedback/list")
+			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list")
 				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		} else {
 			val results = command.apply()
 
-			Mav("coursework/admin/assignments/submissionsandfeedback/list",
+			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list",
 				resultMap(results)
 			).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		}

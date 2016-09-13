@@ -53,7 +53,7 @@ abstract class OldExtensionController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/extensions"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions"))
 class OldListExtensionsForAssignmentController extends OldExtensionController {
 
 	// Add the common breadcrumbs to the model
@@ -70,7 +70,7 @@ class OldListExtensionsForAssignmentController extends OldExtensionController {
 	def listExtensions(cmd: ListExtensionsForAssignmentCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
-		val model = Mav("coursework/admin/assignments/extensions/summary",
+		val model = Mav(s"$urlPrefix/admin/assignments/extensions/summary",
 			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
 			"extensionToOpen" -> universityId,
@@ -84,7 +84,7 @@ class OldListExtensionsForAssignmentController extends OldExtensionController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{department}/manage/extensions"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{department}/manage/extensions"))
 class OldListAllExtensionsController extends OldExtensionController {
 
 	// Add the common breadcrumbs to the model
@@ -103,7 +103,7 @@ class OldListAllExtensionsController extends OldExtensionController {
 	def listExtensions(@ModelAttribute("command") cmd: ListAllExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
-		val model = Mav("coursework/admin/assignments/extensions/departmentSummary",
+		val model = Mav(s"$urlPrefix/admin/assignments/extensions/departmentSummary",
 			"extensionToOpen" -> universityId,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
@@ -118,7 +118,7 @@ class OldListAllExtensionsController extends OldExtensionController {
  * The first mapping is the one that should be used.
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/detail/{universityId}"))
 class OldEditExtensionController extends OldExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
@@ -153,7 +153,7 @@ class OldEditExtensionController extends OldExtensionController {
 			case _ => Map.empty
 		}
 
-		val model = Mav("coursework/admin/assignments/extensions/detail",
+		val model = Mav(s"$urlPrefix/admin/assignments/extensions/detail",
 			"command" -> cmd,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
@@ -187,7 +187,7 @@ class OldEditExtensionController extends OldExtensionController {
 
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/extensions/revoke/{universityId}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/extensions/revoke/{universityId}"))
 class OldDeleteExtensionController extends OldExtensionController {
 
 	@ModelAttribute("deleteExtensionCommand")

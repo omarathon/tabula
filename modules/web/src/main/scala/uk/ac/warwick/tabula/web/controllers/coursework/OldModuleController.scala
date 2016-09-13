@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.permissions._
 class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/module/{module}/"))
+@RequestMapping(Array("/${cm1.prefix}/module/{module}/"))
 class OldModuleController extends OldCourseworkController {
 
 	hideDeletedItems
@@ -25,7 +25,7 @@ class OldModuleController extends OldCourseworkController {
 	def viewModule(@ModelAttribute cmd: ViewModuleCommand) = {
 		val module = cmd.apply()
 
-		Mav("coursework/submit/module",
+		Mav(s"$urlPrefix/submit/module",
 			"module" -> module,
 			"assignments" -> module.assignments
 				.filterNot { _.deleted }

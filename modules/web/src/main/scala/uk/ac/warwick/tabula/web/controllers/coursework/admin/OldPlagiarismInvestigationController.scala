@@ -25,7 +25,7 @@ class OldPlagiarismInvestigationController extends OldCourseworkController {
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
 	def formView(assignment: Assignment) =
-		Mav("coursework/admin/assignments/submissionsandfeedback/mark-plagiarised",
+		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/mark-plagiarised",
 				"assignment" -> assignment
 		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 

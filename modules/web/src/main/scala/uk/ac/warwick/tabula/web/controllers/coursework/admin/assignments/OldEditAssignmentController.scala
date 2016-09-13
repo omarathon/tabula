@@ -33,7 +33,7 @@ class OldEditAssignmentController extends OldCourseworkController {
 		form.copyGroupsFrom(assignment)
 
 		val couldDelete = canDelete(module, assignment)
-		Mav("coursework/admin/assignments/edit",
+		Mav(s"$urlPrefix/admin/assignments/edit",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"assignment" -> assignment,

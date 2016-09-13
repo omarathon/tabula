@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
-import uk.ac.warwick.tabula.helpers.EnvironmentAwareness
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 /**

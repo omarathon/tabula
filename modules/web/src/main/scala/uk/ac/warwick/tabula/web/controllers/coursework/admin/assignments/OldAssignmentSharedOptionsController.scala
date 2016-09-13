@@ -34,7 +34,7 @@ class OldAssignmentSharedOptionsController extends OldCourseworkController {
 	}
 
 	def mav(form: SharedAssignmentPropertiesForm, @PathVariable department: Department) = {
-		Mav("coursework/admin/assignments/shared_options",
+		Mav(s"$urlPrefix/admin/assignments/shared_options",
 			"department" -> department,
 			"maxWordCount" -> Assignment.MaximumWordCount,
 			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes

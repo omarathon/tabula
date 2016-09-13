@@ -17,7 +17,7 @@ class OldArchiveAssignmentController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def confirmation(@ModelAttribute("command") cmd: ArchiveAssignmentCommandInternal) = {
-		Mav("coursework/admin/assignments/archive").noLayoutIf(ajax)
+		Mav(s"$urlPrefix/admin/assignments/archive").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST))

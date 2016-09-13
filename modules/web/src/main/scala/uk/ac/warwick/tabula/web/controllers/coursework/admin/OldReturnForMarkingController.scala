@@ -44,7 +44,7 @@ class OldReturnForMarkingController extends OldCourseworkController {
 								errors: Errors
 								) = {
 
-		Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marking-uncomplete",
 			"assignment" -> assignment,
 			"formAction" -> Routes.admin.assignment.markerFeedback.returnsubmissions(assignment),
 			"marker" -> form.user,

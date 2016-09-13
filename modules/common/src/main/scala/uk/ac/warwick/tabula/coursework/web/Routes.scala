@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
@@ -14,7 +15,7 @@ import uk.ac.warwick.userlookup.User
  */
 object Routes {
 	import RoutesUtils._
-	private val context = "/coursework"
+	private val context = s"/${Wire.property("${cm1.prefix}")}"
 	def home = context + "/"
 
 	def zipFileJob(jobInstance: JobInstance) = "/zips/%s" format encoded(jobInstance.id)
