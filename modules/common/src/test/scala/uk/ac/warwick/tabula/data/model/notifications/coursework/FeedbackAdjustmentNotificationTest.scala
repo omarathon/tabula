@@ -38,7 +38,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsMarkerPage() {
 		val n = createNotification
-		n.url should be("/coursework/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
+		n.url should be("/${cm1.prefix}/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
 	}
 
 	@Test

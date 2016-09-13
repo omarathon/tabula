@@ -37,7 +37,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ReleaseNotificationFixture{
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker2/list")
+		n.url should be("/${cm1.prefix}/admin/module/heron101/assignments/1/marker/marker2/list")
 	}
 
 
@@ -55,7 +55,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 		val model = n.content.model
 
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker2/list")
+		n.url should be("/${cm1.prefix}/admin/module/heron101/assignments/1/marker/marker2/list")
 		model("assignment") should be(testAssignment)
 		model("numReleasedFeedbacks") should be(2)
 		model("workflowVerb") should be("mark")

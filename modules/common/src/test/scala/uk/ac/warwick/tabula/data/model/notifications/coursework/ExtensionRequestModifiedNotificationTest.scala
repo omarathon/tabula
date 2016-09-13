@@ -22,7 +22,7 @@ class ExtensionRequestModifiedNotificationTest extends TestBase with ExtensionNo
 	 @Test
 	 def urlIsProfilePage():Unit = new ExtensionFixture {
 			val n = createNotification(extension, student)
-			n.url should be("/coursework/admin/module/xxx/assignments/123/extensions?universityId=student")
+			n.url should be("/${cm1.prefix}/admin/module/xxx/assignments/123/extensions?universityId=student")
 	 }
 
 	 @Test
@@ -49,7 +49,7 @@ class ExtensionRequestModifiedNotificationTest extends TestBase with ExtensionNo
 		 val n = createNotification(extension, student)
 		 n.content.model("requestedExpiryDate") should be("23 August 2013 at 12:00:00")
 		 n.content.model("reasonForRequest") should be("My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me.")
-		 n.url should be("/coursework/admin/module/xxx/assignments/123/extensions?universityId="+student.getWarwickId)
+		 n.url should be("/${cm1.prefix}/admin/module/xxx/assignments/123/extensions?universityId="+student.getWarwickId)
 		 n.content.model("assignment") should be(assignment)
 		 n.content.model("student") should be(student)
 		}

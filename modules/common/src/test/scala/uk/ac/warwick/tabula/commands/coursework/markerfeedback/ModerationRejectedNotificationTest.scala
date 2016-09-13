@@ -50,7 +50,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
 		val n =  createNotification(marker2, marker1, mf2)
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
+		n.url should be("/${cm1.prefix}/admin/module/heron101/assignments/1/marker/marker1/list")
 	}
 
 
@@ -64,7 +64,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
 		val n =  createNotification(marker2, marker1, mf2)
-		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
+		n.url should be ("/${cm1.prefix}/admin/module/heron101/assignments/1/marker/marker1/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))
 		n.content.model.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))
