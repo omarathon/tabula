@@ -13,6 +13,9 @@
 						</span>
 					</div>
 				</div>
+				<div class="col-md-6">
+					<@bs3form.errors path="groupNames[${group_index}]" />
+				</div>
 			</div>
 		</@bs3form.form_group>
 	</#list>
