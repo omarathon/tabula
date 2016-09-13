@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-class OldAttendanceHomeControllerTest extends TestBase with Mockito{
+class AttendanceHomeControllerTest extends TestBase with Mockito{
 
 	class Fixture{
 		val user = new User("cusfal")

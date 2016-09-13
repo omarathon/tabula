@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Route, Module}
 import uk.ac.warwick.tabula.commands.admin.department.{AdminDepartmentHomeCommandTest, AdminDepartmentHomeCommandState}
 
-class OldAdminDepartmentHomeControllerTest extends TestBase with Mockito with FunctionalContextTesting {
+class AdminDepartmentHomeControllerTest extends TestBase with Mockito with FunctionalContextTesting {
 
 	val controller = new AdminDepartmentHomeController
 

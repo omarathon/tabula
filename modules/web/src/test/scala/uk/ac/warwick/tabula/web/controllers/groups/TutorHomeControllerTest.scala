@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
-class OldTutorHomeControllerTest extends TestBase {
+class TutorHomeControllerTest extends TestBase {
 
 	@Test def controllerShowsYourGroups() {
 		val command = new Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]] {

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{Module, Department}
 import org.springframework.validation.BindException
 
-class OldAddModuleControllerTest extends TestBase with Mockito {
+class AddModuleControllerTest extends TestBase with Mockito {
 
 	val controller = new AddModuleController
 

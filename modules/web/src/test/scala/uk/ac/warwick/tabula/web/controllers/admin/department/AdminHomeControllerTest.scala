@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.admin.department
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.web.Routes
 
-class OldAdminHomeControllerTest extends TestBase {
+class AdminHomeControllerTest extends TestBase {
 
 	val controller = new AdminDepartmentHomeRedirectController
 

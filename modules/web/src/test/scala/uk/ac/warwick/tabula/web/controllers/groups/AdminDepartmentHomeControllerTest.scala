@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.groups.admin.GroupsAdminDepartmentCo
 
 import scala.collection.immutable.ListMap
 
-class OldAdminDepartmentHomeControllerTest extends TestBase with Mockito{
+class AdminDepartmentHomeControllerTest extends TestBase with Mockito{
 
 	def createController = {
 		val controller = new GroupsAdminDepartmentController() {

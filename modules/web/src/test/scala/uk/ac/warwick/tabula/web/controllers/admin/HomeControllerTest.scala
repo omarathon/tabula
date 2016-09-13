@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-class OldHomeControllerTest extends TestBase with Mockito {
+class HomeControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val dept1 = Fixtures.department("in")
