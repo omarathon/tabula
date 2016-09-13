@@ -9,8 +9,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkHomepageCommand.CourseworkHomepageInformation
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CourseworkHomepageActivityPageletCommand, CourseworkHomepageCommand}
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSecurityServiceComponent}
-import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 
 @Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent {
 
