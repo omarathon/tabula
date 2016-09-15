@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.web
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.jobs.JobInstance
@@ -14,7 +15,12 @@ import uk.ac.warwick.userlookup.User
  */
 object Routes {
 	import RoutesUtils._
-	private val context = "/coursework"
+
+	// FIXME this isn't really an optional property, but testing is a pain unless it's made so
+	var _cm1Prefix = Wire.optionProperty("${cm1.prefix}")
+	def cm1Prefix = _cm1Prefix.orNull
+
+	private lazy val context = s"/$cm1Prefix"
 	def home = context + "/"
 
 	def zipFileJob(jobInstance: JobInstance) = "/zips/%s" format encoded(jobInstance.id)

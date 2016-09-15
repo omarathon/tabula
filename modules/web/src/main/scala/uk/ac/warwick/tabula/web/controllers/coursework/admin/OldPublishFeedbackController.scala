@@ -15,7 +15,7 @@ import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
 
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/publish"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/publish"))
 @Profile(Array("cm1Enabled")) @Controller
 class OldPublishFeedbackController extends OldCourseworkController {
 
@@ -29,7 +29,7 @@ class OldPublishFeedbackController extends OldCourseworkController {
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!confirm"))
 	def confirmation(@ModelAttribute("publishFeedbackCommand") command: PublishFeedbackCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) command.prevalidate(errors)
-		Mav("coursework/admin/assignments/publish/form",
+		Mav(s"$urlPrefix/admin/assignments/publish/form",
 			"assignment" -> command.assignment,
 			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation,
 			"gradeValidation" -> command.validateGrades
@@ -42,7 +42,7 @@ class OldPublishFeedbackController extends OldCourseworkController {
 			confirmation(command, errors)
 		} else {
 			command.apply()
-			Mav("coursework/admin/assignments/publish/done", "assignment" -> command.assignment)
+			Mav(s"$urlPrefix/admin/assignments/publish/done", "assignment" -> command.assignment)
 		}
 	}
 

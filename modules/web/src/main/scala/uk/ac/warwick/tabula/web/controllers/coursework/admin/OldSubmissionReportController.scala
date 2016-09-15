@@ -27,7 +27,7 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions-report"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions-report"))
 class OldSubmissionReportController extends OldCourseworkController {
 
 	@Autowired var features: Features = _
@@ -46,7 +46,7 @@ class OldSubmissionReportController extends OldCourseworkController {
 		val hasNoMarks = usersByWarwickIds(report.withoutMarks.toList)
 		val plagiarised = usersByWarwickIds(report.plagiarised.toList)
 
-		Mav("coursework/admin/assignments/submissionsreport",
+		Mav(s"$urlPrefix/admin/assignments/submissionsreport",
 			"assignment" -> command.assignment,
 			"submissionOnly" -> submissionOnly,
 			"feedbackOnly" -> feedbackOnly,

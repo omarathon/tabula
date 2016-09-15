@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/{student}/feedback.pdf"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}/feedback.pdf"))
 class OldDownloadFeedbackAsPdfController extends OldCourseworkController {
 
 	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]

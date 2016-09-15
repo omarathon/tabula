@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{StudentCourseworkFu
 
 abstract class OldStudentCourseworkController extends OldCourseworkController {
 	def getMav(member: Member, info: StudentAssignments) =
-		Mav("coursework/home/_student",
+		Mav(s"$urlPrefix/home/_student",
 			"student" -> member,
 			"enrolledAssignments" -> info.enrolledAssignments,
 			"historicAssignments" -> info.historicAssignments,
@@ -22,7 +22,7 @@ abstract class OldStudentCourseworkController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/student/{member}"))
+@RequestMapping(Array("/${cm1.prefix}/student/{member}"))
 class OldStudentCourseworkFullScreenController extends OldStudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable member: Member) =
@@ -35,7 +35,7 @@ class OldStudentCourseworkFullScreenController extends OldStudentCourseworkContr
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/student/bycourseandyear/{studentCourseYearDetails}"))
+@RequestMapping(Array("/${cm1.prefix}/student/bycourseandyear/{studentCourseYearDetails}"))
 class OldStudentCourseworkGadgetController extends OldStudentCourseworkController {
 
 	@ModelAttribute("command") def command(@PathVariable studentCourseYearDetails: StudentCourseYearDetails) =

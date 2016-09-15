@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marks-template"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marks-template"))
 class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
 	var assignmentMembershipService = Wire[AssessmentMembershipService]
@@ -38,7 +38,7 @@ class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
 class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -60,7 +60,7 @@ class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
 class OldCurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
 	@RequestMapping

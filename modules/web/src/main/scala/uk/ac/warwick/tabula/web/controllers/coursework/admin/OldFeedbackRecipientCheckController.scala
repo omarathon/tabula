@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
  * invalid.
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/check-recipients"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class OldFeedbackRecipientCheckController extends OldCourseworkController {
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
@@ -27,7 +27,7 @@ class OldFeedbackRecipientCheckController extends OldCourseworkController {
 	@RequestMapping()
 	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
 		val report = command.apply()
-		Mav("coursework/admin/assignments/publish/checkrecipients",
+		Mav(s"$urlPrefix/admin/assignments/publish/checkrecipients",
 			"assignment" -> command.assignment,
 			"report" -> report).noLayout()
 	}

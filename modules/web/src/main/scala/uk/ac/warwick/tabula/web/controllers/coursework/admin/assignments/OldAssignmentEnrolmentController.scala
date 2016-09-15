@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.AcademicYear
  * Controller to populate the user listing for editing, without persistence
  */
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/enrolment/{academicYear}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/enrolment/{academicYear}"))
 class OldAssignmentEnrolmentController extends OldCourseworkController with Logging{
 
 	validatesSelf[EditAssignmentEnrolmentCommand]
@@ -32,7 +32,7 @@ class OldAssignmentEnrolmentController extends OldCourseworkController with Logg
 		form.afterBind()
 
 		logger.info(s"Assignment Enrolment includeCount: ${form.membershipInfo.includeCount}")
-		Mav("coursework/admin/assignments/enrolment",
+		Mav(s"$urlPrefix/admin/assignments/enrolment",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
 			"academicYear" -> form.academicYear,

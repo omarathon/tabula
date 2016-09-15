@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.markingworkflows.MarkingWorkflowCommandState
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{department}/markingworkflows/add"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/add"))
 class OldAddMarkingWorkflowController extends OldCourseworkController {
 
 	// tell @Valid annotation how to validate
@@ -27,7 +27,7 @@ class OldAddMarkingWorkflowController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav("coursework/admin/markingworkflows/add", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
+		Mav(s"$urlPrefix/admin/markingworkflows/add", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
 	}
 
 	@RequestMapping(method=Array(POST))

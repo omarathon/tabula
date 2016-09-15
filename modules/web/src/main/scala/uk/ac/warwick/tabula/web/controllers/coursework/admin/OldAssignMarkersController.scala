@@ -56,7 +56,7 @@ object OldAssignMarkersController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/assign-markers"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/assign-markers"))
 class OldAssignmentAssignMarkersController extends OldCourseworkController {
 
 	import OldAssignMarkersController._
@@ -100,7 +100,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 		val firstMarkerUnassignedStudents = members.toList.filterNot(firstMarkers.map(_.students).flatten.contains).sortBy(_.sortValue)
 		val secondMarkerUnassignedStudents = members.toList.filterNot(secondMarkers.map(_.students).flatten.contains).sortBy(_.sortValue)
 
-		Mav("coursework/admin/assignments/assignmarkers/form",
+		Mav(s"$urlPrefix/admin/assignments/assignmarkers/form",
 			"assessment" -> assignment,
 			"isExam" -> false,
 			"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),
@@ -126,7 +126,7 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 							 @PathVariable(value = "assignment") assignment: Assignment,
 							 @ModelAttribute("command") cmd: Appliable[Assignment],
 							 errors: Errors) = {
-			Mav("coursework/admin/assignments/assignmarkers/upload-preview",
+			Mav(s"$urlPrefix/admin/assignments/assignmarkers/upload-preview",
 				"assessment" -> assignment,
 				"isExam" -> false,
 				"assignMarkersURL" -> CourseworkRoutes.admin.assignment.assignMarkers(assignment),

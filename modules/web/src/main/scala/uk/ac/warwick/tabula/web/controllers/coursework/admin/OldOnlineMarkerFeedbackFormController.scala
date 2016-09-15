@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.commands.coursework.feedback.{GenerateGradesFromMarkCommand, OnlineMarkerFeedbackFormCommand}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/online/{student}"))
 class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
@@ -48,7 +48,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 		val allCompletedMarkerFeedback = parentFeedback.getAllCompletedMarkerFeedback
 
 
-		Mav("coursework/admin/assignments/feedback/marker_online_feedback" ,
+		Mav(s"$urlPrefix/admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
 			"isRejected" -> isRejected,
@@ -75,7 +75,7 @@ class OldOnlineMarkerFeedbackFormController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/online/{student}"))
 class OldOnlineMarkerFeedbackFormControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

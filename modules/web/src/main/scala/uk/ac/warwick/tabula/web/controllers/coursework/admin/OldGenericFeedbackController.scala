@@ -13,7 +13,7 @@ import javax.validation.Valid
 import org.springframework.context.annotation.Profile
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/generic"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/generic"))
 class OldGenericFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -25,7 +25,7 @@ class OldGenericFeedbackController extends OldCourseworkController {
 							 @ModelAttribute("command") command: GenericFeedbackCommand,
 							 errors: Errors): Mav = {
 
-		Mav("coursework/admin/assignments/feedback/generic_feedback",
+		Mav(s"$urlPrefix/admin/assignments/feedback/generic_feedback",
 			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
 				Breadcrumbs.Department(assignment.module.adminDepartment),
 				Breadcrumbs.Module(assignment.module)

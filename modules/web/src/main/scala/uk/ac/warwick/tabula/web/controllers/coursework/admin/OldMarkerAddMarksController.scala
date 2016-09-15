@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.{AssessmentService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks"))
 class OldMarkerAddMarksController extends OldCourseworkController {
 
 	@Autowired var assignmentService: AssessmentService = _
@@ -64,7 +64,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 			}
 		}.sortBy(_.universityId)
 
-		Mav("coursework/admin/assignments/markerfeedback/marksform",
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/marksform",
 			"marksToDisplay" -> marksToDisplay,
 			"isGradeValidation" -> module.adminDepartment.assignmentGradeValidation,
 			"isProxying" -> cmd.isProxying,
@@ -99,7 +99,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
-			Mav("coursework/admin/assignments/markerfeedback/markspreview",
+			Mav(s"$urlPrefix/admin/assignments/markerfeedback/markspreview",
 				"isProxying" -> cmd.isProxying,
 				"proxyingAs" -> marker
 			)
@@ -125,7 +125,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 
 // Redirects users trying to access a marking workflow using the old style URL
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/marks"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marks"))
 class OldMarkerAddMarksControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.{Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/department/{department}/markingworkflows/edit/{markingWorkflow}/replace"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/edit/{markingWorkflow}/replace"))
 class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -24,7 +24,7 @@ class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkControlle
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow], @PathVariable department: Department) = {
-		Mav("coursework/admin/markingworkflows/replace").crumbs(Breadcrumbs.Department(department))
+		Mav(s"$urlPrefix/admin/markingworkflows/replace").crumbs(Breadcrumbs.Department(department))
 	}
 
 	@RequestMapping(method=Array(POST))

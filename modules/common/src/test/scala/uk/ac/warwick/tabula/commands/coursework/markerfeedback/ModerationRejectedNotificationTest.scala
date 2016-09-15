@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ModeratorRejectedNotification
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -12,6 +13,9 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
 	val HERON_PLUG = "Not enough time has been given to explaining the awesome nature of Herons"
 	val userLookupService = mock[UserLookupService]
+
+	val cm1Prefix = "coursework"
+	Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
 	def createNotification(agent: User, recipient: User, markerFeedback: MarkerFeedback) = {
 		val n =  Notification.init(new ModeratorRejectedNotification, agent, Seq(markerFeedback))
@@ -50,7 +54,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
 		val n =  createNotification(marker2, marker1, mf2)
-		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
+		n.url should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/marker1/list")
 	}
 
 
@@ -64,7 +68,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
 		val n =  createNotification(marker2, marker1, mf2)
-		n.url should be ("/coursework/admin/module/heron101/assignments/1/marker/marker1/list")
+		n.url should be (s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/marker1/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))
 		n.content.model.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))
