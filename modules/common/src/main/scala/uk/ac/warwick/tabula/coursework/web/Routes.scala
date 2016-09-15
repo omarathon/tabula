@@ -16,12 +16,9 @@ import uk.ac.warwick.userlookup.User
 object Routes {
 	import RoutesUtils._
 
-	var _cm1Prefix = {
-		Wire.optionProperty("${cm1.prefix}")
-	}
-	def cm1Prefix = {
-		_cm1Prefix.orNull
-	}
+	// FIXME this isn't really an optional property, but testing is a pain unless it's made so
+	var _cm1Prefix = Wire.optionProperty("${cm1.prefix}")
+	def cm1Prefix = _cm1Prefix.orNull
 
 	private lazy val context = s"/$cm1Prefix"
 	def home = context + "/"

@@ -1,11 +1,16 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
-import uk.ac.warwick.tabula.data.model.{FirstMarkersMap, FirstMarkerOnlyWorkflow, Notification}
+import uk.ac.warwick.tabula.data.model.{FirstMarkerOnlyWorkflow, FirstMarkersMap, Notification}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+
 import scala.collection.JavaConverters._
 
 class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
+
+	val cm1Prefix = "coursework"
+	Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
 	val admin = Fixtures.user("1170836")
 	val marker = Fixtures.user("1234567", "1234567")
@@ -38,7 +43,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsMarkerPage() {
 		val n = createNotification
-		n.url should be("/${cm1.prefix}/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
+		n.url should be(s"/$cm1Prefix/admin/module/hnz101/assignments/heronzzzz/marker/1234567/list")
 	}
 
 	@Test
