@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.views
 
+import org.springframework.test.context.TestPropertySource
 import uk.ac.warwick.tabula.{AppContextTestBase, HttpMocking}
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.servlet.DispatcherServlet
@@ -8,6 +9,7 @@ import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model.Department
 
+@TestPropertySource(properties = Array("cm1.prefix = coursework"))
 class RedirectViewResolverTest extends AppContextTestBase with HttpMocking {
 
 	val request = mockRequest

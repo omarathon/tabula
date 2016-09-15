@@ -6,10 +6,12 @@ import org.junit.Before
 import freemarker.template.Configuration
 import uk.ac.warwick.tabula.data.model.Department
 import org.joda.time.Duration
+import org.springframework.test.context.TestPropertySource
 
 import scala.util.Properties
 import uk.ac.warwick.tabula.web.Routes
 
+@TestPropertySource(properties = Array("cm1.prefix = coursework"))
 class FreemarkerEngineTest extends AppContextTestBase {
 	var configuration:Configuration = _
 
