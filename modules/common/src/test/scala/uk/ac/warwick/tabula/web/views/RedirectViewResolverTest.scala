@@ -1,16 +1,20 @@
 package uk.ac.warwick.tabula.web.views
 
-import org.springframework.test.context.TestPropertySource
-import uk.ac.warwick.tabula.{AppContextTestBase, HttpMocking}
-import org.springframework.web.servlet.view.RedirectView
+import org.junit.runner.RunWith
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import org.springframework.test.context.{ContextConfiguration, TestPropertySource}
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.support.SessionFlashMapManager
-import uk.ac.warwick.tabula.web.controllers.ControllerViews
-import uk.ac.warwick.tabula.web.Routes
+import org.springframework.web.servlet.view.RedirectView
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.controllers.ControllerViews
+import uk.ac.warwick.tabula.{HttpMocking, TestBase}
 
-@TestPropertySource(properties = Array("cm1.prefix = coursework"))
-class RedirectViewResolverTest extends AppContextTestBase with HttpMocking {
+@RunWith(classOf[SpringJUnit4ClassRunner])
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
+@TestPropertySource(value = Array("/tabula.properties"))
+class RedirectViewResolverTest extends TestBase with HttpMocking {
 
 	val request = mockRequest
 	request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager)

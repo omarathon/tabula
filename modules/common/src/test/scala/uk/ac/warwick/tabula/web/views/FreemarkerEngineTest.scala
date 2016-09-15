@@ -1,18 +1,22 @@
 package uk.ac.warwick.tabula.web.views
-import uk.ac.warwick.tabula.AppContextTestBase
 import java.io.StringWriter
 
-import org.junit.Before
 import freemarker.template.Configuration
-import uk.ac.warwick.tabula.data.model.Department
 import org.joda.time.Duration
-import org.springframework.test.context.TestPropertySource
-
-import scala.util.Properties
+import org.junit.Before
+import org.junit.runner.RunWith
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import org.springframework.test.context.{ContextConfiguration, TestPropertySource}
+import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Routes
 
-@TestPropertySource(properties = Array("cm1.prefix = coursework"))
-class FreemarkerEngineTest extends AppContextTestBase {
+import scala.util.Properties
+
+@RunWith(classOf[SpringJUnit4ClassRunner])
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
+@TestPropertySource(value = Array("/tabula.properties"))
+class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
 
 	@Before def setup() {
