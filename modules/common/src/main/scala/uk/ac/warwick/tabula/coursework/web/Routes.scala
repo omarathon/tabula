@@ -15,7 +15,15 @@ import uk.ac.warwick.userlookup.User
  */
 object Routes {
 	import RoutesUtils._
-	private val context = s"/${Wire.property("${cm1.prefix}")}"
+
+	var _cm1Prefix = {
+		Wire.optionProperty("${cm1.prefix}")
+	}
+	def cm1Prefix = {
+		_cm1Prefix.orNull
+	}
+
+	private lazy val context = s"/$cm1Prefix"
 	def home = context + "/"
 
 	def zipFileJob(jobInstance: JobInstance) = "/zips/%s" format encoded(jobInstance.id)

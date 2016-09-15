@@ -4,23 +4,18 @@ import java.io.StringWriter
 import freemarker.template.Configuration
 import org.joda.time.Duration
 import org.junit.Before
-import org.junit.runner.RunWith
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.test.context.{ContextConfiguration, TestPropertySource}
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Routes
 
 import scala.util.Properties
 
-@RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
-@TestPropertySource(value = Array("/tabula.properties"))
 class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
 
 	@Before def setup() {
 		configuration = newFreemarkerConfiguration()
+		Routes.coursework._cm1Prefix = Some("coursework")
 	}
 
 	def render(template:String, map:Map[String,Any]) = {

@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.web.views
 
-import org.junit.runner.RunWith
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.test.context.{ContextConfiguration, TestPropertySource}
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.support.SessionFlashMapManager
 import org.springframework.web.servlet.view.RedirectView
@@ -11,9 +8,6 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.{HttpMocking, TestBase}
 
-@RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
-@TestPropertySource(value = Array("/tabula.properties"))
 class RedirectViewResolverTest extends TestBase with HttpMocking {
 
 	val request = mockRequest
@@ -37,6 +31,8 @@ class RedirectViewResolverTest extends TestBase with HttpMocking {
 
 	@Test def context() {
 		new ControllerViews {
+			Routes.coursework._cm1Prefix = Some("coursework")
+
 			def requestInfo = None
 			val chemistry = new Department {
 				code = "ch"
