@@ -6,10 +6,10 @@ import uk.ac.warwick.tabula.commands.coursework.feedback.FeedbackAdjustmentComma
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 
-class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
+class OldFeedbackAdjustmentsControllerTest extends AppContextTestBase with Mockito {
 
 	private trait ControllerFixture {
 		val controller = new OldFeedbackAdjustmentsController

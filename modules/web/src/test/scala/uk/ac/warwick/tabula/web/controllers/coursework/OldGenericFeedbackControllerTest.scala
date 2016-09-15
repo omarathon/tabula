@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
 import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldGenericFeedbackController
 import org.springframework.validation.Errors
 
-class OldGenericFeedbackControllerTest extends TestBase with Mockito {
+class OldGenericFeedbackControllerTest extends AppContextTestBase with Mockito {
 
 	trait Fixture {
 		val department = Fixtures.department("hz", "Heron studies")
