@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -157,6 +158,18 @@ class SmallGroup
 
 	def postLoad {
 		ensureSettings
+	}
+
+	def preDelete() = {
+		events.foreach { event =>
+			smallGroupService match {
+				case Some(service) => service.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+					eventOccurrence => eventOccurrence.attendance.asScala.exists {
+						attendance => attendance.state != AttendanceState.NotRecorded
+					}).foreach(service.delete)
+				case _ =>
+			}
+		}
 	}
 
 	def hasScheduledEvents = events.exists(!_.isUnscheduled)

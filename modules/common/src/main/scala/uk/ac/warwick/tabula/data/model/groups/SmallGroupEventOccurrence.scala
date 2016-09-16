@@ -22,7 +22,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	@transient var termService = Wire[TermService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="event_id")
+	@JoinColumn(name="event_id", updatable = false)
 	var event: SmallGroupEvent = _
 
 	var week: SmallGroupEventOccurrence.WeekNumber = _

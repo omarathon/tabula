@@ -4,12 +4,14 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, DepartmentSmallGroupSet, DepartmentSmallGroup}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
@@ -60,12 +62,18 @@ class EditDepartmentSmallGroupsCommandInternal(val department: Department, val s
 		if (groupNames.size() < set.groups.size()) {
 			for (i <- set.groups.size() until groupNames.size() by -1) {
 				val group = set.groups.get(i - 1)
-				set.groups.remove(i - 1)
 
-				// Also remove any linked groups
-				group.linkedGroups.asScala.foreach { smallGroup =>
+				// Remove any linked groups
+				group.linkedGroups.asScala.map { smallGroup =>
+					smallGroup.preDelete()
+					smallGroup
+				}.foreach { smallGroup =>
 					smallGroup.groupSet.groups.remove(smallGroup)
 				}
+
+				set.groups.remove(i - 1)
+
+
 			}
 		}
 
@@ -104,7 +112,7 @@ trait EditDepartmentSmallGroupsDescription extends Describable[Seq[DepartmentSma
 }
 
 trait EditDepartmentSmallGroupsValidation extends SelfValidating {
-	self: EditDepartmentSmallGroupsCommandState =>
+	self: EditDepartmentSmallGroupsCommandState with SmallGroupServiceComponent =>
 
 	override def validate(errors: Errors) {
 		groupNames.asScala.zipWithIndex.foreach { case (name, index) =>
@@ -112,12 +120,25 @@ trait EditDepartmentSmallGroupsValidation extends SelfValidating {
 			else if (name.orEmpty.length > 200) errors.rejectValue(s"groupNames[$index]", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 		}
 
-		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() until groupNames.size() by -1) {
-				val group = set.groups.get(i - 1)
+		val postedGroupNameSize = groupNames.size
+		set.groups.asScala.filterNot(g => groupNames.contains(g.name)).zipWithIndex.foreach { case (group, index) =>
+			if (!group.students.isEmpty) {
+				groupNames.add(group.name) // Add the group name back in so the error message makes sense
+				errors.rejectValue(s"groupNames[${postedGroupNameSize + index}]", "smallGroup.delete.notEmpty")
+			} else {
+				val hasAttendance =
+					group.linkedGroups.asScala.flatMap(_.events).exists { event =>
+						smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+							.exists {
+								_.attendance.asScala.exists { attendance =>
+									attendance.state != AttendanceState.NotRecorded
+								}
+							}
+					}
 
-				if (!group.students.isEmpty) {
-					errors.rejectValue(s"groupNames[${i - 1}]", "smallGroup.delete.notEmpty")
+				if (hasAttendance) {
+					groupNames.add(group.name) // Add the group name back in so the error message makes sense
+					errors.rejectValue(s"groupNames[${postedGroupNameSize + index}]", "smallGroupEvent.delete.hasAttendance")
 				}
 			}
 		}

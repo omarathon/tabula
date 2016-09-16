@@ -164,14 +164,7 @@ class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSe
 		if (updatingExistingLink(set) || creatingNewLink(set)) {
 			copyTo(set)
 
-			set.groups.asScala.foreach {
-				group => group.events.foreach {
-					event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
-						eventOccurrence => eventOccurrence.attendance.asScala.exists {
-							attendance => attendance.state != AttendanceState.NotRecorded
-						}).foreach(smallGroupService.delete)
-				}
-			}
+			set.groups.asScala.foreach(_.preDelete())
 
 			set.groups.clear()
 			linkedDepartmentSmallGroupSet.groups.asScala.foreach { linkedGroup =>

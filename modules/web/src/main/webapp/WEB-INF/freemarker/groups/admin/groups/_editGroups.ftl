@@ -82,7 +82,7 @@
 					</div>
 
 					<div class="col-md-1 max-group-size-options">
-						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" placeholder="Unlimited" type="number" min="0" cssClass="text input-small" />
+						<@f.input id="${index}-maxGroupSize" path="maxGroupSize" placeholder="Unlimited" type="number" min="0" cssClass="text form-control" />
 					</div>
 
 					<#if !no_remove_button>

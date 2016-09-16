@@ -34,12 +34,7 @@ class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGr
 
 
 	override def applyInternal() = transactional() {
-		group.events.foreach {
-			event => smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
-				eventOccurrence => eventOccurrence.attendance.asScala.exists {
-					attendance => attendance.state != AttendanceState.NotRecorded
-				}).foreach(smallGroupService.delete)
-		}
+		group.preDelete()
 
 		set.groups.remove(group)
 		group
