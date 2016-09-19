@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.permissions._
 
+//FIXME don't need module as well as assignment here, post CM2 switchover
 class DownloadAttachmentCommand(
 		val module: Module,
 		val assignment: Assignment,

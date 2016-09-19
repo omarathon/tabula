@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.web.controllers.coursework
+package uk.ac.warwick.tabula.web.controllers.cm2
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
@@ -13,9 +13,9 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/submission-receipt.pdf"))
-class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/submission-receipt.pdf"))
+class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
 	hideDeletedItems
 
@@ -23,10 +23,9 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 
 	@ModelAttribute
 	def command(
-		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		user: CurrentUser
-	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, currentMember)
+	): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(assignment.module, assignment, user, currentMember)
 
 	@RequestMapping
 	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
@@ -41,9 +40,9 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{studentMember}/submission-receipt.pdf"))
-class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/{studentMember}/submission-receipt.pdf"))
+class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkController {
 
 	hideDeletedItems
 
@@ -51,11 +50,10 @@ class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCoursewor
 
 	@ModelAttribute
 	def command(
-		 @PathVariable module: Module,
 		 @PathVariable assignment: Assignment,
 		 @PathVariable studentMember: Member,
 		 user: CurrentUser
-	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(module, assignment, user, studentMember)
+	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(assignment.module, assignment, user, studentMember)
 
 	@RequestMapping
 	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {

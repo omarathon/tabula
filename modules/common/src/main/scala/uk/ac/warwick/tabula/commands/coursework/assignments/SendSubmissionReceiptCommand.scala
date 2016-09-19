@@ -13,6 +13,7 @@ import language.implicitConversions
  * Send an email confirming the receipt of a submission to the student
  * who submitted it.
  */
+//FIXME don't need module as well as assignment here, post CM2 switchover
 class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser)
 	extends Command[Boolean] with Notifies[Boolean, Submission] with ReadOnly {
 

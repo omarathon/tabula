@@ -1,0 +1,1 @@
+${department.formattedGuidelineSummary}<#-- Pre-escaped HTML, no need for escaping so put in an include -->

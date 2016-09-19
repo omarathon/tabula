@@ -40,7 +40,7 @@ Macros for customised form elements, containers and more complex pickers.
 	</div>
 </#macro>
 
-<#macro labelled_form_group path="" labelText="">
+<#macro labelled_form_group path="" labelText="" help="">
 	<@form_group path=path>
 		<#if labelText?has_content>
 			<@label path=path><#compress><#noescape>${labelText}</#noescape></#compress></@label>
@@ -53,6 +53,7 @@ Macros for customised form elements, containers and more complex pickers.
 		<#else>
 			<#nested />
 		</#if>
+		<#if help?has_content><div class="help-block">${help}</div></#if>
 	</@form_group>
 </#macro>
 
@@ -91,7 +92,7 @@ Macros for customised form elements, containers and more complex pickers.
 	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
 </#compress></#macro>
 
-<#macro filewidget types basename multiple=true max=10 labelText="File">
+<#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="">
 <#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@labelled_form_group basename labelText>
@@ -130,6 +131,9 @@ Macros for customised form elements, containers and more complex pickers.
 				<#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
 				<#if types?size &gt; 0>
 					File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
+				</#if>
+				<#if maxFileSize?has_content>
+					Maximum file size per file: ${maxFileSize}MB
 				</#if>
 				<#if multiple && max!=1>
 					<span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>

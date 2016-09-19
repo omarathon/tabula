@@ -52,6 +52,15 @@
 	<#assign nonav=false />
 	<#assign homeUrl><@routes.coursework.home /></#assign>
 	<#assign context="/coursework" />
+<#elseif requestPath == '/cm2' || requestPath?starts_with('/cm2/')>
+	<#assign bodyClass="coursework-page" />
+	<#assign siteHeader="CM2" />
+	<#assign subsite=true />
+	<#assign title="CM2" />
+	<#assign name="cm2" />
+	<#assign nonav=false />
+	<#assign homeUrl><@routes.cm2.home /></#assign>
+	<#assign context="/cm2" />
 <#elseif requestPath == '/profiles' || requestPath?starts_with('/profiles/')>
 	<#assign bodyClass="profiles-page" />
 	<#assign siteHeader="Profiles" />

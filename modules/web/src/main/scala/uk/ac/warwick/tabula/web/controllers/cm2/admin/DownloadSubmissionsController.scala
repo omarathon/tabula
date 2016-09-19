@@ -1,29 +1,29 @@
-package uk.ac.warwick.tabula.web.controllers.coursework.admin
+package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.coursework.assignments.{AdminGetSingleSubmissionCommand, DownloadAllSubmissionsCommand, DownloadAttachmentCommand, DownloadFeedbackSheetsCommand, DownloadMarkersSubmissionsCommand, DownloadSubmissionsCommand}
+import uk.ac.warwick.tabula.commands.coursework.assignments._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions.zip"))
-class OldDownloadSubmissionsController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions.zip"))
+class DownloadSubmissionsController extends CourseworkController {
 
 	@ModelAttribute("command")
-	def getSingleSubmissionCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new DownloadSubmissionsCommand(module, assignment, user)
+	def getSingleSubmissionCommand(@PathVariable assignment: Assignment) =
+		new DownloadSubmissionsCommand(assignment.module, assignment, user)
 
 	@RequestMapping
 	def download(@ModelAttribute("command") command: DownloadSubmissionsCommand, @PathVariable assignment: Assignment): Mav = {
@@ -36,17 +36,16 @@ class OldDownloadSubmissionsController extends OldCourseworkController {
 	}
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/submissions.zip"))
-class OldDownloadMarkerSubmissionsController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/submissions.zip"))
+class DownloadMarkerSubmissionsController extends CourseworkController {
 
 	@ModelAttribute("command")
 	def getMarkersSubmissionCommand(
-			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable marker: User,
 			submitter: CurrentUser
-	) =	DownloadMarkersSubmissionsCommand(module, assignment, marker, submitter)
+	) =	DownloadMarkersSubmissionsCommand(assignment.module, assignment, marker, submitter)
 
 	@RequestMapping
 	def downloadMarkersSubmissions(@ModelAttribute("command") command: Appliable[RenderableFile]): RenderableFile = {
@@ -55,24 +54,23 @@ class OldDownloadMarkerSubmissionsController extends OldCourseworkController {
 
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/submissions.zip"))
-class OldDownloadMarkerSubmissionsControllerCurrentUser extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/submissions.zip"))
+class DownloadMarkerSubmissionsControllerCurrentUser extends CourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.submissions(assignment, currentUser.apparentUser))
 	}
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download-zip/{filename}"))
-class OldDownloadAllSubmissionsController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download-zip/{filename}"))
+class DownloadAllSubmissionsController extends CourseworkController {
 
 	@ModelAttribute def getAllSubmissionsSubmissionCommand(
-			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable filename: String) =
-		new DownloadAllSubmissionsCommand(module, assignment, filename)
+		new DownloadAllSubmissionsCommand(assignment.module, assignment, filename)
 
 	@RequestMapping
 	def downloadAll(command: DownloadAllSubmissionsCommand): RenderableFile = {
@@ -80,36 +78,34 @@ class OldDownloadAllSubmissionsController extends OldCourseworkController {
 	}
 }
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(
-	value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
+	value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
 	params = Array("!single"))
-class OldDownloadSingleSubmissionController extends OldCourseworkController {
+class DownloadSingleSubmissionController extends CourseworkController {
 
 	var userLookup = Wire[UserLookupService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable submission: Submission) =
-		new AdminGetSingleSubmissionCommand(module, assignment, mandatory(submission))
+		new AdminGetSingleSubmissionCommand(assignment.module, assignment, mandatory(submission))
 
 	@RequestMapping
 	def downloadSingle(cmd: AdminGetSingleSubmissionCommand): RenderableFile = cmd.apply()
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}"))
-class OldDownloadSingleSubmissionFileController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions/download/{submission}/{filename}"))
+class DownloadSingleSubmissionFileController extends CourseworkController {
 	var userLookup = Wire[UserLookupService]
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
-			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@PathVariable submission: Submission ) = {
 		val student = profileService.getMemberByUser(userLookup.getUserByUserId(mandatory(submission).userId))
-		new DownloadAttachmentCommand(module, assignment, mandatory(submission), student)
+		new DownloadAttachmentCommand(assignment.module, assignment, mandatory(submission), student)
 	}
 
 	@RequestMapping
@@ -120,14 +116,14 @@ class OldDownloadSingleSubmissionFileController extends OldCourseworkController 
 
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}"))
-class OldDownloadFeedbackSheetsController extends OldCourseworkController {
+@Profile(Array("cm2Enabled")) @Controller
+@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}"))
+class DownloadFeedbackSheetsController extends CourseworkController {
 
 	var userLookup = Wire.auto[UserLookupService]
 
-	@ModelAttribute def feedbackSheetsCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new DownloadFeedbackSheetsCommand(module, assignment)
+	@ModelAttribute def feedbackSheetsCommand(@PathVariable assignment: Assignment) =
+		new DownloadFeedbackSheetsCommand(assignment.module, assignment)
 
 	@RequestMapping(value = Array("/feedback-templates.zip"))
 	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand): RenderableFile = {
