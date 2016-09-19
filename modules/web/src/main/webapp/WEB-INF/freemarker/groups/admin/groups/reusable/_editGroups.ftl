@@ -8,6 +8,7 @@
 							${group_index + 1}.
 						</span>
 						<@f.input path="groupNames[${group_index}]" cssClass="form-control" />
+						<@f.hidden path="groupIds[${group_index}]" />
 						<span class="input-group-btn">
 							<button type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button>
 						</span>
@@ -99,6 +100,10 @@
 					var $name = $group.find('input[type="text"]');
 					$name.attr('name', 'groupNames[' + index + ']');
 					$name.attr('id', 'groupNames' + index);
+
+					var $id = $group.find('input[type="hidden"]');
+					$id.attr('name', 'groupIds[' + index + ']');
+					$id.attr('id', 'groupIds' + index);
 
 					$group.find('.input-group-addon').text((index + 1) + '.');
 				});

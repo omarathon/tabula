@@ -29,15 +29,19 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 	private trait ExistingGroupsFixture extends Fixture {
 		val groupA = new DepartmentSmallGroup(set) {
 			name = "Group A"
+			id = "1"
 		}
 		val groupB = new DepartmentSmallGroup(set) {
 			name = "Group B"
+			id = "2"
 		}
 		val groupC = new DepartmentSmallGroup(set) {
 			name = "Group C"
+			id = "3"
 		}
 		val groupD = new DepartmentSmallGroup(set) {
 			name = "Group D"
+			id = "4"
 		}
 
 		set.groups.add(groupA)
@@ -78,17 +82,25 @@ class EditDepartmentSmallGroupsCommandTest extends TestBase with Mockito {
 
 	@Test def edit() { new CommandWithExistingFixture {
 		command.groupNames.asScala should be (Seq("Group A", "Group B", "Group C", "Group D"))
-		command.groupNames.set(1, "Edited group")
-		command.groupNames.set(3, "")
+		command.groupIds.asScala should be (Seq("1", "2", "3", "4"))
 
-		command.onBind(mock[BindingResult])
+		// Rename Group B
+		command.groupNames.set(1, "Edited group")
+		// Remove Group C
+		command.groupNames.remove(2)
+		command.groupIds.remove(2)
+
+		command.onBind(smartMock[BindingResult])
 
 		val groups = command.applyInternal()
-		groups should be (Seq(groupA, groupB, groupC))
+		groups should be (Seq(groupA, groupB, groupD))
 
 		groupA.name should be ("Group A")
+		groupA.id should be ("1")
 		groupB.name should be ("Edited group")
-		groupC.name should be ("Group C")
+		groupB.id should be ("2")
+		groupD.name should be ("Group D")
+		groupD.id should be ("4")
 
 		set.groups.asScala should be (groups)
 
