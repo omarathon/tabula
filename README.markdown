@@ -94,6 +94,21 @@ The usual SSO config guff. You will need to get this configuration added to Web 
 Ensure it includes a `<trustedapps />` section or you _will_ see NPEs from one of the bouncycastle crypto libraries.
 Also, ensure that the cluster datasource matches the sample - older configs may not match, which will cause _datasource not found_ exceptions.
 
+### The following jars are now provided to newworld apps so they will need to be manually included on dev instances
+
+#### `lib/logback-classic-1.1.3.jar`
+
+You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/logback-classic-1.1.3.jar
+
+#### `lib/logback-core-1.1.3.jar`
+
+You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/logback-core-1.1.3.jar
+
+#### `lib/jtds-1.3.1.jar`
+
+You can get this from https://mvnrepository.com/artifact/org.slf4j/slf4j-api/1.3.1
+
+
 ### ActiveMQ
 
 Unfortunately, the only way to get this working on Tomcat is to install ActiveMQ locally.
