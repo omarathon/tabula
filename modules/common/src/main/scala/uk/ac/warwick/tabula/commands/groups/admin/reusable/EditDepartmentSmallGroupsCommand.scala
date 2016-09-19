@@ -32,50 +32,50 @@ trait EditDepartmentSmallGroupsCommandState {
 	def set: DepartmentSmallGroupSet
 
 	var groupNames: JList[String] = LazyLists.create()
+	var groupIds: JList[String] = LazyLists.create()
 }
 
 class EditDepartmentSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet) extends CommandInternal[Seq[DepartmentSmallGroup]] with EditDepartmentSmallGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
 	override def applyInternal() = {
-		groupNames.asScala.zipWithIndex.foreach { case (name, i) =>
-			if (set.groups.size() > i) {
-				// Edit an existing group
-				set.groups.get(i).name = name
-			} else {
-				// Add a new group
-				val group = new DepartmentSmallGroup(set)
-				group.name = name
+		// Edit existing groups and add new groups
+		groupNames.asScala.zipWithIndex.foreach { case (groupName, groupNameIndex) =>
+			groupIds.asScala.zipWithIndex.find { case (_, groupIdIndex) => groupIdIndex == groupNameIndex} match {
+				case Some((groupId, _)) =>
+					// Edit an existing group
+					set.groups.asScala.find(_.id == groupId)
+						.getOrElse(throw new IllegalArgumentException(s"Could not find existing group with id = $groupId for group $groupName"))
+						.name = groupName
+				case _ =>
+					// Add a new group
+					val group = new DepartmentSmallGroup(set)
+					group.name = groupName
 
-				set.groups.add(group)
+					set.groups.add(group)
 
-				// We also need to create a linked group elsewhere for any sets linked to this set
-				set.linkedSets.asScala.foreach { smallGroupSet =>
-					val smallGroup = new SmallGroup
-					smallGroup.name = name
-					smallGroup.linkedDepartmentSmallGroup = group
-					smallGroupSet.groups.add(smallGroup)
-				}
+					// We also need to create a linked group elsewhere for any sets linked to this set
+					set.linkedSets.asScala.foreach { smallGroupSet =>
+						val smallGroup = new SmallGroup
+						smallGroup.name = groupName
+						smallGroup.linkedDepartmentSmallGroup = group
+						smallGroupSet.groups.add(smallGroup)
+					}
 			}
 		}
 
-		if (groupNames.size() < set.groups.size()) {
-			for (i <- set.groups.size() until groupNames.size() by -1) {
-				val group = set.groups.get(i - 1)
-
-				// Remove any linked groups
-				group.linkedGroups.asScala.map { smallGroup =>
-					smallGroup.preDelete()
-					smallGroup
-				}.foreach { smallGroup =>
-					smallGroup.groupSet.groups.remove(smallGroup)
-				}
-
-				set.groups.remove(i - 1)
-
-
+		// Remove groups
+		val groupsToRemove = set.groups.asScala.filter(group => !groupNames.contains(group.name) && !groupIds.contains(group.id))
+		groupsToRemove.foreach { group =>
+			// Remove any linked groups
+			group.linkedGroups.asScala.map { smallGroup =>
+				smallGroup.preDelete()
+				smallGroup
+			}.foreach { smallGroup =>
+				smallGroup.groupSet.groups.remove(smallGroup)
 			}
 		}
+		set.groups.removeAll(groupsToRemove.asJava)
 
 		smallGroupService.saveOrUpdate(set)
 		set.linkedSets.asScala.foreach(smallGroupService.saveOrUpdate)
@@ -89,7 +89,11 @@ trait PopulateEditDepartmentSmallGroupsCommand extends PopulateOnForm {
 
 	override def populate() {
 		groupNames.clear()
-		groupNames.addAll(set.groups.asScala.map { _.name }.sorted.asJava)
+		groupIds.clear()
+		set.groups.asScala.sortBy(_.name).foreach(group => {
+			groupNames.add(group.name)
+			groupIds.add(group.id)
+		})
 	}
 }
 
