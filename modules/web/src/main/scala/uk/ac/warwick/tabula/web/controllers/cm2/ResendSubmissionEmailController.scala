@@ -7,7 +7,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.coursework.assignments.SendSubmissionReceiptCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.Mav
 

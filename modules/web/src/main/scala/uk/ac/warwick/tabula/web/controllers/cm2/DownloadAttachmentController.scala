@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.DownloadAttachmentCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Member}
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}

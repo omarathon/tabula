@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMo
 	* If the studentMember is not specified it works for the current user, whether they are a member of not.
 	*/
 
-// rename StudentSubmissionController? or StudentSubmissionAndFeedbackController
 @Profile(Array("cm2Enabled")) @Controller
 @RequestMapping(Array("/${cm2.prefix}/submission/{assignment}"))
 class AssignmentController extends CourseworkController
