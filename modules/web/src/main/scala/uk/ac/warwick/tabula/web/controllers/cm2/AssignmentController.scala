@@ -8,11 +8,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.commands.cm2.StudentSubmissionAndFeedbackCommand.StudentSubmissionInformation
+import uk.ac.warwick.tabula.commands.cm2.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{SubmitAssignmentCommand, SubmitAssignmentRequest}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.commands.coursework.{CurrentUserSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
-import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand.StudentSubmissionInformation
-import uk.ac.warwick.tabula.commands.coursework.assignments.{SubmitAssignmentCommand, SubmitAssignmentRequest}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
@@ -34,11 +34,13 @@ class AssignmentController extends CourseworkController
 
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("submitAssignmentCommand") def formOrNull(@PathVariable assignment: Assignment, user: CurrentUser): SubmitAssignmentCommand = {
+	@ModelAttribute("submitAssignmentCommand")
+	def formOrNull(@PathVariable assignment: Assignment, user: CurrentUser): SubmitAssignmentCommand = {
 		restricted(SubmitAssignmentCommand.self(mandatory(assignment.module), mandatory(assignment), user)).orNull
 	}
 
-	@ModelAttribute("studentSubmissionAndFeedbackCommand") def studentSubmissionAndFeedbackCommand(@PathVariable assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute("studentSubmissionAndFeedbackCommand")
+	def studentSubmissionAndFeedbackCommand(@PathVariable assignment: Assignment, user: CurrentUser) =
 		StudentSubmissionAndFeedbackCommand(assignment.module, assignment, user)
 
 	@ModelAttribute("willCheckpointBeCreated")
@@ -60,7 +62,8 @@ class AssignmentController extends CourseworkController
 	def embeddedView(
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
-		errors: Errors) = {
+		errors: Errors
+	) = {
 		view(infoCommand, formOrNull, errors).embedded
 	}
 
@@ -68,7 +71,8 @@ class AssignmentController extends CourseworkController
 	def view(
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
-		errors: Errors) = {
+		errors: Errors
+	) = {
 		val form = Option(formOrNull)
 		val info = infoCommand.apply()
 
@@ -95,7 +99,8 @@ class AssignmentController extends CourseworkController
 	def submit(
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
-		errors: Errors) = {
+		errors: Errors
+	) = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
 			view(infoCommand, form, errors)

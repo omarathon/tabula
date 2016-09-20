@@ -1,22 +1,22 @@
-package uk.ac.warwick.tabula.commands.coursework.assignments
+package uk.ac.warwick.tabula.commands.cm2.assignments
 
-import uk.ac.warwick.tabula.commands.{Notifies, Command, Description, ReadOnly}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceiptNotification
-import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Module}
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.format.DateTimeFormat
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.{Command, Description, Notifies, ReadOnly}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.SubmissionReceiptNotification
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification, Submission}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
-import language.implicitConversions
+
+import scala.language.implicitConversions
 
 /**
  * Send an email confirming the receipt of a submission to the student
  * who submitted it.
  */
-class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser)
+class SendSubmissionReceiptCommand(val assignment: Assignment, val submission: Submission, val user: CurrentUser)
 	extends Command[Boolean] with Notifies[Boolean, Submission] with ReadOnly {
 
-	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 
 	val dateFormatter = DateTimeFormat.forPattern("d MMMM yyyy 'at' HH:mm:ss")

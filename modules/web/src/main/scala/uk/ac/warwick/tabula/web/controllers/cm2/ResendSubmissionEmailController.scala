@@ -5,8 +5,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.coursework.assignments.SendSubmissionReceiptCommand
-import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.commands.cm2.assignments.SendSubmissionReceiptCommand
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.Mav
@@ -21,7 +21,7 @@ class ResendSubmissionEmailController extends CourseworkController {
 
 	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
 		new SendSubmissionReceiptCommand(
-			assignment.module, assignment,
+			assignment,
 			mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId).filter(_.submitted)),
 			user)
 
@@ -34,7 +34,7 @@ class ResendSubmissionEmailController extends CourseworkController {
 
 		Mav(s"$urlPrefix/submit/receipt",
 			"submission" -> form.submission,
-			"module" -> form.module,
+			"module" -> form.assignment.module,
 			"assignment" -> form.assignment,
 			"sent" -> sent,
 			"hasEmail" -> user.email.hasText)

@@ -27,7 +27,7 @@ object Routes {
 	object assignment {
 		def apply(assignment: Assignment) = context + "/submission/%s/" format (encoded(assignment.id))
 		def receipt(assignment: Assignment) = apply(assignment)
-		def feedback(assignment: Assignment) = apply(assignment) + "all/feedback.zip"
+		def allFeedback(assignment: Assignment) = apply(assignment) + "all/feedback.zip"
 		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback) = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.universityId)
 	}
 

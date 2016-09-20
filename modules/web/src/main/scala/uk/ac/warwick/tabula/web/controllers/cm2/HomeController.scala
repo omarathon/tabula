@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller
 @Profile(Array("cm2Enabled")) @Controller
 class HomeController extends CourseworkController {
 
-	@RequestMapping(Array("/${cm2.prefix}")) def home() = Mav(s"$urlPrefix/home/view")
+	@RequestMapping(Array("/${cm2.prefix}"))
+	def home() = Mav(s"$urlPrefix/home/view")
 
 }

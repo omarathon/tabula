@@ -1,19 +1,15 @@
-package uk.ac.warwick.tabula.commands.coursework.assignments
+package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
-import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
 class DownloadAttachmentCommand(
-		val module: Module,
 		val assignment: Assignment,
 		val submission: Submission,
 		val student: Option[Member])
 		extends Command[Option[RenderableFile]] with ReadOnly {
-
-	mustBeLinked(mandatory(assignment), mandatory(module))
 
 	student match {
 		case Some(student: StudentMember) => PermissionCheckAny(

@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 import scala.collection.JavaConversions._
 
-//FIXME don't need module as well as assignment here, post CM2 switchover
 class DownloadAllSubmissionsCommand(
 		val module: Module,
 		val assignment: Assignment,
