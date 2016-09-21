@@ -29,7 +29,8 @@
 		</div>
 	</#if>
 
-	<#assign submitUrl><@routes.coursework.assignment assignment /></#assign>
+
+	<#assign submitUrl><@routes.cm2.assignment assignment /></#assign>
 
 	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand">
 
@@ -55,9 +56,55 @@
 		<@f.errors cssClass="error form-errors"></@f.errors>
 
 		<@form.row>
-			<label class="control-label">Your University ID</label>
+			<label class="control-label">University ID</label>
 			<@form.field>
-				<div class="uneditable-input">${user.apparentUser.warwickId!}</div>
+				<span class="uneditable-input">${user.apparentUser.warwickId!}</span>
+			</@form.field>
+		</@form.row>
+
+		<@form.row>
+		<label class="control-label">Assignment information</label>
+			<@form.field>
+			<div class="assignment-info-field">
+				<#if !assignment.openEnded>
+					<#assign time_remaining = durationFormatter(assignment.closeDate) />
+					<p>
+						<span class="assignment-due">Assignment due:</span> <@fmt.date date=assignment.closeDate />,
+						<span class="time-remaining">${time_remaining}</span>.
+
+						<#if isExtended>
+							<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
+
+						<span class="assignment-due">Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
+							<span class="time-remaining">${extension_time_remaining}</span>.
+						</#if>
+					</p>
+
+					<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
+						<p>
+							You can submit to this assignment multiple times up to the deadline. Only
+							the latest submission of your work will be accepted, and you will not be able
+							to change this once the deadline has passed.
+						</p>
+					</#if>
+
+					<#if assignment.allowLateSubmissions>
+						<p>
+							You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
+							may be affected.
+						</p>
+					</#if>
+				<#else>
+					<p>
+						This assignment does not have a deadline.
+
+						<#if assignment.allowResubmission>
+							You can submit to this assignment multiple times, but only
+							the latest submission of your work will be kept.
+						</#if>
+					</p>
+				</#if>
+			</div>
 			</@form.field>
 		</@form.row>
 
@@ -65,13 +112,13 @@
 
 			<#list assignment.submissionFields as field>
 				<div class="submission-field">
-					<#include "/WEB-INF/freemarker/coursework/submit/formfields/${field.template}.ftl" >
+					<#include "./formfields/${field.template}.ftl" >
 				</div>
 			</#list>
 
 			<#if hasDisability>
 				<div class="submission-field">
-					<#include "/WEB-INF/freemarker/coursework/submit/formfields/disability.ftl" >
+					<#include "./formfields/disability.ftl" >
 				</div>
 			</#if>
 
@@ -92,7 +139,7 @@
 
 			<#if assignment.displayPlagiarismNotice>
 				<@form.row>
-					<label class="control-label">Plagiarism declaration</label>
+					<label class="control-label">Plagiarism</label>
 					<@form.field>
 						<p class="plagiarism-field">
 							Work submitted to the University of Warwick for official
@@ -101,64 +148,24 @@
 							acknowledged. Failure to properly acknowledge any copied
 							work is plagiarism and may result in a mark of zero.
 						</p>
-						<p>
-							<@f.errors path="plagiarismDeclaration" cssClass="error" />
-							<label><@f.checkbox path="plagiarismDeclaration" required="true" /> I confirm that this assignment is all my own work</label>
-						</p>
+					</@form.field>
+				</@form.row>
+				<@form.row>
+					<label class="control-label">Authorship confirmation</label>
+					<@form.field>
+						<@f.errors path="plagiarismDeclaration" cssClass="error" />
+						<@f.checkbox path="plagiarismDeclaration" required="true" /> I confirm that this assignment is all my own work
 					</@form.field>
 				</@form.row>
 			</#if>
 
-			<@form.row>
-				<label class="control-label">Assignment information</label>
-				<@form.field>
-					<div class="assignment-info-field">
-						<#if !assignment.openEnded>
-							<#assign time_remaining = durationFormatter(assignment.closeDate) />
-							<p>
-								The deadline for this assignment is <@fmt.date date=assignment.closeDate />,
-								<span class="time-remaining">${time_remaining}</span>.
 
-								<#if isExtended>
-									<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
-
-									You have an extension until <@fmt.date date=extension.expiryDate />,
-									<span class="time-remaining">${extension_time_remaining}</span>.
-								</#if>
-							</p>
-
-							<#if assignment.allowResubmission && (!assignment.closed || isExtended)>
-								<p>
-									You can submit to this assignment multiple times up to the deadline. Only
-									the latest submission of your work will be accepted, and you will not be able
-									to change this once the deadline has passed.
-								</p>
-							</#if>
-
-							<#if assignment.allowLateSubmissions>
-								<p>
-								  You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
-								  may be affected.
-								</p>
-							</#if>
-						<#else>
-							<p>
-								This assignment does not have a deadline.
-
-								<#if assignment.allowResubmission>
-									You can submit to this assignment multiple times, but only
-									the latest submission of your work will be kept.
-								</#if>
-							</p>
-						</#if>
-					</div>
-				</@form.field>
-			</@form.row>
 
 		</div>
 
 		<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">
+			<a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
 			<#if willCheckpointBeCreated>
 				<div class="alert alert-info" style="display: inline-block;">
 					Submitting this assignment will mark a monitoring point as attended
