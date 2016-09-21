@@ -2,10 +2,7 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
-import uk.ac.warwick.userlookup.User
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -25,10 +22,7 @@ object Routes {
 
 
 	object assignment {
-		def apply(assignment: Assignment) = context + "/submission/%s/" format (encoded(assignment.id))
-		def receipt(assignment: Assignment) = apply(assignment)
-		def allFeedback(assignment: Assignment) = apply(assignment) + "all/feedback.zip"
-		def feedbackPdf(assignment: Assignment, feedback: AssignmentFeedback) = apply(assignment) + "%s/feedback.pdf" format encoded(feedback.universityId)
+		def apply(assignment: Assignment) = context + "/submission/%s/" format encoded(assignment.id)
 	}
 
 }
