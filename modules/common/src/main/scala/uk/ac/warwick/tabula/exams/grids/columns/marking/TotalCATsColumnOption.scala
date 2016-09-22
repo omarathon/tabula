@@ -41,12 +41,7 @@ class TotalCATsColumnOption extends ChosenYearExamGridColumnOption {
 			} else if (isUpperBound) {
 				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
 			} else {
-				val f = entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))
-				val f2 = f.map(mr => BigDecimal(mr.cats))
-				val f3 = f.map(mr => BigDecimal(mr.cats)).sum
-				val f4 = f.map(mr => BigDecimal(mr.cats)).sum.underlying
-				val f1 = transformModuleRegistrations(f)
-				Right(f1)
+				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
 			}
 		}
 

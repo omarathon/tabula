@@ -171,10 +171,12 @@ abstract class AbstractProgressionService extends ProgressionService {
 				(year, courseDao.getCourseYearWeighting(scyd.studentCourseDetails.course.code, scyd.academicYear, year))
 			}
 			if (markPerYear.exists { case (_, possibleMark) => possibleMark.isLeft }) {
-				FinalYearGrade.Unknown(markPerYear.filter { case (_, possibleMark) => possibleMark.isLeft }.map { case (_, possibleMark) => possibleMark.left.get}.mkString(", "))
+				FinalYearGrade.Unknown(markPerYear.flatMap { case (_, possibleMark) => possibleMark.left.toOption }.mkString(", "))
 			} else if (yearWeightings.exists { case (_, possibleYearWeighting) => possibleYearWeighting.isEmpty } ) {
 				FinalYearGrade.Unknown("Could not find year weightings for: %s".format(
-					yearWeightings.filter(_._2.isEmpty).map(_._1).map(year => s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.academicYear.toString} Year $year").mkString(", ")
+					yearWeightings.filter { case (_, possibleWeighting) => possibleWeighting.isEmpty }.map { case (year, _) =>
+						s"${scyd.studentCourseDetails.course.code.toUpperCase} ${scyd.academicYear.toString} Year $year"
+					}.mkString(", ")
 				))
 			} else {
 				weightedFinalYearGrade(
@@ -237,7 +239,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		markPerYear: Seq[(Int, BigDecimal)],
 		yearWeightings: Seq[(Int, CourseYearWeighting)]
 	): FinalYearGrade = {
-		val finalTwoYearsModuleRegistrations = scydPerYear.reverse.take(2).flatMap(_._2.moduleRegistrations)
+		val finalTwoYearsModuleRegistrations = scydPerYear.reverse.take(2).flatMap { case (_, yearDetails) => yearDetails.moduleRegistrations }
 
 		if (finalTwoYearsModuleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
 			FinalYearGrade.Unknown(s"No agreed mark or actual mark for modules: ${
@@ -254,9 +256,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 			val passedCreditsFinalYear = passedModuleRegistrationsFinalYear.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FinalYearRequiredCredits
 
 			if (passedCreditsInFinalTwoYears && passedCreditsFinalYear) {
-				val finalMark: BigDecimal = markPerYear.map(_._1).map(year =>
+				val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
 					markPerYear.toMap.apply(year) * yearWeightings.toMap.apply(year).weighting
-				).sum.setScale(1, RoundingMode.HALF_UP)
+				}.sum.setScale(1, RoundingMode.HALF_UP)
 				FinalYearGrade.fromMark(finalMark)
 			} else {
 				FinalYearGrade.Fail
