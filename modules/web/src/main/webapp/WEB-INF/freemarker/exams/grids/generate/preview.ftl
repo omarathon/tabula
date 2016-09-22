@@ -173,10 +173,10 @@
 				</tr>
 				<#-- Category row -->
 				<tr class="category">
-					<#assign currentCategory = '' />
 					<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
 					<td class="spacer">&nbsp;</td>
 					<#list perYearColumns?keys?sort as year>
+						<#assign currentCategory = '' />
 						<#list mapGet(perYearColumns, year) as column>
 							<#if column.category?has_content>
 								<#if currentCategory != column.category>
@@ -189,6 +189,7 @@
 						</#list>
 						<td class="spacer">&nbsp;</td>
 					</#list>
+					<#assign currentCategory = '' />
 					<#list summaryColumns as column>
 						<#if column.category?has_content>
 							<#if currentCategory != column.category>

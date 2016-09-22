@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.marking.OvercattedYearMarkColumnOption
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreModulesColumnOption, CoreOptionalModulesColumnOption, CoreRequiredModulesColumnOption, OptionalModulesColumnOption}
-import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, ModuleRegistrationService, ModuleRegistrationServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleRegistrationServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, ModuleRegistrationServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONErrorView, JSONView}
@@ -31,7 +31,7 @@ class OvercattingOptionsController extends ExamsController
 
 	private def normalLoad(scyd: StudentCourseYearDetails, academicYear: AcademicYear) = {
 		upstreamRouteRuleService.findNormalLoad(scyd.route, academicYear, scyd.yearOfStudy).getOrElse(
-			ModuleRegistrationService.DefaultNormalLoad
+			scyd.route.degreeType.normalCATSLoad
 		)
 	}
 

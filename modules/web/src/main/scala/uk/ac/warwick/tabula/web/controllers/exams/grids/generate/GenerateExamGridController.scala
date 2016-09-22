@@ -313,7 +313,7 @@ class GenerateExamGridController extends ExamsController
 				"generatedDate" -> DateTime.now,
 				"weightings" -> weightings,
 				"normalLoadOption" -> normalLoadOption,
-				"defaultNormalLoad" -> ModuleRegistrationService.DefaultNormalLoad,
+				"defaultNormalLoad" -> selectCourseCommand.route.degreeType.normalCATSLoad,
 				"routeRules" -> routeRules
 			),
 			department,
@@ -355,7 +355,7 @@ class GenerateExamGridController extends ExamsController
 				route = selectCourseCommand.route,
 				yearOfStudy = selectCourseCommand.yearOfStudy,
 				yearWeightings = weightings,
-				normalLoad = normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad),
+				normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad),
 				entities = entities,
 				leftColumns = studentInformationColumns,
 				perYearColumns = perYearColumns,
