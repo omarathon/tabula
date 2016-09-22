@@ -128,7 +128,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 		academicYear,
 		selectCourseCommand.yearOfStudy
 	)
-	lazy val normalLoad = normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad)
+	lazy val normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
 	lazy val routeRules = upstreamRouteRuleService.list(
 		selectCourseCommand.route,
 		academicYear,

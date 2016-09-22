@@ -59,6 +59,7 @@
 							</#list>
 							<td class="spacer">&nbsp;</td>
 							<#list overcatView.perYearColumns?keys?sort?reverse as year>
+								<#assign currentCategory = '' />
 								<#list mapGet(overcatView.perYearColumns, year) as column>
 									<#if column.category?has_content>
 										<#if currentCategory != column.category>

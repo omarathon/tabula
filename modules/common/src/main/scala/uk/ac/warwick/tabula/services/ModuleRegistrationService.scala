@@ -10,10 +10,6 @@ import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, Modu
 
 import scala.math.BigDecimal.RoundingMode
 
-object ModuleRegistrationService {
-	final val DefaultNormalLoad = BigDecimal(120)
-}
-
 trait ModuleRegistrationService {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration): Unit
