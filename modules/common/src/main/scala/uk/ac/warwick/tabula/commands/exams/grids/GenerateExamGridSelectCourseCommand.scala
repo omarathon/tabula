@@ -15,7 +15,7 @@ object GenerateExamGridSelectCourseCommand {
 		new GenerateExamGridSelectCourseCommandInternal(department, academicYear)
 			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
-			with ComposableCommand[Seq[GenerateExamGridEntity]]
+			with ComposableCommand[Seq[ExamGridEntity]]
 			with GenerateExamGridSelectCourseValidation
 			with GenerateExamGridSelectCoursePermissions
 			with GenerateExamGridSelectCourseCommandState
@@ -23,19 +23,8 @@ object GenerateExamGridSelectCourseCommand {
 			with ReadOnly with Unaudited
 }
 
-case class GenerateExamGridEntity(
-	id: String,
-	name: String,
-	universityId: String,
-	moduleRegistrations: Seq[ModuleRegistration],
-	cats: BigDecimal,
-	overcattingModules: Option[Seq[Module]],
-	markOverrides: Option[Map[Module, BigDecimal]],
-	studentCourseYearDetails: Option[StudentCourseYearDetails]
-)
-
 class GenerateExamGridSelectCourseCommandInternal(val department: Department, val academicYear: AcademicYear) 
-	extends CommandInternal[Seq[GenerateExamGridEntity]] {
+	extends CommandInternal[Seq[ExamGridEntity]] {
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
@@ -47,7 +36,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 			yearOfStudy,
 			eagerLoad = true,
 			disableFreshFilter = true
-		).map(scyd => scyd.toGenerateExamGridEntity())
+		).sortBy(_.studentCourseDetails.scjCode).map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(yearOfStudy))
 	}
 
 }

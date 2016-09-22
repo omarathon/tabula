@@ -55,6 +55,27 @@
 
 	<hr />
 
+	<h3>Years</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearsToShow" value="current"
+					<#if gridOptionsCommand.yearsToShow == 'current'>checked</#if>
+				/> Current year</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="yearsToShow" value="all"
+					<#if gridOptionsCommand.yearsToShow == 'all'>checked</#if>
+				/> All years</label>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
 	<h3>Modules</h3>
 
 	<div class="row">

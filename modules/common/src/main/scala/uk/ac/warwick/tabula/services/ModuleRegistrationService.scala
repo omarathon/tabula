@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridEntity
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
@@ -37,10 +37,10 @@ trait ModuleRegistrationService {
 		* @param moduleRegistrations The module registrations to use
 		* @return The weighted mean mark, if all the provided registration has an agreed mark
 		*/
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal]
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal]
 
 	def overcattedModuleSubsets(
-		entity: GenerateExamGridEntity,
+		entity: ExamGridEntityYear,
 		markOverrides: Map[Module, BigDecimal],
 		normalLoad: BigDecimal,
 		rules: Seq[UpstreamRouteRule]
@@ -72,24 +72,24 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByUsercodesAndYear(usercodes, academicYear)
 
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Option[BigDecimal] = {
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal]): Either[String, BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
 			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mr.firstDefinedMark.map(mark => BigDecimal(mark)).orNull)
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
 			(mark, cats)
 		}).filter{case(mark, cats) => mark != null & cats != null}
 		if (nonNullReplacedMarksAndCats.nonEmpty && nonNullReplacedMarksAndCats.size == moduleRegistrations.size) {
-			Some(
+			Right(
 				(nonNullReplacedMarksAndCats.map{case(mark, cats) => mark * cats}.sum / nonNullReplacedMarksAndCats.map{case(_, cats) => cats}.sum)
 					.setScale(1, RoundingMode.HALF_UP)
 			)
 		} else {
-			None
+			Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code).mkString(", ")}")
 		}
 	}
 
 	def overcattedModuleSubsets(
-		entity: GenerateExamGridEntity,
+		entity: ExamGridEntityYear,
 		markOverrides: Map[Module, BigDecimal],
 		normalLoad: BigDecimal,
 		rules: Seq[UpstreamRouteRule]
@@ -120,7 +120,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 				}
 			}
 			subsetsToReturn.map(modRegs =>
-				(weightedMeanYearMark(modRegs.toSeq, markOverrides).get, modRegs.toSeq.sortBy(_.module.code))
+				(weightedMeanYearMark(modRegs.toSeq, markOverrides).right.get, modRegs.toSeq.sortBy(_.module.code))
 			).sortBy { case (mark, modRegs) =>
 				// Add a definitive sort so subsets with the same mark always come out the same order
 				(mark, modRegs.size, modRegs.map(_.module.code).mkString(","))

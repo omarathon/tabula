@@ -16,7 +16,11 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 
 object GenerateExamGridOvercatCommand {
-	def overcatIdentifier(modules: Seq[ModuleRegistration]) = modules.map(_.module.code).mkString("-")
+	def overcatIdentifier(seq: Seq[_]): String = seq.map {
+		case e: ModuleRegistration => e.module.code
+		case e: Module => e.code
+		case _ => throw new IllegalArgumentException
+	}.mkString("-")
 
 	def apply(
 		department: Department,
@@ -65,11 +69,11 @@ trait PopulateGenerateExamGridOvercatCommand extends PopulateOnForm {
 	self: GenerateExamGridOvercatCommandRequest with GenerateExamGridOvercatCommandState =>
 
 	def populate(): Unit = {
-		overcatChoice = scyd.overcattingModules.map(overcattingModules =>
-			GenerateExamGridOvercatCommand.overcatIdentifier(
-				scyd.moduleRegistrations.filter(mr => overcattingModules.contains(mr.module))
-			)
-		).getOrElse("")
+		overcatChoice = scyd.overcattingModules.flatMap { overcattingModules =>
+			val overcatId = GenerateExamGridOvercatCommand.overcatIdentifier(overcattingModules)
+			val idSubsets = overcattedModuleSubsets.map { case (_, subset) => GenerateExamGridOvercatCommand.overcatIdentifier(subset) }
+			idSubsets.find(_ == overcatId)
+		}.orNull
 	}
 }
 
@@ -122,29 +126,31 @@ trait GenerateExamGridOvercatCommandState {
 	def routeRules: Seq[UpstreamRouteRule]
 	def user: CurrentUser
 
-}
-
-trait GenerateExamGridOvercatCommandRequest {
-
-	self: GenerateExamGridOvercatCommandState with ModuleRegistrationServiceComponent =>
-
-	var overcatChoice: String = _
-
 	lazy val overcattedModuleSubsets = moduleRegistrationService.overcattedModuleSubsets(
-		scyd.toGenerateExamGridEntity(),
+		scyd.toExamGridEntityYear,
 		overwrittenMarks,
 		normalLoad,
 		routeRules
 	)
 
+}
+
+trait GenerateExamGridOvercatCommandRequest {
+
+	self: GenerateExamGridOvercatCommandState =>
+
+	var overcatChoice: String = _
+
 	def chosenModuleSubset: Option[(BigDecimal, Seq[ModuleRegistration])] =
-		overcattedModuleSubsets.find{case(_, modules) =>
-			GenerateExamGridOvercatCommand.overcatIdentifier(modules) == overcatChoice.maybeText.getOrElse("")
-		}
+		Option(overcatChoice).flatMap(overcatChoiceString =>
+			overcattedModuleSubsets.find { case (_, subset) =>
+				overcatChoiceString == GenerateExamGridOvercatCommand.overcatIdentifier(subset)
+			}
+		)
 
 	var newModuleMarks: JMap[Module, String] = LazyMaps.create { module: Module => null: String }.asJava
 
-	def overwrittenMarks: Map[Module, BigDecimal] = newModuleMarks.asScala.map{case(module, markString) =>
+	def overwrittenMarks: Map[Module, BigDecimal] = newModuleMarks.asScala.map { case (module, markString) =>
 		module -> markString.maybeText.map(mark => BigDecimal.apply(mark))
 	}.filter(_._2.isDefined).mapValues(_.get).toMap
 

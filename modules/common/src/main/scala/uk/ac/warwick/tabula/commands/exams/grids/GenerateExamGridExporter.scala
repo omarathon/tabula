@@ -4,11 +4,11 @@ import java.awt.Color
 
 import org.apache.poi.ss.usermodel.{FontUnderline, HorizontalAlignment, VerticalAlignment}
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFCellStyle, XSSFColor, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, HasExamGridColumnCategory, HasExamGridColumnSecondaryValue, HasExamGridColumnSection}
+import uk.ac.warwick.tabula.exams.grids.columns._
 
 object GenerateExamGridExporter {
 
@@ -20,6 +20,8 @@ object GenerateExamGridExporter {
 	case object Overcat extends Style
 	case object Overridden extends Style
 	case object ActualMark extends Style
+	case object FailAndActualMark extends Style
+	case object OvercatAndActualMark extends Style
 
 	def apply(
 		department: Department,
@@ -29,9 +31,13 @@ object GenerateExamGridExporter {
 		yearOfStudy: Int,
 		yearWeightings: Seq[CourseYearWeighting],
 		normalLoad: BigDecimal,
-		scyds: Seq[GenerateExamGridEntity],
-		allPreviousYearsScyds: Option[Seq[(AcademicYear, Seq[GenerateExamGridEntity])]],
-		columnsByYear: Seq[(AcademicYear, Seq[ExamGridColumn])]
+		entities: Seq[ExamGridEntity],
+		leftColumns: Seq[ChosenYearExamGridColumn],
+		perYearColumns: Map[StudentCourseYearDetails.YearOfStudy, Seq[PerYearExamGridColumn]],
+		rightColumns: Seq[ChosenYearExamGridColumn],
+		chosenYearColumnValues: Map[ChosenYearExamGridColumn, Map[ExamGridEntity, ExamGridColumnValue]],
+		perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[StudentCourseYearDetails.YearOfStudy, ExamGridColumnValue]]],
+		yearOrder: Ordering[Int] = Ordering.Int
 	): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 
@@ -40,175 +46,145 @@ object GenerateExamGridExporter {
 
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
 
-		var currentSection = ""
-		var columnOffset = 0 // How many section columns have been added (so how many to shift the columnIndex)
+		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, entities.size, isStudentCount = true)
 
-		var scydHeadingRowNum = 0
-
-		var categoriesRowColumnOffset = 0
-		var titlesInCategoriesRowColumnOffset = 0
-		var headersRowColumnOffset = 0
-
-		summaryAndKey(sheet, cellStyleMap, department, academicYear, course, route, yearOfStudy, yearWeightings, normalLoad, scyds.size, allPreviousYearsScyds.isEmpty)
-
-		if (allPreviousYearsScyds.isDefined) {
-			scydHeadingRowNum = sheet.getLastRowNum + 1
-			sheet.createRow(scydHeadingRowNum)
-		}
-
+		val yearRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
-		val titlesInCategoriesRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val headerRow = sheet.createRow(sheet.getLastRowNum + 1)
+		val secondaryValueRow = sheet.createRow(sheet.getLastRowNum + 1)
+		val entityRows = entities.map(entity => entity -> sheet.createRow(sheet.getLastRowNum + 1)).toMap
 
-		// once per each academicYear
-		columnsByYear.foreach { case (thisAcademicYear, columns) =>
+		val chosenYearColumnCategories = rightColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
+		val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
 
-			val indexedColumns = columns.zipWithIndex
-			val categories = columns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
+		var currentColumnIndex = 0
+		var categoryRowMaxCellWidth = 0
+		var headerRowMaxCellWidth = 0
 
-			if (categories.nonEmpty) {
-				var currentSection = ""
-				var currentCategory = ""
-				columnOffset = categoriesRowColumnOffset
-				var maxCellWidth = 0
-				indexedColumns.foreach { case (column, columnIndex) =>
-					column match {
-						case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection =>
-							currentSection = hasSection.sectionIdentifier
-							columnOffset = columnOffset + 1
-						case _ =>
-					}
-					column match {
-						case hasCategory: HasExamGridColumnCategory =>
-							if (currentCategory != hasCategory.category) {
-								currentCategory = hasCategory.category
-								val cell = categoryRow.createCell(columnIndex + columnOffset)
-								cell.setCellValue(hasCategory.category)
-								sheet.autoSizeColumn(columnIndex + columnOffset)
-								maxCellWidth = Math.max(maxCellWidth, sheet.getColumnWidth(columnIndex + columnOffset))
-								cell.setCellStyle(cellStyleMap(HeaderRotated))
-								sheet.addMergedRegion(new CellRangeAddress(categoryRow.getRowNum, categoryRow.getRowNum, columnIndex + columnOffset, columnIndex + columnOffset + categories(hasCategory.category).size - 1))
-							}
-						case _ =>
-							categoryRow.createCell(columnIndex + columnOffset) // Blank cell
-					}
-					categoriesRowColumnOffset = columnIndex + columnOffset + 1
-				}
-
-				categoryRow.setHeight((maxCellWidth * 0.5).toShort)
-
-				// Titles in categories
-				currentSection = ""
-				columnOffset = titlesInCategoriesRowColumnOffset
-				maxCellWidth = 0
-				indexedColumns.foreach { case (column, columnIndex) =>
-					column match {
-						case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection =>
-							currentSection = hasSection.sectionIdentifier
-								val cell = titlesInCategoriesRow.createCell(columnIndex + columnOffset)
-								cell.setCellStyle(cellStyleMap(Header))
-								cell.setCellValue(hasSection.sectionTitleLabel)
-								columnOffset = columnOffset + 1
-						case _ =>
-					}
-					column match {
-						case hasCategory: HasExamGridColumnCategory =>
-							val cell = titlesInCategoriesRow.createCell(columnIndex + columnOffset)
-							cell.setCellValue(hasCategory.title)
-							sheet.autoSizeColumn(columnIndex + columnOffset)
-							maxCellWidth = Math.max(maxCellWidth, sheet.getColumnWidth(columnIndex + columnOffset))
-							cell.setCellStyle(cellStyleMap(Rotated))
-						case _ =>
-							titlesInCategoriesRow.createCell(columnIndex + columnOffset) // Blank cell
-					}
-					titlesInCategoriesRowColumnOffset =  columnIndex + columnOffset + 1
-				}
-
-				titlesInCategoriesRow.setHeight((maxCellWidth * 0.38).toShort)
-
+		leftColumns.foreach(leftColumn => {
+			// Nothing in year row
+			// Nothing in category row
+			// Header row
+			val headerCell = headerRow.createCell(currentColumnIndex)
+			headerCell.setCellValue(leftColumn.title)
+			headerCell.setCellStyle(cellStyleMap(Header))
+			if (!leftColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
+				// rowspan = 2
+				sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
 			}
+			// Nothing in secondary value row
+			// Entity rows
+			entities.foreach(entity =>
+				if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
+					val entityCell = entityRows(entity).createCell(currentColumnIndex)
+					chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+				}
+			)
+			// And finally...
+			currentColumnIndex = currentColumnIndex + 1
+		})
 
-			// Uncategorized column headers and secondary values
-			currentSection = ""
-			columnOffset = headersRowColumnOffset
-			indexedColumns.foreach { case (column, columnIndex) =>
-				column match {
-					case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionSecondaryValueLabel.nonEmpty =>
-						currentSection = hasSection.sectionIdentifier
-						val cell = headerRow.createCell(columnIndex + columnOffset)
-						cell.setCellStyle(cellStyleMap(Header))
-						cell.setCellValue(hasSection.sectionSecondaryValueLabel)
-						columnOffset = columnOffset + 1
+		// Add a spacer
+		currentColumnIndex = currentColumnIndex + 1
+
+		perYearColumns.keys.toSeq.sorted(yearOrder).foreach(year => {
+			// Year row
+			val yearCell = yearRow.createCell(currentColumnIndex)
+			yearCell.setCellValue(s"Year $year")
+			yearCell.setCellStyle(cellStyleMap(Header))
+			sheet.addMergedRegion(new CellRangeAddress(yearCell.getRowIndex, yearCell.getRowIndex, yearCell.getColumnIndex, yearCell.getColumnIndex + perYearColumns(year).size - 1))
+
+			var currentCategory = ""
+			perYearColumns(year).foreach(perYearColumn => {
+				// Category row
+				perYearColumn match {
+					case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
+						currentCategory = hasCategory.category
+						val categoryCell = categoryRow.createCell(currentColumnIndex)
+						categoryCell.setCellValue(hasCategory.category)
+						sheet.autoSizeColumn(currentColumnIndex)
+						categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+						categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+						sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, categoryCell.getColumnIndex, categoryCell.getColumnIndex + perYearColumnCategories(year)(hasCategory.category).size - 1))
 					case _ =>
 				}
-				column match {
-					case hasSecondary: HasExamGridColumnSecondaryValue =>
-						val cell = headerRow.createCell(columnIndex + columnOffset)
-						cell.setCellValue(hasSecondary.renderSecondaryValue)
-					case hasCategory: HasExamGridColumnCategory =>
-						headerRow.createCell(columnIndex + columnOffset) // Blank cell
-					case _ =>
-						val cell = headerRow.createCell(columnIndex + columnOffset)
-						cell.setCellStyle(cellStyleMap(Header))
-						cell.setCellValue(column.title)
+				// Header row
+				val headerCell = headerRow.createCell(currentColumnIndex)
+				headerCell.setCellValue(perYearColumn.title)
+				sheet.autoSizeColumn(currentColumnIndex)
+				headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+				headerCell.setCellStyle(cellStyleMap(Rotated))
+				if (!perYearColumn.isInstanceOf[HasExamGridColumnCategory]) {
+					// rowspan = 2
+					sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
 				}
-				headersRowColumnOffset =  columnIndex + columnOffset + 1
-			}
-
-
-			(0 to columnsByYear.size + columnOffset).foreach(sheet.autoSizeColumn(_, true))
-		}
-
-		val thisYearsIndexedColumns = columnsByYear.find(_._1 == academicYear).get._2.zipWithIndex
-		var currentColumn = 0
-		// Values per student and section labels
-		scyds.zipWithIndex.foreach { case (scyd, scydIndex) =>
-			currentSection = ""
-			columnOffset = 0
-			val row = sheet.createRow(sheet.getLastRowNum + 1)
-			thisYearsIndexedColumns.foreach { case (column, columnIndex) =>
-				column match {
-					case hasSection: HasExamGridColumnSection if hasSection.sectionIdentifier != currentSection && hasSection.sectionValueLabel.nonEmpty =>
-						currentSection = hasSection.sectionIdentifier
-						if (scydIndex == 0) {
-							val cell = row.createCell(columnIndex + columnOffset)
-							cell.setCellStyle(cellStyleMap(Header))
-							cell.setCellValue(hasSection.sectionValueLabel)
-							sheet.addMergedRegion(new CellRangeAddress(row.getRowNum, row.getRowNum + scyds.size - 1, columnIndex + columnOffset, columnIndex + columnOffset))
-						}
-						columnOffset = columnOffset + 1
+				// Secondary value row
+				perYearColumn match {
+					case hasSecondaryValue: HasExamGridColumnSecondaryValue =>
+						val secondaryValueCell = secondaryValueRow.createCell(currentColumnIndex)
+						secondaryValueCell.setCellValue(hasSecondaryValue.secondaryValue)
 					case _ =>
 				}
-				currentColumn = columnIndex + columnOffset
-				column.renderExcelCell(row, columnIndex + columnOffset, scyd, cellStyleMap)
-			}
-			currentColumn = currentColumn + 1
-
-			if (allPreviousYearsScyds.isDefined) {
-				var previousYearsColumnOffset = 0
-				allPreviousYearsScyds.get.foreach { case (previousAcademicYear, previousYearScyds) =>
-					previousYearScyds.zipWithIndex.foreach { case (prevYearScyd, _ ) =>
-
-						columnsByYear.filter {case (columnsYear, _) => columnsYear == previousAcademicYear}.foreach { case (_, thisYearsColumns) =>
-							val previndexedColumns = thisYearsColumns.zipWithIndex
-
-							previndexedColumns.foreach { case (col, columnIndex) =>
-								col.renderExcelCell(row, columnIndex + currentColumn + 1, prevYearScyd, cellStyleMap)
-								previousYearsColumnOffset = columnIndex + currentColumn
-							}
-							currentColumn = previousYearsColumnOffset + 1
-							// only add scyd heading row data once
-							if (scydIndex == 0){
-								val cell = sheet.getRow(scydHeadingRowNum).createCell(currentColumn - previndexedColumns.size)
-								cell.setCellValue(s"${prevYearScyd.studentCourseYearDetails.get.academicYear} Modules ( ${prevYearScyd.studentCourseYearDetails.get.studentCourseDetails.scjCode})")
-								sheet.addMergedRegion(new CellRangeAddress(scydHeadingRowNum, scydHeadingRowNum, currentColumn - previndexedColumns.size, currentColumn))
-							}
-						}
-						currentColumn = currentColumn + 1 // blank cell after each year
+				// Entity rows
+				entities.foreach(entity =>
+					if (perYearColumnValues.get(perYearColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
+						val entityCell = entityRows(entity).createCell(currentColumnIndex)
+						perYearColumnValues(perYearColumn)(entity)(year).populateCell(entityCell, cellStyleMap)
 					}
-				}
+				)
+				// And finally...
+				currentColumnIndex = currentColumnIndex + 1
+			})
+
+			// Add a spacer after each year
+			currentColumnIndex = currentColumnIndex + 1
+		})
+
+		var currentCategory = ""
+		rightColumns.foreach(rightColumn => {
+			// Nothing in year row
+			// Category row
+			rightColumn match {
+				case hasCategory: HasExamGridColumnCategory if hasCategory.category != currentCategory =>
+					currentCategory = hasCategory.category
+					val categoryCell = categoryRow.createCell(currentColumnIndex)
+					categoryCell.setCellValue(hasCategory.category)
+					sheet.autoSizeColumn(currentColumnIndex)
+					categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+					categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
+					sheet.addMergedRegion(new CellRangeAddress(categoryCell.getRowIndex, categoryCell.getRowIndex, categoryCell.getColumnIndex, categoryCell.getColumnIndex + chosenYearColumnCategories(hasCategory.category).size - 1))
+				case _ =>
 			}
-		}
+			// Header row
+			val headerCell = headerRow.createCell(currentColumnIndex)
+			headerCell.setCellValue(rightColumn.title)
+			headerCell.setCellStyle(cellStyleMap(Rotated))
+			if (!rightColumn.isInstanceOf[HasExamGridColumnSecondaryValue]) {
+				// rowspan = 2
+				sheet.addMergedRegion(new CellRangeAddress(headerCell.getRowIndex, headerCell.getRowIndex + 1, headerCell.getColumnIndex, headerCell.getColumnIndex))
+			}
+			// Secondary value row
+			rightColumn match {
+				case hasSecondaryValue: HasExamGridColumnSecondaryValue =>
+					val secondaryValueCell = secondaryValueRow.createCell(currentColumnIndex)
+					secondaryValueCell.setCellValue(hasSecondaryValue.secondaryValue)
+				case _ =>
+			}
+			// Entity rows
+			entities.foreach(entity =>
+				if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
+					val entityCell = entityRows(entity).createCell(currentColumnIndex)
+					chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
+				}
+			)
+			// And finally...
+			currentColumnIndex = currentColumnIndex + 1
+		})
+
+		(0 until currentColumnIndex).foreach(sheet.autoSizeColumn(_, true))
+		categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
+		headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)
+
 		workbook
 	}
 
@@ -223,7 +199,7 @@ object GenerateExamGridExporter {
 		yearWeightings: Seq[CourseYearWeighting],
 		normalLoad: BigDecimal,
 		count: Int,
-		showStudentCount: Boolean
+		isStudentCount: Boolean
 	): Unit = {
 		def keyValueCells(key: String, value: String, rowIndex: Int) = {
 			val row = sheet.createRow(rowIndex)
@@ -242,7 +218,7 @@ object GenerateExamGridExporter {
 		val yearWeightingRow = keyValueCells("Year weightings:", yearWeightings.map(cyw => s"Year ${cyw.yearOfStudy} = ${cyw.weightingAsPercentage}").mkString("\n"), 5)
 		yearWeightingRow.setHeight((yearWeightingRow.getHeight * (yearWeightings.size - 1)).toShort)
 		keyValueCells("Normal CAT load:", normalLoad.toString, 6)
-		if (showStudentCount) {
+		if (isStudentCount) {
 			keyValueCells("Student Count:", count.toString, 7)
 		} else {
 			keyValueCells("Count:", count.toString, 7)
@@ -260,7 +236,7 @@ object GenerateExamGridExporter {
 		{
 			val row = sheet.createRow(10)
 			val keyCell = row.createCell(0)
-			keyCell.setCellValue("#*")
+			keyCell.setCellValue("#")
 			keyCell.setCellStyle(cellStyleMap(Overcat))
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Used in overcatting calculation")
@@ -268,16 +244,24 @@ object GenerateExamGridExporter {
 		{
 			val row = sheet.createRow(11)
 			val keyCell = row.createCell(0)
-			keyCell.setCellValue("#?")
+			keyCell.setCellValue("#")
+			keyCell.setCellStyle(cellStyleMap(ActualMark))
 			val valueCell = row.createCell(1)
-			valueCell.setCellValue("Agreed mark missing (using actual mark)")
+			valueCell.setCellValue("Agreed mark missing, using actual")
 		}
 		{
 			val row = sheet.createRow(12)
 			val keyCell = row.createCell(0)
-			keyCell.setCellValue("?")
+			keyCell.setCellValue("X")
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Agreed mark and actual mark missing")
+		}
+		{
+			val row = sheet.createRow(13)
+			val keyCell = row.createCell(0)
+			keyCell.setCellValue("")
+			val valueCell = row.createCell(1)
+			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
 	}
 
@@ -325,6 +309,7 @@ object GenerateExamGridExporter {
 			val greenFont = workbook.createFont()
 			greenFont.setFontHeight(10)
 			greenFont.setColor(new XSSFColor(new Color(89, 110, 49)))
+			greenFont.setUnderline(FontUnderline.SINGLE)
 			cs.setFont(greenFont)
 			cs
 		}
@@ -333,8 +318,40 @@ object GenerateExamGridExporter {
 			val cs = workbook.createCellStyle()
 			val blueFont = workbook.createFont()
 			blueFont.setFontHeight(10)
-			blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
+			blueFont.setColor(new XSSFColor(new Color(32, 79, 121)))
 			cs.setFont(blueFont)
+			cs
+		}
+
+		val actualMarkStyle = {
+			val cs = workbook.createCellStyle()
+			val blueFont = workbook.createFont()
+			blueFont.setFontHeight(10)
+			blueFont.setColor(new XSSFColor(new Color(35, 155, 146)))
+			blueFont.setItalic(true)
+			cs.setFont(blueFont)
+			cs
+		}
+
+		val failAndActualMarkStyle = {
+			val cs = workbook.createCellStyle()
+			val redFont = workbook.createFont()
+			redFont.setFontHeight(10)
+			redFont.setColor(new XSSFColor(new Color(175, 39, 35)))
+			redFont.setUnderline(FontUnderline.DOUBLE)
+			redFont.setItalic(true)
+			cs.setFont(redFont)
+			cs
+		}
+
+		val overcatAndActualMarkStyle = {
+			val cs = workbook.createCellStyle()
+			val greenFont = workbook.createFont()
+			greenFont.setFontHeight(10)
+			greenFont.setColor(new XSSFColor(new Color(89, 110, 49)))
+			greenFont.setItalic(true)
+			greenFont.setUnderline(FontUnderline.SINGLE)
+			cs.setFont(greenFont)
 			cs
 		}
 
@@ -344,7 +361,10 @@ object GenerateExamGridExporter {
 			Rotated -> rotatedStyle,
 			Fail -> failStyle,
 			Overcat -> overcatStyle,
-			Overridden -> overriddenStyle
+			Overridden -> overriddenStyle,
+			ActualMark -> actualMarkStyle,
+			FailAndActualMark -> failAndActualMarkStyle,
+			OvercatAndActualMark -> overcatAndActualMarkStyle
 		)
 	}
 

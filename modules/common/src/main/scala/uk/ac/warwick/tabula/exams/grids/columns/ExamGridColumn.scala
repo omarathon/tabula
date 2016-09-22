@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UpstreamRouteRule, Module}
-import uk.ac.warwick.tabula.exams.grids.columns
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, UpstreamRouteRule}
 
 object ExamGridColumnOption {
 	type Identifier = String
@@ -33,40 +33,52 @@ object ExamGridColumnOption {
 }
 
 case class ExamGridColumnState(
-	entities: Seq[GenerateExamGridEntity],
-	overcatSubsets: Map[GenerateExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]],
+	entities: Seq[ExamGridEntity],
+	overcatSubsets: Map[ExamGridEntityYear, Seq[(BigDecimal, Seq[ModuleRegistration])]],
 	coreRequiredModules: Seq[Module],
 	normalLoad: BigDecimal,
 	routeRules: Seq[UpstreamRouteRule],
+	academicYear: AcademicYear,
 	yearOfStudy: Int
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,0)
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0)
 }
 
 @Component
-trait ExamGridColumnOption {
+sealed trait ExamGridColumnOption {
 
 	val identifier: ExamGridColumnOption.Identifier
 	val sortOrder: Int
 	val mandatory: Boolean = false
-	def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn]
 
 }
 
-abstract class ExamGridColumn(state: ExamGridColumnState) {
+trait StudentExamGridColumnOption extends ExamGridColumnOption {
+	def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn]
+}
 
+trait PerYearExamGridColumnOption extends ExamGridColumnOption {
+	def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]]
+}
+
+trait ChosenYearExamGridColumnOption extends ExamGridColumnOption {
+	def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn]
+}
+
+sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val title: String
-	def render: Map[String, String]
-	def renderExcelCell(
-		row: XSSFRow,
-		index: Int,
-		entity: GenerateExamGridEntity,
-		cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-	): Unit
-
 }
+
+abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
+	def values: Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]]
+}
+
+abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
+	def values: Map[ExamGridEntity, ExamGridColumnValue]
+}
+
 
 trait HasExamGridColumnCategory {
 
@@ -80,50 +92,6 @@ trait HasExamGridColumnSecondaryValue {
 
 	self: ExamGridColumn =>
 
-	val renderSecondaryValue: String
-
-}
-
-trait HasExamGridColumnSection {
-
-	self: ExamGridColumn =>
-
-	val sectionIdentifier: String
-
-	val sectionTitleLabel: String
-
-	val sectionSecondaryValueLabel: String
-
-	val sectionValueLabel: String
-}
-
-object BlankColumnOption extends columns.ExamGridColumnOption {
-
-	override val identifier: ExamGridColumnOption.Identifier = "blank"
-
-	override val sortOrder: Int = Int.MaxValue
-
-	case class Column(state: ExamGridColumnState, override val title: String)
-		extends ExamGridColumn(state) with HasExamGridColumnCategory {
-
-		override val category: String = "Additional"
-
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> "").toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			row.createCell(index)
-		}
-
-	}
-
-	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = throw new UnsupportedOperationException
-
-	def getColumn(title: String): Seq[ExamGridColumn] = Seq(Column(EmptyExamGridColumnState(), title))
+	val secondaryValue: String
 
 }
