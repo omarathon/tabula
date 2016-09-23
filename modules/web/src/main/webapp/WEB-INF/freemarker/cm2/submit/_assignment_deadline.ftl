@@ -27,11 +27,11 @@
 	</#if>
 
 	<#if isExtended>
-			<div>${extension_time_remaining} <span class="label label-info">Extended</span></div>
-			Extension granted until <@fmt.date date=extension.expiryDate />
+		<div>${extension_time_remaining} <span class="label label-info">Extended</span></div>
+		Extension granted until <@fmt.date date=extension.expiryDate />
 		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#elseif assignment.closed>
-	<div class="alert alert-info">
+		<div class="alert alert-info">
 			<#if hasActiveExtension>
 				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
 				<div>${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
