@@ -8,7 +8,7 @@
 </#if>
 
 <#if feedback.latestMark?? || feedback.latestGrade??>
-	<div class="mark-and-grade">
+	<div>
 		<#if feedback.studentViewableAdjustments?has_content && feedback.latestMark??>
 			<h3>Adjusted mark: ${feedback.latestMark}%</h3>
 		<#elseif feedback.latestMark??>
@@ -54,15 +54,15 @@
 </#if>
 
 <#if assignment.genericFeedback??>
-<div class="feedback-notes">
+<div>
 	<h3>General feedback on the assignment:</h3>
-	<div class="feedback-notes-content">
+	<div>
 		<p>${assignment.genericFeedback!""}</p>
 	</div>
 </div>
 </#if>
 <#if feedback.comments??>
-<div class="feedback-notes">
+<div>
 	<h3>Feedback on
 	<#if isSelf>
 		your
@@ -70,7 +70,7 @@
 		the student's
 	</#if>
 	 submission</h3>
-	<div class="feedback-notes-content">
+	<div>
 		${feedback.commentsFormattedHtml!""}
 	</div>
 </div>
@@ -96,7 +96,7 @@
 				</#if>
 			</#compress></#assign>
 
-			<a class="btn btn-success" href="${zipDownloadUrl}"><i class="icon-gift"></i>
+			<a class="btn btn-default" href="${zipDownloadUrl}">
 				Download all as a Zip file
 			</a>
 		</p>
@@ -123,7 +123,7 @@
 					</#if>
 				</#compress></#assign>
 
-				<a class="btn<#if feedbackcount=1> btn-success</#if>" href="${attachmentDownloadUrl}"><i class="icon-file"></i>
+				<a class="btn<#if feedbackcount=1> btn btn-default</#if>" href="${attachmentDownloadUrl}">
 					${attachment.name}
 				</a>
 			</li>

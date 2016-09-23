@@ -5,13 +5,13 @@
 
 <#if !assignment.openEnded>
 	<#macro extensionButtonContents label assignment>
-		<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />" class="btn btn-mini">
-			<i class="icon-calendar"></i> ${label}
+		<a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />" class="btn btn-default">
+			${label}
 		</a>
 	</#macro>
 
 	<#macro extensionButton extensionRequested isExtended>
-		<p class="extension-button">
+		<p>
 			<#if extensionRequested>
 				<@extensionButtonContents "Review extension request" assignment />
 			<#elseif !isExtended && assignment.newExtensionsCanBeRequested>
@@ -27,32 +27,32 @@
 	</#if>
 
 	<#if isExtended>
-		<p class="extended deadline">
-			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
-			<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
+			<div>${extension_time_remaining} <span class="label label-info">Extended</span></div>
 			Extension granted until <@fmt.date date=extension.expiryDate />
-		</p>
 		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#elseif assignment.closed>
-		<p class="late deadline">
-			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
+	<div class="alert alert-info">
 			<#if hasActiveExtension>
 				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
-				<span class="time-remaining">${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
+				<div>${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
 				Extension deadline was <@fmt.date date=extension.expiryDate />
+				</div>
 			<#else>
 				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
-				<span class="time-remaining">${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
-				Deadline was <@fmt.date date=assignment.closeDate />
+				<div>${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
+				<p>
+					Deadline was <@fmt.date date=assignment.closeDate />
+				</p>
 			</#if>
-		</p>
+		</div>
 		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#else>
-		<p class="deadline">
-			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
-			<span class="time-remaining">${time_remaining}</span>
-			Deadline <@fmt.date date=assignment.closeDate />
-		</p>
-		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
+		<div class="alert alert-info">
+			<p>
+				<div>${time_remaining}</div>
+				Deadline <@fmt.date date=assignment.closeDate />
+			</p>
+			<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
+		</div>
 	</#if>
 </#if>
