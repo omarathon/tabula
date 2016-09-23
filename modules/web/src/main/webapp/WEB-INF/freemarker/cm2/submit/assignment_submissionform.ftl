@@ -142,6 +142,7 @@
 
 				<@bs3form.labelled_form_group path="" labelText="Authorship confirmation">
 					<@bs3form.checkbox path="plagiarismDeclaration">
+						<@f.errors path="plagiarismDeclaration" cssClass="error" />
 						<@f.checkbox path="plagiarismDeclaration" id="plagiarismDeclaration" required="true"/>
 						I confirm that this assignment is all my own work
 					</@bs3form.checkbox>
@@ -149,10 +150,6 @@
 
 			</#if>
 		</div>
-
-		<#--<@f.errors path="plagiarismDeclaration" cssClass="error" />-->
-	<#--<label><@f.checkbox path="plagiarismDeclaration" required="true" /> I confirm that this assignment is all my own work</label>-->
-
 
 	<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">

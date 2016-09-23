@@ -40,18 +40,14 @@
 			<#else>
 				<#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
 				<div>${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
-				<p>
-					Deadline was <@fmt.date date=assignment.closeDate />
-				</p>
+				Deadline was <@fmt.date date=assignment.closeDate />
 			</#if>
 		</div>
 		<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 	<#else>
 		<div class="alert alert-info">
-			<p>
-				<div>${time_remaining}</div>
-				Deadline <@fmt.date date=assignment.closeDate />
-			</p>
+			<div>${time_remaining}</div>
+			Deadline <@fmt.date date=assignment.closeDate />
 			<#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
 		</div>
 	</#if>
