@@ -196,7 +196,6 @@
 	}
 </style>
 
-<@script "/static/js/fullcalendar.js" />
 <script type="text/javascript">
 	// TIMETABLE STUFF
 	jQuery(function($) {
@@ -262,68 +261,19 @@
 			};
 		}
 
-		function createCalendar(container, defaultViewName){
-			var showWeekends = (defaultViewName == "month");
-			var cal = $(container).fullCalendar({
-				events: getEvents($(container)),
-				defaultView: defaultViewName,
-				<#if startDate??>
-					year: ${startDate.getYear()?c},
-					month: ${(startDate.getMonthOfYear() - 1)?c},
-					date: ${startDate.getDayOfMonth()?c},
-					defaultDate: '${startDate.toString("YYYY-MM-dd")}', // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
-				</#if>
-				allDaySlot: false,
-				slotMinutes: 60,
-				firstHour: 8,
-				firstDay: 1, // monday
-				timeFormat: {
-					agendaWeek: '', // don't display time on event
-					agendaDay: '', // don't display time on event
-					// for all other views
-					'': 'HH:mm'   //  5:00 - 6:30
-				},
-				titleFormat: {
-					month: 'MMMM yyyy',
-					week: "MMM d[ yyyy]{ '&#8212;'[ MMM] d yyyy}",
-					day: 'dddd, MMM d, yyyy'
-				},
-				columnFormat: {
-					month: 'ddd',
-					week: 'ddd d/M',
-					day: 'dddd d/M'
-				},
-				defaultEventMinutes: 30,
-				weekends: showWeekends,
-				viewRender: Profiles.onViewUpdate,
-				header: {
-					left:   'title',
-					center: 'month,agendaWeek,agendaDay',
-					right:  'today prev,next'
-				},
-				weekNumbers: true,
-				weekNumberCalculation: function (moment) {
-					var start = moment.getTime();
-					var week = $.grep(weeks, function(week) {
-						return (week.start >= start);
-					});
-
-					if (week.length > 0) {
-						return week[0].shortDescription;
-					}
-
-					// We should have an entry for every week; in the event that one's missing
-					// we'll just leave it blank. The day columns still have the date on them.
-					return '';
-				},
-				eventAfterRender: function(event, element, view) {
-					Profiles.renderCalendarEvents(event, element);
-				}
-			});
-		}
-
 		var $calendar = $(".calendar");
-		createCalendar($calendar, $calendar.data('viewname'));
+		Profiles.createCalendar(
+			$calendar,
+			$calendar.data('viewname'),
+			weeks,
+			getEvents<#if startDate??>,
+				true,
+				${startDate.getYear()?c},
+				${(startDate.getMonthOfYear() - 1)?c},
+				${startDate.getDayOfMonth()?c},
+				'${startDate.toString("YYYY-MM-dd")}' // This is here for FullCalendar 2 support or if it's ever backported to 1.6.x
+			</#if>
+		);
 		$calendar.find('table').attr('role','presentation');
 
 		var prependClearLink = function($list) {

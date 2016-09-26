@@ -84,7 +84,6 @@
 	}
 </style>
 
-<@script "/static/js/fullcalendar.js" />
 <script type="text/javascript">
 	jQuery(function($) {
 		$(function(){
