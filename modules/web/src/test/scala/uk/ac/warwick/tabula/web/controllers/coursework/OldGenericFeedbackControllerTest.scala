@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.coursework
 
-import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
-import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
-import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldGenericFeedbackController
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands.coursework.feedback.GenericFeedbackCommand
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldGenericFeedbackController
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-class OldGenericFeedbackControllerTest extends AppContextTestBase with Mockito {
+class OldGenericFeedbackControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = Fixtures.department("hz", "Heron studies")
@@ -22,6 +22,7 @@ class OldGenericFeedbackControllerTest extends AppContextTestBase with Mockito {
 	@Test def controllerShowsForm() {
 		new Fixture {
 			val controller = new OldGenericFeedbackController
+			controller.urlPrefix = "coursework"
 			val mav = controller.showForm(assignment, command, null)
 			mav.map("command") should be(command)
 			mav.viewName should be ("coursework/admin/assignments/feedback/generic_feedback")
