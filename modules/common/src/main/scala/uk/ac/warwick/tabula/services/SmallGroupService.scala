@@ -353,7 +353,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	private def groupOccurrencesWithStartEndDateTimeInfo(group: SmallGroup): Seq[(SmallGroupEventOccurrence, Option[LocalDateTime], Option[LocalDateTime])] = {
 		benchmarkTask(s"groupOccurrencesWithStartEndDateTimeInfo[Group-${group.id}]") {
-			findAttendanceByGroup(group).map { groupOccurrence =>
+			findAttendanceByGroup(group).filterNot(_.event.isUnscheduled).map { groupOccurrence =>
 				val startDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.startTime, groupOccurrence.event.group.groupSet.academicYear)
 				val endDateTime = weekToDateConverter.toLocalDatetime(groupOccurrence.week, groupOccurrence.event.day, groupOccurrence.event.endTime, groupOccurrence.event.group.groupSet.academicYear)
 				(groupOccurrence, startDateTime, endDateTime)
