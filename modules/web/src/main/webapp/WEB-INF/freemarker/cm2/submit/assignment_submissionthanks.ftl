@@ -1,6 +1,6 @@
-<div class="submission-received">
+<div>
 	<#if justSubmitted!false>
-	<div class="alert alert-success">
+	<div class="alert alert-info">
 		<a class="close" data-dismiss="alert">&times;</a>
 		Thanks, we've received your submission. We'll send you an email confirming this shortly;
 		don't worry if the email doesn't arrive straight away - we've already recorded the official
@@ -9,29 +9,27 @@
 	</div>
 	</#if>
 
-	<div class="submission-receipt-container is-stackable">
-	<div class="submission-receipt">
-	<h3>Submission receipt</h3>
-	<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
-	<p>Submission ID: ${submission.id}</p>
-	<#if submission.allAttachments??>
-		<p>
-			Uploaded attachments:
-			<ul>
-				<#list submission.allAttachments as attachment>
-					<#assign attachmentUrl><#compress>
-						<#if isSelf>
-							<@routes.cm2.submissionAttachment submission attachment />
-						<#else>
-							<@routes.cm2.submissionAttachment_in_profile submission attachment />
-						</#if>
-					</#compress></#assign>
-					<li><a href="${attachmentUrl}">${attachment.name}</a></li>
-				</#list>
-			</ul>
-		</p>
-	</#if>
-	</div>
+	<div class="well">
+		<h3>Submission receipt</h3>
+		<p>Submission received <@fmt.date date=submission.submittedDate at=true seconds=true relative=false />.</p>
+		<p>Submission ID: ${submission.id}</p>
+		<#if submission.allAttachments??>
+			<p>
+				Uploaded attachments:
+				<ul>
+					<#list submission.allAttachments as attachment>
+						<#assign attachmentUrl><#compress>
+							<#if isSelf>
+								<@routes.cm2.submissionAttachment submission attachment />
+							<#else>
+								<@routes.cm2.submissionAttachment_in_profile submission attachment />
+							</#if>
+						</#compress></#assign>
+						<li><a href="${attachmentUrl}">${attachment.name}</a></li>
+					</#list>
+				</ul>
+			</p>
+		</#if>
 	</div>
 
 	<#assign receiptPdfUrl><#compress>
@@ -53,7 +51,7 @@
 		<#assign receiptFormUrl><@routes.cm2.assignmentreceipt assignment=assignment /></#assign>
 		<form action="${receiptFormUrl}" method="POST">
 			<div class="submit-buttons">
-			<button class="btn" name="resend" value=""><i class="icon-envelope-alt"></i> Re-send email receipt</button>
+			<button class="btn btn-default" name="resend" value="">Re-send email receipt</button>
 			</div>
 		</form>
 	</#if>

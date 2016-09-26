@@ -29,13 +29,12 @@
 		</div>
 	</#if>
 
-
 	<#assign submitUrl><@routes.cm2.assignment assignment /></#assign>
 
-	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand">
+	<@f.form cssClass="double-submit-protection" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand">
 
 		<#if errors.hasErrors()>
-			<div class="alert alert-error animated flash">
+			<div class="alert alert-warning">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 
 				<h4>Your submission was not accepted</h4>
@@ -53,30 +52,27 @@
 				});
 			</script>
 		</#if>
-		<@f.errors cssClass="error form-errors"></@f.errors>
+		<@f.errors cssClass="alert alert-warning"></@f.errors>
 
-		<@form.row>
-			<label class="control-label">University ID</label>
-			<@form.field>
-				<span class="uneditable-input">${user.apparentUser.warwickId!}</span>
-			</@form.field>
-		</@form.row>
+		<@bs3form.labelled_form_group path="" labelText="University ID">
+				<p class="very-subtle">
+					${user.apparentUser.warwickId!}
+				</p>
+		</@bs3form.labelled_form_group>
 
-		<@form.row>
-		<label class="control-label">Assignment information</label>
-			<@form.field>
-			<div class="assignment-info-field">
+		<@bs3form.labelled_form_group path="" labelText="Assignment information">
+			<div>
 				<#if !assignment.openEnded>
 					<#assign time_remaining = durationFormatter(assignment.closeDate) />
 					<p>
-						<span class="assignment-due">Assignment due:</span> <@fmt.date date=assignment.closeDate />,
-						<span class="time-remaining">${time_remaining}</span>.
+						<span>Assignment due:</span> <@fmt.date date=assignment.closeDate />,
+						<span>${time_remaining}</span>.
 
 						<#if isExtended>
 							<#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 
-						<span class="assignment-due">Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
-							<span class="time-remaining">${extension_time_remaining}</span>.
+						<span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
+							<span>${extension_time_remaining}</span>.
 						</#if>
 					</p>
 
@@ -105,65 +101,57 @@
 					</p>
 				</#if>
 			</div>
-			</@form.field>
-		</@form.row>
+		</@bs3form.labelled_form_group>
 
-		<div class="submission-fields">
+		<div>
 
 			<#list assignment.submissionFields as field>
-				<div class="submission-field">
+				<div>
 					<#include "./formfields/${field.template}.ftl" >
 				</div>
 			</#list>
 
 			<#if hasDisability>
-				<div class="submission-field">
+				<div>
 					<#include "./formfields/disability.ftl" >
 				</div>
 			</#if>
 
 			<#if features.privacyStatement>
-				<@form.row>
-					<label class="control-label">Privacy statement</label>
-					<@form.field>
-						<p class="privacy-field">
-							The data on this form relates to your submission of
-							coursework. The date and time of your submission, your
-							identity and the work you have submitted will all be
-							stored, but will not be used for any purpose other than
-							administering and recording your coursework submission.
-						</p>
-					</@form.field>
-				</@form.row>
+				<@bs3form.labelled_form_group path="" labelText="Privacy statement">
+					<p>
+						The data on this form relates to your submission of
+						coursework. The date and time of your submission, your
+						identity and the work you have submitted will all be
+						stored, but will not be used for any purpose other than
+						administering and recording your coursework submission.
+					</p>
+				</@bs3form.labelled_form_group>
 			</#if>
 
 			<#if assignment.displayPlagiarismNotice>
-				<@form.row>
-					<label class="control-label">Plagiarism</label>
-					<@form.field>
-						<p class="plagiarism-field">
-							Work submitted to the University of Warwick for official
-							assessment must be all your own work and any parts that
-							are copied or used from other people must be appropriately
-							acknowledged. Failure to properly acknowledge any copied
-							work is plagiarism and may result in a mark of zero.
-						</p>
-					</@form.field>
-				</@form.row>
-				<@form.row>
-					<label class="control-label">Authorship confirmation</label>
-					<@form.field>
+				<@bs3form.labelled_form_group path="" labelText="Plagiarism">
+					<p>
+						Work submitted to the University of Warwick for official
+						assessment must be all your own work and any parts that
+						are copied or used from other people must be appropriately
+						acknowledged. Failure to properly acknowledge any copied
+						work is plagiarism and may result in a mark of zero.
+					</p>
+				</@bs3form.labelled_form_group>
+
+				<@bs3form.labelled_form_group path="" labelText="Authorship confirmation">
+					<@bs3form.checkbox path="plagiarismDeclaration">
 						<@f.errors path="plagiarismDeclaration" cssClass="error" />
-						<@f.checkbox path="plagiarismDeclaration" required="true" /> I confirm that this assignment is all my own work
-					</@form.field>
-				</@form.row>
+						<@f.checkbox path="plagiarismDeclaration" id="plagiarismDeclaration" required="true"/>
+						I confirm that this assignment is all my own work
+					</@bs3form.checkbox>
+				</@bs3form.labelled_form_group>
+
 			</#if>
-
-
-
 		</div>
 
-		<div class="submit-buttons">
+	<div class="submit-buttons">
 			<input class="btn btn-large btn-primary" type="submit" value="Submit">
 			<a class="btn btn-default" href="<@routes.cm2.home />">Cancel</a>
 			<#if willCheckpointBeCreated>

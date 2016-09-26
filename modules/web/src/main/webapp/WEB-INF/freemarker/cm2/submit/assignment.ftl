@@ -3,7 +3,7 @@
 
 <div class="deptheader">
 	<h1>Submit Assignment</h1>
-	<h5>For ${assignment.name} (${assignment.module.code?upper_case})</h5>
+	<h4 class="with-related">For ${assignment.name} (${assignment.module.code?upper_case})</h4>
 </div>
 
 <#if can.do("Assignment.Update", assignment)>
@@ -17,7 +17,7 @@
 	<#if assignment.collectSubmissions>submit their work and to</#if>
 	receive their feedback<#if assignment.collectMarks> and/or marks</#if>.</p>
 
-	<p><a class="btn" href="<@routes.cm2.depthome assignment.module/>">Return to module management for ${assignment.module.code?upper_case}</a></p>
+	<p><a class="btn btn-default" href="<@routes.cm2.depthome assignment.module/>">Return to module management for ${assignment.module.code?upper_case}</a></p>
 </div>
 </#if>
 
