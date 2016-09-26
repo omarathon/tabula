@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.{ProfileImporter, SitsAcademicYearAware}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
-
+import Transactions._
 import scala.collection.JavaConverters._
 
 object StampMissingRowsCommand {
@@ -20,13 +20,13 @@ object StampMissingRowsCommand {
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringStudentCourseDetailsDaoComponent
 			with AutowiringFeaturesComponent
-			with ComposableCommand[Unit]
+			with ComposableCommandWithoutTransaction[Unit]
 			with StampMissingRowsDescription
 			with StampMissingRowsPermissions
 }
 
 
-class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAcademicYearAware with Logging {
+class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAcademicYearAware with Logging with Daoisms {
 
 	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent
 		with StudentCourseDetailsDaoComponent with FeaturesComponent =>
@@ -35,7 +35,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 
 	override def applyInternal() = {
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
-		val allUniversityIDs = memberDao.getFreshUniversityIds()
+		val allUniversityIDs = transactional() { memberDao.getFreshUniversityIds() }
 
 		logger.info(s"${allUniversityIDs.size} students to fetch from SITS for $sitsCurrentAcademicYear")
 
@@ -53,7 +53,7 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 				sitsRows.map(_.universityId.getOrElse("")).distinct,
 				sitsRows.map(_.scjCode).distinct,
 				sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
-			)
+				)
 		}.toSeq
 
 		val universityIdsSeen = parsedSitsRows.flatMap(_._1).distinct
@@ -77,24 +77,35 @@ class StampMissingRowsCommandInternal extends CommandInternal[Unit] with SitsAca
 		}
 
 		val newStaleScjCodes: Seq[String] = {
-			val allFreshScjCodes = studentCourseDetailsDao.getFreshScjCodes.toSet
+			val allFreshScjCodes = transactional() { studentCourseDetailsDao.getFreshScjCodes.toSet }
 			(allFreshScjCodes -- scjCodesSeen).toSeq
 		}
 
 		val newStaleScydIds: Seq[String] = {
-			val scydIdsSeen = studentCourseYearDetailsDao.convertKeysToIds(studentCourseYearKeysSeen)
-			val allFreshIds = studentCourseYearDetailsDao.getFreshIds.toSet
-			(allFreshIds -- scydIdsSeen).toSeq
+			val scydIdsSeen = transactional() { studentCourseYearDetailsDao.convertKeysToIds(studentCourseYearKeysSeen) }
+			val allFreshIds = transactional() { studentCourseYearDetailsDao.getFreshIds.toSet }
+			transactional() { (allFreshIds -- scydIdsSeen).toSeq }
 		}
 
 		logger.warn(s"Timestamping ${newStaleUniversityIds.size} missing students")
-		memberDao.stampMissingFromImport(newStaleUniversityIds, DateTime.now)
+		transactional() { memberDao.stampMissingFromImport(newStaleUniversityIds, DateTime.now) }
 
 		logger.warn(s"Timestamping ${newStaleScjCodes.size} missing studentCourseDetails")
-		studentCourseDetailsDao.stampMissingFromImport(newStaleScjCodes, DateTime.now)
+		transactional() { studentCourseDetailsDao.stampMissingFromImport(newStaleScjCodes, DateTime.now) }
 
 		logger.warn(s"Timestamping ${newStaleScydIds.size} missing studentCourseYearDetails")
-		studentCourseYearDetailsDao.stampMissingFromImport(newStaleScydIds, DateTime.now)
+		transactional() { studentCourseYearDetailsDao.stampMissingFromImport(newStaleScydIds, DateTime.now) }
+
+		transactional() { session.flush() }
+		transactional() { session.clear() }
+
+		val newFreshUniIds = transactional() { memberDao.getFreshUniversityIds().toSet }
+		val uniIDsStillNotMarked = newStaleUniversityIds.toSet.intersect(newFreshUniIds)
+		if (uniIDsStillNotMarked.nonEmpty) {
+			logger.error(s"There are still stale IDs that weren't marked as missing (${uniIDsStillNotMarked.size} total); here are a few: ${uniIDsStillNotMarked.take(5).mkString(", ")}")
+		} else {
+			logger.info(s"All ${newStaleUniversityIds.size} Uni IDs marked correctly")
+		}
 	}
 
 }

@@ -4,9 +4,9 @@ import java.util.Properties
 import javax.sql.DataSource
 
 import org.quartz._
-import org.springframework.beans.factory.{InitializingBean, FactoryBean}
+import org.springframework.beans.factory.{FactoryBean, InitializingBean}
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
-import org.springframework.context.annotation.{Profile, Bean, Configuration}
+import org.springframework.context.annotation.{Bean, Configuration, Profile}
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
 import org.springframework.scala.jdbc.core.JdbcTemplate
@@ -16,6 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.CronTriggerJob
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
