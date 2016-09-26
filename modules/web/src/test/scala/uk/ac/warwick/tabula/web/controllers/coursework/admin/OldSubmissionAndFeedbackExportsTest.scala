@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
+import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.immutable.ListMap
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
-import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-import uk.ac.warwick.tabula.web.Routes
 
 class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
@@ -72,8 +71,6 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
 	@Test
 	def xmlBuilder() {
-
-		Routes.coursework._cm1Prefix = Some("coursework")
 
 		val builder = new XMLBuilder(items, assignment, assignment.module)
 		builder.topLevelUrl = "https://example.com"

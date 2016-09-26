@@ -9,11 +9,12 @@ import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 
-class OldFeedbackAdjustmentsControllerTest extends AppContextTestBase with Mockito {
+class OldFeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 
 	private trait ControllerFixture {
 		val controller = new OldFeedbackAdjustmentsController
 		controller.profileService = smartMock[ProfileService]
+		controller.urlPrefix = "coursework"
 	}
 
 	private trait CommandFixture {
