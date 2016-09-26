@@ -64,7 +64,7 @@ trait DeleteSmallGroupValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		if (!group.students.isEmpty) {
-			errors.rejectValue("delete", "smallGroup.delete.notEmpty")
+			errors.reject("smallGroup.delete.notEmpty")
 		} else {
 			// Can't delete events that have attendance recorded against them
 			val hasAttendance =
@@ -78,7 +78,7 @@ trait DeleteSmallGroupValidation extends SelfValidating {
 				}
 
 			if (hasAttendance) {
-				errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
+				errors.reject("smallGroupEvent.delete.hasAttendance")
 			}
 		}
 	}
