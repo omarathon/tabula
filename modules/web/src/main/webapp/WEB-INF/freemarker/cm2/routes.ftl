@@ -22,6 +22,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/submission/${assignment.id}"/></#macro>
 <#macro extensionRequest assignment><@_u page="/assignment/${assignment.id}/extension"/></#macro>
+<#macro extensionRequestAttachment assignment attachment><@_u page="/assignment/${assignment.id}/extension/supporting-file/${attachment.name?url}"/></#macro>
 
 <#macro assignmentreceipt assignment><@_u page="/submission/${assignment.id}/resend-receipt"/></#macro>
 

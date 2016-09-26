@@ -92,7 +92,7 @@ Macros for customised form elements, containers and more complex pickers.
 	<input type="checkbox" class="collection-checkbox" name="${name}" value="${value}">
 </#compress></#macro>
 
-<#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="">
+<#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="" required=false>
 <#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@labelled_form_group basename labelText>
@@ -128,7 +128,15 @@ Macros for customised form elements, containers and more complex pickers.
 			</div>
 
 			<small class="very-subtle help-block">
-				<#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+				<#if required>
+					<#if !multiple || max=1>
+						You must attach one file.
+					<#else>
+						You must attach at least one file. Up to <@fmt.p max "attachment" /> allowed.
+					</#if>
+				<#else>
+					<#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+				</#if>
 				<#if types?size &gt; 0>
 					File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
 				</#if>
