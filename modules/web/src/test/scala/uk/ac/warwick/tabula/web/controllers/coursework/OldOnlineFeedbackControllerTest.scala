@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module, StudentM
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 
-class OldOnlineFeedbackControllerTest extends AppContextTestBase with Mockito {
+class OldOnlineFeedbackControllerTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val department = new Department
@@ -29,6 +29,7 @@ class OldOnlineFeedbackControllerTest extends AppContextTestBase with Mockito {
 		new Fixture {
 			val controller = new OldOnlineFeedbackController
 			controller.userLookup = new MockUserLookup
+			controller.urlPrefix = "coursework"
 			val mav = controller.showTable(command, null)
 			mav.map("assignment") should be(assignment)
 			mav.map("command") should be(command)
