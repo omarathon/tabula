@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula
 
-import java.io.{InputStream, File, StringReader}
+import java.io.{File, InputStream, StringReader}
 import java.util.concurrent.TimeUnit
+
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
 import org.scalatest.Matchers
@@ -35,11 +36,13 @@ import org.junit.rules.Timeout
 import org.junit.Rule
 import freemarker.template._
 import java.util
+
 import freemarker.core.Environment
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 import uk.ac.warwick.tabula.data.Transactions
+import uk.ac.warwick.tabula.web.Routes
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -264,6 +267,10 @@ trait TestHelpers extends TestFixtures {
 		new BePropertyMatcher[AnyRef] { def apply(left: AnyRef) =
 			BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
 		}
+	}
+
+	@Before def setupCm1Prefix(): Unit = {
+		Routes.coursework._cm1Prefix = Some("coursework")
 	}
 }
 trait FreemarkerTestHelpers{
