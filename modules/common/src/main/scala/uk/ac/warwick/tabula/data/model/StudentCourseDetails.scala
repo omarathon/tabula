@@ -192,7 +192,7 @@ class StudentCourseDetails
 			// first see if any of the sub-departments that the student is in are set to display this relationship type
 			val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
 				_.studentRelationshipDisplayed.get(relationshipType.id)
-			}.map(_.toBoolean).contains(true)
+			}.exists(_.toBoolean)
 
 			// if either a sub-dept is set to display this relationship type or the parent department is, then display it:
 			relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)
@@ -309,16 +309,13 @@ object CourseType {
 		case other => throw new IllegalArgumentException("Unexpected course code: %s".format(other))
 	}
 
-	def fromCourseCode(cc: String): CourseType = {
-		if (cc.isEmpty) null
-		cc.charAt(0) match {
-			case UG.courseCodeChar => UG
-			case PGT.courseCodeChar => PGT
-			case PGR.courseCodeChar => PGR
-			case Foundation.courseCodeChar => Foundation
-			case PreSessional.courseCodeChar => PreSessional
-			case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
-		}
+	def fromCourseCode(cc: String): CourseType = cc.charAt(0) match {
+		case UG.courseCodeChar => UG
+		case PGT.courseCodeChar => PGT
+		case PGR.courseCodeChar => PGR
+		case Foundation.courseCodeChar => Foundation
+		case PreSessional.courseCodeChar => PreSessional
+		case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
 	}
 }
 

@@ -50,12 +50,14 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
 		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
+		val studentCourseYearDetails = activeAcademicYear.flatMap(studentCourseDetails.freshOrStaleStudentCourseYearDetailsForYear)
+		val relationships = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
 
 		if (!canReadMeetings) {
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
 				"member" -> studentCourseDetails.student,
 				"isSelf" -> isSelf,
-				"relationships" -> studentCourseDetails.relationships(relationshipType),
+				"relationships" -> relationships,
 				"canReadMeetings" -> false
 			), studentCourseDetails, relationshipType)
 		} else {
@@ -78,7 +80,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				"member" -> studentCourseDetails.student,
 				"currentMember" -> currentMember,
 				"thisAcademicYear" -> thisAcademicYear,
-				"relationships" -> studentCourseDetails.relationships(relationshipType),
+				"relationships" -> relationships,
 				"meetings" -> meetings,
 				"meetingApprovalWillCreateCheckpoint" -> meetings.map {
 					case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
