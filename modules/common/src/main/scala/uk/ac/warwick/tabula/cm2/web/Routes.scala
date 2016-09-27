@@ -20,7 +20,6 @@ object Routes {
 	private lazy val context = s"/$cm2Prefix"
 	def home = context + "/"
 
-
 	object assignment {
 		def apply(assignment: Assignment) = context + "/submission/%s/" format encoded(assignment.id)
 	}

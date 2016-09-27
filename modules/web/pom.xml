@@ -436,6 +436,15 @@
 								<include>id7/allocate-associations.js</include>
 							</includes>
 						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/id7/cm2.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>fullcalendar.js</include>
+							</includes>
+						</aggregation>
 					</aggregations>
 				</configuration>
 			</plugin>

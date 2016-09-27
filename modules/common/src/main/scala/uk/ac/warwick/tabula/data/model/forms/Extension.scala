@@ -109,6 +109,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def rejected = state == ExtensionState.Rejected
 	def unreviewed = state == ExtensionState.Unreviewed
 	def revoked = state == ExtensionState.Revoked
+	def moreInfoRequired = state == ExtensionState.MoreInformationRequired
 
 	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
 	def revocable = approved && !isInitiatedByStudent
@@ -172,12 +173,14 @@ object ExtensionState {
 	// you can't infer from state alone whether there's a request outstanding - use extension.awaitingReview()
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
+	case object MoreInformationRequired extends ExtensionState("M", "MoreInformationRequired")
 	case object Rejected extends ExtensionState("R", "Rejected")
 	case object Revoked extends ExtensionState("V", "Revoked")
 
 	def fromCode(code: String) = code match {
 		case Unreviewed.dbValue => Unreviewed
 		case Approved.dbValue => Approved
+		case MoreInformationRequired.dbValue => MoreInformationRequired
 		case Rejected.dbValue => Rejected
 		case Revoked.dbValue => Revoked
 		case _ => throw new IllegalArgumentException()
