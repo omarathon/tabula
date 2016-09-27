@@ -37,7 +37,7 @@ class ExamGridsHomeController extends ExamsController
 		} else if (activeDepartment.isDefined) {
 			Redirect(Routes.Grids.departmentAcademicYear(activeDepartment.get, academicYear))
 		} else {
-			val featureFilteredDepartments = departmentsWithPermission.filter(_.examGridsEnabled)
+			val featureFilteredDepartments = departmentsWithPermission
 			Mav("exams/grids/home",
 				"featureFilteredDepartments" -> featureFilteredDepartments,
 				"academicYear" -> academicYear
