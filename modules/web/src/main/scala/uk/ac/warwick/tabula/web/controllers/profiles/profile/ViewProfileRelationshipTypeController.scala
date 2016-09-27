@@ -50,7 +50,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
 		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
-		val studentCourseYearDetails = activeAcademicYear.flatMap(studentCourseDetails.freshOrStaleStudentCourseYearDetailsForYear)
+		val studentCourseYearDetails = scydToSelect(studentCourseDetails, activeAcademicYear)
 		val relationships = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
 
 		if (!canReadMeetings) {

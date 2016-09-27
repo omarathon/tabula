@@ -309,13 +309,19 @@ object CourseType {
 		case other => throw new IllegalArgumentException("Unexpected course code: %s".format(other))
 	}
 
-	def fromCourseCode(cc: String): CourseType = cc.charAt(0) match {
-		case UG.courseCodeChar => UG
-		case PGT.courseCodeChar => PGT
-		case PGR.courseCodeChar => PGR
-		case Foundation.courseCodeChar => Foundation
-		case PreSessional.courseCodeChar => PreSessional
-		case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
+	def fromCourseCode(cc: String): CourseType = {
+		if(cc == null || cc.isEmpty) {
+			null
+		} else {
+			cc.charAt(0) match {
+				case UG.courseCodeChar => UG
+				case PGT.courseCodeChar => PGT
+				case PGR.courseCodeChar => PGR
+				case Foundation.courseCodeChar => Foundation
+				case PreSessional.courseCodeChar => PreSessional
+				case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
+			}
+		}
 	}
 }
 
