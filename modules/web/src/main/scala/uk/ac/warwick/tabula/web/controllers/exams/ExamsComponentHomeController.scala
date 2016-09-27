@@ -19,7 +19,7 @@ class ExamsComponentHomeController extends ExamsController {
 	def home: Mav = {
 		val homeDepartment = moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
 		val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadExamMarksToSits)
-		val examGridsEnabled = features.examGrids && user.isStaff && homeDepartment.exists(_.examGridsEnabled)
+		val examGridsEnabled = features.examGrids && user.isStaff
 
 		if (examsEnabled && !examGridsEnabled) {
 			Redirect(Routes.Exams.home)
