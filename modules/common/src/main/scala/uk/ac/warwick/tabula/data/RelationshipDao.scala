@@ -381,7 +381,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 						Restrictions.or(
 							Restrictions.isNull("endDate"),
 							Restrictions.gt("endDate", DateTime.now)
-						)
+						),
+						Restrictions.eq("course.mostSignificant", true)
 					))
 			},
 			Projections.projectionList()
@@ -410,7 +411,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 						Restrictions.or(
 							Restrictions.isNull("endDate"),
 							Restrictions.gt("endDate", DateTime.now)
-						)
+						),
+						Restrictions.eq("course.mostSignificant", true)
 					))
 			},
 			Projections.projectionList()
