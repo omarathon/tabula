@@ -73,7 +73,7 @@
 								</table>
 
 								<p>
-									<button type="submit" class="btn btn-primary">Reallocate students</button>
+									<#if canReallocateStudents><button type="submit" class="btn btn-primary">Reallocate students</button></#if>
 									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>

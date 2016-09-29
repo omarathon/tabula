@@ -20,6 +20,7 @@ class ViewStudentRelationshipsController extends ProfilesController {
 	@RequestMapping(method = Array(HEAD, GET))
 	def view(
 		@PathVariable department: Department,
+		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("viewStudentRelationshipsCommand") command: ViewStudentRelationshipsCommand
 	): Mav = {
 		val agentGraph = command.apply()
@@ -28,7 +29,8 @@ class ViewStudentRelationshipsController extends ProfilesController {
 			"missingCount" -> agentGraph.missingCount,
 			"courseMap" -> agentGraph.courseMap,
 			"yearOfStudyMap" -> agentGraph.yearOfStudyMap,
-			"department" -> department
+			"department" -> department,
+			"canReallocateStudents" -> !relationshipType.readOnly(department)
 		)
 	}
 }
