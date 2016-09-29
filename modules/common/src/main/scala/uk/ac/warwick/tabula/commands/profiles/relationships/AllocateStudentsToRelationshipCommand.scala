@@ -56,9 +56,9 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
 
 		relationshipService.endStudentRelationships(relationshipsToExpire)
 
-		/**TODO- If a student is on 2 courses, when we create a new relationship  for most significant course might need to set end date for
-			* that particular relationship type with the same agent if there is another course that is not
-			* most significant one(course transfer case). Also would need to move comments etc from old relationship to this new one. **/
+		/**TODO- If a student is on 2 courses (mainly course transfer cases)-> when we create a new relationship for most significant course Ist time
+			* If there is another course that is not most significant one, set end date for that particular relationship type with the same agent (if it is blank)
+			* Also would need to move comments etc from old relationship to this new one. Probably part of JIRA TAB-4555 **/
 		val newRelationships: Seq[StudentRelationship] = additions.asScala.flatMap{case(entityId, addIDs) =>
 			val alreadyExist = dbAllocated.find(_.entityId == entityId).map(e => e.students.map(_.universityId)).getOrElse(Seq())
 			relationshipService.applyStudentRelationships(relationshipType, entityId, addIDs.asScala.toSeq.filterNot(alreadyExist.contains))
