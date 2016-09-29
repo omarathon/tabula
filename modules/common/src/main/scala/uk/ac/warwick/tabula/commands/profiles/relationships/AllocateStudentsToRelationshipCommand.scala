@@ -39,22 +39,26 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
 	self: AllocateStudentsToRelationshipCommandRequest with AllocateStudentsToRelationshipCommandState with RelationshipServiceComponent =>
 
 	override def applyInternal() = {
-		val relationshipsToExpire: Seq[StudentRelationship] = allocationType match {
+		val relationshipsToExpire: Seq[StudentRelationship] = (allocationType match {
 			case AllocationTypes.Replace =>
-				relationshipsNotInAdditions.groupBy(_._2).mapValues(_.map(_._1)).flatMap{case(entity, studentsToRemove) =>
+				relationshipsNotInAdditions.groupBy(_._2).mapValues(_.map(_._1)).flatMap { case(entity, studentsToRemove) =>
 					relationshipService.listCurrentRelationshipsWithAgent(relationshipType, entity.entityId)
 						.filter(_.studentMember.exists(s => studentsToRemove.map(_.universityId).contains(s.universityId)))
 				}.toSeq
 			case AllocationTypes.Add =>
-				removals.asScala.flatMap{case(entityId, removeIDs) =>
+				removals.asScala.flatMap { case(entityId, removeIDs) =>
 					relationshipService.listCurrentRelationshipsWithAgent(relationshipType, entityId)
 						.filter(_.studentMember.exists(s => removeIDs.contains(s.universityId)))
 				}.toSeq
 			case _ =>
 				Seq()
-		}
+		}).filter (_.studentCourseDetails.mostSignificant)
+
 		relationshipService.endStudentRelationships(relationshipsToExpire)
 
+		/**TODO- If a student is on 2 courses (mainly course transfer cases)-> when we create a new relationship for most significant course Ist time
+			* If there is another course that is not most significant one, set end date for that particular relationship type with the same agent (if it is blank)
+			* Also would need to move comments etc from old relationship to this new one. Probably part of JIRA TAB-4555 **/
 		val newRelationships: Seq[StudentRelationship] = additions.asScala.flatMap{case(entityId, addIDs) =>
 			val alreadyExist = dbAllocated.find(_.entityId == entityId).map(e => e.students.map(_.universityId)).getOrElse(Seq())
 			relationshipService.applyStudentRelationships(relationshipType, entityId, addIDs.asScala.toSeq.filterNot(alreadyExist.contains))
