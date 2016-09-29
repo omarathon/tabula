@@ -43,14 +43,22 @@ abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department
 	override def applyInternal(): Seq[SmallGroupSet] = commands.asScala.map { sHolder =>
 		val set = sHolder.command.apply()
 
-		sHolder.deleteGroupCommands.asScala.foreach(_.apply())
+		// don't apply the delete group command if linked - the set command will have deleted the groups
+		if (set.allocationMethod != SmallGroupAllocationMethod.Linked) {
+			sHolder.deleteGroupCommands.asScala.foreach(_.apply())
+		}
 		sHolder.modifyGroupCommands.asScala.foreach { gHolder =>
 			gHolder.command match {
 				case c: CreateSmallGroupCommandInternal => c.set = set
 				case _ =>
 			}
 
-			val group = gHolder.command.apply()
+			// don't apply the group command if linked - the set command will have created the groups
+			val group = if (set.allocationMethod != SmallGroupAllocationMethod.Linked) {
+				gHolder.command.apply()
+			} else {
+				set.groups.asScala.find(_.name == gHolder.command.name).orNull
+			}
 
 			gHolder.deleteEventCommands.asScala.foreach(_.apply())
 			gHolder.modifyEventCommands.asScala.foreach { eHolder =>
@@ -165,60 +173,57 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							(extractedEvent.title.nonEmpty && extractedEvent.title.contains(smallGroupEvent.title)) ||
 							(extractedEvent.weekRanges == smallGroupEvent.weekRanges && extractedEvent.dayOfWeek == Option(smallGroupEvent.day) && extractedEvent.startTime == Option(smallGroupEvent.startTime))
 
-						// no need for extra group commands if we are using linked groups. These are linked by the set command
-						val groupCommands = if (extracted.allocationMethod == SmallGroupAllocationMethod.Linked) Nil else
-							extracted.groups.map { extractedGroup =>
-								val existingGroup = existing.toSeq.flatMap(_.groups.asScala).find(matchesGroup(extractedGroup))
+						val groupCommands = extracted.groups.map { extractedGroup =>
+							val existingGroup = existing.toSeq.flatMap(_.groups.asScala).find(matchesGroup(extractedGroup))
 
-								val (groupCommand, groupCommandType) = existingGroup match {
-									case Some(group) => (ModifySmallGroupCommand.edit(group.groupSet.module, group.groupSet, group), "Edit")
-									case _ => (ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet), "Create")
-								}
-
-								groupCommand.name = extractedGroup.name
-								groupCommand.maxGroupSize = JInteger(extractedGroup.limit)
-
-								val eventCommands = extractedGroup.events.map { extractedEvent =>
-									val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
-
-									val (eventCommand, eventCommandType) = existingEvent match {
-										case Some(event) => (ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event), "Edit")
-										case _ => (ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup), "Create")
-									}
-
-									eventCommand.title = extractedEvent.title.orNull
-									eventCommand.tutors = extractedEvent.tutors.map(_.getUserId).asJava
-									eventCommand.weekRanges = extractedEvent.weekRanges
-									eventCommand.day = extractedEvent.dayOfWeek.orNull
-									eventCommand.startTime = extractedEvent.startTime.orNull
-									eventCommand.endTime = extractedEvent.endTime.orNull
-
-									extractedEvent.location.foreach {
-										case NamedLocation(name) =>
-											eventCommand.location = name
-											eventCommand.locationId = null
-										case MapLocation(name, lid) =>
-											eventCommand.location = name
-											eventCommand.locationId = lid
-									}
-
-									new ModifySmallGroupEventCommandHolder(eventCommand, eventCommandType)
-								}
-
-								val deleteEventCommands =
-									existingGroup.toSeq.flatMap(_.events.sorted)
-										.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
-										.map { e => DeleteSmallGroupEventCommand(e.group, e) }
-
-								new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands.asJava, deleteEventCommands.asJava)
+							val (groupCommand, groupCommandType) = existingGroup match {
+								case Some(group) => (ModifySmallGroupCommand.edit(group.groupSet.module, group.groupSet, group), "Edit")
+								case _ => (ModifySmallGroupCommand.create(extracted.module, new SmallGroupSet), "Create")
 							}
 
-						// no need for extra delete group commands if we are using linked groups. These are deleted by the set command
-						val deleteGroupCommands = if (extracted.allocationMethod == SmallGroupAllocationMethod.Linked) Nil else {
-							existing.toSeq.flatMap(_.groups.asScala.sorted)
-								.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
-								.map { g => DeleteSmallGroupCommand(g.groupSet, g) }
+							groupCommand.name = extractedGroup.name
+							groupCommand.maxGroupSize = JInteger(extractedGroup.limit)
+
+							val eventCommands = extractedGroup.events.map { extractedEvent =>
+								val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
+
+								val (eventCommand, eventCommandType) = existingEvent match {
+									case Some(event) => (ModifySmallGroupEventCommand.edit(event.group.groupSet.module, event.group.groupSet, event.group, event), "Edit")
+									case _ => (ModifySmallGroupEventCommand.create(extracted.module, new SmallGroupSet, new SmallGroup), "Create")
+								}
+
+								eventCommand.title = extractedEvent.title.orNull
+								eventCommand.tutors = extractedEvent.tutors.map(_.getUserId).asJava
+								eventCommand.weekRanges = extractedEvent.weekRanges
+								eventCommand.day = extractedEvent.dayOfWeek.orNull
+								eventCommand.startTime = extractedEvent.startTime.orNull
+								eventCommand.endTime = extractedEvent.endTime.orNull
+
+								extractedEvent.location.foreach {
+									case NamedLocation(name) =>
+										eventCommand.location = name
+										eventCommand.locationId = null
+									case MapLocation(name, lid) =>
+										eventCommand.location = name
+										eventCommand.locationId = lid
+								}
+
+								new ModifySmallGroupEventCommandHolder(eventCommand, eventCommandType)
+							}
+
+							val deleteEventCommands =
+								existingGroup.toSeq.flatMap(_.events.sorted)
+									.filterNot { e => extractedGroup.events.exists(matchesEvent(_)(e)) }
+									.map { e => DeleteSmallGroupEventCommand(e.group, e) }
+
+							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands.asJava, deleteEventCommands.asJava)
 						}
+
+						// no need for extra delete group commands if we are using linked groups. These are deleted by the set command
+						val deleteGroupCommands = existing.toSeq.flatMap(_.groups.asScala.sorted)
+							.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
+							.map { g => DeleteSmallGroupCommand(g.groupSet, g, isSpreadsheetUpload = true) }
+
 
 						new ModifySmallGroupSetCommandHolder(setCommand, setCommandType, groupCommands.asJava, deleteGroupCommands.asJava)
 					}
