@@ -71,7 +71,6 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
 	@Test
 	def xmlBuilder() {
-		uk.ac.warwick.tabula.cm2.web.Routes._cm2Prefix = Some("coursework")
 
 		val builder = new XMLBuilder(items, assignment, assignment.module)
 		builder.topLevelUrl = "https://example.com"

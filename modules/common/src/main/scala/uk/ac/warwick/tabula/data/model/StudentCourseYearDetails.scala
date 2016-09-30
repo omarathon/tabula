@@ -182,7 +182,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		studentCourseYearDetails = Some(this)
 	)
 
-	override def postLoad {
+	override def postLoad() {
 		ensureOvercatting()
 	}
 }

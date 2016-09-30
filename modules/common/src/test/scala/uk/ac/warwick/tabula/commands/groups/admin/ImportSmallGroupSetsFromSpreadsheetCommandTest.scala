@@ -183,6 +183,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	}
 
 	class DeleteGroupCommand(val set: SmallGroupSet, val group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState {
+		def isSpreadsheetUpload = true
 		var called = false
 		def apply() = {
 			called = true

@@ -252,7 +252,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 				result.reject(
 					"smallGroups.importSpreadsheet.orphanedEvent",
 					Array("Events", row.rowNumber: java.lang.Integer, moduleCode, setName, groupName, "Groups"),
-					s"Sheet Events row ${row.rowNumber}: couldn't find small group $groupName for $setName ($moduleCode) in Groups sheet"
+					s"Sheet Events row ${row.rowNumber}: couldn't find small group $groupName for $setName ($moduleCode) in the Groups sheet"
 				)
 			}
 

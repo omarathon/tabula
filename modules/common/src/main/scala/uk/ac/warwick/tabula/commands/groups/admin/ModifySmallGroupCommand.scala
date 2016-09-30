@@ -87,10 +87,6 @@ trait ModifySmallGroupValidation extends SelfValidating {
 	self: ModifySmallGroupCommandState =>
 
 	override def validate(errors: Errors): Unit = {
-		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
-			errors.reject("smallGroupSet.linked")
-		}
-
 		if (name.isEmpty) errors.rejectValue("name", "smallGroup.name.NotEmpty")
 		else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 

@@ -225,6 +225,8 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 
 		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
 		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
+		else if (allocationMethod == SmallGroupAllocationMethod.Linked && linkedDepartmentSmallGroupSet == null)
+			errors.rejectValue("command.linkedDepartmentSmallGroupSet", "smallGroupSet.allocationMethod.Linked.NotEmpty")
 
 		existingSet.foreach { set =>
 			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
