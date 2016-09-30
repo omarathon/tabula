@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestiga
 import uk.ac.warwick.tabula.commands.Appliable
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class OldPlagiarismInvestigationController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -25,7 +25,7 @@ class OldPlagiarismInvestigationController extends OldCourseworkController {
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
 	def formView(assignment: Assignment) =
-		Mav("coursework/admin/assignments/submissionsandfeedback/mark-plagiarised",
+		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/mark-plagiarised",
 				"assignment" -> assignment
 		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 

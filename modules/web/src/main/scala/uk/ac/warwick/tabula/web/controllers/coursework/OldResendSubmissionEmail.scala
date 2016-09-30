@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/module/{module}/{assignment}/resend-receipt"))
+@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/resend-receipt"))
 class OldResendSubmissionEmail extends OldCourseworkController {
 
 	var submissionService = Wire.auto[SubmissionService]
@@ -35,7 +35,7 @@ class OldResendSubmissionEmail extends OldCourseworkController {
 	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
 		val sent = form.apply()
 
-		Mav("coursework/submit/receipt",
+		Mav(s"$urlPrefix/submit/receipt",
 			"submission" -> form.submission,
 			"module" -> form.module,
 			"assignment" -> form.assignment,

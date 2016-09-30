@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.spring.Wire
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{dept}/reports/feedback"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/reports/feedback"))
 class OldFeedbackReportController extends OldCourseworkController {
 
 	validatesSelf[FeedbackReportCommand]
@@ -32,7 +32,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 	@RequestMapping(method=Array(HEAD, GET), params = Array("!jobId"))
 	def requestReport(cmd:FeedbackReportCommand, errors:Errors):Mav = {
 		val formatter = DateTimeFormat.forPattern(DateFormats.DateTimePicker)
-		Mav("coursework/admin/assignments/feedbackreport/report_range",
+		Mav(s"$urlPrefix/admin/assignments/feedbackreport/report_range",
 			"department" -> cmd.department,
 			"startDate" ->  formatter.print(new DateTime().minusMonths(3)),
 			"endDate" ->  formatter.print(new DateTime())
@@ -53,7 +53,7 @@ class OldFeedbackReportController extends OldCourseworkController {
 	@RequestMapping(params = Array("jobId"))
 	def checkProgress(@RequestParam jobId: String) = {
 		val job = jobService.getInstance(jobId)
-		Mav("coursework/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
+		Mav(s"$urlPrefix/admin/assignments/feedbackreport/progress", "job" -> job).noLayoutIf(ajax)
 	}
 
 

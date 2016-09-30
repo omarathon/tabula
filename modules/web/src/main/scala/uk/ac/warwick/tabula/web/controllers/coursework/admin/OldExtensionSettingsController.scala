@@ -16,7 +16,7 @@ import javax.validation.Valid
 import org.springframework.context.annotation.Profile
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/department/{dept}/settings/extensions"))
+@RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/settings/extensions"))
 class OldExtensionSettingsController extends OldCourseworkController {
 
 	@Autowired var moduleService: ModuleAndDepartmentService = _
@@ -30,7 +30,7 @@ class OldExtensionSettingsController extends OldCourseworkController {
 
 	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
 	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors) =
-		crumbed(Mav("coursework/admin/extension-settings",
+		crumbed(Mav(s"$urlPrefix/admin/extension-settings",
 			"department" -> dept
 		), dept)
 

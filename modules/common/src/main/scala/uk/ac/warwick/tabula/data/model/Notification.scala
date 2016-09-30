@@ -204,9 +204,9 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	// called by Hibernate.
 	final def preSave(newRecord: Boolean) {
 		onPreSave(newRecord)
-
-		// Generate recipientNotificationInfos
-		recipients.foreach(getRecipientNotificationInfo)
+		// Generate recipientNotificationInfos for non-null recipients
+		// (users could be null if inflating user entities that no longer exist in membership)
+		recipients.flatMap(Option(_)).foreach(getRecipientNotificationInfo)
 	}
 	def onPreSave(newRecord: Boolean) {}
 

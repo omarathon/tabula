@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/delete"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/delete"))
 class OldDeleteSubmissionsAndFeedback extends OldCourseworkController {
 
 	@ModelAttribute
@@ -26,7 +26,7 @@ class OldDeleteSubmissionsAndFeedback extends OldCourseworkController {
 	validatesSelf[DeleteSubmissionsAndFeedbackCommand]
 
 	def formView(assignment: Assignment) =
-		Mav("coursework/admin/assignments/submissionsandfeedback/delete",
+		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/delete",
 			"assignment" -> assignment)
 			.crumbs(
 					Breadcrumbs.Department(assignment.module.adminDepartment),

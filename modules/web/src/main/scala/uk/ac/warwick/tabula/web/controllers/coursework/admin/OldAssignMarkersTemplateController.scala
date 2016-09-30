@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/coursework/admin/module/{module}/assignments/{assignment}/assign-markers/template"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/assign-markers/template"))
 class OldAssignMarkersTemplateController {
 
 

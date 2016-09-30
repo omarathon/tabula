@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
 class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
@@ -37,7 +37,7 @@ class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadSelectedFeedbackFileController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
@@ -59,7 +59,7 @@ class OldDownloadSelectedFeedbackFileController extends OldCourseworkController 
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback.zip"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback.zip"))
 class OldDownloadAllFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -78,7 +78,7 @@ class OldDownloadAllFeedbackController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 
 	var feedbackDao = Wire.auto[FeedbackDao]
@@ -101,7 +101,7 @@ class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadMarkerFeedbackControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
 	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
@@ -121,17 +121,17 @@ class OldDownloadMarkerFeebackFilesController extends BaseController {
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
 	// attachments plural, the second has attachments singular.
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachments/*"))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachments/*"))
 	def getAll(command: DownloadMarkerFeedbackFilesCommand): Mav = {
 		getOne(command, null)
 	}
 
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachments/*"))
 	def redirectAll(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.all(assignment, marker, markerFeedback))
 	}
 
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def getOne(command: DownloadMarkerFeedbackFilesCommand, @PathVariable filename: String): Mav = {
 		val renderable = command.apply().getOrElse {
 			throw new ItemNotFoundException()
@@ -139,14 +139,14 @@ class OldDownloadMarkerFeebackFilesController extends BaseController {
 		Mav(new RenderableFileView(renderable))
 	}
 
-	@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
+	@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{markerFeedback}/attachment/{filename}"))
 	def redirectOne(@PathVariable assignment: Assignment, @PathVariable markerFeedback: String, @PathVariable marker: User, @PathVariable filename: String) {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.one(assignment, marker, markerFeedback, filename))
 	}
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedback.zip"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/{position}/feedback.zip"))
 class OldDownloadFirstMarkersFeedbackController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -172,7 +172,7 @@ class OldDownloadFirstMarkersFeedbackController extends OldCourseworkController 
 
 // A read only view of all feedback fields and attachments
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
 class OldFeedbackSummaryController extends OldCourseworkController {
 
 	@ModelAttribute("command")
@@ -182,7 +182,7 @@ class OldFeedbackSummaryController extends OldCourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Appliable[Option[Feedback]]): Mav = {
 		val feedback = command.apply()
-		Mav("coursework/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
+		Mav(s"$urlPrefix/admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
 	}
 
 }

@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import scala.collection.JavaConverters._
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/new"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/new"))
 class OldAddAssignmentController extends OldCourseworkController {
 
 	@Autowired var assignmentService: AssessmentService = _
@@ -76,7 +76,7 @@ class OldAddAssignmentController extends OldCourseworkController {
 	def showForm(form: AddAssignmentCommand) = {
 		val module = form.module
 
-		Mav("coursework/admin/assignments/new",
+		Mav(s"$urlPrefix/admin/assignments/new",
 			"department" -> module.adminDepartment,
 			"module" -> module,
 			"academicYear" -> form.academicYear,

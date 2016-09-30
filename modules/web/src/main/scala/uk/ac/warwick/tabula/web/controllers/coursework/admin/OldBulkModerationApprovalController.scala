@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/{marker}/moderation/bulk-approve"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/moderation/bulk-approve"))
 class OldBulkModerationApprovalController extends OldCourseworkController {
 
 	validatesSelf[SelfValidating]
@@ -32,7 +32,7 @@ class OldBulkModerationApprovalController extends OldCourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@ModelAttribute("command") command: Appliable[Unit], errors: Errors): Mav = {
-		Mav("coursework/admin/assignments/markerfeedback/bulk-approve")
+		Mav(s"$urlPrefix/admin/assignments/markerfeedback/bulk-approve")
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
@@ -52,7 +52,7 @@ class OldBulkModerationApprovalController extends OldCourseworkController {
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value = Array("/coursework/admin/module/{module}/assignments/{assignment}/marker/feedback/online/moderation/bulk"))
+@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/online/moderation/bulk"))
 class OldBulkModerationApprovalControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping

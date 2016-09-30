@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/online"))
 class OldOnlineFeedbackController extends OldCourseworkController with AutowiringUserLookupComponent {
 
 	@ModelAttribute
@@ -29,7 +29,7 @@ class OldOnlineFeedbackController extends OldCourseworkController with Autowirin
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
-		Mav("coursework/admin/assignments/feedback/online_framework",
+		Mav(s"$urlPrefix/admin/assignments/feedback/online_framework",
 			"showMarkingCompleted" -> false,
 			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
@@ -47,7 +47,7 @@ class OldOnlineFeedbackController extends OldCourseworkController with Autowirin
 }
 
 @Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(Array("/coursework/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
+@RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
 class OldOnlineFeedbackFormController extends OldCourseworkController {
 
 	validatesSelf[OnlineFeedbackFormCommand]
@@ -59,7 +59,7 @@ class OldOnlineFeedbackFormController extends OldCourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
 
-		Mav("coursework/admin/assignments/feedback/online_feedback",
+		Mav(s"$urlPrefix/admin/assignments/feedback/online_feedback",
 			"command" -> command,
 			"isGradeValidation" -> command.module.adminDepartment.assignmentGradeValidation
 		).noLayout()

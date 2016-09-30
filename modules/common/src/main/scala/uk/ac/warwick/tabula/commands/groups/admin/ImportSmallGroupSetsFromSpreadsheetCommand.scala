@@ -43,14 +43,22 @@ abstract class ImportSmallGroupSetsFromSpreadsheetCommandInternal(val department
 	override def applyInternal(): Seq[SmallGroupSet] = commands.asScala.map { sHolder =>
 		val set = sHolder.command.apply()
 
-		sHolder.deleteGroupCommands.asScala.foreach(_.apply())
+		// don't apply the delete group command if linked - the set command will have deleted the groups
+		if (set.allocationMethod != SmallGroupAllocationMethod.Linked) {
+			sHolder.deleteGroupCommands.asScala.foreach(_.apply())
+		}
 		sHolder.modifyGroupCommands.asScala.foreach { gHolder =>
 			gHolder.command match {
 				case c: CreateSmallGroupCommandInternal => c.set = set
 				case _ =>
 			}
 
-			val group = gHolder.command.apply()
+			// don't apply the group command if linked - the set command will have created the groups
+			val group = if (set.allocationMethod != SmallGroupAllocationMethod.Linked) {
+				gHolder.command.apply()
+			} else {
+				set.groups.asScala.find(_.name == gHolder.command.name).orNull
+			}
 
 			gHolder.deleteEventCommands.asScala.foreach(_.apply())
 			gHolder.modifyEventCommands.asScala.foreach { eHolder =>
@@ -211,13 +219,15 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							new ModifySmallGroupCommandHolder(groupCommand, groupCommandType, eventCommands.asJava, deleteEventCommands.asJava)
 						}
 
-						val deleteGroupCommands =
-							existing.toSeq.flatMap(_.groups.asScala.sorted)
-								.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
-								.map { g => DeleteSmallGroupCommand(g.groupSet, g) }
+						// no need for extra delete group commands if we are using linked groups. These are deleted by the set command
+						val deleteGroupCommands = existing.toSeq.flatMap(_.groups.asScala.sorted)
+							.filterNot { g => extracted.groups.exists(matchesGroup(_)(g)) }
+							.map { g => DeleteSmallGroupCommand(g.groupSet, g, isSpreadsheetUpload = true) }
+
 
 						new ModifySmallGroupSetCommandHolder(setCommand, setCommandType, groupCommands.asJava, deleteGroupCommands.asJava)
 					}
+
 				}.asJava
 			}
 		}
