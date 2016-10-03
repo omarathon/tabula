@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult
 import org.xml.sax.InputSource
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Department, Location, Module}
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -25,6 +26,7 @@ import uk.ac.warwick.tabula.services.timetables.{AutowiringWAI2GoConfigurationCo
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
 
@@ -256,15 +258,25 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 				)
 			}
 
-			buildEmptySets(department, academicYear, "Sets", setRows, result).map { set =>
+			val sets = buildEmptySets(department, academicYear, "Sets", setRows, result).map { set =>
+				val linkedGroups = set.linkedSmallGroupSet.toSeq.flatMap(_.groups.asScala)
 				set.copy(
 					groups = buildEmptyGroups(set, "Groups", groupRows, result).map { group =>
+						// reject linked groups when the groups on the spreadsheet don't have the same names
+						if(set.allocationMethod == Linked && !linkedGroups.exists(_.name == group.name)) {
+							result.reject(
+								"smallGroups.importSpreadsheet.invalidGroupName",
+								Array(group.name, set.linkedSmallGroupSet.map(_.name).getOrElse("")),
+								s"No group called ${group.name} was found in the reusable small group ${set.linkedSmallGroupSet.map(_.name).getOrElse("")}"
+							)
+						}
 						group.copy(
 							events = buildEvents(set, group, "Events", eventRows, result)
 						)
 					}
 				)
 			}
+			sets
 		} else Nil
 	}
 
