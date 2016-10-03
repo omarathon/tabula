@@ -202,6 +202,8 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			and
+				scd.mostSignificant = true
+			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
 				sr._agentMember, sr.studentCourseDetails
