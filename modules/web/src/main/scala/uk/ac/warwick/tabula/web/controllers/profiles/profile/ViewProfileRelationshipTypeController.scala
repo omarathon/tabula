@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
@@ -47,7 +48,9 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		activeAcademicYear: Option[AcademicYear],
 		relationshipType: StudentRelationshipType
 	): Mav = {
+
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
+		val canEditRelationship = securityService.can(user, Permissions.Profiles.StudentRelationship.Manage(relationshipType), studentCourseDetails)
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
 		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
 		val studentCourseYearDetails = scydToSelect(studentCourseDetails, activeAcademicYear)
@@ -58,7 +61,8 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				"member" -> studentCourseDetails.student,
 				"isSelf" -> isSelf,
 				"relationships" -> relationships,
-				"canReadMeetings" -> false
+				"canReadMeetings" -> false,
+				"canEditRelationship" -> canEditRelationship
 			), studentCourseDetails, relationshipType)
 		} else {
 			val meetings = ViewMeetingRecordCommand(
@@ -87,6 +91,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
 				}.toMap,
 				"isSelf" -> isSelf,
+				"canEditRelationship" -> canEditRelationship,
 				"canCreateMeetings" -> securityService.can(user, Profiles.MeetingRecord.Manage(relationshipType), studentCourseDetails),
 				"canCreateScheduledMeetings" -> canCreateScheduledMeetings
 			), studentCourseDetails, relationshipType)
