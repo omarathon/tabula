@@ -104,7 +104,7 @@ class ImportStudentRowCommandInternal(
 		// We intentionally use single pipes rather than double here - we want all statements to be evaluated
 		val hasChanged = (copyMemberProperties(commandBean, memberBean)
 			| copyStudentProperties(commandBean, memberBean)
-			| markAsSeenInSits(memberBean)
+			| (studentRow.isDefined && markAsSeenInSits(memberBean))
 			|| (member.tier4VisaRequirement.booleanValue() != tier4VisaRequirement))
 
 		if (isTransient || hasChanged) {
