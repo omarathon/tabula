@@ -96,7 +96,8 @@ object SchedulingConfiguration {
 		CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
 		CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
 		SimpleTriggerJob[ImportProfilesSingleDepartmentJob](repeatInterval = 0.seconds), // Register the trigger only, don't repeat or schedule
-		CronTriggerJob[StampMissingRowsJob](cronExpression = "23 0 0 * * ?"), // 11:00pm
+		SimpleTriggerJob[StampMissingRowsJob](repeatInterval = 1.hour),
+
 		CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
 		CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
 
