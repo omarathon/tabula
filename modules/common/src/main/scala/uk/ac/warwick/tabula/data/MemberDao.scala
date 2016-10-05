@@ -341,9 +341,11 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		if (relationshipType == null) Nil
 		else {
 			val d = DetachedCriteria.forClass(classOf[MemberStudentRelationship])
+				.createAlias("studentCourseDetails", "studentCourseDetails")
 				.setProjection(Property.forName("studentCourseDetails.scjCode"))
 				.add(Restrictions.eq("_agentMember.universityId", agentId))
 				.add(Restrictions.eq("relationshipType", relationshipType))
+				.add(is("studentCourseDetails.mostSignificant", true))
 				.add( Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
