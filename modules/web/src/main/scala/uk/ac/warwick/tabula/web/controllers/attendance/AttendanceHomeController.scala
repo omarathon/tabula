@@ -42,7 +42,7 @@ class AttendanceHomeController extends AttendanceController
 			} else {
 				val academicYear = Option(academicYearOverride) match {
 					case Some(year) =>
-						year
+						retrieveActiveAcademicYear(Some(year))
 					case _ =>
 						retrieveActiveAcademicYear(None).getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 				}
