@@ -42,6 +42,7 @@ trait AcademicYearScopedController {
 					userSettingsService.save(user, settings)
 				}
 				Some(academicYear)
+			case Some(academicYear) => Some(academicYear) // just return the academic year if there is no user to save to
 			case _ =>
 				userSettingsService.getByUserId(user.apparentId).flatMap(_.activeAcademicYear)
 		}
