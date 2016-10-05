@@ -82,7 +82,7 @@ class OldDownloadAllSubmissionsController extends OldCourseworkController {
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(
-	value = Array("/coursework/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
+	value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}.zip"),
 	params = Array("!single"))
 class OldDownloadSingleSubmissionController extends OldCourseworkController {
 

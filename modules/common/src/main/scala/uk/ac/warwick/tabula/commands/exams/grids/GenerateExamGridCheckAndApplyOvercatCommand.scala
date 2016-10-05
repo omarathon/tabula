@@ -13,11 +13,11 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object GenerateExamGridCheckAndApplyOvercatCommand {
 
-	type SelectCourseCommand = Appliable[Seq[GenerateExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest
+	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest
 
 	case class Result(
-		entities: Seq[GenerateExamGridEntity],
-		updatedEntities: Map[GenerateExamGridEntity, (BigDecimal, Seq[ModuleRegistration])]
+		entities: Seq[ExamGridEntity],
+		updatedEntities: Map[ExamGridEntity, (BigDecimal, Seq[ModuleRegistration])]
 	)
 
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
@@ -40,18 +40,20 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 	with StudentCourseYearDetailsDaoComponent =>
 
 	override def applyInternal() = {
-		val updatedEntities = filteredEntities.map { case (entity, subsetList) =>
-			val scyd = entity.studentCourseYearDetails.get
+		val updatedEntities = filteredEntities.map { entity =>
+			val scyd = entity.years
+				.getOrElse(selectCourseCommand.yearOfStudy, throw new IllegalArgumentException(s"Could not find entity year for year ${selectCourseCommand.yearOfStudy}"))
+				.studentCourseYearDetails.get
 
 			// Set the choice to be the first one (the one with the highest mark)
-			val chosenModuleSubset = subsetList.head
+			val chosenModuleSubset = overcatSubsets(entity).head
 
 			// Save the overcat choice
 			scyd.overcattingModules = chosenModuleSubset._2.map(_.module)
 			scyd.overcattingChosenBy = user.apparentUser
 			scyd.overcattingChosenDate = DateTime.now
 			studentCourseYearDetailsDao.saveOrUpdate(scyd)
-			entity -> subsetList.head
+			entity -> chosenModuleSubset
 		}
 
 		// Re-fetch the entities to account for the newly chosen subset
@@ -95,10 +97,10 @@ trait GenerateExamGridCheckAndApplyOvercatDescription extends Describable[Genera
 	}
 
 	override def describeResult(d: Description, result: GenerateExamGridCheckAndApplyOvercatCommand.Result): Unit = {
-		d.property("entities", result.updatedEntities.map{case(entity, (mark, modules)) =>
+		d.property("entities", result.updatedEntities.map{ case (entity, (mark, modules)) =>
 			Map(
 				"universityId" -> entity.universityId,
-				"studentCourseYearDetails" -> entity.studentCourseYearDetails.get.id,
+				"studentCourseYearDetails" -> entity.years(selectCourseCommand.yearOfStudy).studentCourseYearDetails.get.id,
 				"modules" -> modules.map(_.module.code),
 				"mark" -> mark.toString
 			)
@@ -114,35 +116,47 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	def academicYear: AcademicYear
 
 	var selectCourseCommand: SelectCourseCommand = _
+	var yearsToShow: String = "current"
 
-	def fetchEntities = selectCourseCommand.apply().sortBy(_.studentCourseYearDetails.get.studentCourseDetails.scjCode)
-	lazy val entities = fetchEntities
+	def fetchEntities = selectCourseCommand.apply()
+	lazy val entities = yearsToShow match {
+		case "all" => fetchEntities
+		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
+	}
 	lazy val normalLoadOption = upstreamRouteRuleService.findNormalLoad(
 		selectCourseCommand.route,
 		academicYear,
 		selectCourseCommand.yearOfStudy
 	)
-	lazy val normalLoad = normalLoadOption.getOrElse(ModuleRegistrationService.DefaultNormalLoad)
+	lazy val normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
 	lazy val routeRules = upstreamRouteRuleService.list(
 		selectCourseCommand.route,
 		academicYear,
 		selectCourseCommand.yearOfStudy
 	)
 
-	lazy val filteredEntities = entities.filter(entity =>
-		// For any student that has overcatted...
-		entity.cats > ModuleRegistrationService.DefaultNormalLoad
-	).map(entity => entity ->
-		// Build the subsets...
-		moduleRegistrationService.overcattedModuleSubsets(entity, entity.markOverrides.getOrElse(Map()), normalLoad, routeRules)
-	).filter { case (_, subsets) =>
-		subsets.nonEmpty
-	}.filter { case (entity, subsets) => entity.overcattingModules match {
-		// And either their current overcat choice is empty...
-		case None => true
-		// Or the highest mark is now a different set of modules (in case the rules have changed)
-		case Some(overcattingModules) =>
-			subsets.head._2.map(_.module).size != overcattingModules.size ||
-				subsets.head._2.exists(mr => !overcattingModules.contains(mr.module))
-	}}
+	lazy val overcatSubsets: Map[ExamGridEntity, Seq[(BigDecimal, Seq[ModuleRegistration])]] =
+		entities.filter(_.years.get(selectCourseCommand.yearOfStudy).isDefined).map(entity => entity ->
+			moduleRegistrationService.overcattedModuleSubsets(
+				entity.years(selectCourseCommand.yearOfStudy),
+				entity.years(selectCourseCommand.yearOfStudy).markOverrides.getOrElse(Map()),
+				normalLoad,
+				routeRules
+			)
+		).toMap
+
+	lazy val filteredEntities: Seq[ExamGridEntity] =
+		entities.filter(entity =>
+			// Filter entities to those that have a entity year for the give academic year
+			// and have more than one some overcat subset
+			overcatSubsets.exists { case (overcatEntity, subsets) => overcatEntity == entity && subsets.size > 1 }
+		).filter(entity => entity.years(selectCourseCommand.yearOfStudy).overcattingModules match {
+			// And either their current overcat choice is empty...
+			case None => true
+			// Or the highest mark is now a different set of modules (in case the rules have changed)
+			case Some(overcattingModules) =>
+				val highestSubset = overcatSubsets(entity).head._2
+				highestSubset.map(_.module).size != overcattingModules.size ||
+					highestSubset.exists(mr => !overcattingModules.contains(mr.module))
+		})
 }

@@ -1,6 +1,5 @@
 <#escape x as x?html>
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
-<#import "grid_macros.ftl" as grid />
 <@modal.wrapper cssClass="modal-xl">
 	<@modal.body>
 		<div class="exam-grid-preview">
@@ -21,8 +20,8 @@
 							<td>Manually adjusted and not stored in SITS</td>
 						</tr>
 						<tr>
-							<td>#?</td>
-							<td>Agreed mark missing (using actual mark)</td>
+							<td><span class="exam-grid-actual-mark">#</span></td>
+							<td>Agreed mark missing, using actual</td>
 						</tr>
 					</tbody>
 				</table>
@@ -35,86 +34,99 @@
 			<p class="clearfix">&nbsp;</p>
 			<form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
 				<table class="table table-condensed grid overcat">
-					<thead>
-						<tr>
-							<th colspan="${overcatView.optionsColumns?size}">Options</th>
-							<td></td>
-							<th colspan="${mapGet(overcatView.columnsBySCYD, scyd)?size}">${scyd.academicYear.toString} Modules (${scyd.studentCourseDetails.scjCode})</th>
-							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td></td>
-								<th colspan="${mapGet(overcatView.columnsBySCYD, thisSCYD)?size}">${thisSCYD.academicYear.toString} Modules (${thisSCYD.studentCourseDetails.scjCode})</th>
-							</#list>
-						</tr>
-					</thead>
 					<tbody>
+						<#-- Year row -->
+						<tr class="year">
+							<th colspan="3">Options</th>
+							<td class="spacer">&nbsp;</td>
+							<#list overcatView.perYearColumns?keys?sort?reverse as year>
+								<th colspan="${mapGet(overcatView.perYearColumns, year)?size}">Year ${year}</th>
+								<td class="spacer">&nbsp;</td>
+							</#list>
+						</tr>
+						<#-- Category row -->
 						<tr class="category">
-							<@grid.categoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
-							<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
-							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td class="first-in-category"></td>
-								<@grid.categoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
+							<#assign currentCategory = '' />
+							<#list overcatView.optionsColumns as column>
+								<#if column.category?has_content>
+									<#if currentCategory != column.category>
+										<#assign currentCategory = column.category />
+										<th class="rotated" colspan="${overcatView.optionsColumnCategories[column.category]?size}"><div class="rotate">${column.category}</div></th>
+									</#if>
+								<#else>
+									<td>&nbsp;</td>
+								</#if>
+							</#list>
+							<td class="spacer">&nbsp;</td>
+							<#list overcatView.perYearColumns?keys?sort?reverse as year>
+								<#assign currentCategory = '' />
+								<#list mapGet(overcatView.perYearColumns, year) as column>
+									<#if column.category?has_content>
+										<#if currentCategory != column.category>
+											<#assign currentCategory = column.category />
+											<th class="rotated" colspan="${mapGet(overcatView.perYearColumnCategories, year)[column.category]?size}"><div class="rotate">${column.category}</div></th>
+										</#if>
+									<#else>
+										<td>&nbsp;</td>
+									</#if>
+								</#list>
+								<td class="spacer">&nbsp;</td>
 							</#list>
 						</tr>
-						<tr class="title-in-category">
-							<@grid.titleInCategoryRow categories=overcatView.optionsColumnsCategories columns=overcatView.optionsColumns showSectionLabels=false />
-							<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, scyd) columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
-							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td class="first-in-category"></td>
-								<@grid.titleInCategoryRow categories=mapGet(overcatView.columnsBySCYDCategories, thisSCYD) columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
+						<#-- Header row -->
+						<tr class="header">
+							<#list overcatView.optionsColumns as column>
+								<th class="rotated" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+							</#list>
+							<td class="spacer">&nbsp;</td>
+							<#list overcatView.perYearColumns?keys?sort?reverse as year>
+								<#list mapGet(overcatView.perYearColumns, year) as column>
+									<th class="rotated <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate">${column.title}</div></th>
+								</#list>
+								<td class="spacer">&nbsp;</td>
 							</#list>
 						</tr>
-						<tr>
-							<@grid.headerRow columns=overcatView.optionsColumns showSectionLabels=false />
-							<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, scyd) showSectionLabels=true />
-							<#list overcatView.previousYearsSCYDs as thisSCYD>
-								<td class="first-in-category"></td>
-								<@grid.headerRow columns=mapGet(overcatView.columnsBySCYD, thisSCYD) showSectionLabels=false />
+						<#-- Secondary value row -->
+						<tr class="secondary">
+							<td class="spacer">&nbsp;</td>
+							<#list overcatView.perYearColumns?keys?sort?reverse as year>
+								<#list mapGet(overcatView.perYearColumns, year) as column>
+									<#if column.secondaryValue?has_content><th <#if column.category?has_content>class="has-category"</#if>>${column.secondaryValue}</th></#if>
+								</#list>
+								<td class="spacer">&nbsp;</td>
 							</#list>
 						</tr>
+
+						<#-- Entities -->
 						<#list overcatView.overcattedEntities as entity>
 							<tr class="student clickable">
-								<#assign isFirstEntity = entity_index == 0 />
-								<@grid.entityRows
-									entity=entity
-									isFirstEntity=isFirstEntity
-									entityCount=overcatView.overcattedEntities?size
-									columns=overcatView.optionsColumns
-									columnValues=overcatView.optionsColumnValues
-									showSectionLabels=false
-								/>
-								<@grid.entityRows
-									entity=entity
-									isFirstEntity=isFirstEntity
-									entityCount=overcatView.overcattedEntities?size
-									columns=mapGet(overcatView.columnsBySCYD, scyd)
-									columnValues=mapGet(overcatView.columnsBySCYDValues, scyd)
-									showSectionLabels=true
-								/>
-								<#list overcatView.previousYearsSCYDs as thisSCYD>
-									<td class="first-in-category"></td>
-									<@grid.entityRows
-										entity=entity
-										isFirstEntity=isFirstEntity
-										entityCount=overcatView.overcattedEntities?size
-										columns=mapGet(overcatView.columnsBySCYD, thisSCYD)
-										columnValues=mapGet(overcatView.columnsBySCYDValues, thisSCYD)
-										showSectionLabels=false
-									/>
+								<#list overcatView.optionsColumns as column>
+									<td>
+										<#assign hasValue = mapGet(overcatView.optionsColumnValues, column)?? && mapGet(mapGet(overcatView.optionsColumnValues, column), entity)?? />
+										<#if hasValue>
+											<#noescape>${mapGet(mapGet(overcatView.optionsColumnValues, column), entity).toHTML}</#noescape>
+										</#if>
+									</td>
+								</#list>
+								<td class="spacer">&nbsp;</td>
+								<#list overcatView.perYearColumns?keys?sort?reverse as year>
+									<#list mapGet(overcatView.perYearColumns, year) as column>
+										<td>
+											<#assign hasValue = mapGet(overcatView.perYearColumnValues, column)?? && mapGet(mapGet(overcatView.perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(overcatView.perYearColumnValues, column), entity), year)?? />
+											<#if hasValue>
+												<#noescape>${mapGet(mapGet(mapGet(overcatView.perYearColumnValues, column), entity), year).toHTML}</#noescape>
+											</#if>
+										</td>
+									</#list>
+									<td class="spacer">&nbsp;</td>
 								</#list>
 							</tr>
 						</#list>
+						<#-- Manual marks -->
 						<tr class="new-marks">
-							<td colspan="${overcatView.optionsColumns?size}" class="borderless"></td>
-							<th class="section-value-label rotated"><div class="rotate nomargin" style="margin-top:-47px;">New<br/>Module<br/>Mark</div></th>
-							<#assign currentCategory = "" />
-							<#list mapGet(overcatView.columnsBySCYD, scyd) as column>
-								<#if column.category?has_content && currentCategory != column.category>
-									<#assign firstInCategory = true />
-									<#assign currentCategory = column.category />
-								<#else>
-									<#assign firstInCategory = false />
-								</#if>
-								<td <#if firstInCategory!false>class="first-in-category"</#if>>
+							<th colspan="${overcatView.optionsColumns?size + 1}">New Module Mark</th>
+							<#list mapGet(overcatView.perYearColumns, overcatView.perYearColumns?keys?sort?reverse?first) as column>
+								<td>
 									<input type="text" class="form-control" name="newModuleMarks[${column.module.code}]" value="${mapGet(command.newModuleMarks, column.module)!}"/>
 								</td>
 							</#list>
@@ -143,7 +155,7 @@
 
 <script>
 	jQuery(function($){
-		var $modalBody = $('.modal-body');
+		var $modalBody = $('.modal-body'), $modalFooter = $('.modal-footer'), $modalFooterButtons = $modalFooter.find('button');
 
 		$('.modal-body th.first-in-category, .modal-body td.first-in-category').each(function(){
 			$(this).prev().addClass('last-in-category');
@@ -204,19 +216,20 @@
 				$('#edit-overcatting-modal').html(data);
 			});
 		});
-		$('.modal-footer').on('click', 'button[name=continue]', function(){
+		$modalFooter.on('click', 'button[name=continue]', function(){
 			$('.modal button').prop('disabled', true);
 		}).on('click', 'button[name=export]', function(){
-
-			$('.modal-footer button').prop('disabled', true);
+			$modalFooterButtons.prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',
 				'name': 'export'
 			}));
 			$form.submit();
+			$form.find('input[name=export]').remove();
+			$modalFooterButtons.prop('disabled', false);
 		}).on('click', 'button[name=continue]', function(){
-			$('.modal-footer button').prop('disabled', true);
+			$modalFooterButtons.prop('disabled', true);
 			var $form = $('.modal-body form');
 			$form.append($('<input/>').attr({
 				'type': 'hidden',

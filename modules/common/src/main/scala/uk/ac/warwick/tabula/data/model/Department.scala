@@ -165,9 +165,6 @@ class Department extends GeneratedId
 		settings += (mapKey -> (markMap + (year.toString -> canUpload.toString)))
 	}
 
-	def examGridsEnabled = getBooleanSetting(Settings.ExamGridsEnabled, default = false)
-	def examGridsEnabled_=(enabled: Boolean) { settings += (Settings.ExamGridsEnabled -> enabled) }
-
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
 			.flatMap {
@@ -470,8 +467,6 @@ object Department {
 		val UploadExamMarksToSits = "uploadExamMarksToSits"
 		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
-
-		val ExamGridsEnabled = "examGridsEnabled"
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
 

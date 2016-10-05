@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnState, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.exams.grids.columns._
 
 @Component
-class BoardAgreedMarksColumnOption extends ExamGridColumnOption {
+class BoardAgreedMarksColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "board"
 
@@ -14,31 +13,25 @@ class BoardAgreedMarksColumnOption extends ExamGridColumnOption {
 
 	override val mandatory = true
 
-	case class Column(state: ExamGridColumnState) extends ExamGridColumn(state) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = "Board Agreed Mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id ->
-				entity.studentCourseYearDetails.flatMap(scyd => Option(scyd.agreedMark)).map(_.toPlainString).getOrElse("")
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map(entity => entity ->
+				ExamGridColumnValueString(
+					entity.years.get(state.yearOfStudy)
+						.flatMap(_.studentCourseYearDetails)
+						.flatMap(scyd => Option(scyd.agreedMark))
+						.map(_.toPlainString).getOrElse("")
+				)
 			).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
-			entity.studentCourseYearDetails.flatMap(scyd => Option(scyd.agreedMark)).foreach(mark => {
-				cell.setCellValue(mark.doubleValue)
-			})
 		}
 
 	}
 
-	def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
 
 }

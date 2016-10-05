@@ -1,36 +1,27 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
-
-import scala.collection.JavaConverters._
-import javax.persistence._
 import javax.persistence.CascadeType._
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
+import javax.persistence.{CascadeType, Entity, _}
+
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
+import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.ToString
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
-import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.AcademicYear
-import org.apache.commons.lang3.builder.HashCodeBuilder
-import org.apache.commons.lang3.builder.EqualsBuilder
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
-import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.FilterDef
-import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ToString}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -428,6 +419,18 @@ class StudentMember extends Member with StudentProperties {
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 
 	def isPGR = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
+
+	def toExamGridEntity(maxYearOfStudy: Int) = {
+		val allSCYDs: Seq[StudentCourseYearDetails] = freshStudentCourseDetails.sorted.flatMap(_.freshStudentCourseYearDetails.sorted)
+		ExamGridEntity(
+			name = fullName.getOrElse("[Unknown]"),
+			universityId = universityId,
+			lastImportDate = Option(lastImportDate),
+			years = (1 to maxYearOfStudy).map(year =>
+				year -> allSCYDs.reverse.find(_.yearOfStudy == year).get.toExamGridEntityYear
+			).toMap
+		)
+	}
 }
 
 @Entity
@@ -547,12 +550,12 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
-	var homeAddress: Address = null
+	var homeAddress: Address = _
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
-	var termtimeAddress: Address = null
+	var termtimeAddress: Address = _
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
 	@Restricted(Array("Profiles.Read.NextOfKin"))

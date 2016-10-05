@@ -237,7 +237,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		// Exam grids stuff
 		department.uploadCourseworkMarksToSits = true
-		department.examGridsEnabled = true
 
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true

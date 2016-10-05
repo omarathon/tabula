@@ -1,58 +1,53 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, ExamGridColumnState, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.ModuleRegistration
+import uk.ac.warwick.tabula.exams.grids.columns._
 
 @Component
-class TotalCATsColumnOption extends columns.ExamGridColumnOption {
+class TotalCATsColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "cats"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.TotalCATs
 
 	case class Column(state: ExamGridColumnState, bound: BigDecimal, isUpperBound: Boolean = false, isTotal: Boolean = false)
-		extends ExamGridColumn(state) with HasExamGridColumnCategory {
+		extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = if (isTotal) "Total Cats" else if (isUpperBound) s"<=$bound" else s">=$bound"
 
 		override val category: String = "CATS"
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> renderValue(entity).map(_.toPlainString).getOrElse("")).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
-			renderValue(entity).foreach(bd => cell.setCellValue(bd.doubleValue()))
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map(entity =>
+				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
+					case Right(mark) => ExamGridColumnValueDecimal(mark)
+					case Left(message) => ExamGridColumnValueMissing(message)
+				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
+			).toMap
 		}
 
-		private def renderValue(entity: GenerateExamGridEntity): Option[JBigDecimal] = {
-			val filteredRegistrations =
-				if (isTotal) {
-					entity.moduleRegistrations
-				} else if (isUpperBound) {
-					entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))
-				} else {
-					entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))
-				}
+		private def result(entity: ExamGridEntityYear): Either[String, JBigDecimal] = {
+			def transformModuleRegistrations(moduleRegistrations: Seq[ModuleRegistration]): JBigDecimal = {
+				moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying
+			}
 
-			if (filteredRegistrations.nonEmpty)
-				Some(filteredRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying.stripTrailingZeros())
-			else
-				None
+			if (!isTotal && entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
+				Left(s"The total CATS cannot be calculated because the following module registrations have no mark: ${entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code).mkString(", ")}")
+			} else if (isTotal) {
+				Right(transformModuleRegistrations(entity.moduleRegistrations))
+			} else if (isUpperBound) {
+				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
+			} else {
+				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
+			}
 		}
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] =
 		Seq(
 			Column(state, BigDecimal(30), isUpperBound = true),
 			Column(state, BigDecimal(40)),

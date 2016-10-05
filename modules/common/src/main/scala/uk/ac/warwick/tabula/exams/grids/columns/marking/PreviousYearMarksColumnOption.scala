@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnState, ExamGridColumn, ExamGridColumnOption, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class PreviousYearMarksColumnOption extends ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "previous"
 
@@ -17,40 +14,34 @@ class PreviousYearMarksColumnOption extends ExamGridColumnOption with Autowiring
 
 	override val mandatory = true
 
-	case class Column(state: ExamGridColumnState, thisYearOfStudy: Int) extends ExamGridColumn(state) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState, thisYearOfStudy: Int) extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = s"Year $thisYearOfStudy"
 
 		override val category: String = "Previous Year Marks"
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
-			result(entity).foreach(mark =>
-				cell.setCellValue(mark.doubleValue())
-			)
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map(entity =>
+				entity -> (result(entity) match {
+					case Right(mark) => ExamGridColumnValueDecimal(mark)
+					case Left(message) => ExamGridColumnValueMissing(message)
+				})
+			).toMap
 		}
 
-		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
-			val scydsFromThisAndOlderCourses: Seq[StudentCourseYearDetails] = entity.studentCourseYearDetails.map(scyd => {
-				val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)
-				scds.flatMap(_.freshStudentCourseYearDetails)
-			}).getOrElse(Seq())
-			val scydsForThisYear = scydsFromThisAndOlderCourses.filter(scyd => scyd.yearOfStudy.toInt == thisYearOfStudy)
-			val latestSCYDForThisYear = scydsForThisYear.lastOption // SCDs and SCYDs are sorted collections
-			latestSCYDForThisYear.flatMap(scyd => Option(scyd.agreedMark).map(mark => BigDecimal(mark)))
+		private def result(entity: ExamGridEntity): Either[String, BigDecimal] = {
+			entity.years.values.find(_.studentCourseYearDetails.get.yearOfStudy == thisYearOfStudy) match {
+				case Some(year) => Option(year.studentCourseYearDetails.get.agreedMark) match {
+					case Some(mark) => Right(BigDecimal(mark))
+					case _ => Left(s"No year mark for Year $thisYearOfStudy")
+				}
+				case _ => Left(s"No course detail found for ${entity.universityId} for Year $thisYearOfStudy")
+			}
 		}
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] =	{
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] =	{
 		val requiredYears = 1 until state.yearOfStudy
 		requiredYears.map(year => Column(state, year))
 	}

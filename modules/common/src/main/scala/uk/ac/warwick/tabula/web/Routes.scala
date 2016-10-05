@@ -9,6 +9,7 @@ object RoutesUtils {
 object Routes {
 
 	import uk.ac.warwick.tabula
+	val cm2        = tabula.cm2.web.Routes
 	val coursework = tabula.coursework.web.Routes
 	val exams      = tabula.exams.web.Routes
 	val profiles   = tabula.profiles.web.Routes
