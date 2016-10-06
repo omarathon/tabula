@@ -367,7 +367,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	): Boolean = {
 		groupOccurrencesWithdateInfo.exists { case(groupOccurrence, startDateTime1, endDateTime1) =>
 			startDateTime1.isDefined && endDateTime1.isDefined && otherOccurrencesWithdateInfo.exists { case(occ, startDateTime2, endDateTime2) =>
-				startDateTime2.isDefined && endDateTime2.isDefined && (startDateTime1.get.isBefore(endDateTime2.get) ||  startDateTime1.get.isEqual(endDateTime2.get)) && (endDateTime1.get.isAfter(startDateTime2.get) || endDateTime1.get.isEqual(startDateTime2.get))
+				startDateTime2.isDefined && endDateTime2.isDefined && startDateTime1.get.isBefore(endDateTime2.get) && endDateTime1.get.isAfter(startDateTime2.get)
 			}
 		}
 	}
