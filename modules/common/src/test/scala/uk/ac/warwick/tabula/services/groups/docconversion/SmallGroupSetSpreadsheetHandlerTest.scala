@@ -31,6 +31,12 @@ class SmallGroupSetSpreadsheetHandlerTest extends TestBase with Mockito {
 		moduleAndDepartmentService.getModuleByCode("CH134") returns Some(ch134)
 
 		val linkedUgY1 = Fixtures.departmentSmallGroupSet("UG Y1")
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Alpha"))
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Beta"))
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Gamma"))
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Delta"))
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Epsilon"))
+		linkedUgY1.groups.add(Fixtures.departmentSmallGroup("Zeta"))
 		smallGroupService.getDepartmentSmallGroupSets(department, academicYear) returns Seq(linkedUgY1)
 
 		userLookup.registerUsers("u0000001", "u0000002", "cuscav", "curef", "u1234567", "u2382344", "u1823774", "u2372372", "u1915121", "u1784383")

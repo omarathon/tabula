@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.exams.grids.columns.marking
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumn, ExamGridColumnOption, ExamGridColumnState, HasExamGridColumnCategory}
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.services.AutowiringModuleRegistrationServiceComponent
 
 @Component
-class OvercattedYearMarkColumnOption extends ExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
+class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with AutowiringModuleRegistrationServiceComponent {
 
 	override val identifier: ExamGridColumnOption.Identifier = "overcatted"
 
@@ -15,55 +14,45 @@ class OvercattedYearMarkColumnOption extends ExamGridColumnOption with Autowirin
 
 	override val mandatory = true
 
-	case class Column(state: ExamGridColumnState)	extends ExamGridColumn(state) with HasExamGridColumnCategory {
+	case class Column(state: ExamGridColumnState)	extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = "Over Catted Mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> result(entity).map(_.toString).getOrElse("")).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
-			result(entity).foreach(mark =>
-				cell.setCellValue(mark.doubleValue())
-			)
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map(entity =>
+				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
+					case Right(mark) => ExamGridColumnValueDecimal(mark)
+					case Left(message) => ExamGridColumnValueMissing(message)
+				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
+			).toMap
 		}
 
-		private def result(entity: GenerateExamGridEntity): Option[BigDecimal] = {
-			// If the entity isn't based on an SCYD i.e. when we're showing the overcatting options, just show the overcat mark for this subset
+		private def result(entity: ExamGridEntityYear): Either[String, BigDecimal] = {
+			// If the entity isn't based on an SCYD i.e. when we're showing the overcatting options, just show the mean mark for this student
 			if (entity.studentCourseYearDetails.isEmpty) {
 				moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()))
 			} else {
-				if (entity.cats > state.normalLoad) {
-					val overcatSubsets = state.overcatSubsets(entity)
-					if (overcatSubsets.size == 1) {
-						// If the student has overcatted, but there's only one valid subset, just show the mark for that subset
-						Option(overcatSubsets.head._1)
-					} else if (entity.overcattingModules.isDefined) {
-						// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
-						// calculate the overcatted mark from that subset
-						moduleRegistrationService.weightedMeanYearMark(
-							entity.moduleRegistrations.filter(mr => entity.overcattingModules.get.contains(mr.module)),
-							entity.markOverrides.getOrElse(Map())
-						)
-					} else {
-						None
+				val overcatSubsets = state.overcatSubsets(entity)
+				if (overcatSubsets.size == 1) {
+					// If the student only has one valid subset, just show the mark for that subset
+					Right(overcatSubsets.head._1)
+				} else if (entity.overcattingModules.isDefined) {
+					// If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
+					// find the subset that matches those modules, and show that mark if found
+					overcatSubsets.find { case (_, subset) => subset.size == entity.overcattingModules.get.size && subset.map(_.module).forall(entity.overcattingModules.get.contains) } match {
+						case Some((mark, subset)) => Right(mark)
+						case _ => Left("Could not find valid module registration subset matching chosen subset")
 					}
 				} else {
-					None
+					Left("The overcat adjusted mark subset has not been chosen")
 				}
 			}
 		}
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(Column(state))
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
 
 }

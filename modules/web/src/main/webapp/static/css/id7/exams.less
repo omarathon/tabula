@@ -112,30 +112,19 @@
 	}
 	.exam-grid-overcat {
 		color: @brand-success;
-		&:after {
-			content: "*";
-		}
+		text-decoration: underline;
 	}
 	.exam-grid-override {
+		color: @brand-primary;
+	}
+	.exam-grid-actual-mark {
+		font-style: italic;
 		color: @brand-info;
-		&:before {
-			content: "{";
-		}
-		&:after {
-			content: "}";
-
-		}
-		&.exam-grid-overcat:after {
-			content: "}*";
-		}
 	}
 	.exam-grid-fail {
 		color: @brand-danger;
 		text-decoration: underline;
 		border-bottom: 1px solid @brand-danger;
-	}
-	.exam-grid-actual-mark {
-		font-style: italic;
 	}
 	.grid {
 		&.overcat {
@@ -153,39 +142,36 @@
 				border-width: 0;
 			}
 			min-width: 30px;
+			vertical-align: bottom;
 		}
 		th {
 			background: @table-bg-hover;
 		}
+		tr.year th {
+			background: @table-bg;
+			text-align: center;
+		}
+		th.has-category {
+			font-weight: normal;
+		}
+		tr.new-marks th {
+			vertical-align: middle;
+			text-align: right;
+		}
 		td {
 			white-space: nowrap;
-		}
-		thead {
-			th, td {
-				border-left: 0;
-				border-right: 0;
-				border-top: 0;
-				background: white;
-				text-align: center;
+			&.spacer {
+				border-width: 0;
+				min-width: 15px;
 			}
 		}
-		.title-in-category th, th.section-secondary-label, th.section-value-label {
-			text-align: center;
-			vertical-align: middle;
-		}
-		th.section-secondary-label .rotate {
-			white-space: pre-wrap;
-			line-height: 1em;
-		}
-		.student:nth-of-type(odd) {
+		.student:nth-of-type(even) {
 			background: @table-bg-accent;
-		}
-		td.last-in-category, th.last-in-category {
-			border-right: 1px solid darken(@table-border-color, 25%);
 		}
 		input[type="text"] {
 			width: 42px;
 			padding: 6px;
 		}
+
 	}
 }

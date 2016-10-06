@@ -56,6 +56,23 @@
 <div class="row">
 	<div class="col-md-12">
 		<p>
+			<#if (canEditRelationship!false)>
+				<#if relationships?has_content>
+					<a class="btn btn-primary"
+					   data-remote="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationships?first.agentMember />"
+					   data-target="#change-agent"
+					   data-toggle="modal">
+					   Edit ${relationshipType.agentRole}
+					</a>
+				<#else>
+					<a class="btn btn-primary"
+					   data-remote="<@routes.profiles.relationship_edit_no_agent relationshipType studentCourseDetails.urlSafeId />"
+					   data-target="#change-agent"
+					   data-toggle="modal">
+						Add a ${relationshipType.agentRole}
+					</a>
+				</#if>
+			</#if>
 			<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
 		</p>
 	</div>
@@ -120,6 +137,8 @@
 		</@modal.body>
 	</@modal.wrapper>
 </div>
+
+<div id="change-agent" class="modal fade"><@modal.wrapper></@modal.wrapper></div>
 
 <h2>Record of meetings</h2>
 

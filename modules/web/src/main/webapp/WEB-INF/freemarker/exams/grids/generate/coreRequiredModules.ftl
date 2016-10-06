@@ -21,6 +21,7 @@
 	<#list gridOptionsCommand.customColumnTitles as column>
 		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
 	</#list>
+	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 
 	<h2>Set grid options</h2>
 

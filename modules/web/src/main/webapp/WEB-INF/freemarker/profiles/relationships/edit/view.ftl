@@ -7,85 +7,82 @@
 		<#assign pageAction="add" >
 	</#if>
 
-	<@modal.wrapper>
-		<@modal.header>
-			<h3 class="modal-title">${pageAction?capitalize} ${relationshipType.agentRole?cap_first}</h3>
-		</@modal.header>
+	<@modal.header>
+		<h3 class="modal-title">${pageAction?capitalize} ${relationshipType.agentRole?cap_first}</h3>
+	</@modal.header>
 
 
-		<#assign student = studentCourseDetails.student/>
+	<#assign student = studentCourseDetails.student/>
 
-		<@modal.body>
-			<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="dirty-check-ignore">
+	<@modal.body>
+		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="dirty-check-ignore">
 
-				<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
-				<input id="student" name="student" type="hidden" value="${student.universityId}" />
+			<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
+			<input id="student" name="student" type="hidden" value="${student.universityId}" />
 
-				<@bs3form.labelled_form_group path="" labelText="${relationshipType.agentRole?cap_first}">
-					<div class="input-group profile-search-results">
-						<#if agentToDisplay??>
-							<input type="text" name="query" value="${agentToDisplay.fullName}" id="query" class="form-control" />
-							<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
-							<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
-						<#else>
-							<input type="text" name="query" value="" id="query" class="form-control" />
-							<input type="hidden" name="agent" />
-						</#if>
-						<span class="input-group-btn">
-							<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
-						</span>
-					</div>
-				</@bs3form.labelled_form_group>
-
-				<input type="hidden" name="remove" value="false" />
-				<#if pageAction!="add">
-					<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
-				</#if>
-
-				<#if pageAction!="add">
-					<div id="removeAgentMessage" style="display: none" class="alert alert-info clearfix">
-						<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
-						<div class="pull-right">
-							<button id="confirm-remove-agent" class="btn btn-primary" type="button">Confirm</button>
-							<button id="cancel-remove-agent" class="btn" data-dismiss="modal" type="button">Cancel</button>
-						</div>
-					</div>
-				</#if>
-
-				<div id="notify-agent-change">
-					<#if pageAction!="add">
-						<div id="notify-remove-agent" class="alert alert-info hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
+			<@bs3form.labelled_form_group path="" labelText="${relationshipType.agentRole?cap_first}">
+				<div class="input-group profile-search-results">
+					<#if agentToDisplay??>
+						<input type="text" name="query" value="${agentToDisplay.fullName}" id="query" class="form-control" />
+						<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
+						<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
+					<#else>
+						<input type="text" name="query" value="" id="query" class="form-control" />
+						<input type="hidden" name="agent" />
 					</#if>
-					<p>Notify these people via email of this change</p>
-					<@bs3form.checkbox>
-						<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
-						${relationshipType.studentRole?cap_first}
-					</@bs3form.checkbox>
-					<@bs3form.checkbox>
-						<input type="checkbox" name="notifyOldAgents" class="notifyOldAgents" <#if pageAction!="add">checked <#else> disabled </#if> />
-						Old ${relationshipType.agentRole}
-					</@bs3form.checkbox>
-					<@bs3form.checkbox>
-						<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
-						New ${relationshipType.agentRole}
-					</@bs3form.checkbox>
+					<span class="input-group-btn">
+						<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
+					</span>
 				</div>
-			</@f.form>
-		</@modal.body>
+			</@bs3form.labelled_form_group>
 
-		<@modal.footer>
-			<div class="pull-right">
-				<button id="save-agent" class="btn btn-default disabled" type="button">Save</button>
-				<button id="cancel-save-agent" class="btn btn-default" data-dismiss="modal" type="button">Cancel</button>
+			<input type="hidden" name="remove" value="false" />
+			<#if pageAction!="add">
+				<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
+			</#if>
+
+			<#if pageAction!="add">
+				<div id="removeAgentMessage" style="display: none" class="alert alert-info clearfix">
+					<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
+					<div class="pull-right">
+						<button id="confirm-remove-agent" class="btn btn-primary" type="button">Confirm</button>
+						<button id="cancel-remove-agent" class="btn" data-dismiss="modal" type="button">Cancel</button>
+					</div>
+				</div>
+			</#if>
+
+			<div id="notify-agent-change">
+				<#if pageAction!="add">
+					<div id="notify-remove-agent" class="alert alert-info hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
+				</#if>
+				<p>Notify these people via email of this change</p>
+				<@bs3form.checkbox>
+					<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
+					${relationshipType.studentRole?cap_first}
+				</@bs3form.checkbox>
+				<@bs3form.checkbox>
+					<input type="checkbox" name="notifyOldAgents" class="notifyOldAgents" <#if pageAction!="add">checked <#else> disabled </#if> />
+					Old ${relationshipType.agentRole}
+				</@bs3form.checkbox>
+				<@bs3form.checkbox>
+					<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
+					New ${relationshipType.agentRole}
+				</@bs3form.checkbox>
 			</div>
-		</@modal.footer>
-	</@modal.wrapper>
+		</@f.form>
+	</@modal.body>
 
+	<@modal.footer>
+		<div class="pull-right">
+			<button id="save-agent" class="btn btn-default disabled" type="button">Save</button>
+			<button id="cancel-save-agent" class="btn btn-default" data-dismiss="modal" type="button">Cancel</button>
+		</div>
+	</@modal.footer>
 
 	<script type="text/javascript">
 		jQuery(function($) {
 			var $form = $('#editStudentRelationshipCommand')
-				, $modal = $('#modal-change-agent')
+				, $modal = $('#change-agent')
 				, $modalBody = $modal.find('.modal-body')
 				, $saveButton = $('#save-agent');
 

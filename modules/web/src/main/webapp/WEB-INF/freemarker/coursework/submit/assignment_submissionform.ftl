@@ -29,7 +29,9 @@
 		</div>
 	</#if>
 
-	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${url('/coursework/module/${module.code}/${assignment.id}#submittop')}" modelAttribute="submitAssignmentCommand">
+	<#assign submitUrl><@routes.coursework.assignment assignment /></#assign>
+
+	<@f.form cssClass="submission-form double-submit-protection form-horizontal" enctype="multipart/form-data" method="post" action="${submitUrl}#submittop" modelAttribute="submitAssignmentCommand">
 
 		<#if errors.hasErrors()>
 			<div class="alert alert-error animated flash">

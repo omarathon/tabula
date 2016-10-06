@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 
-sealed abstract class DegreeType(val dbValue: String, val description: String, val sortOrder: Int)
+sealed abstract class DegreeType(val dbValue: String, val description: String, val sortOrder: Int, val normalCATSLoad: BigDecimal)
 
 object DegreeType {
-	case object Undergraduate extends DegreeType("UG", "Undergraduate", 1)
-	case object Postgraduate extends DegreeType("PG", "Postgraduate", 2)
-	case object PGCE extends DegreeType("PGCE", "PGCE", 3)
-	case object InService extends DegreeType("IS", "In-Service", 4)
+	case object Undergraduate extends DegreeType("UG", "Undergraduate", 1, 120)
+	case object Postgraduate extends DegreeType("PG", "Postgraduate", 2, 180)
+	case object PGCE extends DegreeType("PGCE", "PGCE", 3, 120)
+	case object InService extends DegreeType("IS", "In-Service", 4, 120)
 
 	def fromCode(code: String) = code match {
 	  	case Undergraduate.dbValue => Undergraduate

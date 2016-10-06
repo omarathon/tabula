@@ -25,7 +25,7 @@ class GenerateExamGridGridOptionsCommandInternal extends CommandInternal[(Set[Ex
 	self: GenerateExamGridGridOptionsCommandRequest =>
 
 	override def applyInternal() = {
-		(predefinedColumnIdentifiers.asScala.toSet, customColumnTitles.asScala.toSeq)
+		(predefinedColumnIdentifiers.asScala.toSet, customColumnTitles.asScala)
 	}
 
 }
@@ -53,6 +53,7 @@ trait GenerateExamGridGridOptionsCommandState {
 trait GenerateExamGridGridOptionsCommandRequest {
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
+	var yearsToShow: String = "current"
 	var customColumnTitles: JList[String] = JArrayList()
 
 }

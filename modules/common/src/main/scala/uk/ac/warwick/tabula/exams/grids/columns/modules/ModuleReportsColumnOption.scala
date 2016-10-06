@@ -1,94 +1,83 @@
 package uk.ac.warwick.tabula.exams.grids.columns.modules
 
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFRow}
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{GenerateExamGridEntity, GenerateExamGridExporter}
-import uk.ac.warwick.tabula.exams.grids.columns._
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueString, _}
 
 import scala.math.BigDecimal.RoundingMode
 
 @Component
-class ModuleReportsColumnOption extends ExamGridColumnOption {
+class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "modulereports"
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.ModuleReports
 
 	case class PassedCoreRequiredColumn(state: ExamGridColumnState)
-		extends ExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+		extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
 
 		override val category: String = "Modules Report"
 
 		override val title: String = "Passed Required Core Modules?"
 
-		override val renderSecondaryValue: String = ""
+		override val secondaryValue: String = ""
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> getValue(entity)).toMap
-
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
-			cell.setCellValue(getValue(entity))
+		override def values: Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]] = {
+			state.entities.map(entity =>
+				entity -> entity.years.map { case (academicYear, entityYear) =>
+					academicYear -> result(entityYear)
+				}
+			).toMap
 		}
 
-		private def getValue(entity: GenerateExamGridEntity): String = {
+		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
 			val coreRequiredModuleRegistrations = entity.moduleRegistrations.filter(mr => state.coreRequiredModules.contains(mr.module))
 			if (state.coreRequiredModules.nonEmpty) {
 				if (coreRequiredModuleRegistrations.exists(_.agreedGrade == "F")) {
-					"N"
+					ExamGridColumnValueString("N")
 				} else {
-					"Y"
+					ExamGridColumnValueString("Y")
 				}
 			} else {
-				""
+				ExamGridColumnValueString("")
 			}
 		}
 
 	}
 
 	case class MeanModuleMarkColumn(state: ExamGridColumnState)
-		extends ExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue with ModulesExamGridColumnSection {
+		extends PerYearExamGridColumn(state) with HasExamGridColumnCategory with HasExamGridColumnSecondaryValue {
 
 		override val category: String = "Modules Report"
 
 		override val title: String = "Mean Module Mark For This Year"
 
-		override val renderSecondaryValue: String = ""
+		override val secondaryValue: String = ""
 
-		override def render: Map[String, String] =
-			state.entities.map(entity => entity.id -> {
-				val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
-				if (entityMarks.nonEmpty) {
-					(entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString
-				} else {
-					""
+		override def values: Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]] = {
+			state.entities.map(entity =>
+				entity -> entity.years.map { case (academicYear, entityYear) =>
+					academicYear -> result(entityYear)
 				}
-			}).toMap
+			).toMap
+		}
 
-		override def renderExcelCell(
-			row: XSSFRow,
-			index: Int,
-			entity: GenerateExamGridEntity,
-			cellStyleMap: Map[GenerateExamGridExporter.Style, XSSFCellStyle]
-		): Unit = {
-			val cell = row.createCell(index)
+		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
 			val entityMarks = entity.moduleRegistrations.flatMap(mr => mr.firstDefinedMark).map(mark => BigDecimal(mark))
 			if (entityMarks.nonEmpty) {
-				cell.setCellValue((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)
+				ExamGridColumnValueString((entityMarks.sum / entityMarks.size).setScale(1, RoundingMode.HALF_UP).toString)
 			} else {
-				cell.setCellValue("")
+				ExamGridColumnValueString("")
 			}
 		}
 
 	}
 
-	override def getColumns(state: ExamGridColumnState): Seq[ExamGridColumn] = Seq(
-		PassedCoreRequiredColumn(state),
-		MeanModuleMarkColumn(state)
-	)
+	override def getColumns(state: ExamGridColumnState): Map[YearOfStudy, Seq[PerYearExamGridColumn]] = {
+		state.entities.flatMap(_.years.keys).distinct.map(academicYear => academicYear -> Seq(
+			PassedCoreRequiredColumn(state),
+			MeanModuleMarkColumn(state)
+		)).toMap
+	}
 }

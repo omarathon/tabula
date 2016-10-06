@@ -32,7 +32,7 @@ class OldDownloadSubmissionReceiptAsPdfController extends OldCourseworkControlle
 	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
 		new PDFView(
 			"submission-receipt.pdf",
-			"/WEB-INF/freemarker/coursework/submit/submission-receipt.ftl",
+			s"/WEB-INF/freemarker/$urlPrefix/submit/submission-receipt.ftl",
 			Map(
 				"submission" -> command.apply()
 			)
@@ -61,7 +61,7 @@ class OldDownloadSubmissionReceiptForStudentAsPdfController extends OldCoursewor
 	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser) = {
 		new PDFView(
 			"submission-receipt.pdf",
-			"/WEB-INF/freemarker/coursework/submit/submission-receipt.ftl",
+			s"/WEB-INF/freemarker/$urlPrefix/submit/submission-receipt.ftl",
 			Map(
 				"submission" -> command.apply()
 			)
