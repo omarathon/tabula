@@ -50,11 +50,17 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 	): Mav = {
 
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
-		val canEditRelationship = securityService.can(user, Permissions.Profiles.StudentRelationship.Manage(relationshipType), studentCourseDetails)
+
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
 		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
 		val studentCourseYearDetails = scydToSelect(studentCourseDetails, activeAcademicYear)
 		val relationships = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
+
+		val department = studentCourseYearDetails.map(_.enrolmentDepartment)
+		val relationshipSource = department.map(_.getStudentRelationshipSource(relationshipType))
+
+		val canEditRelationship = relationshipSource.contains(StudentRelationshipSource.Local) &&
+			securityService.can(user, Permissions.Profiles.StudentRelationship.Manage(relationshipType), studentCourseDetails)
 
 		if (!canReadMeetings) {
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
