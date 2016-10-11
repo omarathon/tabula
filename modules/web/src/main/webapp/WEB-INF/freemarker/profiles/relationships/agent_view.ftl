@@ -60,7 +60,12 @@
 										<#list students as studentRelationship>
 											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 											<tr class="student">
-												<td><div class="reallocate <#if studentCourseDetails.department.code!=department.code>hide</#if>"><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></div>
+												<#assign readOnly=(studentCourseDetails.department.code!=department.code)?c />
+												<td>
+													<#if (readOnly == 'true')>
+													<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated via <@routes.profiles.relationship_agents studentCourseDetails.department relationshipType />"></#if>
+													<@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" readOnly='${readOnly}' />
+													<#if (readOnly == 'true')></div></#if>
 												</td>
 												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
 												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
@@ -74,7 +79,7 @@
 								</table>
 
 								<p>
-									<#if canReallocateStudents><button type="submit" class="btn btn-primary">Reallocate students</button></#if>
+									<#if canReallocateStudents><button type="submit" class="btn btn-primary relallocate">Reallocate students</button></#if>
 									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>
@@ -103,10 +108,24 @@
 				sortList: [[2,0], [1,0], [3,0]],
 				headers: { 0: { sorter: false} }
 			}).bigList();
-			$('div.striped-section').on('click', function(e) {
+			$('div.striped-section').on('click', function(e){
+				var $currentExpandedDiv =  $(this);
+				var departmentalStudentsExist = !!$currentExpandedDiv.find('.collection-checkbox').length;
+				if (!departmentalStudentsExist) {
+				 	var $reallocateButton = $currentExpandedDiv.find('button.relallocate');
+					if(!$reallocateButton.hasClass('disabled')){
+						$reallocateButton.addClass('disabled');
+					}
+					var $checkAll = $currentExpandedDiv.find('.collection-check-all');
+						$checkAll.attr('disabled', true);
+				}
 			});
-
 		});
 	})(jQuery);
 </script>
+<style>
+	div.tooltip-inner {
+		max-width: 350px;
+	}
+</style>
 </#escape>
