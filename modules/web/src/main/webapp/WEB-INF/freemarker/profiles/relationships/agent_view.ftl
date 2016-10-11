@@ -79,7 +79,7 @@
 								</table>
 
 								<p>
-									<#if canReallocateStudents><button type="submit" class="btn btn-primary relallocate">Reallocate students</button></#if>
+									<#if canReallocateStudents><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
 									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>
@@ -112,7 +112,7 @@
 				var $currentExpandedDiv =  $(this);
 				var departmentalStudentsExist = !!$currentExpandedDiv.find('.collection-checkbox').length;
 				if (!departmentalStudentsExist) {
-				 	var $reallocateButton = $currentExpandedDiv.find('button.relallocate');
+				 	var $reallocateButton = $currentExpandedDiv.find('button.reallocate');
 					if(!$reallocateButton.hasClass('disabled')){
 						$reallocateButton.addClass('disabled');
 					}
