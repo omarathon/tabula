@@ -88,8 +88,8 @@ Macros for customised form elements, containers and more complex pickers.
 	</div>
 </#macro>
 
-<#macro selector_check_row name value readOnly='false'><#compress>
-	<input type="checkbox" class="collection-checkbox<#if readOnly='true'>disabled</#if>" name="${name}" value="${value}" <#if readOnly='true'>disabled</#if>>
+<#macro selector_check_row name value readOnly=false><#compress>
+	<input type="checkbox" class="collection-checkbox<#if readOnly>disabled</#if>" name="${name}" value="${value}" <#if readOnly>disabled</#if>>
 </#compress></#macro>
 
 <#macro filewidget types basename multiple=true max=10 labelText="File" maxFileSize="" required=false>
