@@ -64,7 +64,7 @@
 												<td>
 													<#if readOnly>
 														<#assign studentDepartment=studentCourseDetails.department />
-														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated within the ${studentDepartment.code?upper_case} at URL <@routes.profiles.relationship_agents studentDepartment relationshipType />">
+														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated within the ${studentDepartment.code?upper_case} department at URL <@routes.profiles.relationship_agents studentDepartment relationshipType />">
 													</#if>
 													<@bs3form.selector_check_row
 														name="preselectStudents"
