@@ -60,7 +60,19 @@
 										<#list students as studentRelationship>
 											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 											<tr class="student">
-												<td><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></td>
+												<#assign readOnly=(studentCourseDetails.department.code!=department.code) />
+												<td>
+													<#if readOnly>
+														<#assign studentDepartment=studentCourseDetails.department />
+														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
+													</#if>
+													<@bs3form.selector_check_row
+														name="preselectStudents"
+														value="${studentCourseDetails.student.universityId}"
+														readOnly=readOnly
+													/>
+													<#if readOnly></div></#if>
+												</td>
 												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
 												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
 												<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
@@ -73,7 +85,7 @@
 								</table>
 
 								<p>
-									<#if canReallocateStudents><button type="submit" class="btn btn-primary">Reallocate students</button></#if>
+									<#if canReallocateStudents><button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
 									<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
 								</p>
 							</form>
@@ -102,7 +114,24 @@
 				sortList: [[2,0], [1,0], [3,0]],
 				headers: { 0: { sorter: false} }
 			}).bigList();
+			$('div.striped-section').on('click', function(e){
+				var $currentExpandedDiv =  $(this);
+				var departmentalStudentsExist = !!$currentExpandedDiv.find('.collection-checkbox').length;
+				if (!departmentalStudentsExist) {
+				 	var $reallocateButton = $currentExpandedDiv.find('button.reallocate');
+					if(!$reallocateButton.hasClass('disabled')){
+						$reallocateButton.addClass('disabled');
+					}
+					var $checkAll = $currentExpandedDiv.find('.collection-check-all');
+						$checkAll.attr('disabled', true);
+				}
+			});
 		});
 	})(jQuery);
 </script>
+<style>
+	div.tooltip-inner {
+		max-width: 350px;
+	}
+</style>
 </#escape>
