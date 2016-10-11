@@ -60,7 +60,8 @@
 										<#list students as studentRelationship>
 											<#assign studentCourseDetails = studentRelationship.studentCourseDetails />
 											<tr class="student">
-												<td><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></td>
+												<td><div class="reallocate <#if studentCourseDetails.department.code!=department.code>hide</#if>"><@bs3form.selector_check_row name="preselectStudents" value="${studentCourseDetails.student.universityId}" /></div>
+												</td>
 												<td><h6>${studentCourseDetails.student.firstName}</h6></td>
 												<td><h6>${studentCourseDetails.student.lastName}</h6></td>
 												<td><a class="profile-link" href="/profiles/view/course/${studentCourseDetails.urlSafeId}">${studentCourseDetails.student.universityId}</a></td>
@@ -102,6 +103,9 @@
 				sortList: [[2,0], [1,0], [3,0]],
 				headers: { 0: { sorter: false} }
 			}).bigList();
+			$('div.striped-section').on('click', function(e) {
+			});
+
 		});
 	})(jQuery);
 </script>
