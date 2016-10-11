@@ -5,7 +5,7 @@
 		<@components.sets_info sets false />
 
 		<#if hasMoreSets>
-			Tabula only shows the first 10 groups. To see more use the filter above.
+			Tabula only shows the first 10 groups before filtering. To see more use the filter above.
 		</#if>
 	<#else>
 	<p class="alert alert-info">No small groups sets found.</p>
