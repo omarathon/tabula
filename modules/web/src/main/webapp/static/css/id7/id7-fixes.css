@@ -9,3 +9,8 @@
 .popover.account-information .popover-content {
 	overflow: visible;
 }
+
+.tabula-page .id7-navigation .navbar-secondary .navbar-nav > li:first-child {
+	color: white;
+}
+
