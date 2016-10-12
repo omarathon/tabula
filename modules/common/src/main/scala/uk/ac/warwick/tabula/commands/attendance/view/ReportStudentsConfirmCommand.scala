@@ -36,7 +36,7 @@ class ReportStudentsConfirmCommandInternal(val department: Department, val acade
 
 	override def applyInternal() = {
 		studentMissedReportCounts.map{ src => {
-			val scd = src.student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException())
+			val scyd = src.student.freshStudentCourseYearDetailsForYear(academicYear).getOrElse(throw new IllegalArgumentException())
 			val report = new MonitoringPointReport
 			report.academicYear = academicYear
 			report.createdDate = DateTime.now
@@ -44,8 +44,8 @@ class ReportStudentsConfirmCommandInternal(val department: Department, val acade
 			report.monitoringPeriod = period
 			report.reporter = user.departmentCode.toUpperCase + user.apparentUser.getWarwickId
 			report.student = src.student
-			report.studentCourseDetails = scd
-			report.studentCourseYearDetails = scd.freshStudentCourseYearDetails.find(_.academicYear == academicYear).getOrElse(throw new IllegalArgumentException())
+			report.studentCourseDetails = scyd.studentCourseDetails
+			report.studentCourseYearDetails = scyd
 			attendanceMonitoringService.saveOrUpdate(report)
 			report
 		}}
