@@ -33,14 +33,14 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var module: Module = null
+	var module: Module = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var cats: JBigDecimal = null
+	var cats: JBigDecimal = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var academicYear: AcademicYear = null
+	var academicYear: AcademicYear = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
@@ -48,29 +48,29 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 	var studentCourseDetails: StudentCourseDetails = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var assessmentGroup: String = null
+	var assessmentGroup: String = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var occurrence: String = null
+	var occurrence: String = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-	var actualMark: JBigDecimal = null
+	var actualMark: JBigDecimal = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-	var actualGrade: String = null
+	var actualGrade: String = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-	var agreedMark: JBigDecimal = null
+	var agreedMark: JBigDecimal = _
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Results"))
-	var agreedGrade: String = null
+	var agreedGrade: String = _
 
 	def firstDefinedMark: Option[JBigDecimal] = Seq(Option(agreedMark), Option(actualMark)).flatten.headOption
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
-	var selectionStatus: ModuleSelectionStatus = null // core, option or optional core
+	var selectionStatus: ModuleSelectionStatus = _ // core, option or optional core
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var lastUpdatedDate = DateTime.now
@@ -95,7 +95,19 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 /**
  * Holds data about an individual student's registration on a single module.
  */
-case class UpstreamModuleRegistration(year: String, sprCode: String, seatNumber: String, occurrence: String, sequence: String, moduleCode: String, assessmentGroup: String) {
+case class UpstreamModuleRegistration(
+	year: String,
+	sprCode: String,
+	seatNumber: String,
+	occurrence: String,
+	sequence: String,
+	moduleCode: String,
+	assessmentGroup: String,
+	actualMark: String,
+	actualGrade: String,
+	agreedMark: String,
+	agreedGrade: String
+) {
 
 	def universityId = SprCode.getUniversityId(sprCode)
 
