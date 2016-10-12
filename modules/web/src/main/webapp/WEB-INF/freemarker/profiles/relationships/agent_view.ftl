@@ -63,7 +63,8 @@
 												<#assign readOnly=(studentCourseDetails.department.code!=department.code) />
 												<td>
 													<#if readOnly>
-														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated via <@routes.profiles.relationship_agents studentCourseDetails.department relationshipType />">
+														<#assign studentDepartment=studentCourseDetails.department />
+														<div class="use-tooltip" data-html="true" data-container ="body" data-title= "This student can be reallocated from their profile page or from within the ${studentDepartment.name} department.">
 													</#if>
 													<@bs3form.selector_check_row
 														name="preselectStudents"

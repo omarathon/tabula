@@ -371,7 +371,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
 		d.allProperties should be (Map(
 			"module" -> "moduleId",
-			"smallGroupSet" -> "existingId"
+			"smallGroupSet" -> "existingId",
+			"allocation" -> Seq(("group1Id", Nil), ("group2Id", Nil))
 		))
 	}}
 

@@ -126,6 +126,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 
 	override def describe(d: Description) {
 		d.smallGroupSet(set)
+		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
 	}
 
 	override def describeResult(d: Description, set: SmallGroupSet) = {
