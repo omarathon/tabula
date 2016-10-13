@@ -32,12 +32,12 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 	private def process(cmd: AdminSmallGroupsHomeCommand, department: Department, view: String) = {
 		val info = cmd.apply()
 
-		val setsToDisplay = info.setsWithPermission.take(AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
+		val isFiltered = !(cmd.moduleFilters.isEmpty && cmd.formatFilters.isEmpty && cmd.statusFilters.isEmpty && cmd.allocationMethodFilters.isEmpty && cmd.termFilters.isEmpty)
+		val setsToDisplay = if (isFiltered) info.setsWithPermission else info.setsWithPermission.take(AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
 
 		val hasModules = info.modulesWithPermission.nonEmpty
 		val hasGroups = setsToDisplay.nonEmpty
 		val hasGroupAttendance = setsToDisplay.exists { _.set.showAttendanceReports }
-		val isFiltered = !(cmd.moduleFilters.isEmpty && cmd.formatFilters.isEmpty && cmd.statusFilters.isEmpty && cmd.allocationMethodFilters.isEmpty && cmd.termFilters.isEmpty)
 
 		val model = Map(
 			"viewedAcademicYear" -> cmd.academicYear,
@@ -57,7 +57,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 			"allAllocationFilters" -> SmallGroupSetFilters.AllocationMethod.all(info.departmentSmallGroupSets),
 			"allTermFilters" -> SmallGroupSetFilters.allTermFilters(cmd.academicYear, termService),
 			"isFiltered" -> isFiltered,
-			"hasMoreSets" -> (info.setsWithPermission.size > AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
+			"hasMoreSets" -> (!isFiltered && info.setsWithPermission.size > AdminSmallGroupsHomeCommand.MaxSetsToDisplay)
 		)
 
 		Mav(view, model)

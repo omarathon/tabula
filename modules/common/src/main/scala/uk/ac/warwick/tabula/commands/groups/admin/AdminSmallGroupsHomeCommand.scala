@@ -91,7 +91,6 @@ class AdminSmallGroupsHomeCommandInternal(val department: Department, val academ
 				sortedSets
 					.toStream
 					.filter { set => canManageDepartment || modulesWithPermission.contains(set.module) || securityService.can(user, RequiredPermission, set) }
-					.take(MaxSetsToDisplay + 1)
 			}
 		}
 
