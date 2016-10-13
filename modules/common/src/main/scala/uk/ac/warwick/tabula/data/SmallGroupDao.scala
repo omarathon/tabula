@@ -188,8 +188,8 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			return Seq()
 
 		session.newCriteria[SmallGroupEventAttendanceNote]
-			.add(in("student.id", studentIds.asJava))
-			.add(in("occurrence", occurrences.asJava))
+			.add(safeIn("student.id", studentIds))
+			.add(safeIn("occurrence", occurrences))
 			.seq
 	}
 
