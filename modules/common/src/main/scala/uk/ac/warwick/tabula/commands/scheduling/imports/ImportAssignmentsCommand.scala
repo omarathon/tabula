@@ -172,7 +172,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 								position = Try(studentRegistrations.head.seatNumber.toInt).toOption
 								actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
 								actualGrade = studentRegistrations.head.actualGrade.maybeText
-								agreedMark = Try(BigDecimal(studentRegistrations.head.agreedGrade)).toOption
+								agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
 								agreedGrade = studentRegistrations.head.agreedGrade.maybeText
 							}
 						} else {
