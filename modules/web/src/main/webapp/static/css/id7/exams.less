@@ -130,7 +130,12 @@
 		&.overcat {
 			margin-bottom: 0;
 		}
-		tr.student:hover {
+		.student, .assignments, .exams {
+			&.odd {
+				background: @table-bg-accent;
+			}
+		}
+		&.with-hover tr.student:hover {
 			background-color: darken(@table-bg-hover, 5%);
 		}
 		tr.clickable {
@@ -165,9 +170,7 @@
 				min-width: 15px;
 			}
 		}
-		.student:nth-of-type(even) {
-			background: @table-bg-accent;
-		}
+
 		input[type="text"] {
 			width: 42px;
 			padding: 6px;

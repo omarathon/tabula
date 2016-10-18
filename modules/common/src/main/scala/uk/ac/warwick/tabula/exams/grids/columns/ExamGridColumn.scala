@@ -39,11 +39,12 @@ case class ExamGridColumnState(
 	normalLoad: BigDecimal,
 	routeRules: Seq[UpstreamRouteRule],
 	academicYear: AcademicYear,
-	yearOfStudy: Int
+	yearOfStudy: Int,
+	showComponentMarks: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0)
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showComponentMarks = false)
 }
 
 @Component
@@ -72,7 +73,7 @@ sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 }
 
 abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
-	def values: Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]]
+	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]
 }
 
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {

@@ -54,6 +54,9 @@ trait GenerateExamGridGridOptionsCommandRequest {
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
 	var yearsToShow: String = "current"
+	var marksToShow: String = "overall"
 	var customColumnTitles: JList[String] = JArrayList()
+
+	def showComponentMarks = marksToShow == "all"
 
 }
