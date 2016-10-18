@@ -46,7 +46,7 @@ class DisplaySettingsController extends AdminController
 	private def viewSettings(department: Department) =
 		Mav("admin/display-settings",
 			"department" -> department,
-			"expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR),
+			"expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional),
 			"returnTo" -> getReturnTo("")
 		).crumbs(
 			Breadcrumbs.Department(department)
