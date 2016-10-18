@@ -57,6 +57,7 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
@@ -251,6 +252,14 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.add(is("sequence", component.sequence))
 			.seq
 	}
+
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(is("academicYear", registration.academicYear))
+			.add(is("moduleCode", registration.toSITSCode))
+			.add(is("assessmentGroup", registration.assessmentGroup))
+			.add(is("occurrence", registration.occurrence))
+			.seq
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]

@@ -22,6 +22,7 @@
 		<input type="hidden" name="customColumnTitles[${column_index}]" value="${column}" />
 	</#list>
 	<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
+	<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
 
 	<h2>Importing student data</h2>
 
