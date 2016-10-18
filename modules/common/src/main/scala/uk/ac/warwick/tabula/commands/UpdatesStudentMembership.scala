@@ -178,7 +178,6 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
 	val id = assessmentComponent.id + ";" + group.id
 
 	val name = assessmentComponent.name
-	val memberCount = group.memberCount
 	val cats = assessmentComponent.cats
 	val occurrence = group.occurrence
 	val sequence = assessmentComponent.sequence

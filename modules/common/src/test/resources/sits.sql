@@ -119,6 +119,22 @@ CREATE TABLE IF NOT EXISTS SRS_VCO
 , VCO_ROUC VARCHAR(12) NOT NULL
 );
 
+-- Valid course/route options
+DROP TABLE CAM_SAS IF EXISTS;
+
+CREATE TABLE IF NOT EXISTS CAM_SAS
+(
+  SPR_CODE VARCHAR(12) NOT NULL
+, AYR_CODE VARCHAR(6) NOT NULL
+, MOD_CODE VARCHAR(10) NOT NULL
+, MAV_OCCUR VARCHAR(6) NOT NULL
+, MAB_SEQ VARCHAR(6) NOT NULL
+, SAS_ACTM INTEGER
+, SAS_ACTG VARCHAR(2)
+, SAS_AGRM INTEGER
+, SAS_AGRG VARCHAR(2)
+);
+
 -- Thoughts - only the assignment importer test really needs all this data,
 -- so perhaps move it into a separate file. Alternatively, just don't invoke
 -- sits.sql at all in the regular PersistenceTestBase since we only require
@@ -198,3 +214,7 @@ INSERT INTO CAM_WSS VALUES ('EXJUN-12', '0123460/1', '11/12', 'CH115-30', 'Y', '
 INSERT INTO CAM_SMO VALUES ('CH130-20', 'A', 'A', '10/11', '0123458/1', 30, 'C', null);
 INSERT INTO CAM_WSS VALUES ('EXJUN-11', '0123458/1', '10/11', 'CH130-20', 'Y', '1', 'A01');
 INSERT INTO CAM_SSN VALUES ('0123458/1', '10/11', 'CON');
+
+-- assessment component marks
+INSERT INTO CAM_SAS VALUES ('0123456/1', '11/12', 'CH115-30', 'A', 'A01', 67, '21', 72, '1');
+INSERT INTO CAM_SAS VALUES ('0123458/1', '11/12', 'CH120-15', 'A', 'A01', null, null, null, null);

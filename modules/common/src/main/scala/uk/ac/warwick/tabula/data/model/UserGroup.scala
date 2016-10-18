@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.CascadeType._
 import javax.persistence._
 
-import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms
@@ -55,9 +53,10 @@ class UserGroup private(val universityIds: Boolean)
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
 	private val includeUsers: JList[String] = JArrayList()
 
-	@OneToMany(mappedBy = "userGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@OrderBy("position")
-	private val staticIncludeUsers: JList[OrderedGroupMember] = JArrayList()
+	@ElementCollection @Column(name = "usercode")
+	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
+		new JoinColumn(name = "group_id", referencedColumnName = "id")))
+	private val staticIncludeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
@@ -70,44 +69,10 @@ class UserGroup private(val universityIds: Boolean)
 		includeUsers.addAll(userIds.asJava)
 	}
 
-	def staticUserIds: Seq[String] = staticIncludeUsers.asScala.map(_.memberId)
+	def staticUserIds: Seq[String] = staticIncludeUsers.asScala
 	def staticUserIds_=(userIds: Seq[String]) {
-
-		val newMembers = userIds.map(uid => {
-			val group = new OrderedGroupMember
-			group.memberId = uid
-			group.userGroup = this
-			group
-		})
-
-		if (!staticIncludeUsers.isEmpty) {
-			staticIncludeUsers.clear()
-			// TAB-3343 - force deletions before inserts
-			optionalSession.foreach { _.flush() }
-		}
-
-		staticIncludeUsers.addAll(newMembers.asJava)
-	}
-
-	def replaceStaticUsers(registrations: Seq[UpstreamModuleRegistration]) {
-		val newMembers = registrations.map(member => {
-			val m = new OrderedGroupMember
-			m.memberId = member.universityId
-			m.userGroup = this
-			m.position = None
-			m
-		})
-		val distinctNewMembers = newMembers.groupBy(m => (m.memberId, m.userGroup)).mapValues(_.head).values.toSeq
-
-		if (!staticIncludeUsers.isEmpty) {
-
-			staticIncludeUsers.clear()
-			// TAB-3343 - force deletions before inserts
-			optionalSession.foreach { _.flush() }
-		}
-
-		staticIncludeUsers.addAll(distinctNewMembers.asJava)
-		optionalSession.foreach { s => distinctNewMembers.foreach(s.save) }
+		staticIncludeUsers.clear()
+		staticIncludeUsers.addAll(userIds.asJava)
 	}
 
 	def excludedUserIds: Seq[String] = excludeUsers.asScala
@@ -150,8 +115,8 @@ class UserGroup private(val universityIds: Boolean)
 	def includesUserId(user: String) =
 		!(excludeUsers contains user) &&
 			(
-				(includeUsers contains user) ||
-				(staticIncludeUsers.asScala.map(_.memberId) contains user) ||
+				includeUsers.contains(user) ||
+				staticIncludeUsers.contains(user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
 	def excludesUserId(user: String) = excludeUsers contains user
@@ -163,10 +128,9 @@ class UserGroup private(val universityIds: Boolean)
 	def size = members.size
 
 	def members: Seq[String] = allIncludedIds diff allExcludedIds
-	def sortedStaticMembers: Seq[OrderedGroupMember] = staticIncludeUsers.asScala.sortBy(_.position)
 
-	def allIncludedIds: Seq[String] = (staticIncludeUsers.asScala.map(_.memberId) ++ includeUsers.asScala.toSeq ++ webgroupMembers).distinct
-	def allExcludedIds: Seq[String] = excludeUsers.asScala.toSeq
+	def allIncludedIds: Seq[String] = (staticIncludeUsers.asScala ++ includeUsers.asScala ++ webgroupMembers).distinct
+	def allExcludedIds: Seq[String] = excludeUsers.asScala
 
 	private def getIdFromUser(user:User):String = {
 		if (universityIds)
@@ -189,7 +153,6 @@ class UserGroup private(val universityIds: Boolean)
 		case _ => Nil
 	}
 
-
 	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
 		assert(this.universityIds == otherGroup.universityIds, "Can only copy from a group with same type of users")
 
@@ -210,7 +173,7 @@ class UserGroup private(val universityIds: Boolean)
 
 	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean ={
 		other match {
-			case otherUg:UserGroup if otherUg.universityIds == this.universityIds => this.members == otherUg.members
+			case otherUg: UserGroup if otherUg.universityIds == this.universityIds => this.members == otherUg.members
 			case _ => this.users == other.users
 		}
 	}
@@ -285,19 +248,4 @@ trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 
 	def includesUserId(userId: String): Boolean
 	def excludesUserId(userId: String): Boolean
-}
-
-@Entity(name="usergroupstatic")
-@Access(AccessType.FIELD)
-class OrderedGroupMember() extends GeneratedId {
-
-	@Column(name="usercode")
-	var memberId: String = _
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="group_id")
-	var userGroup: UserGroup = _
-
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
-	var position: Option[Int] = _
 }
