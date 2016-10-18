@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.services
 
+import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssessmentGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
-	@Test def testDetermineMembership {
+	@Test def testDetermineMembership() {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("aaaaa", "bbbbb", "ccccc", "ddddd", "eeeee", "fffff")
 
@@ -30,10 +31,10 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		val uag = new UpstreamAssessmentGroup
 		uag.assessmentGroup = "A"
 		uag.moduleCode = "AM101"
-		uag.members.add(user3)
-		uag.members.add(user1)
-		uag.members.add(user2)
-		uag.members.add(new AnonymousUser)
+		uag.members.add(new UpstreamAssessmentGroupMember(uag, user3.getWarwickId))
+		uag.members.add(new UpstreamAssessmentGroupMember(uag, user1.getWarwickId))
+		uag.members.add(new UpstreamAssessmentGroupMember(uag, user2.getWarwickId))
+		uag.members.add(new UpstreamAssessmentGroupMember(uag, new AnonymousUser().getWarwickId))
 
 		val other = UserGroup.ofUsercodes
 		other.userLookup = userLookup
@@ -48,31 +49,31 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
 		val info = assignmentMembershipService.determineMembership(upstream, others)
 		info.items.size should be (6)
-		info.items(0).userId should be (Some("aaaaa"))
+		info.items.head.userId should be (Some("aaaaa"))
 		info.items(1).userId should be (Some("bbbbb"))
 		info.items(2).userId should be (Some("ccccc"))
 	}
 
-	@Test def isStudentMember {
+	@Test def studentMember() {
 		val service = new AssessmentMembershipServiceImpl
 
 		val user = new User("cuscav").tap { _.setWarwickId("0672089") }
 
 		val excludedGroup = mock[UnspecifiedTypeUserGroup]
-		excludedGroup.excludesUser(user) returns (true)
+		excludedGroup.excludesUser(user) returns true
 
 		service.isStudentMember(user, Nil, Some(excludedGroup)) should be (false)
 		verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
 		val includedGroup = mock[UnspecifiedTypeUserGroup]
-		includedGroup.excludesUser(user) returns (false)
-		includedGroup.includesUser(user) returns (true)
+		includedGroup.excludesUser(user) returns false
+		includedGroup.includesUser(user) returns true
 
 		service.isStudentMember(user, Nil, Some(includedGroup)) should be (true)
 
 		val notInGroup = mock[UnspecifiedTypeUserGroup]
-		includedGroup.excludesUser(user) returns (false)
-		includedGroup.includesUser(user) returns (false)
+		includedGroup.excludesUser(user) returns false
+		includedGroup.includesUser(user) returns false
 
 		service.isStudentMember(user, Nil, Some(notInGroup)) should be (false)
 
@@ -85,7 +86,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		service.isStudentMember(user, upstreams, None) should be (false)
 
 		// Include the user in upstream2
-		upstream2.members.staticUserIds = Seq("0672089")
+		upstream2.members = JArrayList(new UpstreamAssessmentGroupMember(upstream2, "0672089"))
 
 		service.isStudentMember(user, upstreams, None) should be (true)
 

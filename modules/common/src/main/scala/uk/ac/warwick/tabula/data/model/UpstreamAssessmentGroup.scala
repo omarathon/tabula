@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.persistence._
+
 import org.apache.commons.lang3.builder.EqualsBuilder
-import org.hibernate.annotations.Type
-import javax.persistence.{Basic, Column, Entity, JoinColumn, OneToOne}
+import org.hibernate.annotations.{BatchSize, Type}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.PreSaveBehaviour
-import javax.persistence.CascadeType
-import javax.persistence.FetchType
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 
 /**
@@ -21,7 +23,7 @@ import javax.persistence.FetchType
  *          there's only one value but sometimes can be 2 or even 26 in one case)
  */
 @Entity
-class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
+class UpstreamAssessmentGroup extends GeneratedId {
 
 	// Long-form module code with hyphen and CATS value
 	var moduleCode: String = _
@@ -33,16 +35,17 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	@Column(nullable = false)
 	var academicYear: AcademicYear = _
 
-	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = UserGroup.ofUniversityIds
+	@OneToMany(mappedBy = "upstreamAssessmentGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size = 200)
+	var members: JList[UpstreamAssessmentGroupMember] = JArrayList()
 
-	// UpstreamAssessmentGroups only ever use the static users in the UserGroup
-	// you can access this directly to get a list of members by seatNumber
-	def sortedMembers = members.sortedStaticMembers
+	def membersIncludes(user: User): Boolean = members.asScala.map(_.universityId).contains(user.getWarwickId)
 
-	override def preSave(newRecord: Boolean) {
-		if (!members.universityIds) throw new IllegalStateException
+	def membersIncludes(universityId: String): Boolean = members.asScala.map(_.universityId).contains(universityId)
+
+	def replaceMembers(universityIds: Seq[String]): Unit = {
+		members.clear()
+		members.addAll(universityIds.distinct.map(universityId => new UpstreamAssessmentGroupMember(this, universityId)).asJava)
 	}
 
 	def isEquivalentTo(other: UpstreamAssessmentGroup) =
@@ -56,5 +59,47 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 
 	override def toString = "%s %s g:%s o:%s s:%s" format (moduleCode, academicYear, assessmentGroup, occurrence, sequence)
 
-	def memberCount = members.members.size
+}
+
+@Entity
+class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAssessmentGroupMember]
+	with UpstreamAssessmentGroupMemberProperties {
+
+	def this(upstreamAssessmentGroup: UpstreamAssessmentGroup, universityId: String) = {
+		this()
+		this.upstreamAssessmentGroup = upstreamAssessmentGroup
+		this.universityId = universityId
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "group_id")
+	var upstreamAssessmentGroup: UpstreamAssessmentGroup = _
+
+	@Column(name="universityId")
+	var universityId: String = _
+
+	override def compare(that: UpstreamAssessmentGroupMember): Int =
+		position.getOrElse(Int.MaxValue) - that.position.getOrElse(Int.MaxValue) match {
+			case 0 => Ordering.String.compare(this.universityId, that.universityId)
+			case nonZero => nonZero
+		}
+}
+
+trait UpstreamAssessmentGroupMemberProperties {
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
+	var position: Option[Int] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
+	var actualMark: Option[BigDecimal] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var actualGrade: Option[String] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBigDecimalUserType")
+	var agreedMark: Option[BigDecimal] = None
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
+	var agreedGrade: Option[String] = None
+
 }
