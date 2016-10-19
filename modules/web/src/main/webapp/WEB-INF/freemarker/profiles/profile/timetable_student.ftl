@@ -21,7 +21,10 @@
 	</details>
 </#if>
 
-<h1>Timetable</h1>
+<div class="pull-right">
+	<a class="btn btn-primary" href="<@routes.profiles.department_timetables member.homeDepartment />">Show all timetables</a>
+</div>
+<h1 class="with-settings">Timetable</h1>
 
 <#include "_timetable.ftl" />
 </#escape>
