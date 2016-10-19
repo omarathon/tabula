@@ -80,13 +80,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 					occurrence = rs.getString("mav_occurrence"),
 					sequence = rs.getString("sequence"),
 					moduleCode = rs.getString("module_code"),
-					assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group")),
-					actualMark = rs.getString("actual_mark"),
-					actualGrade = rs.getString("actual_grade"),
-					agreedMark = rs.getString("agreed_mark"),
-					agreedGrade = rs.getString("agreed_grade")
-				))
-
+					assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group"))))
 			}
 		})
 	}
@@ -129,11 +123,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 				occurrence = "A",
 				sequence = "A01",
 				moduleCode = "%s-15".format(moduleCode.toUpperCase),
-				assessmentGroup = "A",
-				actualMark = "",
-				actualGrade = "",
-				agreedMark = "",
-				agreedGrade = ""
+				assessmentGroup = "A"
 			)
 		)
 
@@ -293,11 +283,7 @@ object AssignmentImporter {
 			sms.sms_occl as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			sms.mod_code as module_code,
 			sms.sms_agrp as assessment_group,
-			mab.mab_seq as sequence,
-			sas.sas_actm as actual_mark,
-			sas.sas_actg as actual_grade,
-			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			wss.wss_mabs as sequence
 				from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
 					join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
 						on scj.scj_sprc = spr.spr_code and (spr.sts_code is null or spr.sts_code not like 'P%') -- no perm withdrawn students
@@ -308,16 +294,8 @@ object AssignmentImporter {
 					join $sitsSchema.cam_ssn ssn -- SSN holds module registration status
 						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices confirmed
 
-					left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
-						on mab.map_code = sms.mod_code and mab.mab_agrp = sms.sms_agrp
-
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
-
-					left join $sitsSchema.cam_sas sas -- Where component marks go
-						on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
-							and sas.mav_occur = sms.sms_occl and sas.mab_seq = mab.mab_seq
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -332,11 +310,7 @@ object AssignmentImporter {
 			smo.mav_occur as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group,
-			mab.mab_seq as sequence,
-			sas.sas_actm as actual_mark,
-			sas.sas_actg as actual_grade,
-			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			wss.wss_mabs as sequence
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
@@ -349,16 +323,8 @@ object AssignmentImporter {
 					join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON' -- confirmed module choices
 
-					left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
-						on mab.map_code = smo.mod_code and mab.mab_agrp = smo.smo_agrp
-
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
-
-					left join $sitsSchema.cam_sas sas -- Where component marks go
-						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
-							and sas.mav_occur = smo.mav_occur and sas.mab_seq = mab.mab_seq
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
@@ -372,11 +338,7 @@ object AssignmentImporter {
 			smo.mav_occur as mav_occurrence,
 			smo.mod_code as module_code,
 			smo.smo_agrp as assessment_group,
-			mab.mab_seq as sequence,
-			sas.sas_actm as actual_mark,
-			sas.sas_actg as actual_grade,
-			sas.sas_agrm as agreed_mark,
-			sas.sas_agrg as agreed_grade
+			wss.wss_mabs as sequence
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
@@ -389,16 +351,8 @@ object AssignmentImporter {
 					left outer join $sitsSchema.cam_ssn ssn
 						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
 
-					left join $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components (needed for the sequences)
-						on mab.map_code = smo.mod_code and mab.mab_agrp = smo.smo_agrp
-
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
-						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
-
-					left join $sitsSchema.cam_sas sas -- Where component marks go
-						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
-							and sas.mav_occur = smo.mav_occur and sas.mab_seq = mab.mab_seq
+						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
 
 			where
 				scj.scj_udfa in ('Y','y') and -- most significant courses only
