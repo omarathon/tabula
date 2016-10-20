@@ -420,7 +420,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 							val start = DateTime.parse(event.getOrElse("start", "").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
 							val end = DateTime.parse(event.getOrElse("end","").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
 							val year = AcademicYear.findAcademicYearContainingDate(start)
-							val module = moduleAndDepartmentService.getModuleByCode(event.getOrElse("moduleCode","").toString.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
+							val moduleCode = event.getOrElse("moduleCode","").toString
+							val module = moduleAndDepartmentService.getModuleByCode(moduleCode.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
 							val parent = TimetableEvent.Parent(module)
 							val room = event.getOrElse("room","").toString
 							val location = Option(locationFetchingService.locationFor(room))
@@ -442,8 +443,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 							Seq(TimetableEvent(
 								uid = uid,
-								name = "",
-								title = " ",
+								name = moduleCode,
+								title = "",
 								description = "",
 								eventType = eventType,
 								weekRanges =  Seq(WeekRange(termService.getAcademicWeekForAcademicYear(start, year))),
