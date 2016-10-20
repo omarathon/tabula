@@ -61,7 +61,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 				studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
 
 			studentRelationshipExpected.put(relationshipType, JHashMap(
-				Seq(CourseType.UG, CourseType.PGT, CourseType.PGR).map(courseType =>
+				Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional).map(courseType =>
 					courseType -> JBoolean(Option(department.getStudentRelationshipExpected(relationshipType, courseType)
 						.getOrElse(relationshipType.isDefaultExpected(courseType))))
 				):_*

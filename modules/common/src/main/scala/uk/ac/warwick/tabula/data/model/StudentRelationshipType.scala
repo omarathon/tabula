@@ -69,6 +69,12 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	@Column(name="expected_pgr")
 	var expectedPGR: JBoolean = false
 
+	@Column(name="expected_foundation")
+	var expectedFoundation: JBoolean = false
+
+	@Column(name="expected_presessional")
+	var expectedPreSessional: JBoolean = false
+
 	@Column(name="sort_order")
 	var sortOrder: Int = 2
 
@@ -85,6 +91,10 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGT.booleanValue)
 				case CourseType.PGR =>
 					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGR.booleanValue)
+				case CourseType.Foundation =>
+					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedFoundation.booleanValue)
+				case CourseType.PreSessional =>
+					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPreSessional.booleanValue)
 				case _ => false
 			}
 			case _ => false
@@ -99,6 +109,10 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGT.booleanValue)
 			case CourseType.PGR =>
 				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPGR.booleanValue)
+			case CourseType.Foundation =>
+				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedFoundation.booleanValue)
+			case CourseType.PreSessional =>
+				department.getStudentRelationshipExpected(this, courseType).getOrElse(expectedPreSessional.booleanValue)
 			case _ => false
 		}
 	}
@@ -109,6 +123,8 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 		case CourseType.UG => expectedUG.booleanValue
 		case CourseType.PGT => expectedPGT.booleanValue
 		case CourseType.PGR => expectedPGR.booleanValue
+		case CourseType.Foundation => expectedFoundation.booleanValue
+		case CourseType.PreSessional => expectedPreSessional.booleanValue
 		case _ => false
 	}
 
