@@ -120,5 +120,16 @@ section.identity, section.member-notes, section.circumstances {
 	}
 }
 
+.calendar table[role=presentation] {
+	tbody tr {
+		td, th {
+			display: table-cell !important;
+		}
+		th.fc-widget-header {
+			width: 50px !important;
+		}
+	}
+}
+
 @import "allocate-associations.less";
 @import "profile-attendance.less";
