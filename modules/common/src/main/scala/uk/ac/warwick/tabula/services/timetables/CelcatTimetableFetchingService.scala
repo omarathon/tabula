@@ -415,53 +415,53 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 
 	def parseJSON(incomingJson: String) = {
 		JSON.parseFull(incomingJson) match {
-					case Some(jsonData: List[Map[String, Any]]@unchecked) =>
-						EventList.fresh(jsonData.flatMap { event =>
-							val start = DateTime.parse(event.getOrElse("start", "").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
-							val end = DateTime.parse(event.getOrElse("end","").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
-							val year = AcademicYear.findAcademicYearContainingDate(start)
-							val moduleCode = event.getOrElse("moduleCode","").toString
-							val module = moduleAndDepartmentService.getModuleByCode(moduleCode.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
-							val parent = TimetableEvent.Parent(module)
-							val room = event.getOrElse("room","").toString
-							val location = Option(locationFetchingService.locationFor(room))
-							val eventType:TimetableEventType = event("contactType") match {
-								case "L" => TimetableEventType.Lecture
-								case "S" => TimetableEventType.Seminar
-								case _ => TimetableEventType.Other("")
-							}
-							val uid =
-								DigestUtils.md5Hex(
-									Seq(
-										module,
-										start.toString,
-										end.toString,
-										location.fold("") {_.name},
-										parent.shortName.getOrElse("")
-									).mkString
-								)
+			case Some(jsonData: List[Map[String, Any]]@unchecked) =>
+				EventList.fresh(jsonData.flatMap { event =>
+					val start = DateTime.parse(event.getOrElse("start", "").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+					val end = DateTime.parse(event.getOrElse("end","").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+					val year = AcademicYear.findAcademicYearContainingDate(start)
+					val moduleCode = event.getOrElse("moduleCode","").toString
+					val module = moduleAndDepartmentService.getModuleByCode(moduleCode.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
+					val parent = TimetableEvent.Parent(module)
+					val room = event.getOrElse("room","").toString
+					val location = Option(locationFetchingService.locationFor(room))
+					val eventType:TimetableEventType = event("contactType") match {
+						case "L" => TimetableEventType.Lecture
+						case "S" => TimetableEventType.Seminar
+						case _ => TimetableEventType.Other("")
+					}
+					val uid =
+						DigestUtils.md5Hex(
+							Seq(
+								module,
+								start.toString,
+								end.toString,
+								location.fold("") {_.name},
+								parent.shortName.getOrElse("")
+							).mkString
+						)
 
-							Seq(TimetableEvent(
-								uid = uid,
-								name = moduleCode,
-								title = "",
-								description = "",
-								eventType = eventType,
-								weekRanges =  Seq(WeekRange(termService.getAcademicWeekForAcademicYear(start, year))),
-								day = DayOfWeek(start.getDayOfWeek),
-								startTime = start.toLocalTime,
-								endTime = end.toLocalTime,
-								location = location,
-								comments = None,
-								parent = parent,
-								staff = Nil,
-								students = Nil,
-								year = AcademicYear.guessSITSAcademicYearByDate(start),
-								relatedUrl = None
-							))
-						})
-					case _ => throw new RuntimeException("Could not parse JSON")
-				}
+					Seq(TimetableEvent(
+						uid = uid,
+						name = moduleCode,
+						title = "",
+						description = "",
+						eventType = eventType,
+						weekRanges =  Seq(WeekRange(termService.getAcademicWeekForAcademicYear(start, year))),
+						day = DayOfWeek(start.getDayOfWeek),
+						startTime = start.toLocalTime,
+						endTime = end.toLocalTime,
+						location = location,
+						comments = None,
+						parent = parent,
+						staff = Nil,
+						students = Nil,
+						year = AcademicYear.guessSITSAcademicYearByDate(start),
+						relatedUrl = None
+					))
+				})
+			case _ => throw new RuntimeException("Could not parse JSON")
+		}
 	}
 
 	def parseICal(is: InputStream, config: CelcatDepartmentConfiguration)(implicit termService: TermService): EventList = {
