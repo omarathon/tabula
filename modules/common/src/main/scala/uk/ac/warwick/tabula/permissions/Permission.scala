@@ -38,7 +38,7 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		.append(selector)
 		.build()
 
-	override def toString() = "%s(%s)".format(super.toString(), selector)
+	override def toString = "%s(%s)".format(super.toString(), selector)
 }
 
 trait PermissionsSelector[A <: PermissionsSelector[A]] {
@@ -240,6 +240,7 @@ object Permissions {
 	object Extension {
 		case object MakeRequest extends Permission("Make an extension request")
 
+		case object Search extends ScopelessPermission("Search extensions")
 		case object Create extends Permission("Create an extension for a student")
 		case object Read extends Permission("View extensions and extension requests")
 		case object Update extends Permission("Edit an extension")

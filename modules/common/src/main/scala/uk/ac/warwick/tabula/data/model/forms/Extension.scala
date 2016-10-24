@@ -4,11 +4,12 @@ import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
 
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.{Days, DateTime}
+import org.joda.time.{DateTime, Days}
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
+
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
@@ -16,8 +17,10 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+
 import uk.ac.warwick.tabula.DateFormats
 import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.tabula.system.TwoWayConverter
 
 @Entity @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
@@ -114,19 +117,17 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
 	def revocable = approved && !isInitiatedByStudent
 
-	// keep state encapsulated
-	def approve(comments: String = null) {
-		_state = ExtensionState.Approved
+	def updateState(newState: ExtensionState, comments: String) = {
+		_state = newState
 		reviewedOn = DateTime.now
 		reviewerComments = comments
 	}
 
 	// keep state encapsulated
-	def reject(comments: String = null) {
-		_state = ExtensionState.Rejected
-		reviewedOn = DateTime.now
-		reviewerComments = comments
-	}
+	def approve(comments: String = null) = updateState(ExtensionState.Approved, comments)
+	def reject(comments: String = null) = updateState(ExtensionState.Rejected, comments)
+	def revoke(comments: String = null) = updateState(ExtensionState.Revoked, comments)
+	def requestMoreInfo(comments: String = null) = updateState(ExtensionState.MoreInformationRequired, comments)
 
 	def awaitingReview = {
 		// wrap nullable dates to be more readable in pattern match
@@ -143,14 +144,18 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
-	// calculate deadline only if not late
-	def feedbackDeadline = {
-		val withinDeadline = assignment.findSubmission(universityId).flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
-		withinDeadline.collect { case (true) =>
-			expiryDate.map(ed =>
-				workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed))
+	// calculate deadline only if not late (return None for late returns)
+	def feedbackDeadline = assignment
+		.findSubmission(universityId)
+		.flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
+		.collect {
+			case(true) => feedbackDueDate
 		}.flatten
-	}
+
+	// the feedback deadline if an expry date exists for this extension
+	def feedbackDueDate = expiryDate.map(ed =>
+		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed)
+	)
 
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
@@ -173,7 +178,7 @@ object ExtensionState {
 	// you can't infer from state alone whether there's a request outstanding - use extension.awaitingReview()
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
-	case object MoreInformationRequired extends ExtensionState("M", "MoreInformationRequired")
+	case object MoreInformationRequired extends ExtensionState("M", "More information required")
 	case object Rejected extends ExtensionState("R", "Rejected")
 	case object Revoked extends ExtensionState("V", "Revoked")
 
@@ -185,6 +190,8 @@ object ExtensionState {
 		case Revoked.dbValue => Revoked
 		case _ => throw new IllegalArgumentException()
 	}
+
+	def all = Seq(Unreviewed, Approved, Rejected, Revoked, MoreInformationRequired)
 }
 
 class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, String] {
@@ -196,4 +203,9 @@ class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, Strin
 
 	override def convertToObject(string: String) = ExtensionState.fromCode(string)
 	override def convertToValue(es: ExtensionState) = es.dbValue
+}
+
+class ExtensionStateConverter extends TwoWayConverter[String, ExtensionState] {
+	override def convertRight(code: String) = ExtensionState.fromCode(code)
+	override def convertLeft(state: ExtensionState) = (Option(state) map { _.dbValue }).orNull
 }

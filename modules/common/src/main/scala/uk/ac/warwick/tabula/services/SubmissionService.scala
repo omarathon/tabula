@@ -2,18 +2,18 @@ package uk.ac.warwick.tabula.services
 
 
 import org.springframework.stereotype.Service
-
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.User
 
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission]
 	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
 	def getSubmission(id: String): Option[Submission]
-
+	def getPreviousSubmissions(user: User): Seq[Submission]
 	def delete(submission: Submission): Unit
 }
 
@@ -46,6 +46,12 @@ class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging 
 	}
 
 	def getSubmission(id: String) = getById[Submission](id)
+
+	def getPreviousSubmissions(user: User): Seq[Submission] = {
+		session.newCriteria[Submission]
+			.add(is("universityId", user.getWarwickId))
+			.seq
+	}
 
 	def delete(submission: Submission) {
 		submission.assignment.submissions.remove(submission)
