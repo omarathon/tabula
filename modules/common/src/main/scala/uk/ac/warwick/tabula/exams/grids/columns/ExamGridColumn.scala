@@ -40,11 +40,12 @@ case class ExamGridColumnState(
 	routeRules: Seq[UpstreamRouteRule],
 	academicYear: AcademicYear,
 	yearOfStudy: Int,
+	showFullName: Boolean,
 	showComponentMarks: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showComponentMarks = false)
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showFullName=true,showComponentMarks=false)
 }
 
 @Component
