@@ -54,7 +54,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
 			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
-				upstreamGroup.exists(_.members.includesUser(student))
+				upstreamGroup.exists(_.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 
