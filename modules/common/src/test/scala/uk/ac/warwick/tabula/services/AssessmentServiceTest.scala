@@ -6,11 +6,11 @@ import org.junit.Before
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
-import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.tabula.data.model.forms.{CommentField, Extension, FormFieldContext, WordCountField}
+import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AssessmentDaoImpl, AssessmentMembershipDaoImpl, DepartmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.JavaImports.{JArrayList, JBigDecimal}
 
 // scalastyle:off magic.number
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
@@ -147,7 +147,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignmentService.save(assignment)
 		session.flush()
 
-		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be ('empty)
+		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2009), module) should not be 'empty
 		assignmentService.getAssignmentByNameYearModule("Essay", new AcademicYear(2008), module) should be ('empty)
 		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
@@ -300,12 +300,12 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		val assignments = assignmentService.getAssignmentsWithFeedback(ThisUser)
 		assignments.size should be (1)
-		assignments(0) should be (assignment1)
+		assignments.head should be (assignment1)
 
 		// thisStudent doesn't have a module registration so the assignment should be returned for their most significant details
 		val assignmentsByCourseAndYear = assignmentService.getAssignmentsWithFeedback(thisStudent.mostSignificantCourse.latestStudentCourseYearDetails)
 		assignmentsByCourseAndYear.size should be (1)
-		assignmentsByCourseAndYear(0) should be (assignment1)
+		assignmentsByCourseAndYear.head should be (assignment1)
 
 	}
 
@@ -348,11 +348,11 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		val assignments = assignmentService.getAssignmentsWithSubmission(ThisUser)
 		assignments.size should be (1)
-		assignments(0) should be (assignment1)
+		assignments.head should be (assignment1)
 
 		val assignmentsByCourseAndYear = assignmentService.getAssignmentsWithSubmission(thisStudent.mostSignificantCourse.latestStudentCourseYearDetails)
 		assignmentsByCourseAndYear.size should be (1)
-		assignmentsByCourseAndYear(0) should be (assignment1)
+		assignmentsByCourseAndYear.head should be (assignment1)
 	}
 
 	@Test def upstreamAssessmentGroups() = transactional { tx =>
@@ -362,9 +362,11 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		group.assessmentGroup = "A"
 		group.sequence = "A01"
 		group.academicYear = new AcademicYear(2010)
-
-		group.members.sessionFactory = sessionFactory
-		group.members.staticUserIds = Seq("rob","kev","bib")
+		group.members = JArrayList(
+			new UpstreamAssessmentGroupMember(group, "rob"),
+			new UpstreamAssessmentGroupMember(group, "kev"),
+			new UpstreamAssessmentGroupMember(group, "bib")
+		)
 
 		assignmentMembershipService.save(group)
 		session.flush()
@@ -479,9 +481,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		session.flush()
 
-		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq(ua1, ua2))
-		assignmentMembershipService.getAssessmentComponents(lawDept, true) should be (Seq(ua3))
-		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs"), true) should be (Seq())
+		assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getAssessmentComponents(lawDept, includeSubDepartments = true) should be (Seq(ua3))
+		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs"), includeSubDepartments = true) should be (Seq())
 
 		val chemistrySubDept = Fixtures.department("ch-ug")
 		chemistrySubDept.parent = chemistryDept
@@ -491,8 +493,8 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		chemistryDept.modules.remove(chemistryModule)
 		chemistrySubDept.modules.add(chemistryModule)
 
-		assignmentMembershipService.getAssessmentComponents(chemistryDept, false) should be (Seq())
-		assignmentMembershipService.getAssessmentComponents(chemistryDept, true) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = false) should be (Seq())
+		assignmentMembershipService.getAssessmentComponents(chemistryDept, includeSubDepartments = true) should be (Seq(ua1, ua2))
 	}
 
 	@Test def assessmentGroups() = transactional { tx =>
@@ -508,8 +510,11 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		upstreamGroup.occurrence = "A"
 		upstreamGroup.assessmentGroup = "A"
 		upstreamGroup.academicYear = new AcademicYear(2010)
-		upstreamGroup.members.sessionFactory = sessionFactory
-		upstreamGroup.members.staticUserIds = Seq("rob","kev","bib")
+		upstreamGroup.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamGroup, "rob"),
+			new UpstreamAssessmentGroupMember(upstreamGroup, "kev"),
+			new UpstreamAssessmentGroupMember(upstreamGroup, "bib")
+		)
 
 		assignmentMembershipService.save(upstreamGroup)
 
@@ -538,7 +543,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		assignmentMembershipService.getAssessmentGroup(group.id) should be (Some(group))
 
-		assignmentMembershipService.getAssessmentGroup(group.id) map { assignmentMembershipService.delete }
+		assignmentMembershipService.getAssessmentGroup(group.id) foreach { assignmentMembershipService.delete }
 		assignmentMembershipService.getAssessmentGroup(group.id) should be ('empty)
 	}
 
@@ -566,7 +571,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('defined)
 		submissionService.getSubmissionByUniId(assignment, "0070790").eq(Some(submission)) should be (false)
 
-		submissionService.getSubmissionByUniId(assignment, "0070790") map { submissionService.delete }
+		submissionService.getSubmissionByUniId(assignment, "0070790") foreach { submissionService.delete }
 
 		session.flush()
 		session.clear()
@@ -595,7 +600,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		extensionService.getExtensionById(extension.id) should be ('defined)
 		extensionService.getExtensionById(extension.id).eq(Some(extension)) should be (false)
 
-		extensionService.getExtensionById(extension.id) map { session.delete(_) }
+		extensionService.getExtensionById(extension.id) foreach { session.delete }
 
 		session.flush()
 		session.clear()
@@ -703,14 +708,23 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     upstreamAg3.occurrence = "C"
 		upstreamAg3.sequence = "A03"
 
-		upstreamAg1.members.sessionFactory = sessionFactory
-    upstreamAg1.members.staticUserIds = Seq("0000001", "0000002")
+		upstreamAg1.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamAg1, "0000001"),
+			new UpstreamAssessmentGroupMember(upstreamAg1, "0000002")
+		)
 
-		upstreamAg2.members.sessionFactory = sessionFactory
-		upstreamAg2.members.staticUserIds = Seq("0000002", "0000003")
+		upstreamAg2.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamAg2, "0000002"),
+			new UpstreamAssessmentGroupMember(upstreamAg2, "0000003")
+		)
 
-		upstreamAg3.members.sessionFactory = sessionFactory
-		upstreamAg3.members.staticUserIds = Seq("0000001", "0000002", "0000003", "0000004", "0000005")
+		upstreamAg3.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000001"),
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000002"),
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000003"),
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000004"),
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000005")
+		)
 
 		assignmentMembershipService.save(upstreamAg1)
 		assignmentMembershipService.save(upstreamAg2)

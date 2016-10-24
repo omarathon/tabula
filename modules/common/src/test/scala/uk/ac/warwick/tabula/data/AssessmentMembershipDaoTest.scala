@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.data
 
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, AssessmentType, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssessmentMembershipServiceImpl
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
@@ -66,8 +67,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup2.occurrence = "A"
 		upstreamGroup2.assessmentGroup = "A"
 		upstreamGroup2.academicYear = new AcademicYear(2010)
-		upstreamGroup2.members.sessionFactory = sessionFactory
-		upstreamGroup2.members.knownType.staticUserIds = Seq("0672089")
+		upstreamGroup2.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"))
 
 		assignment2.assessmentGroups.add(assessmentGroup2)
 		assignment2.academicYear = new AcademicYear(2010)
@@ -96,8 +96,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup3.occurrence = "A"
 		upstreamGroup3.assessmentGroup = "A"
 		upstreamGroup3.academicYear = new AcademicYear(2010)
-		upstreamGroup3.members.sessionFactory = sessionFactory
-		upstreamGroup3.members.knownType.staticUserIds = Seq("0672089")
+		upstreamGroup3.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089"))
 
 		assignment3.assessmentGroups.add(assessmentGroup3)
 		assignment3.academicYear = new AcademicYear(2010)
@@ -133,7 +132,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 	}
 
-	@Test def getEnrolledAssignments() {
+	@Test def enrolledAssignments(): Unit = {
 		transactional { tx =>
 			new Fixture {
 				session.save(assignment2AC)
@@ -155,7 +154,10 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		transactional { tx =>
 			new Fixture {
 				// Add user again
-				upstreamGroup3.members.knownType.staticUserIds = Seq("0672089", "0672089")
+				upstreamGroup3.members = JArrayList(
+					new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089"),
+					new UpstreamAssessmentGroupMember(upstreamGroup3, "0672089")
+				)
 
 				session.save(assignment2AC)
 				session.save(upstreamGroup2)

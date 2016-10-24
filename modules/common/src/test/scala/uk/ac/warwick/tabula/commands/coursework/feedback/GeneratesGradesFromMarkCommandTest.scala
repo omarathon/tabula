@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, GradeBoundary, UpstreamAssessmentGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -25,9 +25,7 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 		assessmentGroup.assessmentComponent = upstreamAssessmentComponent
 		val upstreamAssesmentGroup = Fixtures.assessmentGroup(AcademicYear(2014), "A", module.code, null)
 		assessmentGroup.membershipService.getUpstreamAssessmentGroup(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroup)
-		val group = UserGroup.ofUniversityIds
-		group.add(studentUser)
-		upstreamAssesmentGroup.members = group
+		upstreamAssesmentGroup.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamAssesmentGroup, studentUser.getWarwickId))
 
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(studentUser)
 
@@ -71,7 +69,6 @@ class GeneratesGradesFromMarkCommandTest extends TestBase with Mockito {
 	def notInAssessmentComponents(): Unit = new Fixture {
 		val otherStudentUser = new User("student1")
 		mockAssignmentMembershipService.determineMembershipUsers(assignment) returns Seq(otherStudentUser)
-		upstreamAssesmentGroup.members = UserGroup.ofUniversityIds
 		command.studentMarks = JHashMap(otherStudentUser.getUserId -> "100")
 		val result = command.applyInternal()
 		result should be (Map(otherStudentUser.getUserId -> Seq()))

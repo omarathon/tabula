@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.data.AssessmentMembershipDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssessmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
@@ -33,7 +35,7 @@ trait AssessmentMembershipService {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -44,10 +46,10 @@ trait AssessmentMembershipService {
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup): Unit
+	def save(member: UpstreamAssessmentGroupMember): Unit
 	// empty the usergroups for all assessmentgroups in the specified academic years. Skip any groups specified in ignore
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
 	def replaceMembers(group: UpstreamAssessmentGroup, registrations: Seq[UpstreamModuleRegistration]): UpstreamAssessmentGroup
-	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
@@ -115,7 +117,7 @@ class AssessmentMembershipServiceImpl
 		if (debugEnabled) debugReplace(template, registrations.map(_.universityId))
 
 		getUpstreamAssessmentGroup(template).map { group =>
-			group.members.knownType.replaceStaticUsers(registrations)
+			group.replaceMembers(registrations.map(_.universityId))
 			group
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)
@@ -127,9 +129,6 @@ class AssessmentMembershipServiceImpl
 		logger.debug("Setting %d members in group %s" format (universityIds.size, template.toString))
 	}
 
-	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]) =
-		dao.updateSeatNumbers(group, seatNumberMap)
-
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the
 	 * fact that moduleCode and sequence uniquely identify the assignment.
@@ -140,6 +139,7 @@ class AssessmentMembershipServiceImpl
 	def save(group:AssessmentGroup) = dao.save(group)
 	def save(assignment: AssessmentComponent): AssessmentComponent = dao.save(assignment)
 	def save(group: UpstreamAssessmentGroup) = dao.save(group)
+	def save(member: UpstreamAssessmentGroupMember) = dao.save(member)
 
 	def getAssessmentGroup(id:String) = dao.getAssessmentGroup(id)
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup] = find(template)
@@ -160,7 +160,8 @@ class AssessmentMembershipServiceImpl
 	/**
 	 * Gets assessment components by SITS module code
 	 */
-	def getAssessmentComponents(moduleCode: String) = dao.getAssessmentComponents(moduleCode)
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true) =
+		dao.getAssessmentComponents(moduleCode, inUseOnly)
 
 	/**
 	 * Gets assessment components for this department.
@@ -212,10 +213,8 @@ trait AssessmentMembershipMethods extends Logging {
 	self: AssessmentMembershipService with UserLookupComponent =>
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo = {
-		for (group <- upstream) assert(group.members.universityIds)
-
 		val sitsUsers =
-			userLookup.getUsersByWarwickUniIds(upstream.flatMap { _.members.members }.distinct).toSeq
+			userLookup.getUsersByWarwickUniIds(upstream.flatMap { _.members.asScala.map(_.universityId).filter(_.hasText) }.distinct).toSeq
 
 		val includes = others.map(_.users.map(u => u.getUserId -> u)).getOrElse(Nil)
 		val excludes = others.map(_.excludes.map(u => u.getUserId -> u)).getOrElse(Nil)
@@ -253,10 +252,10 @@ trait AssessmentMembershipMethods extends Logging {
 	}
 
 	def determineMembershipUsersWithOrder(exam: Exam): Seq[(User, Option[Int])] = {
-		val sitsMembers = exam.upstreamAssessmentGroups.flatMap(_.sortedMembers).distinct.sortBy(_.position)
-		val sitsUniIds = sitsMembers.map(_.memberId)
+		val sitsMembers = exam.upstreamAssessmentGroups.flatMap(_.members.asScala).distinct.sortBy(_.position)
+		val sitsUniIds = sitsMembers.map(_.universityId)
 		val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains)).getOrElse(Nil)
-		sitsMembers.map(m => userLookup.getUserByWarwickUniId(m.memberId) -> m.position) ++
+		sitsMembers.map(m => userLookup.getUserByWarwickUniId(m.universityId) -> m.position) ++
 			includesUniIds.map(u => userLookup.getUserByWarwickUniId(u)).sortBy(u => (u.getLastName, u.getFirstName)).map(u => u -> None)
 	}
 
@@ -270,9 +269,8 @@ trait AssessmentMembershipMethods extends Logging {
 
 	def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
 		others.foreach { g => assert(g.universityIds) }
-		for (group <- upstream) assert(group.members.universityIds)
 
-		val sitsUsers = upstream.flatMap { _.members.members }.distinct
+		val sitsUsers = upstream.flatMap { _.members.asScala.map(_.universityId) }.distinct
 
 		val includes = others.map(_.knownType.members).getOrElse(Nil)
 		val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
@@ -286,7 +284,7 @@ trait AssessmentMembershipMethods extends Logging {
 				logger.warn("Attempted to use countMembershipWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
 				determineMembershipUsers(upstream, others).size
 			case _ =>
-				val sitsUsers = upstream.flatMap { _.members.members }
+				val sitsUsers = upstream.flatMap { _.members.asScala.map(_.universityId) }
 
 				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil
 				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
@@ -299,7 +297,7 @@ trait AssessmentMembershipMethods extends Logging {
 		if (others.exists(_.excludesUser(user))) false
 		else if (others.exists(_.includesUser(user))) true
 		else upstream.exists {
-			_.members.staticUserIds.contains(user.getWarwickId) //Yes, definitely Uni ID when checking SITS group
+			_.members.asScala.map(_.universityId).contains(user.getWarwickId)
 		}
 	}
 

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula
 
 import java.math
 
-import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model._
@@ -12,6 +11,8 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 object Fixtures extends Mockito {
@@ -149,21 +150,16 @@ object Fixtures extends Mockito {
 	}
 
 	def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String) = {
-		val sessionFactory = smartMock[SessionFactory]
-		val session = smartMock[Session]
-		sessionFactory.getCurrentSession returns session
-		sessionFactory.openSession() returns session
 		val group = new UpstreamAssessmentGroup
 		group.academicYear = academicYear
 		group.assessmentGroup = code
 		group.moduleCode = module
 		group.occurrence = occurrence
-		group.members.sessionFactory = sessionFactory
-		group.members.staticUserIds = Seq(
-			"0123456",
-			"0123457",
-			"0123458"
-		)
+		group.members.addAll(Seq(
+			new UpstreamAssessmentGroupMember(group, "0123456"),
+			new UpstreamAssessmentGroupMember(group, "0123457"),
+			new UpstreamAssessmentGroupMember(group, "0123458")
+		).asJava)
 		group
 	}
 
