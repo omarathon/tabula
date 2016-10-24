@@ -295,7 +295,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							<tr>
 								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
 								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-primary">Linked</span></#if></label></td>
-								<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
+								<td>${available.group.members?size}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
 								<td>${available.group.assessmentGroup}</td>
 								<td>${available.cats!'-'}</td>
 								<td>${available.occurrence}</td>

@@ -29,7 +29,7 @@
 							>
 						</td>
 						<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-primary">Linked</span></#if></label></td>
-						<td>${available.memberCount}</td>
+						<td>${available.group.members?size}</td>
 						<td>${available.group.assessmentGroup}</td>
 						<td>${available.cats!'-'}</td>
 						<td>${available.occurrence}</td>
