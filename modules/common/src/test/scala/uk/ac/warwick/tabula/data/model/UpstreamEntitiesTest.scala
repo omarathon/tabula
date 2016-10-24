@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-
 import scala.collection.JavaConversions.seqAsJavaList
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services._
@@ -76,22 +74,16 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			group2010.occurrence = "A"
 			group2010.assessmentGroup = "A"
 			group2010.academicYear = new AcademicYear(2010)
-			group2010.members = JArrayList(
-				new UpstreamAssessmentGroupMember(group2010, "rob"),
-				new UpstreamAssessmentGroupMember(group2010, "kev"),
-				new UpstreamAssessmentGroupMember(group2010, "bib")
-			)
+			group2010.members.sessionFactory = sessionFactory
+			group2010.members.staticUserIds = Seq("rob","kev","bib")
 
 			val group2011 = new UpstreamAssessmentGroup
 			group2011.moduleCode = "la155-10"
 			group2011.occurrence = "A"
 			group2011.assessmentGroup = "A"
 			group2011.academicYear = new AcademicYear(2011)
-			group2011.members = JArrayList(
-				new UpstreamAssessmentGroupMember(group2011, "hog"),
-				new UpstreamAssessmentGroupMember(group2011, "dod"),
-				new UpstreamAssessmentGroupMember(group2011, "han")
-			)
+			group2011.members.sessionFactory = sessionFactory
+			group2011.members.staticUserIds = Seq("hog","dod","han")
 
 			// similar group but doesn't match the occurence of any assignment above, so ignored.
 			val otherGroup = new UpstreamAssessmentGroup
@@ -99,11 +91,8 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.occurrence = "B"
 			otherGroup.assessmentGroup = "A"
 			otherGroup.academicYear = new AcademicYear(2011)
-			otherGroup.members = JArrayList(
-				new UpstreamAssessmentGroupMember(otherGroup, "hog"),
-				new UpstreamAssessmentGroupMember(otherGroup, "dod"),
-				new UpstreamAssessmentGroupMember(otherGroup, "han")
-			)
+			otherGroup.members.sessionFactory = sessionFactory
+			otherGroup.members.staticUserIds = Seq("hog","dod","han")
 
 			val member = new StaffMember
 			member.universityId = "0672089"
@@ -126,12 +115,12 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			law2010.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2010.id)
-				group.membersIncludes("bib") should be (true)
+				group.members.includesUserId("bib") should be (true)
 			}
 
 			law2011.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2011.id)
-				group.membersIncludes("dod") should be (true)
+				group.members.includesUserId("dod") should be (true)
 			}
 
 			law2012.upstreamAssessmentGroups.isEmpty should be (true)

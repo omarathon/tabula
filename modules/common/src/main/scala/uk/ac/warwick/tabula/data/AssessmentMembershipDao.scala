@@ -32,7 +32,6 @@ trait AssessmentMembershipDao {
 	def save(group: AssessmentGroup): Unit
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
-	def save(member: UpstreamAssessmentGroupMember)
 
 	def delete(group: AssessmentGroup): Unit
 
@@ -49,7 +48,7 @@ trait AssessmentMembershipDao {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -60,6 +59,7 @@ trait AssessmentMembershipDao {
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -87,7 +87,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				Assignment a
 					join a.assessmentGroups ag
 					join ag.assessmentComponent.upstreamAssessmentGroups uag
-					join uag.members uagms with uagms.universityId = :universityId
+					join uag.members autoMembership
+					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
 			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
@@ -100,7 +101,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			from SmallGroupSet sgs
 				join sgs.assessmentGroups ag
 				join ag.assessmentComponent.upstreamAssessmentGroups uag
-				join uag.members uagms with uagms.universityId = :universityId
+				join uag.members autoMembership
+				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
 			where
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
@@ -144,7 +146,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def save(group: AssessmentGroup) = session.saveOrUpdate(group)
+	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
 
 	def save(assignment: AssessmentComponent): AssessmentComponent =
 		find(assignment)
@@ -160,8 +162,6 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def save(group: UpstreamAssessmentGroup) =
 		find(group).getOrElse { session.save(group) }
-
-	def save(member: UpstreamAssessmentGroupMember) = session.saveOrUpdate(member)
 
 
 	def getAssessmentGroup(id:String) = getById[AssessmentGroup](id)
@@ -217,14 +217,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true) = {
-		val c = session.newCriteria[AssessmentComponent]
+	/** Just gets components of type Assignment for this SITS module code, not all components. */
+	def getAssessmentComponents(moduleCode: String) = {
+		session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", moduleCode))
+			.add(is("inUse", true))
 			.addOrder(Order.asc("sequence"))
-		if (inUseOnly) {
-			c.add(is("inUse", true))
-		}
-		c.seq
+			.seq
 	}
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
@@ -265,7 +264,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		val partitionedIds = groupsToEmpty.grouped(Daoisms.MaxInClauseCount)
 		partitionedIds.map(batch => {
 			val numDeleted = transactional() {
-				session.createSQLQuery("delete from UpstreamAssessmentGroupMember where group_id in (:batch)")
+				session.createSQLQuery(s"""delete from usergroupstatic where group_id in (
+						select membersgroup_id from UpstreamAssessmentGroup where id in (:batch)
+					)""")
 					.setParameterList("batch", batch.asJava)
 					.executeUpdate
 			}
@@ -274,6 +275,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			numDeleted
 		}).sum
 
+	}
+
+	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
+		group.sortedMembers.foreach(member => {
+			seatNumberMap.get(member.memberId).foreach(seatNumber => {
+				member.position = Option(seatNumber)
+				session.saveOrUpdate(member)
+			})
+		})
 	}
 
 	def save(gb: GradeBoundary): Unit = {

@@ -107,7 +107,7 @@ trait UserGroupMembershipHelperLookup {
 		val universityIdsClause =
 			if (checkUniversityIds) s""" or (
 					$prop.universityIds = true and
-					((:universityId in elements($prop.staticIncludeUsers)
+					((:universityId in (select memberId from usergroupstatic where userGroup = r.$prop)
 					or :universityId in elements($prop.includeUsers))
 					and :universityId not in elements($prop.excludeUsers))
 				)"""
@@ -120,7 +120,7 @@ trait UserGroupMembershipHelperLookup {
 			where
 				(
 					$prop.universityIds = false and
-			 		((:userId in elements($prop.staticIncludeUsers)
+					((:userId in (select memberId from usergroupstatic where userGroup = r.$prop)
 					or :userId in elements($prop.includeUsers))
 					and :userId not in elements($prop.excludeUsers))
 				) $universityIdsClause
