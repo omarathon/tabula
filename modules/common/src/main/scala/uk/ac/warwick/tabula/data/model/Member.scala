@@ -388,16 +388,6 @@ class StudentMember extends Member with StudentProperties {
 			)
 	}
 
-/*	def permanentlyWithdrawn: Boolean = {
-		inUseFlag.matches("Inactive.*") ||
-			freshStudentCourseDetails
-				.filter(_.statusOnRoute != null)
-				.map(_.statusOnRoute)
-				.filter(_.code != null)
-				.filter(!_.code.startsWith("P"))
-				.size == 0
-	}	*/
-
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
 		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
 
@@ -428,7 +418,8 @@ class StudentMember extends Member with StudentProperties {
 	def toExamGridEntity(maxYearOfStudy: Int) = {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshStudentCourseDetails.sorted.flatMap(_.freshStudentCourseYearDetails.sorted)
 		ExamGridEntity(
-			name = fullName.getOrElse("[Unknown]"),
+			firstName = Option(firstName).getOrElse("[Unknown]"),
+			lastName = Option(lastName).getOrElse("[Unknown]"),
 			universityId = universityId,
 			lastImportDate = Option(lastImportDate),
 			years = (1 to maxYearOfStudy).map(year =>
