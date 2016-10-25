@@ -98,6 +98,9 @@ class GenerateExamGridController extends ExamsController
 		}
 	}
 
+	@ModelAttribute("ExamGridColumnValueType")
+	def examGridColumnValueType = ExamGridColumnValueType
+
 	@RequestMapping(method = Array(GET, POST))
 	def selectCourseRender(
 		@ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
@@ -361,7 +364,8 @@ class GenerateExamGridController extends ExamsController
 				perYearColumns = perYearColumns,
 				rightColumns = summaryColumns,
 				chosenYearColumnValues = chosenYearColumnValues,
-				perYearColumnValues = perYearColumnValues
+				perYearColumnValues = perYearColumnValues,
+				showComponentMarks = gridOptionsCommand.showComponentMarks
 			)
 		)
 	}
@@ -413,7 +417,8 @@ class GenerateExamGridController extends ExamsController
 			normalLoad = normalLoad,
 			routeRules = routeRules,
 			academicYear = selectCourseCommand.academicYear,
-			yearOfStudy = selectCourseCommand.yearOfStudy
+			yearOfStudy = selectCourseCommand.yearOfStudy,
+			showComponentMarks = gridOptionsCommand.showComponentMarks
 		)
 
 		val predefinedColumnOptions = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier))
