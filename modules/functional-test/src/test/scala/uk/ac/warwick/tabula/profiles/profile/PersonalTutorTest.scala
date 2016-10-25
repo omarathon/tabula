@@ -1,10 +1,14 @@
 package uk.ac.warwick.tabula.profiles.profile
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
+import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
+
+	val formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss")
 
 	"An admin" should "be able to view personal tutor details" in {
 
@@ -60,7 +64,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
 		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(true))
 		textField("title").value = "Created meeting"
-		textField("meetingDateTime").value = s"01-Nov-${FunctionalTestAcademicYear.current.startYear.toString} 11:00:00"
+		textField("meetingDateTime").value = formatter.print(DateTime.now.minusDays(1).withHourOfDay(11))
 		singleSel("format").value = "f2f"
 		cssSelector("button.btn-primary[type=submit]").findElement.get.underlying.click()
 
