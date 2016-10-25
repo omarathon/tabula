@@ -80,6 +80,23 @@
 
 	<div class="row">
 		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="marksToShow" value="all"
+					<#if gridOptionsCommand.marksToShow == 'all'>checked</#if>
+				/> Show component marks</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="marksToShow" value="overall"
+					<#if gridOptionsCommand.marksToShow == 'overall'>checked</#if>
+				/> Only show overall mark</label>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="core" checked disabled
 				/> Core Modules</label>

@@ -114,7 +114,8 @@
 										<td>
 											<#assign hasValue = mapGet(overcatView.perYearColumnValues, column)?? && mapGet(mapGet(overcatView.perYearColumnValues, column), entity)?? && mapGet(mapGet(mapGet(overcatView.perYearColumnValues, column), entity), year)?? />
 											<#if hasValue>
-												<#noescape>${mapGet(mapGet(mapGet(overcatView.perYearColumnValues, column), entity), year).toHTML}</#noescape>
+												<#assign values = mapGet(mapGet(mapGet(mapGet(overcatView.perYearColumnValues, column), entity), year), ExamGridColumnValueType.Overall) />
+												<#list values as value><#noescape>${value.toHTML}</#noescape><#if value_has_next>,</#if></#list>
 											</#if>
 										</td>
 									</#list>
@@ -122,23 +123,25 @@
 								</#list>
 							</tr>
 						</#list>
-						<#-- Manual marks -->
-						<tr class="new-marks">
-							<th colspan="${overcatView.optionsColumns?size + 1}">New Module Mark</th>
-							<#list mapGet(overcatView.perYearColumns, overcatView.perYearColumns?keys?sort?reverse?first) as column>
-								<td>
-									<input type="text" class="form-control" name="newModuleMarks[${column.module.code}]" value="${mapGet(command.newModuleMarks, column.module)!}"/>
+						<#if overcatView.overcattedEntities?has_content>
+							<#-- Manual marks -->
+							<tr class="new-marks">
+								<th colspan="${overcatView.optionsColumns?size + 1}">New Module Mark</th>
+								<#list mapGet(overcatView.perYearColumns, overcatView.perYearColumns?keys?sort?reverse?first) as column>
+									<td>
+										<input type="text" class="form-control" name="newModuleMarks[${column.module.code}]" value="${mapGet(command.newModuleMarks, column.module)!}"/>
+									</td>
+								</#list>
+							</tr>
+							<tr>
+								<td colspan="${overcatView.optionsColumns?size + 1}" class="borderless"></td>
+								<#-- 1000 just so it spans the whole rest of the row -->
+								<td colspan="1000" class="borderless">
+									<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
+									<button type="button" class="btn btn-default" name="reset">Reset</button>
 								</td>
-							</#list>
-						</tr>
-						<tr>
-							<td colspan="${overcatView.optionsColumns?size + 1}" class="borderless"></td>
-							<#-- 1000 just so it spans the whole rest of the row -->
-							<td colspan="1000" class="borderless">
-								<button type="button" class="btn btn-default" name="recalculate">Recalculate</button>
-								<button type="button" class="btn btn-default" name="reset">Reset</button>
-							</td>
-						</tr>
+							</tr>
+						</#if>
 					</tbody>
 				</table>
 			</form>
