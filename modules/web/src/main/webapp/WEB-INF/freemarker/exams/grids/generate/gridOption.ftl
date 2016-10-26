@@ -147,6 +147,27 @@
 
 	<hr />
 
+	<h3>CATS</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
+				/> Total CATS</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="passedCats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("passedCats")>checked</#if>
+				/> Passed CATS</label>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
 	<h3>Marking</h3>
 
 	<div class="row">
@@ -169,16 +190,6 @@
 				/> Overcatted year mark</label>
 			</div>
 		</div>
-		<div class="col-md-3">
-			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
-				/> Total CATs</label>
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="board" checked disabled

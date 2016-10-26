@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.exams.grids.columns.marking
+package uk.ac.warwick.tabula.exams.grids.columns.cats
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.JavaImports._
@@ -7,41 +7,41 @@ import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.exams.grids.columns._
 
 @Component
-class TotalCATsColumnOption extends ChosenYearExamGridColumnOption {
+class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "cats"
 
-	override val sortOrder: Int = ExamGridColumnOption.SortOrders.TotalCATs
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.TotalCATS
 
 	case class Column(state: ExamGridColumnState, bound: BigDecimal, isUpperBound: Boolean = false, isTotal: Boolean = false)
 		extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
-		override val title: String = if (isTotal) "Total Cats" else if (isUpperBound) s"<=$bound" else s">=$bound"
+		override val title: String = if (isTotal) "Total" else if (isUpperBound) s"<=$bound" else s">=$bound"
 
-		override val category: String = "CATS"
+		override val category: String = "Total CATS"
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
-					case Right(mark) => ExamGridColumnValueDecimal(mark)
-					case Left(message) => ExamGridColumnValueMissing(message)
-				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
+				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear))
+					.getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
 			).toMap
 		}
 
-		private def result(entity: ExamGridEntityYear): Either[String, JBigDecimal] = {
+		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
 			def transformModuleRegistrations(moduleRegistrations: Seq[ModuleRegistration]): JBigDecimal = {
 				moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying
 			}
 
 			if (!isTotal && entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
-				Left(s"The total CATS cannot be calculated because the following module registrations have no mark: ${entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code).mkString(", ")}")
+				ExamGridColumnValueMissing("The total CATS cannot be calculated because the following module registrations have no mark: %s".format(
+					entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
+				))
 			} else if (isTotal) {
-				Right(transformModuleRegistrations(entity.moduleRegistrations))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations))
 			} else if (isUpperBound) {
-				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
 			} else {
-				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
 			}
 		}
 
