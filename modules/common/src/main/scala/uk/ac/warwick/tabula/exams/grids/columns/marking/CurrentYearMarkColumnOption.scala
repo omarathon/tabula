@@ -20,6 +20,8 @@ class CurrentYearMarkColumnOption extends ChosenYearExamGridColumnOption with Au
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.years.get(state.yearOfStudy).map(entity => result(entity) match {

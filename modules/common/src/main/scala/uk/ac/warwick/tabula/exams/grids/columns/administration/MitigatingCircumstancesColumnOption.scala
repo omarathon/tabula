@@ -17,6 +17,8 @@ class MitigatingCircumstancesColumnOption extends ChosenYearExamGridColumnOption
 
 		override val category: String = "Administration"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> ExamGridColumnValueString("")).toMap
 		}

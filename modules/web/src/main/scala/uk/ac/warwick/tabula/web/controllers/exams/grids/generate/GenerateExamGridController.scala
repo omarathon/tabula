@@ -342,15 +342,15 @@ class GenerateExamGridController extends ExamsController
 			throw new IllegalArgumentException
 		}
 
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = checkAndApplyOvercatAndGetGridData(
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
 			selectCourseCommand,
 			gridOptionsCommand,
 			checkOvercatCommmand,
 			coreRequiredModules
-		)
+		)}
 
-		val chosenYearColumnValues = Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap
-		val perYearColumnValues = perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
+		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
+		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
