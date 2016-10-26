@@ -57,7 +57,7 @@ class ExtensionController extends CourseworkController {
 	def detailCommand(@PathVariable extension: Extension) = ViewExtensionCommand(extension)
 
 	@ModelAttribute("modifyExtensionCommand")
-	def modifyCommand(@PathVariable extension: Extension) = ModifyExtensionCommand(extension)
+	def modifyCommand(@PathVariable extension: Extension) = ModifyExtensionCommand(extension, user)
 
 	@RequestMapping(method=Array(GET), path=Array("detail"))
 	def detail(

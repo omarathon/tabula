@@ -92,7 +92,7 @@
 			<button type="submit" name="state" value="${modifyExtensionCommand.state.dbValue}" class="btn btn-default">Update</button>
 			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Accept</button>
 			<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-danger">Reject</button>
-		<#elseif detail.extension.unreviewed || detail.extension.moreInfoRequired>
+		<#elseif detail.extension.unreviewed || detail.extension.moreInfoRecieved>
 			<button type="submit" name="state" value="${states.Approved.dbValue}" class="btn btn-primary">Accept</button>
 			<button type="submit" name="state" value="${states.Rejected.dbValue}" class="btn btn-danger">Reject</button>
 			<button type="submit" name="state" value="${states.MoreInformationRequired.dbValue}" class="btn btn-default">Request more info</button>

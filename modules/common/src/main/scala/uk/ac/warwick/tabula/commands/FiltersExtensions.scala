@@ -97,14 +97,6 @@ trait FiltersExtensions extends {
 		AliasPaths("department") : _*
 	)
 
-	protected def restrictions: Seq[ScalaRestriction] = Seq(
-		recievedRestriction,
-		stateRestriction,
-		assignmentRestriction,
-		moduleRestriction,
-		departmentRestriction
-	).flatten
-
 	protected def buildOrders(orders: Seq[Order]): Seq[ScalaOrder] =
 		orders.map { underlying =>
 			underlying.getPropertyName match {

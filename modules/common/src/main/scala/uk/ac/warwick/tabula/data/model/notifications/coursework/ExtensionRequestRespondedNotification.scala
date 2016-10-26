@@ -34,3 +34,7 @@ class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespo
 @Entity
 @DiscriminatorValue("ExtensionRequestRespondedReject")
 class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}
+
+@Entity
+@DiscriminatorValue("ExtensionRequestRespondedMoreInfo")
+class ExtensionRequestRespondedMoreInfoNotification extends ExtensionRequestRespondedNotification("returned for more information") {}

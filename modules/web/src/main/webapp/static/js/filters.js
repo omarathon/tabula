@@ -18,6 +18,17 @@ $.fn.enableFilters = function(options) {
 			var $checkbox = $(e.target);
 			doRequest();
 			updateFilterText($checkbox);
+			updateRelatedFilters($checkbox);
+		});
+
+		$this.find('.module-picker').on('change', function(){
+			var $picker = $(this);
+			if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+				return;
+
+			updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+
+			$picker.data('modulecode','').val('');
 		});
 
 		$clearAll.on('click', function(){
@@ -25,10 +36,44 @@ $.fn.enableFilters = function(options) {
 				var $checkbox = $(this);
 				$checkbox.prop('checked', false);
 				updateFilterText($checkbox);
+				updateRelatedFilters($checkbox);
 			});
 			doRequest();
 		});
 		toggleClearAll();
+
+		// Re-order elements inside the dropdown when opened
+		$('.filter-list', $this).closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function() {
+			var $this = $(this);
+			if (!$this.closest('.btn-group').hasClass('open')) {
+				// Re-order before it's opened!
+				var $list = $this.closest('.btn-group').find('.filter-list');
+				var items = $list.find('li.check-list-item').get();
+
+				items.sort(function(a, b) {
+					var aChecked = $(a).find('input').is(':checked');
+					var bChecked = $(b).find('input').is(':checked');
+
+					if (aChecked && !bChecked) return -1;
+					else if (!aChecked && bChecked) return 1;
+					else return $(a).data('natural-sort') - $(b).data('natural-sort');
+				});
+
+				$.each(items, function(item, el) {
+					$list.find('> ul').append(el);
+				});
+
+				prependClearLink($list);
+			}
+		});
+
+		$('input:checked').each(function(index, checkbox){
+			updateFilterText($(checkbox));
+		});
+
+		$('input[data-related-filter]:checked').each(function(index, checkbox){
+			updateRelatedFilters($(checkbox));
+		});
 
 		function doRequest() {
 			// update the url with the new filter values
@@ -69,51 +114,91 @@ $.fn.enableFilters = function(options) {
 				$fsv.html($fsv.data('placeholder'));
 			}
 		}
+		
+		// hides any invalid options in related filters
+		function updateRelatedFilters($checkbox) {
+			var related = $checkbox.data('related-filter');
+			if(related) {
+				var name = $checkbox.attr("name");
+				var values = $('input[name='+name+']:checked').map(function(){return $(this).val()});
+				var $relatedFilter = $('#'+related+'-filter');
+				if(values.length > 0){
+					// hide all filters
+					$relatedFilter.find('li:not(:has(>.module-search))').hide();
+					// show filters that match the value of this filter
+					$.each(values, function(index, value){
+						$relatedFilter.find('input[data-related-value="'+value+'"]').closest('li').show();
+					});
+				} else {
+					$relatedFilter.find('li').show();
+				}
+			}
+		}
 
+		// add a clear list when at least one option is checked
+		function prependClearLink($list) {
+			if (!$list.find('input:checked').length) {
+				$list.find('.clear-this-filter').remove();
+			} else {
+				if (!$list.find('.clear-this-filter').length) {
+					$list.find('> ul').prepend(
+						$('<li />').addClass('clear-this-filter')
+							.append(
+								$('<button />').attr('type', 'button')
+									.addClass('btn btn-link')
+									.html('<i class="icon-ban-circle fa fa-ban"></i> Clear selected items')
+									.on('click', function(e) {
+										$list.find('input:checked').each(function() {
+											var $checkbox = $(this);
+											$checkbox.prop('checked', false);
+											updateFilterText($checkbox);
+											updateRelatedFilters($checkbox);
+										});
+										doRequest();
+									})
+							)
+							.append($('<hr />'))
+					);
+				}
+			}
+		}
+
+		function updateFilterFromPicker($picker, name, value, shortValue) {
+			if (value === undefined || value.length === 0)
+				return;
+
+			shortValue = shortValue || value;
+
+			var $ul = $picker.closest('ul');
+
+			var $li = $ul.find('input[value="' + value + '"]').closest('li');
+			var $checkbox;
+			if ($li.length) {
+				$checkbox = $li.find('input').prop('checked', true);
+				if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+					$li.insertBefore($ul.find('li.check-list-item:first'));
+				}
+			} else {
+				$checkbox = $('<input/>').attr({
+					'type':'checkbox',
+					'name':name,
+					'value':value,
+					'checked':true
+				}).data('short-value', shortValue);
+
+				$('<li/>').addClass('check-list-item').append(
+					$('<label/>').addClass('checkbox').append($checkbox).append($picker.val())
+				).insertBefore($ul.find('li.check-list-item:first'));
+			}
+
+			doRequest();
+			updateFilterText($checkbox);
+		}
 	});
 };
 
 $(function(){
 	$('.filters').enableFilters();
-
-	$('body').on('show.bs.collapse', function(e){
-		var $this = $(e.target);
-		var hasLoaded = $this.data('loaded') || false;
-		if(!hasLoaded) {
-			var detailUrl = $this.data('detailurl');
-			$this.data('request', $.get(detailUrl, function(data) {
-				$this.find('td').html(data);
-
-				// bind form helpers
-				$this.find('input.date-time-picker').tabulaDateTimePicker();
-				$this.find('input.date-picker').tabulaDatePicker();
-				$this.find('input.time-picker').tabulaTimePicker();
-				$this.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
-				$this.find('form.double-submit-protection').tabulaSubmitOnce();
-
-				$this.data('loaded', true);
-			}));
-		}
-	});
-
-	// handle validation for embedded extension update forms
-	$('body').on('submit', 'form.modify-extension', function(e){
-		e.preventDefault();
-		var $form = $(e.target);
-		var $detailRow = $form.closest('tr.detail-row').find('td');
-
-		var formData = $form.serializeArray();
-		var $buttonClicked =  $(document.activeElement);
-		formData.push({ name: $buttonClicked.attr('name'), value: $buttonClicked.val() });
-
-		$.post($form.attr('action'), formData, function(data) {
-			if (data.success) {
-				window.location.replace(data.redirect);
-			} else {
-				$detailRow.html(data);
-			}
-		});
-	});
 });
 
 })(jQuery);

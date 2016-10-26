@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{RequestExtensionCommand, RequestExtensionCommandState}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.Mav
@@ -68,9 +68,10 @@ class ExtensionRequestController extends CourseworkController {
 		if (errors.hasErrors){
 			showForm(cmd)
 		} else {
-			cmd.apply()
+			val extension = cmd.apply()
 			Mav(
 				s"$urlPrefix/submit/extension_request_success",
+				"isReply" -> extension.moreInfoRecieved,
 				"assignment" -> cmd.assignment
 			)
 		}

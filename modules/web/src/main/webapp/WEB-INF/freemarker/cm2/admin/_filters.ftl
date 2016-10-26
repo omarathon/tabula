@@ -1,6 +1,6 @@
-<#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
+<#macro filter name path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
 	<@spring.bind path=path>
-	<div class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
+	<div id="${name}-filter" class="btn-group filter<#if currentFilter == placeholder> empty</#if>">
 		<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
 			<span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
 			<span class="caret"></span>
@@ -8,6 +8,9 @@
 		<div class="dropdown-menu filter-list">
 			<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 			<ul>
+				<#if customPicker?has_content>
+					<li>${customPicker}</li>
+				</#if>
 				<#if allItems?has_content>
 					<#list allItems as item>
 						<#local isValid = (allItems?size == validItems?size)!true />
@@ -18,7 +21,7 @@
 								</#if>
 							</#list>
 						</#if>
-						<li class="checkbox check-list-item" data-natural-sort="${item_index}">
+						<li class="check-list-item" data-natural-sort="${item_index}">
 							<label class="checkbox <#if !isValid>disabled</#if>">
 								<#nested item isValid/>
 							</label>

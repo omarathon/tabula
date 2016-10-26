@@ -16,7 +16,7 @@
 	</thead>
 	<tbody>
 		<#list results.extensions as graph>
-			<tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed">
+			<tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed expandable-row">
 				<td><h6 class="toggle-icon-large">&nbsp;${graph.user.firstName}</h6></td>
 				<td><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
 				<td>${graph.extension.assignment.module.code}</td>
