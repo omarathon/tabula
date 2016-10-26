@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -12,6 +13,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -20,6 +22,13 @@ object ImportAssignmentsCommand {
 		with ImportAssignmentsCommand
 		with ImportAssignmentsDescription
 		with Daoisms
+
+	def applyAllYears() = new ComposableCommandWithoutTransaction[Unit]
+		with ImportAssignmentsAllYearsCommand
+		with ImportAssignmentsDescription
+		with Daoisms {
+		override lazy val eventName = "ImportAssignmentsAllYears"
+	}
 
 	case class Result(
 		assignmentsFound: Int,
@@ -243,4 +252,27 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 trait ImportAssignmentsDescription extends Describable[Unit] {
 	def describe(d: Description) {}
+}
+
+trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
+
+	override def applyInternal() {
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2012))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2013))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2014))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2015))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2016))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+	}
+
 }
