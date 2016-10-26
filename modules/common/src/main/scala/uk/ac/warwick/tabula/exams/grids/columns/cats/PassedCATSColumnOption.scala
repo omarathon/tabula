@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.exams.grids.columns.cats
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.exams.grids.columns._
 
@@ -21,20 +20,18 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> relevantEntityYear(entity).map(entityYear => result(entityYear) match {
-					case Right(mark) => ExamGridColumnValueDecimal(mark)
-					case Left(message) => ExamGridColumnValueMissing(message)
-				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for year $thisYearOfStudy"))
+				entity -> relevantEntityYear(entity).map(entityYear => result(entityYear))
+					.getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for year $thisYearOfStudy"))
 			).toMap
 		}
 
-		private def result(entity: ExamGridEntityYear): Either[String, JBigDecimal] = {
+		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
 			if (entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
-				Left("The passed CATS cannot be calculated because the following module registrations have no mark: %s".format(
+				ExamGridColumnValueMissing("The passed CATS cannot be calculated because the following module registrations have no mark: %s".format(
 					entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
 				))
 			} else {
-				Right(
+				ExamGridColumnValueDecimal(
 					entity.moduleRegistrations.filter(mr => if (Option(mr.agreedMark).isDefined) mr.agreedGrade != "F" else mr.actualGrade != "F")
 						.map(mr => BigDecimal(mr.cats)).sum.underlying
 				)

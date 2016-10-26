@@ -22,28 +22,26 @@ class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
-					case Right(mark) => ExamGridColumnValueDecimal(mark)
-					case Left(message) => ExamGridColumnValueMissing(message)
-				}).getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
+				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear))
+					.getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for ${state.academicYear}"))
 			).toMap
 		}
 
-		private def result(entity: ExamGridEntityYear): Either[String, JBigDecimal] = {
+		private def result(entity: ExamGridEntityYear): ExamGridColumnValue = {
 			def transformModuleRegistrations(moduleRegistrations: Seq[ModuleRegistration]): JBigDecimal = {
 				moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying
 			}
 
 			if (!isTotal && entity.moduleRegistrations.exists(_.firstDefinedMark.isEmpty)) {
-				Left("The total CATS cannot be calculated because the following module registrations have no mark: %s".format(
+				ExamGridColumnValueMissing("The total CATS cannot be calculated because the following module registrations have no mark: %s".format(
 					entity.moduleRegistrations.filter(_.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")
 				))
 			} else if (isTotal) {
-				Right(transformModuleRegistrations(entity.moduleRegistrations))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations))
 			} else if (isUpperBound) {
-				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) <= bound))))
 			} else {
-				Right(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
+				ExamGridColumnValueDecimal(transformModuleRegistrations(entity.moduleRegistrations.filter(mr => mr.firstDefinedMark.exists(mark => BigDecimal(mark) >= bound))))
 			}
 		}
 
