@@ -13,6 +13,8 @@ object BlankColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val category: String = "Additional"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> ExamGridColumnValueString("")).toMap
 		}

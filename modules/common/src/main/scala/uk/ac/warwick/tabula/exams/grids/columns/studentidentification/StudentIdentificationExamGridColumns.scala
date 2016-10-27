@@ -17,6 +17,8 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "First Name"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(entity.firstName)
@@ -29,6 +31,8 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "Last Name"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(entity.lastName)
@@ -40,6 +44,8 @@ class NameColumnOption extends StudentExamGridColumnOption {
 	private case class FullNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "Name"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
@@ -69,6 +75,8 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "ID"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(entity.universityId)
@@ -91,6 +99,8 @@ class StartYearColumnOption extends StudentExamGridColumnOption {
 	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "Start Year"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->

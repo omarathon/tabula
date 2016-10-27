@@ -31,6 +31,14 @@ object ExamGridColumnOption {
 		val MitigatingCircumstances = 40
 		val Comments = 50
 	}
+
+	object ExcelColumnSizes {
+		val Spacer = 600
+		val WholeMark = 900
+		val Decimal = 1200
+		val ShortString = 1700
+		val LongString = 4000
+	}
 }
 
 case class ExamGridColumnState(
@@ -72,6 +80,7 @@ trait ChosenYearExamGridColumnOption extends ExamGridColumnOption {
 
 sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val title: String
+	val excelColumnWidth: Int
 }
 
 abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
