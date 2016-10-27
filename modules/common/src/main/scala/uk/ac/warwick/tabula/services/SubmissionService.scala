@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import scala.collection.JavaConverters._
 
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
@@ -25,8 +26,9 @@ trait OriginalityReportService {
 	def refresh(report: OriginalityReport): Unit
 }
 
-@Service(value = "submissionService")
-class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging {
+abstract class AbstractSubmissionService extends SubmissionService with Daoisms with Logging {
+
+	self: OriginalityReportServiceComponent =>
 
 	def saveSubmission(submission: Submission) = {
 		session.saveOrUpdate(submission)
@@ -49,12 +51,19 @@ class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging 
 
 	def delete(submission: Submission) {
 		submission.assignment.submissions.remove(submission)
+		// TAB-4564 delete the originality report; needs to be done manually because we don't cascade the delete through FileAttachment
+		submission.valuesWithAttachments.flatMap(_.attachments.asScala).foreach(originalityReportService.deleteOriginalityReport)
 		session.delete(submission)
 		// force delete now, just for the cases where we re-insert in the same session
 		// (i.e. when a student is resubmitting work). [HFC-385#comments]
 		session.flush()
 	}
 }
+
+@Service(value = "submissionService")
+class SubmissionServiceImpl
+	extends AbstractSubmissionService
+		with AutowiringOriginalityReportServiceComponent
 
 trait SubmissionServiceComponent {
 	def submissionService: SubmissionService
