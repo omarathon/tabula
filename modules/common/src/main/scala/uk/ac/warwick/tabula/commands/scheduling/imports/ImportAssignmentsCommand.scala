@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -13,6 +14,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 object ImportAssignmentsCommand {
@@ -20,6 +22,13 @@ object ImportAssignmentsCommand {
 		with ImportAssignmentsCommand
 		with ImportAssignmentsDescription
 		with Daoisms
+
+	def applyAllYears() = new ComposableCommandWithoutTransaction[Unit]
+		with ImportAssignmentsAllYearsCommand
+		with ImportAssignmentsDescription
+		with Daoisms {
+		override lazy val eventName = "ImportAssignmentsAllYears"
+	}
 
 	case class Result(
 		assignmentsFound: Int,
@@ -146,34 +155,72 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	 * This sequence of ModuleRegistrations represents the members of an assessment
 	 * group, so save them (and reconcile it with any existing members we have in the
 	 * database).
-	 * The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups (ignoring seat number).
-	 * Then seat the appropriate seat numbers based on the sequence.
+	 * The students in a group does NOT vary by sequence, so the memebership should be set on ALL the groups.
+	 * Then set the properties of members of each group by sequence.
 	 */
 	def save(registrations: Seq[UpstreamModuleRegistration]): Seq[UpstreamAssessmentGroup] = {
 		registrations.headOption.map { head =>
-			val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode).filter(_.assessmentGroup == head.assessmentGroup)
+			// Get all the Assessment Components we have in the DB, even if marked as not in use, as we might have previous years groups to populate
+			val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode, inUseOnly = false)
+				.filter(_.assessmentGroup == head.assessmentGroup)
 			val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
 				.map(assessmentGroup => assessmentMembershipService.replaceMembers(assessmentGroup, registrations))
 
-			// Now sort out seat number/s
-			val withSeats = registrations.filter(r => r.sequence != null && Try(r.seatNumber.toInt).isSuccess)
+			// Now sort out properties
+			val hasSequence = registrations.filter(r => r.sequence != null)
 			assessmentGroups.foreach(group => {
 				// Find the registations for this exact group (including sequence)
-				val theseRegistrations = withSeats.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
+				val theseRegistrations = hasSequence.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
 				if (theseRegistrations.nonEmpty) {
-					val seatMap = theseRegistrations.groupBy(_.sprCode).flatMap{case(sprCode, studentRegistrations) =>
-						if (studentRegistrations.map(_.seatNumber).distinct.size > 1) {
-							logger.warn("Found multiple seat numbers (%s) for %s for Assessment Group %s. Seat number will be null".format(
-								studentRegistrations.map(_.seatNumber).mkString(", "),
-								sprCode,
-								group.toString
-							))
-							None
+					val registrationsByStudent = theseRegistrations.groupBy(_.sprCode)
+					// Where there are multiple values for each of the properties (seat number, mark, and grade) we need to flatten them to a single value.
+					// Where there is ambiguity, set the value to None
+					val propertiesMap: Map[String, UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case (sprCode, studentRegistrations) => sprCode -> {
+						if (studentRegistrations.size == 1) {
+							new UpstreamAssessmentGroupMemberProperties {
+								position = Try(studentRegistrations.head.seatNumber.toInt).toOption
+								actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
+								actualGrade = studentRegistrations.head.actualGrade.maybeText
+								agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
+								agreedGrade = studentRegistrations.head.agreedGrade.maybeText
+							}
 						} else {
-							Option((SprCode.getUniversityId(sprCode), studentRegistrations.head.seatNumber.toInt))
+							def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
+							def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
+							def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
+							def resolveDuplicates[A](props: Seq[A], description: String): Option[A] = {
+								if (props.distinct.size > 1) {
+									logger.warn("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
+										description,
+										props.mkString(", "),
+										sprCode,
+										group.toString,
+										description.capitalize
+									))
+									None
+								} else {
+									props.headOption
+								}
+							}
+
+							new UpstreamAssessmentGroupMemberProperties {
+								position = resolveDuplicates(validInts(studentRegistrations.map(_.seatNumber)), "seat number")
+								actualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.actualMark)), "actual mark")
+								actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
+								agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
+								agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
+							}
 						}
-					}
-					assessmentMembershipService.updateSeatNumbers(group, seatMap)
+					}}
+
+					propertiesMap.foreach { case (sprCode, properties) => group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
+						member.position = properties.position
+						member.actualMark = properties.actualMark
+						member.actualGrade = properties.actualGrade
+						member.agreedMark = properties.agreedMark
+						member.agreedGrade = properties.agreedGrade
+						assessmentMembershipService.save(member)
+					}}
 				}
 			})
 			assessmentGroups
@@ -205,4 +252,27 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
 trait ImportAssignmentsDescription extends Describable[Unit] {
 	def describe(d: Description) {}
+}
+
+trait ImportAssignmentsAllYearsCommand extends ImportAssignmentsCommand {
+
+	override def applyInternal() {
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2012))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2013))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2014))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2015))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2016))
+		doGroups()
+		doGroupMembers()
+		assignmentImporter.yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+	}
+
 }

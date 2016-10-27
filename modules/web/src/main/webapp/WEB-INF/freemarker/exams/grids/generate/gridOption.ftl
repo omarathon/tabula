@@ -32,12 +32,21 @@
 
 	<div class="row">
 		<div class="col-md-3">
-			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="name"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("name")>checked</#if>
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="full"
+					<#if gridOptionsCommand.nameToShow == 'full'>checked</#if>
 				/> Official name</label>
 			</div>
 		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="nameToShow" value="both"
+					<#if gridOptionsCommand.nameToShow == 'both'>checked</#if>
+				/> First and last name</label>
+			</div>
+		</div>
+	</div>
+	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="universityId" checked disabled
@@ -77,6 +86,23 @@
 	<hr />
 
 	<h3>Modules</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="marksToShow" value="all"
+					<#if gridOptionsCommand.marksToShow == 'all'>checked</#if>
+				/> Show component marks</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="radio">
+				<label><input type="radio" name="marksToShow" value="overall"
+					<#if gridOptionsCommand.marksToShow == 'overall'>checked</#if>
+				/> Only show overall mark</label>
+			</div>
+		</div>
+	</div>
 
 	<div class="row">
 		<div class="col-md-3">
@@ -121,6 +147,27 @@
 
 	<hr />
 
+	<h3>CATS</h3>
+
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
+				/> Total CATS</label>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="passedCats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("passedCats")>checked</#if>
+				/> Passed CATS</label>
+			</div>
+		</div>
+	</div>
+
+	<hr />
+
 	<h3>Marking</h3>
 
 	<div class="row">
@@ -143,16 +190,6 @@
 				/> Overcatted year mark</label>
 			</div>
 		</div>
-		<div class="col-md-3">
-			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
-				/> Total CATs</label>
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="board" checked disabled

@@ -39,7 +39,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterNotOvercat(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad, None, None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad, None, None, None)))
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
@@ -52,7 +52,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterNoOvercatSelection(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, None, None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, None, None, None)))
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
 			route = thisRoute
@@ -67,7 +67,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterSameModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1)), None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1)), None, None)))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
@@ -84,7 +84,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterDifferentModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module2)), None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module2)), None, None)))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
@@ -106,7 +106,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterExtraModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1)), None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1)), None, None)))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
@@ -128,7 +128,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def stateFilterRemovedModule(): Unit = { new StateFixture {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1, module2)), None, None)))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, Some(Seq(module1, module2)), None, None)))
 
 		val selectCourseCommand = new Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest {
 			override def apply(): Seq[ExamGridEntity] = Seq(entity)
@@ -150,7 +150,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 
 	@Test
 	def apply(): Unit = {
-		val entity = ExamGridEntity(null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, None, None, Option(scyd))))
+		val entity = ExamGridEntity(null, null, null, null, Map(thisYearOfStudy -> ExamGridEntityYear(null, thisRoute.degreeType.normalCATSLoad + 15, None, None, Option(scyd))))
 
 		var fetchCount = 0
 

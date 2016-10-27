@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedPar
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamModuleRegistration}
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
@@ -14,7 +14,7 @@ import scala.reflect._
 trait EmbeddedSits {
 	val sits = new EmbeddedDatabaseBuilder().addScript("sits.sql").build()
 
-	@After def afterTheFeast {
+	@After def afterTheFeast() {
 		sits.shutdown()
 	}
 }
@@ -27,11 +27,11 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	AssignmentImporter.sitsSchema = "public"
 	AssignmentImporter.sqlStringCastFunction = ""
 	AssignmentImporter.dialectRegexpLike = "regexp_matches"
-	assignmentImporter.afterPropertiesSet
+	assignmentImporter.afterPropertiesSet()
 
 	val NONE = AssessmentComponent.NoneAssessmentGroup
 
-	@Test def groupImportSql {
+	@Test def groupImportSql() {
 		// Not really testing AssignmentImporter but the behaviour of the query class for IN(..)
 		// parameters. The SQL has to have the brackets, and the parameter value has to be a
 		// Java List - a Scala collection will not be recognised and won't be expanded into multiple
@@ -47,7 +47,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 		sqlToUse.trim should endWith ("(?, ?)")
 	}
 
-	@Test def importMembers { withFakeTime(dateTime(2012, 5)) {
+	@Test def importMembers() { withFakeTime(dateTime(2012, 5)) {
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
 		var members = ArrayBuffer[UpstreamModuleRegistration]()
 		assignmentImporter.allMembers { mr =>
 			members += mr
@@ -56,7 +57,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 		members.size should be (5)
 	}}
 
-	@Test def getAllAssessmentGroups { withFakeTime(dateTime(2012, 5)) {
+	@Test def allAssessmentGroups() { withFakeTime(dateTime(2012, 5)) {
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
 		val allGroups = sorted(assignmentImporter.getAllAssessmentGroups)
 		val tuples = allGroups.map(asTuple)
 
@@ -78,7 +80,8 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 
 	}}
 
-	@Test def getAllAssessmentComponents { withFakeTime(dateTime(2012, 5)) {
+	@Test def allAssessmentComponents() { withFakeTime(dateTime(2012, 5)) {
+		assignmentImporter.yearsToImport = Seq(AcademicYear(2011), AcademicYear(2012))
 		val components = sorted(assignmentImporter.getAllAssessmentComponents)
 		val tuples = components map asTuple
 

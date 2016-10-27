@@ -32,6 +32,7 @@ trait AssessmentMembershipDao {
 	def save(group: AssessmentGroup): Unit
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
+	def save(member: UpstreamAssessmentGroupMember)
 
 	def delete(group: AssessmentGroup): Unit
 
@@ -48,7 +49,7 @@ trait AssessmentMembershipDao {
 	 */
 	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
 	def getAssessmentComponents(department: Department, includeSubDepartments: Boolean): Seq[AssessmentComponent]
-	def getAssessmentComponents(moduleCode: String): Seq[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -56,10 +57,10 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
-	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -87,8 +88,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				Assignment a
 					join a.assessmentGroups ag
 					join ag.assessmentComponent.upstreamAssessmentGroups uag
-					join uag.members autoMembership
-					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
+					join uag.members uagms with uagms.universityId = :universityId
 			where
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
@@ -101,8 +101,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			from SmallGroupSet sgs
 				join sgs.assessmentGroups ag
 				join ag.assessmentComponent.upstreamAssessmentGroups uag
-				join uag.members autoMembership
-				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId.memberId = :universityId
+				join uag.members uagms with uagms.universityId = :universityId
 			where
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
@@ -146,7 +145,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
+	def save(group: AssessmentGroup) = session.saveOrUpdate(group)
 
 	def save(assignment: AssessmentComponent): AssessmentComponent =
 		find(assignment)
@@ -162,6 +161,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def save(group: UpstreamAssessmentGroup) =
 		find(group).getOrElse { session.save(group) }
+
+	def save(member: UpstreamAssessmentGroupMember) = session.saveOrUpdate(member)
 
 
 	def getAssessmentGroup(id:String) = getById[AssessmentGroup](id)
@@ -217,13 +218,14 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	/** Just gets components of type Assignment for this SITS module code, not all components. */
-	def getAssessmentComponents(moduleCode: String) = {
-		session.newCriteria[AssessmentComponent]
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true) = {
+		val c = session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", moduleCode))
-			.add(is("inUse", true))
 			.addOrder(Order.asc("sequence"))
-			.seq
+		if (inUseOnly) {
+			c.add(is("inUse", true))
+		}
+		c.seq
 	}
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
@@ -251,6 +253,14 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.seq
 	}
 
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =
+		session.newCriteria[UpstreamAssessmentGroup]
+			.add(is("academicYear", registration.academicYear))
+			.add(is("moduleCode", registration.toSITSCode))
+			.add(is("assessmentGroup", registration.assessmentGroup))
+			.add(is("occurrence", registration.occurrence))
+			.seq
+
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]
 			// TODO Is there a way to do not-in with multiple queries?
@@ -264,9 +274,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		val partitionedIds = groupsToEmpty.grouped(Daoisms.MaxInClauseCount)
 		partitionedIds.map(batch => {
 			val numDeleted = transactional() {
-				session.createSQLQuery(s"""delete from usergroupstatic where group_id in (
-						select membersgroup_id from UpstreamAssessmentGroup where id in (:batch)
-					)""")
+				session.createSQLQuery("delete from UpstreamAssessmentGroupMember where group_id in (:batch)")
 					.setParameterList("batch", batch.asJava)
 					.executeUpdate
 			}
@@ -275,15 +283,6 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			numDeleted
 		}).sum
 
-	}
-
-	def updateSeatNumbers(group: UpstreamAssessmentGroup, seatNumberMap: Map[String, Int]): Unit = {
-		group.sortedMembers.foreach(member => {
-			seatNumberMap.get(member.memberId).foreach(seatNumber => {
-				member.position = Option(seatNumber)
-				session.saveOrUpdate(member)
-			})
-		})
 	}
 
 	def save(gb: GradeBoundary): Unit = {

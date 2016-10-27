@@ -53,7 +53,12 @@ trait GenerateExamGridGridOptionsCommandState {
 trait GenerateExamGridGridOptionsCommandRequest {
 
 	var predefinedColumnIdentifiers: JSet[String] = JHashSet()
+	var nameToShow: String = "full"
 	var yearsToShow: String = "current"
+	var marksToShow: String = "overall"
 	var customColumnTitles: JList[String] = JArrayList()
+
+	def showFullName = nameToShow != "both"
+	def showComponentMarks = marksToShow == "all"
 
 }

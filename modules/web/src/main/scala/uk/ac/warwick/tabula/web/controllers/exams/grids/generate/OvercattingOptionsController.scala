@@ -54,6 +54,9 @@ class OvercattingOptionsController extends ExamsController
 	def overcatView(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable scyd: StudentCourseYearDetails) =
 		OvercattingOptionsView(department, academicYear, scyd, normalLoad(scyd, academicYear), routeRules(scyd, academicYear))
 
+	@ModelAttribute("ExamGridColumnValueType")
+	def examGridColumnValueType = ExamGridColumnValueType
+
 	@RequestMapping(method = Array(GET))
 	def form(
 		@ModelAttribute("command") cmd: Appliable[Seq[Module]] with PopulateOnForm with GenerateExamGridOvercatCommandRequest,
@@ -91,6 +94,7 @@ class OvercattingOptionsController extends ExamsController
 				rightColumns = Seq(),
 				chosenYearColumnValues = overcatView.optionsColumnValues,
 				perYearColumnValues = overcatView.perYearColumnValues,
+				showComponentMarks = false,
 				yearOrder = Ordering.Int.reverse
 			)
 		)
@@ -165,7 +169,9 @@ class OvercattingOptionsView(
 		normalLoad = normalLoad,
 		routeRules = Seq(), // Not used
 		academicYear = academicYear,
-		yearOfStudy = scyd.yearOfStudy
+		yearOfStudy = scyd.yearOfStudy,
+		showFullName = false,
+		showComponentMarks = false
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)
@@ -188,7 +194,7 @@ class OvercattingOptionsView(
 		new OptionalModulesColumnOption().getColumns(overcattedEntitiesState)
 	).flatMap(_.toSeq).groupBy { case (year, _) => year}.mapValues(_.flatMap { case (_, columns) => columns })
 
-	lazy val perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]]] =
+	lazy val perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]] =
 		perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
 
 	lazy val perYearColumnCategories: Map[YearOfStudy, Map[String, Seq[PerYearExamGridColumn with HasExamGridColumnCategory]]] =
@@ -205,6 +211,8 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 	case class Column(state: ExamGridColumnState, selectedEntityId: Option[String]) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = ""
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Spacer
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> {
@@ -239,6 +247,8 @@ class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 		override val title: String = "Weighted Mean Module Mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> (value match {

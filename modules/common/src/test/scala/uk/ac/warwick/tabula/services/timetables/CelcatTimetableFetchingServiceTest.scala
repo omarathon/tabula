@@ -6,7 +6,6 @@ import net.fortuna.ical4j.model.Component
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.io.IOUtils
-import org.apache.http.auth.AuthScope
 import org.apache.http.client.HttpClient
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.message.BasicHttpResponse
@@ -29,10 +28,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
 	val service = new CelcatHttpTimetableFetchingService(new CelcatConfiguration {
 		val departmentConfiguration =	Map(
-			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables")
+			"ch" -> CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables", credentials = Credentials("username", "password"))
 		)
-		lazy val authScope = new AuthScope("www2.warwick.ac.uk", 443)
-		lazy val credentials = Credentials("username", "password")
 		val cacheEnabled = false
 	}) with UserLookupComponent with TermServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with DispatchHttpClientComponent {
 		val userLookup = new MockUserLookup
@@ -52,7 +49,10 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 	}
 
 	@Test def parseICal() {
-		val events = service.parseICal(resourceAsStream("1313406.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
+		val events = service.parseICal(
+			resourceAsStream("1313406.ics"),
+			CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables", credentials = Credentials("username", "password"))
+		)(service.termService)
 		events.events.size should be (142)
 
 		val combined = service.combineIdenticalEvents(events).events.sorted
@@ -131,7 +131,10 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 	}
 
 	@Test def tab2662() {
-		val events = service.parseICal(resourceAsStream("duplicates.ics"), CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"))(service.termService)
+		val events = service.parseICal(
+			resourceAsStream("duplicates.ics"),
+			CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables", credentials = Credentials("username", "password"))
+		)(service.termService)
 		events.events.size should be (2)
 
 		val combined = service.combineIdenticalEvents(events).events.sorted
@@ -167,7 +170,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			CelcatHttpTimetableFetchingService.parseVEvent(
 				cal.getComponent(Component.VEVENT).asInstanceOf[VEvent],
 				Map(),
-				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables"),
+				CelcatDepartmentConfiguration("https://www2.warwick.ac.uk/appdata/chem-timetables", credentials = Credentials("username", "password")),
 				service.locationFetchingService,
 				Map(module.code -> module),
 				service.userLookup
@@ -205,7 +208,8 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 			resourceAsStream("1524943.ics"),
 			CelcatDepartmentConfiguration(
 				baseUri = "https://www2.warwick.ac.uk/appdata/chem-timetables",
-				staffListInBSV = true
+				staffListInBSV = true,
+				credentials = Credentials("username", "password")
 			)
 		)(service.termService)
 		events.events.size should be (122)
