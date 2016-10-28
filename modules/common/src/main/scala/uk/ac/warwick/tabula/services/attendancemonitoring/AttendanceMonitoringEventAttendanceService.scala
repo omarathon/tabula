@@ -146,10 +146,16 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 					// Is the group's module valid
 					&& (point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(attendance.occurrence.event.group.groupSet.module))
 					// Is there no existing checkpoint
-					&& attendanceMonitoringService.getCheckpoints(Seq(point), Seq(studentMember)).isEmpty
+					&& !existingCheckpoint(point, attendance, studentMember)
 					// The student hasn't been sent to SITS for this point
 					&& !attendanceMonitoringService.studentAlreadyReportedThisTerm(studentMember, point)
 		)).getOrElse(Seq())
+	}
+
+	// true if there is an exisiting manual checkpoint or automatic checkpoint with the same state
+	private def existingCheckpoint(point: AttendanceMonitoringPoint, attendance: SmallGroupEventAttendance, studentMember: StudentMember): Boolean = {
+		val checkpoint = attendanceMonitoringService.getCheckpoints(Seq(point), Seq(studentMember)).values.headOption.flatMap(_.values.headOption)
+		checkpoint.exists(c => !c.autoCreated || c.state == attendance.state)
 	}
 
 	private def checkQuantity(point: AttendanceMonitoringPoint, attendance: SmallGroupEventAttendance, student: StudentMember): Boolean = {
