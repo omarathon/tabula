@@ -20,6 +20,8 @@ class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val category: String = "Total CATS"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.years.get(state.yearOfStudy).map(entityYear => result(entityYear))

@@ -68,7 +68,7 @@ object GenerateExamGridExporter {
 		val chosenYearColumnCategories = rightColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 		val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
 
-		var currentColumnIndex = 0
+		var currentColumnIndex = 3 // Move to the right of the key
 		var categoryRowMaxCellWidth = 0
 		var headerRowMaxCellWidth = 0
 
@@ -95,11 +95,13 @@ object GenerateExamGridExporter {
 				}
 			)
 			// And finally...
+			sheet.setColumnWidth(currentColumnIndex, leftColumn.excelColumnWidth)
 			currentColumnIndex = currentColumnIndex + 1
 		})
 
 		if (!showComponentMarks) {
 			// Add a spacer
+			sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
 			currentColumnIndex = currentColumnIndex + 1
 		}
 
@@ -109,6 +111,7 @@ object GenerateExamGridExporter {
 					val cell = row.createCell(currentColumnIndex)
 					cell.setCellValue(valueType.label)
 				}}
+				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
 				currentColumnIndex = currentColumnIndex + 1
 			}
 
@@ -166,11 +169,13 @@ object GenerateExamGridExporter {
 					}
 				)
 				// And finally...
+				sheet.setColumnWidth(currentColumnIndex, perYearColumn.excelColumnWidth)
 				currentColumnIndex = currentColumnIndex + 1
 			})
 
 			if (!showComponentMarks || perYearColumns.keys.toSeq.sorted(yearOrder).last == year) {
 				// Add a spacer after each year
+				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
 				currentColumnIndex = currentColumnIndex + 1
 			}
 		})
@@ -216,10 +221,10 @@ object GenerateExamGridExporter {
 				}
 			)
 			// And finally...
+			sheet.setColumnWidth(currentColumnIndex, rightColumn.excelColumnWidth)
 			currentColumnIndex = currentColumnIndex + 1
 		})
 
-		(0 until currentColumnIndex).foreach(sheet.autoSizeColumn(_, true))
 		categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
 		headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)
 
@@ -301,6 +306,9 @@ object GenerateExamGridExporter {
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
+
+		sheet.autoSizeColumn(0)
+		sheet.autoSizeColumn(1)
 	}
 
 	private def getCellStyleMap(workbook: XSSFWorkbook): Map[GenerateExamGridExporter.Style, XSSFCellStyle] = {

@@ -25,6 +25,9 @@ class UrkundDaoImpl extends UrkundDao with Daoisms {
 
 	override def findReportToSubmit: Option[OriginalityReport] = {
 		session.newCriteria[OriginalityReport]
+			.createAlias("attachment", "attachment") // Don't need these aliases
+			.createAlias("attachment.submissionValue", "submissionValue") // but it ensures the submission
+			.createAlias("submissionValue.submission", "submission") // hasn't been deleted
 		  .add(Restrictions.lt("nextSubmitAttempt", DateTime.now))
 			.add(Restrictions.isNull("nextResponseAttempt"))
 			.addOrder(Order.asc("nextSubmitAttempt"))
@@ -34,6 +37,9 @@ class UrkundDaoImpl extends UrkundDao with Daoisms {
 
 	override def findReportToRetreive: Option[OriginalityReport] = {
 		session.newCriteria[OriginalityReport]
+			.createAlias("attachment", "attachment") // Don't need these aliases
+			.createAlias("attachment.submissionValue", "submissionValue") // but it ensures the submission
+			.createAlias("submissionValue.submission", "submission") // hasn't been deleted
 			.add(Restrictions.isNull("nextSubmitAttempt"))
 			.add(Restrictions.lt("nextResponseAttempt", DateTime.now))
 			.addOrder(Order.asc("nextResponseAttempt"))
