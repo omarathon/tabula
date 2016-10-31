@@ -30,28 +30,28 @@ object Member {
 }
 
 /**
- * Notes about the notDeleted filter:
- * filters don't run on session.get() but getById will check for you.
- * queries will only include it if it's the entity after "from" and not
- * some other secondary entity joined on. It's usually possible to flip the
- * query around to make this work.
- */
+	* Notes about the notDeleted filter:
+	* filters don't run on session.get() but getById will check for you.
+	* queries will only include it if it's the entity after "from" and not
+	* some other secondary entity joined on. It's usually possible to flip the
+	* query around to make this work.
+	*/
 @FilterDefs(Array(
-		new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
-		new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
-		new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
-	))
-	@Filters(Array(
-		new Filter(name = Member.StudentsOnlyFilter),
-		new Filter(name = Member.ActiveOnlyFilter),
-		new Filter(name = Member.FreshOnlyFilter)
-	))
+	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
+	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
+	new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
+))
+@Filters(Array(
+	new Filter(name = Member.StudentsOnlyFilter),
+	new Filter(name = Member.ActiveOnlyFilter),
+	new Filter(name = Member.FreshOnlyFilter)
+))
 @Entity
 @Access(AccessType.FIELD)
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
-		name="userType",
-		discriminatorType=DiscriminatorType.STRING
+	name="userType",
+	discriminatorType=DiscriminatorType.STRING
 )
 abstract class Member
 	extends MemberProperties
@@ -115,18 +115,18 @@ abstract class Member
 	}
 
 	/**
-	 * Get all departments that this member is affiliated to.
-	 * (Overriden by StudentMember).
-	 */
+		* Get all departments that this member is affiliated to.
+		* (Overriden by StudentMember).
+		*/
 	def affiliatedDepartments = homeDepartment match {
 		case null => Stream()
 		case _ => Stream(homeDepartment)
 	}
 
 	/**
-	 * Get all departments that this member touches.
-	 * (Overridden by StudentMember).
-	 */
+		* Get all departments that this member touches.
+		* (Overridden by StudentMember).
+		*/
 	def touchedDepartments = {
 		val topLevelDepts = affiliatedDepartments
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
@@ -178,9 +178,9 @@ abstract class Member
 		}
 
 		u.setExtraProperties(JHashMap(
-				"urn:websignon:usertype" -> u.getUserType,
-				"urn:websignon:timestamp" -> DateTime.now.toString,
-				"urn:websignon:usersource" -> "Tabula"
+			"urn:websignon:usertype" -> u.getUserType,
+			"urn:websignon:timestamp" -> DateTime.now.toString,
+			"urn:websignon:usersource" -> "Tabula"
 		))
 
 		u.setVerified(true)
@@ -264,10 +264,10 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
-			mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
-				case null => None
-				case casUsed => Some(casUsed)
-			})
+		mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
+			case null => None
+			case casUsed => Some(casUsed)
+		})
 	}
 
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
@@ -289,27 +289,27 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	/**
-	 * Get all departments that this student is affiliated with at a departmental level.
-	 * This includes their home department, and the department running their course.
-	 */
+		* Get all departments that this student is affiliated with at a departmental level.
+		* This includes their home department, and the department running their course.
+		*/
 	override def affiliatedDepartments: Stream[Department] = {
 		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
 		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
 		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.currentRoute)).flatMap(route => route.teachingDepartments).toStream
 
 		(Option(homeDepartment).toStream #:::
-				sprDepartments #:::
-				sceDepartments #:::
-				routeDepartments
-		).distinct
+			sprDepartments #:::
+			sceDepartments #:::
+			routeDepartments
+			).distinct
 	}
 
 	/**
-	 * Get all departments that this student touches. This includes their home department,
-	 * the department running their course and any departments that they are taking modules in.
-	 *
-	 * For each department, enumerate any sub-departments that the member matches
-	 */
+		* Get all departments that this student touches. This includes their home department,
+		* the department running their course and any departments that they are taking modules in.
+		*
+		* For each department, enumerate any sub-departments that the member matches
+		*/
 	override def touchedDepartments = {
 		def moduleDepts = registeredModulesByYear(None).map(_.adminDepartment).toStream
 
@@ -320,8 +320,8 @@ class StudentMember extends Member with StudentProperties {
 	@transient var smallGroupService = Wire[SmallGroupService]
 
 	/**
-	 * Get all small groups that this student is signed up for
-	 */
+		* Get all small groups that this student is signed up for
+		*/
 	def registeredSmallGroups: Stream[SmallGroup] = smallGroupService.findSmallGroupsByStudent(asSsoUser).toStream
 
 	override def permissionsParents: Stream[PermissionsTarget] = {
@@ -385,7 +385,7 @@ class StudentMember extends Member with StudentProperties {
 					.map(_.statusOnRoute)
 					.filter(_.code != null)
 					.count(!_.code.startsWith("P")) == 0
-			)
+				)
 	}
 
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
@@ -404,11 +404,11 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	/**
-	 * Get all modules this this student is registered on, including historically.
-	 * TODO consider caching based on getLastUpdatedDate
-	 */
+		* Get all modules this this student is registered on, including historically.
+		* TODO consider caching based on getLastUpdatedDate
+		*/
 	def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] =
-		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.registeredModulesByYear(year))
+	freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.registeredModulesByYear(year))
 
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
@@ -416,7 +416,8 @@ class StudentMember extends Member with StudentProperties {
 	def isPGR = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
 
 	def toExamGridEntity(maxYearOfStudy: Int) = {
-		val allSCYDs: Seq[StudentCourseYearDetails] = freshStudentCourseDetails.sorted.flatMap(_.freshStudentCourseYearDetails.sorted)
+		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
+			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
 		ExamGridEntity(
 			firstName = Option(firstName).getOrElse("[Unknown]"),
 			lastName = Option(lastName).getOrElse("[Unknown]"),

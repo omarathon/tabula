@@ -21,12 +21,12 @@
 
 <h1>${relationshipType.agentRole?cap_first}</h1>
 
-<#if !relationships?has_content>
+<#if !relationshipsToDisplay?has_content>
 	<div class="alert alert-info">No ${relationshipType.agentRole} details found for this course and academic year</div>
 </#if>
 
 <div class="row">
-	<#list relationships as relationship>
+	<#list relationshipsToDisplay as relationship>
 		<div class="col-md-4">
 			<div class="clearfix">
 				<#if relationship.agentMember??>
@@ -57,9 +57,9 @@
 	<div class="col-md-12">
 		<p>
 			<#if (canEditRelationship!false)>
-				<#if relationships?has_content>
+				<#if relationshipsToDisplay?has_content>
 					<a class="btn btn-primary"
-					   data-remote="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationships?first.agentMember />"
+					   data-remote="<@routes.profiles.relationship_edit relationshipType studentCourseDetails.urlSafeId relationshipsToDisplay?first.agentMember />"
 					   data-target="#change-agent"
 					   data-toggle="modal">
 					   Edit ${relationshipType.agentRole}
@@ -84,7 +84,7 @@
 			<h3 class="modal-title">Changes to ${relationshipType.agentRole}</h3>
 		</@modal.header>
 		<@modal.body>
-			<#if !relationships?has_content>
+			<#if !allRelationships?has_content>
 				<em>No ${relationshipType.agentRole} details found for this course</em>
 			<#else>
 				<table class="table table-hover table-condensed sb-no-wrapper-table-popout">
@@ -121,12 +121,12 @@
 							</td>
 						</tr>
 						</#macro>
-						<#list relationships as rel>
+						<#list allRelationships as rel>
 							<#if rel.current>
 								<@timeline_row rel />
 							</#if>
 						</#list>
-						<#list relationships as rel>
+						<#list allRelationships as rel>
 						<#if !rel.current>
 							<@timeline_row rel />
 						</#if>
@@ -219,7 +219,7 @@
 			</table>
 		</#if>
 
-		<#if relationships?has_content>
+		<#if relationshipsToDisplay?has_content>
 			<p>
 				<#if canCreateScheduledMeetings && features.scheduledMeetings>
 					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_scheduled_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Schedule meeting</a>

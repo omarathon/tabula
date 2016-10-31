@@ -79,6 +79,7 @@ trait RelationshipService {
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def endStudentRelationships(relationships: Seq[StudentRelationship])
 	def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()): Seq[StudentAssociationData]
 	def getStudentAssociationEntityData(department: Department, relationshipType: StudentRelationshipType, additionalEntityIds: Seq[String]): Seq[StudentAssociationEntityData]
@@ -125,6 +126,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllPastAndPresentRelationships(student)
+	}
+
+	def getAllPastAndPresentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getAllPastAndPresentRelationships(relationshipType, scd)
 	}
 
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
