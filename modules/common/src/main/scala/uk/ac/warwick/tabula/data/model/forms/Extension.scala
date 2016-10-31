@@ -72,7 +72,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Column(name = "approvedOn")
 	var reviewedOn: DateTime = _
 
-	var reason: String = _received
+	var reason: String = _
 	@Column(name = "approvalComments")
 	var reviewerComments: String = _
 	var disabilityAdjustment: Boolean = false
