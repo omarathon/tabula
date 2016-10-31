@@ -23,6 +23,8 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 
 		override val secondaryValue: String = ""
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
+
 		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 			state.entities.map(entity =>
 				entity -> entity.years.map { case (academicYear, entityYear) =>
@@ -54,6 +56,8 @@ class ModuleReportsColumnOption extends PerYearExamGridColumnOption {
 		override val title: String = "Mean Module Mark For This Year"
 
 		override val secondaryValue: String = ""
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
 		override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 			state.entities.map(entity =>

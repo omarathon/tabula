@@ -14,6 +14,8 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 	override val title: String = s"${module.code.toUpperCase} ${module.name}"
 
+	override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
+
 	override def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
 		state.entities.map(entity =>
 			entity -> entity.years.map { case (academicYear, entityYear) =>

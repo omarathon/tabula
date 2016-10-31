@@ -4,8 +4,8 @@ import java.util.Properties
 import javax.sql.DataSource
 
 import org.quartz._
-import org.springframework.beans.factory.{FactoryBean, InitializingBean}
 import org.springframework.beans.factory.annotation.{Autowired, Qualifier, Value}
+import org.springframework.beans.factory.{FactoryBean, InitializingBean}
 import org.springframework.context.annotation.{Bean, Configuration, Profile}
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ClassPathResource
@@ -16,7 +16,6 @@ import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.services.scheduling.SchedulingConfiguration.CronTriggerJob
 import uk.ac.warwick.tabula.services.scheduling.jobs._
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.util.core.spring.scheduling.{AutowiringSpringBeanJobFactory, PersistableCronTriggerFactoryBean, PersistableSimpleTriggerFactoryBean}
@@ -27,9 +26,8 @@ import scala.language.existentials
 import scala.reflect._
 
 object SchedulingConfiguration {
-	abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] {
+	abstract class UnscheduledJob[J <: AutowiredJobBean : ClassTag] {
 		def name: String
-		def trigger: T
 
 		lazy val jobDetail: JobDetail = {
 			val jobDetail = new JobDetailFactoryBean
@@ -40,6 +38,14 @@ object SchedulingConfiguration {
 			jobDetail.afterPropertiesSet()
 			jobDetail.getObject
 		}
+	}
+
+	case class SimpleUnscheduledJob[J <: AutowiredJobBean : ClassTag](jobName: Option[String] = None) extends UnscheduledJob[J] {
+		lazy val name = jobName.getOrElse(classTag[J].runtimeClass.getSimpleName)
+	}
+
+	abstract class ScheduledJob[J <: AutowiredJobBean : ClassTag, T <: Trigger] extends UnscheduledJob[J] {
+		def trigger: T
 	}
 
 	case class SimpleTriggerJob[J <: AutowiredJobBean : ClassTag](
@@ -83,6 +89,11 @@ object SchedulingConfiguration {
 		}
 	}
 
+	val unscheduledJobs: Seq[UnscheduledJob[_]] = Seq(
+		SimpleUnscheduledJob[ImportProfilesSingleDepartmentJob](),
+		SimpleUnscheduledJob[ImportAssignmentsAllYearsJob]()
+	)
+
 	/**
 		* Be very careful about changing the names of jobs here. If a job with a name is no longer referenced,
 		* we will clear out ALL Quartz data the next time that the application starts, which may have unintended
@@ -95,7 +106,6 @@ object SchedulingConfiguration {
 		// Imports
 		CronTriggerJob[ImportAcademicDataJob](cronExpression = "0 0 7,14 * * ?"), // 7am and 2pm
 		CronTriggerJob[ImportProfilesJob](cronExpression = "0 30 0 * * ?"), // 12:30am
-		SimpleTriggerJob[ImportProfilesSingleDepartmentJob](repeatInterval = 0.seconds), // Register the trigger only, don't repeat or schedule
 		CronTriggerJob[StampMissingRowsJob](cronExpression = "23 0 0 * * ?"), // 11:00pm
 		CronTriggerJob[ImportAssignmentsJob](cronExpression = "0 0 7 * * ?"), // 7am
 		CronTriggerJob[ImportModuleListsJob](cronExpression = "0 0 8 * * ?"), // 8am
@@ -152,7 +162,8 @@ class SchedulingConfiguration {
 				case (rs, _) => rs.getString("trigger_name")
 			}
 
-		val jobs = SchedulingConfiguration.scheduledJobs
+		val scheduledJobs = SchedulingConfiguration.scheduledJobs
+		val jobs = Seq(scheduledJobs, SchedulingConfiguration.unscheduledJobs).flatten
 		val jobNames = jobs.map { _.name }
 
 		// Clear the scheduler if there is a trigger that we no longer want to run
@@ -191,7 +202,7 @@ class SchedulingConfiguration {
 		factory.setJobFactory(jobFactory)
 
 		factory.setJobDetails(jobs.map { _.jobDetail }: _*)
-		factory.setTriggers(jobs.map { _.trigger }: _*)
+		factory.setTriggers(scheduledJobs.map { _.trigger }: _*)
 
 		factory
 	}

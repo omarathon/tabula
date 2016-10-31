@@ -44,6 +44,15 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	var children:JSet[Department] = JHashSet()
 
+	// returns a list containing this department and all departments that are descendants of this department
+	def descendants = {
+		def getDescendantsDepts(department: Department): List[Department] = {
+			if (department.children.asScala.isEmpty) List(department)
+			else department :: department.children.asScala.toList.flatMap(d => getDescendantsDepts(d))
+		}
+		getDescendantsDepts(this)
+	}
+
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent: Department = _
 
@@ -263,7 +272,7 @@ class Department extends GeneratedId
 		extensionManagers.copyFrom(other.extensionManagers)
 	}
 
-	override def postLoad {
+	override def postLoad() {
 		ensureSettings
 	}
 

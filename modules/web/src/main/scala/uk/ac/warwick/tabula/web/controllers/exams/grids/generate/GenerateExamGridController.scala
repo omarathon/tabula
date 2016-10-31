@@ -10,7 +10,7 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids._
-import uk.ac.warwick.tabula.commands.{Appliable, FilterStudentsOrRelationships, SelfValidating}
+import uk.ac.warwick.tabula.commands.{Appliable, FilterStudentsOrRelationships, SelfValidating, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.AutowiringCourseDaoComponent
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -44,7 +44,8 @@ class GenerateExamGridController extends ExamsController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
 	with AutowiringCourseDaoComponent with AutowiringModuleRegistrationServiceComponent
-	with AutowiringUpstreamRouteRuleServiceComponent {
+	with AutowiringUpstreamRouteRuleServiceComponent
+	with TaskBenchmarking {
 
 	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 	type GridOptionsCommand = Appliable[(Set[ExamGridColumnOption.Identifier], Seq[String])] with GenerateExamGridGridOptionsCommandRequest
@@ -223,7 +224,7 @@ class GenerateExamGridController extends ExamsController
 		val jobInstance = jobService.getInstance(jobId)
 		if (jobInstance.isDefined && !jobInstance.get.finished) {
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
-				(e.name, e.lastImportDate.getOrElse(new DateTime(0)))
+				(Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
 			).sortBy(_._2)
 			commonCrumbs(
 				Mav("exams/grids/generate/jobProgress",
@@ -291,17 +292,19 @@ class GenerateExamGridController extends ExamsController
 		department: Department,
 		academicYear: AcademicYear
 	): Mav = {
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, routeRules) = checkAndApplyOvercatAndGetGridData(
-			selectCourseCommand,
-			gridOptionsCommand,
-			checkOvercatCommmand,
-			coreRequiredModules
-		)
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, routeRules) = benchmarkTask("GridData") {
+			checkAndApplyOvercatAndGetGridData(
+				selectCourseCommand,
+				gridOptionsCommand,
+				checkOvercatCommmand,
+				coreRequiredModules
+			)
+		}
 
-		val chosenYearColumnValues = Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap
-		val chosenYearColumnCategories = summaryColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
-		val perYearColumnValues = perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
-		val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
+		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
+		val chosenYearColumnCategories = benchmarkTask("chosenYearColumnCategories") { summaryColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category) }
+		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
+		val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
 
 		commonCrumbs(
 			Mav("exams/grids/generate/preview",
@@ -339,15 +342,15 @@ class GenerateExamGridController extends ExamsController
 			throw new IllegalArgumentException
 		}
 
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = checkAndApplyOvercatAndGetGridData(
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
 			selectCourseCommand,
 			gridOptionsCommand,
 			checkOvercatCommmand,
 			coreRequiredModules
-		)
+		)}
 
-		val chosenYearColumnValues = Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap
-		val perYearColumnValues = perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
+		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
+		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
 
 		new ExcelView(
 			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
@@ -418,6 +421,7 @@ class GenerateExamGridController extends ExamsController
 			routeRules = routeRules,
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
+			showFullName = gridOptionsCommand.showFullName,
 			showComponentMarks = gridOptionsCommand.showComponentMarks
 		)
 

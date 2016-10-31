@@ -59,6 +59,12 @@
 		</p>
 
 		<p>
+		<@f.form method="post" action="${url('/sysadmin/import-sits-all-years')}">
+			<input class="btn btn-danger" type="submit" value="SITS assignments, ALL YEARS" onclick="return confirm('Really? Could take a minute.') && confirm('No seriously. This one takes forever. Really sure?')">
+		</@f.form>
+		</p>
+
+		<p>
 			<@f.form method="post" action="${url('/sysadmin/import-module-lists')}">
 				<input class="btn btn-danger" type="submit" value="SITS module lists" onclick="return confirm('Really? Could take a minute.')">
 			</@f.form>

@@ -170,6 +170,7 @@ class OvercattingOptionsView(
 		routeRules = Seq(), // Not used
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
+		showFullName = false,
 		showComponentMarks = false
 	)
 
@@ -211,6 +212,8 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val title: String = ""
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Spacer
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> {
 				val entityId = GenerateExamGridOvercatCommand.overcatIdentifier(entity.years(state.yearOfStudy).moduleRegistrations)
@@ -244,6 +247,8 @@ class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 		override val title: String = "Weighted Mean Module Mark"
 
 		override val category: String = s"Year ${state.yearOfStudy} Marks"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> (value match {

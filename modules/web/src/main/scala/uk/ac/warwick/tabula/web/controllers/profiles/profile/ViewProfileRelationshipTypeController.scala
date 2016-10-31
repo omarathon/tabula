@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
+import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
@@ -8,17 +9,19 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 import uk.ac.warwick.util.termdates.{Term, TermNotFoundException}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
 class ViewProfileRelationshipTypeController extends AbstractViewProfileController
 	with AutowiringTermServiceComponent
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent {
+	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+	with AutowiringRelationshipServiceComponent {
 
 	@RequestMapping(Array("/{member}/{relationshipType}"))
 	def viewByMemberMapping(
@@ -54,7 +57,9 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		val canReadMeetings = securityService.can(user, ViewMeetingRecordCommand.RequiredPermission(relationshipType), studentCourseDetails)
 		val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
 		val studentCourseYearDetails = scydToSelect(studentCourseDetails, activeAcademicYear)
-		val relationships = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
+		val relationshipsToDisplay = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
+		val allRelationships = relationshipService.getAllPastAndPresentRelationships(relationshipType, studentCourseDetails)
+			.sortBy(r => Option(r.endDate).getOrElse(new DateTime(Integer.MAX_VALUE))).reverse
 
 		val department = studentCourseYearDetails.map(_.enrolmentDepartment)
 		val relationshipSource = department.map(_.getStudentRelationshipSource(relationshipType))
@@ -66,7 +71,8 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 			applyCrumbs(Mav("profiles/profile/relationship_type_student",
 				"member" -> studentCourseDetails.student,
 				"isSelf" -> isSelf,
-				"relationships" -> relationships,
+				"relationshipsToDisplay" -> relationshipsToDisplay,
+				"allRelationships" -> allRelationships,
 				"canReadMeetings" -> false,
 				"canEditRelationship" -> canEditRelationship
 			), studentCourseDetails, relationshipType)
@@ -90,7 +96,8 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				"member" -> studentCourseDetails.student,
 				"currentMember" -> currentMember,
 				"thisAcademicYear" -> thisAcademicYear,
-				"relationships" -> relationships,
+				"relationshipsToDisplay" -> relationshipsToDisplay,
+				"allRelationships" -> allRelationships,
 				"meetings" -> meetings,
 				"meetingApprovalWillCreateCheckpoint" -> meetings.map {
 					case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty

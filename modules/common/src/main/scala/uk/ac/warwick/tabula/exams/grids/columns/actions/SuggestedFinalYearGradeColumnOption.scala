@@ -19,6 +19,8 @@ class SuggestedFinalYearGradeColumnOption extends ChosenYearExamGridColumnOption
 
 		override val category: String = "Suggested Actions"
 
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
+
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.years.get(state.yearOfStudy).map(entity =>

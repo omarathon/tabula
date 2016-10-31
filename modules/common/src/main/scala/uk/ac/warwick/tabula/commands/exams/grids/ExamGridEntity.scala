@@ -5,7 +5,8 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, StudentCourseYearDetails}
 
 case class ExamGridEntity(
-	name: String,
+	firstName: String,
+	lastName: String,
 	universityId: String,
 	lastImportDate: Option[DateTime],
 	years: Map[YearOfStudy, ExamGridEntityYear] // Int = year of study
