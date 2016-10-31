@@ -72,7 +72,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Column(name = "approvedOn")
 	var reviewedOn: DateTime = _
 
-	var reason: String = _
+	var reason: String = _received
 	@Column(name = "approvalComments")
 	var reviewerComments: String = _
 	var disabilityAdjustment: Boolean = false
@@ -180,7 +180,7 @@ object ExtensionState {
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
 	case object MoreInformationRequired extends ExtensionState("M", "More info required")
-	case object MoreInformationRecieved extends ExtensionState("C", "More info recieved")
+	case object MoreInformationRecieved extends ExtensionState("C", "More info received")
 	case object Rejected extends ExtensionState("R", "Rejected")
 	case object Revoked extends ExtensionState("V", "Revoked")
 

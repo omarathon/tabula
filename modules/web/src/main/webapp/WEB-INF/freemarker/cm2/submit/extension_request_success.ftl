@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <#compress>
 	<#if isReply>
-		<h1>You have replyed to a request for more information</h1>
+		<h1>You have replied to a request for more information</h1>
 		<h4><span class="muted">for</span> ${assignment.name}</h4>
 		<p>
 			You will receive an email when your reply has been reviewed. If your request for an extension has not been

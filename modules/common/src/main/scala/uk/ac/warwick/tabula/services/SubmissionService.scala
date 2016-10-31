@@ -72,7 +72,7 @@ class SubmissionServiceImpl
 	extends AbstractSubmissionService
 		with AutowiringOriginalityReportServiceComponent
 
-trait SubmissionServiceComponent {import uk.ac.warwick.userlookup.User
+trait SubmissionServiceComponent {
 	def submissionService: SubmissionService
 }
 

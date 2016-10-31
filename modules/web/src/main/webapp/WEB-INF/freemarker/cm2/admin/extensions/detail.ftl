@@ -1,6 +1,6 @@
 <#if detail.extension.requestedOn?has_content>
 	<div>
-		<label>Request recieved:</label> <@fmt.date date=detail.extension.requestedOn />
+		<label>Request received:</label> <@fmt.date date=detail.extension.requestedOn />
 	</div>
 <#else>
 	<div>
