@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, CourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
 
 object GenerateExamGridSelectCourseCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -82,17 +81,8 @@ trait GenerateExamGridSelectCourseCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	// gets a list of all departments that are descendants of this department
-	def departmentAndSubDepartments = {
-		def getDescendantsDepts(department: Department): List[Department] = {
-			if (department.children.asScala.isEmpty) List(department)
-			else department :: department.children.asScala.toList.flatMap(d => getDescendantsDepts(d))
-		}
-		getDescendantsDepts(department)
-	}
-
-	lazy val courses = departmentAndSubDepartments.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
-	lazy val routes = departmentAndSubDepartments.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
+	lazy val courses = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	lazy val routes = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
 	lazy val yearsOfStudy = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
 
