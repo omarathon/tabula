@@ -291,10 +291,34 @@
 		</table>
 
 		<div class="fix-footer">
-			<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
+			<button class="excel-download btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
 		</div>
 	</form>
-
+	<div class='modal fade' id='confirmModal'>
+		<div class='modal-dialog' role='document'><div class='modal-content'>
+			<div class='modal-body'>
+				<p>
+					Exam grids contain restricted information. Under the University's
+					<a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>
+						information classification scheme
+					</a>, student names and University IDs are 'protected', exam marks are 'restricted' and provisional
+					degree classifications are 'reserved'.
+				</p>
+				<p>
+					When you download a grid as a spreadsheet, you are responsible for managing the security of the
+					information within it. You agree to abide by the University's <a target='_blank' href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
+						Data Protection Policy
+					<a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
+						electronic information asset protection.</a>
+					</p>
+			</div>
+			<div class='modal-footer'>
+				<a class='confirm btn btn-primary'>Accept</a>
+				<a data-dismiss='modal' class='btn'>Cancel</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="modal fade" id="edit-overcatting-modal"></div>
@@ -302,6 +326,30 @@
 <script>
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
+
+		$('.excel-download').on('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var $this = $(this);
+			if(!$this.data("confirmModal")) {
+				var $modal = $('#confirmModal');
+				$modal.data('form', $(this).closest('form'));
+				$('body').append($modal);
+				$modal.modal();
+				$('a.confirm', $modal).on('click', function() {
+					$modal.modal('hide');
+					var $form = $modal.data('form');
+					var $submitInput = $('<input />').attr('type', 'hidden')
+						.attr('name', 'export')
+						.attr('value', 'true');
+					$form.append($submitInput);
+					$form.submit();
+				});
+				$this.data("confirmModal", $modal);
+			} else {
+				$this.data("confirmModal").modal('show');
+			}
+		});
 
 		$('th.rotated, td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();

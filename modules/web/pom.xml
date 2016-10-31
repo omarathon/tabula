@@ -422,6 +422,7 @@
 							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>jquery-confirmmodal.js</include>
 								<include>exams-admin.js</include>
 							</includes>
 						</aggregation>
