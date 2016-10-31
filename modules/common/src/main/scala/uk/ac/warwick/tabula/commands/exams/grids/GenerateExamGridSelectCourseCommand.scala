@@ -80,9 +80,9 @@ trait GenerateExamGridSelectCourseCommandState {
 	
 	def department: Department
 	def academicYear: AcademicYear
-	
-	lazy val courses = courseAndRouteService.findCoursesInDepartment(department).sortBy(_.code)
-	lazy val routes = courseAndRouteService.findRoutesInDepartment(department).sortBy(_.code)
+
+	lazy val courses = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	lazy val routes = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
 	lazy val yearsOfStudy = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
 

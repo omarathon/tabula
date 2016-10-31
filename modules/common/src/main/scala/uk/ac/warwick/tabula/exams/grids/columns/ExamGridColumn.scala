@@ -20,15 +20,24 @@ object ExamGridColumnOption {
 		val CoreOptionalModules = 12
 		val OptionalModules = 13
 		val ModuleReports = 14
-		val TotalCATs = 20
-		val PreviousYears = 21
-		val CurrentYear = 22
-		val OvercattedYearMark = 23
-		val BoardAgreedMark = 24
+		val TotalCATS = 20
+		val PassedCATS = 21
+		val PreviousYears = 22
+		val CurrentYear = 23
+		val OvercattedYearMark = 24
+		val BoardAgreedMark = 25
 		val SuggestedResult = 30
 		val SuggestedFinalYearGrade = 31
 		val MitigatingCircumstances = 40
 		val Comments = 50
+	}
+
+	object ExcelColumnSizes {
+		val Spacer = 600
+		val WholeMark = 900
+		val Decimal = 1200
+		val ShortString = 1700
+		val LongString = 4000
 	}
 }
 
@@ -39,11 +48,13 @@ case class ExamGridColumnState(
 	normalLoad: BigDecimal,
 	routeRules: Seq[UpstreamRouteRule],
 	academicYear: AcademicYear,
-	yearOfStudy: Int
+	yearOfStudy: Int,
+	showFullName: Boolean,
+	showComponentMarks: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0)
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showFullName=true,showComponentMarks=false)
 }
 
 @Component
@@ -69,10 +80,11 @@ trait ChosenYearExamGridColumnOption extends ExamGridColumnOption {
 
 sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 	val title: String
+	val excelColumnWidth: Int
 }
 
 abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
-	def values: Map[ExamGridEntity, Map[YearOfStudy, ExamGridColumnValue]]
+	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]
 }
 
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {

@@ -4,7 +4,7 @@ import java.awt.Color
 
 import org.apache.poi.ss.usermodel.{FontUnderline, HorizontalAlignment, VerticalAlignment}
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.{XSSFCellStyle, XSSFColor, XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
@@ -36,7 +36,8 @@ object GenerateExamGridExporter {
 		perYearColumns: Map[StudentCourseYearDetails.YearOfStudy, Seq[PerYearExamGridColumn]],
 		rightColumns: Seq[ChosenYearExamGridColumn],
 		chosenYearColumnValues: Map[ChosenYearExamGridColumn, Map[ExamGridEntity, ExamGridColumnValue]],
-		perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[StudentCourseYearDetails.YearOfStudy, ExamGridColumnValue]]],
+		perYearColumnValues: Map[PerYearExamGridColumn, Map[ExamGridEntity, Map[StudentCourseYearDetails.YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]]],
+		showComponentMarks: Boolean,
 		yearOrder: Ordering[Int] = Ordering.Int
 	): XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
@@ -52,12 +53,22 @@ object GenerateExamGridExporter {
 		val categoryRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val headerRow = sheet.createRow(sheet.getLastRowNum + 1)
 		val secondaryValueRow = sheet.createRow(sheet.getLastRowNum + 1)
-		val entityRows = entities.map(entity => entity -> sheet.createRow(sheet.getLastRowNum + 1)).toMap
+		val entityRows = entities.map(entity => entity -> {
+			if (showComponentMarks) {
+				Map[ExamGridColumnValueType, XSSFRow](
+					ExamGridColumnValueType.Overall -> sheet.createRow(sheet.getLastRowNum + 1),
+					ExamGridColumnValueType.Assignment -> sheet.createRow(sheet.getLastRowNum + 1),
+					ExamGridColumnValueType.Exam -> sheet.createRow(sheet.getLastRowNum + 1)
+				)
+			} else {
+				Map[ExamGridColumnValueType, XSSFRow](ExamGridColumnValueType.Overall -> sheet.createRow(sheet.getLastRowNum + 1))
+			}
+		}).toMap
 
 		val chosenYearColumnCategories = rightColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 		val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
 
-		var currentColumnIndex = 0
+		var currentColumnIndex = 3 // Move to the right of the key
 		var categoryRowMaxCellWidth = 0
 		var headerRowMaxCellWidth = 0
 
@@ -76,18 +87,34 @@ object GenerateExamGridExporter {
 			// Entity rows
 			entities.foreach(entity =>
 				if (chosenYearColumnValues.get(leftColumn).exists(_.get(entity).isDefined)) {
-					val entityCell = entityRows(entity).createCell(currentColumnIndex)
+					val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 					chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
+					if (showComponentMarks) {
+						sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+					}
 				}
 			)
 			// And finally...
+			sheet.setColumnWidth(currentColumnIndex, leftColumn.excelColumnWidth)
 			currentColumnIndex = currentColumnIndex + 1
 		})
 
-		// Add a spacer
-		currentColumnIndex = currentColumnIndex + 1
+		if (!showComponentMarks) {
+			// Add a spacer
+			sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
+			currentColumnIndex = currentColumnIndex + 1
+		}
 
 		perYearColumns.keys.toSeq.sorted(yearOrder).foreach(year => {
+			if (showComponentMarks) {
+				entityRows.foreach { case (_, rowMap) => rowMap.foreach { case (valueType, row) =>
+					val cell = row.createCell(currentColumnIndex)
+					cell.setCellValue(valueType.label)
+				}}
+				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
+				currentColumnIndex = currentColumnIndex + 1
+			}
+
 			// Year row
 			val yearCell = yearRow.createCell(currentColumnIndex)
 			yearCell.setCellValue(s"Year $year")
@@ -128,16 +155,29 @@ object GenerateExamGridExporter {
 				// Entity rows
 				entities.foreach(entity =>
 					if (perYearColumnValues.get(perYearColumn).exists(_.get(entity).exists(_.get(year).isDefined))) {
-						val entityCell = entityRows(entity).createCell(currentColumnIndex)
-						perYearColumnValues(perYearColumn)(entity)(year).populateCell(entityCell, cellStyleMap)
+						if (showComponentMarks) {
+							val overallCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+							perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(overallCell, cellStyleMap)
+							val assignmentCell = entityRows(entity)(ExamGridColumnValueType.Assignment).createCell(currentColumnIndex)
+							ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Assignment)).populateCell(assignmentCell, cellStyleMap)
+							val examsCell = entityRows(entity)(ExamGridColumnValueType.Exam).createCell(currentColumnIndex)
+							ExamGridColumnValue.merge(perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Exam)).populateCell(examsCell, cellStyleMap)
+						} else {
+							val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
+							perYearColumnValues(perYearColumn)(entity)(year)(ExamGridColumnValueType.Overall).head.populateCell(entityCell, cellStyleMap)
+						}
 					}
 				)
 				// And finally...
+				sheet.setColumnWidth(currentColumnIndex, perYearColumn.excelColumnWidth)
 				currentColumnIndex = currentColumnIndex + 1
 			})
 
-			// Add a spacer after each year
-			currentColumnIndex = currentColumnIndex + 1
+			if (!showComponentMarks || perYearColumns.keys.toSeq.sorted(yearOrder).last == year) {
+				// Add a spacer after each year
+				sheet.setColumnWidth(currentColumnIndex, ExamGridColumnOption.ExcelColumnSizes.Spacer)
+				currentColumnIndex = currentColumnIndex + 1
+			}
 		})
 
 		var currentCategory = ""
@@ -173,15 +213,18 @@ object GenerateExamGridExporter {
 			// Entity rows
 			entities.foreach(entity =>
 				if (chosenYearColumnValues.get(rightColumn).exists(_.get(entity).isDefined)) {
-					val entityCell = entityRows(entity).createCell(currentColumnIndex)
+					val entityCell = entityRows(entity)(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
 					chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
+					if (showComponentMarks) {
+						sheet.addMergedRegion(new CellRangeAddress(entityCell.getRowIndex, entityCell.getRowIndex + 2, entityCell.getColumnIndex, entityCell.getColumnIndex))
+					}
 				}
 			)
 			// And finally...
+			sheet.setColumnWidth(currentColumnIndex, rightColumn.excelColumnWidth)
 			currentColumnIndex = currentColumnIndex + 1
 		})
 
-		(0 until currentColumnIndex).foreach(sheet.autoSizeColumn(_, true))
 		categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
 		headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)
 
@@ -263,6 +306,9 @@ object GenerateExamGridExporter {
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Blank indicates module not taken by student")
 		}
+
+		sheet.autoSizeColumn(0)
+		sheet.autoSizeColumn(1)
 	}
 
 	private def getCellStyleMap(workbook: XSSFWorkbook): Map[GenerateExamGridExporter.Style, XSSFCellStyle] = {

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyCompone
 import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingService._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, DateFormats}
 import uk.ac.warwick.userlookup.UserLookupException
 import uk.ac.warwick.util.cache.{CacheEntryUpdateException, Caches, SingularCacheEntryFactory}
 
@@ -417,8 +417,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 		JSON.parseFull(incomingJson) match {
 			case Some(jsonData: List[Map[String, Any]]@unchecked) =>
 				EventList.fresh(jsonData.flatMap { event =>
-					val start = DateTime.parse(event.getOrElse("start", "").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
-					val end = DateTime.parse(event.getOrElse("end","").toString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+					val start = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("start", "").toString)
+					val end = DateFormats.IsoDateTime.parseDateTime(event.getOrElse("end", "").toString)
 					val year = AcademicYear.findAcademicYearContainingDate(start)
 					val moduleCode = event.getOrElse("moduleCode","").toString
 					val module = moduleAndDepartmentService.getModuleByCode(moduleCode.toLowerCase.safeSubstring(0, expectedModuleCodeLength))
@@ -460,6 +460,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
 						relatedUrl = None
 					))
 				})
+
 			case _ => throw new RuntimeException("Could not parse JSON")
 		}
 	}

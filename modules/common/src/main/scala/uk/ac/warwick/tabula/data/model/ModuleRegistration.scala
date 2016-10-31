@@ -2,13 +2,16 @@ package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-
 import javax.persistence._
-import uk.ac.warwick.tabula.{SprCode, AcademicYear}
+
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.lang3.builder.CompareToBuilder
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import scala.collection.JavaConverters._
 
 /*
  * sprCode, moduleCode, cat score, academicYear and occurrence are a notional key for this table but giving it a generated ID to be
@@ -29,6 +32,8 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 		this.cats = cats
 		this.occurrence = occurrence
 	}
+
+	@transient var membershipService = Wire[AssessmentMembershipService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
@@ -74,6 +79,11 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with Order
 
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var lastUpdatedDate = DateTime.now
+
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this)
+
+	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
 
 	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear.toString
 
