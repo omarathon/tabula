@@ -172,10 +172,11 @@
 						<td></td>
 						<td>Blank indicates module not taken by student</td>
 					</tr>
-					<tr>
-						<td><strong>AB</strong></td>
-						<td>Bold module name indicates a duplicate table entry</td>
-					</tr>
+					<#--TODO - Put this description back once TAB-4669 has been implemented -->
+					<#--<tr>-->
+						<#--<td><strong>AB</strong></td>-->
+						<#--<td>Bold module name indicates a duplicate table entry</td>-->
+					<#--</tr>-->
 				</tbody>
 			</table>
 		</div>
