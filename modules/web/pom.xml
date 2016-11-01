@@ -443,6 +443,8 @@
 							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/id7/common.js</include>
+								<include>cm2-admin.js</include>
+								<include>filters.js</include>
 								<include>fullcalendar.js</include>
 							</includes>
 						</aggregation>

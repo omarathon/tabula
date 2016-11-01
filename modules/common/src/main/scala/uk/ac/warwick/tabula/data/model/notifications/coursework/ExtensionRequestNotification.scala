@@ -67,3 +67,12 @@ class ExtensionRequestModifiedNotification extends ExtensionRequestNotification 
 	def template = "/WEB-INF/freemarker/emails/modified_extension_request.ftl"
 	def title = titlePrefix + "Extension request modified by %s for \"%s\"".format(student.getFullName, assignment.name)
 }
+
+@Entity
+@DiscriminatorValue("ExtensionMoreInfoReceived")
+class ExtensionInfoReceivedNotification extends ExtensionRequestNotification {
+	priority = Warning
+	def verb = "reply"
+	def template = "/WEB-INF/freemarker/emails/extension_info_received.ftl"
+	def title = titlePrefix + "Further information provided by %s for \"%s\"".format(student.getFullName, assignment.name)
+}
