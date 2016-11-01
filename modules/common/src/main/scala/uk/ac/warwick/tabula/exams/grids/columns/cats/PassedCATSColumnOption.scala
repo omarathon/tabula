@@ -49,7 +49,7 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 			entity.years.get(thisYearOfStudy).orElse(
 				entity.years.values.lastOption.flatMap(entityYear =>
 					// For the last year go back up to the student and re-fetch the ExamGridEntity
-					entityYear.studentCourseYearDetails.get.studentCourseDetails.student.toExamGridEntity(thisYearOfStudy)
+					entityYear.studentCourseYearDetails.get.studentCourseDetails.student.toExamGridEntity(entityYear.studentCourseYearDetails.get)
 						// Then see if a matching ExamGrdEntityYear exists
 						.years.get(thisYearOfStudy)
 				)

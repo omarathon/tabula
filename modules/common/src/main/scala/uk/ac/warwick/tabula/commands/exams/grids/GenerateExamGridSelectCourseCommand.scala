@@ -36,7 +36,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 			yearOfStudy,
 			eagerLoad = true,
 			disableFreshFilter = true
-		).sortBy(_.studentCourseDetails.scjCode).map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(yearOfStudy))
+		).sortBy(_.studentCourseDetails.scjCode).map(scyd => scyd.studentCourseDetails.student.toExamGridEntity(scyd))
 	}
 
 }

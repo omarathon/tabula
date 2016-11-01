@@ -415,15 +415,16 @@ class StudentMember extends Member with StudentProperties {
 
 	def isPGR = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
 
-	def toExamGridEntity(maxYearOfStudy: Int) = {
+	def toExamGridEntity(baseSCYD: StudentCourseYearDetails) = {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
+			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 		ExamGridEntity(
 			firstName = Option(firstName).getOrElse("[Unknown]"),
 			lastName = Option(lastName).getOrElse("[Unknown]"),
 			universityId = universityId,
 			lastImportDate = Option(lastImportDate),
-			years = (1 to maxYearOfStudy).map(year =>
+			years = (1 to baseSCYD.yearOfStudy).map(year =>
 				year -> allSCYDs.reverse.find(_.yearOfStudy == year).get.toExamGridEntityYear
 			).toMap
 		)
