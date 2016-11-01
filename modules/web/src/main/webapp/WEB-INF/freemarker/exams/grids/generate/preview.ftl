@@ -53,8 +53,9 @@
 		<div class="alert alert-info">
 			<h3>Your grid</h3>
 			<p>
-				Your grid was generated using the latest data from SITS. If you think the data is inaccurate, please verify the data in SITS.
-				Also, if data changes in SITS after you have downloaded the grid, Tabula will not reflect the changes until you generate the grid again.
+				This grid has been generated from the data available in SITS at
+				<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+				time, you'll need to generate the grid again to see the most recent information.
 			</p>
 		</div>
 
