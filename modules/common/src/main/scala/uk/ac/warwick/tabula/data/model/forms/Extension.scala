@@ -113,7 +113,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def unreviewed = state == ExtensionState.Unreviewed
 	def revoked = state == ExtensionState.Revoked
 	def moreInfoRequired = state == ExtensionState.MoreInformationRequired
-	def moreInfoRecieved = state == ExtensionState.MoreInformationRequired
+	def moreInfoReceived = state == ExtensionState.MoreInformationRequired
 
 	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
 	def revocable = approved && !isInitiatedByStudent
@@ -180,7 +180,7 @@ object ExtensionState {
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
 	case object MoreInformationRequired extends ExtensionState("M", "More info required")
-	case object MoreInformationRecieved extends ExtensionState("C", "More info received")
+	case object MoreInformationReceived extends ExtensionState("C", "More info received")
 	case object Rejected extends ExtensionState("R", "Rejected")
 	case object Revoked extends ExtensionState("V", "Revoked")
 
@@ -188,13 +188,13 @@ object ExtensionState {
 		case Unreviewed.dbValue => Unreviewed
 		case Approved.dbValue => Approved
 		case MoreInformationRequired.dbValue => MoreInformationRequired
-		case MoreInformationRecieved.dbValue => MoreInformationRecieved
+		case MoreInformationReceived.dbValue => MoreInformationReceived
 		case Rejected.dbValue => Rejected
 		case Revoked.dbValue => Revoked
 		case _ => throw new IllegalArgumentException()
 	}
 
-	def all = Seq(Unreviewed, Approved, Rejected, Revoked, MoreInformationRequired, MoreInformationRecieved)
+	def all = Seq(Unreviewed, Approved, Rejected, Revoked, MoreInformationRequired, MoreInformationReceived)
 }
 
 class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, String] {

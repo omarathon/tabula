@@ -71,7 +71,7 @@ class ExtensionRequestController extends CourseworkController {
 			val extension = cmd.apply()
 			Mav(
 				s"$urlPrefix/submit/extension_request_success",
-				"isReply" -> extension.moreInfoRecieved,
+				"isReply" -> extension.moreInfoReceived,
 				"assignment" -> cmd.assignment
 			)
 		}

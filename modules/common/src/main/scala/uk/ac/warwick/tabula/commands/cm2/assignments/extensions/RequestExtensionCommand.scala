@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.extensions.ModifyExtensionCommandState
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState.MoreInformationRecieved
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.MoreInformationReceived
 import uk.ac.warwick.tabula.events.NotificationHandling
 
 import scala.collection.mutable
@@ -74,7 +74,7 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 		}
 
 		if (extension.state == ExtensionState.MoreInformationRequired) {
-			extension._state = MoreInformationRecieved
+			extension._state = MoreInformationReceived
 		}
 
 		save(extension)
@@ -167,7 +167,7 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 	def emit(extension: Extension) = {
 		val agent = submitter.apparentUser
 		val assignment = extension.assignment
-		val baseNotification = if(extension.moreInfoRecieved) {
+		val baseNotification = if(extension.moreInfoReceived) {
 			new ExtensionInfoReceivedNotification
 		} else if (modified) {
 			new ExtensionRequestModifiedNotification

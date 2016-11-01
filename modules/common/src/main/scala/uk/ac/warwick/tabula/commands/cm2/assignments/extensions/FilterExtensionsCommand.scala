@@ -69,7 +69,7 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 		)
 
 		val restrictions: Seq[ScalaRestriction] = Seq(
-			recievedRestriction,
+			receivedRestriction,
 			stateRestriction,
 			assignmentRestriction,
 			moduleRestriction.orElse(defaultModuleRestrictions),

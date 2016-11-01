@@ -72,7 +72,7 @@ trait FiltersExtensions extends {
 		Option(result.getQuery).getOrElse("")
 	}
 
-	def recievedRestriction = if (times.isEmpty) {
+	def receivedRestriction = if (times.isEmpty) {
 			None
 	} else {
 		val criterion = disjunction()
