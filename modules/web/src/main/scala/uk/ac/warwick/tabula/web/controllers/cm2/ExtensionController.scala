@@ -54,10 +54,10 @@ class ExtensionController extends CourseworkController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("extensionDetailCommand")
-	def detailCommand(@PathVariable extension: Extension) = ViewExtensionCommand(extension)
+	def detailCommand(@PathVariable extension: Extension) = ViewExtensionCommand(mandatory(extension))
 
 	@ModelAttribute("modifyExtensionCommand")
-	def modifyCommand(@PathVariable extension: Extension) = ModifyExtensionCommand(extension, user)
+	def modifyCommand(@PathVariable extension: Extension) = ModifyExtensionCommand(mandatory(extension), mandatory(user))
 
 	@RequestMapping(method=Array(GET), path=Array("detail"))
 	def detail(
@@ -100,7 +100,7 @@ class DownloadExtensionAttachmentController extends CourseworkController {
 
 	@ModelAttribute("downloadAttachmentCommand")
 	def attachmentCommand(@PathVariable extension: Extension, @PathVariable filename: String) =
-		DownloadExtensionAttachmentCommand(extension, filename)
+		DownloadExtensionAttachmentCommand(mandatory(extension), mandatory(filename))
 
 	@RequestMapping(method=Array(GET))
 	def supportingFile(
