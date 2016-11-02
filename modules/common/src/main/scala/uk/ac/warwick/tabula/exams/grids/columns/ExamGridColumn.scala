@@ -14,7 +14,8 @@ object ExamGridColumnOption {
 		val PotentialMarkingOptions = 0
 		val Name = 1
 		val UniversityId = 2
-		val StartYear = 3
+		val SPRCode = 3
+		val StartYear = 4
 		val CoreModules = 10
 		val CoreRequiredModules = 11
 		val CoreOptionalModules = 12
@@ -50,11 +51,12 @@ case class ExamGridColumnState(
 	academicYear: AcademicYear,
 	yearOfStudy: Int,
 	showFullName: Boolean,
-	showComponentMarks: Boolean
+	showComponentMarks: Boolean,
+	showModuleNames: Boolean
 )
 
 case object EmptyExamGridColumnState {
-	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showFullName=true,showComponentMarks=false)
+	def apply() = ExamGridColumnState(Nil,Map.empty,Nil,0,Nil,null,0,showFullName=true,showComponentMarks=false,showModuleNames=true)
 }
 
 @Component
