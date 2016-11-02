@@ -424,7 +424,8 @@ class GenerateExamGridController extends ExamsController
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
 			showFullName = gridOptionsCommand.showFullName,
-			showComponentMarks = gridOptionsCommand.showComponentMarks
+			showComponentMarks = gridOptionsCommand.showComponentMarks,
+			showModuleNames = gridOptionsCommand.showModuleNames
 		)
 
 		val predefinedColumnOptions = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier))

@@ -57,8 +57,9 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var yearsToShow: String = "current"
 	var marksToShow: String = "overall"
 	var customColumnTitles: JList[String] = JArrayList()
+	var moduleNameToShow: String = "codeOnly"
 
 	def showFullName = nameToShow != "both"
 	def showComponentMarks = marksToShow == "all"
-
+	def showModuleNames = moduleNameToShow == "nameAndCode"
 }

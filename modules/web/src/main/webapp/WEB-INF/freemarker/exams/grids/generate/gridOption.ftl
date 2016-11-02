@@ -53,6 +53,15 @@
 				/> University ID</label>
 			</div>
 		</div>
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="sprCode"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("sprCode")>checked</#if>
+				/> SPR code</label>
+			</div>
+		</div>
+
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="startyear"
@@ -136,6 +145,16 @@
 	</div>
 
 	<div class="row">
+
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="moduleNameToShow" value="nameAndCode"
+					<#if gridOptionsCommand.moduleNameToShow == 'nameAndCode'>checked</#if>
+				/> Show module names</label>
+			</div>
+		</div>
+
+
 		<div class="col-md-3">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="modulereports"
