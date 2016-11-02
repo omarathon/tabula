@@ -31,7 +31,7 @@ object MemberUserType {
 		"Academic-related staff", "Clerical staff", "Manual staff",
 		"Technical staff", "Security", "Casual staff", "Third party contract staff",
 		"University Staff", "Visiting academic", "External business' staff", "Honorary Teaching Staff",
-		"Academic Partner", "External Partner"
+		"Academic Partner", "External Partner", "Sessional tutor"
 	)
 
 	val AcademicTargetGroups = Set(
