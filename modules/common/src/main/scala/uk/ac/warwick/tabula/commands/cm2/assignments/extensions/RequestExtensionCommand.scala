@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{ExtensionRequestCreatedNotification, ExtensionRequestModifiedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework._
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
@@ -19,6 +19,9 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Re
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.coursework.assignments.extensions.ModifyExtensionCommandState
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.MoreInformationReceived
+import uk.ac.warwick.tabula.events.NotificationHandling
 
 import scala.collection.mutable
 
@@ -68,6 +71,10 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 		for (attachment <- file.attached) {
 			extension.addAttachment(attachment)
+		}
+
+		if (extension.state == ExtensionState.MoreInformationRequired) {
+			extension._state = MoreInformationReceived
 		}
 
 		save(extension)
@@ -160,7 +167,9 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 	def emit(extension: Extension) = {
 		val agent = submitter.apparentUser
 		val assignment = extension.assignment
-		val baseNotification = if (modified) {
+		val baseNotification = if(extension.moreInfoReceived) {
+			new ExtensionInfoReceivedNotification
+		} else if (modified) {
 			new ExtensionRequestModifiedNotification
 		} else {
 			new ExtensionRequestCreatedNotification

@@ -227,6 +227,33 @@ class MemberTest extends TestBase with Mockito {
 		studentMember.hasTier4Visa.get should be {false}
 	}
 
+
+	@Test def examGridEntity(): Unit = {
+		// TAB-4670
+		val student = Fixtures.student()
+		val scd1 = student.mostSignificantCourseDetails.get
+		scd1.scjCode = s"${student.universityId}/1"
+		val scyd2012 = scd1.latestStudentCourseYearDetails
+		scyd2012.academicYear = AcademicYear(2012)
+		scyd2012.yearOfStudy = 1
+		val scyd2013 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2013), yearOfStudy = 1, studentCourseDetails = scd1)
+		scd1.addStudentCourseYearDetails(scyd2013)
+		val scyd2014 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2014), yearOfStudy = 2, studentCourseDetails = scd1)
+		scd1.addStudentCourseYearDetails(scyd2014)
+		val scyd2015 = Fixtures.studentCourseYearDetails(academicYear = AcademicYear(2015), yearOfStudy = 3, studentCourseDetails = scd1)
+		scd1.addStudentCourseYearDetails(scyd2015)
+		val scd2 = Fixtures.studentCourseDetails(student, null, null)
+		scd2.scjCode = s"${student.universityId}/2"
+		val scyd2016 = scd2.latestStudentCourseYearDetails
+		scyd2016.academicYear = AcademicYear(2016)
+		scyd2016.yearOfStudy = 1
+
+		val entity = student.toExamGridEntity(scyd2015)
+		entity.years(1).studentCourseYearDetails.get should be (scyd2013) // Latest year 1 BEFORE the baseSCYD (15/16)
+		entity.years(2).studentCourseYearDetails.get should be (scyd2014)
+		entity.years(3).studentCourseYearDetails.get should be (scyd2015)
+	}
+
 }
 
 class MemberPersistenceTest extends PersistenceTestBase with Mockito {

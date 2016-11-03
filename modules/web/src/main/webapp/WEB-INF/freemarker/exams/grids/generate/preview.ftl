@@ -53,8 +53,9 @@
 		<div class="alert alert-info">
 			<h3>Your grid</h3>
 			<p>
-				Your grid was generated using the latest data from SITS. If you think the data is inaccurate, please verify the data in SITS.
-				Also, if data changes in SITS after you have downloaded the grid, Tabula will not reflect the changes until you generate the grid again.
+				This grid has been generated from the data available in SITS at
+				<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+				time, you'll need to generate the grid again to see the most recent information.
 			</p>
 		</div>
 
@@ -171,10 +172,11 @@
 						<td></td>
 						<td>Blank indicates module not taken by student</td>
 					</tr>
-					<tr>
-						<td><strong>AB</strong></td>
-						<td>Bold module name indicates a duplicate table entry</td>
-					</tr>
+					<#--TODO - Put this description back once TAB-4669 has been implemented -->
+					<#--<tr>-->
+						<#--<td><strong>AB</strong></td>-->
+						<#--<td>Bold module name indicates a duplicate table entry</td>-->
+					<#--</tr>-->
 				</tbody>
 			</table>
 		</div>
@@ -291,10 +293,34 @@
 		</table>
 
 		<div class="fix-footer">
-			<button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
+			<button class="excel-download btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
 		</div>
 	</form>
-
+	<div class='modal fade' id='confirmModal'>
+		<div class='modal-dialog' role='document'><div class='modal-content'>
+			<div class='modal-body'>
+				<p>
+					Exam grids contain restricted information. Under the University's
+					<a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>
+						information classification scheme
+					</a>, student names and University IDs are 'protected', exam marks are 'restricted' and provisional
+					degree classifications are 'reserved'.
+				</p>
+				<p>
+					When you download a grid as a spreadsheet, you are responsible for managing the security of the
+					information within it. You agree to abide by the University's <a target='_blank' href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
+						Data Protection Policy
+					<a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
+						electronic information asset protection.</a>
+					</p>
+			</div>
+			<div class='modal-footer'>
+				<a class='confirm btn btn-primary'>Accept</a>
+				<a data-dismiss='modal' class='btn'>Cancel</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="modal fade" id="edit-overcatting-modal"></div>
@@ -302,6 +328,30 @@
 <script>
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
+
+		$('.excel-download').on('click', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			var $this = $(this);
+			if(!$this.data("confirmModal")) {
+				var $modal = $('#confirmModal');
+				$modal.data('form', $(this).closest('form'));
+				$('body').append($modal);
+				$modal.modal();
+				$('a.confirm', $modal).on('click', function() {
+					$modal.modal('hide');
+					var $form = $modal.data('form');
+					var $submitInput = $('<input />').attr('type', 'hidden')
+						.attr('name', 'export')
+						.attr('value', 'true');
+					$form.append($submitInput);
+					$form.submit();
+				});
+				$this.data("confirmModal", $modal);
+			} else {
+				$this.data("confirmModal").modal('show');
+			}
+		});
 
 		$('th.rotated, td.rotated').each(function() {
 			var width = $(this).find('.rotate').width();

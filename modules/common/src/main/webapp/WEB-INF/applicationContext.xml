@@ -165,7 +165,9 @@
 		<bean class="uk.ac.warwick.tabula.data.convert.TimetableEventTypeConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupFormatConverter"/>
 		<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupAllocationMethodConverter"/>
-
+		<bean class="uk.ac.warwick.tabula.data.convert.ExtensionConverter" />
+		<bean class="uk.ac.warwick.tabula.data.model.forms.ExtensionStateConverter" />
+		<bean class="uk.ac.warwick.tabula.commands.TimeFilterConverter"/>
 	</util:list>
 
 	<bean id="typeConverter"
