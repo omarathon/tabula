@@ -1,8 +1,8 @@
 <#escape x as x?html>
 <#compress>
 	<div class="deptheader">
-		<h1>Request an extension<#if existingRequest.moreInfoRequired> - More information required</#if></h1>
-		<h5 class="with-related">for ${assignment.name}</h5>
+		<h1>Request an extension<#if isModification && existingRequest.moreInfoRequired> - More information required</#if></h1>
+		<h5 class="with-related">for ${assignment.module.code?upper_case} - ${assignment.name}</h5>
 	</div>
 
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
@@ -153,7 +153,11 @@
 			<input type="hidden" name="returnTo" value="${returnTo}" />
 
 			<div class="submit-buttons form-actions">
+			<#if isModification && existingRequest.moreInfoRequired>
+				<input type="submit" class="btn btn-primary" value="Send reply" />
+			<#else>
 				<input type="submit" class="btn btn-primary" value="Submit" />
+			</#if>
 				<a class="btn" href="${returnTo}">Cancel</a>
 			</div>
 		</@f.form>

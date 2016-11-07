@@ -58,3 +58,13 @@ class ExtensionRequestRejectedNotification extends ExtensionStudentNotification 
 	def urlTitle = "view the assignment deadline"
 	priority = NotificationPriority.Warning
 }
+
+@Entity
+@DiscriminatorValue("ExtensionRequestMoreInfo")
+class ExtensionRequestMoreInfo extends ExtensionStudentNotification {
+	def verb = "request"
+	def title = titlePrefix + "More information is required in order to review your extension request for \"%s\"".format(assignment.name)
+	def template = "/WEB-INF/freemarker/emails/extension_info_requested.ftl"
+	def urlTitle = "view the assignment deadline"
+	priority = NotificationPriority.Warning
+}

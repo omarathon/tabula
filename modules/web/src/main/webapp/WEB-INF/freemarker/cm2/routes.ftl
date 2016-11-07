@@ -19,6 +19,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
+<#macro filterExtensions><@_u page="/admin/extensions"/></#macro>
+<#macro extensionDetail extension><@_u page="/admin/extensions/${extension.id}/detail"/></#macro>
+<#macro extensionUpdate extension><@_u page="/admin/extensions/${extension.id}/update"/></#macro>
+<#macro extensionAttachment extension filename><@_u page="/admin/extensions/${extension.id}/supporting-file/${filename?url}" /></#macro>
+
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/submission/${assignment.id}"/></#macro>
 <#macro extensionRequest assignment><@_u page="/assignment/${assignment.id}/extension"/></#macro>

@@ -150,7 +150,7 @@ class OvercattingOptionsView(
 	private lazy val overcattedMarks: Seq[(BigDecimal, Seq[ModuleRegistration])] =
 		moduleRegistrationService.overcattedModuleSubsets(scyd.toExamGridEntityYear, overwrittenMarks, normalLoad, routeRules)
 
-	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd.yearOfStudy)
+	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd)
 
 	lazy val overcattedEntities = overcattedMarks.map { case (mark, overcattedModules) =>
 		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, ExamGridEntityYear(
@@ -171,7 +171,8 @@ class OvercattingOptionsView(
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
 		showFullName = false,
-		showComponentMarks = false
+		showComponentMarks = false,
+		showModuleNames = false
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)

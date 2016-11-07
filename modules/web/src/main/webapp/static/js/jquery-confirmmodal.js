@@ -6,6 +6,7 @@
 
 	Options:
 		message - the message to display in the modal.
+		wrapMessage - wraps the message in a h5 tag - default is true
 		confirm - the text for the confirm button
 		cancel - the text for the cancel button
 		primary - use text 'cancel' to make cancel the (highlighted) primary option
@@ -26,12 +27,14 @@
 					var message = options.message || 'Are you sure?',
 						confirm = options.confirm || 'Confirm',
 						cancel = options.cancel || 'Cancel',
+						wrapMessage = options.wrapMessage || true,
 						confirmPrimary = (options.primary && !(options.primary != 'confirm')) || true,
 						confirmClass = 'confirmModal confirm btn' + (confirmPrimary?' btn-primary':''),
 						cancelClass = 'confirmModal cancel btn' + (confirmPrimary?'':' btn-primary'),
+						fullMessage = wrapMessage ? "<h5>" + message + "</h5>" : message,
 						modalHtml = "<div class='modal hide fade'>" +
 										"<div class='modal-body'>" +
-											"<h5>" + message + "</h5>" +
+											fullMessage +
 										"</div>" +
 										"<div class='modal-footer'>" +
 											"<button class='" + confirmClass + "'>" + confirm + "</button>" +
@@ -47,6 +50,7 @@
 					$form.on('submit.confirmModal', function() {
 						if (! $modal.hasClass("in")) {
                             // don't block if already showing
+                            //$('body').append($modal);
                             $modal.modal();
                             return false;
                         }

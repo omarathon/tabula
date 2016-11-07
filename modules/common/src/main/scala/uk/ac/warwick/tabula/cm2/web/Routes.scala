@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.cm2.web
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -23,5 +24,17 @@ object Routes {
 	object assignment {
 		def apply(assignment: Assignment) = context + "/submission/%s/" format encoded(assignment.id)
 	}
+
+	object admin {
+		def apply() = s"$context/admin"
+
+		object extensions {
+			def apply() = admin() + "/extensions"
+			def detail(extension: Extension) = extensions() + s"/${extension.id}/detail/"
+			def modify(extension: Extension) = extensions() + s"/${extension.id}/update/"
+		}
+	}
+
+
 
 }

@@ -301,6 +301,7 @@ class GenerateExamGridController extends ExamsController
 			)
 		}
 
+		val oldestImport = benchmarkTask("oldestImport") { entities.flatMap(_.lastImportDate).reduceOption((a, b) => if(a.isBefore(b)) a else b) }
 		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
 		val chosenYearColumnCategories = benchmarkTask("chosenYearColumnCategories") { summaryColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category) }
 		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
@@ -308,6 +309,7 @@ class GenerateExamGridController extends ExamsController
 
 		commonCrumbs(
 			Mav("exams/grids/generate/preview",
+				"oldestImport" -> oldestImport,
 				"studentInformationColumns" -> studentInformationColumns,
 				"perYearColumns" -> perYearColumns,
 				"summaryColumns" -> summaryColumns,
@@ -422,7 +424,8 @@ class GenerateExamGridController extends ExamsController
 			academicYear = selectCourseCommand.academicYear,
 			yearOfStudy = selectCourseCommand.yearOfStudy,
 			showFullName = gridOptionsCommand.showFullName,
-			showComponentMarks = gridOptionsCommand.showComponentMarks
+			showComponentMarks = gridOptionsCommand.showComponentMarks,
+			showModuleNames = gridOptionsCommand.showModuleNames
 		)
 
 		val predefinedColumnOptions = allExamGridsColumns.filter(c => c.mandatory || predefinedColumnIDs.contains(c.identifier))

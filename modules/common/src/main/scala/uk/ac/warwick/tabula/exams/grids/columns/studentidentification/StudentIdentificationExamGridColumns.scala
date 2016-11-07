@@ -90,6 +90,35 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 }
 
 @Component
+class SPRCodeColumnOption extends StudentExamGridColumnOption {
+
+	override val identifier: ExamGridColumnOption.Identifier = "sprCode"
+
+	override val sortOrder: Int = ExamGridColumnOption.SortOrders.SPRCode
+
+	case class Column(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
+
+		override val title: String = "SPR Code"
+
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+
+		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+			state.entities.map(entity => entity ->
+				ExamGridColumnValueString (
+					(for {
+						egey <- entity.years.get(state.yearOfStudy)
+						scyd <- egey.studentCourseYearDetails
+					} yield scyd.studentCourseDetails.sprCode).getOrElse("[Unknown]")
+				)
+			).toMap
+		}
+	}
+
+	override def getColumns(state: ExamGridColumnState): Seq[ChosenYearExamGridColumn] = Seq(Column(state))
+
+}
+
+@Component
 class StartYearColumnOption extends StudentExamGridColumnOption {
 
 	override val identifier: ExamGridColumnOption.Identifier = "startyear"

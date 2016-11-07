@@ -1,0 +1,52 @@
+@import "../../libs/font-awesome/less/font-awesome.less";
+
+a.profile-link {
+	text-decoration: none;
+}
+
+
+// extension management
+.detail-row {
+	padding: 0;
+	margin: 0;
+
+	td {
+		padding: 0;
+		margin: 0;
+	}
+
+	.buttons {
+		margin: 10px 0;
+	}
+
+	// styles to make a details summary look like a form label
+	summary {
+		font-weight: 700;
+		color: #555;
+		margin-bottom: 5px;
+	}
+}
+
+.clickable {
+	cursor: pointer;
+
+	&.collapsed .toggle-icon:before {
+		font-family: 'FontAwesome';
+		content: @caret-right;
+	}
+
+	.toggle-icon:before {
+		font-family: 'FontAwesome';
+		content: @caret-down;
+	}
+
+	&.collapsed .toggle-icon-large:before {
+		font-family: 'FontAwesome';
+		content: @chevron-right;
+	}
+
+	.toggle-icon-large:before {
+		font-family: 'FontAwesome';
+		content: @chevron-down;
+	}
+}
