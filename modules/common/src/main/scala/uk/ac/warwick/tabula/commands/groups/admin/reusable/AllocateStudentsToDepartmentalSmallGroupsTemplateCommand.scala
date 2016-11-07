@@ -47,9 +47,6 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
 			// put the student details into the cells
-			// otherwise create blank unprotected cells for the user to enter
-			//val user  = userIterator.next
-			//val thisUser = user
 			row.createCell(0).setCellValue(user.getWarwickId)
 			row.createCell(1).setCellValue(user.getFullName)
 			val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
