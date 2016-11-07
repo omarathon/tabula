@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService, ProfileServiceComponent, UserGroupCacheManager}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -103,7 +103,9 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}
 
 	private trait CommandFixture extends Fixture {
-		val command = new AllocateStudentsToGroupsTemplateCommandInternal(module, set)
+		val command = new AllocateStudentsToGroupsTemplateCommandInternal(module, set) with ProfileServiceComponent {
+			val profileService = smartMock[ProfileService]
+		}
 	}
 
 	@Test def allocateUsersSheet { new CommandFixture {

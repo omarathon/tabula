@@ -3,16 +3,20 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 object AllocateStudentsToDepartmentalSmallGroupsTemplateCommand {
 	def apply(department: Department, set: DepartmentSmallGroupSet) =
 		new AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(department, set)
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[ExcelView]
 			with AllocateStudentsToDepartmentalSmallGroupsTemplatePermissions
 			with ReadOnly with Unaudited
@@ -21,9 +25,9 @@ object AllocateStudentsToDepartmentalSmallGroupsTemplateCommand {
 class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[ExcelView] with AllocateStudentsToDepartmentalSmallGroupsTemplateCommandState {
 
+	self:  ProfileServiceComponent =>
 	val groupLookupSheetName = "GroupLookup"
 	val allocateSheetName = "AllocateStudents"
-	val spreadsheetRows = 1000
 	val sheetPassword = "roygbiv"
 
 	def applyInternal() = {
@@ -33,38 +37,27 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
 
 	def generateWorkbook() = {
 		val groups = set.groups.asScala.toList
-
+		val setUsers = set.allStudents
 		val workbook = new XSSFWorkbook()
 		val sheet: XSSFSheet = generateAllocationSheet(workbook)
 		generateGroupLookupSheet(workbook)
-		generateGroupDropdowns(sheet, groups)
-
+		generateGroupDropdowns(sheet, groups, setUsers.size)
 		val groupLookupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
-		val userIterator = set.allStudents.iterator
-
-		while (sheet.getLastRowNum < spreadsheetRows) {
+		setUsers.foreach { user =>
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
 			// put the student details into the cells
 			// otherwise create blank unprotected cells for the user to enter
-			if (userIterator.hasNext) {
-				val user = userIterator.next
-				val thisUser = user
-				row.createCell(0).setCellValue(thisUser.getWarwickId)
-				row.createCell(1).setCellValue(thisUser.getFullName)
+			//val user  = userIterator.next
+			//val thisUser = user
+			row.createCell(0).setCellValue(user.getWarwickId)
+			row.createCell(1).setCellValue(user.getFullName)
+			val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
 
-				val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
-
-				// If this user is already in a group, prefill
-				groups.find { _.students.includesUser(user) }.foreach { group =>
-					groupNameCell.setCellValue(group.name)
-				}
-			} else {
-				createUnprotectedCell(workbook, row, 0) // cell for student_id
-				createUnprotectedCell(workbook, row, 1) // cell for name (for the user's info only)
-				createUnprotectedCell(workbook, row, 2) // cell for the group name
+			// If this user is already in a group, prefill
+			groups.find { _.students.includesUser(user) }.foreach { group =>
+				groupNameCell.setCellValue(group.name)
 			}
-
 			row.createCell(3).setCellFormula(
 				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
 			)
@@ -84,8 +77,10 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(val depar
 	}
 
 	// attaches the data validation to the sheet
-	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_]) {
-		val dropdownRange = new CellRangeAddressList(1, spreadsheetRows, 2, 2)
+	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_], totalStudents: Int) {
+		var lastRow =  totalStudents
+		if(lastRow == 0) lastRow = 1
+		val dropdownRange = new CellRangeAddressList(1, lastRow, 2, 2)
 		val validation = getDataValidation(groups, sheet, dropdownRange)
 
 		sheet.addValidationData(validation)
