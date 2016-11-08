@@ -129,11 +129,6 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 		allocateSheet.containsDataRow("8888888","Steven Carpenter", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("9293883","Matthew Jones", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("0200202","John Dale", maxRows = 6) should be(true)
-		allocateSheet.containsDataRow("","", maxRows = 6) should be(true)
-
-		val blankRow = allocateSheet.getRow(6)
-		blankRow.getCell(0).toString should be ("")
-		blankRow.getCell(1).toString should be ("")
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {
