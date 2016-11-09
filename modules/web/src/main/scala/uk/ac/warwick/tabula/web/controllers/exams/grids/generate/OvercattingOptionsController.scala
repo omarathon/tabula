@@ -171,7 +171,8 @@ class OvercattingOptionsView(
 		academicYear = academicYear,
 		yearOfStudy = scyd.yearOfStudy,
 		showFullName = false,
-		showComponentMarks = false
+		showComponentMarks = false,
+		showModuleNames = false
 	)
 
 	private lazy val currentYearMark = moduleRegistrationService.weightedMeanYearMark(scyd.moduleRegistrations, overwrittenMarks)

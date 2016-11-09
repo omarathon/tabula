@@ -3,16 +3,20 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 object AllocateStudentsToGroupsTemplateCommand {
 	def apply(module: Module, set: SmallGroupSet) =
 		new AllocateStudentsToGroupsTemplateCommandInternal(module, set)
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[ExcelView]
 			with AllocateStudentsToGroupsTemplatePermissions
 			with ReadOnly with Unaudited
@@ -21,9 +25,10 @@ object AllocateStudentsToGroupsTemplateCommand {
 class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val set: SmallGroupSet)
 	extends CommandInternal[ExcelView] with AllocateStudentsToGroupsTemplateCommandState {
 
+	self:  ProfileServiceComponent =>
+
 	val groupLookupSheetName = "GroupLookup"
 	val allocateSheetName = "AllocateStudents"
-	val spreadsheetRows = 1000
 	val sheetPassword = "roygbiv"
 
 	def applyInternal() = {
@@ -33,43 +38,28 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 
 	def generateWorkbook() = {
 		val groups = set.groups.asScala.toList
-
+		val setUsers = removePermanentlyWithdrawn(set.allStudents)
 		val workbook = new XSSFWorkbook()
 		val sheet: XSSFSheet = generateAllocationSheet(workbook)
 		generateGroupLookupSheet(workbook)
-		generateGroupDropdowns(sheet, groups)
+		generateGroupDropdowns(sheet, groups, setUsers.size)
 
 		val groupLookupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
-		val userIterator = set.allStudents.iterator
-
-		while (sheet.getLastRowNum < spreadsheetRows) {
+		setUsers.foreach { user =>
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
-
 			// put the student details into the cells
-			// otherwise create blank unprotected cells for the user to enter
-			if (userIterator.hasNext) {
-				val user = userIterator.next
-				val thisUser = user
-				row.createCell(0).setCellValue(thisUser.getWarwickId)
-				row.createCell(1).setCellValue(thisUser.getFullName)
+			row.createCell(0).setCellValue(user.getWarwickId)
+			row.createCell(1).setCellValue(user.getFullName)
+			val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
 
-				val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
-
-				// If this user is already in a group, prefill
-				groups.find { _.students.includesUser(user) }.foreach { group =>
-					groupNameCell.setCellValue(group.name)
-				}
-			} else {
-				createUnprotectedCell(workbook, row, 0) // cell for student_id
-				createUnprotectedCell(workbook, row, 1) // cell for name (for the user's info only)
-				createUnprotectedCell(workbook, row, 2) // cell for the group name
+			// If this user is already in a group, prefill
+			groups.find { _.students.includesUser(user) }.foreach { group =>
+				groupNameCell.setCellValue(group.name)
 			}
-
 			row.createCell(3).setCellFormula(
 				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
 			)
 		}
-
 		formatWorkbook(workbook)
 		workbook
 	}
@@ -83,9 +73,20 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		cell
 	}
 
+	def removePermanentlyWithdrawn(users: Seq[User]) = {
+		val members: Seq[Member] = users.flatMap(usr => profileService.getMemberByUser(usr))
+		val membersFiltered: Seq[Member] = members.filter {
+			case (student: StudentMember) => !student.permanentlyWithdrawn
+			case (member: Member) => true
+		}
+		membersFiltered.map { mem => mem.asSsoUser}
+	}
+
 	// attaches the data validation to the sheet
-	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_]) {
-		val dropdownRange = new CellRangeAddressList(1, spreadsheetRows, 2, 2)
+	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_], totalStudents: Int) {
+		var lastRow =  totalStudents
+		if(lastRow == 0) lastRow = 1
+		val dropdownRange = new CellRangeAddressList(1, lastRow, 2, 2)
 		val validation = getDataValidation(groups, sheet, dropdownRange)
 
 		sheet.addValidationData(validation)
@@ -142,7 +143,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		// set style on all columns
 		0 to 3 foreach  {
 			col => sheet.setDefaultColumnStyle(col, style)
-			sheet.autoSizeColumn(col)
+				sheet.autoSizeColumn(col)
 		}
 
 		// set ID column to be wider

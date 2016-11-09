@@ -101,7 +101,8 @@
 								</td>
 								<td>${module.code}</td>
 								<td>${module.title}</td>
-								<td>${module.adminDepartment}</td>
+								<#--This is a ViewSmallGroupsForPointCommandResult.Module which has .department rather than .adminDepartment -->
+								<td>${module.department}</td>
 								<td>${module.cats}</td>
 								<td>${module.status}</td>
 							</tr>

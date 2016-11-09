@@ -12,7 +12,9 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 
 	def moduleSelectionStatus: Option[ModuleSelectionStatus]
 
-	override val title: String = s"${module.code.toUpperCase} ${module.name}"
+	override val title: String =
+		if (state.showModuleNames) s"${module.code.toUpperCase} ${module.name}"
+		else s"${module.code.toUpperCase}"
 
 	override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 

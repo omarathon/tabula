@@ -41,6 +41,7 @@
 		<input type="hidden" name="nameToShow" value="${gridOptionsCommand.nameToShow}" />
 		<input type="hidden" name="yearsToShow" value="${gridOptionsCommand.yearsToShow}" />
 		<input type="hidden" name="marksToShow" value="${gridOptionsCommand.marksToShow}" />
+		<input type="hidden" name="moduleNameToShow" value="${gridOptionsCommand.moduleNameToShow}" />
 
 		<h2>Preview and download</h2>
 
