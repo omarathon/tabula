@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.UserGroupCacheManager
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, UserGroupCacheManager}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -100,7 +100,9 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 	}
 
 	private trait CommandFixture extends Fixture {
-		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(department, set)
+		val command = new AllocateStudentsToDepartmentalSmallGroupsTemplateCommandInternal(department, set) with ProfileServiceComponent {
+			val profileService = smartMock[ProfileService]
+		}
 	}
 
 	@Test def allocateUsersSheet { new CommandFixture {
@@ -127,11 +129,6 @@ class AllocateStudentsToDepartmentalSmallGroupsTemplateTest extends TestBase wit
 		allocateSheet.containsDataRow("8888888","Steven Carpenter", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("9293883","Matthew Jones", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("0200202","John Dale", maxRows = 6) should be(true)
-		allocateSheet.containsDataRow("","", maxRows = 6) should be(true)
-
-		val blankRow = allocateSheet.getRow(6)
-		blankRow.getCell(0).toString should be ("")
-		blankRow.getCell(1).toString should be ("")
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {
