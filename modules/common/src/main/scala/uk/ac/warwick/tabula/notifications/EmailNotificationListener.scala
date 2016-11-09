@@ -31,9 +31,9 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 	val replyWarning = "\n\nThis email was sent from an automated system and replies to it will not reach a real person."
 
 	def link(n: Notification[_,_]) = if (n.isInstanceOf[ActionRequiredNotification]) {
-		s"\n\nYou need to ${n.urlTitle}. Please visit $topLevelUrl${n.url}."
+		s"\n\nYou need to ${n.urlTitle}. Please visit $topLevelUrl${n.url}"
 	} else {
-		s"\n\nTo ${n.urlTitle}, please visit $topLevelUrl${n.url}."
+		s"\n\nTo ${n.urlTitle}, please visit $topLevelUrl${n.url}"
 	}
 
 	// add an isEmail property for the model for emails

@@ -43,7 +43,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable relationshipType: StudentRelationshipType
 	): Mav = {
-		viewByCourse(studentCourseDetails, Some(mandatory(academicYear)), relationshipType)
+		viewByCourse(studentCourseDetails, Some(mandatory(academicYear)), mandatory(relationshipType))
 	}
 
 	private def viewByCourse(
