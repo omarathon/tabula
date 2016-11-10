@@ -71,6 +71,9 @@
 					<#if member.userId??>
 						<strong>IT code:</strong> ${member.userId}<br/>
 					</#if>
+					<#if member.homeDepartment??>
+						<strong>Home department:</strong> ${member.homeDepartment.name}<br/>
+					</#if>
 				</div>
 			</div>
 
