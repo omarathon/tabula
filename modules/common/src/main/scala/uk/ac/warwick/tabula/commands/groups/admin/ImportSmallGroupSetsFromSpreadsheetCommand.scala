@@ -83,7 +83,7 @@ trait ImportSmallGroupSetsFromSpreadsheetValidation extends SelfValidating {
 
 	override def validate(errors: Errors): Unit = {
 		commands.asScala.zipWithIndex.foreach { case (set, i) =>
-			errors.pushNestedPath(s"commands[$i]")
+			errors.pushNestedPath(s"commands[$i].command")
 
 			set.command.validate(errors)
 
