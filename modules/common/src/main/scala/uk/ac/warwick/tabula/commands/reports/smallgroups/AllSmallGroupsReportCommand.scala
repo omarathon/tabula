@@ -77,7 +77,7 @@ class AllSmallGroupsReportCommandInternal(
 		// so generate case classes to repesent each occurrence (a combination of event and week)
 		val eventWeeks: Seq[SmallGroupEventWeek] = benchmarkTask("eventWeeks") {
 			sets.flatMap(_.groups.asScala.flatMap(_.events).filter(!_.isUnscheduled).flatMap(sge => {
-				sge.allWeeks.map(week => SmallGroupEventWeek(UUID.randomUUID.toString, sge, week, {
+				sge.allWeeks.map(week => SmallGroupEventWeek(s"${sge.id}-$week", sge, week, {
 					week < thisWeek || week == thisWeek && sge.day.getAsInt < thisDay
 				}))
 			})).filter{sgew =>
