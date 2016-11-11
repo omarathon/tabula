@@ -47,6 +47,7 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 		response match {
 			case Success(urkundResponse) => urkundResponse match {
 				case success: UrkundSuccessResponse =>
+					report.submittedDate = DateTime.now
 					report.nextSubmitAttempt = null
 					report.nextResponseAttempt = DateTime.now.plusMinutes(UrkundService.reportTimeoutInMinutes)
 				case error =>
