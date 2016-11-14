@@ -214,7 +214,7 @@
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="finalOverallMark"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("finalOverallMark")>checked</#if>
-				/> Final year mark</label>
+				/> Final overall mark</label>
 			</div>
 		</div>
 		<div class="col-md-3">
