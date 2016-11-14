@@ -27,6 +27,7 @@ object ModifySmallGroupSetCommand {
 			with CreateSmallGroupSetPermissions
 			with CreateSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
+			with ModifySmallGroupSetsScheduledNotifications
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringAssessmentMembershipServiceComponent
 			with GeneratesDefaultWeekRangesWithTermService
@@ -38,6 +39,7 @@ object ModifySmallGroupSetCommand {
 			with EditSmallGroupSetPermissions
 			with EditSmallGroupSetDescription
 			with ModifySmallGroupSetValidation
+			with ModifySmallGroupSetsScheduledNotifications
 			with AutowiringSmallGroupServiceComponent
 }
 
@@ -296,4 +298,19 @@ trait EditSmallGroupSetDescription extends Describable[SmallGroupSet] {
 		d.smallGroupSet(set)
 	}
 
+}
+
+trait ModifySmallGroupSetsScheduledNotifications
+	extends SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] with GeneratesNotificationsForSmallGroupEventOccurrence {
+
+	self: SmallGroupServiceComponent with ModifySmallGroupSetCommandState =>
+
+	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
+		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
+		set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
+
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+		if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
+		else Nil // The set commands spawned will hande notification creation for events
+	}
 }
