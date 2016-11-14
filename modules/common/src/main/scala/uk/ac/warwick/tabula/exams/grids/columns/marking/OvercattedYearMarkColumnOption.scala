@@ -12,8 +12,6 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
 
 	override val sortOrder: Int = ExamGridColumnOption.SortOrders.OvercattedYearMark
 
-	override val mandatory = true
-
 	case class Column(state: ExamGridColumnState)	extends ChosenYearExamGridColumn(state) with HasExamGridColumnCategory {
 
 		override val title: String = "Over Catted Mark"
