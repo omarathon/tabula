@@ -21,32 +21,61 @@ sealed abstract class FinalYearGrade(val description: String, val lowerBound: Bi
 	def applies(mark: BigDecimal): Boolean = {
 		mark <= upperBound && mark >= lowerBound
 	}
+	def withMark(mark: BigDecimal): FinalYearMark = FinalYearMark(mark, description, lowerBound, upperBound)
 }
+
+case class FinalYearMark(mark: BigDecimal, override val description: String, override val lowerBound: BigDecimal, override val upperBound: BigDecimal)
+	extends FinalYearGrade(description, lowerBound, upperBound)
 
 object FinalYearGrade {
 	case object First extends FinalYearGrade(
 		"1",
-		BigDecimal(70.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(71.0).setScale(1, RoundingMode.HALF_UP),
 		BigDecimal(200.0).setScale(1, RoundingMode.HALF_UP)
+	)
+	case object FirstBorderline extends FinalYearGrade(
+		"1 (b)",
+		BigDecimal(70.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(70.9).setScale(1, RoundingMode.HALF_UP)
 	)
 	case object UpperSecond extends FinalYearGrade(
 		"2.1",
 		BigDecimal(60.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(67.9).setScale(1, RoundingMode.HALF_UP)
+	)
+	case object UpperSecondBorderline extends FinalYearGrade(
+		"2.1 (b)",
+		BigDecimal(68.0).setScale(1, RoundingMode.HALF_UP),
 		BigDecimal(69.9).setScale(1, RoundingMode.HALF_UP)
 	)
 	case object LowerSecond extends FinalYearGrade(
 		"2.2",
 		BigDecimal(50.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(57.9).setScale(1, RoundingMode.HALF_UP)
+	)
+	case object LowerSecondBorderline extends FinalYearGrade(
+		"2.2 (b)",
+		BigDecimal(58.0).setScale(1, RoundingMode.HALF_UP),
 		BigDecimal(59.9).setScale(1, RoundingMode.HALF_UP)
 	)
 	case object Third extends FinalYearGrade(
 		"3",
 		BigDecimal(40.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(47.9).setScale(1, RoundingMode.HALF_UP)
+	)
+	case object ThirdBorderline extends FinalYearGrade(
+		"3 (b)",
+		BigDecimal(48.0).setScale(1, RoundingMode.HALF_UP),
 		BigDecimal(49.9).setScale(1, RoundingMode.HALF_UP)
 	)
 	case object Pass extends FinalYearGrade(
 		"Pass",
 		BigDecimal(35.0).setScale(1, RoundingMode.HALF_UP),
+		BigDecimal(37.9).setScale(1, RoundingMode.HALF_UP)
+	)
+	case object PassBorderline extends FinalYearGrade(
+		"Pass (b)",
+		BigDecimal(38.0).setScale(1, RoundingMode.HALF_UP),
 		BigDecimal(39.9).setScale(1, RoundingMode.HALF_UP)
 	)
 	case object Fail extends FinalYearGrade(
@@ -56,8 +85,13 @@ object FinalYearGrade {
 	)
 	case class Unknown(details: String) extends FinalYearGrade("?", null, null)
 	case object Ignore extends FinalYearGrade("-", null, null)
-	private val all = Seq(First, UpperSecond, LowerSecond, Third, Pass, Fail)
-	def fromMark(mark: BigDecimal): FinalYearGrade = all.find(_.applies(mark)).getOrElse(Unknown(s"Could not find matching grade for mark ${mark.toString}"))
+	private val all = Seq(
+		First, FirstBorderline, UpperSecond, UpperSecondBorderline, LowerSecond, LowerSecondBorderline,
+		Third, ThirdBorderline, Pass, PassBorderline, Fail
+	)
+	def fromMark(mark: BigDecimal): FinalYearGrade =
+		all.find(_.applies(mark)).map(_.withMark(mark))
+			.getOrElse(Unknown(s"Could not find matching grade for mark ${mark.toString}"))
 }
 
 object ProgressionService {
@@ -246,6 +280,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 				finalTwoYearsModuleRegistrations.filter(_.firstDefinedMark.isEmpty).map(mr => "%s %s".format(mr.module.code.toUpperCase, mr.academicYear.toString)).mkString(", ")
 			}")
 		} else {
+			val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
+				markPerYear.toMap.apply(year) * yearWeightings.toMap.apply(year).weighting
+			}.sum.setScale(1, RoundingMode.HALF_UP)
 
 			val passedModuleRegistrationsInFinalTwoYears: Seq[ModuleRegistration] = finalTwoYearsModuleRegistrations
 				.filter(mr => BigDecimal(mr.firstDefinedMark.get) >= ProgressionService.ModulePassMark)
@@ -256,12 +293,9 @@ abstract class AbstractProgressionService extends ProgressionService {
 			val passedCreditsFinalYear = passedModuleRegistrationsFinalYear.map(mr => BigDecimal(mr.cats)).sum > ProgressionService.FinalYearRequiredCredits
 
 			if (passedCreditsInFinalTwoYears && passedCreditsFinalYear) {
-				val finalMark: BigDecimal = markPerYear.map { case (year, _) =>
-					markPerYear.toMap.apply(year) * yearWeightings.toMap.apply(year).weighting
-				}.sum.setScale(1, RoundingMode.HALF_UP)
 				FinalYearGrade.fromMark(finalMark)
 			} else {
-				FinalYearGrade.Fail
+				FinalYearGrade.Fail.withMark(finalMark)
 			}
 
 		}
