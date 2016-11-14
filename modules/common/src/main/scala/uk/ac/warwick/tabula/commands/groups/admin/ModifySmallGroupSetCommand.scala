@@ -307,7 +307,7 @@ trait ModifySmallGroupSetsScheduledNotifications
 
 	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
 		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
-		set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences)))
+		set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
 
 	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
 		if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
