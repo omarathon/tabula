@@ -24,7 +24,7 @@ class ViewProfileTimetableController extends AbstractViewProfileController
 			case student: StudentMember if student.mostSignificantCourseDetails.isDefined =>
 				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
 			case _ =>
-				Mav("profiles/profile/timetable_staff",
+				Mav("profiles/profile/timetable",
 					"academicYears" -> scientiaConfiguration.academicYears
 				).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
 		}
@@ -43,7 +43,7 @@ class ViewProfileTimetableController extends AbstractViewProfileController
 		studentCourseDetails: StudentCourseDetails,
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
-		Mav("profiles/profile/timetable_student",
+		Mav("profiles/profile/timetable",
 			"member" -> studentCourseDetails.student
 		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.TimetableIdentifier): _*)
 			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.timetable(scyd)): _*)
