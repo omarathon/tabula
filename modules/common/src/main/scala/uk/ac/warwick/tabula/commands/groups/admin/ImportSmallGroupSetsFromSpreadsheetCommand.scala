@@ -186,7 +186,7 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 
 							def duplicate(a: ExtractedSmallGroupEvent, b: ExtractedSmallGroupEvent): Boolean =
 								a != b && (
-									(a.title == b.title) ||
+									(a.title.nonEmpty && a.title == b.title) ||
 									(a.weekRanges == b.weekRanges && a.dayOfWeek == b.dayOfWeek && a.startTime == b.startTime)
 								)
 
