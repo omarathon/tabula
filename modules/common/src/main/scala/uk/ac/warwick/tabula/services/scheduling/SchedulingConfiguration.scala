@@ -113,6 +113,7 @@ object SchedulingConfiguration {
 		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 2 * * ?"), // 2am
 
 		CronTriggerJob[UpdateMonitoringPointSchemeMembershipJob](cronExpression = "0 0 4 * * ?"), // 4am
+		CronTriggerJob[UpdateLinkedDepartmentSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
 
 		SimpleTriggerJob[ProcessScheduledNotificationsJob](repeatInterval = 1.minute),
 		SimpleTriggerJob[ProcessTriggersJob](repeatInterval = 10.seconds),
