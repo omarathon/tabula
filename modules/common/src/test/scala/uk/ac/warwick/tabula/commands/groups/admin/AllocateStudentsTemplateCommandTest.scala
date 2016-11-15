@@ -4,9 +4,9 @@ import org.apache.poi.xssf.usermodel.XSSFSheet
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.{Appliable, ReadOnly, Unaudited}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ProfileService, ProfileServiceComponent, UserGroupCacheManager}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
@@ -21,6 +21,18 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
+
+		def studentMemberWithCourse(universityId: String, userId: String, firstName: String, lastName: String): StudentMember ={
+			val studentWithUsercode1 = new StudentMember
+			studentWithUsercode1.universityId = universityId
+			studentWithUsercode1.userId = userId
+			studentWithUsercode1.firstName = firstName
+			studentWithUsercode1.lastName = lastName
+			studentWithUsercode1.inUseFlag= "Active"
+			Fixtures.studentCourseDetails(studentWithUsercode1,null,null)
+			studentWithUsercode1
+		}
+
 		val module = Fixtures.module("in101", "Introduction to Scala")
 		val set = Fixtures.smallGroupSet("My small groups")
 
@@ -30,29 +42,37 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		user1.setLastName("Mannion")
 		user1.setWarwickId("0672089")
 
+		val studentWithUsercode1 = studentMemberWithCourse("0672089","cuscav", "Mathew", "Mannion")
+
+
 		val user2 = new User("cusebr")
 		user2.setFoundUser(true)
 		user2.setFirstName("Nick")
 		user2.setLastName("Howes")
 		user2.setWarwickId("0672088")
+		val studentWithUsercode2 = studentMemberWithCourse("0672088","cusebr", "Nick", "Howes")
+
 
 		val user3 = new User("cusfal")
 		user3.setFoundUser(true)
 		user3.setFirstName("Matthew")
 		user3.setLastName("Jones")
 		user3.setWarwickId("9293883")
+		val studentWithUsercode3 = studentMemberWithCourse("9293883","cusfal", "Matthew", "Jones")
 
 		val user4 = new User("curef")
 		user4.setFoundUser(true)
 		user4.setFirstName("John")
 		user4.setLastName("Dale")
 		user4.setWarwickId("0200202")
+		val studentWithUsercode4 = studentMemberWithCourse("0200202","curef", "John", "Dale")
 
 		val user5 = new User("cusmab")
 		user5.setFoundUser(true)
 		user5.setFirstName("Steven")
 		user5.setLastName("Carpenter")
 		user5.setWarwickId("8888888")
+		val studentWithUsercode5 = studentMemberWithCourse("8888888","cusmab", "Steven", "Carpenter")
 
 		userLookup.users += (
 			user1.getUserId -> user1,
@@ -103,7 +123,15 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}
 
 	private trait CommandFixture extends Fixture {
-		val command = new AllocateStudentsToGroupsTemplateCommandInternal(module, set)
+		val command = new AllocateStudentsToGroupsTemplateCommandInternal(module, set) with ProfileServiceComponent {
+			val profileService = smartMock[ProfileService]
+
+		}
+		command.profileService.getMemberByUser(user1) returns (Some(studentWithUsercode1))
+		command.profileService.getMemberByUser(user2) returns (Some(studentWithUsercode2))
+		command.profileService.getMemberByUser(user3) returns (Some(studentWithUsercode3))
+		command.profileService.getMemberByUser(user4) returns (Some(studentWithUsercode4))
+		command.profileService.getMemberByUser(user5) returns (Some(studentWithUsercode5))
 	}
 
 	@Test def allocateUsersSheet { new CommandFixture {
@@ -130,11 +158,6 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		allocateSheet.containsDataRow("8888888","Steven Carpenter", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("9293883","Matthew Jones", maxRows = 6) should be(true)
 		allocateSheet.containsDataRow("0200202","John Dale", maxRows = 6) should be(true)
-		allocateSheet.containsDataRow("","", maxRows = 6) should be(true)
-
-		val blankRow = allocateSheet.getRow(6)
-		blankRow.getCell(0).toString should be ("")
-		blankRow.getCell(1).toString should be ("")
 	}}
 
 	@Test def groupLookupSheet { new CommandFixture {

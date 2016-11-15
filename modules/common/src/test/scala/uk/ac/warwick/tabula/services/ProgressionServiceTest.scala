@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.mockito.Matchers
+import org.scalatest.Assertions
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{CourseDao, CourseDaoComponent}
@@ -487,6 +488,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			student.mostSignificantCourse.addModuleRegistration(mr3)
 			student.mostSignificantCourse.addModuleRegistration(mr4)
 			val result = service.suggestedFinalYearGrade(scyd3, 180, Seq())
+			result match {
+				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
+				case _ => Assertions.fail("Incorrect type returned")
+			}
 			result.description should be (FinalYearGrade.Fail.description)
 		}
 
@@ -525,6 +530,10 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			student.mostSignificantCourse.addModuleRegistration(mr3)
 			student.mostSignificantCourse.addModuleRegistration(mr4)
 			val result = service.suggestedFinalYearGrade(scyd3, 180, Seq())
+			result match {
+				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
+				case _ => Assertions.fail("Incorrect type returned")
+			}
 			result.description should be (FinalYearGrade.Fail.description)
 		}
 
@@ -564,8 +573,12 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			student.mostSignificantCourse.addModuleRegistration(mr4)
 			val result = service.suggestedFinalYearGrade(scyd3, 180, Seq())
 			// 1st year: 65 @ 20%, 2nd year: 60 @ 40%, 3rd year 80 @ 40%
-			// Final grade 69 = 2.1
-			result.description should be (FinalYearGrade.UpperSecond.description)
+			// Final grade 69 = 2.1, but on the grade boundary so borderline
+			result match {
+				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
+				case _ => Assertions.fail("Incorrect type returned")
+			}
+			result.description should be (FinalYearGrade.UpperSecondBorderline.description)
 		}
 	}
 

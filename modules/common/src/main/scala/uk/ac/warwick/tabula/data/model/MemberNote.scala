@@ -24,7 +24,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="memberid")
-	var member: Member =_
+	def member: Member
 
 	var note: String =_
 
@@ -62,12 +62,22 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("note")
-class MemberNote extends AbstractMemberNote
+class MemberNote extends AbstractMemberNote {
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="memberid")
+	var member: Member = _
+
+}
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("circumstances")
 class ExtenuatingCircumstances extends AbstractMemberNote {
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="memberid")
+	var member: Member = _
 
 	@NotNull
 	@Column(name = "start_date")

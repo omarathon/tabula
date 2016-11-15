@@ -13,12 +13,21 @@
 </#macro>
 
 <#macro set_command_details holder>
+
+	<#assign setError><#compress>
+		<@spring.bind path="command.*">
+			<#if status.error>true</#if>
+		</@spring.bind>
+	</#compress></#assign>
+
 	<div class="set-info striped-section collapsible">
 		<div class="clearfix">
-			<div class="section-title row">
+			<div class="section-title row ">
 				<div class="col-md-6 icon-container">
+					<#if setError == "true">
+						<span class="label label-danger">Has errors</span>
+					</#if>
 					<@command_type_label holder.commandType />
-
 					<span class="h6 colour-h6">
 						${holder.command.module.code?upper_case} ${holder.command.format.description}s: "${holder.command.name}"
 					</span>
