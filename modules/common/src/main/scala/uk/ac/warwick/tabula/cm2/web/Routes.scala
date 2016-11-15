@@ -33,8 +33,11 @@ object Routes {
 			def detail(extension: Extension) = extensions() + s"/${extension.id}/detail/"
 			def modify(extension: Extension) = extensions() + s"/${extension.id}/update/"
 		}
+
+		object assignment {
+				object audit {
+					def apply(assignment: Assignment) = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
+				}
+			}
 	}
-
-
-
 }

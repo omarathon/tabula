@@ -49,6 +49,32 @@
 				}
 			});
 		});
+
+		$('table.expanding-row-pairs').each(function(){
+			$(this).find('tbody tr').each(function(i){
+				if (i % 2 === 0) {
+					var $selectRow = $(this), $expandRow = $selectRow.next('tr');
+					$selectRow.data('expandRow', $expandRow.remove()).find('td:first').addClass('can-expand').prepend(
+						$('<i/>').addClass('fa fa-fw fa-caret-right')
+					);
+				}
+			}).end().on('click', 'td.can-expand', function(){
+				var $row = $(this).closest('tr');
+				if ($row.is('.expanded')) {
+					$row.removeClass('expanded').next('tr').remove().end()
+						.find('td i.fa-caret-down').removeClass('fa-caret-down').addClass('fa-caret-right');
+				} else {
+					$row.addClass('expanded').after($row.data('expandRow'))
+						.find('td i.fa-caret-right').removeClass('fa-caret-right').addClass('fa-caret-down');
+				}
+			}).find('tr.expand td.can-expand').trigger('click');
+		});
+
+		// code for tabs
+		$('.nav.nav-tabs a').click(function (e) {
+			e.preventDefault();
+			$(this).tab('show');
+		});
 	});
 
 
