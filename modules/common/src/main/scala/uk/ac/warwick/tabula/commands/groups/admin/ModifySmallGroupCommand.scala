@@ -36,6 +36,7 @@ trait ModifySmallGroupCommandState extends CurrentSITSAcademicYear {
 
 	var name: String = _
 	var maxGroupSize: JInteger = SmallGroup.DefaultGroupSize
+	var hasDuplicateEvents: Boolean = false
 }
 
 trait CreateSmallGroupCommandState extends ModifySmallGroupCommandState
@@ -91,6 +92,9 @@ trait ModifySmallGroupValidation extends SelfValidating {
 		else if (name.length > 200) errors.rejectValue("name", "smallGroup.name.Length", Array[Object](200: JInteger), "")
 
 		if (maxGroupSize != null && maxGroupSize <= 0) errors.rejectValue("maxGroupSize", "invalid")
+
+		if (hasDuplicateEvents)
+			errors.reject("smallGroupEvent.duplicate", Array[Object](set.module.code.toUpperCase, set.name, name), "")
 	}
 }
 

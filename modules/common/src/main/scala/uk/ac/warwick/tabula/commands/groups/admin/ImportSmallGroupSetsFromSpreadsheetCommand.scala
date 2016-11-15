@@ -184,6 +184,15 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener {
 							groupCommand.name = extractedGroup.name
 							groupCommand.maxGroupSize = JInteger(extractedGroup.limit)
 
+							def duplicate(a: ExtractedSmallGroupEvent, b: ExtractedSmallGroupEvent): Boolean =
+								a != b && (
+									(a.title.nonEmpty && a.title == b.title) ||
+									(a.weekRanges == b.weekRanges && a.dayOfWeek == b.dayOfWeek && a.startTime == b.startTime)
+								)
+
+							groupCommand.hasDuplicateEvents =
+								extractedGroup.events.exists(a => extractedGroup.events.exists(b => duplicate(a,b)))
+
 							val eventCommands = extractedGroup.events.map { extractedEvent =>
 								val existingEvent = existingGroup.toSeq.flatMap(_.events).find(matchesEvent(extractedEvent))
 
