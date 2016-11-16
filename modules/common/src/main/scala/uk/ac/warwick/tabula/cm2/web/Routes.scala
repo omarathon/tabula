@@ -35,9 +35,9 @@ object Routes {
 		}
 
 		object assignment {
-				object audit {
-					def apply(assignment: Assignment) = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
-				}
+			object audit {
+				def apply(assignment: Assignment) = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
 			}
+		}
 	}
 }

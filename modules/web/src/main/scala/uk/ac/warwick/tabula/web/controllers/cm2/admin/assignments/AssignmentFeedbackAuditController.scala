@@ -25,8 +25,6 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 		@ModelAttribute("auditCommand") auditCommand: Appliable[AssignmentFeedbackAuditResults]
 	) = {
 		val auditData = auditCommand.apply()
-		val extensionCountsByStatus = assignment.extensionCountByStatus
-
 		Mav("cm2/admin/assignments/submissions_audit", "command" -> auditCommand,
 			"auditData" -> auditData,
 			"assignment" -> assignment,

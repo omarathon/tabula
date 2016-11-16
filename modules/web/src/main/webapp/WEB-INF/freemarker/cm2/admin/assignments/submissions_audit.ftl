@@ -1,11 +1,9 @@
 <#import "../assignments/feedback/feedback_macros.ftl" as fs>
-
+<#import "../assignments/submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "submission_macros.ftl" as sub />
 
 <#escape x as x?html>
-
 	<h1>${assignment.module.code?upper_case} - (${assignment.name}) </h1>
-
 	<h4>View audit </h4>
 	<ul id="marks-tabs" class="nav nav-tabs">
 		<li class="active"><a href="#submissions">Submissions</a></li>
@@ -13,7 +11,7 @@
 	</ul>
 	<div class="tab-content">
 		<div class="tab-pane active" id="submissions">
-			<table class="table table-striped expanding-row-pairs member-notes">
+			<table class="table table-striped expanding-row-pairs">
 				<thead>
 					<tr>
 						<th>First name</th>
@@ -24,160 +22,159 @@
 				<#assign students=auditData.students>
 				<#if students?size gt 0>
 					<#list students as student>
-					<tr>
-						<td>${student.user.firstName}-${student.user.warwickId}</td>
-						<td>${student.user.lastName}</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<div calss="audit-info">
-								<h2>Submission</h2>
-								<#if !assignment.openEnded>
-									<strong>Assignment closed: </strong><@fmt.date date=assignment.closeDate />
-								<#else>
-									<strong>Open-ended assignment (no close date)</strong>
-								</#if>
-							</div>
-							<#if student.coursework.enhancedSubmission??>
-								<#assign submission=student.coursework.enhancedSubmission.submission>
-								<div>
-									<strong>Submission recieved: </strong><@fmt.date date=submission.submittedDate />
-									<#if submission.late>
-										<span> - late.</span>
-									<#elseif submission.authorisedLate>
-										<span> - Within Extension.</span>
+						<tr>
+							<td>${student.user.firstName}-${student.user.warwickId}</td>
+							<td>${student.user.lastName}</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div calss="audit-info">
+									<h2>Submission</h2>
+									<#if !assignment.openEnded>
+										<strong>Assignment closed: </strong><@fmt.date date=assignment.closeDate />
 									<#else>
-										<span> - On time.</span>
+										<strong>Open-ended assignment (no close date)</strong>
 									</#if>
 								</div>
-								<#if assignment.module.department.plagiarismDetectionEnabled && assignment.collectSubmissions>
-									<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
-										<div class="stage-group clearfix">
-											<strong>Plagiarism check:</strong>
-											<#if !student.stages['CheckForPlagiarism'].completed>
-												Not checked for plagiarism
-											<#else>
-												<#assign attachments = submission.allAttachments />
-												<#if attachments?size gt 0>
-												${attachments?size}
-													<#if attachments?size == 1> file
-													<#else> files
-													</#if>
-												</#if>
-												<div>
-													<#list submission.allAttachments as attachment>
-														<!-- Checking originality report for ${attachment.name} ... -->
-														<#if attachment.originalityReportReceived>
-															<@sub.originalityReport attachment />
+								<#if student.coursework.enhancedSubmission??>
+									<#assign submission=student.coursework.enhancedSubmission.submission>
+									<div>
+										<strong>Submission recieved: </strong><@fmt.date date=submission.submittedDate />
+										<#if submission.late>
+											- <span class="label label-danger use-tooltip" data-title="<@sd.lateness submission />" data-container="body">Late</span>
+										<#elseif submission.authorisedLate>
+											- <span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+										<#else>
+											<span> - On time</span>
+										</#if>
+									</div>
+									<#if assignment.module.department.plagiarismDetectionEnabled && assignment.collectSubmissions>
+										<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
+											<div class="stage-group clearfix">
+												<strong>Plagiarism check:</strong>
+												<#if !student.stages['CheckForPlagiarism'].completed>
+													Not checked for plagiarism
+												<#else>
+													<#assign attachments = submission.allAttachments />
+													<#if attachments?size gt 0>
+														${attachments?size}
+														<#if attachments?size == 1> file
+														<#else> files
 														</#if>
-													</#list>
-												</div>
+													</#if>
+													<div>
+														<#list submission.allAttachments as attachment>
+															<!-- Checking originality report for ${attachment.name} ... -->
+															<#if attachment.originalityReportReceived>
+																<@sub.originalityReport attachment />
+															</#if>
+														</#list>
+													</div>
+												</#if>
+											</div>
+										</#if>
+									</#if>
+								<#else>
+									<span>Not submitted</span>
+								</#if>
+								<#if assignment.allowExtensions &&  student.coursework.enhancedExtension??>
+									<#assign extension = student.coursework.enhancedExtension.extension />
+									<#assign duration = extension.duration + extension.requestedExtraDuration />
+									<div class="audit-info">
+										<h2>Extension</h2>
+										<div><strong>Extension request: </strong>${(extension.state.description)!""}</div>
+										<div><strong>Extension date: </strong>
+											<#if extension.expiryDate??>
+												<@fmt.date date=extension.expiryDate /> - ${extension.duration}
+												day<#if extension.duration gt 1>s</#if>
+											<#elseif extension.requestedExpiryDate??>
+												<@fmt.date date=extension.requestedExpiryDate />
+												- ${extension.requestedExtraDuration} day<#if extension.requestedExtraDuration gt 1>
+												s</#if>
 											</#if>
 										</div>
+									</div>
+									<div>
+										<strong>Student's extension request </strong>
+										<div class="muted">
+											${extension.reason!}
+										</div>
+									</div>
+									<#if extension.attachments??>
+										<div><span class="muted"><strong>Supporting documents</strong></span>
+												<#list extension.attachments as attachment>
+													<div>
+														<a href="<@routes.coursework.extensionreviewattachment assignment=assignment userid=student.user.warwickId filename=attachment.name />">
+															${attachment.name}
+														</a>
+													</div>
+												</#list>
+											</div>
+										</div>
 									</#if>
 								</#if>
-							<#else>
-								<span>Not submitted</span>
-							</#if>
-							<#if assignment.allowExtensions &&  student.coursework.enhancedExtension??>
-								<#assign extension = student.coursework.enhancedExtension.extension />
-								<#assign duration = extension.duration + extension.requestedExtraDuration />
-								<div class="audit-info">
-									<h2>Extension</h2>
-									<div><strong>Extension request: </strong>${(extension.state.description)!""}</div>
-									<div><strong>Extension date: </strong>
-										<#if extension.expiryDate??>
-											<@fmt.date date=extension.expiryDate /> - ${extension.duration}
-											day<#if extension.duration gt 1>s</#if>
-										<#elseif extension.requestedExpiryDate??>
-											<@fmt.date date=extension.requestedExpiryDate />
-											- ${extension.requestedExtraDuration} day<#if extension.requestedExtraDuration gt 1>
-											s</#if>
-										</#if>
+								<#if student.stages?keys?seq_contains('ReleaseForMarking') && student.coursework.enhancedFeedback??>
+									<#assign feedback = student.coursework.enhancedFeedback.feedback />
+									<#if ((assignment.markingWorkflow.markingMethod.toString)!"") = "ModeratedMarking">
+										<#assign isModerated = true />
+									<#else>
+										<#assign isModerated = false />
+									</#if>
+
+									<div class="marking-details audit-info">
+										<h2>Marking</h2>
+										<#list feedback.allMarkerFeedback as markerFeedback>
+											<#if markerFeedback??>
+												<@fs.feedbackSummary markerFeedback isModerated/>
+												<@fs.secondMarkerNotes markerFeedback isModerated />
+											</#if>
+										</#list>
 									</div>
-								</div>
-								<div>
-									<strong>Student's extension request </strong>
-									<div class="muted">
-										${extension.reason!}
-									</div>
-								</div>
-								<#if extension.attachments??>
-									<div><span class="muted"><strong>Supporting documents</strong></span>
-											<#list extension.attachments as attachment>
-												<div>
-													<a href="<@routes.coursework.extensionreviewattachment assignment=assignment userid=student.user.warwickId filename=attachment.name />">
-														${attachment.name}
-													</a>
+
+									<#if feedback.released>
+										<h3>Published</h3>
+										<div class="feedback-summary-heading">
+											<#if feedback.releasedDate??><strong>Feedback released:</strong> <@fmt.date feedback.releasedDate /></#if>
+										</div>
+									</#if>
+									<#if feedback.hasPrivateOrNonPrivateAdjustments>
+										<h2>Post publish adjustment</h2>
+										<#list feedback.adminViewableAdjustments as adminViewableFeedback>
+											<div class="mg-label"><strong>Adjustment date:</strong>
+												<span><@fmt.date adminViewableFeedback.uploadedDate /></span>
+											</div>
+											<#if adminViewableFeedback.mark?has_content>
+												<div class="mg-label"><strong>Mark:</strong>
+													<span>${adminViewableFeedback.mark!""}%</span>
 												</div>
-											</#list>
-										</div>
+											</#if>
+											<#if adminViewableFeedback.grade?has_content>
+												<div class="mg-label"><strong>Grade:</strong>
+													<span>${adminViewableFeedback.grade!""}</span>
+												</div>
+											</#if>
+
+											<#if adminViewableFeedback.reason?has_content>
+												<div class="mg-label"><strong>Reason for adjustment:</strong>
+													<span>${adminViewableFeedback.reason!""}</span>
+												</div>
+											</#if>
+											<#if adminViewableFeedback.comments?has_content>
+												<div class="mg-label"><strong>Feedback:</strong>
+													<p>${adminViewableFeedback.comments!""}</p>
+												</div>
+											</#if>
+										</#list>
+									</#if>
+								<#elseif !assignment.markingWorkflow??>
+									<div class="marking-details audit-info">
+										<h2>Marking</h2>
+										<div>No marking workflow</div>
+										<@fs.feedbackComments student.coursework.enhancedFeedback.feedback />
 									</div>
 								</#if>
-							</#if>
-							<#if student.stages?keys?seq_contains('ReleaseForMarking') && student.coursework.enhancedFeedback??>
-								<#assign feedback = student.coursework.enhancedFeedback.feedback />
-								<#if ((assignment.markingWorkflow.markingMethod.toString)!"") = "ModeratedMarking">
-									<#assign isModerated = true />
-								<#else>
-									<#assign isModerated = false />
-								</#if>
-
-								<div class="marking-details audit-info">
-									<h2>Marking</h2>
-									<#list feedback.allMarkerFeedback as markerFeedback>
-										<#if markerFeedback??>
-											<@fs.feedbackSummary markerFeedback isModerated/>
-											<@fs.secondMarkerNotes markerFeedback isModerated />
-										</#if>
-									</#list>
-								</div>
-
-								<#assign isSelf = false />
-								<#if feedback.released>
-									<h3>Published</h3>
-									<div class="feedback-summary-heading">
-										<#if feedback.releasedDate??><strong>Feedback released:</strong> <@fmt.date feedback.releasedDate /></#if>
-									</div>
-								</#if>
-								<#if feedback.hasPrivateOrNonPrivateAdjustments>
-									<h2>Post publish adjustment</h2>
-									<#list feedback.adminViewableAdjustments as adminViewableFeedback>
-										<div class="mg-label"><strong>Adjustment date:</strong>
-											<span><@fmt.date adminViewableFeedback.uploadedDate /></span>
-										</div>
-										<#if adminViewableFeedback.mark?has_content>
-											<div class="mg-label"><strong>Mark:</strong>
-												<span>${adminViewableFeedback.mark!""}%</span>
-											</div>
-										</#if>
-										<#if adminViewableFeedback.grade?has_content>
-											<div class="mg-label"><strong>Grade:</strong>
-												<span>${adminViewableFeedback.grade!""}</span>
-											</div>
-										</#if>
-
-										<#if adminViewableFeedback.reason?has_content>
-											<div class="mg-label"><strong>Reason for adjustment:</strong>
-												<span>${adminViewableFeedback.reason!""}</span>
-											</div>
-										</#if>
-										<#if adminViewableFeedback.comments?has_content>
-											<div class="mg-label"><strong>Feedback:</strong>
-												<p>${adminViewableFeedback.comments!""}</p>
-											</div>
-										</#if>
-									</#list>
-								</#if>
-							<#elseif !assignment.markingWorkflow??>
-								<div class="marking-details audit-info">
-									<h2>Marking</h2>
-									<div>No marking workflow</div>
-									<@fs.feedbackComments student.coursework.enhancedFeedback.feedback />
-								</div>
-							</#if>
-						</td>
-					</tr>
+							</td>
+						</tr>
 					</#list>
 				</tbody>
 				</#if>

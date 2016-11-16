@@ -67,6 +67,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		with Cm2WorkflowServiceComponent =>
 
 	override def applyInternal(): AssignmentFeedbackAuditResults = {
+		//most of the logic copied from cm1
 		val submissions = assignment.submissions
 		val extensionCountsByStatus = benchmarkTask("Get extension counts") {
 			assignment.extensionCountByStatus

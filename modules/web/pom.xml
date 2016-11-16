@@ -446,7 +446,6 @@
 								<include>cm2-admin.js</include>
 								<include>filters.js</include>
 								<include>fullcalendar.js</include>
-								<include>cm2-admin.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

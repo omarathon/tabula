@@ -1,5 +1,3 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-
 <#macro stage_delete stage>
 	<#if stage.messageCode?default("")?length gt 0>
 	<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
@@ -45,8 +43,6 @@
 	<p>
 		<#if r.turnitinId?has_content>
 			<a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
-		<#else>
-			<a target="turnitin-viewer" href="<@routes.coursework.turnitinReport assignment attachment />">View full report - available via Tabula until end of August 2016</a>
 		</#if>
 	</p>
 </div>
