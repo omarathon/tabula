@@ -1,10 +1,14 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import java.util.concurrent.TimeUnit
+
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.util.cache.{CacheEntryFactory, CacheEntryUpdateException, Caches}
+import uk.ac.warwick.util.cache._
+import uk.ac.warwick.util.collections.Pair
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -62,8 +66,12 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 
 	// rather than using 5 little caches, use one big one with a composite key
 	lazy val timetableCache = {
-		val cache = Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+		val cache = Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime * 4, cacheStrategy)
 		// serve stale data if we have it while we update in the background
+		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[TimetableCacheKey, EventList] {
+			override def getTTL(entry: CacheEntry[TimetableCacheKey, EventList]): Pair[Number, TimeUnit] = Pair.of(CacheExpiryTime * 4, TimeUnit.SECONDS)
+			override def isStale(entry: CacheEntry[TimetableCacheKey, EventList]): Boolean = (entry.getTimestamp + CacheExpiryTime * 1000) <= DateTime.now.getMillis
+		})
 		cache.setAsynchronousUpdateEnabled(true)
 		cache
 	}
