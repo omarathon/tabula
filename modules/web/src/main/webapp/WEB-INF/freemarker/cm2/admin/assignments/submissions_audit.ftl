@@ -191,6 +191,7 @@
 					</#if>
 				</div>
 			</div>
+			<!--TODO- Might need to see what should be displayed for formative type assignment as there could be 0 ExpectedSubmissions -->
 			<#assign totalExpectedSubmissions = assignment.membershipInfo.totalCount />
 			<#assign lateSubmissions = assignment.lateSubmissionCount />
 			<div><strong>Total submissions: </strong>${totalExpectedSubmissions} </div>
