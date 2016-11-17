@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSeco
 import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 
-//TODO- his might need further refactoring. Currently just copied  from existing coursework
+//TODO- This might need further refactoring. Currently just copied  from existing coursework
 @Service
 class Cm2WorkflowService {
 	import Cm2WorkflowStages._
