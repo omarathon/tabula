@@ -21,17 +21,22 @@ object ExamGridColumnOption {
 		val CoreOptionalModules = 12
 		val OptionalModules = 13
 		val ModuleReports = 14
-		val TotalCATS = 20
-		val PassedCATS = 21
-		val PreviousYears = 22
-		val CurrentYear = 23
-		val OvercattedYearMark = 24
-		val BoardAgreedMark = 25
-		val SuggestedResult = 30
-		val FinalOverallMark = 31
-		val SuggestedFinalYearGrade = 32
-		val MitigatingCircumstances = 40
-		val Comments = 50
+		val CATSThreshold30 = 20
+		val CATSThreshold40 = 21
+		val CATSThreshold50 = 22
+		val CATSThreshold60 = 23
+		val CATSThreshold70 = 24
+		val TotalCATS = 25
+		val PassedCATS = 26
+		val PreviousYears = 30
+		val CurrentYear = 31
+		val OvercattedYearMark = 32
+		val BoardAgreedMark = 33
+		val FinalOverallMark = 34
+		val SuggestedResult = 40
+		val SuggestedFinalYearGrade = 41
+		val MitigatingCircumstances = 50
+		val Comments = 60
 	}
 
 	object ExcelColumnSizes {

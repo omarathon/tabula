@@ -166,14 +166,49 @@
 
 	<hr />
 
-	<h3>CATS</h3>
+	<h3>CATS breakdowns <@fmt.help_popover id="catsbreakdowns" content="CATS totals across all modules that scored above / below given thresholds" /></h3>
 
 	<div class="row">
-		<div class="col-md-3">
+		<div class="col-md-1">
 			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="cats"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("cats")>checked</#if>
-				/> Total CATS <@fmt.help_popover id="cats" content="Number of CATS taken by a student." /></label>
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="30cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("30cats")>checked</#if>
+				/> <=30</label>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="40cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("40cats")>checked</#if>
+				/> >=40</label>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="50cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("50cats")>checked</#if>
+				/> >=50</label>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="60cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("60cats")>checked</#if>
+				/> >=60</label>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="70cats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("70cats")>checked</#if>
+				/> >=70</label>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="totalCats"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("totalCats")>checked</#if>
+				/> Total <@fmt.help_popover id="totalCats" content="Number of CATS taken by a student." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
@@ -217,6 +252,16 @@
 		</div>
 	</div>
 
+	<div class="row">
+		<div class="col-md-3">
+			<div class="checkbox">
+				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="finalOverallMark"
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("finalOverallMark")>checked</#if>
+				/> Final overall mark <@fmt.help_popover id="finalOverallMark" content="For final-year students, the average mark calculated according to year weighting." /></label>
+			</div>
+		</div>
+	</div>
+
 	<hr />
 
 	<h3>Suggested Actions</h3>
@@ -227,13 +272,6 @@
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="suggestedresult"
 					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("suggestedresult")>checked</#if>
 				/> Suggested result <@fmt.help_popover id="suggestedresult" content="Suggested course of action: proceed, resit or pass." /></label>
-			</div>
-		</div>
-		<div class="col-md-3">
-			<div class="checkbox">
-				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="finalOverallMark"
-					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("finalOverallMark")>checked</#if>
-				/> Final overall mark <@fmt.help_popover id="finalOverallMark" content="For final-year students, the average mark calculated according to year weighting." /></label>
 			</div>
 		</div>
 		<div class="col-md-3">
