@@ -39,7 +39,7 @@
 								<#if student.coursework.enhancedSubmission??>
 									<#assign submission=student.coursework.enhancedSubmission.submission>
 									<div>
-										<strong>Submission recieved: </strong><@fmt.date date=submission.submittedDate />
+										<strong>Submission received: </strong><@fmt.date date=submission.submittedDate />
 										<#if submission.late>
 											- <span class="label label-danger use-tooltip" data-title="<@sd.lateness submission />" data-container="body">Late</span>
 										<#elseif submission.authorisedLate>
@@ -195,9 +195,9 @@
 			<#assign totalExpectedSubmissions = assignment.membershipInfo.totalCount />
 			<#assign lateSubmissions = assignment.lateSubmissionCount />
 			<div><strong>Total submissions: </strong>${totalExpectedSubmissions} </div>
-			<div><strong>Submission recieved on time: </strong>${assignment.submissions?size - lateSubmissions} </div>
-			<div><strong>Submission recieved late: </strong>${lateSubmissions} </div>
-			<div><strong>Submission unrecieved: </strong>${totalExpectedSubmissions - assignment.submissions?size} </div>
+			<div><strong>Submission received on time: </strong>${assignment.submissions?size - lateSubmissions} </div>
+			<div><strong>Submission received late: </strong>${lateSubmissions} </div>
+			<div><strong>Submission unreceived: </strong>${totalExpectedSubmissions - assignment.submissions?size} </div>
 
 			<div class="audit-info">
 				<h2>Plagiarism check</h2>
