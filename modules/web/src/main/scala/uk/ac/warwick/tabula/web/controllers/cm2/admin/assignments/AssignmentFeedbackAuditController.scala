@@ -17,7 +17,7 @@ class AssignmentFeedbackAuditController extends CourseworkController {
 
 	@ModelAttribute("auditCommand")
 	def listCommand(@PathVariable assignment: Assignment) =
-		AssignmentFeedbackAuditCommand(assignment)
+		AssignmentFeedbackAuditCommand(mandatory(assignment))
 
 
 	@RequestMapping(method=Array(GET))
