@@ -278,10 +278,17 @@ class StudentMember extends Member with StudentProperties {
 		})
 	}
 
+	// Both of the below unused directly but needed as an association for filtering
+
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("MonitoringPoints.View"))
 	@BatchSize(size=200)
 	var attendanceCheckpointTotals: JSet[AttendanceMonitoringCheckpointTotal] = JHashSet()
+
+	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("MemberNotes.Read"))
+	@BatchSize(size=200)
+	var memberNotes: JSet[MemberNote] = JHashSet()
 
 	def this(id: String) = {
 		this()
