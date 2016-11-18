@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
-import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.cm2._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCm2WorkflowServiceComponent, Cm2WorkflowServiceComponent}
@@ -12,7 +11,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 
 
 object AssignmentFeedbackAuditCommand {
@@ -133,7 +131,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 
 		val submitted: Seq[WorkFlowStudent] = benchmarkTask("Get submitted users") {
 			for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
-				val usersSubmissions = submissions.filter(_.universityId == uniId)
+				val usersSubmissions = submissions.asScala.filter(_.universityId == uniId)
 				val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
 
 				val userFilter = moduleMembers.filter(member => member.getWarwickId == uniId)
@@ -178,7 +176,7 @@ class AssignmentFeedbackAuditCommandInternal(val assignment: Assignment) extends
 		}
 
 		val totalFilesCheckedForPlagiarism = benchmarkTask("Check for originality reports") {
-			assignment.submissions.map { sub => sub.allAttachments.count(_.originalityReportReceived) }.sum
+			assignment.submissions.asScala.map { sub => sub.allAttachments.count(_.originalityReportReceived) }.sum
 		}
 		val extensionInfo = ExtensionInfo(extensionCount(extensionCountsByStatus, ExtensionState.Approved), extensionCount(extensionCountsByStatus, ExtensionState.Rejected))
 		val markerInfo = MarkerInfo(assignment.firstMarkersWithStudentAllocationCountMap, assignment.secondMarkersWithStudentAllocationCountMap)
