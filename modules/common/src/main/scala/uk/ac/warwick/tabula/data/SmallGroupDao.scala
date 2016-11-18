@@ -9,13 +9,11 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
 	val smallGroupDao: SmallGroupDao
@@ -85,6 +83,7 @@ trait SmallGroupDao {
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
+	def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
 
@@ -93,6 +92,8 @@ trait SmallGroupDao {
 	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
 
 	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
+
+	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 }
 
 @Repository
@@ -290,6 +291,17 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.seq
 	}
 
+	def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]] = {
+		session.newCriteria[DepartmentSmallGroupSet]
+			.add(is("academicYear", year))
+			.add(is("deleted", false))
+			.add(is("archived", false))
+			.add(isNotNull("memberQuery"))
+			.addOrder(asc("name"))
+			.seq
+			.groupBy(_.department)
+	}
+
 	def delete(occurrence: SmallGroupEventOccurrence) = session.delete(occurrence)
 
 	def findAttendedSmallGroupEvents(studentId: String) =
@@ -444,5 +456,13 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		)).toMap
 		members.map(member => member -> data.getOrElse(member.universityId, MemberAllocationData("", "", 0))).toMap
 	}
+
+	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet] =
+		session.newQuery[DepartmentSmallGroupSet](
+			"""
+					from DepartmentSmallGroupSet
+					where memberQuery is not null and length(memberQuery) > 0
+			"""
+		).seq
 
 }

@@ -73,6 +73,7 @@ trait SmallGroupService {
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean
 
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet]
+	def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]]
 
 	def delete(occurrence: SmallGroupEventOccurrence)
 
@@ -84,6 +85,8 @@ trait SmallGroupService {
 	def listSmallGroupEventsForReport(department: Department, academicYear: AcademicYear): Seq[SmallGroupEventReportData]
 
 	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
+
+	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -281,6 +284,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.getDepartmentSmallGroupSets(department, year)
 
+	def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]] =
+		smallGroupDao.findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year)
+
 	def delete(occurrence: SmallGroupEventOccurrence) {
 		if (occurrence.attendance.asScala.exists { attendance => attendance.state != AttendanceState.NotRecorded })
 			throw new IllegalStateException("Tried to delete event with linked event occurrence")
@@ -377,6 +383,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData] =
 		smallGroupDao.listMemberDataForAllocation(members, academicYear)
+
+	def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet] =
+		smallGroupDao.listDepartmentSetsForMembershipUpdate
 }
 
 trait SmallGroupMembershipHelpers {

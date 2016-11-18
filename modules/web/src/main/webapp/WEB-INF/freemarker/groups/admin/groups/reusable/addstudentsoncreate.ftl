@@ -27,20 +27,37 @@
 		<div class="fix-footer">
 			<p style="padding-left: 20px;" class="checkbox">
 				<label><#compress>
-					<@f.checkbox path="findCommand.linkToSits" />
-					Link to SITS
-					<#assign popoverContent><#noescape>
-						If ticked, this filter will be automatically update this group of students from SITS.
-						<br />
-						If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
-					</#noescape></#assign>
-					<a class="use-popover"
-					   id="popover-linkToSits"
-					   data-content="${popoverContent}"
-					   data-html="true"
-					>
-						<i class="fa fa-question-circle"></i>
-					</a>
+					<#if SITSInFlux>
+						<input type="hidden" name="_linkToSits" value="on" />
+						<input type="checkbox" name="linkToSits" disabled />
+						Link to SITS
+						<#assign popoverContent><#noescape>
+							You can no longer link to SITS for the current academic year,
+							as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
+						</#noescape></#assign>
+						<a class="use-popover"
+						   id="popover-linkToSits"
+						   data-content="${popoverContent}"
+						   data-html="true"
+						>
+							<i class="fa fa-question-circle"></i>
+						</a>
+					<#else>
+						<@f.checkbox path="findCommand.linkToSits" />
+						Link to SITS
+						<#assign popoverContent><#noescape>
+							If ticked, this filter will be automatically update this group of students from SITS.
+							<br />
+							If not, these students will be imported into a static list which will <strong>not</strong> be updated from SITS.
+						</#noescape></#assign>
+						<a class="use-popover"
+						   id="popover-linkToSits"
+						   data-content="${popoverContent}"
+						   data-html="true"
+						>
+							<i class="fa fa-question-circle"></i>
+						</a>
+					</#if>
 				</#compress></label>
 			</p>
 

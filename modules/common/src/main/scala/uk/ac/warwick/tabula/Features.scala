@@ -140,6 +140,7 @@ abstract class Features {
 	@Value("${features.scheduling.moduleListsImport:true}") var schedulingModuleListsImport = defaults.schedulingModuleListsImport
 	@Value("${features.scheduling.processNotificationListeners:true}") var schedulingProcessNotificationListeners = defaults.schedulingProcessNotificationListeners
 	@Value("${features.scheduling.monitoringPointMigration:false}") var schedulingMonitoringPointMigration = defaults.schedulingMonitoringPointMigration
+	@Value("${features.scheduling.groups.updateDepartmentSets:true}") var schedulingGroupsUpdateDepartmentSets = defaults.schedulingGroupsUpdateDepartmentSets
 
 
 	@Value("${features.exams:true}") var exams = defaults.exams
@@ -271,6 +272,7 @@ class FeaturesMessage {
 	@BeanProperty var schedulingModuleListsImport = true
 	@BeanProperty var schedulingProcessNotificationListeners = true
 	@BeanProperty var schedulingMonitoringPointMigration = false
+	@BeanProperty var schedulingGroupsUpdateDepartmentSets = true
 
 
 	@BeanProperty var exams = true
