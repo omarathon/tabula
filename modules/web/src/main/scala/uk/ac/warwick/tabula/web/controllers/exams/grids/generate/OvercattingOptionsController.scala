@@ -68,7 +68,7 @@ class OvercattingOptionsController extends ExamsController
 		Mav("exams/grids/generate/overcat").noLayoutIf(ajax)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.export))
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excel))
 	def export(
 		@ModelAttribute("command") cmd: Appliable[Seq[Module]] with PopulateOnForm with GenerateExamGridOvercatCommandRequest,
 		@ModelAttribute("overcatView") overcatView: OvercattingOptionsView with GenerateExamGridOvercatCommandRequest,
