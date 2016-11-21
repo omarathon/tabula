@@ -96,6 +96,14 @@
 					</#if>
 				</#macro>
 
+				<#macro uniIdSafeMarkerLink marker role>
+					<#if marker.warwickId?has_content>
+						- <a href="<@routes.coursework.listmarkersubmissions assignment marker />">Proxy as this ${role}</a>
+					<#else>
+						- Cannot proxy as this marker as they have no University ID
+					</#if>
+				</#macro>
+
 				<#macro workflow student>
 					<#if student.coursework.enhancedSubmission??>
 						<#local enhancedSubmission=student.coursework.enhancedSubmission>
@@ -194,7 +202,7 @@
 										<#if firstMarker?default("")?length gt 0>
 											(<#noescape>${firstMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.coursework.listmarkersubmissions assignment fm />">Proxy as this marker</a>
+												<@uniIdSafeMarkerLink fm "marker" />
 											</#if>
 										</#if>
 									</#compress></@stage>
@@ -211,7 +219,7 @@
 										<#if secondMarker?default("")?length gt 0>
 											(<#noescape>${secondMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.coursework.listmarkersubmissions assignment sm />">Proxy as this marker</a>
+												<@uniIdSafeMarkerLink sm "marker" />
 											</#if>
 										</#if>
 									</#compress></@stage>
@@ -227,7 +235,7 @@
 										<#if secondMarker?default("")?length gt 0>
 											(<#noescape>${secondMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.coursework.listmarkersubmissions assignment sm />">Proxy as this moderator</a>
+												<@uniIdSafeMarkerLink sm "moderator" />
 											</#if>
 										</#if>
 									</#compress></@stage>
@@ -243,7 +251,7 @@
 										<#if firstMarker?default("")?length gt 0>
 											(<#noescape>${firstMarker}</#noescape>)
 											<#if can.do("Assignment.MarkOnBehalf", assignment)>
-												- <a href="<@routes.coursework.listmarkersubmissions assignment fm />">Proxy as this marker</a>
+												<@uniIdSafeMarkerLink fm "marker" />
 											</#if>
 										</#if>
 									</#compress></@stage>

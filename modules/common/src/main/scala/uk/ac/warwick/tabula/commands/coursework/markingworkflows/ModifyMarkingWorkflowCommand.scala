@@ -93,14 +93,14 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 		if (markingMethod == null)
 			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.none")
 
-		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers"){
+		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers", universityIdRequired = true){
 			override def alreadyHasCode = hasDuplicates(firstMarkers.asScala)
 		}
 		firstMarkersValidator.validate(errors)
 
 		// validate only when second markers are used
 		if(Seq(SeenSecondMarking, SeenSecondMarkingLegacy, ModeratedMarking).contains(markingMethod)){
-			val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
+			val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers", universityIdRequired = true){
 				override def alreadyHasCode = hasDuplicates(secondMarkers.asScala)
 			}
 			secondMarkersValidator.validate(errors)

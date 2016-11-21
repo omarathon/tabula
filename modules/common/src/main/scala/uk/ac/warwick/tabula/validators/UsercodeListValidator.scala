@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  *
  * Could be extended with options such as allowing it to be empty.
  */
-class UsercodeListValidator(usercodes: JList[String], pathName: String) {
+class UsercodeListValidator(usercodes: JList[String], pathName: String, universityIdRequired: Boolean = false) {
 
 	var userLookup = Wire.auto[UserLookupService]
 
@@ -24,11 +24,18 @@ class UsercodeListValidator(usercodes: JList[String], pathName: String) {
 		} else if (alreadyHasCode) {
 			errors.rejectValue(pathName, "userId.duplicate")
 		} else {
+			val users = userLookup.getUsersByUserIds(trimmedCodes).values()
 			// Uses find() so we'll only show one missing user at any one time. Could change this to
 			// use filter() and combine the result into one error message listing them all.
-			val anonUsers = userLookup.getUsersByUserIds(trimmedCodes).values().find { !_.isFoundUser }
+			val anonUsers = users.find { !_.isFoundUser }
 			for (user <- anonUsers) {
 				errors.rejectValue(pathName, "userId.notfound.specified", Array(user.getUserId), "")
+			}
+			if (universityIdRequired) {
+				val noUniIdUsers = users.find { !_.getWarwickId.hasText }
+				for (user <- noUniIdUsers) {
+					errors.rejectValue(pathName, "userId.missingUniId", Array(user.getUserId), "")
+				}
 			}
 		}
 	}
