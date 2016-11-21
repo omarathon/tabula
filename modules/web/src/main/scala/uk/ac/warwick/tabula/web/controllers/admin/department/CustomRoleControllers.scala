@@ -6,21 +6,25 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.admin.department._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
-import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permissions, Permission, PermissionsTarget}
+import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
+import uk.ac.warwick.tabula.services.RelationshipService
 
 trait CustomRoleControllerMethods extends AdminController {
 	validatesSelf[SelfValidating]
 
 	var permissionsService = Wire[PermissionsService]
+	var relationshipService = Wire[RelationshipService]
 
 	@ModelAttribute("allRoleDefinitions")
 	def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser) = transactional(readOnly = true) {
@@ -31,11 +35,23 @@ trait CustomRoleControllerMethods extends AdminController {
 			case _ => permissionsTarget.permissionsParents.flatMap(parentDepartments)
 		}
 
-		val customRoleDefinitions =
-			parentDepartments(department)
-				.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
+		val allDepartments = parentDepartments(department)
 
-		(builtInRoleDefinitions ++ customRoleDefinitions).filter { _.isAssignable }
+		val relationshipTypes =
+			if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter { _.defaultDisplay }
+			else allDepartments.flatMap { _.displayedStudentRelationshipTypes }.distinct
+
+		val selectorBuiltInRoleDefinitions =
+			ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
+				SelectorBuiltInRoleDefinition.of(name, PermissionsSelector.Any[StudentRelationshipType]) +:
+					relationshipTypes.map { relationshipType =>
+						SelectorBuiltInRoleDefinition.of(name, relationshipType)
+					}
+			}
+
+		val customRoleDefinitions = allDepartments.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
+
+		(builtInRoleDefinitions ++ customRoleDefinitions ++ selectorBuiltInRoleDefinitions).filter { _.isAssignable }
 	}
 }
 
