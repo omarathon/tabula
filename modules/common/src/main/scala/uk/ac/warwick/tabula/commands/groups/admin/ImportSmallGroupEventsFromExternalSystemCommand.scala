@@ -10,13 +10,13 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.services.timetables.{TimetableEmptyException, ScientiaHttpTimetableFetchingServiceComponent, ModuleTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
-import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsCheckingMethods, PermissionsChecking}
-import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
+import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
+
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
-
 import ImportSmallGroupEventsFromExternalSystemCommand._
 
 import scala.concurrent.Await
@@ -37,6 +37,7 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringScientiaConfigurationComponent
+			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 			with LookupEventsFromModuleTimetable

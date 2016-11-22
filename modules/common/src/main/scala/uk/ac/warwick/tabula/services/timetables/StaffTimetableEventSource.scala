@@ -42,6 +42,7 @@ trait AutowiringStaffTimetableEventSourceComponent extends StaffTimetableEventSo
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringUserLookupComponent
 		with AutowiringScientiaConfigurationComponent
+		with AutowiringNewScientiaConfigurationComponent
 		with AutowiringCelcatConfigurationComponent
 		with AutowiringExamTimetableConfigurationComponent
 		with AutowiringSecurityServiceComponent

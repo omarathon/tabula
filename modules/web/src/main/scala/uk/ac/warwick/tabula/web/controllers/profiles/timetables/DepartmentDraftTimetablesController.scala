@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.timetables._
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
-import uk.ac.warwick.tabula.services.timetables.{ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
+import uk.ac.warwick.tabula.services.timetables.{CachedPartialTimetableFetchingService, ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent}
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
@@ -30,6 +30,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 				s"https://timetablingmanagement.warwick.ac.uk/$endpoint" -> academicYear
 			)
 			override val cacheSuffix: String = s"$endpoint${academicYear.startYear}"
+			override val cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
 		}
 
 		val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)

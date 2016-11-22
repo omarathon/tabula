@@ -14,10 +14,9 @@ import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables"))
 class DepartmentTimetablesController extends ProfilesController
-	with AutowiringScientiaConfigurationComponent with SystemClockComponent
+	with AutowiringScientiaConfigurationComponent with AutowiringNewScientiaConfigurationComponent
+	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
 	with AutowiringUserLookupComponent with CurrentSITSAcademicYear {
-
-	val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
 	@ModelAttribute("activeDepartment")
 	def activeDepartment(@PathVariable department: Department) = department

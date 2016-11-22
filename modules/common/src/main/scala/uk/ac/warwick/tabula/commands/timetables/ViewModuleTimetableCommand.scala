@@ -26,11 +26,9 @@ object ViewModuleTimetableCommand {
 			with ViewModuleTimetableValidation
 			with ViewModuleTimetableDescription with ReadOnly
 			with AutowiringScientiaConfigurationComponent
+			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
-			with ModuleTimetableFetchingServiceComponent {
-			// Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
-			val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
-		}
+			with ScientiaHttpTimetableFetchingServiceComponent // Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
 
 	// Re-usable service
 	def apply(module: Module, service: ModuleTimetableFetchingService): CommandType =
