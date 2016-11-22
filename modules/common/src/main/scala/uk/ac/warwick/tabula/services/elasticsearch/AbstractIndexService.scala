@@ -69,11 +69,15 @@ trait ElasticsearchIndexInitialisation extends ElasticsearchIndexEnsure {
 	def ensureIndexExists(): Future[Boolean] = {
 		// Initialise the index if it doesn't already exist
 		def exists() = client.execute { indexExists(indexName) }.map(_.isExists)
+		def aliasExists() = client.execute { indexExists(s"$indexName-alias") }.map(_.isExists)
 		def create() = client.execute { createIndex(indexName) mappings(mapping(indexType) fields fields) analysis analysers }.map(_.isAcknowledged)
 		def createAlias() = client.execute { add alias s"$indexName-alias" on indexName }.map(_.isAcknowledged)
 
 		exists().flatMap {
-			case true => Future.successful(true)
+			case true => aliasExists().flatMap {
+				case true => Future.successful(true)
+				case false => createAlias()
+			}
 			case false =>
 				create().filter { b => b }
 					.flatMap { _ => createAlias() }
