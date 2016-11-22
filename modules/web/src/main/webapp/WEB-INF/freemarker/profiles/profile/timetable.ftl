@@ -141,7 +141,8 @@
 					// as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
 					data: {
 						'from':startToSend.getTime()/1000,
-						'to':endToSend.getTime()/1000
+						'to':endToSend.getTime()/1000,
+						'cb':new Date().valueOf() // Break the IE cache
 					},
 					success:function(data){
 						if (data.lastUpdated) {
