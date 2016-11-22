@@ -183,7 +183,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
 			attendance <- smallGroupDao.getAttendance(studentId, occurrence)
 		} {
-			if (!attendance.addedManually || isPermanent) {
+			if (attendance.replacedBy.isEmpty && (!attendance.addedManually || isPermanent)) {
 				occurrence.attendance.remove(attendance)
 				smallGroupDao.deleteAttendance(attendance)
 			} else {
