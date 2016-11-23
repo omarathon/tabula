@@ -19,6 +19,8 @@ import scala.xml.Elem
 trait ScientiaConfiguration {
 	val perYearUris: Seq[(String, AcademicYear)]
 	val cacheSuffix: String
+	val cacheExpiryTime: Int
+	val returnEvents: Boolean = true
 }
 
 trait ScientiaConfigurationComponent {
@@ -53,14 +55,38 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		lazy val perYearUris = academicYears.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
 
 		lazy val cacheSuffix = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
+
+		val cacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
+	}
+
+}
+
+trait NewScientiaConfigurationComponent {
+	val newScientiaConfiguration: ScientiaConfiguration
+}
+
+trait AutowiringNewScientiaConfigurationComponent extends AutowiringScientiaConfigurationComponent with NewScientiaConfigurationComponent {
+	val newScientiaConfiguration = new AutowiringNewScientiaConfiguration
+
+	class AutowiringNewScientiaConfiguration extends AutowiringScientiaConfiguration {
+		override lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url.new}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
+
+		override lazy val cacheSuffix = "New"
+
+		override val cacheExpiryTime: Int = 60 * 60 // 1 hour in seconds
+
+		override val returnEvents: Boolean = false
 	}
 
 }
 
 trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
-	self: ScientiaConfigurationComponent =>
+	self: ScientiaConfigurationComponent with NewScientiaConfigurationComponent =>
 
-	lazy val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
+	lazy val timetableFetchingService = new CombinedTimetableFetchingService(
+		ScientiaHttpTimetableFetchingService(scientiaConfiguration),
+		ScientiaHttpTimetableFetchingService(newScientiaConfiguration)
+	)
 }
 
 private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: ScientiaConfiguration) extends CompleteTimetableFetchingService with Logging {
@@ -155,7 +181,9 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		}
 
 		Futures.combine(results, EventList.combine).map(eventsList =>
-			if (eventsList.events.isEmpty) {
+			if (!scientiaConfiguration.returnEvents) {
+				EventList.empty
+			} else if (eventsList.events.isEmpty) {
 				logger.info(s"All timetable years are empty for $param")
 				throw new TimetableEmptyException(uris, param)
 			} else {
@@ -187,7 +215,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
 			service
 		} else {
-			new CachedCompleteTimetableFetchingService(service, s"$cacheName${scientiaConfiguration.cacheSuffix}")
+			new CachedCompleteTimetableFetchingService(service, s"$cacheName${scientiaConfiguration.cacheSuffix}", scientiaConfiguration.cacheExpiryTime)
 		}
 	}
 

@@ -5,16 +5,16 @@ import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.commands.groups.admin.{UpdateSmallGroupEventFromExternalSystemCommand, ModifySmallGroupEventCommandState, ModifySmallGroupEventCommand}
+import uk.ac.warwick.tabula.commands.groups.admin.{ModifySmallGroupEventCommand, ModifySmallGroupEventCommandState, UpdateSmallGroupEventFromExternalSystemCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.services.timetables.{ScientiaHttpTimetableFetchingServiceComponent, AutowiringScientiaConfigurationComponent}
-import uk.ac.warwick.tabula.services.{TermService, AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.timetables.{AutowiringNewScientiaConfigurationComponent, AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermService, TermServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.util.termdates.Term
 
@@ -101,7 +101,8 @@ class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEve
 }
 
 abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController with AutowiringTermServiceComponent
-	with AutowiringScientiaConfigurationComponent with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
+	with AutowiringScientiaConfigurationComponent with AutowiringNewScientiaConfigurationComponent
+	with ScientiaHttpTimetableFetchingServiceComponent with SystemClockComponent
 	with SyllabusPlusEventCountForModule {
 
 	type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
