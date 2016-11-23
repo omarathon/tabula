@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridMarksRecordExporter, GenerateExamGridExporter}
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridMarksRecordExporter, ExamGridTranscriptExporter, GenerateExamGridExporter}
 import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department}
 import uk.ac.warwick.tabula.services.{AutowiringProgressionServiceComponent, AutowiringUpstreamRouteRuleServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
@@ -128,6 +128,53 @@ trait ExamGridDocumentsController extends ExamsController
 			)
 		} else {
 			marksRecordRender(selectCourseCommand, isConfidential = true)
+		}
+	}
+
+	private def transcriptRender(selectCourseCommand: SelectCourseCommand, isConfidential: Boolean): View = {
+		val entities = selectCourseCommand.apply()
+		new WordView(
+			"%sTranscript for %s %s %s %s.docx".format(
+				if (isConfidential) "Confidential " else "",
+				selectCourseCommand.department.name,
+				selectCourseCommand.course.code,
+				selectCourseCommand.route.code.toUpperCase,
+				selectCourseCommand.academicYear.toString.replace("/","-")
+			),
+			ExamGridTranscriptExporter(
+				entities,
+				selectCourseCommand.course,
+				selectCourseCommand.route,
+				isConfidential = isConfidential
+			)
+		)
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.transcript))
+	def transcript(
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		selectCourseCommandErrors: Errors
+	): View = {
+		if (selectCourseCommandErrors.hasErrors) {
+			throw new IllegalArgumentException(selectCourseCommandErrors.getAllErrors.asScala.map(e =>
+				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
+			)
+		} else {
+			transcriptRender(selectCourseCommand, isConfidential = false)
+		}
+	}
+
+	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.transcriptConfidential))
+	def transcriptConfidential(
+		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
+		selectCourseCommandErrors: Errors
+	): View = {
+		if (selectCourseCommandErrors.hasErrors) {
+			throw new IllegalArgumentException(selectCourseCommandErrors.getAllErrors.asScala.map(e =>
+				messageSource.getMessage(e.getCode, e.getArguments, null)).mkString(", ")
+			)
+		} else {
+			transcriptRender(selectCourseCommand, isConfidential = true)
 		}
 	}
 

@@ -36,6 +36,8 @@ object GenerateExamGridMappingParameters {
 	final val excel = "excel"
 	final val marksRecord = "marksRecord"
 	final val marksRecordConfidential = "marksRecordConfidential"
+	final val transcript = "transcript"
+	final val transcriptConfidential = "transcriptConfidential"
 }
 
 @Controller
