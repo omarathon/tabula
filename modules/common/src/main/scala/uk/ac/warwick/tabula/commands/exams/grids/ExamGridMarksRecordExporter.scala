@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import org.apache.poi.util.Units
-import org.apache.poi.xwpf.usermodel.{Document, XWPFDocument}
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.{STHdrFtr, STTblWidth}
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.{Course, Route, UpstreamRouteRule}
 import uk.ac.warwick.tabula.services.{FinalYearGrade, ProgressionService}
 
 import scala.collection.JavaConverters._
 
-object ExamGridMarksRecordExporter extends TaskBenchmarking {
+object ExamGridMarksRecordExporter extends TaskBenchmarking with AddConfidentialWatermarkToDocument {
 
 	def apply(
 		entities: Seq[ExamGridEntity],
@@ -120,27 +119,7 @@ object ExamGridMarksRecordExporter extends TaskBenchmarking {
 		}
 
 		if (isConfidential) {
-			// Create header
-			val header = doc.createHeaderFooterPolicy().createHeader(STHdrFtr.DEFAULT)
-			val r = header.createParagraph().createRun()
-			// Add the image
-			r.addPicture(
-				getClass.getResourceAsStream("/confidential-a4-watermark.png"),
-				Document.PICTURE_TYPE_PNG,
-				"confidential-a4-watermark.png",
-				Units.toEMU(Units.pixelToPoints(595)),
-				Units.toEMU(Units.pixelToPoints(841))
-			)
-			val drawing = r.getCTR.getDrawingArray(0)
-			// Swap the inline image to an anchored image so it can
-			val inline = drawing.getInlineArray(0)
-			val anchor = drawing.addNewAnchor()
-			anchor.setDocPr(inline.getDocPr)
-			anchor.setExtent(inline.getExtent)
-			anchor.setBehindDoc(true)
-			anchor.setGraphic(inline.getGraphic)
-			anchor.addNewWrapNone()
-			drawing.removeInline(0)
+			addWatermark(doc)
 		}
 
 		doc
