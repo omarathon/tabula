@@ -150,7 +150,7 @@
 	<@modal.footer>
 		<div class="pull-left">
 			<button type="button" class="btn btn-primary" name="continue">Continue</button>
-			<button type="button" class="btn btn-default" name="${GenerateExamGridMappingParameters.export}">Download for printing</button>
+			<button type="button" class="btn btn-default" name="${GenerateExamGridMappingParameters.excel}">Download for printing</button>
 			<button type="button" class="btn btn-default" name="cancel">Cancel</button>
 		</div>
 	</@modal.footer>

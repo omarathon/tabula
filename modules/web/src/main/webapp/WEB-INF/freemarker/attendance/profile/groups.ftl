@@ -214,7 +214,7 @@
 
 			<#if result.groupData.terms?size == 0>
 				<em>There are no small group events defined for this academic year.</em>
-			<#else>
+			<#else
 				<#list result.groupData.terms as term>
 					<@groupsInATerm term />
 				</#list>

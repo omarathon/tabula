@@ -294,7 +294,16 @@
 		</table>
 
 		<div class="fix-footer">
-			<button class="excel-download btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.export}">Download for Excel</button>
+			<div class="btn-group dropup">
+				<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
+				<ul class="dropdown-menu download-options">
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button></li>
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button></li>
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record</button></li>
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcript}">Transcript</button></li>
+					<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcriptConfidential}">Confidential transcript</button></li>
+				</ul>
+			</div>
 		</div>
 	</form>
 	<div class='modal fade' id='confirmModal'>
@@ -317,7 +326,7 @@
 			</div>
 			<div class='modal-footer'>
 				<a class='confirm btn btn-primary'>Accept</a>
-				<a data-dismiss='modal' class='btn'>Cancel</a>
+				<a data-dismiss='modal' class='btn btn-default'>Cancel</a>
 				</div>
 			</div>
 		</div>
@@ -330,28 +339,22 @@
 	jQuery(function($){
 		$('.fix-area').fixHeaderFooter();
 
-		$('.excel-download').on('click', function(e) {
+		var $form = $('form.exam-grid-preview'), $confirmModal = $('#confirmModal');
+		$('a.confirm', $confirmModal).on('click', function() {
+			$form.submit();
+		});
+		$('.download-options').on('click', 'button', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			var $this = $(this);
-			if(!$this.data("confirmModal")) {
-				var $modal = $('#confirmModal');
-				$modal.data('form', $(this).closest('form'));
-				$('body').append($modal);
-				$modal.modal();
-				$('a.confirm', $modal).on('click', function() {
-					$modal.modal('hide');
-					var $form = $modal.data('form');
-					var $submitInput = $('<input />').attr('type', 'hidden')
-						.attr('name', 'export')
-						.attr('value', 'true');
-					$form.append($submitInput);
-					$form.submit();
-				});
-				$this.data("confirmModal", $modal);
-			} else {
-				$this.data("confirmModal").modal('show');
-			}
+			$form.find('input.download-option').remove();
+			$form.append($('<input/>').attr({
+				'type' : 'hidden',
+				'class' : 'download-option',
+				'name' : $this.attr('name'),
+				'value' : true
+			}));
+			$confirmModal.modal('show');
 		});
 
 		$('th.rotated, td.rotated').each(function() {
