@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.{Location, MapLocation, Module, NamedLocation}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingServiceComponent, TimetableEmptyException}
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -32,6 +32,7 @@ object UpdateSmallGroupEventFromExternalSystemCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringScientiaConfigurationComponent
+			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
 			with ScientiaHttpTimetableFetchingServiceComponent
 

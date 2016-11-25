@@ -33,13 +33,11 @@ object ViewModuleEventsCommand {
 			with ViewModuleEventsValidation
 			with Unaudited with ReadOnly
 			with AutowiringScientiaConfigurationComponent
+			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
-			with ModuleTimetableFetchingServiceComponent
+			with ScientiaHttpTimetableFetchingServiceComponent // Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
 			with AutowiringTermServiceComponent
-			with AutowiringTermBasedEventOccurrenceServiceComponent {
-			// Only include Scientia events for now. If we ever include from other sources, they should be opt-in via params
-			val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
-		}
+			with AutowiringTermBasedEventOccurrenceServiceComponent
 
 	// Re-usable service
 	def apply(module: Module, service: ModuleTimetableFetchingService): CommandType =
@@ -106,7 +104,7 @@ trait ViewModuleEventsState {
 
 // Request parameters
 trait ViewModuleEventsRequest extends ViewModuleEventsState {
-	var academicYear: AcademicYear = null
+	var academicYear: AcademicYear = _
 	var start: LocalDate = LocalDate.now.minusMonths(12)
 	var end: LocalDate = start.plusMonths(13)
 }
