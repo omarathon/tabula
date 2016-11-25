@@ -22,6 +22,17 @@ object UpdateStudentsForDepartmentSmallGroupSetCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
+trait UpdateStudentsForDepartmentSmallGroupSetCommandFactory {
+	def apply(department: Department, set: DepartmentSmallGroupSet): Appliable[DepartmentSmallGroupSet] with UpdateStudentsForDepartmentSmallGroupSetCommandState
+}
+
+object UpdateStudentsForDepartmentSmallGroupSetCommandFactoryImpl
+	extends UpdateStudentsForDepartmentSmallGroupSetCommandFactory {
+
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		UpdateStudentsForDepartmentSmallGroupSetCommand(department, set)
+}
+
 class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[DepartmentSmallGroupSet] with UpdateStudentsForDepartmentSmallGroupSetCommandState {
 	self: UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups =>
@@ -54,7 +65,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
 			for {
 				user <- oldUsers -- newUsers
 				group <- set.groups.asScala
-				if (group.students.includesUser(user))
+				if group.students.includesUser(user)
 			} removeFromGroup(user, group)
 		}
 

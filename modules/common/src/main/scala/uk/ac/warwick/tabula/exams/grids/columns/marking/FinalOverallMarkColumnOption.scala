@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.exams.grids.columns.actions
+package uk.ac.warwick.tabula.exams.grids.columns.marking
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
@@ -17,7 +17,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
 
 		override val title: String = "Final Overall Mark"
 
-		override val category: String = "Suggested Actions"
+		override val category: String = "Marking"
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 

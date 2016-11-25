@@ -10,7 +10,6 @@ import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
 import net.fortuna.ical4j.model.{Component, Parameter, Property}
 import net.fortuna.ical4j.util.CompatibilityHints
 import org.apache.commons.codec.digest.DigestUtils
-import org.joda.time.format.DateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Module

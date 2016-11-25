@@ -2,16 +2,14 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -37,6 +35,18 @@ object FindStudentsForDepartmentSmallGroupSetCommand {
 			with Unaudited with ReadOnly
 }
 
+trait FindStudentsForDepartmentSmallGroupSetCommandFactory {
+	def apply(department: Department, set: DepartmentSmallGroupSet): Appliable[FindStudentsForDepartmentSmallGroupSetCommandResult]
+		with FindStudentsForDepartmentSmallGroupSetCommandState
+		with PopulateOnForm
+}
+
+object FindStudentsForDepartmentSmallGroupSetCommandFactoryImpl
+	extends FindStudentsForDepartmentSmallGroupSetCommandFactory {
+
+	def apply(department: Department, set: DepartmentSmallGroupSet) =
+		FindStudentsForDepartmentSmallGroupSetCommand(department, set)
+}
 
 class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
 	extends CommandInternal[FindStudentsForDepartmentSmallGroupSetCommandResult]

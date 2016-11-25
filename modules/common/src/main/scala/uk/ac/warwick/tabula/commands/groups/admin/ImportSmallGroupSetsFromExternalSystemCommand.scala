@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.{LazyLists, SystemClockComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.timetables.{AutowiringScientiaConfigurationComponent, ModuleTimetableFetchingServiceComponent, ScientiaHttpTimetableFetchingService, TimetableEmptyException}
+import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
@@ -46,10 +46,9 @@ object ImportSmallGroupSetsFromExternalSystemCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringScientiaConfigurationComponent
+			with AutowiringNewScientiaConfigurationComponent
 			with SystemClockComponent
-			with ModuleTimetableFetchingServiceComponent {
-				val timetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
-			}
+			with ScientiaHttpTimetableFetchingServiceComponent
 
 	def generateSmallGroupSetNameAndFormat(module: Module, eventType: TimetableEventType) = {
 		val format = eventType match {
@@ -91,7 +90,7 @@ trait LookupEventsFromModuleTimetables {
 					.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
 					.groupBy { _.eventType }
 					.toSeq.map { case (eventType, events) =>
-						new TimetabledSmallGroupEvent(module, eventType, events.sorted)
+						TimetabledSmallGroupEvent(module, eventType, events.sorted)
 					}
 			}.recover {
 				case _: TimeoutException | _: TimetableEmptyException => Nil

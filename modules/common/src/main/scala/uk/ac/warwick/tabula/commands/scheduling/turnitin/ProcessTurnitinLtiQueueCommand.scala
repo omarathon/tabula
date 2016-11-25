@@ -92,7 +92,6 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 
 	private def processReportForSubmission(report: OriginalityReport): OriginalityReport = {
 		logger.info(s"Processing report for submission ${report.id}...")
-		report.lastSubmittedToTurnitin = DateTime.now
 
 		val attachment = report.attachment
 		val submission = attachment.submissionValue.submission
@@ -120,6 +119,8 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 		)
 
 		originalityReportService.refresh(report)
+
+		report.lastSubmittedToTurnitin = DateTime.now
 
 		if (response.success) {
 			report.turnitinId = response.turnitinSubmissionId()

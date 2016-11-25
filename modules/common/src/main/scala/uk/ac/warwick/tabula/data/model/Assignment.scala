@@ -369,6 +369,9 @@ class Assignment
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
+	def lateSubmissionCount: Int =
+		submissions.filter { submission => isLate(submission) }.size
+
 	def submissionDeadline(user: User): DateTime = submissionDeadline(user.getWarwickId, user.getUserId)
 
 	def submissionDeadline(universityId: String, usercode: String): DateTime =
@@ -534,6 +537,10 @@ class Assignment
 
 	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
+	def extensionCountByStatus = {
+		extensions.groupBy(_._state).map { case (state, extensionList) => (state, extensionList.size ) }
+	}
+
 	def addFields(fieldz: AssignmentFormField*) = for (field <- fieldz) addField(field)
 
 	def addFeedback(feedback: AssignmentFeedback) {
@@ -680,6 +687,17 @@ class Assignment
 		else Seq()
 	}
 
+	//Return all first markes along with total students allocated
+	def firstMarkersWithStudentAllocationCountMap: Map[User, Int] = {
+		firstMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
+	}
+
+	//Return all second markes along with total students allocated
+	def secondMarkersWithStudentAllocationCountMap: Map[User, Int] = {
+		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
+	}
+
+
 	/**
 	 * Report on the submissions and feedbacks, noting
 	 * where the lists of students don't match up.
@@ -768,7 +786,6 @@ class Assignment
 	}
 
 	def toEntityReference = new AssignmentEntityReference().put(this)
-
 }
 
 case class SubmissionsReport(assignment: Assignment) {

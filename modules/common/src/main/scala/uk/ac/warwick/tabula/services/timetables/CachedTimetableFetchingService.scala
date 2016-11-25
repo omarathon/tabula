@@ -1,24 +1,35 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import java.util.concurrent.TimeUnit
+
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableCacheKey._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
-import uk.ac.warwick.util.cache.{CacheEntryFactory, CacheEntryUpdateException, Caches}
+import uk.ac.warwick.util.cache._
+import uk.ac.warwick.util.collections.Pair
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
+object CachedPartialTimetableFetchingService {
+	final val defaultCacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
+}
+
 /**
  * A wrapper around a TimetableFetchingService that stores the resulting TimetableEvents in a
  * cache, thus allowing us not to thrash Syllabus+ too badly
  *
  */
-class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingService, cacheName: String) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
+class CachedPartialTimetableFetchingService(
+	delegate: PartialTimetableFetchingService,
+	cacheName: String,
+	cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
+) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
 
-	val CacheExpiryTime = 60 * 60 * 6 // 6 hours in seconds
 	val FetchTimeout = 15.seconds
 
 	val cacheEntryFactory = new CacheEntryFactory[TimetableCacheKey, EventList] {
@@ -62,8 +73,12 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 
 	// rather than using 5 little caches, use one big one with a composite key
 	lazy val timetableCache = {
-		val cache = Caches.newCache(cacheName, cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+		val cache = Caches.newCache(cacheName, cacheEntryFactory, cacheExpiryTime * 4, cacheStrategy)
 		// serve stale data if we have it while we update in the background
+		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[TimetableCacheKey, EventList] {
+			override def getTTL(entry: CacheEntry[TimetableCacheKey, EventList]): Pair[Number, TimeUnit] = Pair.of(cacheExpiryTime * 4, TimeUnit.SECONDS)
+			override def isStale(entry: CacheEntry[TimetableCacheKey, EventList]): Boolean = (entry.getTimestamp + cacheExpiryTime * 1000) <= DateTime.now.getMillis
+		})
 		cache.setAsynchronousUpdateEnabled(true)
 		cache
 	}
@@ -81,26 +96,26 @@ class CachedPartialTimetableFetchingService(delegate: PartialTimetableFetchingSe
 
 }
 
-class CachedStudentTimetableFetchingService(delegate: StudentTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StudentTimetableFetchingService
+class CachedStudentTimetableFetchingService(delegate: StudentTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with StudentTimetableFetchingService
 
-class CachedModuleTimetableFetchingService(delegate: ModuleTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with ModuleTimetableFetchingService
+class CachedModuleTimetableFetchingService(delegate: ModuleTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with ModuleTimetableFetchingService
 
-class CachedCourseTimetableFetchingService(delegate: CourseTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with CourseTimetableFetchingService
+class CachedCourseTimetableFetchingService(delegate: CourseTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with CourseTimetableFetchingService
 
-class CachedRoomTimetableFetchingService(delegate: RoomTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with RoomTimetableFetchingService
+class CachedRoomTimetableFetchingService(delegate: RoomTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with RoomTimetableFetchingService
 
-class CachedStaffTimetableFetchingService(delegate: StaffTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StaffTimetableFetchingService
+class CachedStaffTimetableFetchingService(delegate: StaffTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with StaffTimetableFetchingService
 
-class CachedStaffAndStudentTimetableFetchingService(delegate: StudentTimetableFetchingService with StaffTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with StudentTimetableFetchingService with StaffTimetableFetchingService
+class CachedStaffAndStudentTimetableFetchingService(delegate: StudentTimetableFetchingService with StaffTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with StudentTimetableFetchingService with StaffTimetableFetchingService
 
-class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetchingService, cacheName: String)
-	extends CachedPartialTimetableFetchingService(delegate, cacheName) with CompleteTimetableFetchingService
+class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetchingService, cacheName: String, cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime)
+	extends CachedPartialTimetableFetchingService(delegate, cacheName, cacheExpiryTime) with CompleteTimetableFetchingService
 
 @SerialVersionUID(3326840601345l) sealed trait TimetableCacheKey extends Serializable {
 	val id: String

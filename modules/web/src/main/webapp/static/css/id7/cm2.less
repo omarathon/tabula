@@ -1,4 +1,6 @@
-@import "../../libs/font-awesome/less/font-awesome.less";
+@import "../../libs/font-awesome/less/variables.less";
+@import "colours.less";
+
 
 a.profile-link {
 	text-decoration: none;
@@ -49,4 +51,27 @@ a.profile-link {
 		font-family: 'FontAwesome';
 		content: @chevron-down;
 	}
+}
+
+
+table.expanding-row-pairs {
+	td.can-expand {
+		i.fa-caret-down, i.fa-caret-right {
+			font-size: 1.5em;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+	}
+	.deleted {
+		text-decoration: line-through;
+	}
+	.disabled {
+		text-decoration: none;
+		color: @tabulaGrayLight;
+		cursor: not-allowed;
+	}
+}
+
+.audit-info {
+	margin-top: 20px;
 }

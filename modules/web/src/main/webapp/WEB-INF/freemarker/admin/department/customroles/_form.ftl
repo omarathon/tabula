@@ -30,18 +30,23 @@ Adding or editing a custom role definition
 
 	<@bs3form.labelled_form_group path="baseDefinition" labelText="Base role definition">
 		<@f.select path="baseDefinition" cssClass="form-control">
+			<#assign shownOriginalValue = false />
 			<#list allRoleDefinitions as roleDefinition>
 				<#assign roleDefinitionName><#compress>
 					<#if roleDefinition.id??>
-					${roleDefinition.id}
+						${roleDefinition.id}
 					<#elseif roleDefinition.selector??>
-					${roleDefinition.name}(${roleDefinition.selector.id})
+						${roleDefinition.name}(${roleDefinition.selector.id})
 					<#else>
-					${roleDefinition.name}
+						${roleDefinition.name}
 					</#if>
 				</#compress></#assign>
 				<option value="${roleDefinitionName}"<#if status.value! == roleDefinitionName> selected</#if>>${roleDefinition.description}</option>
+				<#if !status.value?has_content || status.value == roleDefinitionName><#assign shownOriginalValue = true /></#if>
 			</#list>
+			<#if !shownOriginalValue>
+				<option value="${status.value}" selected>${status.value}</option>
+			</#if>
 		</@f.select>
 		<div class="help-block">
 			The "starting point" for this custom role definition.

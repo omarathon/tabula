@@ -332,6 +332,7 @@ object Permissions {
 		case object AllocateSelf extends Permission("Allocate the current user to a small group")
 
 		case object ImportFromExternalSystem extends Permission("Import small groups from Syllabus+")
+		case object UpdateMembership extends ScopelessPermission("Update department small group membership")
 	}
 
 	object SmallGroupEvents {
