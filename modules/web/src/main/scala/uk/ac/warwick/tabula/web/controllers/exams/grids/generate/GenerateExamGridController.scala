@@ -6,7 +6,6 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.{BindException, Errors}
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
-import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids._
@@ -23,7 +22,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
-import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
+import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
@@ -34,7 +33,13 @@ object GenerateExamGridMappingParameters {
 	final val gridOptions = "gridOptions"
 	final val coreRequiredModules = "coreRequiredModules"
 	final val previewAndDownload = "previewAndDownload"
-	final val export = "export"
+	final val excel = "excel"
+	final val marksRecord = "marksRecord"
+	final val marksRecordConfidential = "marksRecordConfidential"
+	final val passList = "passList"
+	final val passListConfidential = "passListConfidential"
+	final val transcript = "transcript"
+	final val transcriptConfidential = "transcriptConfidential"
 }
 
 @Controller
@@ -44,7 +49,7 @@ class GenerateExamGridController extends ExamsController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
 	with AutowiringCourseDaoComponent with AutowiringModuleRegistrationServiceComponent
-	with AutowiringUpstreamRouteRuleServiceComponent
+	with ExamGridDocumentsController
 	with TaskBenchmarking {
 
 	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
@@ -329,53 +334,7 @@ class GenerateExamGridController extends ExamsController
 		)
 	}
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.export))
-	def export(
-		@Valid @ModelAttribute("selectCourseCommand") selectCourseCommand: SelectCourseCommand,
-		selectCourseCommandErrors: Errors,
-		@Valid @ModelAttribute("gridOptionsCommand") gridOptionsCommand: GridOptionsCommand,
-		gridOptionsCommandErrors: Errors,
-		@ModelAttribute("checkOvercatCommmand") checkOvercatCommmand: CheckOvercatCommand,
-		@ModelAttribute("coreRequiredModules") coreRequiredModules: Seq[CoreRequiredModule],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): View = {
-		if (selectCourseCommandErrors.hasErrors || gridOptionsCommandErrors.hasErrors) {
-			throw new IllegalArgumentException
-		}
-
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadOption, _) = benchmarkTask("GridData") { checkAndApplyOvercatAndGetGridData(
-			selectCourseCommand,
-			gridOptionsCommand,
-			checkOvercatCommmand,
-			coreRequiredModules
-		)}
-
-		val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
-		val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
-
-		new ExcelView(
-			s"Exam grid for ${department.name} ${selectCourseCommand.course.code} ${selectCourseCommand.route.code.toUpperCase} ${academicYear.toString.replace("/","-")}.xlsx",
-			GenerateExamGridExporter(
-				department = department,
-				academicYear = academicYear,
-				course = selectCourseCommand.course,
-				route = selectCourseCommand.route,
-				yearOfStudy = selectCourseCommand.yearOfStudy,
-				yearWeightings = weightings,
-				normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad),
-				entities = entities,
-				leftColumns = studentInformationColumns,
-				perYearColumns = perYearColumns,
-				rightColumns = summaryColumns,
-				chosenYearColumnValues = chosenYearColumnValues,
-				perYearColumnValues = perYearColumnValues,
-				showComponentMarks = gridOptionsCommand.showComponentMarks
-			)
-		)
-	}
-
-	private case class GridData(
+	protected case class GridData(
 		entities: Seq[ExamGridEntity],
 		studentInformationColumns: Seq[ChosenYearExamGridColumn],
 		perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
@@ -385,7 +344,7 @@ class GenerateExamGridController extends ExamsController
 		routeRules: Seq[UpstreamRouteRule]
 	)
 
-	private def checkAndApplyOvercatAndGetGridData(
+	protected def checkAndApplyOvercatAndGetGridData(
 		selectCourseCommand: SelectCourseCommand,
 		gridOptionsCommand: GridOptionsCommand,
 		checkOvercatCmd: CheckOvercatCommand,
