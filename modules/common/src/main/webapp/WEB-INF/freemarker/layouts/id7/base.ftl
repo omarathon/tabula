@@ -164,7 +164,18 @@
 				<nav class="navbar navbar-tertiary" role="navigation">
 					<ul class="nav navbar-nav">
 						<#list secondBreadcrumbs as crumb>
-							<li <#if crumb.active>class="active"</#if>><a href="<@url page=crumb.url!"" />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a></li>
+							<li <#if crumb.active>class="active"</#if>>
+								<a
+									<#if crumb.active> <#-- can't click active tertiary nav as already on that page -->
+										data-page-url="<@url page=crumb.url!"" />"
+									<#else>
+										href="<@url page=crumb.url!"" />"
+									</#if>
+									<#if crumb.tooltip??>title="${crumb.tooltip}"</#if>
+								>
+									${crumb.title}
+								</a>
+							</li>
 						</#list>
 					</ul>
 				</nav>
