@@ -83,7 +83,10 @@ object ViewSmallGroupAttendanceCommand {
 			}
 		}
 
-	def attendanceForStudent(allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])], isLate: EventInstance => Boolean)(user: User): SortedMap[(SmallGroupEvent, WeekNumber), SmallGroupAttendanceState with Product with Serializable] = {
+	def attendanceForStudent(
+		allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])],
+		isLate: EventInstance => Boolean
+	)(user: User): SortedMap[(SmallGroupEvent, WeekNumber), SmallGroupAttendanceState] = {
 		val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
 			val instance = (event, week)
 			val attendance =
@@ -106,7 +109,7 @@ object ViewSmallGroupAttendanceCommand {
 			instance -> state
 		}
 
-		SortedMap(userAttendance.toSeq:_*)
+		SortedMap(userAttendance:_*)
 	}
 }
 

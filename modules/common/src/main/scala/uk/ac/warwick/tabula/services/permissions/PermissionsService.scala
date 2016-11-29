@@ -325,7 +325,7 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrateg
 	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
 	final val GrantedRolesForUserCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedRolesForUserCache: Cache[(String, ClassManifest[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
+	final lazy val GrantedRolesForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, cacheStrategy)
 		cache
 	}
@@ -347,7 +347,7 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrate
 	final val GrantedRolesForGroupCacheName = "GrantedRolesForGroup"
 	final val GrantedRolesForGroupCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedRolesForGroupCache: Cache[(Seq[String], ClassManifest[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
+	final lazy val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, cacheStrategy)
 		cache
 	}
@@ -364,7 +364,7 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 	final val GrantedPermissionsForUserCacheName = "GrantedPermissionsForUser"
 	final val GrantedPermissionsForUserCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedPermissionsForUserCache: Cache[(String, ClassManifest[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
+	final lazy val GrantedPermissionsForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(
 			GrantedPermissionsForUserCacheName,
 			new GrantedPermissionsForUserCacheFactory,
@@ -385,7 +385,7 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 	final val GrantedPermissionsForGroupCacheName = "GrantedPermissionsForGroup"
 	final val GrantedPermissionsForGroupCacheMaxAgeSecs: Int = 60 * 60 // 1 hour
 
-	final lazy val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassManifest[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
+	final lazy val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), _root_.uk.ac.warwick.tabula.JavaImports.JArrayList[String]] = {
 		val cache = Caches.newCache(
 			GrantedPermissionsForGroupCacheName,
 			new GrantedPermissionsForGroupCacheFactory,

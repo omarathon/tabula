@@ -113,7 +113,7 @@ object GrantedRole {
 		case _ => false
 	}
 
-	def classObject[A <: PermissionsTarget : ClassTag]: Class[_ >: DepartmentGrantedRole with ModuleGrantedRole with RouteGrantedRole with MemberGrantedRole with AssignmentGrantedRole with SmallGroupGrantedRole with SmallGroupSetGrantedRole with SmallGroupEventGrantedRole <: GrantedRole[_ >: Department with Module with Route with Member with Assignment with SmallGroup with SmallGroupSet with SmallGroupEvent]] = classTag[A] match {
+	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedRole]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedRole]
 		case t if isSubtype(t, classTag[Route]) => classOf[RouteGrantedRole]

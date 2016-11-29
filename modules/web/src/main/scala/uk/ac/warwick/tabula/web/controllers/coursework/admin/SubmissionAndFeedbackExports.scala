@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsComma
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.csv.CSVLineWriter
 
-import scala.collection.immutable.{ListMap, Seq}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.DateFormats
 import org.joda.time.ReadableInstant
@@ -21,7 +20,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
-import scala.collection.AbstractSeq
+import scala.collection.mutable
 
 class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackExport {
 
@@ -80,7 +79,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 		else Map()
 	}
 
-	def fieldElement(item: SubmissionListItem)(value: SavedFormValue): AbstractSeq[Node] with Seq[Node] =
+	def fieldElement(item: SubmissionListItem)(value: SavedFormValue): Seq[Node] =
 		if (value.hasAttachments)
 			<field name={ value.name }>
 				{
@@ -316,8 +315,8 @@ trait SubmissionAndFeedbackExport {
 		"second-marker" -> assignment.getStudentsSecondMarker(student.user.getWarwickId).map(_.getFullName).getOrElse("")
 	)
 
-	protected def extraFieldData(student: Student): Map[String, Any] = {
-		var fieldDataMap = ListMap[String, String]()
+	protected def extraFieldData(student: Student): Map[String, String] = {
+		var fieldDataMap = mutable.ListMap[String, String]()
 
 		student.coursework.enhancedSubmission match {
 			case Some(item) => item.submission.values.asScala foreach ( value =>
@@ -340,7 +339,7 @@ trait SubmissionAndFeedbackExport {
 			case None =>
 		}
 
-		fieldDataMap
+		fieldDataMap.toMap
 	}
 
 	protected def plagiarismData(student: Student): Map[String, Any] = student.coursework.enhancedSubmission match {

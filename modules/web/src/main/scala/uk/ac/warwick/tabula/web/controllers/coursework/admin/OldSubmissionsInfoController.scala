@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.web.views.CSVView
 import uk.ac.warwick.util.csv.CSVLineWriter
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
-import scala.collection.immutable.{ListMap, Seq}
+import scala.collection.immutable.ListMap
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module

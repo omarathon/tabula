@@ -91,7 +91,7 @@ trait WebsignonMethods extends Matchers  with Eventually{
 	//
 	// (currently requires that the user's first name is the usercode, to check signed-in-ness)
 	object signIn {
-		def as(details: LoginDetails): _root_.uk.ac.warwick.tabula.WebsignonMethods.signIn.SigningInPhase = {
+		def as(details: LoginDetails): SigningInPhase = {
 			SigningInPhase(details)
 		}
 

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web
 
-import javax.servlet.http.{Cookie, HttpServletResponse}
+import javax.servlet.http.HttpServletResponse
 import javax.servlet.http
 
 import language.implicitConversions
@@ -27,7 +27,7 @@ class Cookie(val cookie: http.Cookie) {
  * Scala-ish wrapper for the array of servlet Cookies from a request.
  */
 class Cookies(val _cookies: Array[http.Cookie]) {
-	lazy val cookies: Array[Cookie] = if (_cookies == null) Array.empty[http.Cookie] else _cookies
+	lazy val cookies: Array[http.Cookie] = if (_cookies == null) Array.empty[http.Cookie] else _cookies
 	def getCookie(name: String): Option[Cookie] = wrap(cookies.find { _.getName == name })
 	def getString(name: String): Option[String] = getCookie(name) match {
 		case Some(cookie) => Some(cookie.value)

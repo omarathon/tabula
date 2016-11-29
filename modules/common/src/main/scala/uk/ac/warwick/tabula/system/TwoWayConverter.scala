@@ -7,7 +7,7 @@ import org.springframework.core.convert.TypeDescriptor
 import org.springframework.core.convert.converter.GenericConverter
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair
 import com.google.common.collect.Sets._
-import java.{util, util => j}
+import java.{util => j}
 
 import org.springframework.format.Formatter
 import java.util.Locale
@@ -33,14 +33,14 @@ import scala.reflect._
  */
 abstract class TwoWayConverter[A <: String: ClassTag, B <: AnyRef: ClassTag] extends GenericConverter with Formatter[B] {
 	// JVM can't normally remember types at runtime, so store them as Manifests here
-	val typeA: ClassManifest[A] = classTag[A]
-	val typeB: ClassManifest[B] = classTag[B]
+	val typeA: ClassTag[A] = classTag[A]
+	val typeB: ClassTag[B] = classTag[B]
 
 	val convertibleTypes: j.Set[ConvertiblePair] = newHashSet(
 		new ConvertiblePair(typeA.runtimeClass, typeB.runtimeClass),
 		new ConvertiblePair(typeB.runtimeClass, typeA.runtimeClass))
 
-	def getConvertibleTypes: util.Set[ConvertiblePair] = convertibleTypes
+	def getConvertibleTypes: j.Set[ConvertiblePair] = convertibleTypes
 
 	// implement these. throw an IllegalArgumentException if input is invalid - don't just return null!
 	def convertRight(source: A): B

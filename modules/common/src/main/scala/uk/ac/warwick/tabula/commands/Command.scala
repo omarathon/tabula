@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, DateFormats, JavaImports, RequestInfo}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.core.StopWatch
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -181,7 +180,7 @@ object Command {
 		override def initialValue = None
 	}
 
-	def getOrInitStopwatch(): StopWatch =
+	def getOrInitStopwatch(): uk.ac.warwick.util.core.StopWatch =
 		threadLocal.get match {
 			case Some(sw) => sw
 			case None =>

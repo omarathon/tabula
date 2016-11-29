@@ -17,9 +17,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
-import scala.Predef.Map
 import scala.collection.JavaConverters._
-import scala.collection.{Map, mutable}
+import scala.collection.mutable
 
 class AgentPointRecordCommandTest extends TestBase with Mockito {
 
@@ -121,7 +120,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		new PopulateFixture {
 			populate.templatePoint = scheme1point1
 			populate.populate()
-			val result: Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
+			val result: collection.Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
 			// Student1 doesn't have any attendance, but the checkpoint map should still be populated for each valid point
 			result(student1)(scheme1point1) should be (null)
 			result(student1)(scheme2point1) should be (null)
