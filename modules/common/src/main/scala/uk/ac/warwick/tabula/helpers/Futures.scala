@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.util.concurrent.{ScheduledExecutorService, TimeoutException}
+import java.util.concurrent.{Executor, Executors, ScheduledExecutorService, TimeoutException}
 
 import org.hibernate.{FlushMode, SessionFactory}
 import org.springframework.orm.hibernate4.{SessionFactoryUtils, SessionHolder}
@@ -68,6 +68,8 @@ trait Futures {
 
 object Futures extends Futures {
 
+	private lazy val executionContextExecutor = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
+
 	/**
 		* One big problem with threads is that Hibernate binds the current session to a thread local, and then other
 		* things depend on it. What's a safe way to do that? Well there isn't one, really. We can open a new read-only
@@ -84,7 +86,7 @@ object Futures extends Futures {
 				// Grab any resources bound to ThreadLocals and re-bind them inside the Runnable
 				val resources = Map(TransactionSynchronizationManager.getResourceMap.asScala.toSeq: _*)
 
-				ExecutionContext.Implicits.global.execute(Runnable {
+				executionContextExecutor.execute(Runnable {
 					// Don't try and rebind or unbind something already bound
 					val resourcesToBind = resources.filterNot { case (key, _) => TransactionSynchronizationManager.hasResource(key) }
 
@@ -96,7 +98,7 @@ object Futures extends Futures {
 					}
 				})
 
-			case Some(sf) => ExecutionContext.Implicits.global.execute(Runnable {
+			case Some(sf) => executionContextExecutor.execute(Runnable {
 				val session = sf.openSession()
 				session.setDefaultReadOnly(true)
 				session.setFlushMode(FlushMode.MANUAL)
