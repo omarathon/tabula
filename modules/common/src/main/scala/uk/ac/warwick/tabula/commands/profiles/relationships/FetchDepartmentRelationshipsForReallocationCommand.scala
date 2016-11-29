@@ -19,7 +19,7 @@ object FetchDepartmentRelationshipsForReallocationCommand {
 			with FetchDepartmentRelationshipInformationCommandBindListener
 			with ReadOnly with Unaudited {
 
-			override val agent = agentId
+			override val agent: String = agentId
 
 		}
 

@@ -9,7 +9,7 @@ import org.mockito.Mockito._
 class FeedbackSummaryCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends FeedbackServiceComponent with FeedbackSummaryCommandState  {
-		val feedbackService = mock[FeedbackService]
+		val feedbackService: FeedbackService = mock[FeedbackService]
 	}
 
 	trait Fixture {

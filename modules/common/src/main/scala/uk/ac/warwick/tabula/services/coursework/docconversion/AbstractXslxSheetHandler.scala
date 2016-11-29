@@ -4,9 +4,12 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandl
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
+import org.xml.sax.XMLReader
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
+
+import scala.collection.mutable
 
 abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var items: JList[A])
 	extends SheetContentsHandler with Logging {
@@ -14,13 +17,13 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
 	var lastContents: String = null
 	var cellIsString = false
 	var isFirstRow = true // flag to skip the first row as it will contain column headers
-	var columnMap = scala.collection.mutable.Map[Short, String]()
+	var columnMap: mutable.Map[Short, String] = scala.collection.mutable.Map[Short, String]()
 	var columnIndex: Int = _
 	var currentItem: A = _
 
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
-	def fetchSheetParser = {
+	def fetchSheetParser: XMLReader = {
 		val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
 		parser.setContentHandler(xssfHandler)
 		parser

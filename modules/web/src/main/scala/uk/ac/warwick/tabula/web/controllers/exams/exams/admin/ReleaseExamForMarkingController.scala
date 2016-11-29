@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Exam, Feedback, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.commands.exams.ReleaseExamForMarkingCommand
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/release-for-marking"))
@@ -21,7 +22,7 @@ class ReleaseExamForMarkingController extends ExamsController {
 		)
 
 	@RequestMapping(method = Array(GET))
-	def form(@PathVariable module: Module, @PathVariable exam: Exam) = {
+	def form(@PathVariable module: Module, @PathVariable exam: Exam): Mav = {
 		Mav("exams/exams/admin/release").crumbs(
 			Breadcrumbs.Exams.Home,
 			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
@@ -30,7 +31,7 @@ class ReleaseExamForMarkingController extends ExamsController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam) = {
+	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam): Mav = {
 		cmd.apply()
 		Redirect(Routes.Exams.admin.module(exam.module, exam.academicYear))
 	}

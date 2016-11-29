@@ -17,7 +17,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var moduleRegistrationDao = Wire[ModuleRegistrationDao]
+	var moduleRegistrationDao: ModuleRegistrationDao = Wire[ModuleRegistrationDao]
 
 
 
@@ -70,7 +70,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		}
 	}
 
-	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String) = {
+	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {
 		val property = "selectionStatus"
 		val oldValue = destinationBean.getPropertyValue(property)
 		val newValue = ModuleSelectionStatus.fromCode(selectionStatusCode)
@@ -91,6 +91,6 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade"
 	)
 
-	override def describe(d: Description) = d.properties("scjCode" -> course.scjCode)
+	override def describe(d: Description): Unit = d.properties("scjCode" -> course.scjCode)
 
 }

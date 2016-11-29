@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.NamedLocation
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
@@ -13,7 +13,7 @@ import scala.xml.XML
 
 class TimetableFetchingServiceTest extends TestBase with Mockito {
 
-	val module = Fixtures.module("cs132")
+	val module: Module = Fixtures.module("cs132")
 
 	@Test def parseXML() {
 		val locationFetchingService = new LocationFetchingService {

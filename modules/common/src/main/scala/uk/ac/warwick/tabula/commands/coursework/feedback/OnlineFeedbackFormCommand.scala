@@ -42,7 +42,7 @@ abstract class OnlineFeedbackFormCommand(
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
-	def feedback = assignment.findFeedback(student.getWarwickId)
+	def feedback: Option[Feedback] = assignment.findFeedback(student.getWarwickId)
 
 	feedback match {
 		case Some(f) => copyFrom(f)
@@ -226,7 +226,7 @@ trait OnlineFeedbackStudentState {
 	private def fieldHasVaue = fields.asScala.exists{ case (_, value: StringFormValue) => value.value.hasText }
 	private def hasFile = Option(attachedFiles).exists(!_.isEmpty) || Option(file).exists(!_.attachedOrEmpty.isEmpty)
 
-	def hasContent = mark.hasText || grade.hasText || hasFile || fieldHasVaue
+	def hasContent: Boolean = mark.hasText || grade.hasText || hasFile || fieldHasVaue
 }
 
 trait OnlineFeedbackFormDescription[A] extends Describable[A] {

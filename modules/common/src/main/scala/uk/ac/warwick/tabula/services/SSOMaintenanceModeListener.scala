@@ -22,13 +22,13 @@ import uk.ac.warwick.util.queue.conversion.ItemType
  */
 class SSOMaintenanceModeListener extends QueueListener with InitializingBean with Logging with ServletContextAware with AutowiringMaintenanceModeServiceComponent {
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
-	def config = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
+	def config: Option[SSOConfiguration] = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
 		case config: SSOConfiguration => Some(config)
 		case _ => None
 	}
-	def cache = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
+	def cache: Option[DatabaseUserCache] = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
 		case cache: DatabaseUserCache => Some(cache)
 		case _ => None
 	}

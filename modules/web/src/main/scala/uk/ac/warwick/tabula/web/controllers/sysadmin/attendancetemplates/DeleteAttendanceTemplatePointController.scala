@@ -5,8 +5,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringTemplate, AttendanceMonitoringTemplatePoint}
 import uk.ac.warwick.tabula.commands.sysadmin.attendancetemplates.DeleteAttendanceTemplatePointCommand
-import uk.ac.warwick.tabula.web.controllers.sysadmin.{SysadminBreadcrumbs, BaseSysadminController}
+import uk.ac.warwick.tabula.web.controllers.sysadmin.{BaseSysadminController, SysadminBreadcrumbs}
 import uk.ac.warwick.tabula.sysadmin.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/attendancetemplates/{template}/points/{point}/delete"))
@@ -16,7 +17,7 @@ class DeleteAttendanceTemplatePointController extends BaseSysadminController {
 	def command(@PathVariable point: AttendanceMonitoringTemplatePoint) = DeleteAttendanceTemplatePointCommand(mandatory(point))
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[Unit], @PathVariable template: AttendanceMonitoringTemplate) = {
+	def form(@ModelAttribute("command") cmd: Appliable[Unit], @PathVariable template: AttendanceMonitoringTemplate): Mav = {
 		render(template)
 	}
 
@@ -31,7 +32,7 @@ class DeleteAttendanceTemplatePointController extends BaseSysadminController {
 	def submit(
 		@ModelAttribute("command") cmd: Appliable[Unit],
 		@PathVariable template: AttendanceMonitoringTemplate
-	) = {
+	): Mav = {
 		cmd.apply()
 		Redirect(Routes.AttendanceTemplates.edit(template))
 	}

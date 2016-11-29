@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.coursework.{ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.commands.coursework.{FeedbackReleasedNotifier, ReleasedState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.data.model.{Module, _}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -12,7 +12,9 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+
 import collection.JavaConverters._
+import scala.collection.mutable
 
 object ReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =
@@ -39,9 +41,9 @@ abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assi
 	def unreleasableSubmissions: Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
 	def studentsWithoutKnownMarkers:Seq[String] = students.asScala -- studentsWithKnownMarkers
-	def studentsAlreadyReleased = invalidFeedback.asScala.map(f => f.universityId)
+	def studentsAlreadyReleased: mutable.Buffer[String] = invalidFeedback.asScala.map(f => f.universityId)
 
-	override def applyInternal() = {
+	override def applyInternal(): List[AssignmentFeedback] = {
 		// get the parent feedback or create one if none exist
 		val feedbacks = studentsWithKnownMarkers.toBuffer.map { uniId: String =>
 			val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == uniId).getOrElse({

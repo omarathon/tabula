@@ -43,7 +43,7 @@ private class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
 	private var value: A = _
 	private var defined = false
 
-	def get = {
+	def get: A = {
 		if (!defined) {
 			// eval
 			val value = fn
@@ -53,7 +53,7 @@ private class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
 
 		value
 	}
-	def set(newValue: => A) = {
+	def set(newValue: => A): FunctionalPromise[A] = {
 		value = newValue
 		defined = true
 		this
@@ -62,7 +62,7 @@ private class FunctionalPromise[A](fn: => A) extends MutablePromise[A] {
 }
 
 private object FunctionalPromise {
-	def empty[A] = {
+	def empty[A]: Unit = {
 
 	}
 }
@@ -71,7 +71,7 @@ class OptionalPromise[A](fn: => Option[A]) extends Promise[A] {
 
 	private var result: A = _
 
-	def get = {
+	def get: A = {
 		if (result == null) result = fn match {
 			case Some(value) => value
 			case _ => throw new UnfulfilledPromiseException("Fulfilled promise on Option(None)")

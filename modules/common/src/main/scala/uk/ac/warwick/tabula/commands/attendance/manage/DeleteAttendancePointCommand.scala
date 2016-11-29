@@ -29,7 +29,7 @@ class DeleteAttendancePointCommandInternal(val department: Department, val templ
 	self: DeleteAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		pointsToDelete.foreach(p => {
 			attendanceMonitoringService.deletePoint(p)
 			p.scheme.points.remove(p)

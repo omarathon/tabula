@@ -38,7 +38,7 @@ class CreateMemberNoteCommandInternal(val member: Member, val user: CurrentUser)
 	memberNote.creationDate = DateTime.now
 	memberNote.creatorId = user.universityId
 	memberNote.member = member
-	override val abstractMemberNote = memberNote
+	override val abstractMemberNote: MemberNote = memberNote
 
 }
 

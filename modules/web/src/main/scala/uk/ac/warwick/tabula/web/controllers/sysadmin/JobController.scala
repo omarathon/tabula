@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.jobs.TestingJob
 import uk.ac.warwick.tabula.services.jobs.JobService
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers._
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -23,7 +23,7 @@ class JobController extends BaseController {
 	val pageSize = 100
 
 	@RequestMapping(Array("/list"))
-	def list(query: JobQuery) = {
+	def list(query: JobQuery): Mav = {
 		val unfinished = jobService.unfinishedInstances
 
 		val page = query.page
@@ -43,7 +43,7 @@ class JobController extends BaseController {
 	}
 
 	@RequestMapping(Array("/create-test"))
-	def test = {
+	def test: Mav = {
 		val jobInstance = jobService.add(Some(user), TestingJob("sysadmin test", sleepTime = TestingJob.DefaultDelay))
 		val id = jobInstance.id
 		status(id)
@@ -51,7 +51,7 @@ class JobController extends BaseController {
 	}
 
 	@RequestMapping(Array("/job-status"))
-	def status(@RequestParam("id") id: String) = {
+	def status(@RequestParam("id") id: String): Mav = {
 		jobService.getInstance(id).map(instance =>
 			if (ajax)
 				Mav(new JSONView(Map(
@@ -68,14 +68,14 @@ class JobController extends BaseController {
 	}
 
 	@RequestMapping(Array("/kill"))
-	def kill(@RequestParam("id") id: String) = {
+	def kill(@RequestParam("id") id: String): Mav = {
 		val instance = jobService.getInstance(id)
 		jobService.kill(instance.get)
 		Redirect(Routes.sysadmin.jobs.list)
 	}
 
 	@RequestMapping(Array("/run"))
-	def run(@RequestParam("id") id: String) = {
+	def run(@RequestParam("id") id: String): Mav = {
 		val instance = jobService.getInstance(id).get
 		val job = jobService.findJob(instance.jobType).get
 

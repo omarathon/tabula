@@ -21,11 +21,11 @@ abstract class ViewProfilePhotoCommand(val member: Member)
 
 	PermissionCheck(Permissions.Profiles.Read.Photo, mandatory(member))
 
-	override def applyInternal() = {
+	override def applyInternal(): Mav = {
 		Mav(s"redirect:${photoUrl(Option(member))}")
 	}
 
-	override def describe(d: Description) = d.member(member)
+	override def describe(d: Description): Unit = d.member(member)
 }
 
 class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship)
@@ -33,11 +33,11 @@ class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: 
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationship.relationshipType), member)
 
-	override def applyInternal() = {
+	override def applyInternal(): Mav = {
 		Mav(s"redirect:${photoUrl(relationship.agentMember)}")
 	}
 
-	override def describe(d: Description) = d.member(member).property("relationship" -> relationship)
+	override def describe(d: Description): Unit = d.member(member).property("relationship" -> relationship)
 
 }
 

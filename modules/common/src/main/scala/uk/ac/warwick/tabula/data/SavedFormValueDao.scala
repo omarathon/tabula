@@ -38,5 +38,5 @@ trait SavedFormValueDaoComponent {
 }
 
 trait AutowiringSavedFormValueDaoComponent extends SavedFormValueDaoComponent {
-	var savedFormValueDao = Wire[SavedFormValueDao]
+	var savedFormValueDao: SavedFormValueDao = Wire[SavedFormValueDao]
 }

@@ -7,9 +7,9 @@ import org.hibernate.criterion.Order
 import org.apache.commons.lang3.builder.ToStringStyle
 
 class ScalaOrder(val underlying: Order) extends Aliasable {
-	def apply[A](c: ScalaCriteria[A]) = c.addOrder(this)
+	def apply[A](c: ScalaCriteria[A]): ScalaCriteria[A] = c.addOrder(this)
 
-	override final def equals(other: Any) = other match {
+	override final def equals(other: Any): Boolean = other match {
 		case that: ScalaOrder =>
 			new EqualsBuilder()
 				.append(underlying, that.underlying)
@@ -18,13 +18,13 @@ class ScalaOrder(val underlying: Order) extends Aliasable {
 		case _ => false
 	}
 
-	override final def hashCode =
+	override final def hashCode: Int =
 		new HashCodeBuilder()
 			.append(underlying)
 			.append(aliases)
 			.build()
 
-	override final def toString =
+	override final def toString: String =
 		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("underlying", underlying)
 			.append("aliases", aliases)
@@ -34,7 +34,7 @@ class ScalaOrder(val underlying: Order) extends Aliasable {
 object ScalaOrder {
 	import Aliasable._
 
-	def apply(underlying: Order, aliases: (String, AliasAndJoinType)*) =
+	def apply(underlying: Order, aliases: (String, AliasAndJoinType)*): ScalaOrder =
 		addAliases(new ScalaOrder(underlying), aliases: _*)
 
 	def asc(property: String, aliases: (String, AliasAndJoinType)*): ScalaOrder =

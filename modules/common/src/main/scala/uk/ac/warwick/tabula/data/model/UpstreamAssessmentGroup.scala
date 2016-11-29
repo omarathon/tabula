@@ -48,7 +48,7 @@ class UpstreamAssessmentGroup extends GeneratedId {
 		members.addAll(universityIds.distinct.map(universityId => new UpstreamAssessmentGroupMember(this, universityId)).asJava)
 	}
 
-	def isEquivalentTo(other: UpstreamAssessmentGroup) =
+	def isEquivalentTo(other: UpstreamAssessmentGroup): Boolean =
 		new EqualsBuilder()
 			.append(moduleCode, other.moduleCode)
 			.append(assessmentGroup, other.assessmentGroup)
@@ -57,7 +57,7 @@ class UpstreamAssessmentGroup extends GeneratedId {
 			.append(sequence, other.sequence)
 			.isEquals
 
-	override def toString = "%s %s g:%s o:%s s:%s" format (moduleCode, academicYear, assessmentGroup, occurrence, sequence)
+	override def toString: String = "%s %s g:%s o:%s s:%s" format (moduleCode, academicYear, assessmentGroup, occurrence, sequence)
 
 }
 

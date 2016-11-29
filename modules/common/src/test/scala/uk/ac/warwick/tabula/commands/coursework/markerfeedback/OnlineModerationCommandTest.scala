@@ -13,13 +13,13 @@ import uk.ac.warwick.userlookup.User
 
 class OnlineModerationCommandTest extends TestBase with Mockito {
 	trait Fixture {
-		def fakeUser(id:String) = {
+		def fakeUser(id:String): User = {
 			val newUser = new User(id)
 			newUser.setWarwickId(id)
 			newUser
 		}
 
-		val student = fakeUser("user1")
+		val student: User = fakeUser("user1")
 
 		val assignment = new Assignment
 		val module = new Module
@@ -27,10 +27,10 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		assignment.collectMarks = true
 		module.adminDepartment = new Department
 
-		val marker = fakeUser("marker")
+		val marker: User = fakeUser("marker")
 		val currentUser = new CurrentUser(realUser = marker, apparentUser = marker)
 
-		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 		gradeGenerator.applyForMarks(Map("user1" -> 69)) returns Map("user1" -> Seq())
 
 		val command = new OnlineModerationCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator) with ModerationCommandSupport
@@ -60,7 +60,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 			command.rejectionComments = heronRebuke
 			command.mark = "68"
 			command.grade = "2:1"
-			val fs = command.feedbackService
+			val fs: FeedbackService = command.feedbackService
 			command.applyInternal()
 
 			firstMarkerFeedback.state should be(Rejected)
@@ -86,11 +86,11 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 		with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with SavedFormValueDaoComponent
 		with ProfileServiceComponent
 	{
-		def feedbackService = smartMock[FeedbackService]
-		def fileAttachmentService = smartMock[FileAttachmentService]
-		def zipService = smartMock[ZipService]
-		def savedFormValueDao = smartMock[SavedFormValueDao]
-		def profileService = smartMock[ProfileService]
+		def feedbackService: FeedbackService = smartMock[FeedbackService]
+		def fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+		def zipService: ZipService = smartMock[ZipService]
+		def savedFormValueDao: SavedFormValueDao = smartMock[SavedFormValueDao]
+		def profileService: ProfileService = smartMock[ProfileService]
 		def apply() = new MarkerFeedback()
 	}
 

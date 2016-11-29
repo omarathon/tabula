@@ -26,16 +26,16 @@ import scala.reflect._
 class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	import ImportAcademicInformationCommand._
 
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	var routeDao = Wire[RouteDao]
-	var relationshipService = Wire[RelationshipService]
-	var scdDao = Wire[StudentCourseDetailsDao]
-	var memberDao = Wire[MemberDao]
-	var attendanceMonitoringDao = Wire[AttendanceMonitoringDao]
-	var smallGroupService = Wire[SmallGroupService]
-	var permissionsService = Wire[PermissionsService]
-	var feedbackForSitsService = Wire[FeedbackForSitsService]
-	var memberNoteService = Wire[MemberNoteService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var routeDao: RouteDao = Wire[RouteDao]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
+	var scdDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var attendanceMonitoringDao: AttendanceMonitoringDao = Wire[AttendanceMonitoringDao]
+	var smallGroupService: SmallGroupService = Wire[SmallGroupService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
+	var feedbackForSitsService: FeedbackForSitsService = Wire[FeedbackForSitsService]
+	var memberNoteService: MemberNoteService = Wire[MemberNoteService]
 
 	def applyInternal() {
 		benchmarkTask("setupDepartmentAndModules") {

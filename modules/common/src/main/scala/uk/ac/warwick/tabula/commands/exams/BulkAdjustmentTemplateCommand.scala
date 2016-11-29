@@ -23,7 +23,7 @@ object BulkAdjustmentTemplateCommand {
 class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends CommandInternal[ExcelView] {
 
 	self: AssessmentMembershipServiceComponent =>
-	override def applyInternal() = {
+	override def applyInternal(): ExcelView = {
 		val workbook = generateWorkbook
 		new ExcelView("Adjustments for " + assessment.name +  ".xlsx", workbook)
 	}

@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
+import scala.xml.Elem
+
 @Controller
 @RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
 class ExportExamsController extends ExamsController with ExamExports  {
@@ -20,7 +22,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): CSVView = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
 		val results = command.apply()
@@ -42,7 +44,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Elem = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
 		val results = command.apply()
@@ -54,7 +56,7 @@ class ExportExamsController extends ExamsController with ExamExports  {
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): ExcelView = {
 
 		val command = ViewExamCommand(module, academicYear, exam)
 		val results = command.apply()

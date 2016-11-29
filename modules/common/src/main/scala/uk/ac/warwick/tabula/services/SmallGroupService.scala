@@ -22,7 +22,7 @@ trait SmallGroupServiceComponent {
 }
 
 trait AutowiringSmallGroupServiceComponent extends SmallGroupServiceComponent {
-	var smallGroupService = Wire[SmallGroupService]
+	var smallGroupService: SmallGroupService = Wire[SmallGroupService]
 }
 
 trait SmallGroupService {
@@ -100,13 +100,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with WeekToDateConverterComponent
 		with Logging with TaskBenchmarking =>
 
-	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
-	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
-	def getSmallGroupEventById(id: String) = smallGroupDao.getSmallGroupEventById(id)
-	def getSmallGroupEventOccurrenceById(id: String) = smallGroupDao.getSmallGroupEventOccurrenceById(id)
-	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
-	def getDepartmentSmallGroupSetById(id: String) = smallGroupDao.getDepartmentSmallGroupSetById(id)
-	def getDepartmentSmallGroupById(id: String) = smallGroupDao.getDepartmentSmallGroupById(id)
+	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = smallGroupDao.getSmallGroupSetById(id)
+	def getSmallGroupById(id: String): Option[SmallGroup] = smallGroupDao.getSmallGroupById(id)
+	def getSmallGroupEventById(id: String): Option[SmallGroupEvent] = smallGroupDao.getSmallGroupEventById(id)
+	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence] = smallGroupDao.getSmallGroupEventOccurrenceById(id)
+	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence] = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
+	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet] = smallGroupDao.getDepartmentSmallGroupSetById(id)
+	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup] = smallGroupDao.getDepartmentSmallGroupById(id)
 	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence] = {
 		event.allWeeks.find(_ == weekNumber).map { _ =>
 			smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber).getOrElse {
@@ -125,17 +125,17 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def getAllSmallGroupEventOccurrencesForEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] =
 		smallGroupDao.findSmallGroupOccurrencesByEvent(event)
 
-	def saveOrUpdate(smallGroupSet: SmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
-	def saveOrUpdate(smallGroup: SmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
-	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = smallGroupDao.saveOrUpdate(smallGroupEvent)
-	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
-	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
-	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
-	def saveOrUpdate(attendance: SmallGroupEventAttendance) = smallGroupDao.saveOrUpdate(attendance)
+	def saveOrUpdate(smallGroupSet: SmallGroupSet): Unit = smallGroupDao.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: SmallGroup): Unit = smallGroupDao.saveOrUpdate(smallGroup)
+	def saveOrUpdate(smallGroupEvent: SmallGroupEvent): Unit = smallGroupDao.saveOrUpdate(smallGroupEvent)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote): Unit = smallGroupDao.saveOrUpdate(note)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet): Unit = smallGroupDao.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup): Unit = smallGroupDao.saveOrUpdate(smallGroup)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance): Unit = smallGroupDao.saveOrUpdate(attendance)
 
-	def getSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.findSetsByDepartmentAndYear(department, year)
-	def getSmallGroupSets(module: Module, year: AcademicYear) = smallGroupDao.findSetsByModuleAndYear(module, year)
-	def getAllSmallGroupSets(department: Department) = smallGroupDao.findAllSetsByDepartment(department)
+	def getSmallGroupSets(department: Department, year: AcademicYear): Seq[SmallGroupSet] = smallGroupDao.findSetsByDepartmentAndYear(department, year)
+	def getSmallGroupSets(module: Module, year: AcademicYear): Seq[SmallGroupSet] = smallGroupDao.findSetsByModuleAndYear(module, year)
+	def getAllSmallGroupSets(department: Department): Seq[SmallGroupSet] = smallGroupDao.findAllSetsByDepartment(department)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user)
@@ -270,19 +270,19 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findManuallyAddedAttendance(studentId)
 
-	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
 
-	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear) =
+	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence] =
 		smallGroupDao.findOccurrencesInModulesInWeeks(startWeek, endWeek, modules, academicYear)
 
-	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear) =
+	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence] =
 		smallGroupDao.findOccurrencesInWeeks(startWeek, endWeek, academicYear)
 
 	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 	def hasSmallGroups(module: Module, academicYear: AcademicYear): Boolean = smallGroupDao.hasSmallGroups(module, academicYear)
 
-	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = smallGroupDao.getDepartmentSmallGroupSets(department, year)
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet] = smallGroupDao.getDepartmentSmallGroupSets(department, year)
 
 	def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]] =
 		smallGroupDao.findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year)
@@ -316,11 +316,11 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		(weeksOccurrencesForModules ++ tutorOccurrences).filter(_.event.day == today)
 	}
 
-	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet) = {
+	def findPossibleTimetableClashesForGroupSet(set: SmallGroupSet): Seq[(SmallGroup, Seq[User])] = {
  		benchmarkTask(s"possibleTimetableClash[Set-${set.id}]") { possibleTimetableClashesForStudents(set, set.allStudents) }
 	}
 
-	def doesTimetableClashesForStudent(group: SmallGroup, student: User) = {
+	def doesTimetableClashesForStudent(group: SmallGroup, student: User): Boolean = {
 		benchmarkTask(s"studentTimetableClash[Group-${group.id}, Student - ${student.getUserId}]") {
 			val possibleClashes = possibleTimetableClashesForStudents(group.groupSet, Seq(student))
 			possibleClashes.exists { case(clashGroup, users) => group.id == clashGroup.id && users.exists { user => user.getUserId == student.getUserId } }

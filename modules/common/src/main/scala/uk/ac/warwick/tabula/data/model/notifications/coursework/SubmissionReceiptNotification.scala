@@ -15,12 +15,12 @@ class SubmissionReceiptNotification extends SubmissionNotification
 		recipientUniversityId = submission.universityId
 	}
 
-	def title = "%s: Submission receipt for \"%s\"".format(moduleCode, assignment.name)
+	def title: String = "%s: Submission receipt for \"%s\"".format(moduleCode, assignment.name)
 
 	@transient val templateLocation = "/WEB-INF/freemarker/emails/submissionreceipt.ftl"
 
 	def urlTitle = "review your submission"
 
-	def url = Routes.assignment.receipt(assignment)
+	def url: String = Routes.assignment.receipt(assignment)
 
 }

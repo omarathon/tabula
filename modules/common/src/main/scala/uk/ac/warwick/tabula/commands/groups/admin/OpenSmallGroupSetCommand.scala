@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 
 
 object OpenSmallGroupSetCommand {
-	def apply(department: Department, setsToUpdate: Seq[SmallGroupSet], user: User, desiredState: SmallGroupSetSelfSignUpState) = desiredState match {
+	def apply(department: Department, setsToUpdate: Seq[SmallGroupSet], user: User, desiredState: SmallGroupSetSelfSignUpState): OpenSmallGroupSet with ComposableCommand[Seq[SmallGroupSet]] with OpenSmallGroupSetPermissions with OpenSmallGroupSetAudit = desiredState match {
 
 
 		case Open => new OpenSmallGroupSet(department, setsToUpdate, user, desiredState)
@@ -45,7 +45,7 @@ trait OpenSmallGroupSetState {
 class OpenSmallGroupSet(val department: Department, val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState)
 	extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
-	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
+	 val applicableSets: Seq[SmallGroupSet] = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
 
 	 def applyInternal(): Seq[SmallGroupSet] = {
 		 applicableSets.foreach(s => s.openState = setState)

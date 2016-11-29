@@ -15,28 +15,28 @@ object Routes {
 	import RoutesUtils._
 
 	// FIXME this isn't really an optional property, but testing is a pain unless it's made so
-	var _cm2Prefix = Wire.optionProperty("${cm2.prefix}")
-	def cm2Prefix = _cm2Prefix.orNull
+	var _cm2Prefix: Option[String] = Wire.optionProperty("${cm2.prefix}")
+	def cm2Prefix: String = _cm2Prefix.orNull
 
 	private lazy val context = s"/$cm2Prefix"
-	def home = context + "/"
+	def home: String = context + "/"
 
 	object assignment {
-		def apply(assignment: Assignment) = context + "/submission/%s/" format encoded(assignment.id)
+		def apply(assignment: Assignment): String = context + "/submission/%s/" format encoded(assignment.id)
 	}
 
 	object admin {
 		def apply() = s"$context/admin"
 
 		object extensions {
-			def apply() = admin() + "/extensions"
-			def detail(extension: Extension) = extensions() + s"/${extension.id}/detail/"
-			def modify(extension: Extension) = extensions() + s"/${extension.id}/update/"
+			def apply(): String = admin() + "/extensions"
+			def detail(extension: Extension): String = extensions() + s"/${extension.id}/detail/"
+			def modify(extension: Extension): String = extensions() + s"/${extension.id}/update/"
 		}
 
 		object assignment {
 			object audit {
-				def apply(assignment: Assignment) = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
+				def apply(assignment: Assignment): String = admin() + "/audit/assignment/%s" format (encoded(assignment.id))
 			}
 		}
 	}

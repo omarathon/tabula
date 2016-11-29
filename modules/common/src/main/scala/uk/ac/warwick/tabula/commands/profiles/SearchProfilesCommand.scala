@@ -21,7 +21,7 @@ object SearchProfilesCommand {
 class SearchProfilesCommandInternal(val currentMember: Member, user: CurrentUser) extends AbstractSearchProfilesCommand(user, Student, Staff)
 	with CommandInternal[Seq[Member]] {
 
-	override def applyInternal() =
+	override def applyInternal(): Seq[Member] =
 		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
 		else Seq()
 

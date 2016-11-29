@@ -4,11 +4,12 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.api.web.helpers.{SmallGroupToJsonConverter, SmallGroupEventToJsonConverter, AssessmentMembershipInfoToJsonConverter, SmallGroupSetToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{AssessmentMembershipInfoToJsonConverter, SmallGroupEventToJsonConverter, SmallGroupSetToJsonConverter, SmallGroupToJsonConverter}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.groups.admin.{AdminSmallGroupsHomeCommand, AdminSmallGroupsHomeCommandState, AdminSmallGroupsHomeInformation}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -34,7 +35,7 @@ trait ListSmallGroupSetsForDepartmentApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors) = {
+	def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

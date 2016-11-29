@@ -48,6 +48,6 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 	@Column(name = "absence_type")
 	var absenceType: AbsenceType = _
 
-	def hasContent = note.hasText || attachment != null || absenceType != null
+	def hasContent: Boolean = note.hasText || attachment != null || absenceType != null
 
 }

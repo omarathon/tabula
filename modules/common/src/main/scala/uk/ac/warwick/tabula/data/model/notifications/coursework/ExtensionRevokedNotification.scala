@@ -21,12 +21,12 @@ class ExtensionRevokedNotification extends Notification[Assignment, Unit]
 
 	priority = Warning
 
-	def assignment = item.entity
+	def assignment: Assignment = item.entity
 
 	def verb = "revoke"
 
-	def title =	"%s: Your extended deadline for \"%s\" has been revoked".format(assignment.module.code.toUpperCase, assignment.name)
-	def url = Routes.assignment.apply(assignment)
+	def title: String =	"%s: Your extended deadline for \"%s\" has been revoked".format(assignment.module.code.toUpperCase, assignment.name)
+	def url: String = Routes.assignment.apply(assignment)
 	def urlTitle = "view the assignment"
 
 	def content = FreemarkerModel(ExtensionRevokedNotification.templateLocation, Map (

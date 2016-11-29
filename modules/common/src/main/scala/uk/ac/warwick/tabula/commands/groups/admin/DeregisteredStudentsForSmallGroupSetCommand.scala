@@ -7,10 +7,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent, ProfileServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object DeregisteredStudentsForSmallGroupSetCommand {
 	def apply(module: Module, set: SmallGroupSet) =
@@ -49,7 +51,7 @@ class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, va
 		with DeregisteredStudentsForSmallGroupSetCommandState {
 	self: SmallGroupServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() =
+	override def applyInternal(): mutable.Buffer[StudentNotInMembership] =
 		for {
 			student <- students.asScala
 			if !set.members.includesUser(student) // Prevent irrelevant students being sent

@@ -5,11 +5,15 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
+import uk.ac.warwick.tabula.AutowiringFeaturesComponent
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.BulkMeetingRecordCommand
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, TaskBenchmarking}
+import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 import scala.collection.JavaConverters._
@@ -38,7 +42,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 	def getCommand(
 		@PathVariable relationshipType: StudentRelationshipType,
 		@ModelAttribute("studentRelationships") studentRelationships: Seq[StudentRelationship]
-	) = {
+	): BulkMeetingRecordCommandInternal with AutowiringMeetingRecordServiceComponent with AutowiringFeaturesComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with AutowiringFileAttachmentServiceComponent with ComposableCommand[Seq[MeetingRecord]] with MeetingRecordCommandBindListener with MeetingRecordValidation with BulkMeetingRecordDescription with BulkMeetingRecordPermissions with BulkMeetingRecordCommandState with MeetingRecordCommandRequest with BulkMeetingRecordCommandNotifications = {
 		BulkMeetingRecordCommand(mandatory(studentRelationships), currentMember)
 	}
 
@@ -48,7 +52,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 		@ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
 		@PathVariable relationshipType: StudentRelationshipType,
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	) = {
+	): Mav = {
 		form(cmd, relationshipType, studentCourseDetails, iframe = true)
 	}
 
@@ -58,7 +62,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 		@ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
 		@PathVariable relationshipType: StudentRelationshipType,
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	) = {
+	): Mav = {
 		form(cmd, relationshipType, studentCourseDetails)
 	}
 
@@ -91,7 +95,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 		errors: Errors,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, relationshipType, studentCourseDetails, iframe = true)
 		} else {
@@ -108,7 +112,7 @@ class BulkMeetingRecordController extends ProfilesController with TaskBenchmarki
 		errors: Errors,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, relationshipType, studentCourseDetails)
 		} else {

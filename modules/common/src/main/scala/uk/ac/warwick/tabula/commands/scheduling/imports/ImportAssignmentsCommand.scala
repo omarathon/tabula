@@ -44,9 +44,9 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
-	var assignmentImporter = Wire[AssignmentImporter]
-	var assessmentMembershipService = Wire[AssessmentMembershipService]
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
+	var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	val ImportGroupSize = 100
 
@@ -228,7 +228,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	}
 
 
-	def saveGroups(groups: Seq[UpstreamAssessmentGroup]) = transactional() {
+	def saveGroups(groups: Seq[UpstreamAssessmentGroup]): Unit = transactional() {
 		logger.debug("Importing " + groups.size + " assessment groups")
 		benchmark("Import " + groups.size + " groups") {
 			for (group <- groups) {

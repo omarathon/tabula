@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -27,7 +28,7 @@ class PermanantlyWithdrawnForGroupSetCommandInternal(val module: Module, val set
 
 	self: ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[String] = {
 		val setUniversityIds = set.allStudents.map(_.getWarwickId)
 		val studentMembers = profileService.getAllMembersWithUniversityIds(setUniversityIds).flatMap {
 			case (student: StudentMember) => Option(student)
@@ -65,7 +66,7 @@ class PermanantlyWithdrawnForGroupSetController extends GroupsController {
 		PermanantlyWithdrawnForGroupSetCommand(module, set)
 
 	@RequestMapping
-	def submit(@ModelAttribute("command") cmd: Appliable[Seq[String]]) = {
+	def submit(@ModelAttribute("command") cmd: Appliable[Seq[String]]): Mav = {
 		Mav(new JSONView(Map(
 			"students" -> cmd.apply()
 		)))

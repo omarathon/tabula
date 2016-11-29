@@ -26,7 +26,7 @@ object MasqueradeCommand {
 class MasqueradeCommandInternal(val user: CurrentUser) extends CommandInternal[Option[Cookie]] with MasqueradeCommandState {
 	self: UserLookupComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Option[Cookie] = {
 		if (action == "remove") Some(newCookie(null))
 		else userLookup.getUserByUserId(usercode) match {
 			case FoundUser(u) => Some(newCookie(usercode))
@@ -79,7 +79,7 @@ trait MasqueradeCommandValidation extends SelfValidating {
 trait MasqueradeCommandDescription extends Describable[Option[Cookie]] {
 	self: MasqueradeCommandState =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"usercode" -> usercode,
 		"action" -> action
 	)

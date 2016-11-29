@@ -43,8 +43,8 @@ class ZipService extends ZipCreator with AutowiringObjectStorageServiceComponent
 
 	private def showStudentName(assignment: Assignment): Boolean = assignment.module.adminDepartment.showStudentName
 
-	def invalidateSubmissionZip(assignment: Assignment) = invalidate(resolvePathForSubmission(assignment))
-	def invalidateIndividualFeedbackZip(feedback: Feedback) = {
+	def invalidateSubmissionZip(assignment: Assignment): Unit = invalidate(resolvePathForSubmission(assignment))
+	def invalidateIndividualFeedbackZip(feedback: Feedback): Unit = {
 		invalidate(resolvePath(feedback))
 		invalidate(resolvePathForStudent(feedback))
 	}
@@ -194,7 +194,7 @@ trait ZipServiceComponent {
 }
 
 trait AutowiringZipServiceComponent extends ZipServiceComponent {
-	var zipService = Wire[ZipService]
+	var zipService: ZipService = Wire[ZipService]
 }
 
 object Zips {

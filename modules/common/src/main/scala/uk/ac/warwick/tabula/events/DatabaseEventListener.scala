@@ -33,9 +33,9 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
 		}
 	}
 
-	def beforeCommand(event: Event) = save(event, "before")
-	def afterCommand(event: Event, returnValue: Any) = save(event, "after")
-	def onException(event: Event, exception: Throwable) = save(event, "error")
+	def beforeCommand(event: Event): Unit = save(event, "before")
+	def afterCommand(event: Event, returnValue: Any): Unit = save(event, "after")
+	def onException(event: Event, exception: Throwable): Unit = save(event, "error")
 
 	def startLoggingToFile(): Unit = {
 		// nothing to be done, save() will log to file when necessary.
@@ -70,6 +70,6 @@ class DatabaseEventListener extends EventListener with InitializingBean with Log
 	}
 
 	def withSuffix(suffix: String): FilenameFilter = new FilenameFilter {
-		def accept(file: File, name: String) = name.endsWith(suffix)
+		def accept(file: File, name: String): Boolean = name.endsWith(suffix)
 	}
 }

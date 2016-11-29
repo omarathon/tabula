@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.assignments.MarkerAssignmentsSummaryCommand.Result
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkingWorkflow, Member}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -36,7 +37,7 @@ class MarkerAssignmentsSummaryCommandInternal(marker: Member) extends CommandInt
 
 	self: AssessmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Result = {
 		val markerUser = MemberOrUser(marker).asUser
 		val allAssignments = benchmarkTask("allAssignments") { assessmentService.getAssignmentWhereMarker(markerUser) }
 

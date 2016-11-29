@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import javax.sql.DataSource
 
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Projection, DetachedCriteria, PropertySubqueryExpression}
+import org.hibernate.criterion.{Criterion, DetachedCriteria, Projection, PropertySubqueryExpression}
 import org.hibernate.proxy.HibernateProxy
 import org.hibernate.{Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
@@ -27,7 +27,7 @@ trait SessionComponent {
  * forcing a test to provide these methods.
  */
 trait ExtendedSessionComponent extends SessionComponent {
-	def isFilterEnabled(name: String) = session.getEnabledFilter(name) != null
+	def isFilterEnabled(name: String): Boolean = session.getEnabledFilter(name) != null
 
 	/**
 	 * type-safe session.get. returns an Option object, which will match None if
@@ -48,10 +48,10 @@ trait ExtendedSessionComponent extends SessionComponent {
 
 trait HelperRestrictions extends Logging {
 	@transient protected val maxInClause = Daoisms.MaxInClauseCount
-	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
-	def isNot = org.hibernate.criterion.Restrictions.neOrIsNotNull _
+	def is: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.eqOrIsNull _
+	def isNot: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.neOrIsNotNull _
 	def isSubquery(propertyName: String, subquery: DetachedCriteria) = new PropertySubqueryExpressionWithToString(propertyName, subquery)
-	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
+	def safeIn[A](propertyName: String, iterable: Seq[A]): Criterion = {
 		if (iterable.isEmpty) {
 			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
 			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
@@ -127,14 +127,14 @@ object Daoisms {
  */
 trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
 	@transient private var _dataSource = Wire.option[DataSource]("dataSource")
-	def dataSource = _dataSource.orNull
+	def dataSource: DataSource = _dataSource.orNull
 	def dataSource_=(dataSource: DataSource) { _dataSource = Option(dataSource) }
 
 	@transient private var _sessionFactory = Wire.option[SessionFactory]
-	def sessionFactory = _sessionFactory.orNull
+	def sessionFactory: SessionFactory = _sessionFactory.orNull
 	def sessionFactory_=(sessionFactory: SessionFactory) { _sessionFactory = Option(sessionFactory) }
 
-	protected def optionalSession =
+	protected def optionalSession: Option[Session] =
 		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }
 			.map { session =>
 				session.enableFilter(Member.FreshOnlyFilter)
@@ -143,12 +143,12 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session
 			}
 
-	protected def session = optionalSession.getOrElse({
+	protected def session: Session = optionalSession.getOrElse({
 		logger.error("Trying to access session, but it is null")
 		null
 	})
 
-	protected def optionalSessionWithoutFreshFilters =
+	protected def optionalSessionWithoutFreshFilters: Option[Session] =
 		_sessionFactory.flatMap { sf => Try(sf.getCurrentSession).toOption }
 			.map { session =>
 				session.disableFilter(Member.FreshOnlyFilter)
@@ -157,7 +157,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session
 			}
 
-	protected def sessionWithoutFreshFilters = optionalSessionWithoutFreshFilters.orNull
+	protected def sessionWithoutFreshFilters: Session = optionalSessionWithoutFreshFilters.orNull
 
 	/**
 	 * Do some work in a new session. Only needed outside of a request,
@@ -176,6 +176,6 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 
 class PropertySubqueryExpressionWithToString(propertyName: String, dc: DetachedCriteria) extends PropertySubqueryExpression(propertyName, "=", null, dc) {
 
-	override def toString() = propertyName + "=" + dc
+	override def toString(): String = propertyName + "=" + dc
 
 }

@@ -129,7 +129,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	// Move this up and out if it'd be useful in other tests.
 	object SpreadsheetTester {
 		/** Assert that this cell is the expected value. */
-		def compare(cell: Cell, expected: Any) = expected match {
+		def compare(cell: Cell, expected: Any): Unit = expected match {
 			case string: String => cell.getStringCellValue should be (string)
 			case dt: AbstractInstant => cell.getDateCellValue should be (dt.toDate)
 			case date: Date => cell.getDateCellValue should be (date)
@@ -213,7 +213,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			Seq("Module Two","IN102",5,408,408,1,36,100,308,128,0.4155844155844156,180,0.5844155844155844))
 	}
 
-	def getTestFeedbackReport = {
+	def getTestFeedbackReport: FeedbackReport = {
 		val report = new FeedbackReport(department, dateTime(2013, 3, 1), dateTime(2013, 9, 30))
 		report.assignmentMembershipService = assignmentMembershipService
 		report.auditEventQueryMethods = auditEventQueryMethods

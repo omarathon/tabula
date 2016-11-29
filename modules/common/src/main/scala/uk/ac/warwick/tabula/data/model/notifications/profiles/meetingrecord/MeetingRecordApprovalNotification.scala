@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.userlookup.User
 
 abstract class MeetingRecordApprovalNotification(val verb: String)
 	extends NotificationWithTarget[MeetingRecord, StudentRelationship]
@@ -23,10 +24,10 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 		}
 	}
 
-	def meeting = item.entity
-	def relationship = target.entity
+	def meeting: MeetingRecord = item.entity
+	def relationship: StudentRelationship = target.entity
 
-	def title = {
+	def title: String = {
 		val name =
 			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
 			else meeting.relationship.agentName
@@ -40,7 +41,7 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 		"verbed" ->  (if (verb == "create") "created" else "edited"),
 		"meetingRecord" -> meeting
 	))
-	def recipients = meeting.pendingApprovers.map(_.asSsoUser)
+	def recipients: List[User] = meeting.pendingApprovers.map(_.asSsoUser)
 	def urlTitle = "review the meeting record"
 
 }

@@ -26,7 +26,7 @@ class ExportFeedbackToSitsCommand extends CommandInternal[Seq[FeedbackForSits]] 
 
 	self: FeedbackForSitsDaoComponent with ExportFeedbackToSitsServiceComponent with FeaturesComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Seq[FeedbackForSits] = transactional() {
 
 		val feedbacksToLoad = feedbackForSitsDao.feedbackToLoad
 		var feedbacksLoaded: Seq[FeedbackForSits] = Seq()

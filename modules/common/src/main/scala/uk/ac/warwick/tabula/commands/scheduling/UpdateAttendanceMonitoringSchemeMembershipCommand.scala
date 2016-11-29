@@ -32,7 +32,7 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
 
 	self: FeaturesComponent with AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringSchemeMembershipCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringScheme] = {
 		// TODO: This all runs in one giant transaction but it shouldn't need to
 		// However, whenever I try and narrow the transaction to only when it's needed,
 		// hibernate isn't picking up the change in staticUserIds before the manual flush (UserGroup.scala line 86).

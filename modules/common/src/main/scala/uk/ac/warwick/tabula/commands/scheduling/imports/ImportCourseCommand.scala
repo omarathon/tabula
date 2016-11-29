@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand.ImportResult
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.{CourseDao, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -18,14 +19,14 @@ class ImportCourseCommand(info: CourseInfo)
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var courseDao = Wire.auto[CourseDao]
+	var courseDao: CourseDao = Wire.auto[CourseDao]
 
-	var code = info.code
-	var shortName = info.shortName
-	var name = info.fullName
-	var title = info.title
+	var code: String = info.code
+	var shortName: String = info.shortName
+	var name: String = info.fullName
+	var title: String = info.title
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): (Course, ImportResult) = transactional() {
 		val courseExisting = courseDao.getByCode(code)
 
 		logger.debug("Importing course " + code + " into " + courseExisting)
@@ -61,6 +62,6 @@ class ImportCourseCommand(info: CourseInfo)
 		"code", "shortName", "name", "title"
 	)
 
-	override def describe(d: Description) = d.property("shortName" -> shortName)
+	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

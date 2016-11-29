@@ -7,7 +7,7 @@ import org.springframework.web.method.HandlerMethod
 import uk.ac.warwick.tabula.web.controllers.PreRequestHandler
 
 class ControllerPreRequestInterceptor extends HandlerInterceptorAdapter {
-	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 		obj match {
 			case method: HandlerMethod => method.getBean match {
 				case controller: PreRequestHandler => controller.preRequest

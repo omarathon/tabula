@@ -19,17 +19,17 @@ trait RelationshipServiceComponent {
 }
 
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent {
-	var relationshipService = Wire[RelationshipService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 }
 
 case class SortableAgentIdentifier(agentId: String, lastName: Option[String]){
-	val sortkey = lastName.getOrElse("") + agentId
-	override def toString = sortkey
+	val sortkey: String = lastName.getOrElse("") + agentId
+	override def toString: String = sortkey
 }
 object SortableAgentIdentifier{
 	def apply(r:StudentRelationship): SortableAgentIdentifier = SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
 
-	val KeyOrdering = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
+	val KeyOrdering: Ordering[SortableAgentIdentifier] = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
 }
 
 /**
@@ -94,15 +94,15 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	self: RelationshipDaoComponent with ProfileServiceComponent =>
 
-	def saveOrUpdate(relationship: StudentRelationship) = relationshipDao.saveOrUpdate(relationship)
+	def saveOrUpdate(relationship: StudentRelationship): Unit = relationshipDao.saveOrUpdate(relationship)
 
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = relationshipDao.allStudentRelationshipTypes
-	def getStudentRelationshipTypeById(id: String) = relationshipDao.getStudentRelationshipTypeById(id)
+	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType] = relationshipDao.getStudentRelationshipTypeById(id)
 
-	def getStudentRelationshipTypeByUrlPart(urlPart: String) = relationshipDao.getStudentRelationshipTypeByUrlPart(urlPart)
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType] = relationshipDao.getStudentRelationshipTypeByUrlPart(urlPart)
 
-	def saveOrUpdate(relationshipType: StudentRelationshipType) = relationshipDao.saveOrUpdate(relationshipType)
-	def delete(relationshipType: StudentRelationshipType) = relationshipDao.delete(relationshipType)
+	def saveOrUpdate(relationshipType: StudentRelationshipType): Unit = relationshipDao.saveOrUpdate(relationshipType)
+	def delete(relationshipType: StudentRelationshipType): Unit = relationshipDao.delete(relationshipType)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
 		relationshipDao.getCurrentRelationships(relationshipType, scd)
@@ -232,7 +232,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		saveStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, agentsToAdd)
 	}
 
-	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =
+	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship): Boolean =
 		rel.studentMember.exists(studentDepartmentFilterMatches(department))
 
 	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
@@ -240,11 +240,11 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 			scd => !scd.permanentlyWithdrawn && scd.missingFromImportSince == null)
 	}
 
-	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member, Option(department))
+	def studentDepartmentFilterMatches(department: Department)(member: StudentMember): Boolean = department.filterRule.matches(member, Option(department))
 
-	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
+	def studentNotPermanentlyWithdrawn(member: StudentMember): Boolean = !member.permanentlyWithdrawn
 
-	def studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
+	def studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember): Boolean = {
 		department.filterRule.matches(member, Option(department)) &&
 		member.freshStudentCourseDetails
 		.filter(scd => Option(scd.currentRoute).exists(route => route.adminDepartment == department || route.adminDepartment == department.rootDepartment)) // there needs to be an SCD for the right department ...
@@ -252,55 +252,55 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		.exists(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
 	}
 
-	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
+	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
 		benchmarkTask("listStudentRelationshipsByDepartment") {
 		relationshipDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}}
 
-	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
+	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listAllStudentRelationshipsWithMember(agent: Member) = transactional(readOnly = true) {
+	def listAllStudentRelationshipsWithMember(agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllRelationshipsByAgent(agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember) = transactional(readOnly = true) {
+	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember): Seq[StudentRelationshipType] = transactional(readOnly = true) {
 		relationshipDao.getAllRelationshipTypesByStudent(student)
 	}
 
 
-	def listAllStudentRelationshipTypesWithMember(agent: Member) = transactional(readOnly = true) {
+	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType] = transactional(readOnly = true) {
 		relationshipDao.getAllRelationshipTypesByAgent(agent.universityId)
 	}
 
-	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member) = transactional(readOnly = true) {
+	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department) = transactional(readOnly = true) {
+	def listStudentRelationshipsWithMemberInDepartment(relationshipType: StudentRelationshipType, agent: Member, department: Department): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByAgent(relationshipType, agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 			.filter(r => r.studentCourseDetails.department == department.rootDepartment)
 	}
 
-	def listAllStudentRelationshipsWithUniversityId(agentId: String) = transactional(readOnly = true) {
+	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllRelationshipsByAgent(agentId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String) = transactional(readOnly = true) {
+	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getRelationshipsByAgent(relationshipType, agentId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-  def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
+  def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] = transactional(readOnly = true) {
 		benchmarkTask("listStudentsWithoutRelationship") {
 			relationshipDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department.rootDepartment)
 				.filter(studentDepartmentMatchesAndExpectedToHaveRelationship(relationshipType, department))
@@ -332,7 +332,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		FiltersStudents.AliasPaths("statusOnRoute"): _*
 	)
 
-	def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()) = transactional(readOnly = true) {
+	def getStudentAssociationDataWithoutRelationship(department: Department, relationshipType: StudentRelationshipType, restrictions: Seq[ScalaRestriction] = Seq()): Seq[StudentAssociationData] = transactional(readOnly = true) {
 		benchmarkTask("getStudentAssociationDataWithoutRelationship") {
 			val allRestrictions = departmentRestrictions(department) ++ notPermanentlyWithdrawnRestriction ++
 				// For this relationship type and not expired, but null

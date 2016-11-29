@@ -11,11 +11,11 @@ class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assign
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, submission)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal() = zipService.getSubmissionZip(submission)
+	override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
 
-	override def describe(d: Description) = d.submission(submission).properties(
+	override def describe(d: Description): Unit = d.submission(submission).properties(
 		"studentId" -> submission.universityId,
 		"attachmentCount" -> submission.allAttachments.size)
 }

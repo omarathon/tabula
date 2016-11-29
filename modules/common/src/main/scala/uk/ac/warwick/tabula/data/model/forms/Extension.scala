@@ -36,7 +36,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
 
-	def permissionsParents = Option(assignment).toStream
+	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
 	@NotNull
 	var userId: String = _
@@ -80,7 +80,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Column(name = "state")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.forms.ExtensionStateUserType")
 	var _state: ExtensionState = ExtensionState.Unreviewed
-	def state = _state
+	def state: ExtensionState = _state
 	/** Don't use rawState_ directly, call approve() or reject() instead **/
 	def rawState_= (state: ExtensionState) { _state = state }
 
@@ -89,7 +89,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@BatchSize(size = 200)
 	var attachments: JSet[FileAttachment] = JSet()
 
-	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
+	def nonEmptyAttachments: Seq[FileAttachment] = attachments.toSeq filter(_.hasData)
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
@@ -98,39 +98,39 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 		attachments.add(attachment)
 	}
 
-	def removeAttachment(attachment: FileAttachment) = {
+	def removeAttachment(attachment: FileAttachment): Boolean = {
 		attachment.extension = null
 		attachments.remove(attachment)
 	}
 
 	// this extension was manually created by an administrator, rather than requested by a student
-	def isManual = requestedOn == null
-	def isInitiatedByStudent = !isManual
+	def isManual: Boolean = requestedOn == null
+	def isInitiatedByStudent: Boolean = !isManual
 
 	// you can't infer from state alone whether there's a request outstanding - use awaitingReview()
-	def approved = state == ExtensionState.Approved
-	def rejected = state == ExtensionState.Rejected
-	def unreviewed = state == ExtensionState.Unreviewed
-	def revoked = state == ExtensionState.Revoked
-	def moreInfoRequired = state == ExtensionState.MoreInformationRequired
-	def moreInfoReceived = state == ExtensionState.MoreInformationRequired
+	def approved: Boolean = state == ExtensionState.Approved
+	def rejected: Boolean = state == ExtensionState.Rejected
+	def unreviewed: Boolean = state == ExtensionState.Unreviewed
+	def revoked: Boolean = state == ExtensionState.Revoked
+	def moreInfoRequired: Boolean = state == ExtensionState.MoreInformationRequired
+	def moreInfoReceived: Boolean = state == ExtensionState.MoreInformationRequired
 
-	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
-	def revocable = approved && !isInitiatedByStudent
+	def rejectable: Boolean = awaitingReview || (approved && isInitiatedByStudent)
+	def revocable: Boolean = approved && !isInitiatedByStudent
 
-	def updateState(newState: ExtensionState, comments: String) = {
+	def updateState(newState: ExtensionState, comments: String): Unit = {
 		_state = newState
 		reviewedOn = DateTime.now
 		reviewerComments = comments
 	}
 
 	// keep state encapsulated
-	def approve(comments: String = null) = updateState(ExtensionState.Approved, comments)
-	def reject(comments: String = null) = updateState(ExtensionState.Rejected, comments)
-	def revoke(comments: String = null) = updateState(ExtensionState.Revoked, comments)
-	def requestMoreInfo(comments: String = null) = updateState(ExtensionState.MoreInformationRequired, comments)
+	def approve(comments: String = null): Unit = updateState(ExtensionState.Approved, comments)
+	def reject(comments: String = null): Unit = updateState(ExtensionState.Rejected, comments)
+	def revoke(comments: String = null): Unit = updateState(ExtensionState.Revoked, comments)
+	def requestMoreInfo(comments: String = null): Unit = updateState(ExtensionState.MoreInformationRequired, comments)
 
-	def awaitingReview = {
+	def awaitingReview: Boolean = {
 		// wrap nullable dates to be more readable in pattern match
 		val requestDate = Option(requestedOn)
 		val reviewDate = Option(reviewedOn)
@@ -146,7 +146,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
 	// calculate deadline only if not late (return None for late returns)
-	def feedbackDeadline = assignment
+	def feedbackDeadline: Option[DateTime] = assignment
 		.findSubmission(universityId)
 		.flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
 		.collect {
@@ -154,22 +154,22 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 		}.flatten
 
 	// the feedback deadline if an expry date exists for this extension
-	def feedbackDueDate = expiryDate.map(ed =>
+	def feedbackDueDate: Option[DateTime] = expiryDate.map(ed =>
 		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(ed)
 	)
 
 
-	def toEntityReference = new ExtensionEntityReference().put(this)
+	def toEntityReference: ExtensionEntityReference = new ExtensionEntityReference().put(this)
 
-	def duration = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
+	def duration: Int = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
-	def requestedExtraDuration = requestedExpiryDate
+	def requestedExtraDuration: Int = requestedExpiryDate
 		.map(Days.daysBetween(expiryDate.getOrElse(assignment.closeDate), _).getDays).getOrElse(0)
 }
 
 
 object Extension {
-	val MaxDaysToDisplayAsProgressBar = 8 * 7
+	val MaxDaysToDisplayAsProgressBar: Int = 8 * 7
 }
 
 
@@ -184,7 +184,7 @@ object ExtensionState {
 	case object Rejected extends ExtensionState("R", "Rejected")
 	case object Revoked extends ExtensionState("V", "Revoked")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): ExtensionState = code match {
 		case Unreviewed.dbValue => Unreviewed
 		case Approved.dbValue => Approved
 		case MoreInformationRequired.dbValue => MoreInformationRequired
@@ -204,11 +204,11 @@ class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, Strin
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = ExtensionState.fromCode(string)
-	override def convertToValue(es: ExtensionState) = es.dbValue
+	override def convertToObject(string: String): ExtensionState = ExtensionState.fromCode(string)
+	override def convertToValue(es: ExtensionState): String = es.dbValue
 }
 
 class ExtensionStateConverter extends TwoWayConverter[String, ExtensionState] {
-	override def convertRight(code: String) = ExtensionState.fromCode(code)
-	override def convertLeft(state: ExtensionState) = (Option(state) map { _.dbValue }).orNull
+	override def convertRight(code: String): ExtensionState = ExtensionState.fromCode(code)
+	override def convertLeft(state: ExtensionState): String = (Option(state) map { _.dbValue }).orNull
 }

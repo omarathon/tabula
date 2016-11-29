@@ -4,11 +4,11 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.util.termdates.{Term, TermImpl}
 
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat, Module, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports.JHashSet
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.attendance._
@@ -18,14 +18,14 @@ import collection.JavaConverters._
 class CreateAttendancePointCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val thisDepartment = Fixtures.department("its")
+		val thisDepartment: Department = Fixtures.department("its")
 		val thisAcademicYear = AcademicYear(2014)
-		val thisTermService = smartMock[TermService]
+		val thisTermService: TermService = smartMock[TermService]
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = thisDepartment
 		scheme.academicYear = thisAcademicYear
 		scheme.pointStyle = AttendanceMonitoringPointStyle.Date
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 		scheme.members.addUserId(student.universityId)
 		val command = new CreateAttendancePointCommandInternal(thisDepartment, thisAcademicYear, Seq(scheme))
 			with CreateAttendancePointCommandState
@@ -35,16 +35,16 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 			with AttendanceMonitoringServiceComponent
 			with ProfileServiceComponent {
 
-			val termService = thisTermService
+			val termService: TermService = thisTermService
 			val smallGroupService = null
 			val moduleAndDepartmentService = null
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val profileService = smartMock[ProfileService]
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val profileService: ProfileService = smartMock[ProfileService]
 			thisScheduledNotificationService = smartMock[ScheduledNotificationService]
 		}
 		val validator = new AttendanceMonitoringPointValidation with TermServiceComponent with AttendanceMonitoringServiceComponent {
-			val termService = thisTermService
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val termService: TermService = thisTermService
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		}
 		val errors = new BindException(command, "command")
 	}
@@ -80,19 +80,19 @@ class CreateAttendancePointCommandTest extends TestBase with Mockito {
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2013).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2013).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_BEFORE_START
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2016).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2016).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns Term.WEEK_NUMBER_AFTER_END
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {true}
 		}
 		new Fixture {
-			val date = new DateTime().withYear(2015).toLocalDate
+			val date: LocalDate = new DateTime().withYear(2015).toLocalDate
 			validator.termService.getAcademicWeekForAcademicYear(date.toDateTimeAtStartOfDay, AcademicYear(2014)) returns 10
 			validator.validateDate(errors, date, AcademicYear(2014), "startDate")
 			errors.hasFieldErrors("startDate") should be {false}

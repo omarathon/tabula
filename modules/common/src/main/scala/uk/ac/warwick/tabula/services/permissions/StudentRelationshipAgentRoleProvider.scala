@@ -80,7 +80,7 @@ trait CustomRolesForAdminDepartments {
 	}
 
 	// returns department overrides for the specified definition for all of the students admin departments
-	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition) =
+	def customRoles(student: StudentMember, relType: StudentRelationshipType, definition: RoleDefinition): Seq[Role] =
 		for {
 			department <- studentsAdminDepartments(student)
 			customRole <- customRoleFor(department)(definition, student)

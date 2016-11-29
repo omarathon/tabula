@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.MemberAllocationData
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupAllocationMethod, SmallGroupSet}
@@ -40,7 +41,7 @@ class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: Small
 
 	self: GroupsObjects[User, SmallGroup] with SmallGroupServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
@@ -53,7 +54,7 @@ class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: Small
 
 trait AllocateStudentsToGroupsSorting extends GroupsObjects[User, SmallGroup] {
 	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
+	implicit val defaultOrderingForUser: Ordering[User] = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
 	// Sort all the lists of users by surname, firstname.
 	override def sort() {
@@ -82,7 +83,7 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
 		}
 	}
 
-	override def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+	override def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[SmallGroup, JList[User]] = {
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
@@ -103,10 +104,10 @@ trait AllocateStudentsToGroupsCommandState extends SmallGroupSetCommand with Has
 	def module: Module
 	def set: SmallGroupSet
 	def viewer: CurrentUser
-	def apparentUser = viewer.apparentUser
+	def apparentUser: User = viewer.apparentUser
 	override def academicYear: AcademicYear = set.academicYear
 
-	def isStudentSignup = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+	def isStudentSignup: Boolean = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
 	var sortedGroups: JList[SmallGroup] = JArrayList()
 	var unallocatedPermWithdrawnCount: Int = 0
@@ -129,7 +130,7 @@ trait AllocateStudentsToGroupsDescription extends Describable[SmallGroupSet] {
 		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
 	}
 
-	override def describeResult(d: Description, set: SmallGroupSet) = {
+	override def describeResult(d: Description, set: SmallGroupSet): Unit = {
 		d.property("allocation", set.groups.asScala.map(g => g.id -> g.students.users.map(_.getUserId)))
 	}
 
@@ -161,7 +162,7 @@ trait PopulateAllocateStudentsToGroupsCommand extends PopulateOnForm {
 		unallocatedPermWithdrawnCount = set.unallocatedStudents.distinct.size - unallocated.size
 	}
 
-	def removePermanentlyWithdrawn(users: Seq[User]) = {
+	def removePermanentlyWithdrawn(users: Seq[User]): Seq[User] = {
 		val members: Seq[Member] = users.flatMap(usr => profileService.getMemberByUser(usr))
 		val membersFiltered: Seq[Member] = members filter {
 			case (student: StudentMember) => !student.permanentlyWithdrawn
@@ -177,7 +178,7 @@ trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends Task
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	def mappingById =
+	def mappingById: Map[String, _root_.uk.ac.warwick.tabula.JavaImports.JList[User]] =
 		mapping.asScala
 			.filter { case (group, users) => group != null && users != null}
 			.map {
@@ -185,9 +186,9 @@ trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends Task
 		}.toMap
 
 	// For use by Freemarker to get a simple map of university IDs to Member objects
-	lazy val membersById = loadMembersById
+	lazy val membersById: Map[String, Member] = loadMembersById
 
-	def loadMembersById = {
+	def loadMembersById: Map[String, Member] = {
 		def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
 		val allUsers = unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten
@@ -199,16 +200,16 @@ trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends Task
 		members
 	}
 
-	lazy val memberAllocationData = smallGroupService.listMemberDataForAllocation(membersById.values.toSeq, academicYear)
+	lazy val memberAllocationData: Map[Member, MemberAllocationData] = smallGroupService.listMemberDataForAllocation(membersById.values.toSeq, academicYear)
 
-	lazy val allMembersRoutes = {
+	lazy val allMembersRoutes: Seq[MemberAllocationData] = {
 		memberAllocationData.values
 			.filter(_.routeCode.nonEmpty)
 			.map(data => data.copy(yearOfStudy = 0))
 			.toSeq.distinct.sortBy(_.routeCode)
 	}
 
-	lazy val allMembersYears = {
+	lazy val allMembersYears: Seq[MemberAllocationData] = {
 		memberAllocationData.values
 			.filter(_.yearOfStudy > 0)
 			.map(data => data.copy(routeCode = "", routeName = ""))

@@ -9,7 +9,7 @@ trait TextRenderer {
 }
 
 trait FreemarkerTextRenderer extends TextRenderer with FreemarkerRendering{
-  implicit var freemarker = Wire[Configuration]
+  implicit var freemarker: Configuration = Wire[Configuration]
 
   def renderTemplate(templateId:String, model:Any):String = renderToString(templateId, model)
 

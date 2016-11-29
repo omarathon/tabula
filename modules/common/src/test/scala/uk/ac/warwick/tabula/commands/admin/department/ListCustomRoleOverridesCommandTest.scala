@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import ListCustomRoleOverridesCommand._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, RoleBuilder}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 
 class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends ListCustomRoleOverridesCommandState
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 		val customRole = new CustomRoleDefinition
 		customRole.name = "Custom role"
 		customRole.baseRoleDefinition = DepartmentalAdministratorRoleDefinition
@@ -27,14 +29,14 @@ class ListCustomRoleOverridesCommandTest extends TestBase with Mockito {
 		customRole.overrides.add(override1)
 		customRole.overrides.add(override2)
 
-		val generatedRole = RoleBuilder.build(customRole, Some(null), customRole.name)
+		val generatedRole: GeneratedRole = RoleBuilder.build(customRole, Some(null), customRole.name)
 
 		command.applyInternal() should be (CustomRoleOverridesInfo(generatedRole, Seq(override1, override2)))
 	}}
 
 	@Test def permissions {
 		val command = new ListCustomRoleOverridesCommandPermissions with ListCustomRoleOverridesCommandState {
-			override val department = Fixtures.department("in")
+			override val department: Department = Fixtures.department("in")
 			override val customRoleDefinition = new CustomRoleDefinition
 		}
 

@@ -12,7 +12,7 @@ class DatabaseEventListenerTest extends TestBase with Mockito {
 
 	val listener = new DatabaseEventListener
 
-	val auditEventService = mock[AuditEventService]
+	val auditEventService: AuditEventService = mock[AuditEventService]
 	val maintenanceModeService = new MaintenanceModeServiceImpl
 
 	listener.auditEventService = auditEventService

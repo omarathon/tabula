@@ -38,7 +38,7 @@ class EditDepartmentCommandInternal(val department: Department) extends CommandI
 		filterRule = department.filterRule
 	}
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Department = transactional() {
 		department.fullName = fullName
 		department.shortName = shortName
 

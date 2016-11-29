@@ -31,12 +31,12 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 
 	self: OriginalityReportServiceComponent =>
 
-	def saveSubmission(submission: Submission) = {
+	def saveSubmission(submission: Submission): Unit = {
 		session.saveOrUpdate(submission)
 		session.flush()
 	}
 
-	def getSubmissionByUniId(assignment: Assignment, uniId: String) = {
+	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission] = {
 		session.newCriteria[Submission]
 			.add(is("assignment", assignment))
 			.add(is("universityId", uniId))
@@ -48,7 +48,7 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 			.add(is("assignment", assignment)).seq
 	}
 
-	def getSubmission(id: String) = getById[Submission](id)
+	def getSubmission(id: String): Option[Submission] = getById[Submission](id)
 
 	def getPreviousSubmissions(user: User): Seq[Submission] = {
 		session.newCriteria[Submission]
@@ -77,7 +77,7 @@ trait SubmissionServiceComponent {
 }
 
 trait AutowiringSubmissionServiceComponent extends SubmissionServiceComponent {
-	var submissionService = Wire[SubmissionService]
+	var submissionService: SubmissionService = Wire[SubmissionService]
 }
 
 
@@ -122,5 +122,5 @@ trait OriginalityReportServiceComponent {
 }
 
 trait AutowiringOriginalityReportServiceComponent extends OriginalityReportServiceComponent {
-	var originalityReportService = Wire[OriginalityReportService]
+	var originalityReportService: OriginalityReportService = Wire[OriginalityReportService]
 }

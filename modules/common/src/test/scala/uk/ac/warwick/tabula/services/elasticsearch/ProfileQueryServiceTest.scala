@@ -15,7 +15,7 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "profiles"
-	val indexType = new ProfileIndexType {}.indexType
+	val indexType: String = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new ProfileQueryServiceImpl

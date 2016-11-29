@@ -28,7 +28,7 @@ trait DeleteCustomRoleOverrideCommandState {
 class DeleteCustomRoleOverrideCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition, val roleOverride: RoleOverride) extends CommandInternal[RoleOverride] with DeleteCustomRoleOverrideCommandState {
 	self: PermissionsServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): RoleOverride = transactional() {
 		customRoleDefinition.overrides.remove(roleOverride)
 
 		permissionsService.saveOrUpdate(customRoleDefinition)
@@ -55,7 +55,7 @@ trait DeleteCustomRoleOverrideCommandValidation extends SelfValidating {
 trait DeleteCustomRoleOverrideCommandDescription extends Describable[RoleOverride] {
 	self: DeleteCustomRoleOverrideCommandState =>
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.customRoleDefinition(customRoleDefinition)
 }
 

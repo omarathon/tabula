@@ -21,7 +21,7 @@ import uk.ac.warwick.util.core.StringUtils
 import scala.collection.JavaConversions._
 
 trait CourseImporter extends Logging {
-	var courseDao = Wire[CourseDao]
+	var courseDao: CourseDao = Wire[CourseDao]
 
 	private var courseMap: Map[String, Course] = _
 
@@ -71,7 +71,7 @@ trait CourseImporter extends Logging {
 class SitsCourseImporter extends CourseImporter {
 	import SitsCourseImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val coursesQuery = new CoursesQuery(sits)
 
@@ -167,5 +167,5 @@ trait CourseImporterComponent {
 }
 
 trait AutowiringCourseImporterComponent extends CourseImporterComponent {
-	var courseImporter = Wire[CourseImporter]
+	var courseImporter: CourseImporter = Wire[CourseImporter]
 }

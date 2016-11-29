@@ -18,7 +18,7 @@ object DepartmentSmallGroup {
 
 	// For sorting a collection by group name. Either pass to the sort function,
 	// or expose as an implicit val.
-	val NameOrdering = Ordering.by { group: DepartmentSmallGroup => (group.name, group.id) }
+	val NameOrdering: Ordering[DepartmentSmallGroup] = Ordering.by { group: DepartmentSmallGroup => (group.name, group.id) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small groups.
@@ -37,7 +37,7 @@ class DepartmentSmallGroup
 	import DepartmentSmallGroup._
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
 	def this(_set: DepartmentSmallGroupSet) {
 		this()
@@ -55,8 +55,8 @@ class DepartmentSmallGroup
 	@BatchSize(size=200)
 	var linkedGroups: JSet[SmallGroup] = JHashSet()
 
-	def permissionsParents = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
-	override def humanReadableId = name
+	def permissionsParents: Stream[GeneratedId with ToString with PermissionsTarget with Serializable with ToEntityReference] = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
+	override def humanReadableId: String = name
 
 	/**
 	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
@@ -90,6 +90,6 @@ class DepartmentSmallGroup
 		newGroup
 	}
 
-	override def toEntityReference = new DepartmentSmallGroupEntityReference().put(this)
+	override def toEntityReference: DepartmentSmallGroupEntityReference = new DepartmentSmallGroupEntityReference().put(this)
 
 }

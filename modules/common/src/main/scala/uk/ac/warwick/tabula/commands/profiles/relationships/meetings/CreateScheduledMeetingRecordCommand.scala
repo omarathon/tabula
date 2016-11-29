@@ -5,7 +5,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -34,7 +34,7 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 
 	self: MeetingRecordServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): ScheduledMeetingRecord = {
 		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationship)
 		scheduledMeeting.title = title
 		scheduledMeeting.description = description
@@ -82,7 +82,7 @@ trait CreateScheduledMeetingRecordState {
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = _
 
-	var attachmentTypes = Seq[String]()
+	var attachmentTypes: Seq[String] = Seq[String]()
 }
 
 trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -108,7 +108,7 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 }
 
 trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
-	def emit(meeting: ScheduledMeetingRecord) = {
+	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		val user = meeting.creator.asSsoUser
 		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship)
 		if(!meeting.universityIdInRelationship(user.getWarwickId)) {
@@ -124,7 +124,7 @@ trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifi
 
 	override def transformResult(meetingRecord: ScheduledMeetingRecord) = Seq(meetingRecord)
 
-	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord) = {
+	override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
 		Seq(
 			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
 			new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),

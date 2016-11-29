@@ -34,10 +34,10 @@ trait FinaliseFeedbackCommandState {
 abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedbacks: Seq[MarkerFeedback], val user: User)
 	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
-	var fileDao = Wire.auto[FileDao]
-	var zipService = Wire.auto[ZipService]
+	var fileDao: FileDao = Wire.auto[FileDao]
+	var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[Feedback] = {
 		markerFeedbacks.map { markerFeedback =>
 			this.copyToFeedback(markerFeedback)
 		}

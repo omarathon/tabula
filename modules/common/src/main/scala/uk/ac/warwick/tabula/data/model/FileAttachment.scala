@@ -23,8 +23,8 @@ import scala.util.matching.Regex
 class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
-	@transient var fileDao = Wire[FileDao]
-	@transient var objectStorageService = Wire[ObjectStorageService]
+	@transient var fileDao: FileDao = Wire[FileDao]
+	@transient var objectStorageService: ObjectStorageService = Wire[ObjectStorageService]
 
 	@Column(name="file_hash")
 	var hash: String = _
@@ -80,8 +80,8 @@ class FileAttachment extends GeneratedId {
 
 	@Column(name = "name")
 	private var _name: String = _
-	def name = _name
-	def getName = _name
+	def name: String = _name
+	def getName: String = _name
 	def setName(n: String) { name = n }
 	def name_=(n: String) {
 		_name = Option(n).map(sanitisedFilename).orNull
@@ -132,11 +132,11 @@ class FileAttachment extends GeneratedId {
 		token
 	}
 
-	def hasData = id.hasText && objectStorageService.keyExists(id)
+	def hasData: Boolean = id.hasText && objectStorageService.keyExists(id)
 
 	@transient var uploadedData: ByteSource = null
 
-	def isDataEqual(other: Any) = other match {
+	def isDataEqual(other: Any): Boolean = other match {
 		case that: FileAttachment =>
 			if (this.id != null && that.id != null && this.id == that.id) true
 			else if (this.actualDataLength != that.actualDataLength) false
@@ -167,7 +167,7 @@ object FileAttachment {
 	private val DefaultFilename = "download"
 	private val DefaultExtension = "unknowntype"
 
-	def sanitisedFilename(filename: String) = {
+	def sanitisedFilename(filename: String): String = {
 		val spaced = Space.replaceAllIn(filename, " ")
 		val sanitised = BadCharacters.replaceAllIn(spaced, "")
 		val leadingDot = sanitised.head == '.'

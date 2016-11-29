@@ -9,7 +9,7 @@ class AttendanceMonitoringPointIdConverter extends TwoWayConverter[String, Atten
 
 	@Autowired var service: AttendanceMonitoringService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getPointById }).orNull
-	override def convertLeft(point: AttendanceMonitoringPoint) = (Option(point) map {_.id}).orNull
+	override def convertRight(id: String): AttendanceMonitoringPoint = (Option(id) flatMap { service.getPointById }).orNull
+	override def convertLeft(point: AttendanceMonitoringPoint): String = (Option(point) map {_.id}).orNull
 
 }

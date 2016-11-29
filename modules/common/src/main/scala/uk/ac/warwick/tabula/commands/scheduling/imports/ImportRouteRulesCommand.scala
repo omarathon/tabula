@@ -25,8 +25,8 @@ trait ImportRouteRulesCommand extends CommandInternal[Unit]
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 
-	var routeRuleImporter = Wire[RouteRuleImporter]
-	var upstreamRouteRuleService = Wire[UpstreamRouteRuleService]
+	var routeRuleImporter: RouteRuleImporter = Wire[RouteRuleImporter]
+	var upstreamRouteRuleService: UpstreamRouteRuleService = Wire[UpstreamRouteRuleService]
 
 	val ImportGroupSize = 100
 

@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.helpers
 import org.joda.time.{DateTime, Duration, Period, PeriodType, ReadablePeriod}
-import org.joda.time.format.PeriodFormatterBuilder
+import org.joda.time.format.{PeriodFormatter, PeriodFormatterBuilder}
 import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 
 class DurationFormatterTag extends BaseTemplateMethodModelEx {
-	override def execMethod(args: Seq[_]) = args match {
+	override def execMethod(args: Seq[_]): String = args match {
 		// TAB-688 when passed null values, return a null value
 		case Seq(null) | Seq(null, null) => null
 		case Seq(end: DateTime) => DurationFormatter.format(new DateTime(), end)
@@ -29,9 +29,9 @@ object DurationFormatter {
 	 * You can change periodType to a value that has weeks - you'll then need to update the
 	 * formatter to include weeks in its output, otherwise it'll just be missing.
 	 */
-	val periodType = PeriodType.yearMonthDayTime
+	val periodType: PeriodType = PeriodType.yearMonthDayTime
 
-	val formatter = new PeriodFormatterBuilder()
+	val formatter: PeriodFormatter = new PeriodFormatterBuilder()
 		.appendYears.appendSuffix(" year", " years").appendSeparator(sep, finalSep)
 		.appendMonths.appendSuffix(" month", " months").appendSeparator(sep, finalSep)
 		.appendDays.appendSuffix(" day", " days").appendSeparator(sep, finalSep)

@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.ZipCreator
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance}
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{ItemNotFoundException, PermissionDeniedException}
@@ -19,7 +20,7 @@ import uk.ac.warwick.tabula.{ItemNotFoundException, PermissionDeniedException}
 @RequestMapping(Array("/zips/{jobId}"))
 class ZipFileJobController extends BaseController with AutowiringJobServiceComponent with AutowiringObjectStorageServiceComponent {
 
-	var fileServer = Wire[FileServer]
+	var fileServer: FileServer = Wire[FileServer]
 
 	private def jobAndInstance(jobId: String) = {
 		jobService.getInstance(jobId) match {
@@ -36,7 +37,7 @@ class ZipFileJobController extends BaseController with AutowiringJobServiceCompo
 	}
 
 	@RequestMapping
-	def home(@PathVariable jobId: String) = {
+	def home(@PathVariable jobId: String): Mav = {
 		val (job, jobInstance) = jobAndInstance(jobId)
 		if (ajax)
 			Mav(new JSONView(Map(

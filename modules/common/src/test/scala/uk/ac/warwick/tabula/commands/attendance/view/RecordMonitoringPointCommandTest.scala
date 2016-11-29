@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{Fixtures, CurrentUser, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, AttendanceMonitoringScheme, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember, UserGroup}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceMonitoringScheme, AttendanceState}
 import uk.ac.warwick.tabula.commands.attendance.GroupedPoint
 import uk.ac.warwick.userlookup.User
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
-import uk.ac.warwick.tabula.data.convert.{MemberUniversityIdConverter, AttendanceMonitoringPointIdConverter}
+import uk.ac.warwick.tabula.data.convert.{AttendanceMonitoringPointIdConverter, MemberUniversityIdConverter}
 import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.web.bind.WebDataBinder
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.util.termdates.TermImpl
 import org.joda.time.base.BaseDateTime
+import org.springframework.validation.BindingResult
 import uk.ac.warwick.util.termdates.Term.TermType
 
 class RecordMonitoringPointCommandTest extends TestBase with Mockito {
@@ -23,10 +25,10 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	trait CommandStateTestSupport extends AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent with TermServiceComponent with SecurityServiceComponent {
 
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val profileService = smartMock[ProfileService]
-		val termService = smartMock[TermService]
-		val securityService = smartMock[SecurityService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val termService: TermService = smartMock[TermService]
+		val securityService: SecurityService = smartMock[SecurityService]
 	}
 
 	trait Fixture {
@@ -34,11 +36,11 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		thisUser.setIsLoggedIn(true)
 		thisUser.setFoundUser(true)
 
-		val thisDepartment = Fixtures.department("its")
+		val thisDepartment: Department = Fixtures.department("its")
 
-		val student1 = Fixtures.student("1234")
-		val student2 = Fixtures.student("2345")
-		val student3 = Fixtures.student("3456")
+		val student1: StudentMember = Fixtures.student("1234")
+		val student2: StudentMember = Fixtures.student("2345")
+		val student3: StudentMember = Fixtures.student("3456")
 
 		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
 
@@ -49,7 +51,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		scheme1.members = UserGroup.ofUniversityIds
 		scheme1.members.addUserId(student1.universityId)
 		scheme1.members.addUserId(student2.universityId)
-		val point1 = Fixtures.attendanceMonitoringPoint(scheme1)
+		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1)
 		point1.id = "123"
 		val scheme2 = new AttendanceMonitoringScheme
 		scheme2.attendanceMonitoringService = None
@@ -58,13 +60,13 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		scheme2.members = UserGroup.ofUniversityIds
 		scheme2.members.addUserId(student2.universityId)
 		scheme2.members.addUserId(student3.universityId)
-		val point2 = Fixtures.attendanceMonitoringPoint(scheme2)
+		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme2)
 		point2.id = "234"
 
-		val student1point1checkpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.Attended)
-		val student2point1checkpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student2, AttendanceState.Attended)
-		val student2point2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.Attended)
-		val student3point2checkpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student3, AttendanceState.Attended)
+		val student1point1checkpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student1, AttendanceState.Attended)
+		val student2point1checkpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, student2, AttendanceState.Attended)
+		val student2point2checkpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student2, AttendanceState.Attended)
+		val student3point2checkpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, student3, AttendanceState.Attended)
 	}
 
 	trait StateFixture extends Fixture {
@@ -99,7 +101,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	def statePointsToRecord() {	new StateFixture with FilteredPointsFixture with StudentDatasFixture {
 		state.filteredPoints = thisFilteredPoints
 		state.studentDatas = thisStudentDatas
-		val result = state.pointsToRecord
+		val result: Seq[AttendanceMonitoringPoint] = state.pointsToRecord
 		result.contains(point1) should be {true}
 		result.contains(point2) should be {true}
 	}}
@@ -108,7 +110,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 	def stateStudentMap() {	new StateFixture with FilteredPointsFixture with StudentDatasFixture {
 		state.filteredPoints = thisFilteredPoints
 		state.studentDatas = thisStudentDatas
-		val result = state.studentMap
+		val result: Map[AttendanceMonitoringPoint, Seq[StudentMember]] = state.studentMap
 		result(point1).contains(student1) should be {true}
 		result(point1).contains(student2) should be {true}
 		result(point1).contains(student3) should be {false}
@@ -138,7 +140,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		populate.filteredPoints = thisFilteredPoints
 		populate.studentDatas = thisStudentDatas
 		populate.populate()
-		val result = populate.checkpointMap.asScala.mapValues(_.asScala.toMap).toMap
+		val result: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala.toMap).toMap
 		result(student1).keys.size should be (1)
 		result(student2).keys.size should be (2)
 		result(student3).keys.size should be (1)
@@ -181,7 +183,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 
 		var binder = new WebDataBinder(validator, "command")
 		binder.setConversionService(conversionService)
-		val errors = binder.getBindingResult
+		val errors: BindingResult = binder.getBindingResult
 	}
 
 	@Test

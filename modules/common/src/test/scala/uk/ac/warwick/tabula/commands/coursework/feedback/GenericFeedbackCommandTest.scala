@@ -22,7 +22,7 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 	def commandApply() {
 		new Fixture {
 			assignment.genericFeedback should be("")
-			val result = command.applyInternal()
+			val result: Assignment = command.applyInternal()
 			verify(command.assessmentService, times(1)).save(assignment)
 			assignment.genericFeedback should be(heronRant)
 		}
@@ -31,6 +31,6 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
 
 // Implements the dependencies declared by the command
 trait GenericFeedbackCommandTestSupport extends AssessmentServiceComponent with Mockito {
-	val assessmentService = mock[AssessmentService]
+	val assessmentService: AssessmentService = mock[AssessmentService]
 	def apply(): Assignment = null
 }

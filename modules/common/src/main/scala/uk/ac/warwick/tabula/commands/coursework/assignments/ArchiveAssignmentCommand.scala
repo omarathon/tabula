@@ -24,7 +24,7 @@ class ArchiveAssignmentCommandInternal(val module: Module, val assignment: Assig
 
 	self: ArchiveAssignmentCommandState with AssessmentServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Assignment = {
 		transactional() {
 			if (unarchive) assignment.unarchive()
 			else assignment.archive()
@@ -40,7 +40,7 @@ trait ArchiveAssignmentPermissions extends RequiresPermissionsChecking with Perm
 
 	self: ArchiveAssignmentCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) = {
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		mustBeLinked(assignment, module)
 		p.PermissionCheck(Permissions.Assignment.Archive, assignment)
 	}

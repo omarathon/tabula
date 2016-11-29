@@ -52,7 +52,7 @@ abstract class OnlineModerationCommand(
 	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
-	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, marker, SecondFeedback)
+	def markerFeedback: Option[MarkerFeedback] = assignment.getMarkerFeedback(student.getWarwickId, marker, SecondFeedback)
 
 	copyState(markerFeedback, copyModerationFieldsFrom)
 

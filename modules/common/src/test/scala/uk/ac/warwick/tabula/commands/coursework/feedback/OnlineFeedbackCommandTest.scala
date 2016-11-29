@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
 
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {
@@ -10,11 +11,11 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	trait Fixture {
 
 		// user1 and user3 deliberately have same uniId, to test members with multiple logins.
-		val marker = Fixtures.user(universityId="marker", userId="marker")
+		val marker: User = Fixtures.user(universityId="marker", userId="marker")
 
-		val user1 = Fixtures.user(universityId="user1", userId="user1")
-		val user2 = Fixtures.user(universityId="user2", userId="user2")
-		val user3 = Fixtures.user(universityId="user1", userId="user3")
+		val user1: User = Fixtures.user(universityId="user1", userId="user1")
+		val user2: User = Fixtures.user(universityId="user2", userId="user2")
+		val user3: User = Fixtures.user(universityId="user1", userId="user3")
 
 		val assignment = new Assignment
 		val module = new Module
@@ -24,7 +25,7 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
 		val feedback1 = new AssignmentFeedback
 		feedback1.assignment = assignment
-		val feedback2 = Fixtures.assignmentFeedback("user2")
+		val feedback2: AssignmentFeedback = Fixtures.assignmentFeedback("user2")
 		feedback2.released = true
 		feedback2.assignment = assignment
 
@@ -49,21 +50,21 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApply() {
 		new Fixture {
-			val feedbackGraphs = command.applyInternal()
+			val feedbackGraphs: Seq[StudentFeedbackGraph] = command.applyInternal()
 			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user1")
 			verify(command.feedbackService, times(1)).getAssignmentFeedbackByUniId(assignment, "user2")
 
 			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user1")
 			verify(command.submissionService, times(1)).getSubmissionByUniId(assignment, "user2")
 
-			val graph1 = feedbackGraphs(0)
+			val graph1: StudentFeedbackGraph = feedbackGraphs(0)
 			graph1.student should be(user1)
 			graph1.hasSubmission should be {true}
 			graph1.hasUncompletedFeedback should be {true}
 			graph1.hasPublishedFeedback should be {false}
 			graph1.hasCompletedFeedback should be {false}
 
-			val graph2 = feedbackGraphs(1)
+			val graph2: StudentFeedbackGraph = feedbackGraphs(1)
 			graph2.student should be(user2)
 			graph2.hasSubmission should be {false}
 			graph2.hasUncompletedFeedback should be {true}
@@ -79,8 +80,8 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 // Implements the dependencies declared by the command
 trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with Mockito {
 	val userLookup = new MockUserLookup
-	val submissionService = mock[SubmissionService]
-	val feedbackService = mock[FeedbackService]
-	var assessmentMembershipService = mock[AssessmentMembershipService]
+	val submissionService: SubmissionService = mock[SubmissionService]
+	val feedbackService: FeedbackService = mock[FeedbackService]
+	var assessmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 	def apply(): Seq[StudentFeedbackGraph] = Seq()
 }

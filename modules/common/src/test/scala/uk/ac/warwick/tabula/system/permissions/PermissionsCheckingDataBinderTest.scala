@@ -14,12 +14,13 @@ import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.system.CustomDataBinder
 import uk.ac.warwick.tabula.system.BindListenerBinding
 
 class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 
-	val securityService = mock[SecurityService]
+	val securityService: SecurityService = mock[SecurityService]
 
 	abstract class TestCommand extends Command[Boolean] {
 		def describe(d:Description) {}
@@ -40,7 +41,7 @@ class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 
 	case class AccidentallyPublicCommand() extends TestCommand
 
-	val dept = Fixtures.department("in", "IT Services")
+	val dept: Department = Fixtures.department("in", "IT Services")
 
 	class Binder(obj:Any, name:String, val securityService:SecurityService)
 		extends CustomDataBinder(obj, name)

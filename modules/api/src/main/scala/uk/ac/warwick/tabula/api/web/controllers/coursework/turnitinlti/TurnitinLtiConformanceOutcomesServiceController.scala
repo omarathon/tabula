@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.turnitinlti
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestBody, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestBody, RequestMapping}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.commands.coursework.turnitinlti.{TurnitinLtiConformanceOutcomesServiceCommandResponse, TurnitinLtiConformanceOutcomesServiceCommandState, TurnitinLtiConformanceOutcomesServiceCommand}
-import scala.xml.XML
+import uk.ac.warwick.tabula.commands.coursework.turnitinlti.{TurnitinLtiConformanceOutcomesServiceCommand, TurnitinLtiConformanceOutcomesServiceCommandResponse, TurnitinLtiConformanceOutcomesServiceCommandState}
+
+import scala.xml.{Elem, XML}
 import uk.ac.warwick.tabula.api.web.controllers.coursework.turnitinlti.TurnitinLtiConformanceOutcomesServiceController.TurnitinLtiConformanceOutcomesServiceCommand
 
 object TurnitinLtiConformanceOutcomesServiceController {
@@ -35,7 +36,7 @@ trait TurnitinLtiConformanceOutcomesServiceApi {
 		@ModelAttribute("command") command: TurnitinLtiConformanceOutcomesServiceCommand,
 		@PathVariable assignment: Assignment,
 		errors: Errors
-	 ) = {
+	 ): Elem = {
 		command.body = body
 		val response = command.apply()
 		XML.loadString(response.xmlString)

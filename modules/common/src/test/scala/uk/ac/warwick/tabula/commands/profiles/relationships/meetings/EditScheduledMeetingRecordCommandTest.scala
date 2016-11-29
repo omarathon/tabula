@@ -54,7 +54,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val newTitle: String = "new title"
 		val newDescription: String = "new description"
 		val newFormat = MeetingFormat.VideoConference
-		val newMeetingDate = new DateTime().plusMinutes(1)
+		val newMeetingDate: DateTime = new DateTime().plusMinutes(1)
 		command.title = newTitle
 		command.description = newDescription
 		command.format = newFormat
@@ -150,7 +150,7 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	}}
 
 	trait EditScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {
-		def fileAttachmentService = mock[FileAttachmentService]
+		def fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
 	}
 
 }

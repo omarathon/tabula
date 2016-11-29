@@ -16,16 +16,16 @@ import uk.ac.warwick.tabula.JavaImports.{JArrayList, JBigDecimal}
 class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 	val thisAssignmentDao = new AssessmentDaoImpl
-	val thisFirstMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
-	val thisSecondMarkerHelper = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
-	val thisMarkingWorkflowService = smartMock[MarkingWorkflowService]
+	val thisFirstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisSecondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = smartMock[UserGroupMembershipHelper[MarkingWorkflow]]
+	val thisMarkingWorkflowService: MarkingWorkflowService = smartMock[MarkingWorkflowService]
 
 	val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
 		with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
-		val assessmentDao = thisAssignmentDao
-		val firstMarkerHelper = thisFirstMarkerHelper
-		val secondMarkerHelper = thisSecondMarkerHelper
-		val markingWorkflowService = thisMarkingWorkflowService
+		val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
+		val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisFirstMarkerHelper
+		val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow] = thisSecondMarkerHelper
+		val markingWorkflowService: MarkingWorkflowService = thisMarkingWorkflowService
 	}
 	val assignmentMembershipService = new AssessmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
@@ -55,7 +55,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
 		extensionService = new AbstractExtensionService with ExtensionDaoComponent {
-			val extensionDao = extDao
+			val extensionDao: ExtensionDaoImpl = extDao
 		}
 	}
 
@@ -623,31 +623,31 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		userLookup.registerUserObjects(student1, student2, student3, student4, student5, manual1, manual2, manual3, manual4, manual5, manual10)
 
-		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 		def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
 			case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val assignment1 = newDeepAssignment("ch101")
+		val assignment1: Assignment = newDeepAssignment("ch101")
 		assignment1.academicYear = year
 		assignment1.assessmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment1.members)
 
-		val department1 = assignment1.module.adminDepartment
+		val department1: Department = assignment1.module.adminDepartment
 
 		session.save(department1)
 		session.save(assignment1.module)
 		assignmentService.save(assignment1)
 
-		val assignment2 = newDeepAssignment("ch101")
+		val assignment2: Assignment = newDeepAssignment("ch101")
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
 		assignment2.assessmentMembershipService = assignmentMembershipService
 		wireUserLookup(assignment2.members)
 
-		val department2 = assignment2.module.adminDepartment
+		val department2: Department = assignment2.module.adminDepartment
 
 		session.save(department2)
 		assignmentService.save(assignment2)
@@ -661,7 +661,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		up1.name = "Egg plants"
 		up1.inUse = true
 
-		val upstream1 = assignmentMembershipService.save(up1)
+		val upstream1: AssessmentComponent = assignmentMembershipService.save(up1)
 
 		val up2 = new AssessmentComponent
 		up2.module = assignment1.module
@@ -672,7 +672,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		up2.name = "Greg's plants"
 		up2.inUse = true
 
-		val upstream2 = assignmentMembershipService.save(up2)
+		val upstream2: AssessmentComponent = assignmentMembershipService.save(up2)
 
 		val up3 = new AssessmentComponent
 		up3.module = assignment1.module
@@ -683,7 +683,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		up3.name = "Steg's plants"
 		up3.inUse = true
 
-    val upstream3 = assignmentMembershipService.save(up3)
+    val upstream3: AssessmentComponent = assignmentMembershipService.save(up3)
 
     session.flush()
 
@@ -773,14 +773,14 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		session.flush()
 
-		val universityIdGroup = UserGroup.ofUniversityIds
+		val universityIdGroup: UserGroup = UserGroup.ofUniversityIds
 		universityIdGroup.userLookup = userLookup
 		universityIdGroup.addUserId("0000001")
 		universityIdGroup.addUserId("0000010")
 		universityIdGroup.addUserId("0000015")
 		universityIdGroup.excludeUserId("0000009")
 
-		val userIdGroup = UserGroup.ofUsercodes
+		val userIdGroup: UserGroup = UserGroup.ofUsercodes
 		userIdGroup.userLookup = userLookup
 		userIdGroup.addUserId("student1")
 		userIdGroup.addUserId("manual5")
@@ -790,7 +790,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def enrolledAssignments() { transactional { tx =>
 		new AssignmentMembershipFixture() {
-			val ams = assignmentMembershipService
+			val ams: AssessmentMembershipServiceImpl = assignmentMembershipService
 
 			withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
 			withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }

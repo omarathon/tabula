@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.services.{AssessmentService, UserLookupService}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -47,7 +48,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		val submissions = assignment.getMarkersSubmissions(marker)
 		val markerFeedbacks = submissions.flatMap(s => assignment.getMarkerFeedbackForCurrentPosition(s.universityId, marker))
 		val filteredFeedbackId = markerFeedbacks.filter(_.state != MarkingCompleted).map(_.feedback.universityId)
@@ -95,7 +96,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		@PathVariable marker: User,
 		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, marker, cmd, errors)
 		else {
 			bindAndValidate(assignment, cmd, errors)
@@ -112,7 +113,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 		@PathVariable assignment: Assignment,
 		@PathVariable marker: User,
 		@ModelAttribute("markerAddMarksCommand") cmd: MarkerAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		bindAndValidate(assignment, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
@@ -128,7 +129,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marks"))
 class OldMarkerAddMarksControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
 	}
 }

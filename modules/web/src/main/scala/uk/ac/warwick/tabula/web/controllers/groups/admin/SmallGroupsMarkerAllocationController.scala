@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.{Exam, Assignment}
-import uk.ac.warwick.tabula.commands.groups.admin.{SetAllocation, SmallGroupsMarkerAllocationCommand}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data.model.{Assignment, Exam}
+import uk.ac.warwick.tabula.commands.groups.admin.{SetAllocation, SmallGroupsMarkerAllocationCommand, SmallGroupsMarkerAllocationCommandInternal, SmallGroupsMarkerAllocationCommandPermissions}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @Controller
@@ -12,7 +14,7 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 class SmallGroupsMarkerAllocationController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) = {
+	def command(@PathVariable assignment: Assignment): SmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with SmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
 		SmallGroupsMarkerAllocationCommand(assignment)
 	}
 
@@ -20,7 +22,7 @@ class SmallGroupsMarkerAllocationController extends GroupsController {
 	def getGroupMembership(
 		@PathVariable assignment:Assignment,
 		@ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
-	) = {
+	): Mav = {
 
 		val allocations = cmd.apply()
 
@@ -40,7 +42,7 @@ class SmallGroupsMarkerAllocationController extends GroupsController {
 class SmallGroupsExamMarkerAllocationController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable exam: Exam) = {
+	def command(@PathVariable exam: Exam): SmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with SmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
 		SmallGroupsMarkerAllocationCommand(exam)
 	}
 
@@ -48,7 +50,7 @@ class SmallGroupsExamMarkerAllocationController extends GroupsController {
 	def getGroupMembership(
 		@PathVariable exam: Exam,
 		@ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
-	) = {
+	): Mav = {
 
 		val allocations = cmd.apply()
 

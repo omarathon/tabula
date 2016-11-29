@@ -14,14 +14,14 @@ import uk.ac.warwick.tabula.web.Mav
  */
 class MavReturnValueHandler extends HandlerMethodReturnValueHandler with Logging with Ordered {
 
-	override def supportsReturnType(methodParam: MethodParameter) = {
+	override def supportsReturnType(methodParam: MethodParameter): Boolean = {
 		classOf[Mav] isAssignableFrom methodParam.getMethod.getReturnType
 	}
 
 	override def handleReturnValue(returnValue: Object,
 		returnType: MethodParameter,
 		mavContainer: ModelAndViewContainer,
-		webRequest: NativeWebRequest) =
+		webRequest: NativeWebRequest): Unit =
 		returnValue match {
 			case mav: Mav => {
 				mavContainer.addAllAttributes(mav.toModel)

@@ -11,11 +11,11 @@ import uk.ac.warwick.tabula.services.scheduling.SitsStatusImporter
 import uk.ac.warwick.tabula.JavaImports._
 
 trait PropertyCopying extends Logging {
-	var sitsStatusImporter = Wire[SitsStatusImporter]
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var sitsStatusImporter: SitsStatusImporter = Wire[SitsStatusImporter]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
-	 def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, destinationBean: BeanWrapper) = {
+	 def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, destinationBean: BeanWrapper): Boolean = {
 		// Transform the set of properties to a set of booleans saying whether the value has changed
 		// It's okay to yield a Set here because we only care if it has any values that are true, no point in storing 300 trues
 		val changedProperties = for (property <- properties) yield {
@@ -40,7 +40,7 @@ trait PropertyCopying extends Logging {
 	}
 
 	// returns true if there is a change, false if no change
-	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, optionObj: Option[Object]) = {
+	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, optionObj: Option[Object]): Boolean = {
 
 		val oldValue = memberBean.getPropertyValue(property)
 
@@ -75,7 +75,7 @@ trait PropertyCopying extends Logging {
 		}
 	}
 
-	def markAsSeenInSits(bean: BeanWrapper) = {
+	def markAsSeenInSits(bean: BeanWrapper): Boolean = {
 		val propertyName = "missingFromImportSince"
 		if (bean.getPropertyValue(propertyName) == null)
 			false
@@ -101,7 +101,7 @@ trait PropertyCopying extends Logging {
 		}
 	}
 
-	def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {
+	def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper): Boolean = {
 		val oldValue = memberBean.getPropertyValue(property) match {
 			case value: AcademicYear => value
 			case _ => null
@@ -127,7 +127,7 @@ trait PropertyCopying extends Logging {
 		}
 	}
 
-	def copyBigDecimal(destinationBean: BeanWrapper, property: String, optionalBigDecimal: Option[JBigDecimal]) = {
+	def copyBigDecimal(destinationBean: BeanWrapper, property: String, optionalBigDecimal: Option[JBigDecimal]): Boolean = {
 		val oldValue = destinationBean.getPropertyValue(property)
 
 		optionalBigDecimal match {

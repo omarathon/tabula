@@ -22,7 +22,7 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssessmentMarkerMap
 	def thirdMarkerRoleName = Some("Final marker")
 	def thirdMarkerVerb = Some("mark")
 
-	override def thirdMarkers = this.firstMarkers
+	override def thirdMarkers: UnspecifiedTypeUserGroup = this.firstMarkers
 
 	def getStudentsThirdMarker(assessment: Assessment, universityId: UniversityId): Option[String] =
 		MarkingWorkflow.getMarkerFromAssessmentMap(userLookup, universityId, assessment.firstMarkerMap)

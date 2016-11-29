@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
-	val relationshipService = mock[RelationshipService]
+	val relationshipService: RelationshipService = mock[RelationshipService]
 
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
@@ -21,7 +21,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 	student.attachStudentCourseDetails(studentCourseDetails)
 
-	val staff = Fixtures.staff(universityId="0672089")
+	val staff: StaffMember = Fixtures.staff(universityId="0672089")
 	staff.firstName = "Steve"
 	staff.lastName = "Taff"
 

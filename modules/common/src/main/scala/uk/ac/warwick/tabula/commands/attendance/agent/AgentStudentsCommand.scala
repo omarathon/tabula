@@ -33,7 +33,7 @@ class AgentStudentsCommandInternal(val relationshipType: StudentRelationshipType
 
 	self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent with TermServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AgentStudentsCommandResult = {
 		val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, currentMember).flatMap(_.studentMember).distinct
 		val pointMap = students.map { student =>
 			student -> attendanceMonitoringService.listStudentsPoints(student, None, academicYear)

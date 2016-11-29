@@ -13,8 +13,8 @@ class RoleDefinitionConverterTest extends TestBase with Mockito {
 
 	val converter = new RoleDefinitionConverter
 
-	val sessionFactory = mock[SessionFactory]
-	val session = mock[Session]
+	val sessionFactory: SessionFactory = mock[SessionFactory]
+	val session: Session = mock[Session]
 
 	sessionFactory.getCurrentSession() returns (session)
 

@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.spring.Wire
 
 class StudentCourseYearDetailsIdConverter extends TwoWayConverter[String, StudentCourseYearDetails]  {
-	var dao = Wire.auto[StudentCourseYearDetailsDao]
+	var dao: StudentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
 
 	// print
-	override def convertLeft(scyd: StudentCourseYearDetails) = Option(scyd).map { _.id }.orNull
+	override def convertLeft(scyd: StudentCourseYearDetails): String = Option(scyd).map { _.id }.orNull
 
 	// parse
-	override def convertRight(id: String) = dao.getStudentCourseYearDetails(id).orNull
+	override def convertRight(id: String): StudentCourseYearDetails = dao.getStudentCourseYearDetails(id).orNull
 }

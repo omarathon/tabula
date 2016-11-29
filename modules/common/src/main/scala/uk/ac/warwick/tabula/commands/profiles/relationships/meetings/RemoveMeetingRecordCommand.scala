@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification}
-import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, MeetingRecord, Notification, ScheduledMeetingRecord}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -25,7 +25,7 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 trait RemoveMeetingRecordDescription extends Describable[AbstractMeetingRecord] {
 	self: RemoveMeetingRecordState =>
 
-	override def describe(d: Description) = d.properties(
+	override def describe(d: Description): Unit = d.properties(
 		"meetingRecord" -> meetingRecord.id)
 
 }
@@ -54,7 +54,7 @@ class DeleteMeetingRecordCommand(val meetingRecord: AbstractMeetingRecord, val u
 
 	self: MeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMeetingRecord = {
 		meetingRecord.deleted = true
 		meetingRecordService.saveOrUpdate(meetingRecord)
 		meetingRecord
@@ -75,7 +75,7 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 
 	self: RemoveMeetingRecordState =>
 
-	def emit(meeting: AbstractMeetingRecord) = {
+	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m, m.relationship)
@@ -95,7 +95,7 @@ class RestoreMeetingRecordCommand (val meetingRecord: AbstractMeetingRecord, val
 
 	self: MeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMeetingRecord = {
 		meetingRecord.deleted = false
 		meetingRecordService.saveOrUpdate(meetingRecord)
 		meetingRecord
@@ -116,7 +116,7 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 
 	self: RemoveMeetingRecordState =>
 
-	def emit(meeting: AbstractMeetingRecord) = {
+	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m, m.relationship)
@@ -136,7 +136,7 @@ class PurgeMeetingRecordCommand (val meetingRecord: AbstractMeetingRecord, val u
 
 	self: MeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMeetingRecord = {
 		meetingRecordService.purge(meetingRecord)
 		meetingRecord
 	}

@@ -22,7 +22,7 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	def applyInternal() = assignment.submissionsReport
+	def applyInternal(): SubmissionsReport = assignment.submissionsReport
 
 }
 
@@ -56,8 +56,8 @@ class OldSubmissionReportController extends OldCourseworkController {
 			"report" -> report).noLayoutIf(ajax)
 	}
 
-	def usersByWarwickIds(ids: Seq[String]) = userLookup.getUsersByWarwickUniIds(ids).values.toSeq.sortBy { _.getWarwickId }
+	def usersByWarwickIds(ids: Seq[String]): Seq[User] = userLookup.getUsersByWarwickUniIds(ids).values.toSeq.sortBy { _.getWarwickId }
 
-	def surname(user: User) = user.getLastName
+	def surname(user: User): String = user.getLastName
 
 }

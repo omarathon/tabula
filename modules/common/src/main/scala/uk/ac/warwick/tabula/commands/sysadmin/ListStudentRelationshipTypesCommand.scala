@@ -22,7 +22,7 @@ object ListStudentRelationshipTypesCommand {
 class ListStudentRelationshipTypesCommandInternal extends CommandInternal[Seq[StudentRelationshipType]] {
 	this: RelationshipServiceComponent =>
 
-	override def applyInternal() = relationshipService.allStudentRelationshipTypes
+	override def applyInternal(): Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 }
 
 trait ListStudentRelationshipTypesCommandPermissions extends RequiresPermissionsChecking {

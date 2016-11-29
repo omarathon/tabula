@@ -15,7 +15,7 @@ case class UnallocatedStudentsInformation (
 )
 
 object ListSmallGroupSetUnallocatedStudentsCommand {
-	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser) = {
+	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser): ListSmallGroupSetUnallocatedStudentsCommandInternal with ComposableCommand[UnallocatedStudentsInformation] with AutowiringProfileServiceComponent with ListSmallGroupSetUnallocatedStudentsCommandPermissions with Unaudited with ReadOnly = {
 		new ListSmallGroupSetUnallocatedStudentsCommandInternal(smallGroupSet, user)
 			with ComposableCommand[UnallocatedStudentsInformation]
 			with AutowiringProfileServiceComponent
@@ -28,7 +28,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandInternal(val smallGroupSet: Sma
 	extends CommandInternal[UnallocatedStudentsInformation] with ListSmallGroupSetUnallocatedStudentsCommandState  {
 	self:ProfileServiceComponent =>
 
-		override def applyInternal() = {
+		override def applyInternal(): UnallocatedStudentsInformation = {
 				val studentsNotInGroups = smallGroupSet.unallocatedStudents
 				val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
 				val showTutors = smallGroupSet.studentsCanSeeTutorName

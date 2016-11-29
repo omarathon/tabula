@@ -26,8 +26,8 @@ case class GoodUser(u: User) extends RecipientReportItem(u.getWarwickId, u, true
 
 case class RecipientCheckReport(
 	val users: List[RecipientReportItem]) {
-	def hasProblems = users.find { !_.good }.isDefined
-	def problems = users.filter { !_.good }
+	def hasProblems: Boolean = users.find { !_.good }.isDefined
+	def problems: List[RecipientReportItem] = users.filter { !_.good }
 }
 
 /**
@@ -41,16 +41,16 @@ class FeedbackRecipientCheckCommand(val module: Module, val assignment: Assignme
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 
-	var feedbackService = Wire.auto[FeedbackService]
+	var feedbackService: FeedbackService = Wire.auto[FeedbackService]
 
-	override def applyInternal() = {
+	override def applyInternal(): RecipientCheckReport = {
 		val items: Seq[RecipientReportItem] =
 			for ((id, user) <- feedbackService.getUsersForFeedback(assignment))
 				yield resolve(id, user)
 		RecipientCheckReport(items.toList)
 	}
 
-	def resolve(id: String, user: User) = user match {
+	def resolve(id: String, user: User): RecipientReportItem = user match {
 		case FoundUser(user) => {
 			if (user.getEmail.hasText && isGoodEmail(user.getEmail)) {
 				GoodUser(user)

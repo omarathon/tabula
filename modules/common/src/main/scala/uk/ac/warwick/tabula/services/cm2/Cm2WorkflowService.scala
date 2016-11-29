@@ -15,9 +15,9 @@ class Cm2WorkflowService {
 	import Cm2WorkflowStages._
 
 	final val MaxPower = 100
-	var features = Wire.auto[Features]
+	var features: Features = Wire.auto[Features]
 
-	def getStagesFor(assignment: Assignment) = {
+	def getStagesFor(assignment: Assignment): Seq[Cm2WorkflowStage] = {
 		var stages = Seq[Cm2WorkflowStage]()
 		if (assignment.collectSubmissions) {
 			stages = stages ++ Seq(Submission)
@@ -54,7 +54,7 @@ class Cm2WorkflowService {
 		stages
 	}
 
-	def progress(assignment: Assignment)(cm2: WorkflowItems) = {
+	def progress(assignment: Assignment)(cm2: WorkflowItems): WorkflowProgress = {
 		val allStages = getStagesFor(assignment)
 		val progresses = allStages map { _.progress(assignment)(cm2) }
 
@@ -87,7 +87,7 @@ object Cm2WorkflowStages {
 
 	case object Submission extends Cm2WorkflowStage {
 		def actionCode = "workflow.Submission.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = cm2.enhancedSubmission match {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
 			case None if cm2.enhancedFeedback.exists(!_.feedback.isPlaceholder) =>
 				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
@@ -115,7 +115,7 @@ object Cm2WorkflowStages {
 
 	case object DownloadSubmission extends Cm2WorkflowStage {
 		def actionCode = "workflow.DownloadSubmission.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = cm2.enhancedSubmission match {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			case Some(submission) if submission.downloaded =>
 				StageProgress(DownloadSubmission, started = true, messageCode = "workflow.DownloadSubmission.downloaded", health = Good, completed = true)
 			case Some(_) =>
@@ -128,7 +128,7 @@ object Cm2WorkflowStages {
 
 	case object CheckForPlagiarism extends Cm2WorkflowStage {
 		def actionCode = "workflow.CheckForPlagiarism.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = cm2.enhancedSubmission match {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.suspectPlagiarised", health = Danger, completed = true)
 			case Some(item) if item.submission.allAttachments.exists(_.originalityReportReceived) =>
@@ -141,7 +141,7 @@ object Cm2WorkflowStages {
 
 	case object ReleaseForMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			if (assignment.isReleasedForMarking(cm2.student.getWarwickId)) {
 				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
 			} else {
@@ -153,7 +153,7 @@ object Cm2WorkflowStages {
 
 	case object FirstMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.FirstMarking.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = cm2.enhancedFeedback match {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedFeedback match {
 			case Some(item) =>
 				if (item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.marked", health = Good, completed = true)
@@ -166,7 +166,7 @@ object Cm2WorkflowStages {
 
 	case object SecondMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(cm2.student.getWarwickId)
 			cm2.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
@@ -194,7 +194,7 @@ object Cm2WorkflowStages {
 
 	case object Moderation extends Cm2WorkflowStage {
 		def actionCode = "workflow.ModeratedMarking.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(cm2.student.getWarwickId)
 			cm2.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
@@ -222,7 +222,7 @@ object Cm2WorkflowStages {
 
 	case object FinaliseSeenSecondMarking extends Cm2WorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToThirdMarker(cm2.student.getWarwickId)
 			cm2.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
@@ -253,7 +253,7 @@ object Cm2WorkflowStages {
 
 	case object AddMarks extends Cm2WorkflowStage {
 		def actionCode = "workflow.AddMarks.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) =
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.hasMarkOrGrade =>
 					StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.marked", health = Good, completed = true)
@@ -264,7 +264,7 @@ object Cm2WorkflowStages {
 
 	case object AddFeedback extends Cm2WorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) = cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress = cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
 				StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.uploaded", health = Good, completed = true)
 			case Some(_) =>
@@ -276,7 +276,7 @@ object Cm2WorkflowStages {
 
 	case object ReleaseFeedback extends Cm2WorkflowStage {
 		def actionCode = "workflow.ReleaseFeedback.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) =
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
@@ -289,7 +289,7 @@ object Cm2WorkflowStages {
 
 	case object ViewOnlineFeedback extends Cm2WorkflowStage {
 		def actionCode = "workflow.ViewOnlineFeedback.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) =
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released && item.onlineViewed =>
 					StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.viewed", health = Good, completed = true)
@@ -302,7 +302,7 @@ object Cm2WorkflowStages {
 
 	case object DownloadFeedback extends Cm2WorkflowStage {
 		def actionCode = "workflow.DownloadFeedback.action"
-		def progress(assignment: Assignment)(cm2: WorkflowItems) =
+		def progress(assignment: Assignment)(cm2: WorkflowItems): StageProgress =
 			cm2.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) && !item.downloaded  =>
 					StageProgress(DownloadFeedback, started = false, messageCode = "workflow.DownloadFeedback.notDownloaded")
@@ -321,5 +321,5 @@ trait Cm2WorkflowServiceComponent {
 }
 
 trait AutowiringCm2WorkflowServiceComponent extends Cm2WorkflowServiceComponent {
-	var cm2WorkflowService = Wire[Cm2WorkflowService]
+	var cm2WorkflowService: Cm2WorkflowService = Wire[Cm2WorkflowService]
 }

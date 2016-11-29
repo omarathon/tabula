@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula
 
-import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.{Level, Logger}
 import ch.qos.logback.classic.spi.ILoggingEvent
 import org.slf4j.LoggerFactory
 import ch.qos.logback
+
 import scala.collection.JavaConverters._
 
 object TestLoggerFactory {
@@ -14,7 +15,7 @@ object TestLoggerFactory {
 		override def initialValue = Nil
 	}
 
-	def getTestLogger(name: String) = {
+	def getTestLogger(name: String): Logger = {
 		val logger = LoggerFactory.getLogger(name).asInstanceOf[logback.classic.Logger]
 		val appender = new Appender
 		appender.start()

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.helpers.MutablePromise
 
 /**
  * A role provider that will look for any staff members who the current user
@@ -19,9 +20,9 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	val roleService = promise { Wire[RoleService] }
-	val roleProviders = promise { Wire.all[RoleProvider] }
-	val profileService = promise { Wire[ProfileService] }
+	val roleService: MutablePromise[RoleService] = promise { Wire[RoleService] }
+	val roleProviders: MutablePromise[Seq[RoleProvider]] = promise { Wire.all[RoleProvider] }
+	val profileService: MutablePromise[ProfileService] = promise { Wire[ProfileService] }
 
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for StaffMemberAssistantRoleProvider") {
 		profileService.get.findStaffMembersWithAssistant(user.apparentUser).toStream.flatMap { staff =>
@@ -40,7 +41,7 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
 		}
 	}
 
-	def rolesProvided =
+	def rolesProvided: Set[Class[_ <: Role]] =
 		roleProviders.get.toSet[RoleProvider].filterNot { _.isInstanceOf[StaffMemberAssistantRoleProvider] }.flatMap { _.rolesProvided }
 
 }

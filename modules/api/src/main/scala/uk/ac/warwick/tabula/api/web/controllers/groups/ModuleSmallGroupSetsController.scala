@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewSet}
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -57,7 +57,7 @@ trait ListSmallGroupSetsForModuleApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors, @PathVariable module: Module) = {
+	def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors, @PathVariable module: Module): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
@@ -82,7 +82,7 @@ class CreateSmallGroupSetControllerForModuleApi extends ModuleSmallGroupSetsCont
 		ModifySmallGroupSetCommand.create(module)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@Valid @ModelAttribute("createSmallGroupSetCommand") command: CreateSmallGroupSetCommand, @RequestBody request: CreateSmallGroupSetRequest, errors: Errors)(implicit response: HttpServletResponse) = {
+	def create(@Valid @ModelAttribute("createSmallGroupSetCommand") command: CreateSmallGroupSetCommand, @RequestBody request: CreateSmallGroupSetRequest, errors: Errors)(implicit response: HttpServletResponse): Mav = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)

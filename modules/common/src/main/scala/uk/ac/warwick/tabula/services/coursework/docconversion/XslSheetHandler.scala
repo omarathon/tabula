@@ -19,7 +19,7 @@ class XslSheetHandler extends HSSFListener with Logging {
 	val formatListener = new FormatTrackingHSSFListener(this)
 
 	@Override
-	def processRecord(record: Record) = {
+	def processRecord(record: Record): Unit = {
 		record match {
 			case record: SSTRecord => {
 				sstrec = record

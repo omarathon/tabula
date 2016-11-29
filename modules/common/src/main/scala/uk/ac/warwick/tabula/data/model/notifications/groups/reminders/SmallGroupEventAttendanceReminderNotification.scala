@@ -2,11 +2,12 @@ package uk.ac.warwick.tabula.data.model.notifications.groups.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
-import org.joda.time.Days
+import org.joda.time.{DateTime, Days}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, WeekRange}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.WholeWeekFormatter
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, ModuleAndDepartmentService, TermService, UserLookupService}
@@ -26,18 +27,18 @@ class SmallGroupEventAttendanceReminderNotification
 
 	override def urlTitle = "record attendance for these seminars"
 
-	override def url = Routes.tutor.registerForWeek(event, item.entity.week)
+	override def url: String = Routes.tutor.registerForWeek(event, item.entity.week)
 
-	@transient implicit var termService = Wire[TermService]
-
-	@transient
-	final lazy val event = item.entity.event
+	@transient implicit var termService: TermService = Wire[TermService]
 
 	@transient
-	final lazy val configuringDepartment = event.group.groupSet.module.adminDepartment
+	final lazy val event: SmallGroupEvent = item.entity.event
 
 	@transient
-	final lazy val referenceDate = item.entity.dateTime.getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
+	final lazy val configuringDepartment: Department = event.group.groupSet.module.adminDepartment
+
+	@transient
+	final lazy val referenceDate: DateTime = item.entity.dateTime.getOrElse(throw new IllegalArgumentException("Tried to create notification for occurrence with no date time"))
 
 	override final def onPreSave(newRecord: Boolean) {
 		priority = if (Days.daysBetween(created, referenceDate).getDays >= 5) {
@@ -47,7 +48,7 @@ class SmallGroupEventAttendanceReminderNotification
 		}
 	}
 
-	override def title = {
+	override def title: String = {
 		val name = s"${event.group.groupSet.module.code.toUpperCase} ${event.group.groupSet.nameWithoutModulePrefix}"
 		val dayOfWeek = event.day.name
 
@@ -117,7 +118,7 @@ class SmallGroupEventAttendanceReminderNotification
 class SmallGroupEventAttendanceReminderNotificationSettings(departmentSettings: NotificationSettings) {
 	@transient private val userLookup = Wire[UserLookupService]
 	// Configuration settings specific to this type of notification
-	def enabled = departmentSettings.enabled
+	def enabled: BooleanSetting = departmentSettings.enabled
 	def notifyTutors = departmentSettings.BooleanSetting("notifyTutors", default = true)
 	def notifyModuleAssistants = departmentSettings.BooleanSetting("notifyModuleAssistants", default = false)
 	def notifyModuleManagers = departmentSettings.BooleanSetting("notifyModuleManagers", default = true)

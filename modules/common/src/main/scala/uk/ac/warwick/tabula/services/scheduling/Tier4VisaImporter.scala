@@ -21,7 +21,7 @@ trait Tier4VisaImporter {
 class Tier4VisaImporterImpl extends Tier4VisaImporter {
 	import Tier4VisaImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val tier4VisaMappingQuery = new Tier4VisaMappingQuery(sits)
 
@@ -52,7 +52,7 @@ object Tier4VisaImporter {
 		extends MappingSqlQueryWithParameters[(Number)](ds, Tier4VisaSql) {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _])= {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): JLong = {
 			(rs.getLong("count"))
 		}
 	}
@@ -63,5 +63,5 @@ trait Tier4VisaImporterComponent {
 }
 
 trait AutowiringTier4VisaImporterComponent extends Tier4VisaImporterComponent{
-	var tier4VisaImporter = Wire[Tier4VisaImporter]
+	var tier4VisaImporter: Tier4VisaImporter = Wire[Tier4VisaImporter]
 }

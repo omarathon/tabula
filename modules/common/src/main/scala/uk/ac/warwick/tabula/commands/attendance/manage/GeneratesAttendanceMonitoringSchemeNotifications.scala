@@ -13,9 +13,9 @@ trait GeneratesAttendanceMonitoringSchemeNotifications extends Logging {
 
 	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
-	var thisScheduledNotificationService = Wire.auto[ScheduledNotificationService]
+	var thisScheduledNotificationService: ScheduledNotificationService = Wire.auto[ScheduledNotificationService]
 
-	def generateNotifications(schemes: Seq[AttendanceMonitoringScheme]) = {
+	def generateNotifications(schemes: Seq[AttendanceMonitoringScheme]): Unit = {
 		// Custom scheduled notifications
 		schemes.groupBy(_.department).foreach{case(department, _) =>
 

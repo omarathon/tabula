@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 
 object SmallGroupsReportFilters {
 
-	val termService = Wire[TermService]
-	val attendanceMonitoringService = Wire[AttendanceMonitoringService]
+	val termService: TermService = Wire[TermService]
+	val attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	def identity(result: AllSmallGroupsReportCommandResult): AllSmallGroupsReportCommandResult = result
 

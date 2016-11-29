@@ -65,7 +65,7 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
 	}
 
 	@RequestMapping(value = Array("/additional"))
-	def addAdditionalForm(@PathVariable event: SmallGroupEvent, @RequestParam week: Int, @RequestParam student: Member) = {
+	def addAdditionalForm(@PathVariable event: SmallGroupEvent, @RequestParam week: Int, @RequestParam student: Member): Mav = {
 		case class EventOccurrenceAndState(
 			event: SmallGroupEvent,
 			week: Int,

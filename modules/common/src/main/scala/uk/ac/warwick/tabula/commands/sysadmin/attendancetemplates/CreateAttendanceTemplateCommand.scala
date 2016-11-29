@@ -23,7 +23,7 @@ class CreateAttendanceTemplateCommandInternal extends CommandInternal[Attendance
 
 	self: ManageAttendanceTemplateCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringTemplate = {
 		val template = new AttendanceMonitoringTemplate
 		template.templateName = name
 		template.pointStyle = pointStyle

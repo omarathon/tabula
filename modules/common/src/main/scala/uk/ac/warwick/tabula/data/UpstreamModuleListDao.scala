@@ -11,7 +11,7 @@ trait UpstreamModuleListDaoComponent {
 }
 
 trait AutowiringUpstreamModuleListDaoComponent extends UpstreamModuleListDaoComponent {
-	val upstreamModuleListDao = Wire[UpstreamModuleListDao]
+	val upstreamModuleListDao: UpstreamModuleListDao = Wire[UpstreamModuleListDao]
 }
 
 trait UpstreamModuleListDao {

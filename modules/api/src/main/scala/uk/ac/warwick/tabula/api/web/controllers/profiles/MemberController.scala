@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.MemberToJsonConverter
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONView}
 
 @Controller
@@ -23,7 +24,7 @@ trait GetMemberApi {
 		new ViewProfileCommand(user, mandatory(member))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand) = {
+	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",

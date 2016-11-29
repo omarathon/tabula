@@ -36,7 +36,7 @@ class CreateExtenuatingCircumstancesCommandInternal(val member: Member, val user
 	circumstances.creationDate = DateTime.now
 	circumstances.creatorId = user.universityId
 	circumstances.member = member
-	override val abstractMemberNote = circumstances
+	override val abstractMemberNote: ExtenuatingCircumstances = circumstances
 
 }
 

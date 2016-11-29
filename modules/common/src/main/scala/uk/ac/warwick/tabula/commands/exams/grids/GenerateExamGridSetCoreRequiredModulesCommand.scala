@@ -32,7 +32,7 @@ class GenerateExamGridSetCoreRequiredModulesCommandInternal(val department: Depa
 	self: GenerateExamGridSetCoreRequiredModulesCommandState with GenerateExamGridSetCoreRequiredModulesCommandRequest
 		with GenerateExamGridSelectCourseCommandRequest with ModuleRegistrationServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[CoreRequiredModule] = {
 		val newModules = modules.asScala.map(module =>
 			existingCoreRequiredModules.find(_.module == module).getOrElse(
 				new CoreRequiredModule(route, academicYear, yearOfStudy, module)
@@ -105,8 +105,8 @@ trait GenerateExamGridSetCoreRequiredModulesCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val allModules = moduleAndDepartmentService.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
-	lazy val existingCoreRequiredModules = moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy)
+	lazy val allModules: Seq[Module] = moduleAndDepartmentService.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
+	lazy val existingCoreRequiredModules: Seq[CoreRequiredModule] = moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy)
 }
 
 trait GenerateExamGridSetCoreRequiredModulesCommandRequest {

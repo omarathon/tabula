@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.StudentAssignmentInfoToJsonConverter
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
-import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
+import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser}
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkFullScreenCommand
 import uk.ac.warwick.tabula.data.model.Member
-
 import MemberAssignmentsController._
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 object MemberAssignmentsController {
 	type ViewMemberAssignmentsCommand = Appliable[StudentAssignments]
@@ -32,7 +32,7 @@ trait GetMemberAssignmentsApi {
 		StudentCourseworkFullScreenCommand(MemberOrUser(member))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("getAssignmentsCommand") command: ViewMemberAssignmentsCommand, errors: Errors) = {
+	def list(@ModelAttribute("getAssignmentsCommand") command: ViewMemberAssignmentsCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

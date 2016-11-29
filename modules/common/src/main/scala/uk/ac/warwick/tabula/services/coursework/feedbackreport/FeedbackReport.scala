@@ -5,30 +5,28 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import collection.immutable.TreeMap
-
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-import org.joda.time.DateTime
-
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
-import uk.ac.warwick.tabula.data.model.{FeedbackReportGenerator, Assignment, Department}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, FeedbackReportGenerator}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssessmentMembershipService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, SubmissionService}
 
-import scala.concurrent.{TimeoutException, Await}
+import scala.concurrent.{Await, TimeoutException}
 import scala.concurrent.duration._
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
 	import FeedbackReport._
 
-	var auditEventQueryMethods = Wire[AuditEventQueryMethods]
-	var assignmentMembershipService = Wire[AssessmentMembershipService]
-	var submissionService = Wire[SubmissionService]
-	var feedbackService = Wire[FeedbackService]
+	var auditEventQueryMethods: AuditEventQueryMethods = Wire[AuditEventQueryMethods]
+	var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+	var submissionService: SubmissionService = Wire[SubmissionService]
+	var feedbackService: FeedbackService = Wire[FeedbackService]
 	val workbook = new XSSFWorkbook()
 
 	var assignmentData : List[AssignmentInfo] = List()
 
-	def generateAssignmentSheet(dept: Department) = {
+	def generateAssignmentSheet(dept: Department): XSSFSheet = {
 		val sheet = workbook.createSheet("Report for " + safeDeptName(department))
 
 		// add header row
@@ -124,7 +122,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		}
 	}
 
-	def generateModuleSheet(dept: Department) = {
+	def generateModuleSheet(dept: Department): XSSFSheet = {
 		val sheet = workbook.createSheet("Module report for " + safeDeptName(department))
 		val style = headerStyle(workbook)
 		// add header row
@@ -260,8 +258,8 @@ object FeedbackReport {
 	)
 
 	case class SubmissionlessFeedbackReportGenerator(assignment: Assignment, user: User) extends FeedbackReportGenerator {
-		val universityId = user.getWarwickId
-		val feedbackDeadline = assignment.feedbackDeadline
+		val universityId: String = user.getWarwickId
+		val feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadline
 	}
 
 }

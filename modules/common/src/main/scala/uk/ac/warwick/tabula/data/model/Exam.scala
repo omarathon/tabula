@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 
-import org.hibernate.annotations.{Filter, FilterDef, BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object Exam {
 	final val NotDeletedFilter = "notDeleted"
@@ -49,7 +50,7 @@ class Exam
 	@OneToMany(mappedBy = "exam", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var feedbacks: JList[ExamFeedback] = JArrayList()
-	override def allFeedback = feedbacks.asScala
+	override def allFeedback: mutable.Buffer[ExamFeedback] = feedbacks.asScala
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "workflow_id")
@@ -113,7 +114,7 @@ class Exam
 		ensureMembersGroup
 	}
 
-	def ensureMembersGroup = {
+	def ensureMembersGroup: UserGroup = {
 		if (_members == null) _members = UserGroup.ofUsercodes
 		_members
 	}
@@ -128,8 +129,8 @@ class Exam
 	@transient
 	override val collectMarks: JBoolean = true
 
-	override def permissionsParents = Option(module).toStream
+	override def permissionsParents: Stream[Module] = Option(module).toStream
 
-	override def toEntityReference = new ExamEntityReference().put(this)
+	override def toEntityReference: ExamEntityReference = new ExamEntityReference().put(this)
 
 }

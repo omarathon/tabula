@@ -60,7 +60,7 @@ class AddTemplatePointsToSchemesCommandInternal(val department: Department, val 
 trait AddTemplatePointsToSchemesPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: AddTemplatePointsToSchemesCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) = {
+	override def permissionsCheck(p: PermissionsChecking): Unit = {
 		p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
 	}
 }
@@ -74,7 +74,7 @@ trait AddTemplatePointsToSchemesCommandState {
 	var schemes: JList[AttendanceMonitoringScheme] = new JArrayList()
 	var templateScheme: AttendanceMonitoringTemplate = _
 
-	def templateSchemeItems() = attendanceMonitoringService.listTemplateSchemesByStyle(schemes.get(0).pointStyle)
+	def templateSchemeItems(): Seq[AttendanceMonitoringTemplate] = attendanceMonitoringService.listTemplateSchemesByStyle(schemes.get(0).pointStyle)
 }
 
 trait AddTemplatePointsToSchemesDescription extends Describable[Seq[AttendanceMonitoringPoint]] {

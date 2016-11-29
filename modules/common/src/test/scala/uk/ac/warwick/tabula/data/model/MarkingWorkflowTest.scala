@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking, SeenSecondMarkingLegacy}
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.userlookup.User
 
 class MarkingWorkflowTest extends TestBase with Mockito {
 
@@ -17,20 +18,20 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		val cm1Prefix = "coursework"
 		Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
-		val module = Fixtures.module("heron101")
-		val assignment = Fixtures.assignment("my assignment")
+		val module: Module = Fixtures.module("heron101")
+		val assignment: Assignment = Fixtures.assignment("my assignment")
 		assignment.id = "1"
 		assignment.module = module
 
-		val sub1 = Fixtures.submission(universityId="0000001", userId="student1")
-		val sub2 = Fixtures.submission(universityId="0000002", userId="student2")
-		val sub3 = Fixtures.submission(universityId="0000003", userId="student3")
-		val sub4 = Fixtures.submission(universityId="0000004", userId="student4")
+		val sub1: Submission = Fixtures.submission(universityId="0000001", userId="student1")
+		val sub2: Submission = Fixtures.submission(universityId="0000002", userId="student2")
+		val sub3: Submission = Fixtures.submission(universityId="0000003", userId="student3")
+		val sub4: Submission = Fixtures.submission(universityId="0000004", userId="student4")
 
-		val f1 = Fixtures.assignmentFeedback(universityId="0000001")
-		val f2 = Fixtures.assignmentFeedback(universityId="0000002")
-		val f3 = Fixtures.assignmentFeedback(universityId="0000003")
-		val f4 = Fixtures.assignmentFeedback(universityId="0000004")
+		val f1: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000001")
+		val f2: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000002")
+		val f3: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000003")
+		val f4: AssignmentFeedback = Fixtures.assignmentFeedback(universityId="0000004")
 
 		assignment.submissions.addAll(Seq(sub1, sub2, sub3, sub4).toList.asJava)
 		assignment.submissions.asScala.toList foreach { _.assignment = assignment }
@@ -41,17 +42,17 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		f3.firstMarkerFeedback = Fixtures.markerFeedback(f3)
 		f4.firstMarkerFeedback = Fixtures.markerFeedback(f4)
 
-		val s1 = Fixtures.user(universityId="0000001", userId="student1")
-		val s2 = Fixtures.user(universityId="0000002", userId="student2")
-		val s3 = Fixtures.user(universityId="0000003", userId="student3")
-		val s4 = Fixtures.user(universityId="0000004", userId="student4")
+		val s1: User = Fixtures.user(universityId="0000001", userId="student1")
+		val s2: User = Fixtures.user(universityId="0000002", userId="student2")
+		val s3: User = Fixtures.user(universityId="0000003", userId="student3")
+		val s4: User = Fixtures.user(universityId="0000004", userId="student4")
 
-		val m1 = Fixtures.user(universityId="0000005", userId="cuscav")
-		val m2 = Fixtures.user(universityId="0000006", userId="cusebr")
-		val m3 = Fixtures.user(universityId="0000007", userId="curef")
-		val m4 = Fixtures.user(universityId="0000008", userId="cusfal")
+		val m1: User = Fixtures.user(universityId="0000005", userId="cuscav")
+		val m2: User = Fixtures.user(universityId="0000006", userId="cusebr")
+		val m3: User = Fixtures.user(universityId="0000007", userId="curef")
+		val m4: User = Fixtures.user(universityId="0000008", userId="cusfal")
 
-		val userLookup = mock[UserLookupService]
+		val userLookup: UserLookupService = mock[UserLookupService]
 		when(userLookup.getUserByWarwickUniId("0000001")).thenReturn(s1)
 		when(userLookup.getUserByWarwickUniId("0000002")).thenReturn(s2)
 		when(userLookup.getUserByWarwickUniId("0000003")).thenReturn(s3)

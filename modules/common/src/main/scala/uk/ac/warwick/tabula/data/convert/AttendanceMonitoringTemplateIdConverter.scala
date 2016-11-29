@@ -10,7 +10,7 @@ class AttendanceMonitoringTemplateIdConverter extends TwoWayConverter[String, At
 
 	@Autowired var service: AttendanceMonitoringService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getTemplateSchemeById }).orNull
-	override def convertLeft(scheme: AttendanceMonitoringTemplate) = (Option(scheme) map {_.id}).orNull
+	override def convertRight(id: String): AttendanceMonitoringTemplate = (Option(id) flatMap { service.getTemplateSchemeById }).orNull
+	override def convertLeft(scheme: AttendanceMonitoringTemplate): String = (Option(scheme) map {_.id}).orNull
 
 }

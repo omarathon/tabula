@@ -18,7 +18,7 @@ case class DocumentId(val value: String)
 // handle items that might not have the expected string format
 class AnyDocumentTitle(val value:String)
 object AnyDocumentTitle {
-    def apply(value: String) = value match {
+    def apply(value: String): AnyDocumentTitle = value match {
         case DocumentTitle(id, extension) => new DocumentTitle(id, extension)
         case _ => new AnyDocumentTitle(value)
     }

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.JavaImports._
 case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None)
 
 object ExceptionHandler {
-	def renderStackTrace(exception: Throwable) = {
+	def renderStackTrace(exception: Throwable): String = {
 		val stringWriter = new StringWriter
 		val writer = new PrintWriter(stringWriter)
 		exception.printStackTrace(writer)
@@ -34,7 +34,7 @@ object ExceptionHandler {
 	// Check for this exception without needing it on the classpath
 	private val ClientAbortException = "org.apache.catalina.connector.ClientAbortException"
 
-	def isClientAbortException(e: IOException) = e.getClass.getName == ClientAbortException
+	def isClientAbortException(e: IOException): Boolean = e.getClass.getName == ClientAbortException
 }
 
 trait ExceptionHandler {
@@ -43,12 +43,12 @@ trait ExceptionHandler {
 
 class CompositeExceptionHandler(handlers: JList[ExceptionHandler]) extends ExceptionHandler {
 	private val _handlers = handlers.toList
-	override def exception(context: ExceptionContext) =
+	override def exception(context: ExceptionContext): Unit =
 		for (handler <- _handlers) handler.exception(context)
 }
 
 class LoggingExceptionHandler extends ExceptionHandler with Logging {
-	override def exception(context: ExceptionContext) = context.exception match {
+	override def exception(context: ExceptionContext): Unit = context.exception match {
 		case userError: UserError => if (debugEnabled) logger.debug("User error", userError)
 		case handled: HandledException => if (debugEnabled) logger.debug("Handled exception", handled)
 		case e => logger.error("Exception " + context.token, e)
@@ -63,7 +63,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	@Autowired var freemarker: FreemarkerConfiguration = _
 	var template: Template = _
 
-	override def exception(context: ExceptionContext) = context.exception match {
+	override def exception(context: ExceptionContext): Unit = context.exception match {
 		case userError: UserError => {}
 		case handled: HandledException => {}
 		case e: IOException if ExceptionHandler.isClientAbortException(e) => {} // cancelled download.

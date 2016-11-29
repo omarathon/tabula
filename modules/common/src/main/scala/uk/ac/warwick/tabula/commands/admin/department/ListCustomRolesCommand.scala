@@ -22,7 +22,7 @@ object ListCustomRolesCommand {
 class ListCustomRolesCommandInternal(val department: Department) extends CommandInternal[Seq[CustomRoleInfo]] with ListCustomRolesCommandState {
 	self: PermissionsServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[CustomRoleInfo] = {
 		permissionsService.getCustomRoleDefinitionsFor(department).map { defn =>
 			val granted = permissionsService.getAllGrantedRolesForDefinition(defn)
 			val derived = permissionsService.getCustomRoleDefinitionsBasedOn(defn)

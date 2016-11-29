@@ -242,7 +242,7 @@ class AssignmentTest extends TestBase with Mockito {
 	}
 
 	/** Zero-pad integer to a 7 digit string */
-	def idFormat(i:Int) = "%07d" format i
+	def idFormat(i:Int): String = "%07d" format i
 
 	def mockFeedback(assignment: Assignment): AssignmentFeedback = {
 		val f = new AssignmentFeedback()

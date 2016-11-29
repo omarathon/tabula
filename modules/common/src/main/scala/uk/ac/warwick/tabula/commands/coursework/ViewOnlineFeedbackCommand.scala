@@ -19,7 +19,7 @@ trait ViewOnlineFeedbackCommandState {
 }
 
 class ViewOnlineFeedbackCommandInternal(val feedback: Feedback) extends CommandInternal[Feedback] with ViewOnlineFeedbackCommandState {
-	def applyInternal() = feedback
+	def applyInternal(): Feedback = feedback
 }
 
 trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
@@ -27,7 +27,7 @@ trait ViewOnlineFeedbackCommandDescription extends Describable[Feedback] {
 
 	override lazy val eventName = "ViewOnlineFeedback"
 
-	def describe(d: Description) = HibernateHelpers.initialiseAndUnproxy(feedback) match {
+	def describe(d: Description): Unit = HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case assignmentFeedback: AssignmentFeedback =>
 			d.assignment(assignmentFeedback.assignment).properties("student" -> feedback.universityId)
 		case examFeedback: ExamFeedback =>

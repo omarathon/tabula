@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.{CurrentUser, JsonObjectMapperFactory, MockUserLookup, Mockito, TestBase}
-import uk.ac.warwick.tabula.system.{UserNavigation, UserNavigationGenerator, CurrentUserInterceptor}
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, UserNavigation, UserNavigationGenerator}
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.permissions.Permission
@@ -8,11 +9,11 @@ import uk.ac.warwick.userlookup.User
 
 class JobInstanceTest extends TestBase with Mockito {
 
-	val jsonMapper = new JsonObjectMapperFactory().createInstance
+	val jsonMapper: ObjectMapper = new JsonObjectMapperFactory().createInstance
 	val userLookup = new MockUserLookup
 
 	val currentUserFinder = new CurrentUserInterceptor
-	val roleService = mock[RoleService]
+	val roleService: RoleService = mock[RoleService]
 	currentUserFinder.userLookup = userLookup
 	currentUserFinder.roleService = roleService
 	currentUserFinder.profileService = smartMock[ProfileService]

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.jobs
 
+import java.io.Serializable
+
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.stereotype.Service
@@ -8,7 +10,9 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.Notification
-import scala.collection.mutable
+
+import scala.collection.mutable.ListBuffer
+import scala.collection.{AbstractSeq, mutable}
 
 /**
  * A Job is a task that is added to a queue and processed in the
@@ -40,7 +44,7 @@ abstract class Job extends Logging {
 	 */
 	def run(implicit job: JobInstance): Unit
 
-	protected def getProgress(implicit job: JobInstance) = job.progress
+	protected def getProgress(implicit job: JobInstance): Int = job.progress
 
 	protected def updateProgress(percent: Int)(implicit job: JobInstance): Unit = {
 		transactional(propagation = REQUIRES_NEW) {
@@ -51,7 +55,7 @@ abstract class Job extends Logging {
 	protected def updateProgress(index: Int, total: Int)(implicit job: JobInstance): Unit =
 		updateProgress((index.toFloat / total.toFloat * 100).toInt)
 
-	protected def getStatus(implicit job: JobInstance) = job.status
+	protected def getStatus(implicit job: JobInstance): String = job.status
 
 	protected def updateStatus(status: String)(implicit job: JobInstance) {
 		transactional(propagation = REQUIRES_NEW) {
@@ -72,11 +76,11 @@ abstract class Job extends Logging {
 trait NotifyingJob[A] { // Doesn't extend Notifies[A] because we don't know which instance to emit for
 	this: Job =>
 
-	var notifications = mutable.Map[JobInstance, mutable.ListBuffer[Notification[_,_]]]()
+	var notifications: mutable.Map[JobInstance, ListBuffer[Notification[_, _]]] = mutable.Map[JobInstance, mutable.ListBuffer[Notification[_,_]]]()
 
 	def pushNotification(instance: JobInstance, n: Notification[_,_]) {
 		notifications.getOrElseUpdate(instance, new mutable.ListBuffer[Notification[_,_]]).append(n)
 	}
 
-	def popNotifications(instance: JobInstance) = notifications.remove(instance).getOrElse(Nil)
+	def popNotifications(instance: JobInstance): AbstractSeq[Notification[_, _]] with Serializable = notifications.remove(instance).getOrElse(Nil)
 }

@@ -30,7 +30,7 @@ class SmallGroupsByModuleReportCommandInternal(val department: Department, val a
 
 	self: SmallGroupsByModuleReportCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): SmallGroupsByModuleReportCommandResult = {
 		val byModule: Map[User, Map[Module, Int]] = filteredAttendance.attendance.map{case(student, eventMap) =>
 			student -> eventMap.groupBy(_._1.event.group.groupSet.module).map { case (module, groupedEventMap) =>
 				module -> groupedEventMap.keys.size

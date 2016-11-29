@@ -9,7 +9,7 @@ trait AccreditedPriorLearningDaoComponent {
 }
 
 trait AutowiringAccreditedPriorLearningDaoComponent extends AccreditedPriorLearningDaoComponent {
-	val accreditedPriorLearningDao = Wire[AccreditedPriorLearningDao]
+	val accreditedPriorLearningDao: AccreditedPriorLearningDao = Wire[AccreditedPriorLearningDao]
 }
 
 trait AccreditedPriorLearningDao {
@@ -20,9 +20,9 @@ trait AccreditedPriorLearningDao {
 @Repository
 class AccreditedPriorLearningDaoImpl extends AccreditedPriorLearningDao with Daoisms {
 
-	def saveOrUpdate(accreditedPriorLearning: AccreditedPriorLearning) = session.saveOrUpdate(accreditedPriorLearning)
+	def saveOrUpdate(accreditedPriorLearning: AccreditedPriorLearning): Unit = session.saveOrUpdate(accreditedPriorLearning)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, award: Award, sequenceNumber: Integer) =
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, award: Award, sequenceNumber: Integer): Option[AccreditedPriorLearning] =
 		session.newCriteria[AccreditedPriorLearning]
 			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("award", award))

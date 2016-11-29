@@ -20,7 +20,7 @@ class UpstreamAssessmentGroupCreationFixtureCommandInternal extends CommandInter
 	 var sequence = "A01"
 	 var universityIds: JList[String] = JArrayList()
 
-	 def applyInternal() = transactional() {
+	 def applyInternal(): UpstreamAssessmentGroup = transactional() {
 		 val group = new UpstreamAssessmentGroup
 		 group.moduleCode = moduleCode
 		 group.occurrence = occurrence

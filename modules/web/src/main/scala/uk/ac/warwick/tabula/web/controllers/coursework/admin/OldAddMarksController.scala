@@ -36,14 +36,14 @@ class OldAddMarksController extends OldCourseworkController {
 		AdminAddMarksCommand(mandatory(module), mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment)))
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def viewMarkUploadForm(
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
 			@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 
 		if(assignment.hasWorkflow) {
 			logger.error(s"Can't add marks to an assignment with a workflow - ${assignment.id}")
@@ -88,7 +88,7 @@ class OldAddMarksController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		if (errors.hasErrors) viewMarkUploadForm(module, assignment, cmd, errors)
 		else {
 			bindAndValidate(module, cmd, errors)
@@ -101,7 +101,7 @@ class OldAddMarksController extends OldCourseworkController {
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		@ModelAttribute("adminAddMarksCommand") cmd: AdminAddMarksCommand, errors: Errors
-	) = {
+	): Mav = {
 		bindAndValidate(module, cmd, errors)
 		cmd.apply()
 		Redirect(Routes.admin.module(module))

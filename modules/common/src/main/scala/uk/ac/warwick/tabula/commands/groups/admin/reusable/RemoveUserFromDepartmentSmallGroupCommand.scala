@@ -10,13 +10,13 @@ class RemoveUserFromDepartmentSmallGroupCommand(val user: User, val group: Depar
 
 	PermissionCheck(Permissions.SmallGroups.Update, group)
 
-	def applyInternal() = {
+	def applyInternal(): UnspecifiedTypeUserGroup = {
 		val ug = group.students
 		ug.remove(user)
 		ug
 	}
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.departmentSmallGroup(group).properties(
 			"usercode" -> user.getUserId,
 			"universityId" -> user.getWarwickId

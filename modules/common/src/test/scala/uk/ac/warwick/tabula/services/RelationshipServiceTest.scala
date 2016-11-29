@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.SitsStatusDaoImpl
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, Member, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 
 // scalastyle:off magic.number
 class RelationshipServiceTest extends AppContextTestBase with Mockito {
@@ -19,15 +19,15 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 	@Autowired var relationshipService: RelationshipServiceImpl = _
 	@Autowired var profileService: ProfileServiceImpl = _
 	val sitsStatusDao = new SitsStatusDaoImpl
-	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-	var sprWithdrawnStatus = Fixtures.sitsStatus("PX", "PWD X", "Permanently Withdrawn with Nuance")
+	val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+	var sprWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("PX", "PWD X", "Permanently Withdrawn with Nuance")
 
 	trait Environment {
-		val student = Fixtures.student(universityId="0102030")
-		val studentCourseDetails = student.mostSignificantCourseDetails.get
+		val student: StudentMember = Fixtures.student(universityId="0102030")
+		val studentCourseDetails: StudentCourseDetails = student.mostSignificantCourseDetails.get
 
-		val staff1 = Fixtures.staff(universityId = "1234567")
-		val staff2 = Fixtures.staff(universityId = "7654321")
+		val staff1: StaffMember = Fixtures.staff(universityId = "1234567")
+		val staff2: StaffMember = Fixtures.staff(universityId = "7654321")
 
 		session.save(student)
 		session.save(staff1)
@@ -43,8 +43,8 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 			relationshipService.findCurrentRelationships(relationshipType, student) should be('empty)
 			relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(staff1))
 
-			val opt = relationshipService.findCurrentRelationships(relationshipType, student).headOption
-			val currentRelationship = opt.getOrElse(fail("Failed to get current relationship"))
+			val opt: Option[StudentRelationship] = relationshipService.findCurrentRelationships(relationshipType, student).headOption
+			val currentRelationship: StudentRelationship = opt.getOrElse(fail("Failed to get current relationship"))
 			currentRelationship.agent should be("1234567")
 
 			// now we've stored a relationship.  Try storing the identical one again:
@@ -57,17 +57,17 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 			DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
 			relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(staff2))
 
-			val rels = relationshipService.getRelationships(relationshipType, student)
+			val rels: Seq[StudentRelationship] = relationshipService.getRelationships(relationshipType, student)
 
 			DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
-			val currentRelationshipsUpdated = relationshipService.findCurrentRelationships(relationshipType, student)
+			val currentRelationshipsUpdated: Seq[StudentRelationship] = relationshipService.findCurrentRelationships(relationshipType, student)
 			currentRelationshipsUpdated.size should be(2)
 
 			currentRelationshipsUpdated.find(_.agent == "7654321") should be('defined)
 
 			relationshipService.getRelationships(relationshipType, student).size should be(2)
 
-			val stu = Fixtures.student(universityId = "1250148", userId = "student", sprStatus = sprFullyEnrolledStatus)
+			val stu: StudentMember = Fixtures.student(universityId = "1250148", userId = "student", sprStatus = sprFullyEnrolledStatus)
 			stu.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
 			profileService.save(stu)
@@ -412,16 +412,16 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 			session.saveOrUpdate(newRelationship)
 			session.flush()
 			session.clear()
-			val relationshipService = Wire[RelationshipService]
-			val relsFromDb = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+			val relationshipService: RelationshipService = Wire[RelationshipService]
+			val relsFromDb: Seq[StudentRelationship] = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 			relsFromDb.size should be (1)
 			relsFromDb.head.endDate should be (null)
 			relationshipService.endStudentRelationships(relsFromDb)
 			session.flush()
 			session.clear()
-			val relsFromDb2 = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
+			val relsFromDb2: Seq[StudentRelationship] = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 			relsFromDb.size should be (1)
-			val endDate =relsFromDb.head.endDate
+			val endDate: DateTime =relsFromDb.head.endDate
 			endDate should not be (null)
 			endDate.isBefore(new DateTime())
 		}

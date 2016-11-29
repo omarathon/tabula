@@ -28,7 +28,7 @@ object EditSmallGroupEventsCommand {
 
 	class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
 		var delete: Boolean = false
-		def hasRecordedAttendance = {
+		def hasRecordedAttendance: Boolean = {
 			smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
 				.exists { _.attendance.asScala.exists { attendance =>
 				attendance.state != AttendanceState.NotRecorded
@@ -67,7 +67,7 @@ trait PopulateEditSmallGroupEventsSubCommands {
 class EditSmallGroupEventsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[SmallGroupSet] with EditSmallGroupEventsCommandState {
 	self: SmallGroupServiceComponent with DeletesSmallGroupEvents =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		groups.asScala.foreach { case (group, props) =>
 			props.events.asScala.filter(_.delete).map(_.event).foreach { event =>
 				deleteEvent(group, event)

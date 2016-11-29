@@ -24,7 +24,7 @@ class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRe
 
 	this.copyFrom(relationshipType)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): StudentRelationshipType = transactional() {
 		copyTo(relationshipType)
 		relationshipService.saveOrUpdate(relationshipType)
 		relationshipType

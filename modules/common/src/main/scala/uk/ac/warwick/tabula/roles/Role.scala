@@ -40,35 +40,35 @@ trait RoleDefinition {
 }
 
 trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinition] with RoleDefinition {
-	val getName = RoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: BuiltInRoleDefinition]])
+	val getName: String = RoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: BuiltInRoleDefinition]])
 
 	private var scopedPermissions: List[Permission] = List()
 	private var scopelessPermissions: List[ScopelessPermission] = List()
 	private var globalPermissions: List[Permission] = List()
 	private var subRoleDefinitions: Set[BuiltInRoleDefinition] = Set()
 
-	def GrantsScopelessPermission(perms: ScopelessPermission*) =
+	def GrantsScopelessPermission(perms: ScopelessPermission*): Unit =
 		for (permission <- perms) scopelessPermissions ::= permission
 
-	def GrantsScopedPermission(perms: Permission*) =
+	def GrantsScopedPermission(perms: Permission*): Unit =
 		for (permission <- perms)	scopedPermissions ::= permission
 
-	def GrantsGlobalPermission(perms: Permission*) =
+	def GrantsGlobalPermission(perms: Permission*): Unit =
 		for (permission <- perms) globalPermissions ::= permission
 
-	def GeneratesSubRole(roles: BuiltInRoleDefinition*) =
+	def GeneratesSubRole(roles: BuiltInRoleDefinition*): Unit =
 		for (role <- roles) subRoleDefinitions += role
 
-	def permissions(scope: Option[PermissionsTarget]) =
+	def permissions(scope: Option[PermissionsTarget]): ListMap[Permission, Option[PermissionsTarget]] =
 		ListMap() ++
 		(if (scope.isDefined) scopedPermissions map { _ -> scope } else Map()) ++
 		(globalPermissions map { _ -> None }) ++
 		(scopelessPermissions map { _ -> None })
 
-	def subRoles(scope: Option[PermissionsTarget]) =
+	def subRoles(scope: Option[PermissionsTarget]): Set[Role] =
 		subRoleDefinitions map { defn => RoleBuilder.build(defn, scope, defn.getName) }
 
-	def mayGrant(permission: Permission) =
+	def mayGrant(permission: Permission): Boolean =
 		scopedPermissions.contains(permission) ||
 		scopelessPermissions.contains(permission) ||
 		globalPermissions.contains(permission) ||
@@ -84,13 +84,13 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 }
 
 abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A]) extends BuiltInRoleDefinition {
-	override val getName = SelectorBuiltInRoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: SelectorBuiltInRoleDefinition[_]]])
-	def <= [B <: PermissionsSelector[B]](other: SelectorBuiltInRoleDefinition[B]) = other match {
+	override val getName: String = SelectorBuiltInRoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: SelectorBuiltInRoleDefinition[_]]])
+	def <= [B <: PermissionsSelector[B]](other: SelectorBuiltInRoleDefinition[B]): Boolean = other match {
 		case that: SelectorBuiltInRoleDefinition[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
 		case _ => false
 	}
 
-	override def equals(other: Any) = other match {
+	override def equals(other: Any): Boolean = other match {
 		case that: SelectorBuiltInRoleDefinition[A] =>
 			new EqualsBuilder()
 			.append(getName, that.getName)
@@ -99,13 +99,13 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 		case _ => false
 	}
 
-	override def hashCode() =
+	override def hashCode(): Int =
 		new HashCodeBuilder()
 		.append(getName)
 		.append(selector)
 		.build()
 
-	override def toString() = "%s(%s)".format(super.toString(), selector)
+	override def toString(): String = "%s(%s)".format(super.toString(), selector)
 
 	def duplicate(selector: Option[PermissionsSelector[A]]): SelectorBuiltInRoleDefinition[A]
 }
@@ -123,8 +123,8 @@ object SelectorBuiltInRoleDefinition {
 		}
 	}
 
-	def shortName(clazz: Class[_ <: BuiltInRoleDefinition])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
+	def shortName(clazz: Class[_ <: BuiltInRoleDefinition]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
 }
 
 trait UnassignableBuiltInRoleDefinition extends BuiltInRoleDefinition {
@@ -153,8 +153,8 @@ object RoleDefinition {
 		}
 	}
 
-	def shortName(clazz: Class[_ <: BuiltInRoleDefinition])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+	def shortName(clazz: Class[_ <: BuiltInRoleDefinition]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 }
 
 abstract class Role(val definition: RoleDefinition, val scope: Option[PermissionsTarget]) {
@@ -162,14 +162,14 @@ abstract class Role(val definition: RoleDefinition, val scope: Option[Permission
 	private var permissions: Seq[(Permission, Option[PermissionsTarget])] = Seq()
 	private var roles: Set[Role] = Set()
 
-	def getName = getClass.getSimpleName
-	def isScoped = scope.isDefined
+	def getName: String = getClass.getSimpleName
+	def isScoped: Boolean = scope.isDefined
 
-	lazy val explicitPermissions = permissions
+	lazy val explicitPermissions: Seq[(Permission, Option[PermissionsTarget])] = permissions
 
-	lazy val explicitPermissionsAsList = explicitPermissions.toList
-	lazy val viewablePermissionsAsList = explicitPermissionsAsList.filterNot { case (p, _) => delegatePermissions.contains(p) }
-	lazy val subRoles = roles
+	lazy val explicitPermissionsAsList: List[(Permission, Option[PermissionsTarget])] = explicitPermissions.toList
+	lazy val viewablePermissionsAsList: List[(Permission, Option[PermissionsTarget])] = explicitPermissionsAsList.filterNot { case (p, _) => delegatePermissions.contains(p) }
+	lazy val subRoles: Set[Role] = roles
 
 	private final val delegatePermissions = Seq(
 		Permissions.RolesAndPermissions.Create,

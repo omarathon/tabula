@@ -32,7 +32,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 	override def execute(env: Environment,
 		params: JMap[_, _],
 		loopVars: Array[TemplateModel],
-		body: TemplateDirectiveBody) = {
+		body: TemplateDirectiveBody): Unit = {
 
 		val wrapper = env.getObjectWrapper()
 

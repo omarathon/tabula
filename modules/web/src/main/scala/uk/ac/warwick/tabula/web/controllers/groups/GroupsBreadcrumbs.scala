@@ -18,7 +18,7 @@ object GroupsBreadcrumbs {
 	 * Special case breadcrumb for the department admin page, for a particular academic year.
 	 */
 	case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
-		val title = department.name
+		val title: String = department.name
 		val url = Some(Routes.admin(department, academicYear))
 	}
 
@@ -27,9 +27,9 @@ object GroupsBreadcrumbs {
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
 	case class Module(module: model.Module) extends Abstract {
-		val title = module.code.toUpperCase
+		val title: String = module.code.toUpperCase
 		val url = Some(Routes.admin(module.adminDepartment, AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
-		override val tooltip = module.name
+		override val tooltip: String = module.name
 	}
 
 	/**
@@ -37,9 +37,9 @@ object GroupsBreadcrumbs {
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
 	case class ModuleForYear(module: model.Module, academicYear: AcademicYear) extends Abstract {
-		val title = module.code.toUpperCase
+		val title: String = module.code.toUpperCase
 		val url = Some(Routes.admin.module(module, academicYear))
-		override val tooltip = module.name
+		override val tooltip: String = module.name
 	}
 
 	case class Reusable(department: model.Department, academicYear: AcademicYear) extends Abstract {

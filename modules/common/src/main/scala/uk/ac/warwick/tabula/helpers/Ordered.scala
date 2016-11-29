@@ -7,6 +7,6 @@ package uk.ac.warwick.tabula.helpers
  */
 trait Ordered extends org.springframework.core.Ordered {
 	var order: Int = _
-	override def getOrder = order
+	override def getOrder: Int = order
 	def setOrder(o: Int) { order = o }
 }

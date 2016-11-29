@@ -18,7 +18,7 @@ trait AssessmentMembershipDaoComponent {
 }
 
 trait AutowiringAssessmentMembershipDaoComponent extends AssessmentMembershipDaoComponent {
-	val membershipDao = Wire[AssessmentMembershipDao]
+	val membershipDao: AssessmentMembershipDao = Wire[AssessmentMembershipDao]
 }
 
 /**
@@ -145,7 +145,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def save(group: AssessmentGroup) = session.saveOrUpdate(group)
+	def save(group: AssessmentGroup): Unit = session.saveOrUpdate(group)
 
 	def save(assignment: AssessmentComponent): AssessmentComponent =
 		find(assignment)
@@ -159,15 +159,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 			.getOrElse { session.save(assignment); assignment }
 
-	def save(group: UpstreamAssessmentGroup) =
+	def save(group: UpstreamAssessmentGroup): Unit =
 		find(group).getOrElse { session.save(group) }
 
-	def save(member: UpstreamAssessmentGroupMember) = session.saveOrUpdate(member)
+	def save(member: UpstreamAssessmentGroupMember): Unit = session.saveOrUpdate(member)
 
 
-	def getAssessmentGroup(id:String) = getById[AssessmentGroup](id)
+	def getAssessmentGroup(id:String): Option[AssessmentGroup] = getById[AssessmentGroup](id)
 
-	def getUpstreamAssessmentGroup(id:String) = getById[UpstreamAssessmentGroup](id)
+	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup] = getById[UpstreamAssessmentGroup](id)
 
 	def delete(group: AssessmentGroup) {
 		group.assignment.assessmentGroups.remove(group)
@@ -175,9 +175,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		session.flush()
 	}
 
-	def getAssessmentComponent(id: String) = getById[AssessmentComponent](id)
+	def getAssessmentComponent(id: String): Option[AssessmentComponent] = getById[AssessmentComponent](id)
 
-	def getAssessmentComponent(group: UpstreamAssessmentGroup) = {
+	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent] = {
 		session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", group.moduleCode))
 			.add(is("assessmentGroup", group.assessmentGroup))
@@ -185,7 +185,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	}
 
 	/** Just gets components of type Assignment for this module, not all components. */
-	def getAssessmentComponents(module: Module) = {
+	def getAssessmentComponents(module: Module): Seq[AssessmentComponent] = {
 		session.newCriteria[AssessmentComponent]
 			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
 			.add(is("inUse", true))
@@ -218,7 +218,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		}
 	}
 
-	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true) = {
+	def getAssessmentComponents(moduleCode: String, inUseOnly: Boolean = true): Seq[AssessmentComponent] = {
 		val c = session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", moduleCode))
 			.addOrder(Order.asc("sequence"))
@@ -269,7 +269,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.seq
 			.map(_.id)
 
-	def emptyMembers(groupsToEmpty:Seq[String]) = {
+	def emptyMembers(groupsToEmpty:Seq[String]): Int = {
 		var count = 0
 		val partitionedIds = groupsToEmpty.grouped(Daoisms.MaxInClauseCount)
 		partitionedIds.map(batch => {

@@ -9,7 +9,7 @@ class SubmissionIdConverter extends TwoWayConverter[String, Submission] {
 
 	@Autowired var service: SubmissionService = _
 
-	override def convertRight(id: String) = service.getSubmission(id).orNull
-	override def convertLeft(submission: Submission) = (Option(submission) map { _.id }).orNull
+	override def convertRight(id: String): Submission = service.getSubmission(id).orNull
+	override def convertLeft(submission: Submission): String = (Option(submission) map { _.id }).orNull
 
 }

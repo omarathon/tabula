@@ -25,18 +25,18 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var madService = Wire[ModuleAndDepartmentService]
-	var profileImporter = Wire[ProfileImporter]
-	var profileService = Wire[ProfileService]
-	var userLookup = Wire[UserLookupService]
-	var moduleRegistrationImporter = Wire[ModuleRegistrationImporter]
-	var accreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
-	var moduleRegistrationService = Wire[ModuleRegistrationService]
-	var smallGroupService = Wire[SmallGroupService]
-	var profileIndexService = Wire[ProfileIndexService]
-	var memberDao = Wire[MemberDao]
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
-	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
+	var madService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var profileImporter: ProfileImporter = Wire[ProfileImporter]
+	var profileService: ProfileService = Wire[ProfileService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var moduleRegistrationImporter: ModuleRegistrationImporter = Wire[ModuleRegistrationImporter]
+	var accreditedPriorLearningImporter: AccreditedPriorLearningImporter = Wire[AccreditedPriorLearningImporter]
+	var moduleRegistrationService: ModuleRegistrationService = Wire[ModuleRegistrationService]
+	var smallGroupService: SmallGroupService = Wire[SmallGroupService]
+	var profileIndexService: ProfileIndexService = Wire[ProfileIndexService]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 
 	var deptCode: String = _
 
@@ -345,8 +345,8 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		}
 	}
 
-	def describe(d: Description) = d.property("deptCode" -> deptCode)
+	def describe(d: Description): Unit = d.property("deptCode" -> deptCode)
 
 	// Makes the related event easier to spot in the logs
-	override def describeResult(d: Description, result: Unit) = d.property("deptCode" -> deptCode)
+	override def describeResult(d: Description, result: Unit): Unit = d.property("deptCode" -> deptCode)
 }

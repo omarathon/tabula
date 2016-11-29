@@ -18,10 +18,10 @@ class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initi
 
 	trait CustomDataBinderDependencies {
 		// dependency for PermissionsBinding
-		val securityService = Wire.auto[SecurityService]
+		val securityService: SecurityService = Wire.auto[SecurityService]
 	}
 
-	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= {
+	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest): CustomDataBinder with CustomDataBinderDependencies with PermissionsBinding with AllowedFieldsBinding with BindListenerBinding with NoAutoGrownNestedPaths = {
 		new CustomDataBinder(target, objectName)
 				with CustomDataBinderDependencies
 				with PermissionsBinding

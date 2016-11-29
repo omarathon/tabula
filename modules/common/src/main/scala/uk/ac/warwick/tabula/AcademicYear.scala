@@ -17,16 +17,16 @@ import uk.ac.warwick.tabula.data.model.Convertible
  * toString() returns the traditional format.
  */
 case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Convertible[JInteger] {
-	val endYear = startYear + 1
+	val endYear: Int = startYear + 1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
 
-	override def toString = "%s/%s".format(toDigits(startYear), toDigits(endYear))
+	override def toString: String = "%s/%s".format(toDigits(startYear), toDigits(endYear))
 	private def toDigits(year: Int) = year.toString.substring(2)
 
 	// properties for binding to dropdown box
-	def getStoreValue = startYear
-	def getLabel = toString
-	def value = startYear
+	def getStoreValue: Int = startYear
+	def getLabel: String = toString
+	def value: JInteger = startYear
 	def previous = new AcademicYear(startYear - 1)
 	def next = new AcademicYear(startYear + 1)
 
@@ -55,7 +55,7 @@ case class AcademicYear(startYear: Int) extends Ordered[AcademicYear] with Conve
 	 *  *Restrictions apply. Always read the small print. We are confident
 	 *   that November 1st is always in term 1 of the year
 	 */
-	def dateInTermOne =	new LocalDate(startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
+	def dateInTermOne: DateTime =	new LocalDate(startYear, DateTimeConstants.NOVEMBER, 1).toDateTimeAtStartOfDay
 
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear
@@ -85,9 +85,9 @@ object AcademicYear {
 	private val CenturyBreak = 90
 
 	// An implicit for the UserType to create instances
-	implicit val factory = (year: JInteger) => AcademicYear(year)
+	implicit val factory: (_root_.uk.ac.warwick.tabula.JavaImports.JInteger) => AcademicYear = (year: JInteger) => AcademicYear(year)
 
-	def parse(string: String) = string match {
+	def parse(string: String): AcademicYear = string match {
 		case SitsPattern(year1, year2) => AcademicYear(parseTwoDigits(year1))
 		case _ => throw new IllegalArgumentException("Did not match YY/YY: " + string)
 	}
@@ -110,7 +110,7 @@ object AcademicYear {
 	 * This function returns the year based on when SITS rolls over,
 	 * not when the academic year starts/stops
 	 */
-	def guessSITSAcademicYearByDate(now: BaseDateTime) = {
+	def guessSITSAcademicYearByDate(now: BaseDateTime): AcademicYear = {
 		if (now.getMonthOfYear >= AUGUST) {
 			new AcademicYear(now.getYear)
 		} else {

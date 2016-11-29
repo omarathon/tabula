@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldFeedbackSummaryC
 
 class OldFeedbackControllersTest extends TestBase with Mockito {
 	val controller = new OldFeedbackSummaryController
-	val command = mock[Appliable[Option[Feedback]]]
+	val command: Appliable[Option[Feedback]] = mock[Appliable[Option[Feedback]]]
 	val feedback = new AssignmentFeedback
 	command.apply() returns Some(feedback)
 

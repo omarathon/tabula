@@ -6,19 +6,19 @@ import org.joda.time.DateTime
 import org.springframework.util.Assert
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.events.{TriggerHandling, NotificationHandling}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent, CurrentUser}
+import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{SubmissionDueGeneralNotification, SubmissionDueWithExtensionNotification, SubmissionReceiptNotification, SubmissionReceivedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent, AttendanceMonitoringCourseworkSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringCourseworkSubmissionServiceComponent, AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, RequiresPermissionsChecking, PermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
@@ -99,7 +99,7 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 		with AttendanceMonitoringCourseworkSubmissionServiceComponent
 		with TriggerHandling =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Submission = transactional() {
 		assignment.submissions.asScala.find(_.isForUser(user.asUser)).foreach { existingSubmission =>
 			if (assignment.resubmittable(user.asUser)) {
 				triggerService.removeExistingTriggers(existingSubmission)
@@ -240,7 +240,7 @@ trait SubmitAssignmentValidation extends SelfValidating {
 trait SubmitAssignmentDescription extends Describable[Submission] {
 	self: SubmitAssignmentState =>
 
-	override def describe(d: Description) =	{
+	override def describe(d: Description): Unit =	{
 		d.assignment(assignment)
 
 		assignment.submissions.asScala.find(_.universityId == user.universityId).map { existingSubmission =>
@@ -251,7 +251,7 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
 		}
 	}
 
-	override def describeResult(d: Description, s: Submission) = {
+	override def describeResult(d: Description, s: Submission): Unit = {
 		d.assignment(assignment).properties("submission" -> s.id).fileAttachments(s.allAttachments)
 		if (s.isNoteworthy)
 			d.properties("submissionIsNoteworthy" -> true)
@@ -261,7 +261,7 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
 trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] with CompletesNotifications[Submission] {
 	self: SubmitAssignmentState with NotificationHandling =>
 
-	override def emit(submission: Submission) = {
+	override def emit(submission: Submission): Seq[SubmissionNotification] = {
 		val studentNotifications =
 			if (assignment.isVisibleToStudents)
 				Seq(Notification.init(new SubmissionReceiptNotification, user.asUser, Seq(submission), assignment))

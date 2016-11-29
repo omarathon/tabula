@@ -15,7 +15,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 		val testDepartment = new Department
 
 		val commandInternal = new NotificationSettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with UserLookupComponent with PopulateNotificationSettingsCommandState {
-			var moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+			var moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 			var userLookup = new MockUserLookup
 		}
 	}
@@ -99,7 +99,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 				val department: Department = testDepartment
 			}
 
-			val description = mock[Description]
+			val description: Description = mock[Description]
 			describable.describe(description)
 			verify(description, times(1)).department(testDepartment)
 		}
@@ -111,7 +111,7 @@ class NotificationSettingsCommandTest extends TestBase with Mockito {
 			val perms = new NotificationSettingsPermissions() with NotificationSettingsCommandState {
 				val department: Department = testDepartment
 			}
-			val checking = mock[PermissionsChecking]
+			val checking: PermissionsChecking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			verify(checking, times(1)).PermissionCheck(Permissions.Department.ManageNotificationSettings, testDepartment)
 		}

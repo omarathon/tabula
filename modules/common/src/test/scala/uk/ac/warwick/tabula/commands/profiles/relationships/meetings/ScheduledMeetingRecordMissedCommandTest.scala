@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class ScheduledMeetingRecordMissedCommandTest  extends TestBase with Mockito {
 
 	trait Fixture {
-		val mockMeetingRecordService = mock[MeetingRecordService]
+		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 
 		var scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
 		scheduledMeetingRecord.meetingDate = new DateTime().minusDays(1)
@@ -23,7 +23,7 @@ class ScheduledMeetingRecordMissedCommandTest  extends TestBase with Mockito {
 	def apply() { new Fixture {
 		val missedReason = "no reason"
 		command.missedReason = missedReason
-		val scheduledMeeting = command.applyInternal()
+		val scheduledMeeting: ScheduledMeetingRecord = command.applyInternal()
 
 		verify(mockMeetingRecordService, times(1)).saveOrUpdate(scheduledMeetingRecord)
 		scheduledMeeting.missed should be (true)

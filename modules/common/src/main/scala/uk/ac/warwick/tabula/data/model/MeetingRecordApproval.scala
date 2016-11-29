@@ -41,7 +41,7 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
 }
 
 sealed abstract class MeetingApprovalState(val code: String, val description: String) {
-	override def toString = description
+	override def toString: String = description
 }
 
 object MeetingApprovalState {
@@ -52,14 +52,14 @@ object MeetingApprovalState {
 	// lame manual collection. Keep in sync with the case objects above
 	val states = Set(Pending, Approved, Rejected)
 
-	def fromCode(code: String) =
+	def fromCode(code: String): MeetingApprovalState =
 		if (code == null) null
 		else states.find{_.code == code} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
 
-	def fromDescription(description: String) =
+	def fromDescription(description: String): MeetingApprovalState =
 		if (description == null) null
 		else states.find{_.description == description} match {
 			case Some(caseObject) => caseObject
@@ -75,6 +75,6 @@ class MeetingApprovalStateUserType extends AbstractBasicUserType[MeetingApproval
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = MeetingApprovalState.fromCode(string)
-	override def convertToValue(state: MeetingApprovalState) = state.code
+	override def convertToObject(string: String): MeetingApprovalState = MeetingApprovalState.fromCode(string)
+	override def convertToValue(state: MeetingApprovalState): String = state.code
 }

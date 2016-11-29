@@ -44,7 +44,7 @@ class AttendanceReportProcessorInternal(val department: Department, val academic
 
 	self: AttendanceReportProcessorState with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceReportProcessorResult = {
 		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),

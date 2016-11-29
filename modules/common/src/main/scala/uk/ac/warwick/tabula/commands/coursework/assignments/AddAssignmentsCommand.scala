@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats, PermissionD
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 import scala.collection.convert.Wrappers.MapWrapper
+import scala.collection.mutable
 
 object AddAssignmentsCommand {
 	def apply(department: Department, user: CurrentUser) =
@@ -48,7 +49,7 @@ class AssignmentItem(
 
 	def this() = this(true, null, null)
 
-	var assignmentService = Wire.auto[AssessmentService]
+	var assignmentService: AssessmentService = Wire.auto[AssessmentService]
 
 	// set after bind
 	var assessmentGroup: Option[UpstreamAssessmentGroup] = _
@@ -69,7 +70,7 @@ class AssignmentItem(
 
 	var openEnded: JBoolean = false
 
-	def sameAssignment(other: AssignmentItem) =
+	def sameAssignment(other: AssignmentItem): Boolean =
 		upstreamAssignment == other.upstreamAssignment &&
 			occurrence == other.occurrence
 }
@@ -79,7 +80,7 @@ class AddAssignmentsCommandInternal(val department: Department, val user: Curren
 
 	self: AddAssignmentsCommandState with ModuleAndDepartmentServiceComponent with AssessmentServiceComponent with AssessmentMembershipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): mutable.Buffer[Assignment] = {
 		assignmentItems.asScala.filter(_.include).map(item => {
 			val assignment = new Assignment()
 			assignment.assignmentService = assessmentService
@@ -124,7 +125,7 @@ trait PopulatesAddAssignmentsCommand extends PopulateOnForm {
 
 	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		assignmentItems.clear()
 		if (academicYear != null) {
 			assignmentItems.addAll(fetchAssignmentItems())
@@ -160,7 +161,7 @@ trait AddAssignmentsCommandOnBind extends BindListener {
 
 	self: AddAssignmentsCommandState with AssessmentMembershipServiceComponent =>
 
-	override def onBind(result: BindingResult) = {
+	override def onBind(result: BindingResult): Unit = {
 		// re-attach UpstreamAssessmentGroup objects based on the other properties
 		for (item <- assignmentItems.asScala if item.assessmentGroup == null) {
 			item.assessmentGroup = assessmentMembershipService.getUpstreamAssessmentGroup(new UpstreamAssessmentGroup {
@@ -298,7 +299,7 @@ trait AddAssignmentsCommandState {
 	// All the possible assignments, prepopulated from SITS.
 	var assignmentItems: JList[AssignmentItem] = LazyLists.create()
 
-	protected def includedItems = assignmentItems.asScala.filter { _.include }
+	protected def includedItems: mutable.Buffer[AssignmentItem] = assignmentItems.asScala.filter { _.include }
 
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
@@ -312,11 +313,11 @@ trait AddAssignmentsCommandState {
 	// just for prepopulating the date form fields.
 	@WithinYears(maxPast = 3, maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
-	val defaultOpenDate = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
+	val defaultOpenDate: DateTime = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
 
 	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
-	val defaultCloseDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
+	val defaultCloseDate: DateTime = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 
 	@BeanProperty
 	val defaultOpenEnded = false

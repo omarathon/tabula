@@ -44,7 +44,7 @@ object DateBuilder {
 			relative: Boolean,
 			split: Boolean,
 			shortMonth: Boolean,
-			includeTime: Boolean) = {
+			includeTime: Boolean): String = {
 		if (includeTime) {
 			val pattern = new StringBuilder
 			pattern.append("HH:mm")
@@ -57,7 +57,7 @@ object DateBuilder {
 		}
 	}
 
-	def ordinal(day: Int) = day % 10 match {
+	def ordinal(day: Int): String = day % 10 match {
 		case _ if (day >= 10 && day <= 20) => "th"
 		case 1 => "st"
 		case 2 => "nd"
@@ -65,7 +65,7 @@ object DateBuilder {
 		case _ => "th"
 	}
 
-	def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean) = {
+	def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean): String = {
 		val today = LocalDate.now.toDateTimeAtStartOfDay
 		val thatDay = new LocalDate(date.getMillis, date.getChronology).toDateTimeAtStartOfDay
 
@@ -86,7 +86,7 @@ class DateBuilder extends TemplateMethodModelEx {
 	import DateBuilder.format
 
 	/** For Freemarker */
-	override def exec(list: JList[_]) = {
+	override def exec(list: JList[_]): String = {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
 		val date = args.head match {

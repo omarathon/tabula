@@ -8,10 +8,10 @@ import uk.ac.warwick.tabula.services.MemberNoteService
 
 class MemberNoteIdConverter extends TwoWayConverter[String, MemberNote] {
 
-	var service = Wire.auto[MemberNoteService]
+	var service: MemberNoteService = Wire.auto[MemberNoteService]
 
-	override def convertRight(id: String) = service.getNoteById(id).orNull
+	override def convertRight(id: String): MemberNote = service.getNoteById(id).orNull
 
-	override def convertLeft(note: MemberNote) = (Option(note) map {_.id}).orNull
+	override def convertLeft(note: MemberNote): String = (Option(note) map {_.id}).orNull
 
 }

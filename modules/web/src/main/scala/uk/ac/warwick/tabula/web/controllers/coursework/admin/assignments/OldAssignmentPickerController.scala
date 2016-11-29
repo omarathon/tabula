@@ -28,13 +28,13 @@ class OldAssignmentPickerController extends OldCourseworkController {
 	@ModelAttribute def command(@PathVariable module: Module) = new AssignmentPickerCommand(module)
 
 	@RequestMapping
-	def submit(cmd: AssignmentPickerCommand) = {
+	def submit(cmd: AssignmentPickerCommand): JSONView = {
 		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
 
 		new JSONView(assignmentsJson)
 	}
 
-	def toJson(assignments: Seq[Assignment]) = {
+	def toJson(assignments: Seq[Assignment]): Seq[Map[String, String]] = {
 
 		def assignmentToJson(assignment: Assignment) = Map[String, String](
 			"name" -> assignment.name,
@@ -51,9 +51,9 @@ class OldAssignmentPickerController extends OldCourseworkController {
 class AssignmentPickerCommand(module: Module) extends Command[Seq[Assignment]] with ReadOnly with Unaudited {
 	PermissionCheck(Permissions.Assignment.Read, module)
 
-	var assignmentService = Wire.auto[AssessmentService]
+	var assignmentService: AssessmentService = Wire.auto[AssessmentService]
 
 	var searchTerm: String = ""
 
-	def applyInternal() = assignmentService.getAssignmentsByName(searchTerm, module.adminDepartment)
+	def applyInternal(): Seq[Assignment] = assignmentService.getAssignmentsByName(searchTerm, module.adminDepartment)
 }

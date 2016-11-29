@@ -146,11 +146,11 @@ class AuditEventServiceImpl extends AuditEventService {
 		}.toSeq
 
 
-	def addParsedData(event: AuditEvent) = {
+	def addParsedData(event: AuditEvent): Unit = {
 		event.parsedData = parseData(event.data)
 	}
 
-	def addRelated(event: AuditEvent) = {
+	def addRelated(event: AuditEvent): AuditEvent = {
 		event.related = getByEventId(event.eventId)
 		event
 	}
@@ -226,5 +226,5 @@ trait AuditEventServiceComponent {
 }
 
 trait AutowiringAuditEventServiceComponent extends AuditEventServiceComponent {
-	var auditEventService = Wire[AuditEventService]
+	var auditEventService: AuditEventService = Wire[AuditEventService]
 }

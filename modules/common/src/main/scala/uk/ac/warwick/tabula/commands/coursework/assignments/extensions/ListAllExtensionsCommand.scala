@@ -21,8 +21,8 @@ class ListAllExtensionsCommand(val department: Department, val academicYear: Aca
 	// Extension.Read permission, we would need to make this less strict.
 	PermissionCheck(Permissions.Extension.Read, mandatory(department))
 
-	var assignmentDao = Wire.auto[AssessmentDao]
-	var userLookup = Wire[UserLookupService]
+	var assignmentDao: AssessmentDao = Wire.auto[AssessmentDao]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
 	def applyInternal(): Seq[ExtensionGraph] = {
 

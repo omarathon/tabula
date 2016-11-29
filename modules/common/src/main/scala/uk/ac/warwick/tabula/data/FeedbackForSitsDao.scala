@@ -9,7 +9,7 @@ trait FeedbackForSitsDaoComponent {
 }
 
 trait AutowiringFeedbackForSitsDaoComponent extends FeedbackForSitsDaoComponent {
-	var feedbackForSitsDao = Wire[FeedbackForSitsDao]
+	var feedbackForSitsDao: FeedbackForSitsDao = Wire[FeedbackForSitsDao]
 }
 
 trait FeedbackForSitsDao {
@@ -24,16 +24,16 @@ trait FeedbackForSitsDao {
 @Repository
 class FeedbackForSitsDaoImpl extends FeedbackForSitsDao with Daoisms {
 
-	def saveOrUpdate(feedbackForSits: FeedbackForSits) = session.saveOrUpdate(feedbackForSits)
-	def saveOrUpdate(feedback: Feedback) = session.saveOrUpdate(feedback)
-	def saveOrUpdate(mark: Mark) = session.saveOrUpdate(mark)
+	def saveOrUpdate(feedbackForSits: FeedbackForSits): Unit = session.saveOrUpdate(feedbackForSits)
+	def saveOrUpdate(feedback: Feedback): Unit = session.saveOrUpdate(feedback)
+	def saveOrUpdate(mark: Mark): Unit = session.saveOrUpdate(mark)
 
-	def feedbackToLoad =
+	def feedbackToLoad: Seq[FeedbackForSits] =
 		session.newCriteria[FeedbackForSits]
 			.add(is("status", FeedbackForSitsStatus.UploadNotAttempted))
 			.seq
 
-	def getByFeedback(feedback: Feedback) = {
+	def getByFeedback(feedback: Feedback): Option[FeedbackForSits] = {
 		session.newCriteria[FeedbackForSits]
 			.add(is("feedback", feedback))
 			.uniqueResult

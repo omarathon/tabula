@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.model.Department
 
 class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito {
 
-	var securityService = mock[SecurityService]
-	val user = {
+	var securityService: SecurityService = mock[SecurityService]
+	val user: CurrentUser = {
 		val u = new User("cuscav")
 		u.setIsLoggedIn(true)
 		u.setFoundUser(true)
@@ -19,7 +20,7 @@ class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito
 		new CurrentUser(u, u)
 	}
 
-	val dept = Fixtures.department("in", "IT Services")
+	val dept: Department = Fixtures.department("in", "IT Services")
 	dept.id = "dept"
 
 	abstract class TestCommand extends Command[Boolean] {

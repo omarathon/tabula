@@ -13,7 +13,7 @@ trait SearchJSONHelpers {
 
 	val formMav: Mav
 
-	def toJson(profiles: Seq[Member]) = {
+	def toJson(profiles: Seq[Member]): Seq[Map[String, String]] = {
 		def memberToJson(member: Member) = Map[String, String](
 			"name" -> {member.fullName match {
 				case None => "[Unknown user]"
@@ -26,7 +26,7 @@ trait SearchJSONHelpers {
 		profiles.map(memberToJson(_))
 	}
 
-	def submitJson(cmd: Appliable[Seq[Member]], errors: Errors) = {
+	def submitJson(cmd: Appliable[Seq[Member]], errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			formMav
 		} else {
@@ -36,7 +36,7 @@ trait SearchJSONHelpers {
 		}
 	}
 
-	def submit(cmd: Appliable[Seq[Member]], errors: Errors, path: String) = {
+	def submit(cmd: Appliable[Seq[Member]], errors: Errors, path: String): Mav = {
 		if (errors.hasErrors) {
 			formMav
 		} else {

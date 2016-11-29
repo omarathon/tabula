@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, UpstreamRout
 
 object ExamGridColumnOption {
 	type Identifier = String
-	implicit val defaultOrdering = Ordering.by { columnOption: ExamGridColumnOption => columnOption.sortOrder }
+	implicit val defaultOrdering: Ordering[ExamGridColumnOption] = Ordering.by { columnOption: ExamGridColumnOption => columnOption.sortOrder }
 
 	object SortOrders {
 		val PotentialMarkingOptions = 0

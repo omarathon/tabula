@@ -31,7 +31,7 @@ object HomeCommand {
 abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeInformation] with HomeCommandState {
 	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with RelationshipServiceComponent with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): HomeInformation = {
 		val optionalCurrentMember = user.profile
 		val currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
 		val hasProfile = currentMember match {

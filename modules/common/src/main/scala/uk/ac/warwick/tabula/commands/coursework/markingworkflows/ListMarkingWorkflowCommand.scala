@@ -29,7 +29,7 @@ class ListMarkingWorkflowCommandInternal(val department: Department, val isExam:
 
 	self: MarkingWorkflowServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[ListMarkingWorkflowCommandResult] = {
 		val validWorkflows = if (isExam) department.markingWorkflows.filter(_.validForExams) else department.markingWorkflows
 		validWorkflows.map { markingWorkflow =>
 			val assignments = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow)

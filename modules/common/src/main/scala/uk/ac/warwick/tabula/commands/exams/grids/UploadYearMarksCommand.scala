@@ -14,9 +14,10 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringYearMarksExtractorComponent, YearMarkItem, YearMarksExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, SprCode}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ArrayBuffer
 import scala.math.BigDecimal.RoundingMode
 
 object UploadYearMarksCommand {
@@ -50,7 +51,7 @@ class UploadYearMarksCommandInternal(val department: Department, val academicYea
 
 	self: UploadYearMarksCommandState with StudentCourseYearDetailsDaoComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): ArrayBuffer[StudentCourseYearDetails] = {
 		processedYearMarks.flatMap(item =>
 			if (item.scyd.isDefined && item.errors.isEmpty) {
 				item.scyd.get.agreedMark = item.mark.underlying

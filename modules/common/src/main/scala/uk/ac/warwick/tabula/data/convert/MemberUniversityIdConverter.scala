@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class MemberUniversityIdConverter extends TwoWayConverter[String, Member] {
 
-	var service = Wire.auto[ProfileService]
+	var service: ProfileService = Wire.auto[ProfileService]
 
-	override def convertRight(universityId: String) = {
+	override def convertRight(universityId: String): Member = {
 		if ("me" == universityId) {
 			RequestInfo.fromThread.flatMap { info =>
 				service.getMemberByUniversityIdStaleOrFresh(info.user.universityId)
@@ -18,6 +18,6 @@ class MemberUniversityIdConverter extends TwoWayConverter[String, Member] {
 			service.getMemberByUniversityIdStaleOrFresh(universityId).orNull
 		}
 	}
-	override def convertLeft(member: Member) = (Option(member) map {_.universityId}).orNull
+	override def convertLeft(member: Member): String = (Option(member) map {_.universityId}).orNull
 
 }

@@ -55,85 +55,85 @@ trait PermissionsChecking extends PermissionsCheckingMethods  {
 trait Public extends PermissionsChecking
 
 trait PermissionsCheckingMethods extends Logging {
-	def mustBeLinked(module: Module, department: Department) =
+	def mustBeLinked(module: Module, department: Department): Unit =
 		if (mandatory(module).adminDepartment.id != mandatory(department).id) {
 			logger.info("Not displaying module as it doesn't belong to specified department")
 			throw new ItemNotFoundException(module, "Not displaying module as it doesn't belong to specified department")
 		}
 
-	def mustBeLinked(assessment: Assessment, module: Module) =
+	def mustBeLinked(assessment: Assessment, module: Module): Unit =
 		if (mandatory(assessment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assessment as it doesn't belong to specified module")
 			throw new ItemNotFoundException(assessment, "Not displaying assessment as it doesn't belong to specified module")
 		}
 
-	def mustBeLinked(set: SmallGroupSet, module: Module) =
+	def mustBeLinked(set: SmallGroupSet, module: Module): Unit =
 		if (mandatory(mandatory(set).module).id != mandatory(module).id) {
 			logger.info("Not displaying small group set as it doesn't belong to specified module")
 			throw new ItemNotFoundException(set, "Not displaying small group set as it doesn't belong to specified module")
 		}
 
-	def mustBeLinked(group: SmallGroup, set: SmallGroupSet) =
+	def mustBeLinked(group: SmallGroup, set: SmallGroupSet): Unit =
 		if (mandatory(mandatory(group).groupSet).id != mandatory(set).id) {
 			logger.info("Not displaying small group as it doesn't belong to specified set")
 			throw new ItemNotFoundException(group, "Not displaying small group as it doesn't belong to specified set")
 		}
 
-	def mustBeLinked(event: SmallGroupEvent, group: SmallGroup) =
+	def mustBeLinked(event: SmallGroupEvent, group: SmallGroup): Unit =
 		if (mandatory(mandatory(event).group).id != mandatory(group).id) {
 			logger.info("Not displaying small group event as it doesn't belong to specified group")
 			throw new ItemNotFoundException(event, "Not displaying small group event as it doesn't belong to specified group")
 		}
 
-	def mustBeLinked(set: DepartmentSmallGroupSet, department: Department) =
+	def mustBeLinked(set: DepartmentSmallGroupSet, department: Department): Unit =
 		if (mandatory(mandatory(set).department).id != mandatory(department).id) {
 			logger.info("Not displaying department small group set as it doesn't belong to specified department")
 			throw new ItemNotFoundException(set, "Not displaying department small group set as it doesn't belong to specified department")
 		}
 
-	def mustBeLinked(feedback: AssignmentFeedback, assignment: Assignment) =
+	def mustBeLinked(feedback: AssignmentFeedback, assignment: Assignment): Unit =
 		if (mandatory(feedback).assignment.id != mandatory(assignment).id) {
 			logger.info("Not displaying feedback as it doesn't belong to specified assignment")
 			throw new ItemNotFoundException(feedback, "Not displaying feedback as it doesn't belong to specified assignment")
 		}
 
-	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department) =
+	def mustBeLinked(markingWorkflow: MarkingWorkflow, department: Department): Unit =
 		if (mandatory(markingWorkflow).department.id != mandatory(department.id)) {
 			logger.info("Not displaying marking workflow as it doesn't belong to specified department")
 			throw new ItemNotFoundException(markingWorkflow, "Not displaying marking workflow as it doesn't belong to specified department")
 		}
 
-	def mustBeLinked(template: FeedbackTemplate, department: Department) =
+	def mustBeLinked(template: FeedbackTemplate, department: Department): Unit =
 		if (mandatory(template).department.id != mandatory(department.id)) {
 			logger.info("Not displaying feedback template as it doesn't belong to specified department")
 			throw new ItemNotFoundException(template, "Not displaying feedback template as it doesn't belong to specified department")
 		}
 
-  def mustBeLinked(submission: Submission, assignment: Assignment) =
+  def mustBeLinked(submission: Submission, assignment: Assignment): Unit =
     if (mandatory(submission).assignment.id != mandatory(assignment).id) {
       logger.info("Not displaying submission as it doesn't belong to specified assignment")
       throw new ItemNotFoundException(submission, "Not displaying submission as it doesn't belong to specified assignment")
     }
 
-	def mustBeLinked(fileAttachment: FileAttachment, submission: Submission) =
+	def mustBeLinked(fileAttachment: FileAttachment, submission: Submission): Unit =
 		if (mandatory(fileAttachment).submissionValue.submission.id != mandatory(submission).id) {
 			logger.info("Not displaying file attachment as it doesn't belong to specified submission")
 			throw new ItemNotFoundException(submission, "Not displaying file attachment as it doesn't belong to specified submission")
 		}
 
-	def mustBeLinked(memberNote: AbstractMemberNote, member: Member) =
+	def mustBeLinked(memberNote: AbstractMemberNote, member: Member): Unit =
 		if (mandatory(memberNote).member.id != mandatory(member).id) {
 			logger.info("Not displaying member note as it doesn't belong to specified member")
 			throw new ItemNotFoundException(memberNote, "Not displaying member note as it doesn't belong to specified member")
 		}
 
-	def mustBeLinked(customRoleDefinition: CustomRoleDefinition, department: Department) =
+	def mustBeLinked(customRoleDefinition: CustomRoleDefinition, department: Department): Unit =
 		if (mandatory(customRoleDefinition).department.id != mandatory(department).id) {
 			logger.info("Not displaying custom role definition as it doesn't belong to specified department")
 			throw new ItemNotFoundException(customRoleDefinition, "Not displaying custom role definition as it doesn't belong to specified department")
 		}
 
-	def mustBeLinked(roleOverride: RoleOverride, customRoleDefinition: CustomRoleDefinition) =
+	def mustBeLinked(roleOverride: RoleOverride, customRoleDefinition: CustomRoleDefinition): Unit =
 		if (mandatory(roleOverride).customRoleDefinition.id != mandatory(customRoleDefinition).id) {
 			logger.info("Not displaying role override as it doesn't belong to specified role definition")
 			throw new ItemNotFoundException(roleOverride, "Not displaying role override as it doesn't belong to specified role definition")

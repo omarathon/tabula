@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 case class FindStudentsForSchemeCommandResult(
 	staticStudentIds: JList[String],
@@ -42,7 +43,7 @@ class FindStudentsForSchemeCommandInternal(val scheme: AttendanceMonitoringSchem
 
 	self: ProfileServiceComponent with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): FindStudentsForSchemeCommandResult = {
 		// Remove any duplicate routes caused by search for routes already displayed
 		routes = routes.asScala.distinct.asJava
 
@@ -88,7 +89,7 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
 
 	self: FindStudentsForSchemeCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		staticStudentIds = scheme.members.staticUserIds.asJava
 		includedStudentIds = scheme.members.includedUserIds.asJava
 		excludedStudentIds = scheme.members.excludedUserIds.asJava
@@ -111,7 +112,7 @@ trait UpdatesFindStudentsForSchemeCommand {
 
 	self: FindStudentsForSchemeCommandState =>
 
-	def update(editSchemeMembershipCommandResult: EditSchemeMembershipCommandResult) = {
+	def update(editSchemeMembershipCommandResult: EditSchemeMembershipCommandResult): Any = {
 		includedStudentIds = editSchemeMembershipCommandResult.includedStudentIds
 		excludedStudentIds = editSchemeMembershipCommandResult.excludedStudentIds
 		// Default to current students
@@ -153,13 +154,13 @@ trait FindStudentsForSchemeCommandState extends FiltersStudents with Deserialize
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
 	var page = 1
-	def totalResults = staticStudentIds.size
+	def totalResults: Int = staticStudentIds.size
 	val studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 
 	// Filter binds
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
-	lazy val outOfDepartmentRoutes = routes.asScala.diff(allRoutes)
+	lazy val outOfDepartmentRoutes: mutable.Buffer[Route] = routes.asScala.diff(allRoutes)
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()

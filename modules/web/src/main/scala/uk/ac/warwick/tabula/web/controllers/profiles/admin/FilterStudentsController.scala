@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, CurrentSITSAcademicYear}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
@@ -28,7 +29,7 @@ class FilterStudentsAcademicYearController extends ProfilesController
 
 
 	@RequestMapping
-	def filter(@ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def filter(@ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		if (errors.hasErrors) {
 			Mav("profiles/profile/filter/filter").noLayout()
 		} else {
@@ -57,7 +58,7 @@ class FilterStudentsController extends ProfilesController
 	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 	@RequestMapping
-	def filter(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) = {
+	def filter(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
 		Redirect(Routes.Profile.students(department, activeAcademicYear.getOrElse(academicYear)))
 	}
 }

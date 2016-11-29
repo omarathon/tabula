@@ -15,7 +15,7 @@ trait LevelServiceComponent {
 
 
 trait AutowiringLevelServiceComponent extends LevelServiceComponent {
-	var levelService = Wire[LevelService]
+	var levelService: LevelService = Wire[LevelService]
 }
 
 trait LevelService {

@@ -34,7 +34,7 @@ class ImportCommandFactory() {
 	// needed by Command
 	var maintenanceModeService: MaintenanceModeService = _
 
-	def createImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMember) = {
+	def createImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMember): ImportStudentCourseCommand = {
 		val command = new ImportStudentCourseCommand(rows, stuMem, this)
 
 		if (test) {
@@ -56,7 +56,7 @@ class ImportCommandFactory() {
 		command
 	}
 
-	def createImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails) = {
+	def createImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails): ImportStudentCourseYearCommand = {
 		val command = new ImportStudentCourseYearCommand(row, studentCourseDetails)
 		if (test) { // FIXME horrible hack
 			command.modeOfAttendanceImporter = modeOfAttendanceImporter

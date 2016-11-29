@@ -14,8 +14,8 @@ case class ExtensionDetail(
 	previousExtensions: Seq[Extension],
 	previousSubmissions: Seq[Submission]
 ) {
-	def numAcceptedExtensions = previousExtensions.count(_.approved)
-	def numRejectedExtensions = previousExtensions.count(_.rejected)
+	def numAcceptedExtensions: Int = previousExtensions.count(_.approved)
+	def numRejectedExtensions: Int = previousExtensions.count(_.rejected)
 }
 
 object ViewExtensionCommand {
@@ -33,7 +33,7 @@ class ViewExtensionCommandInternal(val extension: Extension) extends CommandInte
 
 	this: UserLookupComponent with ExtensionServiceComponent with SubmissionServiceComponent  =>
 
-	def applyInternal() = {
+	def applyInternal(): ExtensionDetail = {
 		val user = Option(userLookup.getUserByUserId(extension.userId))
 		val previousExtensions = user.toSeq.flatMap(extensionService.getPreviousExtensions)
 		val previousSubmissions = user.toSeq.flatMap(submissionService.getPreviousSubmissions)

@@ -1,18 +1,20 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent, ProfileService}
 
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase, RequestInfo}
+import uk.ac.warwick.tabula.commands.ComposableCommand
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, FileField, FileFormValue}
+import uk.ac.warwick.tabula.data.model.forms.{FileField, FileFormValue, FormFieldContext}
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
 
 class SubmitAssignmentCommandTest extends TestBase with Mockito {
@@ -88,38 +90,38 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
 		// common reusable setup
 		trait Setup {
-			val cmd = SubmitAssignmentCommand.self(assignment.module, assignment, user)
+			val cmd: SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentAsSelfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent = SubmitAssignmentCommand.self(assignment.module, assignment, user)
 			cmd.features = emptyFeatures
 			cmd.features.disabilityOnSubmission = true
 			// pre-tick the box
 			cmd.plagiarismDeclaration = true
 			var errors = new BindException(cmd, "command")
-			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
+			val submissionValue: FileFormValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
 		}
 
 		new Setup {
-			val document = resourceAsBytes("attachment1.docx")
+			val document: Array[Byte] = resourceAsBytes("attachment1.docx")
 			submissionValue.file.upload add new MockMultipartFile("attachment1.docx", "attachment1.docx", null, document)
 			cmd.validate(errors)
 			errors.hasErrors should be{false}
 		}
 
 		new Setup {
-			val document2 = resourceAsBytes("attachment2.doc")
+			val document2: Array[Byte] = resourceAsBytes("attachment2.doc")
 			submissionValue.file.upload add new MockMultipartFile("attachment2.doc", "attachment2.doc", null, document2)
 			cmd.validate(errors)
 			errors.hasErrors should be{false}
 		}
 
 		new Setup {
-			val pdf = resourceAsBytes("attachment3.pdf")
+			val pdf: Array[Byte] = resourceAsBytes("attachment3.pdf")
 			submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.PDF", null, pdf)
 			cmd.validate(errors)
 			errors.hasErrors should be{false}
 		}
 
 		new Setup {
-			val csv = resourceAsBytes("attachment4.csv")
+			val csv: Array[Byte] = resourceAsBytes("attachment4.csv")
 			submissionValue.file.upload add new MockMultipartFile("attachment4.csv", "attachment4.csv", null, csv)
 			cmd.validate(errors)
 			errors.hasErrors should be{true}
@@ -127,7 +129,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 		}
 
 		new Setup {
-			val pdf = resourceAsBytes("attachment3.pdf")
+			val pdf: Array[Byte] = resourceAsBytes("attachment3.pdf")
 			submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.pdf", null, pdf)
 			submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.pdf", null, pdf)
 			cmd.validate(errors)

@@ -10,7 +10,7 @@ trait MemberNoteServiceComponent {
 }
 
 trait AutowiringMemberNoteServiceComponent extends MemberNoteServiceComponent {
-	var memberNoteService = Wire[MemberNoteService]
+	var memberNoteService: MemberNoteService = Wire[MemberNoteService]
 }
 
 trait MemberNoteService {
@@ -42,10 +42,10 @@ abstract class AbstractMemberNoteService extends MemberNoteService {
 	def listNonDeletedNotes(student: Member): Seq[MemberNote] =
 		memberNoteDao.listNotes(student, includeDeleted = false)
 
-	def saveOrUpdate(memberNote: MemberNote) =
+	def saveOrUpdate(memberNote: MemberNote): Unit =
 		memberNoteDao.saveOrUpdate(memberNote)
 
-	def delete(memberNote: MemberNote) =
+	def delete(memberNote: MemberNote): Unit =
 		memberNoteDao.delete(memberNote)
 
 	def getExtenuatingCircumstancesById(id: String): Option[ExtenuatingCircumstances] =
@@ -57,10 +57,10 @@ abstract class AbstractMemberNoteService extends MemberNoteService {
 	def listNonDeletedExtenuatingCircumstances(student: Member): Seq[ExtenuatingCircumstances] =
 		memberNoteDao.listExtenuatingCircumstances(student, includeDeleted = false)
 
-	def saveOrUpdate(circumstances: ExtenuatingCircumstances) =
+	def saveOrUpdate(circumstances: ExtenuatingCircumstances): Unit =
 		memberNoteDao.saveOrUpdate(circumstances)
 
-	def delete(circumstances: ExtenuatingCircumstances) =
+	def delete(circumstances: ExtenuatingCircumstances): Unit =
 		memberNoteDao.delete(circumstances)
 
 }

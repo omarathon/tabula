@@ -8,11 +8,13 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 
+import scala.xml.Elem
+
 class XmlReturnValueHandlerTest extends TestBase {
 
 	val handler = new XmlReturnValueHandler
 
-	def returnsXml = {
+	def returnsXml: Elem = {
 		<xml>
 			<scala>is the best</scala>
 		</xml>

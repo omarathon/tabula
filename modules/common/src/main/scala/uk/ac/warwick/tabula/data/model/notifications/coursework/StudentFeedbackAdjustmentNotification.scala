@@ -5,8 +5,8 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Info
 import uk.ac.warwick.tabula.data.model._
-
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.userlookup.User
 
 object StudentFeedbackAdjustmentNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/student_feedback_adjustment_notification.ftl"
@@ -21,17 +21,17 @@ class StudentFeedbackAdjustmentNotification
 	with AutowiringUserLookupComponent {
 
 	def verb = "adjusted"
-	def assignment = target.entity
+	def assignment: Assignment = target.entity
 	def feedback: Feedback = item.entity
 
-	def recipient = {
+	def recipient: User = {
 		val uniId = Option(feedback.universityId).getOrElse({
 			throw new IllegalStateException(s"No student found for ${feedback.universityId}")
 		})
 		userLookup.getUserByWarwickUniId(uniId)
 	}
 
-	def whatAdjusted = {
+	def whatAdjusted: String = {
 		val mark = feedback.latestMark.map(m => "mark")
 		val grade = feedback.latestGrade.map(g => "grade")
 		(mark ++ grade).mkString(" and ")

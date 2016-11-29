@@ -5,6 +5,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
 
 import scala.util.{Failure, Success, Try}
+import scala.xml.Elem
 
 /**
 	* N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
@@ -99,7 +100,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 			case _: Success[Seq[Map[String, Any]]] => //OK
 		}
 	}
-	val singleEvent = <Data>
+	val singleEvent: Elem = <Data>
 		<Activities>
 			<Activity>
 				<name>CS132L</name>
@@ -123,7 +124,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with Give
 	</Data>
 
 	// should you want to test weekend events...
-	val twoEvents = <Data>
+	val twoEvents: Elem = <Data>
 		<Activities>
 			<Activity>
 				<name>CS132L</name>

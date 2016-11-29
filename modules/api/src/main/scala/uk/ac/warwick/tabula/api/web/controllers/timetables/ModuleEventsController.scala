@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.timetables.ViewModuleEventsCommand
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{DateFormats, RequestFailedException}
 
@@ -38,7 +39,7 @@ trait GetModuleEventsApi {
 		ViewModuleEventsCommand(module)
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showModuleEvents(@Valid @ModelAttribute("getTimetableCommand") command: ViewModuleEventsCommand, errors: Errors) = {
+	def showModuleEvents(@Valid @ModelAttribute("getTimetableCommand") command: ViewModuleEventsCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else command.apply() match {

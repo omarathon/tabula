@@ -10,7 +10,7 @@ trait ModeOfAttendanceDaoComponent {
 }
 
 trait AutowiringModeOfAttendanceDaoComponent extends ModeOfAttendanceDaoComponent {
-	val modeOfAttendanceDao = Wire[ModeOfAttendanceDao]
+	val modeOfAttendanceDao: ModeOfAttendanceDao = Wire[ModeOfAttendanceDao]
 }
 
 trait ModeOfAttendanceDao {
@@ -23,9 +23,9 @@ trait ModeOfAttendanceDao {
 @Repository
 class ModeOfAttendanceDaoImpl extends ModeOfAttendanceDao with Daoisms {
 
-	def saveOrUpdate(modeOfAttendance: ModeOfAttendance) = session.saveOrUpdate(modeOfAttendance)
+	def saveOrUpdate(modeOfAttendance: ModeOfAttendance): Unit = session.saveOrUpdate(modeOfAttendance)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[ModeOfAttendance] =
 		session.newQuery[ModeOfAttendance]("from ModeOfAttendance where code = :code").setString("code", code).uniqueResult
 
 	def getAllStatusCodes: Seq[String] =

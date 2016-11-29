@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.objectstore
 import java.io.InputStream
 
 import com.google.common.io.ByteSource
-import org.jclouds.blobstore.BlobStoreContext
+import org.jclouds.blobstore.{BlobStore, BlobStoreContext}
 import org.jclouds.blobstore.domain.{Blob, StorageMetadata}
 import org.jclouds.blobstore.options.{ListContainerOptions, PutOptions}
 import org.jclouds.blobstore.strategy.internal.MultipartUploadSlicingAlgorithm
@@ -22,7 +22,7 @@ import scala.collection.JavaConverters._
 class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectContainerName: String)
 	extends ObjectStorageService with Logging with InitializingBean with TaskBenchmarking {
 
-	protected lazy val blobStore = blobStoreContext.getBlobStore
+	protected lazy val blobStore: BlobStore = blobStoreContext.getBlobStore
 
 	private final val slicer = new BasePayloadSlicer
 
@@ -31,7 +31,7 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
 		if (!blobStore.containerExists(objectContainerName)) blobStore.createContainerInLocation(null, objectContainerName)
 	}
 
-	override def keyExists(key: String) = blobStore.blobExists(objectContainerName, key)
+	override def keyExists(key: String): Boolean = blobStore.blobExists(objectContainerName, key)
 
 	private def blob(key: String) = key.maybeText.flatMap { k => Option(blobStore.getBlob(objectContainerName, k)) }
 
@@ -72,7 +72,7 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
 	/**
 		* Overridden in SwiftObjectStorageService to support multipart
 		*/
-	protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata) = blobStore.putBlob(objectContainerName, blob)
+	protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata): String = blobStore.putBlob(objectContainerName, blob)
 
 	override def fetch(key: String): Option[InputStream] = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
 		blob(key).map { _.getPayload.openStream() }

@@ -23,12 +23,12 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
             ModuleInfo("Computers for Science", "CS102", null, DegreeType.Undergraduate))
 
         // Mocks
-		val mockModuleService = mock[ModuleAndDepartmentService]
+		val mockModuleService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 		// The class under test, with mocks wired
 		val command = new ImportModules with Logging with ModuleImporterComponent with ModuleAndDepartmentServiceComponent {
-			val moduleImporter = mock[ModuleImporter]
-			val moduleAndDepartmentService = mockModuleService
+			val moduleImporter: ModuleImporter = mock[ModuleImporter]
+			val moduleAndDepartmentService: ModuleAndDepartmentService = mockModuleService
 		}
 	}
 

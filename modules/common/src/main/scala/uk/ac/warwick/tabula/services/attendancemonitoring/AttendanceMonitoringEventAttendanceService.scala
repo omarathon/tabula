@@ -17,7 +17,7 @@ trait AttendanceMonitoringEventAttendanceServiceComponent {
 }
 
 trait AutowiringAttendanceMonitoringEventAttendanceServiceComponent extends AttendanceMonitoringEventAttendanceServiceComponent {
-	val attendanceMonitoringEventAttendanceService = Wire[AttendanceMonitoringEventAttendanceService]
+	val attendanceMonitoringEventAttendanceService: AttendanceMonitoringEventAttendanceService = Wire[AttendanceMonitoringEventAttendanceService]
 }
 
 trait AttendanceMonitoringEventAttendanceService {

@@ -36,7 +36,7 @@ trait CreateMonitoringPointReportCommandState extends CreateMonitoringPointRepor
 class CreateMonitoringPointReportCommandInternal(val department: Department, val currentUser: CurrentUser) extends CommandInternal[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState {
 	self: AttendanceMonitoringServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Seq[MonitoringPointReport] = {
 		missedPoints.map { case (student, missedCount) =>
 			val scd = student.mostSignificantCourseDetails.orNull
 			val report = new MonitoringPointReport
@@ -57,7 +57,7 @@ class CreateMonitoringPointReportCommandInternal(val department: Department, val
 trait CreateMonitoringPointReportCommandValidation extends SelfValidating {
 	self: AttendanceMonitoringServiceComponent with SecurityServiceComponent with CreateMonitoringPointReportCommandState =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		val allStudents = missedPoints.keySet.toSeq
 
 		if (allStudents.isEmpty) {

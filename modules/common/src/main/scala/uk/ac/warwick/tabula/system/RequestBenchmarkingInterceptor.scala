@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.Command
 
 class RequestBenchmarkingInterceptor extends HandlerInterceptorAdapter with TaskBenchmarking {
 
-		override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+		override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 			if (Logging.benchmarking) {
 				val description = RequestInfo.fromThread.map { info =>
 					val userId =

@@ -12,7 +12,7 @@ object AttendanceState {
 	case object MissedUnauthorised extends AttendanceState("unauthorised", "Missed (unauthorised)")
 	case object NotRecorded extends AttendanceState("not-recorded", "Unrecorded") // Equivalent to null
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): AttendanceState = code match {
 	  	case Attended.dbValue => Attended
 	  	case MissedAuthorised.dbValue => MissedAuthorised
 	  	case MissedUnauthorised.dbValue => MissedUnauthorised
@@ -32,8 +32,8 @@ class AttendanceStateUserType extends AbstractBasicUserType[AttendanceState, Str
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = AttendanceState.fromCode(string)
+	override def convertToObject(string: String): AttendanceState = AttendanceState.fromCode(string)
 
-	override def convertToValue(state: AttendanceState) = state.dbValue
+	override def convertToValue(state: AttendanceState): String = state.dbValue
 
 }

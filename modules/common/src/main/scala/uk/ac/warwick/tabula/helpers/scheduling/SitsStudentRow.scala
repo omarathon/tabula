@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.helpers.scheduling
 
 import java.sql.ResultSet
 
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers._
 import uk.ac.warwick.tabula.data.model.{BasicStudentCourseProperties, BasicStudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -26,24 +27,24 @@ class SitsStudentRow(val resultSet: ResultSet)
 
 	implicit val rs = Option(resultSet)
 
-	val universityId = optString("university_id")
-	val usercode = optString("user_code")
-	val title = optString("title")
-	val preferredForename = optString("preferred_forename")
-	val fornames = optString("forenames")
-	val familyName = optString("family_name")
-	val gender = optString("gender")
-	val emailAddress = optString("email_address")
-	val dateOfBirth = optLocalDate("date_of_birth")
-	val inUseFlag = optString("in_use_flag")
-	val alternativeEmailAddress = optString("alternative_email_address")
-	val disabilityCode = optString("disability")
-	val deceased = optString("mst_type") match {
+	val universityId: Option[String] = optString("university_id")
+	val usercode: Option[String] = optString("user_code")
+	val title: Option[String] = optString("title")
+	val preferredForename: Option[String] = optString("preferred_forename")
+	val fornames: Option[String] = optString("forenames")
+	val familyName: Option[String] = optString("family_name")
+	val gender: Option[String] = optString("gender")
+	val emailAddress: Option[String] = optString("email_address")
+	val dateOfBirth: Option[LocalDate] = optLocalDate("date_of_birth")
+	val inUseFlag: Option[String] = optString("in_use_flag")
+	val alternativeEmailAddress: Option[String] = optString("alternative_email_address")
+	val disabilityCode: Option[String] = optString("disability")
+	val deceased: Boolean = optString("mst_type") match {
 		case Some("D") | Some("d") => true
 		case _ => false
 	}
-	val nationality = optString("nationality")
-	val mobileNumber = optString("mobile_number")
+	val nationality: Option[String] = optString("nationality")
+	val mobileNumber: Option[String] = optString("mobile_number")
 }
 
 // this trait holds data from the result set which will be used by ImportStudentCourseCommand to create
@@ -52,13 +53,13 @@ trait SitsStudentRowCourseDetails
 	extends BasicStudentCourseProperties {
 	self: HasResultSet =>
 
-	var routeCode = resultSet.getString("route_code")
-	var courseCode = resultSet.getString("course_code")
-	var sprStatusCode = resultSet.getString("spr_status_code")
-	var scjStatusCode = resultSet.getString("scj_status_code")
-	var departmentCode = resultSet.getString("department_code")
-	var awardCode = resultSet.getString("award_code")
-	var sprStartAcademicYearString = resultSet.getString("spr_academic_year_start")
+	var routeCode: String = resultSet.getString("route_code")
+	var courseCode: String = resultSet.getString("course_code")
+	var sprStatusCode: String = resultSet.getString("spr_status_code")
+	var scjStatusCode: String = resultSet.getString("scj_status_code")
+	var departmentCode: String = resultSet.getString("department_code")
+	var awardCode: String = resultSet.getString("award_code")
+	var sprStartAcademicYearString: String = resultSet.getString("spr_academic_year_start")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	//WMG uses a different table and column for their tutors
@@ -74,7 +75,7 @@ trait SitsStudentRowCourseDetails
 		}
 
 	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
-	var scjCode = resultSet.getString("scj_code")
+	var scjCode: String = resultSet.getString("scj_code")
 
 	// now grab data from the result set into properties
 	this.mostSignificant = resultSet.getString("most_signif_indicator") match {
@@ -96,13 +97,13 @@ trait SitsStudentRowCourseDetails
 trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties with Logging {
 	self: HasResultSet =>
 
-	var enrolmentDepartmentCode = resultSet.getString("enrolment_department_code")
-	var enrolmentStatusCode = resultSet.getString("enrolment_status_code")
-	var modeOfAttendanceCode = resultSet.getString("mode_of_attendance_code")
-	var academicYearString = resultSet.getString("sce_academic_year")
-	var moduleRegistrationStatusCode = resultSet.getString("mod_reg_status")
+	var enrolmentDepartmentCode: String = resultSet.getString("enrolment_department_code")
+	var enrolmentStatusCode: String = resultSet.getString("enrolment_status_code")
+	var modeOfAttendanceCode: String = resultSet.getString("mode_of_attendance_code")
+	var academicYearString: String = resultSet.getString("sce_academic_year")
+	var moduleRegistrationStatusCode: String = resultSet.getString("mod_reg_status")
 
-	var sceRouteCode = resultSet.getString("sce_route_code")
+	var sceRouteCode: String = resultSet.getString("sce_route_code")
 
 	this.yearOfStudy = resultSet.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")

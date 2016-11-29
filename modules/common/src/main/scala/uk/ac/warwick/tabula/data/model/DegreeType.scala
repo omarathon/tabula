@@ -9,7 +9,7 @@ object DegreeType {
 	case object PGCE extends DegreeType("PGCE", "PGCE", 3, 120)
 	case object InService extends DegreeType("IS", "In-Service", 4, 120)
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): DegreeType = code match {
 	  	case Undergraduate.dbValue => Undergraduate
 	  	case Postgraduate.dbValue => Postgraduate
 	  	case InService.dbValue => InService
@@ -32,7 +32,7 @@ object DegreeType {
 }
 
 class DegreeTypeUserType extends AbstractStringUserType[DegreeType] {
-	override def convertToObject(string: String) = DegreeType.fromCode(string)
-	override def convertToValue(degreeType: DegreeType) = degreeType.dbValue
+	override def convertToObject(string: String): DegreeType = DegreeType.fromCode(string)
+	override def convertToValue(degreeType: DegreeType): String = degreeType.dbValue
 }
 

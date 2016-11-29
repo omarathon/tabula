@@ -21,18 +21,18 @@ import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
 
-	def removeAttachment(attachment: FileAttachment) = {
+	def removeAttachment(attachment: FileAttachment): Boolean = {
 		attachments.remove(attachment)
 	}
 
-	def removeAllAttachments() = attachments.clear()
+	def removeAllAttachments(): Unit = attachments.clear()
 
 }
 
 object AbstractMeetingRecord {
 	// do not remove - import needed for sorting DateTimes
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-	implicit val defaultOrdering = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }.reverse
+	implicit val defaultOrdering: Ordering[AbstractMeetingRecord] = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }.reverse
 }
 
 @Entity
@@ -44,7 +44,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	type Entity = AbstractMeetingRecord
 
 	@transient
-	implicit var termService = Wire[TermService]
+	implicit var termService: TermService = Wire[TermService]
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -130,7 +130,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		))
 	}
 
-	def permissionsParents = Option(relationship.studentCourseDetails).toStream
+	def permissionsParents: Stream[StudentCourseDetails] = Option(relationship.studentCourseDetails).toStream
 
 	def toStringProps = Seq(
 		"creator" -> creator,
@@ -138,14 +138,14 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		"meetingDate"  -> meetingDate,
 		"relationship" -> relationship)
 
-	override def toEntityReference = new MeetingRecordEntityReference().put(this)
+	override def toEntityReference: MeetingRecordEntityReference = new MeetingRecordEntityReference().put(this)
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {
-	def getCode = code
-	def getDescription = description
+	def getCode: String = code
+	def getDescription: String = description
 
-	override def toString = description
+	override def toString: String = description
 }
 
 object MeetingFormat {
@@ -157,7 +157,7 @@ object MeetingFormat {
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Set(FaceToFace, VideoConference, PhoneCall, Email)
 
-	def fromCode(code: String) =
+	def fromCode(code: String): MeetingFormat =
 		if (code == null) null
 		else members.find{_.code == code} match {
 			case Some(caseObject) => caseObject
@@ -165,7 +165,7 @@ object MeetingFormat {
 		}
 
 	@Deprecated // use only in MonitoringPoint, AttendanceMonitoringPoint to catch legacy db data
-	def fromCodeOrDescription(value: String) =
+	def fromCodeOrDescription(value: String): MeetingFormat =
 		if (value == null) null
 		else members.find{ m => m.description == value || m.code == value} match {
 			case Some(caseObject) => caseObject
@@ -181,6 +181,6 @@ class MeetingFormatUserType extends AbstractBasicUserType[MeetingFormat, String]
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = MeetingFormat.fromCode(string)
-	override def convertToValue(format: MeetingFormat) = format.code
+	override def convertToObject(string: String): MeetingFormat = MeetingFormat.fromCode(string)
+	override def convertToValue(format: MeetingFormat): String = format.code
 }

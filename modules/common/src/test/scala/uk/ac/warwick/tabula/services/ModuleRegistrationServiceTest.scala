@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.model.ModuleSelectionStatus
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails}
 import uk.ac.warwick.tabula.data.{ModuleRegistrationDao, ModuleRegistrationDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class ModuleRegistrationServiceTest extends TestBase with Mockito {
 
-	val mockModuleRegistrationDao = smartMock[ModuleRegistrationDao]
+	val mockModuleRegistrationDao: ModuleRegistrationDao = smartMock[ModuleRegistrationDao]
 
 	trait Fixture {
 		val service = new AbstractModuleRegistrationService with ModuleRegistrationDaoComponent {
-			val moduleRegistrationDao = mockModuleRegistrationDao
+			val moduleRegistrationDao: ModuleRegistrationDao = mockModuleRegistrationDao
 		}
 	}
 
@@ -31,7 +31,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val result = service.weightedMeanYearMark(moduleRegistrations, Map())
+			val result: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrations, Map())
 			result.isRight should be {true}
 			result.right.get.scale should be (1)
 			result.right.get.doubleValue() should be (64.6)
@@ -44,7 +44,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val noResult = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map())
+			val noResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithMissingAgreedMark, Map())
 			noResult.isRight should be {false}
 
 			val moduleRegistrationsWithOverriddenMark = Seq(
@@ -55,7 +55,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(null, module5, BigDecimal(7.5).underlying, null, agreedMark = BigDecimal(97)),
 				Fixtures.moduleRegistration(null, module6, BigDecimal(15).underlying, null, agreedMark = BigDecimal(64))
 			)
-			val overriddenResult = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0))
+			val overriddenResult: Either[String, BigDecimal] = service.weightedMeanYearMark(moduleRegistrationsWithOverriddenMark, Map(module4 -> 0))
 			overriddenResult.isRight should be {true}
 			overriddenResult.right.get.scale should be (1)
 			overriddenResult.right.get.doubleValue() should be (64.6)
@@ -65,7 +65,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 	@Test
 	def overcattedModuleSubsets(): Unit = {
 		new Fixture {
-			val scd = Fixtures.student().mostSignificantCourse
+			val scd: StudentCourseDetails = Fixtures.student().mostSignificantCourse
 			val academicYear = AcademicYear(2014)
 			scd.latestStudentCourseYearDetails.academicYear = academicYear
 			val moduleRegistrations = Seq(
@@ -79,7 +79,7 @@ class ModuleRegistrationServiceTest extends TestBase with Mockito {
 				Fixtures.moduleRegistration(scd, Fixtures.module("ch3f8"), BigDecimal(15).underlying, academicYear, "", BigDecimal(68), ModuleSelectionStatus.Option)
 			)
 			moduleRegistrations.foreach(scd.addModuleRegistration)
-			val result = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toExamGridEntityYear, Map(), 120, Seq()) // TODO check route rules
+			val result: Seq[(BigDecimal, Seq[ModuleRegistration])] = service.overcattedModuleSubsets(scd.latestStudentCourseYearDetails.toExamGridEntityYear, Map(), 120, Seq()) // TODO check route rules
 			// There are 81 CATS of core modules, leaving 39 to reach the normal load of 120
 			// All the options are 15 CATS, so there are 5 combinations of modules that are valid (4 with 3 in each and 1 with 4)
 			result.size should be (5)

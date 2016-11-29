@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 /**
  * This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
@@ -45,7 +46,7 @@ class OldAssignmentController extends OldCourseworkController
 		@PathVariable module: Module,
 		@PathVariable assignment: Assignment,
 		user: CurrentUser
-	) = {
+	): Boolean = {
 		val submission = new Submission(user.universityId)
 		submission.assignment = assignment
 		submission.submittedDate = DateTime.now
@@ -60,7 +61,7 @@ class OldAssignmentController extends OldCourseworkController
 	def embeddedView(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
-			errors: Errors) = {
+			errors: Errors): Mav = {
 		view(infoCommand, formOrNull, errors).embedded
 	}
 
@@ -68,7 +69,7 @@ class OldAssignmentController extends OldCourseworkController
 	def view(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 			@ModelAttribute("submitAssignmentCommand") formOrNull: SubmitAssignmentCommand,
-			errors: Errors) = {
+			errors: Errors): Mav = {
 		val form = Option(formOrNull)
 		val info = infoCommand.apply()
 
@@ -95,7 +96,7 @@ class OldAssignmentController extends OldCourseworkController
 	def submit(
 			@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 			@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
-			errors: Errors) = {
+			errors: Errors): Mav = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
 			view(infoCommand, form, errors)

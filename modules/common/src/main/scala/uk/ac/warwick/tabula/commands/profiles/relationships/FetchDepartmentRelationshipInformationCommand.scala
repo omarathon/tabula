@@ -47,7 +47,7 @@ class FetchDepartmentRelationshipInformationCommandInternal(val department: Depa
 	self: RelationshipServiceComponent with ProfileServiceComponent with FetchDepartmentRelationshipInformationCommandRequest
 		with FetchDepartmentRelationshipInformationCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): StudentAssociationResult = {
 		val initialState = fetchResult
 		action match {
 			case Actions.DistributeAll =>
@@ -262,7 +262,7 @@ trait FetchDepartmentRelationshipInformationCommandState {
 	def department: Department
 	def relationshipType: StudentRelationshipType
 
-	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
+	lazy val dbUnallocated: Seq[StudentAssociationData] = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
 	var dbAllocated: Seq[StudentAssociationEntityData] = Seq()
 	def updateDbAllocated(): Unit = {
 		dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, Option(additionalEntities).map(_.asScala).getOrElse(Seq()))
@@ -273,7 +273,7 @@ trait FetchDepartmentRelationshipInformationCommandBindListener extends BindList
 
 	self: FetchDepartmentRelationshipInformationCommandRequest with FetchDepartmentRelationshipInformationCommandState =>
 
-	override def onBind(result: BindingResult) = {
+	override def onBind(result: BindingResult): Unit = {
 		updateDbAllocated()
 
 		if (removeSingleCombined.hasText) {

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, Module, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
@@ -10,17 +10,17 @@ import uk.ac.warwick.userlookup.User
 class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with RemovesUsersFromGroups {
-		val smallGroupService = mock[SmallGroupService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
 		val userLookup = new MockUserLookup
-		var assessmentMembershipService = mock[AssessmentMembershipService]
+		var assessmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 
-		def removeFromGroup(user: User, group: SmallGroup) = group.students.remove(user)
+		def removeFromGroup(user: User, group: SmallGroup): Unit = group.students.remove(user)
 	}
 
 	private trait Fixture {
 		val department = new Department()
 
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 		module.adminDepartment = department
 
@@ -107,8 +107,8 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
 	private trait ValidationFixture extends Fixture {
 		val command = new EditSmallGroupSetMembershipValidation with EditSmallGroupSetMembershipCommandState {
-			val module = ValidationFixture.this.module
-			val set = ValidationFixture.this.set
+			val module: Module = ValidationFixture.this.module
+			val set: SmallGroupSet = ValidationFixture.this.set
 		}
 	}
 

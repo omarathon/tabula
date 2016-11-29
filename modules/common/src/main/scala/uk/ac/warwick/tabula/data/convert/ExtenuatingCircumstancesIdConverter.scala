@@ -8,10 +8,10 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class ExtenuatingCircumstancesIdConverter extends TwoWayConverter[String, ExtenuatingCircumstances] {
 
-	var service = Wire.auto[MemberNoteService]
+	var service: MemberNoteService = Wire.auto[MemberNoteService]
 
-	override def convertRight(id: String) = service.getExtenuatingCircumstancesById(id).orNull
+	override def convertRight(id: String): ExtenuatingCircumstances = service.getExtenuatingCircumstancesById(id).orNull
 
-	override def convertLeft(circumstances: ExtenuatingCircumstances) = (Option(circumstances) map {_.id}).orNull
+	override def convertLeft(circumstances: ExtenuatingCircumstances): String = (Option(circumstances) map {_.id}).orNull
 
 }

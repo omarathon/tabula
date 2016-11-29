@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOvercatCommand.SelectCourseCommand
+import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOvercatCommand.{Result, SelectCourseCommand}
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.data.model.{ModuleRegistration, Department}
+import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRule}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -39,7 +39,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 	self: ModuleRegistrationServiceComponent with GenerateExamGridCheckAndApplyOvercatCommandState
 	with StudentCourseYearDetailsDaoComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Result = {
 		val updatedEntities = filteredEntities.map { entity =>
 			val scyd = entity.years
 				.getOrElse(selectCourseCommand.yearOfStudy, throw new IllegalArgumentException(s"Could not find entity year for year ${selectCourseCommand.yearOfStudy}"))
@@ -118,18 +118,18 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	var selectCourseCommand: SelectCourseCommand = _
 	var yearsToShow: String = "current"
 
-	def fetchEntities = selectCourseCommand.apply()
-	lazy val entities = yearsToShow match {
+	def fetchEntities: Seq[ExamGridEntity] = selectCourseCommand.apply()
+	lazy val entities: Seq[ExamGridEntity] = yearsToShow match {
 		case "all" => fetchEntities
 		case _ => fetchEntities.map(entity => entity.copy(years = Map(entity.years.keys.max -> entity.years(entity.years.keys.max))))
 	}
-	lazy val normalLoadOption = upstreamRouteRuleService.findNormalLoad(
+	lazy val normalLoadOption: Option[BigDecimal] = upstreamRouteRuleService.findNormalLoad(
 		selectCourseCommand.route,
 		academicYear,
 		selectCourseCommand.yearOfStudy
 	)
-	lazy val normalLoad = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
-	lazy val routeRules = upstreamRouteRuleService.list(
+	lazy val normalLoad: BigDecimal = normalLoadOption.getOrElse(selectCourseCommand.route.degreeType.normalCATSLoad)
+	lazy val routeRules: Seq[UpstreamRouteRule] = upstreamRouteRuleService.list(
 		selectCourseCommand.route,
 		academicYear,
 		selectCourseCommand.yearOfStudy

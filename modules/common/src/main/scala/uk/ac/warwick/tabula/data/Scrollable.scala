@@ -45,7 +45,7 @@ class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFun
 		private var _nextChecked = false
 		private var _next = false
 
-		def hasNext = {
+		def hasNext: Boolean = {
 			if (!_nextChecked) {
 				_nextChecked = true
 				_next = results.next()
@@ -62,14 +62,14 @@ class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFun
 			} else throw new NoSuchElementException
 		}
 
-		override def foreach[U](f: A => U) = Closeables.closeThis(results) { r =>
+		override def foreach[U](f: A => U): Unit = Closeables.closeThis(results) { r =>
 			super.foreach { entity: A =>
 				f(entity)
 				safeEvict(entity)
 			}
 		}
 
-		def close() = results.close()
+		def close(): Unit = results.close()
 	}
 
 	private def safeEvict(entity: A) =
@@ -78,8 +78,8 @@ class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFun
 
 	class CountLimitedScrollable(count: Int) extends ScrollableIterator {
 		private var _i = 0
-		override def hasNext = _i < count && super.hasNext
-		override def next() = {
+		override def hasNext: Boolean = _i < count && super.hasNext
+		override def next(): A = {
 			val ret = super.next()
 			_i += 1
 			ret
@@ -91,7 +91,7 @@ class ScrollableImpl[A](results: ScrollableResults, session: Session, mappingFun
 		private var _next = false
 		private var _nextEntity: A = _
 
-		override def hasNext = {
+		override def hasNext: Boolean = {
 			if (!_nextChecked) {
 				_nextChecked = true
 				_next = results.next()

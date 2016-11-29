@@ -104,12 +104,12 @@ class OvercattingOptionsController extends ExamsController
 	def recalculate(
 		@ModelAttribute("command") cmd: Appliable[Seq[Module]],
 		@ModelAttribute("overcatView") overcatView: OvercattingOptionsView
-	) = {
+	): Mav = {
 		Mav("exams/grids/generate/overcat").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("continue"))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Module]], errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Module]], errors: Errors): JSONView = {
 		if (errors.hasErrors) {
 			new JSONErrorView(errors)
 		} else {
@@ -152,7 +152,7 @@ class OvercattingOptionsView(
 
 	private lazy val originalEntity = scyd.studentCourseDetails.student.toExamGridEntity(scyd)
 
-	lazy val overcattedEntities = overcattedMarks.map { case (mark, overcattedModules) =>
+	lazy val overcattedEntities: Seq[ExamGridEntity] = overcattedMarks.map { case (mark, overcattedModules) =>
 		originalEntity.copy(years = originalEntity.years.updated(scyd.yearOfStudy, ExamGridEntityYear(
 			moduleRegistrations = overcattedModules,
 			cats = overcattedModules.map(mr => BigDecimal(mr.cats)).sum,

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.commands.exams.{AddExamCommand, ExamState, ModifiesExamMembership}
 import uk.ac.warwick.tabula.exams.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
@@ -28,7 +29,7 @@ class AddExamController extends ExamsController {
 		 @PathVariable academicYear : AcademicYear) = AddExamCommand(mandatory(module), mandatory(academicYear))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: AddExamCommand) = {
+	def showForm(@ModelAttribute("command") cmd: AddExamCommand): Mav = {
 		cmd.populate()
 		cmd.afterBind()
 		render(cmd)
@@ -51,7 +52,7 @@ class AddExamController extends ExamsController {
 	def submit(
 		@Valid @ModelAttribute("command") cmd: AddExamCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 		cmd.afterBind()
 		if (errors.hasErrors) {
 			render(cmd)

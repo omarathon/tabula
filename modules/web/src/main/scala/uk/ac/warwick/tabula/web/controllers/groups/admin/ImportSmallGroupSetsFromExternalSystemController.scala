@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -35,9 +35,9 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
 	override val departmentPermission: Permission = Permissions.SmallGroups.ImportFromExternalSystem
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("academicYearChoices") def academicYearChoices =
+	@ModelAttribute("academicYearChoices") def academicYearChoices: Seq[AcademicYear] =
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2)
 
 	@ModelAttribute("command") def command(@PathVariable department: Department, user: CurrentUser): ImportSmallGroupSetsFromExternalSystemCommand =
@@ -45,14 +45,14 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
 
 	// Handling page to avoid extra long spinny time
 	@RequestMapping
-	def showForm(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) = {
+	def showForm(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors): Mav = {
 		Mav("groups/admin/groups/import_loading",
 			"academicYear" -> command.academicYear
 		).crumbs(Breadcrumbs.Department(command.department, command.academicYear))
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=populate"))
-	def populate(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) = {
+	def populate(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors): Mav = {
 		command.populate()
 		form(command, errors)
 	}
@@ -66,11 +66,11 @@ class ImportSmallGroupSetsFromExternalSystemController extends GroupsController
 
 	// Change the academic year; restarts from scratch
 	@RequestMapping(method = Array(POST), params = Array("action=change-year"))
-	def changeYear(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) =
+	def changeYear(@ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors): Mav =
 		populate(command, errors) // Run an initial populate() again
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors) =
+	def submit(@Valid @ModelAttribute("command") command: ImportSmallGroupSetsFromExternalSystemCommand, errors: Errors): Mav =
 		if (errors.hasErrors) form(command, errors)
 		else {
 			command.apply()

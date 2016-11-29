@@ -1,17 +1,19 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import org.hibernate.`type`.StandardBasicTypes
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, AbstractBasicUserType}
-import uk.ac.warwick.tabula.permissions.{PermissionsSelector, Permissions, Permission, SelectorPermission}
+import uk.ac.warwick.tabula.data.model.{AbstractBasicUserType, StudentRelationshipType}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsSelector, SelectorPermission}
 import java.sql.Types
+
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.MutablePromise
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 
-	val relationshipService = promise { Wire[RelationshipService] }
+	val relationshipService: MutablePromise[RelationshipService] = promise { Wire[RelationshipService] }
 
 	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
@@ -19,7 +21,7 @@ class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = {
+	override def convertToObject(string: String): Permission = {
 		string match {
 			case r"([A-Za-z\.]+)${permissionName}\(\*\)" => {
 				SelectorPermission.of(permissionName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
@@ -36,7 +38,7 @@ class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 		}
 	}
 
-	override def convertToValue(permission: Permission) = permission match {
+	override def convertToValue(permission: Permission): String = permission match {
 		case sperm: SelectorPermission[_] => "%s(%s)".format(sperm.getName, sperm.selector.id)
 		case _ => permission.getName
 	}

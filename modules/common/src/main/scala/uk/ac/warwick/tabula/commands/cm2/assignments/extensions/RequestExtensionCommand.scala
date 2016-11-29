@@ -27,7 +27,7 @@ import scala.collection.mutable
 
 object RequestExtensionCommand {
 
-	def apply (assignment: Assignment, submitter: CurrentUser, action: String) = {
+	def apply (assignment: Assignment, submitter: CurrentUser, action: String): RequestExtensionCommandInternal with ComposableCommand[Extension] with AutowiringRelationshipServiceComponent with RequestExtensionCommandDescription with RequestExtensionCommandPermission with RequestExtensionCommandValidation with RequestExtensionCommandNotification with HibernateExtensionPersistenceComponent = {
 		new RequestExtensionCommandInternal(assignment, submitter) with
 			ComposableCommand[Extension] with
 			AutowiringRelationshipServiceComponent with
@@ -46,11 +46,11 @@ class RequestExtensionCommandInternal(val assignment:Assignment, val submitter: 
 
 	self: RelationshipServiceComponent with ExtensionPersistenceComponent =>
 
-	override def onBind(result:BindingResult) = transactional() {
+	override def onBind(result:BindingResult): Unit = transactional() {
 		file.onBind(result)
 	}
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Extension = transactional() {
 		val universityId = submitter.apparentUser.getWarwickId
 		val extension = assignment.findExtension(universityId).getOrElse({
 			val newExtension = new Extension(universityId)
@@ -147,9 +147,9 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 	self: RequestExtensionCommandState with RelationshipServiceComponent =>
 
 	val basicInfo = Map("moduleManagers" -> assignment.module.managers.users)
-	val studentRelationships = relationshipService.allStudentRelationshipTypes
+	val studentRelationships: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
-	val relationshipAndCourseInfo = for {
+	val relationshipAndCourseInfo: Option[Map[String, Object]] = for {
 		student <- submitter.profile.collect { case student: StudentMember => student }
 		scd <- student.mostSignificantCourseDetails
 		relationships = studentRelationships.map(relType =>
@@ -162,9 +162,9 @@ trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Ext
 		"scdAward" -> scd.award
 	)
 
-	val extraInfo = basicInfo ++ relationshipAndCourseInfo.getOrElse(Map())
+	val extraInfo: Map[String, Object] = basicInfo ++ relationshipAndCourseInfo.getOrElse(Map())
 
-	def emit(extension: Extension) = {
+	def emit(extension: Extension): Seq[ExtensionRequestNotification] = {
 		val agent = submitter.apparentUser
 		val assignment = extension.assignment
 		val baseNotification = if(extension.moreInfoReceived) {

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Reactor
+import uk.ac.warwick.tabula.Reactor.EventSource
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.events.{Event, EventDescription}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -52,7 +53,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	var until: Option[DateTime]
 	var message: Option[String]
 
-	def update(message: MaintenanceModeMessage) = {
+	def update(message: MaintenanceModeMessage): MaintenanceModeService = {
 		this.message = Option(message.message)
 		this.until = message.until match {
 			case -1 => None
@@ -76,9 +77,9 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	var message: Option[String] = None
 
 	// for other classes to listen to changes to maintenance mode.
-	val changingState = Reactor.EventSource[Boolean]
+	val changingState: EventSource[Boolean] = Reactor.EventSource[Boolean]
 
-	def exception(callee: Describable[_]) = {
+	def exception(callee: Describable[_]): MaintenanceModeEnabledException = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
 		logger.info("[Maintenance Reject] " + m)
 
@@ -107,7 +108,7 @@ trait MaintenanceModeServiceComponent {
 }
 
 trait AutowiringMaintenanceModeServiceComponent extends MaintenanceModeServiceComponent {
-	var maintenanceModeService = Wire[MaintenanceModeService]
+	var maintenanceModeService: MaintenanceModeService = Wire[MaintenanceModeService]
 }
 
 trait SettingsSyncQueueComponent {
@@ -115,7 +116,7 @@ trait SettingsSyncQueueComponent {
 }
 
 trait AutowiringSettingsSyncQueueComponent extends SettingsSyncQueueComponent {
-	var settingsSyncQueue = Wire.named[Queue]("settingsSyncTopic")
+	var settingsSyncQueue: Queue = Wire.named[Queue]("settingsSyncTopic")
 }
 
 /**
@@ -130,7 +131,7 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 	extends RuntimeException
 		with HandledException {
 
-	def getMessageOrEmpty = message.getOrElse("")
+	def getMessageOrEmpty: String = message.getOrElse("")
 
 }
 
@@ -157,7 +158,7 @@ class MaintenanceModeMessage {
 
 class MaintenanceModeListener extends QueueListener with InitializingBean with Logging with AutowiringMaintenanceModeServiceComponent {
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
 	override def isListeningToQueue = true
 
@@ -168,7 +169,7 @@ class MaintenanceModeListener extends QueueListener with InitializingBean with L
 		}
 	}
 
-	override def afterPropertiesSet = {
+	override def afterPropertiesSet: Unit = {
 		queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
 	}
 

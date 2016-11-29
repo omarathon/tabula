@@ -19,13 +19,13 @@ import scala.collection.JavaConverters._
 
 @Controller
 class UserPickerController extends BaseController {
-	var json = Wire.auto[ObjectMapper]
+	var json: ObjectMapper = Wire.auto[ObjectMapper]
 
 	@RequestMapping(value = Array("/ajax/userpicker/form"))
 	def form: Mav = Mav("ajax/userpicker/form").noLayout()
 
 	@RequestMapping(value = Array("/ajax/userpicker/query.json"))
-	def queryJson(form: UserPickerCommand, out: Writer) = {
+	def queryJson(form: UserPickerCommand, out: Writer): Unit = {
 		def toJson(user: User) = Map(
 			"value" -> user.getUserId,
 			"label" -> user.getFullName,
@@ -35,7 +35,7 @@ class UserPickerController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/ajax/userpicker/query"))
-	def query(form: UserPickerCommand, out: Writer) = {
+	def query(form: UserPickerCommand, out: Writer): Mav = {
 		val foundUsers = form.apply()
 		val (staff, students) = foundUsers.partition { _.isStaff }
 		Mav("ajax/userpicker/results",
@@ -49,12 +49,12 @@ object UserPickerController {
 	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
 		PermissionCheck(Permissions.UserPicker)
 
-		var userLookup = Wire.auto[UserLookupService]
+		var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 		var firstName: String = ""
 		var lastName: String = ""
 
-		def applyInternal() = {
+		def applyInternal(): Seq[User] = {
 			var users = userLookup.findUsersWithFilter(filter).asScala.toSeq
 			if (users.size < 10) users ++= (userLookup.findUsersWithFilter(filterBackwards).asScala.toSeq filter { !users.contains(_) })
 
@@ -75,8 +75,8 @@ object UserPickerController {
 				case first :: second :: _ => firstName = first; lastName = second
 			}
 		}
-		def query = if (firstName == "") lastName else firstName + " " + lastName
-		def query_=(q: String) = setQuery(q)
+		def query: String = if (firstName == "") lastName else firstName + " " + lastName
+		def query_=(q: String): Unit = setQuery(q)
 
 		def filter: Map[String, String] = {
 			item("givenName", firstName) ++ item("sn", lastName)

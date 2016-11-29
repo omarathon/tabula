@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{AddAssignmentComman
 import uk.ac.warwick.tabula.commands.{UpstreamGroup, UpstreamGroupPropertyEditor, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -36,7 +36,7 @@ class ListAssignmentsForModuleController extends ModuleAssignmentsController {
 		new ViewViewableCommand(Permissions.Module.ManageAssignments, mandatory(module))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("listCommand") command: ViewViewableCommand[Module], errors: Errors, @RequestParam(required = false) academicYear: AcademicYear) = {
+	def list(@ModelAttribute("listCommand") command: ViewViewableCommand[Module], errors: Errors, @RequestParam(required = false) academicYear: AcademicYear): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {
@@ -69,7 +69,7 @@ class CreateAssignmentController extends ModuleAssignmentsController {
 	}
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@RequestBody request: CreateAssignmentRequest, @ModelAttribute("createCommand") command: AddAssignmentCommand, errors: Errors)(implicit response: HttpServletResponse) = {
+	def create(@RequestBody request: CreateAssignmentRequest, @ModelAttribute("createCommand") command: AddAssignmentCommand, errors: Errors)(implicit response: HttpServletResponse): Mav = {
 		request.copyTo(command, errors)
 
 		globalValidator.validate(command, errors)

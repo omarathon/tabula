@@ -38,7 +38,7 @@ trait GroupedPointRecordValidation extends FiltersCheckpointMapChanges {
 		checkpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]],
 		existingCheckpointMap: Map[StudentMember, Map[AttendanceMonitoringPoint, AttendanceState]],
 		user: CurrentUser
-	) = {
+	): Unit = {
 		filterCheckpointMapForChanges(checkpointMap, existingCheckpointMap).foreach{ case(student, pointMap) =>
 			pointMap.foreach{ case(point, state) =>
 				errors.pushNestedPath(s"checkpointMap[${student.universityId}][${point.id}]")

@@ -16,8 +16,8 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 		this.department = dept
 	}
 
-	@transient var submissionService = Wire[SubmissionService]
-	@transient var userLookupService = Wire[UserLookupService]
+	@transient var submissionService: SubmissionService = Wire[SubmissionService]
+	@transient var userLookupService: UserLookupService = Wire[UserLookupService]
 
 	def markingMethod = StudentsChooseMarker
 
@@ -31,13 +31,13 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 		}
 	}
 
-	def getMarkersStudents(assessment: Assessment, user: User) = assessment match {
+	def getMarkersStudents(assessment: Assessment, user: User): Seq[User] = assessment match {
 		case assignment: Assignment => getSubmissions(assignment, user).map(s => userLookupService.getUserByWarwickUniId(s.universityId))
 		case _ => Nil
 	}
 
 
-	def getSubmissions(assignment: Assignment, user: User) = assignment.markerSelectField.map { markerField =>
+	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = assignment.markerSelectField.map { markerField =>
 			val releasedSubmission = assignment.submissions.asScala.filter(s => assignment.isReleasedForMarking(s.universityId))
 			releasedSubmission.filter(submission => {
 				submission.getValue(markerField) match {

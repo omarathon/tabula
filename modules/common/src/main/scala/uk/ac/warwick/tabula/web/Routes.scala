@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web
 import java.net.URLEncoder
 
 object RoutesUtils {
-	def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
+	def encoded(string: String): String = URLEncoder.encode(string, "UTF-8")
 }
 
 object Routes {

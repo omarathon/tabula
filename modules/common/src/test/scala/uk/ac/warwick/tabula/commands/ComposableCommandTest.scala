@@ -44,8 +44,8 @@ class ComposableCommandTest extends TestBase with Mockito{
 	/**
 	 * Fixture data
 	 */
-	val mockDescribable = mock[Describable[String]]
-	val mockPerms = mock[RequiresPermissionsChecking]
+	val mockDescribable: Describable[String] = mock[Describable[String]]
+	val mockPerms: RequiresPermissionsChecking = mock[RequiresPermissionsChecking]
 	val sampleName="Reverend Arthur Belling"
 
 
@@ -81,7 +81,7 @@ class ComposableCommandTest extends TestBase with Mockito{
 
 	@Test def CanTestPermissionsIndependently(){
 		val perms = new HelloCommandPermissions with HelloCommand {
-			val name = sampleName
+			val name: String = sampleName
 		}
 		val mockChecking = mock[PermissionsChecking]
 		perms.permissionsCheck(mockChecking)
@@ -100,7 +100,7 @@ class ComposableCommandTest extends TestBase with Mockito{
 
 	@Test def CanTestNotificationIndependently(){
 		val desc = new HelloCommandNotification with HelloCommand {
-			val name = sampleName
+			val name: String = sampleName
 			val eventName = "test"
 		}
 		val description = new DescriptionImpl

@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.assignments.StudentAssignmentsSummaryCommand.Result
 import uk.ac.warwick.tabula.data.model.EnhancedAssignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AssessmentServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
@@ -33,7 +34,7 @@ class StudentAssignmentsSummaryCommandInternal(val student: MemberOrUser, val ac
 
 	self: AssessmentMembershipServiceComponent with AssessmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Result = {
 		val studentUser = student.asUser
 
 		val enrolledAssignments = assessmentMembershipService.getEnrolledAssignments(studentUser)

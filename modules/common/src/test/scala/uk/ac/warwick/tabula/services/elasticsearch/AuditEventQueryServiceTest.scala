@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.AuditEventService
 import uk.ac.warwick.tabula.{ElasticsearchTestBase, MockUserLookup, Mockito}
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.IndexedSeq
 
 class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
@@ -21,7 +22,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "audit"
-	val indexType = new AuditEventIndexType {}.indexType
+	val indexType: String = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new AuditEventQueryServiceImpl
@@ -38,7 +39,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 			}
 		}
 
-		implicit val indexable = AuditEventIndexService.auditEventIndexable(queryService.auditEventService)
+		implicit val indexable: ElasticsearchIndexable[AuditEvent] = AuditEventIndexService.auditEventIndexable(queryService.auditEventService)
 	}
 
 	@Before def setUp(): Unit = {
@@ -60,7 +61,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		* by adminDownloadedSubmissions(Assignment).
 		*/
 	@Test def downloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
-		val assignment = {
+		val assignment: Assignment = {
 			val a = newDeepAssignment()
 			a.id = "12345"
 			val s1 = new Submission
@@ -100,7 +101,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	}}
 
 	@Test def individuallyDownloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
-		val assignment = {
+		val assignment: Assignment = {
 			val a = newDeepAssignment()
 			a.id = "54321"
 			a.createdDate = new DateTime().minusHours(10)
@@ -157,20 +158,20 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		module.assignments = List(assignment).asJava
 		module.adminDepartment = dept
 
-		val beforeJsonData = json.writeValueAsString(Map(
+		val beforeJsonData: String = json.writeValueAsString(Map(
 			"assignment" -> assignment.id,
 			"module" -> module.id,
 			"department" -> dept.code
 		))
 
-		val afterJsonData = json.writeValueAsString(Map(
+		val afterJsonData: String = json.writeValueAsString(Map(
 			"assignment" -> assignment.id,
 			"module" -> module.id,
 			"department" -> dept.code,
 			"submission" -> "94624c3b-adda-0dd0-b0b0-REPLACE-THIS"
 		))
 
-		val afterLateJsonData = json.writeValueAsString(Map(
+		val afterLateJsonData: String = json.writeValueAsString(Map(
 			"assignment" -> assignment.id,
 			"module" -> module.id,
 			"department" -> dept.code,
@@ -180,28 +181,28 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		stopwatch.start("creating items")
 
-		val submitBefore = for (i <- 1 to 70)
+		val submitBefore: IndexedSeq[AuditEvent] = for (i <- 1 to 70)
 			yield AuditEvent(
 				eventId="ontime"+i, eventType="SubmitAssignment", eventStage="before", userId="bob",
 				eventDate=new DateTime(2009,12,1,0,0,0).plusSeconds(i),
 				data=beforeJsonData
 			)
 
-		val submitAfter = for (i <- 1 to 70)
+		val submitAfter: IndexedSeq[AuditEvent] = for (i <- 1 to 70)
 			yield AuditEvent(
 				eventId="ontime"+i, eventType="SubmitAssignment", eventStage="after", userId="bob",
 				eventDate=new DateTime(2009,12,1,0,0,0).plusMinutes(5).plusSeconds(i),
 				data=afterLateJsonData.replace("REPLACE-THIS", "%012d".format(i))
 			)
 
-		val submitBeforeLate = for (i <- 1 to 70)
+		val submitBeforeLate: IndexedSeq[AuditEvent] = for (i <- 1 to 70)
 			yield AuditEvent(
 				eventId="late"+i, eventType="SubmitAssignment", eventStage="before", userId="bob",
 				eventDate=new DateTime(2010,1,1,0,0,0).plusSeconds(i),
 				data=beforeJsonData
 			)
 
-		val submitAfterLate = for (i <- 1 to 70)
+		val submitAfterLate: IndexedSeq[AuditEvent] = for (i <- 1 to 70)
 			yield AuditEvent(
 				eventId="late"+i, eventType="SubmitAssignment", eventStage="after", userId="bob",
 				eventDate=new DateTime(2010,1,1,0,0,0).plusMinutes(5).plusSeconds(i),
@@ -210,12 +211,12 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		stopwatch.stop()
 
-		val events = submitBefore ++ submitAfter ++ submitBeforeLate ++ submitAfterLate
+		val events: IndexedSeq[AuditEvent] = submitBefore ++ submitAfter ++ submitBeforeLate ++ submitAfterLate
 		events.foreach { event =>
 			event.parsedData = Option(event.data).map { json.readValue(_, classOf[Map[String, Any]]) }
 		}
 
-		val beforeEvents = events.filter { _.eventStage == "before" }
+		val beforeEvents: IndexedSeq[AuditEvent] = events.filter { _.eventStage == "before" }
 
 		beforeEvents.zipWithIndex.foreach { case (auditEvent, i) =>
 			auditEvent.id = i
@@ -237,17 +238,17 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		stopwatch.stop()
 
-		val paged0 = queryService.submissionsForModules(Seq(module), None, 100).futureValue
+		val paged0: PagedAuditEvents = queryService.submissionsForModules(Seq(module), None, 100).futureValue
 		paged0.items.length should be (100)
 		paged0.totalHits should be (140)
 
-		val paged1 = queryService.submissionsForModules(Seq(module), paged0.lastUpdatedDate, 100).futureValue
+		val paged1: PagedAuditEvents = queryService.submissionsForModules(Seq(module), paged0.lastUpdatedDate, 100).futureValue
 		// asked to batch in 100s, but only 40 left
 		paged1.items.length should be (40)
 		paged1.totalHits should be (40) // This excludes anything before lastUpdatedDate, which may be confusing.
 
 		// check pager for noteworthy submissions
-		val paged2 = queryService.noteworthySubmissionsForModules(Seq(module), None, 100).futureValue
+		val paged2: PagedAuditEvents = queryService.noteworthySubmissionsForModules(Seq(module), None, 100).futureValue
 		paged2.items.length should be (70)
 		paged2.totalHits should be (70)
 	}}

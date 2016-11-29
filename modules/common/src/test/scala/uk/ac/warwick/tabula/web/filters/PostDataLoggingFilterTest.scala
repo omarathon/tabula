@@ -3,15 +3,15 @@ package uk.ac.warwick.tabula.web.filters
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Future
 
-import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.{Level, Logger}
 import com.google.common.net.MediaType
 import org.junit.Ignore
 import org.springframework.mock.web._
 import org.springframework.util.FileCopyUtils
 import org.springframework.web.multipart.support.StandardServletMultipartResolver
 import uk.ac.warwick.sso.client.SSOClientFilter
-import uk.ac.warwick.tabula.{TestLoggerFactory, TestBase}
-import org.apache.http.entity.{StringEntity, ContentType}
+import uk.ac.warwick.tabula.{TestBase, TestLoggerFactory}
+import org.apache.http.entity.{ContentType, StringEntity}
 
 class PostDataLoggingFilterTest extends TestBase {
 	val request = new MockHttpServletRequest
@@ -23,7 +23,7 @@ class PostDataLoggingFilterTest extends TestBase {
 	request.setRequestURI("/url.php")
 
 	// Capture POST_LOGGER output
-	val testLogger = TestLoggerFactory.getTestLogger("POST_LOGGER")
+	val testLogger: Logger = TestLoggerFactory.getTestLogger("POST_LOGGER")
 
 	private def withSsoUser(user:String)(fn: =>Unit): Unit = {
 		withUser(user) {

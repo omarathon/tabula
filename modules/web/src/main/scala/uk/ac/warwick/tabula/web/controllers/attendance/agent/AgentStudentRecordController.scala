@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.{StudentRecordCommand, GroupsPoints}
+import uk.ac.warwick.tabula.commands.attendance.{GroupsPoints, StudentRecordCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, HasMonthNames}
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoin
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}/{academicYear}/{student}/record"))
@@ -28,7 +29,7 @@ class AgentStudentRecordController extends AttendanceController
 	var points: Seq[AttendanceMonitoringPoint] = _
 
 	@InitBinder // do on each request
-	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
+	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
 			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
 	}
 
@@ -69,7 +70,7 @@ class AgentStudentRecordController extends AttendanceController
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		cmd.populate()
 		render(relationshipType, academicYear, student)
 	}
@@ -92,7 +93,7 @@ class AgentStudentRecordController extends AttendanceController
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(relationshipType, academicYear, student)
 		} else {

@@ -10,7 +10,7 @@ trait DisabilityDaoComponent {
 }
 
 trait AutowiringDisabilityDaoComponent extends DisabilityDaoComponent {
-	val disabilityDao = Wire[DisabilityDao]
+	val disabilityDao: DisabilityDao = Wire[DisabilityDao]
 }
 
 trait DisabilityDao {
@@ -22,9 +22,9 @@ trait DisabilityDao {
 @Repository
 class DisabilityDaoImpl extends DisabilityDao with Daoisms {
 
-	def saveOrUpdate(disability: Disability) = session.saveOrUpdate(disability)
+	def saveOrUpdate(disability: Disability): Unit = session.saveOrUpdate(disability)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[Disability] =
 		session.newQuery[Disability]("from Disability disability where code = :code").setString("code", code).uniqueResult
 
 	def getAllDisabilityCodes: Seq[String] =

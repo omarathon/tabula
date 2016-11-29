@@ -5,10 +5,10 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet, WeekRange}
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Department, Module}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{TermServiceImpl, TermServiceComponent, SmallGroupService, SmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, TermServiceComponent, TermServiceImpl}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
@@ -16,14 +16,14 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 	private trait CommandTestSupport extends SmallGroupServiceComponent with PopulateCopySmallGroupSetsRequestDefaults {
 		self: CopySmallGroupSetsRequestState with CopySmallGroupSetsCommandState =>
 
-		val smallGroupService = smartMock[SmallGroupService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		department.id = "departmentId"
 
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 		module.adminDepartment = department
 	}
@@ -68,11 +68,11 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		val (d, m) = (department, Seq(module))
 
 		val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
-			val department = d
-			val modules = m
+			val department: Department = d
+			val modules: Seq[Module] = m
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Read, module)
@@ -91,7 +91,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedModule(): Unit = {
 		val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			department.id = "d id"
 
 			val modules = Seq(new Module(code = "in101", adminDepartment = Fixtures.department("other")))
@@ -105,7 +105,7 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState with TermServiceComponent {
 			val termService = new TermServiceImpl
 
-			val department = ValidationFixture.this.department
+			val department: Department = ValidationFixture.this.department
 			val modules = Seq(ValidationFixture.this.module)
 
 			// Populate some default values
@@ -163,9 +163,9 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 		command.sourceAcademicYear = new AcademicYear(2014) // 14/15
 		command.targetAcademicYear = new AcademicYear(2015) // 15/16
 
-		val set = Fixtures.smallGroupSet("set")
-		val group = Fixtures.smallGroup("group")
-		val event = Fixtures.smallGroupEvent("event")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("set")
+		val group: SmallGroup = Fixtures.smallGroup("group")
+		val event: SmallGroupEvent = Fixtures.smallGroupEvent("event")
 
 		set.groups.add(group)
 		group.addEvent(event)
@@ -223,8 +223,8 @@ class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
 		val command = new CopySmallGroupSetsDescription with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
 			override val eventName = "test"
-			val department = d
-			val modules = m
+			val department: Department = d
+			val modules: Seq[Module] = m
 
 			// Populate some default values
 			targetAcademicYear = new AcademicYear(2014)

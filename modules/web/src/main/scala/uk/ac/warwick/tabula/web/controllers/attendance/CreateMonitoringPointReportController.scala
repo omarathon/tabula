@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 
@@ -33,7 +34,7 @@ class CreateMonitoringPointReportController extends AttendanceController {
 		CreateMonitoringPointReportCommand(department, user)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def createAsJson(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("command") command: CreateMonitoringPointReportCommand, errors: Errors)(implicit response: HttpServletResponse) = {
+	def createAsJson(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("command") command: CreateMonitoringPointReportCommand, errors: Errors)(implicit response: HttpServletResponse): Mav = {
 		request.copyTo(command, errors)
 		command.validate(errors)
 
@@ -53,7 +54,7 @@ class CreateMonitoringPointReportController extends AttendanceController {
 
 @JsonAutoDetect
 class CreateMonitoringPointReportRequest extends Serializable {
-	@transient var profileService = Wire[ProfileService]
+	@transient var profileService: ProfileService = Wire[ProfileService]
 
 	@BeanProperty var period: String = _
 	@BeanProperty var academicYear: String = _

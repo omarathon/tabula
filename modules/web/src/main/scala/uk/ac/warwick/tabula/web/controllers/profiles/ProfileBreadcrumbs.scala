@@ -39,14 +39,14 @@ object ProfileBreadcrumbs {
 
 		case class Identity(member: Member) extends ProfileBreadcrumb {
 			val identifier = IdentityIdentifier
-			val title = member.userId
+			val title: String = member.userId
 			val url = Some(Routes.Profile.identity(member))
 			override val tooltip: String = member.fullName.getOrElse("")
 		}
 
 		case class IdentityForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
 			val identifier = IdentityIdentifier
-			val title = scyd.studentCourseDetails.student.userId
+			val title: String = scyd.studentCourseDetails.student.userId
 			val url = Some(Routes.Profile.identity(scyd))
 			override val tooltip: String = scyd.studentCourseDetails.student.fullName.getOrElse("")
 		}
@@ -65,7 +65,7 @@ object ProfileBreadcrumbs {
 
 		case class RelationshipTypeForScyd(scyd: StudentCourseYearDetails, relationshipType: StudentRelationshipType) extends ProfileBreadcrumb {
 			val identifier = RelationshipTypeIdentifier(relationshipType)
-			val title = relationshipType.agentRole.capitalize
+			val title: String = relationshipType.agentRole.capitalize
 			val url = Some(Routes.Profile.relationshipType(scyd, relationshipType))
 		}
 

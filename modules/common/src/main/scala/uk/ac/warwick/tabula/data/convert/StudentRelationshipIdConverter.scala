@@ -10,7 +10,7 @@ class StudentRelationshipIdConverter extends TwoWayConverter[String, StudentRela
 
 	@Autowired var service: RelationshipService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getStudentRelationshipById }).orNull
-	override def convertLeft(relationshipType: StudentRelationship) = (Option(relationshipType) map {_.id}).orNull
+	override def convertRight(id: String): StudentRelationship = (Option(id) flatMap { service.getStudentRelationshipById }).orNull
+	override def convertLeft(relationshipType: StudentRelationship): String = (Option(relationshipType) map {_.id}).orNull
 
 }

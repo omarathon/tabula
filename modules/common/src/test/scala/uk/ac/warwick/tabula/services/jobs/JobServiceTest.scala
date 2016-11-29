@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class JobServiceTest extends TestBase with Mockito {
 
 	val service = new JobService
-	val jobDao = smartMock[JobDao]
+	val jobDao: JobDao = smartMock[JobDao]
 	service.jobDao = jobDao
 
 	@Test def add() {

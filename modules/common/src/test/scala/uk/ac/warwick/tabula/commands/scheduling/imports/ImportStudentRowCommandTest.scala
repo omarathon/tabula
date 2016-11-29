@@ -21,39 +21,39 @@ trait ComponentMixins extends Mockito
 		with ProfileServiceComponent
 		with Tier4RequirementImporterComponent
 		with ModeOfAttendanceImporterComponent {
-	var profileService = smartMock[ProfileService]
-	var tier4RequirementImporter = smartMock[Tier4RequirementImporter]
-	var modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+	var profileService: ProfileService = smartMock[ProfileService]
+	var tier4RequirementImporter: Tier4RequirementImporter = smartMock[Tier4RequirementImporter]
+	var modeOfAttendanceImporter: ModeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
 }
 
 trait ImportCommandFactoryForTesting extends ComponentMixins {
 	val importCommandFactory = new ImportCommandFactory
 	importCommandFactory.test = true
 
-	var maintenanceModeService = smartMock[MaintenanceModeService]
+	var maintenanceModeService: MaintenanceModeService = smartMock[MaintenanceModeService]
 	maintenanceModeService.enabled returns false
 	importCommandFactory.maintenanceModeService = maintenanceModeService
 
 	// needed for importCommandFactor for ImportStudentCourseCommand and also needed for ImportStudentRowCommand
-	val memberDao = smartMock[MemberDao]
+	val memberDao: MemberDao = smartMock[MemberDao]
 }
 
 trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting with PropertyCopyingSetup {
 	importCommandFactory.memberDao = memberDao
 
-	val relationshipService = smartMock[RelationshipService]
+	val relationshipService: RelationshipService = smartMock[RelationshipService]
 	relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 	importCommandFactory.relationshipService = relationshipService
 
 	importCommandFactory.studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 
-	val courseAndRouteService = smartMock[CourseAndRouteService]
-	val route = smartMock[Route]
+	val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
+	val route: Route = smartMock[Route]
 	courseAndRouteService.getRouteByCode("C100") returns Some(new Route("c100", smartMock[Department]))
 	courseAndRouteService.getRouteByCode(null) returns None
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
-	val courseImporter = smartMock[CourseImporter]
+	val courseImporter: CourseImporter = smartMock[CourseImporter]
 	courseImporter.getCourseByCodeCached("UESA-H612") returns Some(new Course("UESA-H612", "Computer Systems Engineering MEng"))
 	courseImporter.getCourseByCodeCached(null) returns None
 	importCommandFactory.courseImporter = courseImporter
@@ -65,7 +65,7 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 }
 
 trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
-	val sitsStatusImporter = smartMock[SitsStatusImporter]
+	val sitsStatusImporter: SitsStatusImporter = smartMock[SitsStatusImporter]
 	sitsStatusImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
 	sitsStatusImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 	importCommandFactory.sitsStatusImporter = sitsStatusImporter
@@ -74,7 +74,7 @@ trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
 	department.code = "ph"
 	department.fullName = "Philosophy"
 
-	val modAndDeptService = smartMock[ModuleAndDepartmentService]
+	val modAndDeptService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	modAndDeptService.getDepartmentByCode("ph") returns Some(department)
 	modAndDeptService.getDepartmentByCode("PH") returns Some(department)
 	importCommandFactory.modAndDeptService = modAndDeptService
@@ -142,7 +142,7 @@ trait MockedResultSet extends Mockito {
 		rs.getBigDecimal("sce_agreed_mark") returns new JBigDecimal(66.666666)
 	}
 
-	val rs = getResultSet()
+	val rs: ResultSet = getResultSet()
 }
 
 // scalastyle:off magic.number
@@ -200,7 +200,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		new Environment {
 			val student = new StudentMember()
 
-			def createRelationship(sprCode: String, scjCode: String) = {
+			def createRelationship(sprCode: String, scjCode: String): MemberStudentRelationship = {
 				val rel = new MemberStudentRelationship()
 				rel.studentMember = student
 				val scd = new StudentCourseDetails()
@@ -210,16 +210,16 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				rel
 			}
 
-			val rel1 = createRelationship(sprCode="1111111/1", scjCode="1111111/1")
-			val rel2 = createRelationship(sprCode="1111111/2", scjCode="1111111/2")
-			val rel3 = createRelationship(sprCode="1111111/1", scjCode="1111111/3")
+			val rel1: MemberStudentRelationship = createRelationship(sprCode="1111111/1", scjCode="1111111/1")
+			val rel2: MemberStudentRelationship = createRelationship(sprCode="1111111/2", scjCode="1111111/2")
+			val rel3: MemberStudentRelationship = createRelationship(sprCode="1111111/1", scjCode="1111111/3")
 			relationshipService.getAllCurrentRelationships(student) returns Seq(rel1, rel2, rel3)
 
 			row.sprCode = "1111111/1"
 			row.sprStatusCode = "P"
 			row.endDate = new DateTime().minusMonths(6).toLocalDate
 
-			val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), student)
+			val courseCommand: ImportStudentCourseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), student)
 			courseCommand.applyInternal()
 
 			rel1.endDate.toLocalDate should be (row.endDate)
@@ -234,10 +234,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 
-			val yearCommand = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails)
+			val yearCommand: ImportStudentCourseYearCommand = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails)
 
 			// now the set up is done, run the apply command and test it:
-			val studentCourseYearDetails = yearCommand.applyInternal()
+			val studentCourseYearDetails: StudentCourseYearDetails = yearCommand.applyInternal()
 
 			// and check stuff:
 			studentCourseYearDetails.academicYear.toString should be ("10/11")
@@ -259,7 +259,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 
-			val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), smartMock[StudentMember])
+			val courseCommand: ImportStudentCourseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), smartMock[StudentMember])
 
 			importCommandFactory.relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
@@ -313,7 +313,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
-			val member = rowCommand.applyInternal()
+			val member: Member = rowCommand.applyInternal()
 
 			// test that member contains the expected data:
 			member.title should be ("Mr")
@@ -356,8 +356,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	}
 
 	trait MockedResultSetWithNulls extends Mockito {
-		val rs = smartMock[ResultSet]
-		val rsMetaData = smartMock[ResultSetMetaData]
+		val rs: ResultSet = smartMock[ResultSet]
+		val rsMetaData: ResultSetMetaData = smartMock[ResultSetMetaData]
 		rs.getMetaData returns rsMetaData
 
 		rsMetaData.getColumnCount returns 4
@@ -400,7 +400,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
-			val member = rowCommand.applyInternal()
+			val member: Member = rowCommand.applyInternal()
 
 			// test that member contains the expected data:
 			member.title should be ("Mr")
@@ -446,7 +446,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns None
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
-			val member = rowCommand.applyInternal()
+			val member: Member = rowCommand.applyInternal()
 			member match {
 				case stu: StudentMember =>
 					stu.freshStudentCourseDetails.size should be (1)
@@ -475,12 +475,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			// if personalTutorSource is "local", there should be no update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
 
-			val member = rowCommand.applyInternal() match {
+			val member: Option[StudentMember] = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
 				case _ => None
 			}
 
-			val studentMember = member.get
+			val studentMember: StudentMember = member.get
 
 			studentMember.freshStudentCourseDetails.size should not be 0
 
@@ -507,12 +507,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns Nil
 
-			val member = rowCommand.applyInternal() match {
+			val member: Option[StudentMember] = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
 				case _ => None
 			}
 
-			val studentMember = member.get
+			val studentMember: StudentMember = member.get
 
 			studentMember.mostSignificantCourseDetails should not be null
 
@@ -524,7 +524,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		new Environment {
 			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
-			var student = rowCommand.applyInternal().asInstanceOf[StudentMember]
+			var student: StudentMember = rowCommand.applyInternal().asInstanceOf[StudentMember]
 			student.disability should be (Some(disabilityQ))
 
 			// override to test for attempted import of unknown disability
@@ -554,7 +554,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			thisRowCommand.profileService = profileService
 			thisRowCommand.tier4RequirementImporter = tier4RequirementImporter
 
-			val result = thisRowCommand.applyInternal().asInstanceOf[StudentMember]
+			val result: StudentMember = thisRowCommand.applyInternal().asInstanceOf[StudentMember]
 			result.freshStudentCourseDetails.size should be (2)
 			result.freshStudentCourseDetails.find(_.scjCode == "0770884/1").exists(_.freshStudentCourseYearDetails.size == 2)
 			result.freshStudentCourseDetails.find(_.scjCode == "0770884/2").exists(_.freshStudentCourseYearDetails.size == 2)

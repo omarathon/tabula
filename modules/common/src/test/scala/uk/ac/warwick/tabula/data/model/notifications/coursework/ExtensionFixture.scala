@@ -7,38 +7,39 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito}
+import uk.ac.warwick.userlookup.User
 
 trait ExtensionFixture extends Mockito{
 
 	val studentMember = new StudentMember
 	studentMember.universityId = "student"
-	val student = studentMember.asSsoUser
+	val student: User = studentMember.asSsoUser
 
 	val adminMember = new StaffMember
 	adminMember.universityId = "admin"
 	adminMember.userId = "admin"
-	val admin = adminMember.asSsoUser
+	val admin: User = adminMember.asSsoUser
 
 	val adminMember2 = new StaffMember
 	adminMember2.universityId = "admin2"
 	adminMember2.userId = "admin2"
-	val admin2 = adminMember2.asSsoUser
+	val admin2: User = adminMember2.asSsoUser
 
 	val adminMember3 = new StaffMember
 	adminMember3.universityId = "admin3"
 	adminMember3.userId = "admin3"
-	val admin3 = adminMember3.asSsoUser
+	val admin3: User = adminMember3.asSsoUser
 
 	val otherAdmins = Seq(admin2, admin3)
 
 	val userLookup = new MockUserLookup
 	userLookup.users = Map("admin" -> admin, "admin2" -> admin2, "admin3" -> admin3)
-	val extensionManagers = UserGroup.ofUsercodes
+	val extensionManagers: UserGroup = UserGroup.ofUsercodes
 	extensionManagers.userLookup = userLookup
 	extensionManagers.includedUserIds = Seq("admin", "admin2", "admin3")
 
 	val department = new Department
-	val permissionsService = mock[PermissionsService]
+	val permissionsService: PermissionsService = mock[PermissionsService]
 	when(permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition)) thenReturn extensionManagers
 	department.permissionsService = permissionsService
 

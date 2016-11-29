@@ -5,15 +5,16 @@ package uk.ac.warwick.tabula.web.views
  */
 
 import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 
 import freemarker.ext.beans.BeanModel
 import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{RequestInfo, ScalaConcurrentMapHelpers}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
 
 import scala.collection.JavaConverters._
@@ -52,7 +53,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 			case model: TemplateModel => superWrap(model)
 			case sobj if isScalaCompiled(sobj) =>
 				new ScalaHashModel(obj, this, useWrapperCache) with SecurityServiceComponent {
-					def securityService = ScalaBeansWrapper.this.securityService
+					def securityService: SecurityService = ScalaBeansWrapper.this.securityService
 				}
 			case _ => superWrap(obj)
 		}
@@ -146,9 +147,9 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 			}
 		}
 
-		var cache = JConcurrentMap[String, TemplateModel]()
+		var cache: ConcurrentHashMap[String, TemplateModel] with ScalaConcurrentMapHelpers[String, TemplateModel] = JConcurrentMap[String, TemplateModel]()
 
-		def clear() = cache.clear()
+		def clear(): Unit = cache.clear()
 	}
 
 	private def user = RequestInfo.fromThread.get.user
@@ -199,5 +200,5 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 object ScalaHashModel {
 	type Getter = java.lang.reflect.Method
 	type PermissionsFetcher = Any => Seq[Permission]
-	val gettersCache = JConcurrentMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]()
+	val gettersCache: ConcurrentHashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]] with ScalaConcurrentMapHelpers[Class[_], Map[String, (Getter, PermissionsFetcher)]] = JConcurrentMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]()
 }

@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.timetables._
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -49,7 +50,7 @@ trait UpdateSmallGroupEventFromExternalSystemCommandState extends ImportSmallGro
 	def group: SmallGroup
 	def event: SmallGroupEvent
 
-	lazy val timetableEvents =
+	lazy val timetableEvents: Seq[TimetableEvent] =
 		Try {
 			Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
 				.events
@@ -109,7 +110,7 @@ trait UpdateSmallGroupEventFromExternalSystemPermissions extends RequiresPermiss
 trait UpdateSmallGroupEventFromExternalSystemDescription extends Describable[SmallGroupEvent] {
 	self: UpdateSmallGroupEventFromExternalSystemCommandState =>
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.smallGroupEvent(event)
 
 }
@@ -119,7 +120,7 @@ trait SmallGroupEventUpdater {
 }
 
 trait CommandSmallGroupEventUpdater extends SmallGroupEventUpdater {
-	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+	def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent = {
 		val command = ModifySmallGroupEventCommand.edit(module, set, group, event)
 		command.weekRanges = weeks
 		command.day = day

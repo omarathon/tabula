@@ -13,10 +13,10 @@ class DismissHiddenIntroCommand(user: CurrentUser, settings: UserSettings, setti
 
 	PermissionCheck(Permissions.UserSettings.Update, settings)
 
-	var service = Wire[UserSettingsService]
+	var service: UserSettingsService = Wire[UserSettingsService]
 	var dismiss: Boolean = settings.hiddenIntros.contains(settingHash)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Unit = transactional() {
 		if (dismiss && !settings.hiddenIntros.contains(settingHash)) settings.hiddenIntros = (settings.hiddenIntros :+ settingHash)
 		else if (!dismiss) settings.hiddenIntros = settings.hiddenIntros.filterNot(_ == settingHash)
 

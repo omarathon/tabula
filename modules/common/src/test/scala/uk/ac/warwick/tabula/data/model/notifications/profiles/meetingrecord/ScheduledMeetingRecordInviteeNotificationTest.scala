@@ -42,11 +42,11 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 	}
 
 	trait TitleFixture {
-		val agent = Fixtures.staff("1234567", "tutor")
+		val agent: StaffMember = Fixtures.staff("1234567", "tutor")
 		agent.firstName = "Tutor"
 		agent.lastName = "Name"
 
-		val student = Fixtures.student("7654321", "student")
+		val student: StudentMember = Fixtures.student("7654321", "student")
 		student.firstName = "Student"
 		student.lastName = "Name"
 
@@ -54,7 +54,7 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 
 		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
 
-		val thirdParty = Fixtures.staff("1122331", "3rdparty")
+		val thirdParty: StaffMember = Fixtures.staff("1122331", "3rdparty")
 		thirdParty.firstName = "Third"
 		thirdParty.lastName = "Party"
 
@@ -62,19 +62,19 @@ class ScheduledMeetingRecordInviteeNotificationTest extends TestBase with Mockit
 	}
 
 	@Test def titleEditedByTutor() { new TitleFixture {
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), agent.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), agent.asSsoUser, meeting, relationship)
 		notification.title should be ("Personal tutor meeting with Tutor Name edited by Tutor Name")
 		notification.recipient.getUserId should be (student.userId)
 	}}
 
 	@Test def titleEditedByStudent() { new TitleFixture {
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), student.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), student.asSsoUser, meeting, relationship)
 		notification.title should be ("Personal tutor meeting with Student Name edited by Student Name")
 		notification.recipient.getUserId should be (agent.userId)
 	}}
 
 	@Test def titleEditedByThirdParty() { new TitleFixture {
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), thirdParty.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordInviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("edited"), thirdParty.asSsoUser, meeting, relationship)
 		notification.title should be ("Personal tutor meeting with Tutor Name edited by Third Party")
 		notification.recipient.getUserId should be (student.userId)
 	}}

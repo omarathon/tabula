@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
  */
 class AcademicYearConverter extends TwoWayConverter[String, AcademicYear] {
 
-	implicit var termService = Wire[TermService]
+	implicit var termService: TermService = Wire[TermService]
 
-	override def convertRight(year: String) =
+	override def convertRight(year: String): AcademicYear =
 		if ("current" == year) AcademicYear.findAcademicYearContainingDate(DateTime.now)
 		else if ("sits" == year) AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 		else if (year.hasText)
@@ -24,7 +24,7 @@ class AcademicYearConverter extends TwoWayConverter[String, AcademicYear] {
 			}
 		else null
 
-	override def convertLeft(year: AcademicYear) = Option(year) match {
+	override def convertLeft(year: AcademicYear): String = Option(year) match {
 		case Some(year) => year.startYear.toString
 		case None => null
 	}

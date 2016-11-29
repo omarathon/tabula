@@ -34,7 +34,7 @@ class DownloadTimetableCalendarController extends ProfilesController
 		@PathVariable member: Member,
 		@RequestParam(value = "calendarView", required = false) calendarView: String,
 		@RequestParam(value = "renderDate", required = false) renderDate: LocalDate
-	) = {
+	): PDFView = {
 		val thisRenderDate = Option(renderDate).getOrElse(DateTime.now.toLocalDate)
 		val thisCalendarView = Option(calendarView).getOrElse("month")
 		val (startDate, endDate) = Option(calendarView).getOrElse("month") match {

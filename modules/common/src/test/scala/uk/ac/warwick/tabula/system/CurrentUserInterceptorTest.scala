@@ -15,9 +15,9 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
 	val interceptor = new CurrentUserInterceptor
 
-	val roleService = mock[RoleService]
-	val profileService = mock[ProfileService]
-	val departmentService = mock[ModuleAndDepartmentService]
+	val roleService: RoleService = mock[RoleService]
+	val profileService: ProfileService = mock[ProfileService]
+	val departmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	val userLookup = new MockUserLookup
 
 	interceptor.roleService = roleService

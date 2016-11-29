@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{Manual, StudentSignUp}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -12,8 +12,8 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 	private trait Fixture{
-		val userLookup  =mock[UserLookupService]
-		val testGroup = new SmallGroupBuilder().withUserLookup(userLookup).build
+		val userLookup: UserLookupService =mock[UserLookupService]
+		val testGroup: SmallGroup = new SmallGroupBuilder().withUserLookup(userLookup).build
 		val user = new User("abcde")
 		user.setWarwickId("01234")
 
@@ -22,7 +22,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}}
 
-		val testGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
+		val testGroupSet: SmallGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
 		val allocateCommand = new AllocateSelfToGroupCommand(user, testGroupSet)
 		allocateCommand.group = testGroup
 
@@ -73,10 +73,10 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 	def requiresAllocateSelfPermission(){new Fixture {
 		val perms = new StudentSignupCommandPermissions with StudentSignUpCommandState{
 			val user = null
-			val groupSet = testGroupSet
+			val groupSet: SmallGroupSet = testGroupSet
 		}
 		perms.group = testGroup
-		val permissionsChecking = mock[PermissionsChecking]
+		val permissionsChecking: PermissionsChecking = mock[PermissionsChecking]
 		perms.permissionsCheck(permissionsChecking)
 		verify(permissionsChecking, times(1)).PermissionCheck(Permissions.SmallGroups.AllocateSelf,testGroup.groupSet)
 	}}
@@ -93,7 +93,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
 		signUpValidator.group = testGroup
 		unsignUpValidator.group = testGroup
-		val errors  = mock[Errors]
+		val errors: Errors = mock[Errors]
 		testGroup.groupSet.allocationMethod = StudentSignUp
 		testGroup.groupSet.openForSignups =true
 		testGroupSet.allowSelfGroupSwitching = true

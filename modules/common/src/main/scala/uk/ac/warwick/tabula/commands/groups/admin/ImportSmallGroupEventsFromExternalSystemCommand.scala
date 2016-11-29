@@ -19,12 +19,13 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import ImportSmallGroupEventsFromExternalSystemCommand._
 
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.util.Try
 
 object ImportSmallGroupEventsFromExternalSystemCommand {
 
-	val Timeout = 15.seconds
+	val Timeout: FiniteDuration = 15.seconds
 
 	val RequiredPermission = Permissions.SmallGroups.Update
 
@@ -42,7 +43,7 @@ object ImportSmallGroupEventsFromExternalSystemCommand {
 			with ScientiaHttpTimetableFetchingServiceComponent
 			with LookupEventsFromModuleTimetable
 
-	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent) =
+	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent): Boolean =
 		event.year == academicYear &&
 			(event.eventType == TimetableEventType.Practical || event.eventType == TimetableEventType.Seminar || event.eventType == TimetableEventType.Other("WRB-ACTIVE"))
 
@@ -73,7 +74,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
 		with ImportSmallGroupEventsFromExternalSystemRequestState {
 	self: SmallGroupEventGenerator with UserLookupComponent with SmallGroupServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): mutable.Buffer[SmallGroupEvent] = transactional() {
 		val events = eventsToImport.asScala
 			.map { e => (e.timetableEvent, Option(e.group)) }
 			.filter { case (_, group) => group.nonEmpty }
@@ -128,7 +129,7 @@ trait ImportSmallGroupEventsFromExternalSystemPermissions extends RequiresPermis
 trait ImportSmallGroupEventsFromExternalSystemDescription extends Describable[Seq[SmallGroupEvent]] {
 	self: ImportSmallGroupEventsFromExternalSystemCommandState =>
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.smallGroupSet(set)
 
 }

@@ -14,7 +14,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 	val heron = new Heron()
 	val heron2 = new Heron()
 
-	def testNotification(target: Heron, date: DateTime) = {
+	def testNotification(target: Heron, date: DateTime): ScheduledNotification[Heron] = {
 		val sn = new ScheduledNotification[Heron]("heronWarning", target, date)
 		sn
 	}

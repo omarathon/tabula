@@ -40,12 +40,12 @@ class DeleteAssignmentCommand(val module: Module = null, val assignment: Assignm
 		commonChecks(errors)
 	}
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Assignment = transactional() {
 		assignment.markDeleted()
 		assignment
 	}
 
-	override def describe(d: Description) = d.assignment(assignment)
+	override def describe(d: Description): Unit = d.assignment(assignment)
 
 	override def transformResult(assignment: Assignment) = Seq(assignment)
 

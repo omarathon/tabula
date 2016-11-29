@@ -33,11 +33,11 @@ object AppCommentCommand {
 			with AppCommentCommandRequest
 			with ReadOnly with Public {
 
-			var mailSender = Wire[RedirectingMailSender]("studentMailSender")
-			var adminMailAddress = Wire.property("${mail.admin.to}")
-			var freemarker = Wire.auto[Configuration]
-			var deptAdminTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
-			var webTeamTemplate = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
+			var mailSender: RedirectingMailSender = Wire[RedirectingMailSender]("studentMailSender")
+			var adminMailAddress: String = Wire.property("${mail.admin.to}")
+			var freemarker: Configuration = Wire.auto[Configuration]
+			var deptAdminTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback-deptadmin.ftl")
+			var webTeamTemplate: Template = freemarker.getTemplate("/WEB-INF/freemarker/emails/appfeedback.ftl")
 		}
 }
 
@@ -53,7 +53,7 @@ class AppCommentCommandInternal(val user: CurrentUser) extends CommandInternal[F
 		usercode = user.apparentUser.getUserId
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Future[JBoolean] = {
 		val deptAdmin: Option[User] = {
 			Option(user) match {
 				case Some(loggedInUser) if loggedInUser.loggedIn =>
@@ -112,7 +112,7 @@ trait AppCommentDescription extends Describable[Future[JBoolean]] {
 
 	override def describe(d: Description) {}
 
-	override def describeResult(d: Description) = d.properties(
+	override def describeResult(d: Description): Unit = d.properties(
 		"name" -> name,
 		"email" -> email,
 		"message" -> message

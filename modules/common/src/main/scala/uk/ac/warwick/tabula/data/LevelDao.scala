@@ -8,7 +8,7 @@ trait LevelDaoComponent {
 }
 
 trait AutowiringLevelDaoComponent extends LevelDaoComponent {
-	val levelDao = Wire[LevelDao]
+	val levelDao: LevelDao = Wire[LevelDao]
 }
 
 trait LevelDao {
@@ -21,9 +21,9 @@ trait LevelDao {
 @Repository
 class LevelDaoImpl extends LevelDao with Daoisms {
 
-	def saveOrUpdate(level: Level) = session.saveOrUpdate(level)
+	def saveOrUpdate(level: Level): Unit = session.saveOrUpdate(level)
 
-	def getByCode(code: String) = {
+	def getByCode(code: String): Option[Level] = {
 		session.newQuery[Level]("from StudyLevel level where code = :code").setString("code", code).uniqueResult
 	}
 

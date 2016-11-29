@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.exams
 
-import org.openqa.selenium.By
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen {
 
-	val year = FunctionalTestAcademicYear.currentSITS.startYear
+	val year: Int = FunctionalTestAcademicYear.currentSITS.startYear
 
 	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
 
@@ -74,7 +74,7 @@ class AdministerExamsTest extends ExamFixtures
 			pageSource contains "Module-XXX01-Exam1-edited" should be {true}
 	}
 
-	def getModuleInfo(moduleCode: String) = {
+	def getModuleInfo(moduleCode: String): WebElement = {
 		val moduleInfoBlocks = findAll(className("module-info"))
 
 		if (moduleInfoBlocks.isEmpty)

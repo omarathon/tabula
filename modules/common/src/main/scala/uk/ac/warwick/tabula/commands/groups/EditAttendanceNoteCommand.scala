@@ -34,7 +34,7 @@ abstract class EditAttendanceNoteCommand(
 
 	self: SmallGroupServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
 
-	def populate() = {
+	def populate(): Unit = {
 		note = attendanceNote.note
 		attachedFile = attendanceNote.attachment
 		absenceType = attendanceNote.absenceType
@@ -59,7 +59,7 @@ abstract class EditAttendanceNoteCommand(
 		})
 	}
 
-	def applyInternal() = {
+	def applyInternal(): SmallGroupEventAttendanceNote = {
 		attendanceNote.note = note
 
 		if (attendanceNote.attachment != null && attachedFile == null) {
@@ -83,7 +83,7 @@ abstract class EditAttendanceNoteCommand(
 trait AttendanceNoteValidation extends SelfValidating {
 	self: AttendanceNoteCommandState =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		if (absenceType == null) {
 			errors.rejectValue("absenceType", "attendanceNote.absenceType.empty")
 		}

@@ -31,7 +31,7 @@ abstract class FormValue extends BindListener {
 	override def onBind(result: BindingResult) {}
 	def persist(value: SavedFormValue)
 
-	protected def safeToString(value: Any) = Option(value).map { _.toString }.getOrElse("")
+	protected def safeToString(value: Any): String = Option(value).map { _.toString }.getOrElse("")
 }
 
 class StringFormValue(val field: FormField) extends FormValue {
@@ -52,7 +52,7 @@ class BooleanFormValue(val field: FormField) extends FormValue {
 class FileFormValue(val field: FormField) extends FormValue {
 	var file: UploadedFile = new UploadedFile
 
-	lazy val fileDao = Wire.auto[FileDao]
+	lazy val fileDao: FileDao = Wire.auto[FileDao]
 	override def onBind(result: BindingResult) { file.onBind(result) }
 	def persist(ssv: SavedFormValue) {
 		val savedAttachments = for (attachment <- file.attached.asScala) yield {
@@ -96,13 +96,13 @@ class SavedFormValue extends GeneratedId {
 	@Cascade(Array(CascadeType.PERSIST, CascadeType.MERGE, CascadeType.SAVE_UPDATE, CascadeType.REFRESH))
 	var attachments: JSet[FileAttachment] = JSet()
 
-	def hasAttachments = attachments != null && !attachments.isEmpty
+	def hasAttachments: Boolean = attachments != null && !attachments.isEmpty
 
 	var value: String = _
 }
 
 object SavedFormValue {
-	def withAttachments(submission: Submission, name: String, attachments: Set[FileAttachment]) = {
+	def withAttachments(submission: Submission, name: String, attachments: Set[FileAttachment]): SavedFormValue = {
 		val value = new SavedFormValue()
 		value.submission = submission
 		value.name = name
@@ -110,7 +110,7 @@ object SavedFormValue {
 		value
 	}
 
-	def withAttachments(feedback: Feedback, name: String, attachments: Set[FileAttachment]) = {
+	def withAttachments(feedback: Feedback, name: String, attachments: Set[FileAttachment]): SavedFormValue = {
 		val value = new SavedFormValue()
 		value.feedback = feedback
 		value.name = name

@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.services.turnitinlti
 
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, TestBase}
-import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 
 class TurnitinLtiServiceTest extends TestBase {
 
 	private trait Fixture {
 		val file = new FileAttachment
 
-		val assignment = Fixtures.assignment("1500 word assignment")
-		val module = Fixtures.module("ab101", "First year module")
+		val assignment: Assignment = Fixtures.assignment("1500 word assignment")
+		val module: Module = Fixtures.module("ab101", "First year module")
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2014)
 		assignment.id = "12345"

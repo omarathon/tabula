@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/resend-receipt"))
 class OldResendSubmissionEmail extends OldCourseworkController {
 
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
 	hideDeletedItems
 

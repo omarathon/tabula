@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
 abstract class ScalaFactoryBean[A : ClassTag] extends AbstractFactoryBean[A] {
-	override def getObjectType = classTag[A].runtimeClass
+	override def getObjectType: Class[_] = classTag[A].runtimeClass
 }
 
 class JsonObjectMapperFactory extends ScalaFactoryBean[ObjectMapper] {
@@ -18,7 +18,7 @@ class JsonObjectMapperFactory extends ScalaFactoryBean[ObjectMapper] {
 
 object JsonObjectMapperFactory {
 	val instance: ObjectMapper = createInstance
-	def createInstance = {
+	def createInstance: ObjectMapper = {
 		val mapper = new ObjectMapper
 		mapper.registerModule(DefaultScalaModule)
 		mapper.registerModule(new JodaModule)
@@ -36,7 +36,7 @@ object JsonHelper {
 
 	def toJson(value: Any): String = mapper.writeValueAsString(value)
 
-	def toMap[V](json: String)(implicit m: Manifest[V]) = fromJson[Map[String,V]](json)
+	def toMap[V](json: String)(implicit m: Manifest[V]): Map[String, V] = fromJson[Map[String,V]](json)
 
 	def fromJson[T](json: String)(implicit m : Manifest[T]): T = mapper.readValue[T](json)
 }

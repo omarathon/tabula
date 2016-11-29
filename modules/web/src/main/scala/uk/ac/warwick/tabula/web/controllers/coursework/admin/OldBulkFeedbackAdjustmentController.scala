@@ -13,6 +13,7 @@ import javax.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -31,7 +32,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 		)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form = {
+	def form: Mav = {
 		Mav(s"$urlPrefix/admin/assignments/feedback/bulk/bulk_adjustment",
 			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
 			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
@@ -40,7 +41,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors) = {
+	def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors): Mav = {
 		if (errors.hasFieldErrors("file"))
 			form
 		else
@@ -51,7 +52,7 @@ class OldBulkFeedbackAdjustmentController extends OldCourseworkController {
 	def confirm(
 		 @Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
 		 @PathVariable assignment: Assignment
-	) = {
+	): Mav = {
 		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
 			upload(cmd, errors)
 		} else {
@@ -71,7 +72,7 @@ class OldBulkFeedbackAdjustmentTemplateController extends OldCourseworkControlle
 		BulkAdjustmentTemplateCommand(mandatory(assignment))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]) = {
+	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
 		cmd.apply()
 	}
 

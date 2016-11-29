@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.services.timetables.{CachedPartialTimetableFetchingService, ScientiaConfiguration, ScientiaHttpTimetableFetchingService}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserLookupComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{FullCalendarEvent, JSONView}
 
@@ -20,7 +21,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	with AutowiringUserLookupComponent with AutowiringTermServiceComponent {
 
 	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department) = department
+	def activeDepartment(@PathVariable department: Department): Department = department
 
 	@ModelAttribute("command")
 	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentTimetablesCommand.CommandType = {
@@ -44,7 +45,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 			new ViewStudentPersonalTimetableCommandFactory() {
 				override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =
 					new Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest {
-						override val member = student
+						override val member: StudentMember = student
 						override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
 					}
 			},
@@ -53,7 +54,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	}
 
 	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def form(@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		Mav("profiles/timetables/department_draft",
 			"startDate" -> termService.getAcademicWeek(academicYear.dateInTermOne, 1).getStart.toLocalDate,
 			"canFilterStudents" -> false,
@@ -67,7 +68,7 @@ class DepartmentDraftTimetablesController extends ProfilesController
 	def post(
 		@ModelAttribute("command") cmd: DepartmentTimetablesCommand.CommandType,
 		@PathVariable department: Department
-	) = {
+	): Mav = {
 		val result = cmd.apply()
 		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
 		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))

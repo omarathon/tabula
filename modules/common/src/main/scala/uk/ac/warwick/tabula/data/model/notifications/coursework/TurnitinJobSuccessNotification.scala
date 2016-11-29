@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 @Entity
@@ -11,9 +13,9 @@ class TurnitinJobSuccessNotification
 	extends TurnitinReportNotification
 	with SingleRecipientNotification {
 
-	def title = "%s: The Turnitin check for \"%s\" has finished".format(assignment.module.code.toUpperCase, assignment.name)
+	def title: String = "%s: The Turnitin check for \"%s\" has finished".format(assignment.module.code.toUpperCase, assignment.name)
 
-	def content = {
+	def content: FreemarkerModel = {
 		val failedReports = items.asScala.map(_.entity).filter(_.lastTurnitinError != null)
 		FreemarkerModel("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
 			"assignment" -> assignment,
@@ -24,5 +26,5 @@ class TurnitinJobSuccessNotification
 		))
 	}
 
-	def recipient = agent
+	def recipient: User = agent
 }

@@ -20,7 +20,7 @@ trait ExportAttendanceToSitsServiceComponent {
 }
 
 trait AutowiringExportAttendanceToSitsServiceComponent extends ExportAttendanceToSitsServiceComponent {
-	var exportAttendanceToSitsService = Wire[ExportAttendanceToSitsService]
+	var exportAttendanceToSitsService: ExportAttendanceToSitsService = Wire[ExportAttendanceToSitsService]
 }
 
 trait ExportAttendanceToSitsService {
@@ -112,5 +112,5 @@ trait SitsDataSourceComponent {
 }
 
 trait AutowiringSitsDataSourceComponent extends SitsDataSourceComponent {
-	var sitsDataSource = Wire[DataSource]("sitsDataSource")
+	var sitsDataSource: DataSource = Wire[DataSource]("sitsDataSource")
 }

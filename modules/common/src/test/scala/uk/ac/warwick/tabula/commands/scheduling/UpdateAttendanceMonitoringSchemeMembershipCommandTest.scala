@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import uk.ac.warwick.tabula.commands.{DeserializesFilter, TaskBenchmarking}
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
-import uk.ac.warwick.tabula.{AcademicYear, FeaturesComponent, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 
 class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase with Mockito {
 
@@ -14,11 +15,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	trait CommandTestSupport extends FeaturesComponent with AttendanceMonitoringServiceComponent
 		with DeserializesFilter	with UpdateAttendanceMonitoringSchemeMembershipCommandState with TaskBenchmarking {
 
-		val features = emptyFeatures
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val profileService = smartMock[ProfileService]
+		val features: FeaturesImpl = emptyFeatures
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
 		profileService.getAllMembersWithUniversityIds(Seq()) returns Seq()
-		def deserializeFilter(filterString: String) = {
+		def deserializeFilter(filterString: String): Unit = {
 			deserializeFilterCalled = true
 		}
 	}
@@ -31,14 +32,14 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 	@Test
 	def noSchemes() { new Fixture {
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq()
-		val schemes = cmd.applyInternal()
+		val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
 		deserializeFilterCalled should be {false}
 		schemes.isEmpty should be {true}
 	}}
 
 	@Test
 	def sameStudentInMultipleSchemesInSameDept() { new Fixture {
-		val dept = Fixtures.department("its")
+		val dept: Department = Fixtures.department("its")
 		val scheme1 = new AttendanceMonitoringScheme
 		scheme1.attendanceMonitoringService = None
 		scheme1.department = dept
@@ -50,11 +51,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 		scheme2.academicYear = AcademicYear(2014)
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq(scheme1, scheme2)
 
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 		cmd.profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(isEq(dept), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student.universityId)
 		cmd.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 
-		val schemes = cmd.applyInternal()
+		val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
 		deserializeFilterCalled should be {true}
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
@@ -65,8 +66,8 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 
 	@Test
 	def sameStudentInMultipleSchemesInDifferentDept() { new Fixture {
-		val dept1 = Fixtures.department("its")
-		val dept2 = Fixtures.department("foo")
+		val dept1: Department = Fixtures.department("its")
+		val dept2: Department = Fixtures.department("foo")
 		val scheme1 = new AttendanceMonitoringScheme
 		scheme1.attendanceMonitoringService = None
 		scheme1.department = dept1
@@ -79,12 +80,12 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
 
 		cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq(scheme1, scheme2)
 
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 		cmd.profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(isEq(dept1), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student.universityId)
 		cmd.profileService.findAllUniversityIdsByRestrictionsInAffiliatedDepartments(isEq(dept2), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student.universityId)
 		cmd.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 
-		val schemes = cmd.applyInternal()
+		val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
 		deserializeFilterCalled should be {true}
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
 		verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)

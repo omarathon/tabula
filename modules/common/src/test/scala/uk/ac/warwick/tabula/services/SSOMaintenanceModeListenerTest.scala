@@ -4,19 +4,19 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.sso.client.cache.spring.DatabaseUserCache
 import org.springframework.mock.web.MockServletContext
-import uk.ac.warwick.sso.client.SSOConfigLoader
+import uk.ac.warwick.sso.client.{SSOConfigLoader, SSOConfiguration}
 import uk.ac.warwick.util.queue.Queue
 
 class SSOMaintenanceModeListenerTest extends TestBase with Mockito {
 
-	val config = newSSOConfiguration
+	val config: SSOConfiguration = newSSOConfiguration
 	val cache = new DatabaseUserCache(config)
 
 	val context = new MockServletContext
 	context.setAttribute(SSOConfigLoader.SSO_CACHE_KEY, cache)
 	context.setAttribute(SSOConfigLoader.SSO_CONFIG_KEY, config)
 
-	val queue = mock[Queue]
+	val queue: Queue = mock[Queue]
 
 	val observer = new SSOMaintenanceModeListener
 	observer.maintenanceModeService = new MaintenanceModeServiceImpl

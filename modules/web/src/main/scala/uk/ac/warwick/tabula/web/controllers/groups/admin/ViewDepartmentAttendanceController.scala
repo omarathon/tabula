@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -20,12 +21,12 @@ abstract class AbstractViewDepartmentAttendanceController extends GroupsControll
 	override val departmentPermission: Permission = ViewDepartmentAttendanceCommand.RequiredPermission
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	hideDeletedItems
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]] with ViewDepartmentAttendanceCommandState) = {
+	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]] with ViewDepartmentAttendanceCommandState): Mav = {
 		Mav("groups/attendance/view_department",
 			"modules" -> cmd.apply()
 		).crumbs(Breadcrumbs.Department(cmd.department, cmd.academicYear))

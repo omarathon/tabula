@@ -24,7 +24,7 @@ trait ModulePermissionControllerMethods extends AdminController {
 	@ModelAttribute("addCommand") def addCommandModel(@PathVariable module: Module): GrantRoleCommand = GrantRoleCommand(module)
 	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable module: Module): RevokeRoleCommand = RevokeRoleCommand(module)
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 	def form(module: Module): Mav = {
 		Mav("admin/modules/permissions", "module" -> module)

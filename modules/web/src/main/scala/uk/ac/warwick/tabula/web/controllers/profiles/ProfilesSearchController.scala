@@ -8,7 +8,9 @@ import uk.ac.warwick.tabula.commands.profiles.{AbstractSearchProfilesCommandStat
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
+
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.util.core.StringUtils
 
 @Controller
@@ -24,13 +26,13 @@ class ProfilesSearchController extends ProfilesController with SearchJSONHelpers
 	def home = Redirect(Routes.home)
 
 	@RequestMapping(value=Array("/profiles/search"), params=Array("query"))
-	def submitSearch(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors) = {
+	def submitSearch(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
 		if (!StringUtils.hasText(cmd.query)) home
 		else submit(cmd, errors, "profiles/profile/search/results")
 	}
 
 	@RequestMapping(value=Array("/profiles/search.json"), params=Array("query"))
-	def submitSearchJSON(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors) = {
+	def submitSearchJSON(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
 		submitJson(cmd, errors)
 	}
 

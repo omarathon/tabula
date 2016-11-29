@@ -9,11 +9,11 @@ import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
-	val ug1 = UserGroup.ofUniversityIds.tap(g=>{
+	val ug1: UserGroup = UserGroup.ofUniversityIds.tap(g=>{
 		g.includedUserIds = Seq("1", "2","4")
 		g.userLookup = new MockUserLookup(true)
 	})
-	val ug2 = UserGroup.ofUniversityIds.tap(g=>{
+	val ug2: UserGroup = UserGroup.ofUniversityIds.tap(g=>{
 		g.includedUserIds = Seq("1", "2","3")
 		g.userLookup = new MockUserLookup(true)
 	})
@@ -104,8 +104,8 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 trait ReleaseForMarkingCommandTestSupport extends AssessmentServiceComponent with StateServiceComponent
 with FeedbackServiceComponent with Mockito {
 
-	val assessmentService = mock[AssessmentService]
-	val stateService = mock[StateService]
-	val feedbackService = mock[FeedbackService]
+	val assessmentService: AssessmentService = mock[AssessmentService]
+	val stateService: StateService = mock[StateService]
+	val feedbackService: FeedbackService = mock[FeedbackService]
 	def apply(): List[Feedback] = List()
 }

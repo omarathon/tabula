@@ -16,11 +16,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConversions.asScalaBuffer
 
 trait DisabilityImporter extends Logging {
-	var disabilityDao = Wire[DisabilityDao]
+	var disabilityDao: DisabilityDao = Wire[DisabilityDao]
 
 	private var disabilityMap: Map[String, Disability] = _
 
-	def getDisabilityForCode(code: String) = {
+	def getDisabilityForCode(code: String): Disability = {
 		if (disabilityMap == null) updateDisabilityMap()
 		disabilityMap(code)
 	}
@@ -56,7 +56,7 @@ trait DisabilityImporter extends Logging {
 class SitsDisabilityImporter extends DisabilityImporter {
 	import SitsDisabilityImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val disabilitysQuery = new DisabilitysQuery(sits)
 
@@ -104,5 +104,5 @@ trait DisabilityImporterComponent {
 }
 
 trait AutowiringDisabilityImporterComponent extends DisabilityImporterComponent {
-	var disabilityImporter = Wire[DisabilityImporter]
+	var disabilityImporter: DisabilityImporter = Wire[DisabilityImporter]
 }

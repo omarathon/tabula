@@ -41,7 +41,7 @@ class EditAttendancePointCommandInternal(
 	self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with TermServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val editedPoints = pointsToEdit.map(point => {
 			copyTo(point)
 			point.updatedDate = DateTime.now
@@ -61,7 +61,7 @@ trait PopulatesEditAttendancePointCommand extends PopulateOnForm {
 
 	self: EditAttendancePointCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		copyFrom(templatePoint)
 
 		if (pointsToEdit.isEmpty) throw new ItemNotFoundException

@@ -4,12 +4,13 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, ReadOnly}
 import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services.AutowiringZipServiceComponent
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.RenderableFileView
 import uk.ac.warwick.tabula.web.Mav
@@ -21,7 +22,7 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
 class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute
 	def singleFeedbackCommand(
@@ -40,7 +41,7 @@ class OldDownloadSelectedFeedbackController extends OldCourseworkController {
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadSelectedFeedbackFileController extends OldCourseworkController {
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def singleFeedbackCommand(
 		@PathVariable module: Module,
@@ -81,7 +82,7 @@ class OldDownloadAllFeedbackController extends OldCourseworkController {
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	@RequestMapping
 	def markerFeedback(
@@ -90,7 +91,7 @@ class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 		@PathVariable feedbackId: String,
 		@PathVariable filename: String,
 		@PathVariable marker: User
-	) = {
+	): Mav = {
 		feedbackDao.getMarkerFeedback(feedbackId) match {
 			case Some(markerFeedback) =>
 				val renderable = new AdminGetSingleMarkerFeedbackCommand(module, assignment, markerFeedback).apply()
@@ -104,7 +105,7 @@ class OldDownloadMarkerFeedbackController extends OldCourseworkController {
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/feedback/download/{feedbackId}/{filename}"))
 class OldDownloadMarkerFeedbackControllerCurrentUser extends OldCourseworkController {
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, @PathVariable feedbackId: String, @PathVariable filename: String, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.downloadFeedback.marker(assignment, currentUser.apparentUser, feedbackId, filename))
 	}
 }
@@ -156,7 +157,7 @@ class OldDownloadFirstMarkersFeedbackController extends OldCourseworkController 
 		@PathVariable position: String,
 		@PathVariable marker: User,
 		user: CurrentUser
-	) = {
+	): DownloadMarkersFeedbackForPositionCommand with ComposableCommand[RenderableFile] with DownloadMarkersFeedbackForPositionDescription with DownloadMarkersFeedbackForPositionPermissions with DownloadMarkersFeedbackForPositionCommandState with ReadOnly with AutowiringZipServiceComponent = {
 		val feedbackPosition = position match {
 			case "firstmarker" => FirstFeedback
 			case "secondmarker" => SecondFeedback

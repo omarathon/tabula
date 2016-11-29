@@ -71,13 +71,13 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 	}
 
 	// Only if there is a student ID in the row
-	def isValid = rowData.contains("student_id") && rowData("student_id").hasText
+	def isValid: Boolean = rowData.contains("student_id") && rowData("student_id").hasText
 }
 
 @Service
 class RawStudentRelationshipExtractor {
 
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of relationships

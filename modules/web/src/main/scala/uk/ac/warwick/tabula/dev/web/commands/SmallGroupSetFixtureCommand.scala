@@ -28,7 +28,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 	var releasedToStudents: Boolean = true
 	var academicYear: AcademicYear = _
 
-	protected def applyInternal() = {
+	protected def applyInternal(): SmallGroupSet = {
 		transactional() {
 			val module = moduleAndDepartmentService.getModuleByCode(moduleCode).getOrElse(throw new RuntimeException)
 			val groupSet = new SmallGroupSet()
@@ -61,7 +61,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 	}
 }
 object SmallGroupSetFixtureCommand{
-	def apply() = {
+	def apply(): SmallGroupSetFixtureCommand with ComposableCommand[SmallGroupSet] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with Unaudited with PubliclyVisiblePermissions with AutowiringTermServiceComponent = {
 		new SmallGroupSetFixtureCommand()
 			with ComposableCommand[SmallGroupSet]
 			with AutowiringModuleAndDepartmentServiceComponent

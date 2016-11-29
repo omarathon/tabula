@@ -44,7 +44,7 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, department)
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
 			val feedbackTemplates = if (!file.attached.isEmpty) {
 				for (attachment <- file.attached) yield {
@@ -70,13 +70,13 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 	mustBeLinked(template, department)
 	PermissionCheck(Permissions.FeedbackTemplate.Manage, template)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
 	var id:String = _
 	var name:String = _
 	var description:String = _
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
 			val feedbackTemplate = department.feedbackTemplates.find(_.id == id).get
 			feedbackTemplate.name = name
@@ -103,7 +103,7 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 
 	var id:String = _
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[FeedbackTemplate] = {
 		transactional() {
 			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
 			if (feedbackTemplate.hasAssignments) {

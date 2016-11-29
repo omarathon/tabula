@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
 
 class DepartmentTest extends TestBase with Mockito {
 
-	val permissionsService = mock[PermissionsService]
+	val permissionsService: PermissionsService = mock[PermissionsService]
 
 	@Test def settings() {
 		val department = new Department
@@ -99,15 +99,15 @@ class DepartmentTest extends TestBase with Mockito {
 	private trait FilterRuleFixture {
 		val department = new Department
 		val otherDepartment = new Department
-		val ugRoute = new Route().tap(r => {
+		val ugRoute: Route = new Route().tap(r => {
 			r.degreeType = DegreeType.Undergraduate
 			r.adminDepartment = department
 		})
-		val pgRoute = new Route().tap(r => {
+		val pgRoute: Route = new Route().tap(r => {
 			r.degreeType = DegreeType.Postgraduate
 			r.adminDepartment = otherDepartment
 		})
-		val undergraduate = new StudentMember().tap(m=>{
+		val undergraduate: StudentMember = new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =1))
@@ -116,7 +116,7 @@ class DepartmentTest extends TestBase with Mockito {
 			m.attachStudentCourseDetails(scd)
 			m.mostSignificantCourse = scd
 		})
-		val postgraduate = new StudentMember().tap(m=>{
+		val postgraduate: StudentMember = new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =7))

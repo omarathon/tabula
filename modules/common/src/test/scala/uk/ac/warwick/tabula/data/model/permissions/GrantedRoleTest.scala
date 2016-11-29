@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import uk.ac.warwick.tabula.{TestBase, Fixtures}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.{Fixtures, TestBase}
 import uk.ac.warwick.tabula.roles.AssignmentSubmitterRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permissions
 
 class GrantedRoleTest extends TestBase {
 
-	val dept = Fixtures.department("in")
-	val module = Fixtures.module("in101")
+	val dept: Department = Fixtures.department("in")
+	val module: Module = Fixtures.module("in101")
 	module.adminDepartment = dept
 
-	val assignment = Fixtures.assignment("assignment")
-	val member = Fixtures.staff()
+	val assignment: Assignment = Fixtures.assignment("assignment")
+	val member: StaffMember = Fixtures.staff()
 
-	val feedback = Fixtures.assignmentFeedback()
+	val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
 
 	val roleDefinition = AssignmentSubmitterRoleDefinition
 

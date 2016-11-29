@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupSetChangedNotification
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
@@ -38,18 +39,18 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 			userDatabase.find {_.getUserId == id}.getOrElse (new AnonymousUser())
 		}}
 
-    val eventA = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1","tutor2"),identifierIsUniNumber = false)).build
-    val groupA = new SmallGroupBuilder()
+    val eventA: SmallGroupEvent = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1","tutor2"),identifierIsUniNumber = false)).build
+    val groupA: SmallGroupBuilder = new SmallGroupBuilder()
       .withGroupName("groupA")
       .withStudents(createUserGroup(Seq("user1", "user2"),identifierIsUniNumber = true))
       .withEvents(Seq(eventA))
-    val eventB = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor3"),identifierIsUniNumber = false)).build
-		val groupB = new SmallGroupBuilder()
+    val eventB: SmallGroupEvent = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor3"),identifierIsUniNumber = false)).build
+		val groupB: SmallGroup = new SmallGroupBuilder()
 			.withGroupName("groupB")
 			.withStudents(createUserGroup(Seq("user3", "user4"),identifierIsUniNumber = true))
 			.withEvents(Seq(eventB))
 			.build
-    val groupSet = new SmallGroupSetBuilder().withReleasedToStudents(isReleased = true).withGroups(Seq(groupA.build, groupB))
+    val groupSet: SmallGroupSetBuilder = new SmallGroupSetBuilder().withReleasedToStudents(isReleased = true).withGroups(Seq(groupA.build, groupB))
 
     val command: StubCommand = new StubCommand(groupSet.build, actor, userLookup)
 
@@ -68,7 +69,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   @Test
   def affectedStudentsGroupsDetectsAdditions() { new Fixture {
     // add user4 to group A
-    val modifiedGroupA = groupA.withStudents(createUserGroup(Seq("user1","user2","user4"))).build
+    val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1","user2","user4"))).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
     command.hasAffectedStudentsGroups(user4) should be { true }
@@ -78,7 +79,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   @Test
   def affectedStudentsGroupsDetectsRemovals() { new Fixture {
     // remove user2 from group A
-    val modifiedGroupA = groupA.withStudents(createUserGroup(Seq("user1"))).build
+    val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1"))).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
     command.hasAffectedStudentsGroups(user2) should be { true }
@@ -87,8 +88,8 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
   @Test
   def affectedStudentsGroupDetectsChangesToEvents(){new Fixture{
-    val event = new SmallGroupEventBuilder().build
-    val modifiedGroupA = groupA.withEvents(Seq(event)).build
+    val event: SmallGroupEvent = new SmallGroupEventBuilder().build
+    val modifiedGroupA: SmallGroup = groupA.withEvents(Seq(event)).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
     // group A - affected
@@ -103,11 +104,11 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   @Test
   def emitsANotificationForEachAffectedStudent() { new Fixture{
 
-    val event = new SmallGroupEventBuilder().build
-    val modifiedGroupA = groupA.withEvents(Seq(event)).build
+    val event: SmallGroupEvent = new SmallGroupEventBuilder().build
+    val modifiedGroupA: SmallGroup = groupA.withEvents(Seq(event)).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
-    val notifications = command.emit(command.set)
+    val notifications: Seq[Notification[SmallGroup, SmallGroupSet]] = command.emit(command.set)
     notifications.size should be(2)
 
 		notifications.foreach{
@@ -122,10 +123,10 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
   @Test
   def emitsNoNotificationsToStudentsIfGroupsetIsNotReleased() { new Fixture {
-    val unreleasedGroupset =groupSet.withReleasedToStudents(isReleased = false).build
+    val unreleasedGroupset: SmallGroupSet =groupSet.withReleasedToStudents(isReleased = false).build
     val cmd = new StubCommand(unreleasedGroupset, actor, userLookup)
-    val event = new SmallGroupEventBuilder().build
-    val modifiedGroupA = groupA.withEvents(Seq(event)).build
+    val event: SmallGroupEvent = new SmallGroupEventBuilder().build
+    val modifiedGroupA: SmallGroup = groupA.withEvents(Seq(event)).build
     cmd.set.groups = JArrayList(modifiedGroupA, groupB)
 
     cmd.emit(cmd.set) should be(Nil)
@@ -134,17 +135,17 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   @Test
   def createsFilteredGroupsetViewForTutors() { new Fixture {
 
-    val addedEvent = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
-    val addedGroup =   new SmallGroupBuilder().copyOf(group1).withGroupName("addedGroup").withEvents(Seq(addedEvent)).build
+    val addedEvent: SmallGroupEvent = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
+    val addedGroup: SmallGroup =   new SmallGroupBuilder().copyOf(group1).withGroupName("addedGroup").withEvents(Seq(addedEvent)).build
 
-    val event = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
+    val event: SmallGroupEvent = new SmallGroupEventBuilder().build // tutor1 is not a tutor on this event
     group1.addEvent(event)
     groupSet1.groups.add(addedGroup)
 
     groupSet1.groups.size should be(2)
     group1.events.size should be(2)
 
-    val filteredView = command.tutorsEvents(groupSet1,tutor1)
+    val filteredView: SmallGroupSet = command.tutorsEvents(groupSet1,tutor1)
     filteredView.groups.size should be(1)
     filteredView.groups.asScala.head.events.size should be(1)
 
@@ -153,12 +154,12 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 	@Test
 	def detectsAllocationChangesForTutors() { new Fixture {
 
-			val group = command.set.groups.asScala.find(_.name == "groupA").get
+			val group: SmallGroup = command.set.groups.asScala.find(_.name == "groupA").get
 			val test: User = new User("test")
 			test.setWarwickId("123")
 			group.students.add(test)
 
-			val tutor = group.events.head.tutors.users.head
+			val tutor: User = group.events.head.tutors.users.head
 			command.hasAffectedTutorsEvents(tutor1) should be { true }
 			// should return false for an arbitrary user (worryingly this failed pre TAB-2728)
 			command.hasAffectedTutorsEvents(new User()) should be { false }

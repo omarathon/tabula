@@ -25,10 +25,10 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 	// This is a global permissions check, but we can't pass null here, so just pass a pretend object
 	PermissionCheck(RolesAndPermissions.Read, PermissionsTarget.Global)
 
-	var securityService = Wire.auto[SecurityService]
-	var roleService = Wire.auto[RoleService]
+	var securityService: SecurityService = Wire.auto[SecurityService]
+	var roleService: RoleService = Wire.auto[RoleService]
 
-	var conversionService = Wire.auto[ConversionService]
+	var conversionService: ConversionService = Wire.auto[ConversionService]
 
 	var user: User = null
 	var scopeType: Class[_ <: PermissionsTarget] = null
@@ -68,7 +68,7 @@ class PermissionsHelperCommand extends Command[PermissionHelperResult] with Unau
 		}
 	}
 
-	def applyInternal() = {
+	def applyInternal(): PermissionHelperResult = {
 		val currentUser = new CurrentUser(user, user)
 
 		val scope = resolveScope().orNull

@@ -19,7 +19,7 @@ class DeleteAttendanceTemplatePointCommandInternal(val point: AttendanceMonitori
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Unit = {
 		attendanceMonitoringService.deleteTemplatePoint(point)
 	}
 

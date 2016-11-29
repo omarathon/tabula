@@ -42,7 +42,7 @@ class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Depar
 	extends CommandInternal[EditDepartmentSmallGroupSetMembershipCommandResult] with EditDepartmentSmallGroupSetMembershipCommandState {
 	self: UserLookupComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): EditDepartmentSmallGroupSetMembershipCommandResult = {
 		def toMembershipItem(universityId: String, itemType: DepartmentSmallGroupSetMembershipItemType) = {
 			val user = userLookup.getUserByWarwickUniId(universityId)
 			DepartmentSmallGroupSetMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
@@ -67,7 +67,7 @@ trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnFor
 
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		includedStudentIds = set.members.knownType.includedUserIds.asJava
 		excludedStudentIds = set.members.knownType.excludedUserIds.asJava
 	}
@@ -114,7 +114,7 @@ trait RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand {
 
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
-	def removeUsers() = {
+	def removeUsers(): Unit = {
 		excludedStudentIds = (excludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
 	}
 }
@@ -123,16 +123,16 @@ trait ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand {
 
 	self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
-	def resetMembership() = {
+	def resetMembership(): Unit = {
 		includedStudentIds = (includedStudentIds.asScala diff resetStudentIds.asScala).asJava
 		excludedStudentIds = (excludedStudentIds.asScala diff resetStudentIds.asScala).asJava
 	}
 
-	def resetAllIncluded() = {
+	def resetAllIncluded(): Unit = {
 		includedStudentIds.clear()
 	}
 
-	def resetAllExcluded() = {
+	def resetAllExcluded(): Unit = {
 		excludedStudentIds.clear()
 	}
 }

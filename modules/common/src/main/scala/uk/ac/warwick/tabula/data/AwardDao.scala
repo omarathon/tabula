@@ -11,7 +11,7 @@ trait AwardDaoComponent {
 }
 
 trait AutowiringAwardDaoComponent extends AwardDaoComponent {
-	val awardDao = Wire[AwardDao]
+	val awardDao: AwardDao = Wire[AwardDao]
 }
 
 trait AwardDao {
@@ -24,9 +24,9 @@ trait AwardDao {
 @Repository
 class AwardDaoImpl extends AwardDao with Daoisms {
 
-	def saveOrUpdate(award: Award) = session.saveOrUpdate(award)
+	def saveOrUpdate(award: Award): Unit = session.saveOrUpdate(award)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[Award] =
 		session.newQuery[Award]("from Award award where code = :code").setString("code", code).uniqueResult
 
 	def getAllAwardCodes: Seq[String] =

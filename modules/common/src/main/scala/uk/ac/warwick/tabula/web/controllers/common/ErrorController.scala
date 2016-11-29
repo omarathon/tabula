@@ -25,7 +25,7 @@ class ErrorController extends BaseController {
 	}
 
 	@RequestMapping(Array("/error/404"))
-	def pageNotFound(@RequestHeader(value="X-Requested-Uri", required=false) requestedUri: String)(implicit request: HttpServletRequest, response: HttpServletResponse) = {
+	def pageNotFound(@RequestHeader(value="X-Requested-Uri", required=false) requestedUri: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
 		if (request.isJsonRequest) {
 			Mav(new JSONView(Map(
 				"success" -> false,

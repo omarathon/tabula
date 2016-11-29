@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 import uk.ac.warwick.tabula.groups.web.views.{GroupsDisplayHelper, GroupsViewModel}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -37,7 +38,7 @@ abstract class AbstractGroupsHomeController extends GroupsController with Groups
 	import GroupsDisplayHelper._
 
 	@RequestMapping
-	def home(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) = {
+	def home(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
 		val academicYear = activeAcademicYear.getOrElse(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 
 		if (user.loggedIn) {

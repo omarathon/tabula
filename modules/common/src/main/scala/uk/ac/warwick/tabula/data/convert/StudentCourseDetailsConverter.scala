@@ -7,15 +7,15 @@ import uk.ac.warwick.spring.Wire
 
 class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCourseDetails] {
 
-	var service = Wire.auto[StudentCourseDetailsDao]
+	var service: StudentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
 	// parse
-	override def convertRight(scjCode: String) = {
+	override def convertRight(scjCode: String): StudentCourseDetails = {
 		val scjCodeDecoded = scjCode.replace("_","/")
 		service.getByScjCode(scjCodeDecoded).orNull
 	}
 
 	// print
-	override def convertLeft(studentCourseDetails: StudentCourseDetails) = (Option(studentCourseDetails) map {_.scjCode}).orNull
+	override def convertLeft(studentCourseDetails: StudentCourseDetails): String = (Option(studentCourseDetails) map {_.scjCode}).orNull
 
 }

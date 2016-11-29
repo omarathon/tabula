@@ -2,10 +2,13 @@ package uk.ac.warwick.tabula.data.model.notifications.attendance.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
 
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, TermService}
 import uk.ac.warwick.userlookup.User
@@ -20,20 +23,20 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 	priority = NotificationPriority.Critical
 
 	@transient
-	implicit var termService = Wire[TermService]
+	implicit var termService: TermService = Wire[TermService]
 
 	@transient
-	var attendanceMonitoringService = Wire[AttendanceMonitoringService]
+	var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	final def referenceDate = created.plusDays(-7)
+	final def referenceDate: DateTime = created.plusDays(-7)
 
 	@transient
-	lazy val academicYear = AcademicYear.findAcademicYearContainingDate(referenceDate)
+	lazy val academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(referenceDate)
 
-	final def department = item.entity
+	final def department: Department = item.entity
 
 }
 
@@ -42,11 +45,11 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 class AttendanceMonitoringUnrecordedPointsNotification
 	extends AbstractAttendanceMonitoringUnrecordedNotification {
 
-	override final def url = Routes.View.pointsUnrecorded(department, academicYear)
+	override final def url: String = Routes.View.pointsUnrecorded(department, academicYear)
 
 	override final def urlTitle = "record attendance for these points"
 
-	override def title = {
+	override def title: String = {
 		val pointsCount = unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).size
 
 		s"$pointsCount monitoring ${if (pointsCount == 1) "point needs" else "points need"} recording"
@@ -55,7 +58,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_points_notification.ftl"
 
 	@transient
-	final lazy val unrecordedPoints = {
+	final lazy val unrecordedPoints: Seq[AttendanceMonitoringPoint] = {
 		attendanceMonitoringService.findUnrecordedPoints(department, academicYear, referenceDate.toLocalDate)
 	}
 
@@ -81,11 +84,11 @@ class AttendanceMonitoringUnrecordedPointsNotification
 class AttendanceMonitoringUnrecordedStudentsNotification
 	extends AbstractAttendanceMonitoringUnrecordedNotification {
 
-	override final def url = Routes.View.studentsUnrecorded(department, academicYear)
+	override final def url: String = Routes.View.studentsUnrecorded(department, academicYear)
 
 	override final def urlTitle = "record attendance for these students"
 
-	override def title = {
+	override def title: String = {
 		val studentsCount = unrecordedStudents.size
 
 		s"$studentsCount ${if (studentsCount == 1) "student needs" else "students need"} monitoring points recording"
@@ -94,7 +97,7 @@ class AttendanceMonitoringUnrecordedStudentsNotification
 	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_students_notification.ftl"
 
 	@transient
-	final lazy val unrecordedStudents = {
+	final lazy val unrecordedStudents: Seq[AttendanceMonitoringStudentData] = {
 		attendanceMonitoringService.findUnrecordedStudents(department, academicYear, referenceDate.toLocalDate)
 			.sortBy(u => (u.lastName, u.firstName))
 	}

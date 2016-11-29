@@ -24,7 +24,7 @@ trait FeedbackAttachments {
 
 	def hasAttachments: Boolean = !attachments.isEmpty
 
-	def mostRecentAttachmentUpload =
+	def mostRecentAttachmentUpload: DateTime =
 		if (attachments.isEmpty) null
 		else attachments.asScala.maxBy { _.dateUploaded }.dateUploaded
 
@@ -41,7 +41,7 @@ trait FeedbackAttachments {
 		!isIdentical
 	}
 
-	def removeAttachment(attachment: FileAttachment) = {
+	def removeAttachment(attachment: FileAttachment): Boolean = {
 		attachment.feedback = null
 		attachment.markerFeedback = null
 		attachments.remove(attachment)
@@ -120,8 +120,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	@OrderBy("uploadedDate DESC")
 	@BatchSize(size=200)
 	private val _marks: JList[Mark] = JArrayList()
-	def marks = _marks
-	def addMark(uploaderId: String, markType: MarkType, mark: Int, grade: Option[String], reason: String, comments: String = null) = {
+	def marks: _root_.uk.ac.warwick.tabula.JavaImports.JList[Mark] = _marks
+	def addMark(uploaderId: String, markType: MarkType, mark: Int, grade: Option[String], reason: String, comments: String = null): Mark = {
 		val newMark = new Mark
 		newMark.feedback = this
 		newMark.mark = mark
@@ -171,9 +171,9 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 		} else Seq()
 	}
 
-	def hasPrivateAdjustments = latestPrivateAdjustment.isDefined
-	def hasNonPrivateAdjustments = latestNonPrivateAdjustment.isDefined
-	def hasPrivateOrNonPrivateAdjustments = marks.asScala.nonEmpty
+	def hasPrivateAdjustments: Boolean = latestPrivateAdjustment.isDefined
+	def hasNonPrivateAdjustments: Boolean = latestNonPrivateAdjustment.isDefined
+	def hasPrivateOrNonPrivateAdjustments: Boolean = marks.asScala.nonEmpty
 
 	@OneToOne(cascade=Array(PERSIST,MERGE,REFRESH,DETACH), fetch = FetchType.LAZY)
 	@JoinColumn(name = "first_marker_feedback")
@@ -241,7 +241,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	// FormValue containing the per-user online feedback comment
-	def commentsFormValue = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
+	def commentsFormValue: Option[SavedFormValue] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
 	def comments: Option[String] = commentsFormValue.map(_.value)
 
@@ -255,11 +255,11 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def getThirdMarkerFeedback: Option[MarkerFeedback] = Option(thirdMarkerFeedback)
 
 	// The current workflow position isn't None so this must be a placeholder
-	def isPlaceholder = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
+	def isPlaceholder: Boolean = getCurrentWorkflowFeedbackPosition.isDefined || !hasContent
 
-	def hasContent = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
+	def hasContent: Boolean = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 
-	def hasMarkOrGrade = hasMark || hasGrade
+	def hasMarkOrGrade: Boolean = hasMark || hasGrade
 
 	def hasMark: Boolean = actualMark.isDefined
 
@@ -304,7 +304,7 @@ class AssignmentFeedback extends Feedback {
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
 	var assignment: Assignment = _
 
-	def module = assignment.module
+	def module: Module = assignment.module
 
 	override def markingWorkflow: MarkingWorkflow = assignment.markingWorkflow
 
@@ -318,9 +318,9 @@ class AssignmentFeedback extends Feedback {
 
 	override def assessmentGroups: JavaImports.JList[AssessmentGroup] = assignment.assessmentGroups
 
-	def permissionsParents = Option(assignment).toStream
+	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
-	override def toEntityReference = new AssignmentFeedbackEntityReference().put(this)
+	override def toEntityReference: AssignmentFeedbackEntityReference = new AssignmentFeedbackEntityReference().put(this)
 
 }
 
@@ -332,7 +332,7 @@ class ExamFeedback extends Feedback {
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE))
 	var exam: Exam = _
 
-	def module = exam.module
+	def module: Module = exam.module
 
 	override def markingWorkflow: MarkingWorkflow = null
 
@@ -346,9 +346,9 @@ class ExamFeedback extends Feedback {
 
 	override def assessmentGroups: JavaImports.JList[AssessmentGroup] = exam.assessmentGroups
 
-	def permissionsParents = Option(exam).toStream
+	def permissionsParents: Stream[Exam] = Option(exam).toStream
 
-	override def toEntityReference = new ExamFeedbackEntityReference().put(this)
+	override def toEntityReference: ExamFeedbackEntityReference = new ExamFeedbackEntityReference().put(this)
 
 }
 
@@ -368,7 +368,7 @@ object FeedbackPosition {
 sealed trait FeedbackPosition extends Ordered[FeedbackPosition] {
 	val description: String
 	val position: Int
-	def compare(that: FeedbackPosition) = this.position compare that.position
+	def compare(that: FeedbackPosition): Int = this.position compare that.position
 }
 case object FirstFeedback extends FeedbackPosition { val description = "First marker's feedback"; val position = 1 }
 case object SecondFeedback extends FeedbackPosition { val description = "Second marker's feedback"; val position = 2 }

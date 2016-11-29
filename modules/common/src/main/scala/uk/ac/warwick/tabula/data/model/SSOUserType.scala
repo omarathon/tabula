@@ -12,7 +12,7 @@ object SSOUserType {
  * Stores a User by userid.
  */
 class SSOUserType extends AbstractStringUserType[User] {
-	lazy val _userLookup = Wire[UserLookupService]
+	lazy val _userLookup: UserLookupService = Wire[UserLookupService]
 
 	private def userLookup =
 		if (SSOUserType.userLookup != null) SSOUserType.userLookup

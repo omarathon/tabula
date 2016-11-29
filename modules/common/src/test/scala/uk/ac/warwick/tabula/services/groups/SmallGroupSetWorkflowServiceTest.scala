@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.services.groups
 
 import uk.ac.warwick.tabula.WorkflowStageHealth._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{Department, Module, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserGroupCacheManager}
 
 import scala.collection.immutable.ListMap
@@ -11,9 +11,9 @@ import scala.collection.immutable.ListMap
 // scalastyle:off magic.number
 class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 
-	val department = Fixtures.department("in", "IT Services")
-	val module = Fixtures.module("in101", "Introduction to Web Development")
-	val set = Fixtures.smallGroupSet("IN101 Seminars")
+	val department: Department = Fixtures.department("in", "IT Services")
+	val module: Module = Fixtures.module("in101", "Introduction to Web Development")
+	val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
 	set.module = module
 	module.adminDepartment = department
 

@@ -28,9 +28,9 @@ class FeedbackAuditCommandInternal(val assignment: Assignment, val student: User
 
 	self : SubmissionServiceComponent with FeedbackServiceComponent =>
 
-	lazy val submission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
+	lazy val submission: Option[Submission] = submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
 
-	def applyInternal() = {
+	def applyInternal(): FeedbackAuditData = {
 		val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, student.getWarwickId)
 		FeedbackAuditData(submission, feedback)
 	}

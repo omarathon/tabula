@@ -40,7 +40,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 		ensureUsers
 	}
 
-	def ensureUsers = {
+	def ensureUsers: UnspecifiedTypeUserGroup = {
 		if (users == null) _users = UserGroup.ofUsercodes
 		users
 	}
@@ -66,7 +66,7 @@ object GrantedPermission {
 			case _ => throw new IllegalArgumentException("Cannot define new permissions for " + scope)
 		}).asInstanceOf[GrantedPermission[A]]
 
-	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
+	def canDefineFor[A <: PermissionsTarget](scope: A): OverrideType = scope match {
 		case _: Department => true
 		case _: Module => true
 		case _: Route => true
@@ -78,7 +78,7 @@ object GrantedPermission {
 		case _ => false
 	}
 
-	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
+	def classObject[A <: PermissionsTarget : ClassTag]: Class[_ >: DepartmentGrantedPermission with ModuleGrantedPermission with RouteGrantedPermission with MemberGrantedPermission with AssignmentGrantedPermission with SmallGroupGrantedPermission with SmallGroupSetGrantedPermission with SmallGroupEventGrantedPermission <: GrantedPermission[_ >: Department with Module with Route with Member with Assignment with SmallGroup with SmallGroupSet with SmallGroupEvent]] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedPermission]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedPermission]
 		case t if isSubtype(t, classTag[Route]) => classOf[RouteGrantedPermission]
@@ -92,8 +92,8 @@ object GrantedPermission {
 
   private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 
-	def className[A <: PermissionsTarget : ClassTag] = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag] =
+	def className[A <: PermissionsTarget : ClassTag]: String = classObject[A].getSimpleName
+	def discriminator[A <: PermissionsTarget : ClassTag]: Option[String] =
 		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
 }
 

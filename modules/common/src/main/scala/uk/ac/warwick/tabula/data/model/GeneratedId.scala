@@ -17,7 +17,7 @@ trait GeneratedId extends IdEquality {
 	@GeneratedValue(generator = "system-uuid")
 	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 	var id: String = null
-	def isTransient = id == null
+	def isTransient: Boolean = id == null
 }
 
 trait Identifiable {
@@ -29,12 +29,12 @@ trait StringId extends Identifiable {
 }
 
 trait IdEquality extends StringId {
-	override final def hashCode = id match {
+	override final def hashCode: Int = id match {
 		case null => super.hashCode
 		case str => getClass.hashCode + (41 * str.hashCode)
 	}
 
-	override final def equals(other: Any)= other match {
+	override final def equals(other: Any): Boolean = other match {
 		case that: IdEquality if sameDomainClass(that) =>
 			if (id == null && that.id == null) this.eq(that) // Reference equality
 			else id == that.id
@@ -45,5 +45,5 @@ trait IdEquality extends StringId {
 		HibernateProxyHelper.getClassWithoutInitializingProxy(this) == HibernateProxyHelper.getClassWithoutInitializingProxy(other)
 	}
 
-	override def toString = getClass.getSimpleName + "[" + (if (id != null) id else "(transient " + hashCode + ")") + "]"
+	override def toString: String = getClass.getSimpleName + "[" + (if (id != null) id else "(transient " + hashCode + ")") + "]"
 }

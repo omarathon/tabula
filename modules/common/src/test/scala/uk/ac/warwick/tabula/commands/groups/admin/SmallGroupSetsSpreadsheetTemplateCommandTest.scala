@@ -1,19 +1,22 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.{DateTime, LocalTime}
-import uk.ac.warwick.tabula.data.model.{MapLocation, NamedLocation}
-import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupAllocationMethod, SmallGroupFormat, WeekRange}
+import uk.ac.warwick.tabula.data.model.{Department, MapLocation, Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+
+import scala.collection.immutable.IndexedSeq
 
 class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent {
-		val smallGroupService = smartMock[SmallGroupService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 	}
 
 	private trait CommandFixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val academicYear = AcademicYear(2015)
 
 		val command = new SmallGroupSetsSpreadsheetTemplateCommandInternal(department, academicYear) with CommandTestSupport
@@ -22,16 +25,16 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 	@Test def emptySpreadsheet(): Unit = new CommandFixture {
 		command.smallGroupService.getSmallGroupSets(department, academicYear) returns Nil
 
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 		workbook.getSheet("Sets").getLastRowNum should be (0)
 		workbook.getSheet("Groups").getLastRowNum should be (0)
 		workbook.getSheet("Events").getLastRowNum should be (0)
 
-		val lookups = workbook.getSheet("Lookups")
+		val lookups: XSSFSheet = workbook.getSheet("Lookups")
 
-		val formats = (1 to 9).map { i => lookups.getRow(i).getCell(0).toString }
-		val allocationMethods = (1 to 4).map { i => lookups.getRow(i).getCell(1).toString }
-		val daysOfWeek = (1 to 7).map { i => lookups.getRow(i).getCell(2).toString }
+		val formats: IndexedSeq[String] = (1 to 9).map { i => lookups.getRow(i).getCell(0).toString }
+		val allocationMethods: IndexedSeq[String] = (1 to 4).map { i => lookups.getRow(i).getCell(1).toString }
+		val daysOfWeek: IndexedSeq[String] = (1 to 7).map { i => lookups.getRow(i).getCell(2).toString }
 
 		formats should be (Seq("Seminar", "Lab", "Tutorial", "Project group", "Example Class", "Workshop", "Lecture", "Exam", "Meeting"))
 		allocationMethods should be (Seq("Manual", "Self sign-up", "Linked", "Random"))
@@ -39,9 +42,9 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 	}
 
 	@Test def itWorks(): Unit = new CommandFixture {
-		val in101 = Fixtures.module("in101", "Introduction to Programming")
+		val in101: Module = Fixtures.module("in101", "Introduction to Programming")
 
-		val set = Fixtures.smallGroupSet("IN101 Labs")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Labs")
 		set.module = in101
 		set.format = SmallGroupFormat.Lab
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -50,11 +53,11 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 		set.allowSelfGroupSwitching = true
 		set.collectAttendance = true
 
-		val group1 = Fixtures.smallGroup("Alpha")
+		val group1: SmallGroup = Fixtures.smallGroup("Alpha")
 		group1.groupSet = set
 		set.groups.add(group1)
 
-		val event1 = Fixtures.smallGroupEvent("")
+		val event1: SmallGroupEvent = Fixtures.smallGroupEvent("")
 		event1.group = group1
 		event1.tutors.knownType.addUserId("cuscav")
 		event1.weekRanges = Seq(WeekRange(1, 6), WeekRange(8, 10))
@@ -64,7 +67,7 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 		event1.location = MapLocation("S0.27", "123")
 		group1.addEvent(event1)
 
-		val event2 = Fixtures.smallGroupEvent("Class test")
+		val event2: SmallGroupEvent = Fixtures.smallGroupEvent("Class test")
 		event2.group = group1
 		event2.tutors.knownType.addUserId("cusfal")
 		event2.tutors.knownType.addUserId("curef")
@@ -75,41 +78,41 @@ class SmallGroupSetsSpreadsheetTemplateCommandTest extends TestBase with Mockito
 		event2.location = NamedLocation("Student break-out area")
 		group1.addEvent(event2)
 
-		val group2 = Fixtures.smallGroup("Beta")
+		val group2: SmallGroup = Fixtures.smallGroup("Beta")
 		group2.groupSet = set
 		group2.maxGroupSize = 10
 		set.groups.add(group2)
 
 		command.smallGroupService.getSmallGroupSets(department, academicYear) returns Seq(set)
 
-		val workbook = command.generateWorkbook()
+		val workbook: XSSFWorkbook = command.generateWorkbook()
 
-		val setsSheet = workbook.getSheet("Sets")
+		val setsSheet: XSSFSheet = workbook.getSheet("Sets")
 		setsSheet.getLastRowNum should be (1)
 
-		val setRow = (0 to 8).map { col => setsSheet.getRow(1).getCell(col).toString }
+		val setRow: IndexedSeq[String] = (0 to 8).map { col => setsSheet.getRow(1).getCell(col).toString }
 		setRow should be (Seq("IN101", "Lab", "IN101 Labs", "Self sign-up", "TRUE", "FALSE", "TRUE", "", "TRUE"))
 
-		val groupsSheet = workbook.getSheet("Groups")
+		val groupsSheet: XSSFSheet = workbook.getSheet("Groups")
 		groupsSheet.getLastRowNum should be (2)
 
-		val groupRow1 = (0 to 3).map { col => groupsSheet.getRow(1).getCell(col).toString }
-		val groupRow2 = (0 to 3).map { col => groupsSheet.getRow(2).getCell(col).toString }
+		val groupRow1: IndexedSeq[String] = (0 to 3).map { col => groupsSheet.getRow(1).getCell(col).toString }
+		val groupRow2: IndexedSeq[String] = (0 to 3).map { col => groupsSheet.getRow(2).getCell(col).toString }
 
 		groupRow1 should be (Seq("IN101", "IN101 Labs", "Alpha", ""))
 		groupRow2 should be (Seq("IN101", "IN101 Labs", "Beta", "10.0"))
 
-		val eventsSheet = workbook.getSheet("Events")
+		val eventsSheet: XSSFSheet = workbook.getSheet("Events")
 		eventsSheet.getLastRowNum should be (2)
 
-		val eventRow1 = (0 to 9).map { col =>
+		val eventRow1: IndexedSeq[String] = (0 to 9).map { col =>
 			if (col == 7 || col == 8) {
 				new DateTime(eventsSheet.getRow(1).getCell(col).getDateCellValue).toLocalTime.toString("HH:mm")
 			} else {
 				eventsSheet.getRow(1).getCell(col).toString
 			}
 		}
-		val eventRow2 = (0 to 9).map { col =>
+		val eventRow2: IndexedSeq[String] = (0 to 9).map { col =>
 			if (col == 7 || col == 8) {
 				new DateTime(eventsSheet.getRow(2).getCell(col).getDateCellValue).toLocalTime.toString("HH:mm")
 			} else {

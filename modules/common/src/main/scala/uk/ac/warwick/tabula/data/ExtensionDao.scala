@@ -13,7 +13,7 @@ trait ExtensionDaoComponent {
 }
 
 trait AutowiringExtensionDaoComponent extends ExtensionDaoComponent {
-	val extensionDao = Wire[ExtensionDao]
+	val extensionDao: ExtensionDao = Wire[ExtensionDao]
 }
 
 trait ExtensionDao {
@@ -29,9 +29,9 @@ trait ExtensionDao {
 
 @Repository
 class ExtensionDaoImpl extends ExtensionDao with Daoisms {
-	def getExtensionById(id: String) = getById[Extension](id)
+	def getExtensionById(id: String): Option[Extension] = getById[Extension](id)
 
-	def saveOrUpdate(extension: Extension) = session.saveOrUpdate(extension)
+	def saveOrUpdate(extension: Extension): Unit = session.saveOrUpdate(extension)
 
 	def countExtensions(assignment: Assignment): Int = {
 		session.newCriteria[Extension]

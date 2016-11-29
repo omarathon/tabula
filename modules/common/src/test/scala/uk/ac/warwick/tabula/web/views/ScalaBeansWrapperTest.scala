@@ -20,23 +20,23 @@ class MyObject extends PermissionsTarget {
 	def getMotto() = "do be good, don't be bad"
 	def grotto = "Santa's"
 
-	def getGreeting(name:String) = "Hello %s!" format (name)
+	def getGreeting(name:String): String = "Hello %s!" format (name)
 	def getGreeting():String = getGreeting("you")
 
 	def isSomething = true
 	def something = "steve"
 
-	def departments = "ah" :: List("ch", "cs")
+	def departments: List[String] = "ah" :: List("ch", "cs")
 
 	@Restricted(Array("GodMode")) var permsName = "text"
 	@Restricted(Array("Module.ManageAssignments")) def getPermsMotto() = "do be good, don't be bad"
 	@Restricted(Array("Module.ManageAssignments")) def permsGrotto = "Santa's"
 
-	@Restricted(Array("Module.ManageAssignments")) def getPermsGreeting(name:String) = "Hello %s!" format (name)
+	@Restricted(Array("Module.ManageAssignments")) def getPermsGreeting(name:String): String = "Hello %s!" format (name)
 	@Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
 
 	override def id = ""
-	override def permissionsParents = Stream.empty
+	override def permissionsParents: Stream[Nothing] = Stream.empty
 
 
 	var restrictAccess:Boolean = false

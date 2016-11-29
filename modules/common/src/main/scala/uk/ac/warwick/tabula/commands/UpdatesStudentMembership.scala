@@ -175,25 +175,25 @@ trait UpdatesStudentMembership {
  * convenience classes
  */
 class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup) {
-	val id = assessmentComponent.id + ";" + group.id
+	val id: String = assessmentComponent.id + ";" + group.id
 
-	val name = assessmentComponent.name
-	val cats = assessmentComponent.cats
-	val occurrence = group.occurrence
-	val sequence = assessmentComponent.sequence
-	val assessmentType = Option(assessmentComponent.assessmentType).map(_.value).orNull // TAB-1174 remove Option wrap when non-null is in place
+	val name: String = assessmentComponent.name
+	val cats: Option[String] = assessmentComponent.cats
+	val occurrence: String = group.occurrence
+	val sequence: String = assessmentComponent.sequence
+	val assessmentType: String = Option(assessmentComponent.assessmentType).map(_.value).orNull // TAB-1174 remove Option wrap when non-null is in place
 
-	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.asScala.exists(ag =>
+	def isLinked(assessmentGroups: JList[AssessmentGroup]): Boolean = assessmentGroups.asScala.exists(ag =>
 		ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)
 
-	override def toString = "assessmentComponent: " + assessmentComponent.id + ", occurrence: " + group.occurrence
+	override def toString: String = "assessmentComponent: " + assessmentComponent.id + ", occurrence: " + group.occurrence
 }
 
 
 class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] {
-	var membershipService = Wire.auto[AssessmentMembershipService]
+	var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
-	override def fromString(id: String) = {
+	override def fromString(id: String): UpstreamGroup = {
 		def explode = throw new IllegalArgumentException("No unique upstream group which matches id " + id + " is available")
 
 		id.split(";") match {
@@ -205,7 +205,7 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 		}
 	}
 
-	override def toString(ug: UpstreamGroup) = ug.id
+	override def toString(ug: UpstreamGroup): String = ug.id
 }
 trait SpecifiesGroupType{
 	val updateStudentMembershipGroupIsUniversityIds: Boolean

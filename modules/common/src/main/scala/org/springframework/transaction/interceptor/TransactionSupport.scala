@@ -5,5 +5,5 @@ package org.springframework.transaction.interceptor
  * static and protected meaning it can only be access from within the same package.
  */
 object TransactionSupport extends TransactionAspectSupport {
-  def currentTransactionInfo = TransactionAspectSupport.currentTransactionInfo()
+  def currentTransactionInfo: TransactionAspectSupport#TransactionInfo = TransactionAspectSupport.currentTransactionInfo()
 }

@@ -37,7 +37,7 @@ class CreateAttendancePointCommandInternal(val department: Department, val acade
 	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
 		with TermServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val points = schemes.map(scheme => {
 			val point = new AttendanceMonitoringPoint
 			point.scheme = scheme

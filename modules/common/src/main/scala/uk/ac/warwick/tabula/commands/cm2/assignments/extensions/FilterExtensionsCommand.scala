@@ -48,10 +48,10 @@ class FilterExtensionsCommandInternal(val user: CurrentUser) extends CommandInte
 	private def modulesInDepartmentsWithPermission =
 		moduleAndDepartmentService.modulesInDepartmentsWithPermission(user, Permissions.Department.ManageExtensionSettings)
 
-	lazy val allModules = (modulesWithPermssion ++ modulesInDepartmentsWithPermission).toSeq.sortBy(_.code)
-	lazy val allDepartments = (departmentsWithPermssion ++ allModules.map(_.adminDepartment)).toSeq.sortBy(_.fullName)
+	lazy val allModules: Seq[Module] = (modulesWithPermssion ++ modulesInDepartmentsWithPermission).toSeq.sortBy(_.code)
+	lazy val allDepartments: Seq[Department] = (departmentsWithPermssion ++ allModules.map(_.adminDepartment)).toSeq.sortBy(_.fullName)
 
-	def applyInternal() = {
+	def applyInternal(): FilterExtensionResults = {
 
 		// on the off chance that someone has tried to hack extra departments or modules into the filter remove them
 		departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava
@@ -112,6 +112,6 @@ trait FilterExtensionsState extends FiltersExtensions {
 	val user: CurrentUser
 	val allModules: Seq[Module]
 	val allDepartments: Seq[Department]
-	lazy val allStates = ExtensionState.all
-	lazy val allTimes = TimeFilter.all
+	lazy val allStates: Seq[ExtensionState with Product with Serializable] = ExtensionState.all
+	lazy val allTimes: Seq[TimeFilter with Product with Serializable] = TimeFilter.all
 }

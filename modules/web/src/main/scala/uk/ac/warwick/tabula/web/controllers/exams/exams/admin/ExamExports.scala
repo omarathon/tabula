@@ -12,19 +12,21 @@ import uk.ac.warwick.tabula.commands.exams.ViewExamCommandResult
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.csv.CSVLineWriter
 
+import scala.xml.Elem
+
 trait ExamExports {
 
 class CSVBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
 		extends CSVLineWriter[User] with ExamHeaderInformation with ItemData with FormatsContent{
 
-		def getNoOfColumns(item:User) = headers.size
-		def getColumn(item:User, i:Int) = formatData(getItemData(item, results, module).get(headers(i)))
+		def getNoOfColumns(item:User): Int = headers.size
+		def getColumn(item:User, i:Int): String = formatData(getItemData(item, results, module).get(headers(i)))
 	}
 }
 
 trait FormatsContent {
 
-	protected def formatData(data: Option[Any]) = data match {
+	protected def formatData(data: Option[Any]): String = data match {
 		case Some(date: DateTime) => DateTimeFormat.forPattern("HH:mm:ss dd/MM/yyyy").print(date)
 		case Some(b: Boolean) => b.toString.toLowerCase
 		case Some(i: Int) => i.toString
@@ -73,7 +75,7 @@ trait ExamHeaderInformation {
 }
 
 trait ItemData extends ExamHeaderInformation {
-	def getItemData(student: User,  results:ViewExamCommandResult, module: Module) = {
+	def getItemData(student: User,  results:ViewExamCommandResult, module: Module): Map[String, Any] = {
 
 		val feedback:ExamFeedback = studentFeedback(results, student)
 		val hasFeedback = studentHasFeedback(results, student)
@@ -136,7 +138,7 @@ trait ItemData extends ExamHeaderInformation {
 class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val exam: Exam, val module: Module, val academicYear: AcademicYear)
 	extends ItemData with FormatsContent {
 
-	def toXML  = {
+	def toXML: Elem = {
 		<exam>
 			<name>{exam.name}</name>
 			<module-code>{ module.code }</module-code>
@@ -150,7 +152,7 @@ class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val 
 		</exam>
 	}
 
-	def studentXML(student: User) = {
+	def studentXML(student: User): Elem = {
 
 		val feedback:ExamFeedback = studentFeedback(results, student)
 		val hasFeedback = studentHasFeedback(results, student)
@@ -175,7 +177,7 @@ class XMLBuilder(val students:Seq[User], val results:ViewExamCommandResult, val 
 class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, val module: Module)
 	extends ExamHeaderInformation with ItemData with FormatsContent {
 
-	def toXLSX = {
+	def toXLSX: XSSFWorkbook = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 
@@ -185,7 +187,7 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 		workbook
 	}
 
-	def generateNewSheet(workbook: XSSFWorkbook) = {
+	def generateNewSheet(workbook: XSSFWorkbook): XSSFSheet = {
 		val sheet = workbook.createSheet(module.code.toUpperCase + " - " + safeExamName)
 
 		def formatHeader(header: String) =
@@ -220,12 +222,12 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 		}
 	}
 
-	def formatWorksheet(sheet: XSSFSheet) = {
+	def formatWorksheet(sheet: XSSFSheet): Unit = {
 		(0 to headers.size) foreach sheet.autoSizeColumn
 	}
 
 	// trim the assignment name down to 20 characters. Excel sheet names must be 31 chars or less so
-	val trimmedModuleName = {
+	val trimmedModuleName: String = {
 		if (module.name.length > 20)
 			module.name.substring(0, 20)
 		else
@@ -233,5 +235,5 @@ class ExcelBuilder(val students: Seq[User], val results:ViewExamCommandResult, v
 	}
 
 	// util to replace unsafe characters with spaces
-	val safeExamName = WorkbookUtil.createSafeSheetName(trimmedModuleName)
+	val safeExamName: String = WorkbookUtil.createSafeSheetName(trimmedModuleName)
 }

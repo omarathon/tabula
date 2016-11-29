@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.commands.{Appliable, StudentAssociationResult}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -13,7 +14,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 class ReallocateStudentRelationshipsController extends ProfilesController {
 
 	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department) = department
+	def activeDepartment(@PathVariable department: Department): Department = department
 
 	@ModelAttribute("commandActions")
 	def commandActions = FetchDepartmentRelationshipInformationCommand.Actions
@@ -30,7 +31,7 @@ class ReallocateStudentRelationshipsController extends ProfilesController {
 		FetchDepartmentRelationshipsForReallocationCommand(mandatory(department), mandatory(relationshipType), agentId)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
+	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType): Mav = {
 		val results = cmd.apply()
 		if (ajax) {
 			Mav(new JSONView(

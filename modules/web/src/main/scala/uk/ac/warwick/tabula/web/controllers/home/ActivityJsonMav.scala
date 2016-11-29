@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
-import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONView, MarkdownRenderer}
@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.web.views.{JSONView, MarkdownRenderer}
 trait ActivityJsonMav {
 	self: MarkdownRenderer =>
 
-	val DateFormat = ISODateTimeFormat.dateTimeNoMillis()
+	val DateFormat: DateTimeFormatter = ISODateTimeFormat.dateTimeNoMillis()
 
 	def toModel(activities: Seq[Activity[_]]) = Map("items" -> activities.map { item =>
 		val source = item.message

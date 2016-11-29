@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.timetables.ViewMemberEventsCommand
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats, RequestFailedException}
 
@@ -44,7 +45,7 @@ trait GetMemberEventsApi {
 		errors: Errors,
 		@RequestParam(required = false) start: LocalDate,
 		@RequestParam(required = false) end: LocalDate
-	) = {
+	): Mav = {
 		for (from <- Option(start); to <- Option(end)) {
 			command.from = from
 			command.to = to

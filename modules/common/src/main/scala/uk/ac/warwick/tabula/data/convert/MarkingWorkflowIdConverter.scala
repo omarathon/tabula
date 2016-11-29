@@ -6,11 +6,11 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class MarkingWorkflowIdConverter extends TwoWayConverter[String, MarkingWorkflow] with Daoisms {
 
-	override def convertLeft(scheme: MarkingWorkflow) = Option(scheme) match {
+	override def convertLeft(scheme: MarkingWorkflow): String = Option(scheme) match {
 		case Some(s) => s.id
 		case None => null
 	}
 
-	override def convertRight(id: String) = getById[MarkingWorkflow](id).orNull
+	override def convertRight(id: String): MarkingWorkflow = getById[MarkingWorkflow](id).orNull
 
 }

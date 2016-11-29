@@ -52,14 +52,14 @@ trait AdminSmallGroupsHomeCommandState {
 trait AdminSmallGroupsHomePermissionsRestrictedState {
 	self: AdminSmallGroupsHomeCommandState with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
-	lazy val canManageDepartment = securityService.can(user, RequiredPermission, department)
-	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
+	lazy val canManageDepartment: Boolean = securityService.can(user, RequiredPermission, department)
+	lazy val modulesWithPermission: Set[Module] = moduleAndDepartmentService.modulesWithPermission(user, RequiredPermission, department)
 }
 
 class AdminSmallGroupsHomeCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser, val calculateProgress: Boolean) extends CommandInternal[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState with TaskBenchmarking {
 	self: AdminSmallGroupsHomePermissionsRestrictedState with SmallGroupServiceComponent with SecurityServiceComponent with SmallGroupSetWorkflowServiceComponent =>
 
-	def applyInternal() = benchmarkTask("Build small groups admin home info") {
+	def applyInternal(): AdminSmallGroupsHomeInformation = benchmarkTask("Build small groups admin home info") {
 		val modules: Set[Module] =
 			if (canManageDepartment) department.modules.asScala.toSet
 			else modulesWithPermission

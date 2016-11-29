@@ -8,10 +8,11 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.web.Routes
-import uk.ac.warwick.tabula.web.controllers.{DepartmentScopedController, AcademicYearScopedController}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 
 import scala.collection.JavaConverters._
@@ -37,9 +38,9 @@ with ReadOnly with Unaudited with AutowiringSecurityServiceComponent with Autowi
 			managedModules
 		}
 
-	lazy val modulesAndExams = assessmentService.getExamsByModules(modules, academicYear).withDefaultValue(Seq())
+	lazy val modulesAndExams: Map[Module, Seq[Exam]] = assessmentService.getExamsByModules(modules, academicYear).withDefaultValue(Seq())
 
-	def applyInternal() = {
+	def applyInternal(): Seq[Module] = {
 		benchmarkTask("Sort modules") { modules.sortBy { module => (modulesAndExams(module).isEmpty, module.code) } }
 	}
 
@@ -98,7 +99,7 @@ class ExamsAdminDepartmentHomeController extends ExamsController
 		AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(2, 2).asJava
 
 	@RequestMapping
-	def adminDepartment(cmd: ExamsAdminDepartmentHomeCommand, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def adminDepartment(cmd: ExamsAdminDepartmentHomeCommand, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		val result = cmd.apply()
 
 		Mav("exams/exams/admin/department",
@@ -129,11 +130,11 @@ class ExamsAdminModuleHomeController extends ExamsController
 		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
 	@ModelAttribute("examMap")
-	def examMap(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
+	def examMap(@PathVariable module: Module, @PathVariable academicYear: AcademicYear): Map[Module, Seq[Exam]] =
 		examService.getExamsByModules(Seq(module), academicYear).withDefaultValue(Seq())
 
 	@RequestMapping
-	def adminModule(@ModelAttribute("command") cmd: Appliable[Module], @PathVariable module: Module, @PathVariable academicYear: AcademicYear) = {
+	def adminModule(@ModelAttribute("command") cmd: Appliable[Module], @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
 		val module = cmd.apply()
 
 		if (ajax) Mav("exams/exams/admin/modules/admin_partial").noLayout()

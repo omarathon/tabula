@@ -14,8 +14,8 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
   )
 
   trait FakeLookups { self: UserGroupMembershipHelperLookup =>
-    override def getUser(usercode: String) = user
-    override def getWebgroups(usercode: String) = fakeGroups.getOrElse(usercode, Nil)
+    override def getUser(usercode: String): User = user
+    override def getWebgroups(usercode: String): List[String] = fakeGroups.getOrElse(usercode, Nil)
   }
 
 	@Transactional

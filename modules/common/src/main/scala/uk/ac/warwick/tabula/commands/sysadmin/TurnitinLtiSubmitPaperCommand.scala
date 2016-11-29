@@ -32,7 +32,7 @@ class TurnitinLtiSubmitPaperCommandInternal(val user: CurrentUser) extends Comma
 
 	self: TurnitinLtiSubmitPaperCommandState with TurnitinLtiServiceComponent with OriginalityReportServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): TurnitinLtiResponse = transactional() {
 		val userEmail = if (user.email == null || user.email.isEmpty) user.firstName + user.lastName + "@TurnitinLti.warwick.ac.uk" else user.email
 		val response = turnitinLtiService.submitPaper(assignment, paperUrl, user.userId, userEmail, attachment, user.universityId, "SYSADMIN")
 

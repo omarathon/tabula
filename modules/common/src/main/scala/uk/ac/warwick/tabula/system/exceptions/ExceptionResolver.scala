@@ -61,7 +61,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 		doResolve(e, Some(request), Some(response)).noLayoutIf(ajax).toModelAndView
 	}
 
-	override def requestInfo = RequestInfo.fromThread
+	override def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
 
 	private def ajax = requestInfo.exists { _.ajax }
 
@@ -109,7 +109,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * work that's done outside of a request, such as a scheduled task, because
 	 * otherwise the exception will be only minimally logged by the scheduler.
 	 */
-	def reportExceptions[A](fn: => A) =
+	def reportExceptions[A](fn: => A): A =
 		try fn
 		catch { case throwable: Throwable => handle(throwable, None, None); throw throwable }
 

@@ -15,20 +15,20 @@ import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefi
 object Routes {
 	import RoutesUtils._
 	private val context = "/admin"
-	def home = context + "/"
-	def masquerade = context + "/masquerade"
+	def home: String = context + "/"
+	def masquerade: String = context + "/masquerade"
 
 	object department {
-		def apply(department: Department) = context + "/department/%s" format (encoded(department.code))
+		def apply(department: Department): String = context + "/department/%s" format (encoded(department.code))
 
-		def permissions(department: Department) = context + "/department/%s/permissions" format (encoded(department.code))
+		def permissions(department: Department): String = context + "/department/%s/permissions" format (encoded(department.code))
 
-		def edit(department: Department) = context + "/department/%s/edit" format (encoded(department.code))
-		def createSubDepartment(department: Department) = context + "/department/%s/subdepartment/new" format (encoded(department.code))
-		def createModule(department: Department) = context + "/department/%s/module/new" format (encoded(department.code))
+		def edit(department: Department): String = context + "/department/%s/edit" format (encoded(department.code))
+		def createSubDepartment(department: Department): String = context + "/department/%s/subdepartment/new" format (encoded(department.code))
+		def createModule(department: Department): String = context + "/department/%s/module/new" format (encoded(department.code))
 
-		def sortModules(department: Department) = context + "/department/%s/sort-modules" format (encoded(department.code))
-		def sortRoutes(department: Department) = context + "/department/%s/sort-routes" format (encoded(department.code))
+		def sortModules(department: Department): String = context + "/department/%s/sort-modules" format (encoded(department.code))
+		def sortRoutes(department: Department): String = context + "/department/%s/sort-routes" format (encoded(department.code))
 
 		object customRoles {
 			def apply(department: Department) = s"$context/department/${encoded(department.code)}/customroles/list"
@@ -43,15 +43,15 @@ object Routes {
 	}
 
 	object module {
-		def apply(module: Module) = department(module.adminDepartment) + "#module-" + encoded(module.code)
+		def apply(module: Module): String = department(module.adminDepartment) + "#module-" + encoded(module.code)
 
-		def permissions(module: Module) = context + "/module/%s/permissions" format (encoded(module.code))
+		def permissions(module: Module): String = context + "/module/%s/permissions" format (encoded(module.code))
 	}
 
 	object route {
-		def apply(route: Route) = department(route.adminDepartment) + "#route-" + encoded(route.code)
+		def apply(route: Route): String = department(route.adminDepartment) + "#route-" + encoded(route.code)
 
-		def permissions(route: Route) = context + "/route/%s/permissions" format (encoded(route.code))
+		def permissions(route: Route): String = context + "/route/%s/permissions" format (encoded(route.code))
 	}
 
 	object permissions {

@@ -4,7 +4,7 @@ import javax.persistence.Entity
 import javax.validation.constraints.NotNull
 
 object GradeBoundary {
-	def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int, signalStatus: String) = {
+	def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int, signalStatus: String): GradeBoundary = {
 		val gb = new GradeBoundary()
 		gb.grade = grade
 		gb.marksCode = marksCode
@@ -44,6 +44,6 @@ class GradeBoundary extends GeneratedId {
 	@NotNull
 	var signalStatus: String = _
 
-	def isDefault = signalStatus == "N"
+	def isDefault: Boolean = signalStatus == "N"
 
 }

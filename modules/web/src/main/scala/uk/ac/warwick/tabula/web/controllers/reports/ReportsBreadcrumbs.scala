@@ -13,12 +13,12 @@ object ReportsBreadcrumbs {
 
 	object Home {
 		case class Department(department: model.Department) extends BreadCrumb {
-			val title = department.name
+			val title: String = department.name
 			val url = Some(Routes.reports.departmentHome(department))
 		}
 
 		case class DepartmentForYear(department: model.Department, academicYear: AcademicYear) extends BreadCrumb {
-			val title = academicYear.startYear.toString
+			val title: String = academicYear.startYear.toString
 			val url = Some(Routes.reports.departmentAcademicYear(department, academicYear))
 		}
 	}

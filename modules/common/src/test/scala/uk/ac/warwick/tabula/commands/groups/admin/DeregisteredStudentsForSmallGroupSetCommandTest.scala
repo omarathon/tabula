@@ -3,19 +3,21 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.DeregisteredStudentsForSmallGroupSetCommand.StudentNotInMembership
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{Module, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with ProfileServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
-		val profileService = mock[ProfileService]
+		val smallGroupService: SmallGroupService = mock[SmallGroupService]
+		val profileService: ProfileService = mock[ProfileService]
 	}
 
 	private trait Fixture {
@@ -27,26 +29,26 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		}
 
 		userLookup.registerUsers("user1", "user2", "user3", "user4")
-		val user1 = userLookup.getUserByUserId("user1")
-		val user2 = userLookup.getUserByUserId("user2")
-		val user3 = userLookup.getUserByUserId("user3")
-		val user4 = userLookup.getUserByUserId("user4")
+		val user1: User = userLookup.getUserByUserId("user1")
+		val user2: User = userLookup.getUserByUserId("user2")
+		val user3: User = userLookup.getUserByUserId("user3")
+		val user4: User = userLookup.getUserByUserId("user4")
 
-		val module = Fixtures.module("in101", "Introduction to Scala")
+		val module: Module = Fixtures.module("in101", "Introduction to Scala")
 		module.id = "moduleId"
 
-		val set = Fixtures.smallGroupSet("IN101 Seminars")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
 		wireUserLookup(set.members)
 		set.id = "setId"
 		set.module = module
 
-		val group1 = Fixtures.smallGroup("Group 1")
+		val group1: SmallGroup = Fixtures.smallGroup("Group 1")
 		wireUserLookup(group1.students)
 		group1.id = "group1Id"
 		group1.groupSet = set
 		set.groups.add(group1)
 
-		val group2 = Fixtures.smallGroup("Group 2")
+		val group2: SmallGroup = Fixtures.smallGroup("Group 2")
 		wireUserLookup(group2.students)
 		group2.id = "group2Id"
 		group2.groupSet = set
@@ -76,8 +78,8 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 
 	private trait PopulateFixture extends Fixture {
 		val command = new PopulateDeregisteredStudentsForSmallGroupSetCommandState with DeregisteredStudentsForSmallGroupSetCommandState {
-			val module = PopulateFixture.this.module
-			val set = PopulateFixture.this.set
+			val module: Module = PopulateFixture.this.module
+			val set: SmallGroupSet = PopulateFixture.this.set
 		}
 	}
 
@@ -96,7 +98,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		command.students.add(user3) // user3 is a no-op because they are still in the group
 		command.students.add(user4)
 
-		val results = command.applyInternal()
+		val results: mutable.Buffer[StudentNotInMembership] = command.applyInternal()
 		results.size should be (1)
 
 		results.head.student.asUser should be (user4)
@@ -109,11 +111,11 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 	@Test def permissions { new Fixture {
 		val (theModule, theSet) = (module, set)
 		val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
-			val module = theModule
-			val set = theSet
+			val module: Module = theModule
+			val set: SmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
@@ -131,7 +133,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			val set = null
 		}
 
@@ -141,7 +143,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new DeregisteredStudentsForSmallGroupSetPermissions with DeregisteredStudentsForSmallGroupSetCommandState {
-			val module = Fixtures.module("in101")
+			val module: Module = Fixtures.module("in101")
 			module.id = "set id"
 
 			val set = new SmallGroupSet(Fixtures.module("other"))
@@ -155,8 +157,8 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		val (mod, s) = (module, set)
 		val command = new DeregisteredStudentsForSmallGroupSetDescription with DeregisteredStudentsForSmallGroupSetCommandState {
 			override val eventName = "test"
-			val module = mod
-			val set = s
+			val module: Module = mod
+			val set: SmallGroupSet = s
 		}
 
 		val d = new DescriptionImpl
@@ -172,8 +174,8 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
 		val (mod, s) = (module, set)
 		val command = new DeregisteredStudentsForSmallGroupSetDescription with DeregisteredStudentsForSmallGroupSetCommandState {
 			override val eventName = "test"
-			val module = mod
-			val set = s
+			val module: Module = mod
+			val set: SmallGroupSet = s
 		}
 
 		val results = Seq(

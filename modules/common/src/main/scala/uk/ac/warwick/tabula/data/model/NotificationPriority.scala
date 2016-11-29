@@ -6,10 +6,10 @@ sealed abstract class NotificationPriority (val dbValue: String) {
 	// When transforming notifications to activity streams priority is represented by a numerical value between 0 and 1
 	def toNumericalValue: Double
 
-	def < (other: NotificationPriority) = toNumericalValue < other.toNumericalValue
-	def <= (other: NotificationPriority) = toNumericalValue <= other.toNumericalValue
-	def > (other: NotificationPriority) = toNumericalValue > other.toNumericalValue
-	def >= (other: NotificationPriority) = toNumericalValue >= other.toNumericalValue
+	def < (other: NotificationPriority): Boolean = toNumericalValue < other.toNumericalValue
+	def <= (other: NotificationPriority): Boolean = toNumericalValue <= other.toNumericalValue
+	def > (other: NotificationPriority): Boolean = toNumericalValue > other.toNumericalValue
+	def >= (other: NotificationPriority): Boolean = toNumericalValue >= other.toNumericalValue
 }
 
 object NotificationPriority {
@@ -44,7 +44,7 @@ class NotificationPriorityUserType extends AbstractBasicUserType[NotificationPri
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = NotificationPriority.fromDbValue(string)
+	override def convertToObject(string: String): NotificationPriority = NotificationPriority.fromDbValue(string)
 
-	override def convertToValue(state: NotificationPriority) = state.dbValue
+	override def convertToValue(state: NotificationPriority): String = state.dbValue
 }

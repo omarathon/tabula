@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{SeenSecondMarkingWorkflow, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, SeenSecondMarkingWorkflow, UserGroup}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
+
 import collection.JavaConverters._
 
 class ReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito {
 
 	val mockUserLookup = new MockUserLookup
-	val mockAssessmentService = smartMock[AssessmentService]
-	val mockMarkingWorkflowService = smartMock[MarkingWorkflowService]
+	val mockAssessmentService: AssessmentService = smartMock[AssessmentService]
+	val mockMarkingWorkflowService: MarkingWorkflowService = smartMock[MarkingWorkflowService]
 
 	trait Fixture {
 		val marker1 = new User("marker1")
@@ -22,12 +23,12 @@ class ReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito {
 		mockUserLookup.users.values.foreach(_.setFoundUser(true))
 
 		val thisMarkingWorkflow = new SeenSecondMarkingWorkflow
-		val firstMarkersGroup = UserGroup.ofUsercodes
+		val firstMarkersGroup: UserGroup = UserGroup.ofUsercodes
 		firstMarkersGroup.add(marker1)
 		firstMarkersGroup.add(marker2)
 		firstMarkersGroup.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		thisMarkingWorkflow.firstMarkers = firstMarkersGroup
-		val secondMarkersGroup = UserGroup.ofUsercodes
+		val secondMarkersGroup: UserGroup = UserGroup.ofUsercodes
 		secondMarkersGroup.add(marker2)
 		secondMarkersGroup.add(marker3)
 		secondMarkersGroup.asInstanceOf[UserGroup].userLookup = mockUserLookup
@@ -36,22 +37,22 @@ class ReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito {
 		val validator = new ReplaceMarkerInMarkingWorkflowValidation with ReplaceMarkerInMarkingWorkflowCommandState
 			with ReplaceMarkerInMarkingWorkflowCommandRequest with UserLookupComponent with MarkingWorkflowServiceComponent {
 
-			val userLookup = mockUserLookup
+			val userLookup: MockUserLookup = mockUserLookup
 			val markingWorkflowService = null
 			val department = null
-			val markingWorkflow = thisMarkingWorkflow
+			val markingWorkflow: SeenSecondMarkingWorkflow = thisMarkingWorkflow
 		}
 
-		val department = Fixtures.department("its")
+		val department: Department = Fixtures.department("its")
 		val command = new ReplaceMarkerInMarkingWorkflowCommandInternal(department, thisMarkingWorkflow) with UserLookupComponent with MarkingWorkflowServiceComponent
 			with AssessmentServiceComponent with ReplaceMarkerInMarkingWorkflowCommandRequest with ReplaceMarkerInMarkingWorkflowCommandState{
 
-			val userLookup = mockUserLookup
-			val assessmentService = mockAssessmentService
-			val markingWorkflowService = mockMarkingWorkflowService
+			val userLookup: MockUserLookup = mockUserLookup
+			val assessmentService: AssessmentService = mockAssessmentService
+			val markingWorkflowService: MarkingWorkflowService = mockMarkingWorkflowService
 		}
 
-		val assignment1 = Fixtures.assignment("assignment1")
+		val assignment1: Assignment = Fixtures.assignment("assignment1")
 		assignment1.markingWorkflow = thisMarkingWorkflow
 		Seq(
 			Fixtures.firstMarkerMap(assignment1, marker1.getUserId, Seq("student1", "student2")),

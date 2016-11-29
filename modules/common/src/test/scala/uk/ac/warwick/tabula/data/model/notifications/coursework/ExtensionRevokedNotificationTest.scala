@@ -7,7 +7,7 @@ import uk.ac.warwick.userlookup.User
 class ExtensionRevokedNotificationTest extends TestBase with Mockito with ExtensionNotificationTesting {
 
 
-	def createNotification(assignment: Assignment, student: User, actor: User) = {
+	def createNotification(assignment: Assignment, student: User, actor: User): ExtensionRevokedNotification = {
 		val n = Notification.init(new ExtensionRevokedNotification, actor, Seq(assignment))
 		wireUserlookup(n, student)
 		n
@@ -15,25 +15,25 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 
 	@Test
 	def urlIsProfilePage():Unit = new ExtensionFixture {
-		val n = createNotification(assignment, student, admin)
+		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
 		n.url should be(s"/$cm1Prefix/module/xxx/123/")
 	}
 
 	@Test
 	def recipientsContainsSingleUser():Unit = new ExtensionFixture{
-		val n = createNotification(assignment, student, admin)
+		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
 		n.recipients should be (Seq(student))
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ExtensionFixture {
-		val n = createNotification(assignment, student, admin)
+		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
 		n.content.template should be ("/WEB-INF/freemarker/emails/revoke_manual_extension.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ExtensionFixture {
-		val n = createNotification(assignment, student, admin)
+		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
 		n.content.model("originalAssignmentDate") should be("1 August 2013 at 12:00:00")
 		n.content.model("assignment") should be(assignment)
 		n.content.model("module") should be(module)
@@ -47,7 +47,7 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 		assignment.name = "5,000 word essay"
 		student.setFullName("John Studentson")
 
-		val n = createNotification(assignment, student, admin)
+		val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
 		n.title should be ("CS118: Your extended deadline for \"5,000 word essay\" has been revoked")
 	}}
 }

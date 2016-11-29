@@ -37,7 +37,7 @@ class BulkMeetingRecordCommandInternal(val studentRelationships: Seq[StudentRela
 		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
 		with FileAttachmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[MeetingRecord] = {
 		val meetingRecords = studentRelationships.map { studentRelationship =>
 			new MeetingRecord(creator, studentRelationship)
 		}
@@ -52,11 +52,11 @@ trait BulkMeetingRecordCommandNotifications extends Notifies[Seq[MeetingRecord],
 	with SchedulesNotifications[Seq[MeetingRecord], MeetingRecord] {
 	self: BulkMeetingRecordCommandState =>
 
-	def emit(meetingRecords: Seq[MeetingRecord]) = meetingRecords.map { meetingRecord =>
+	def emit(meetingRecords: Seq[MeetingRecord]): Seq[NewMeetingRecordApprovalNotification] = meetingRecords.map { meetingRecord =>
 		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, meetingRecord, meetingRecord.relationship)
 	}
 
-	override def transformResult(meetingRecords: Seq[MeetingRecord]) = meetingRecords
+	override def transformResult(meetingRecords: Seq[MeetingRecord]): Seq[MeetingRecord] = meetingRecords
 
 	override def scheduledNotifications(meetingRecord: MeetingRecord) = Seq(
 		new ScheduledNotification[MeetingRecord]("newMeetingRecordApproval", meetingRecord, DateTime.now.plusWeeks(1))

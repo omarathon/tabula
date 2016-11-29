@@ -44,26 +44,26 @@ trait StudentCourseworkCommandHelper
 	val user: User
 	val universityId: String
 
-	val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") { overridableAssignmentsWithFeedback }
+	val assignmentsWithFeedback: Seq[Assignment] = benchmarkTask("Get assignments with feedback") { overridableAssignmentsWithFeedback }
 
-	val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
+	val enrolledAssignments: Seq[Assignment] = benchmarkTask("Get enrolled assignments") {
 		if (features.assignmentMembership) overridableEnrolledAssignments
 		else Nil
 	}
 
-	val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
+	val assignmentsWithSubmission: Seq[Assignment] = benchmarkTask("Get assignments with submission") {
 		if (features.submissions) overridableAssignmentsWithSubmission
 		else Nil
 	}
 
-	val lateFormativeAssignments = {
+	val lateFormativeAssignments: Seq[Assignment] = {
 		enrolledAssignments.filter {
 			ass => !ass.summative && ass.isClosed
 		}
 	} // TAB-706
 
 	// exclude assignments already included in other lists.
-	def enrolledAssignmentsTrimmed(user: User, universityId: String) =
+	def enrolledAssignmentsTrimmed(user: User, universityId: String): Seq[Assignment] =
 		enrolledAssignments
 			.diff(assignmentsWithFeedback)
 			.diff(assignmentsWithSubmission)
@@ -118,10 +118,10 @@ trait StudentCourseworkCommandHelper
 	}
 
 	// adorn the enrolled assignments with extra data.
-	val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed(user, universityId)) yield enhanced(assignment, user, universityId)
-	val assignmentsWithFeedbackInfo = for (assignment <- assignmentsWithFeedback) yield enhanced(assignment, user, universityId)
-	val assignmentsWithSubmissionInfo = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment, user, universityId)
-	val lateFormativeAssignmentsInfo = for (assignment <- lateFormativeAssignments) yield enhanced(assignment, user, universityId)
+	val enrolledAssignmentsInfo: Seq[Map[String, Any]] = for (assignment <- enrolledAssignmentsTrimmed(user, universityId)) yield enhanced(assignment, user, universityId)
+	val assignmentsWithFeedbackInfo: Seq[Map[String, Any]] = for (assignment <- assignmentsWithFeedback) yield enhanced(assignment, user, universityId)
+	val assignmentsWithSubmissionInfo: Seq[Map[String, Any]] = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment, user, universityId)
+	val lateFormativeAssignmentsInfo: Seq[Map[String, Any]] = for (assignment <- lateFormativeAssignments) yield enhanced(assignment, user, universityId)
 
 	def getHistoricAssignmentsInfo(
 																	assignmentsWithFeedbackInfo: Seq[AssignmentInfo],

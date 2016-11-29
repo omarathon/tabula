@@ -20,8 +20,8 @@ class HibernateStatisticsService extends QueueListener with InitializingBean wit
 
 	private val DateFormat = DateTimeFormat.shortDateTime()
 
-	var queue = Wire.named[Queue]("settingsSyncTopic")
-	var context = Wire.property("${module.context}")
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
+	var context: String = Wire.property("${module.context}")
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {
@@ -34,7 +34,7 @@ class HibernateStatisticsService extends QueueListener with InitializingBean wit
 		}
 	}
 
-	def getStatisticsSummary(stats: Statistics) = {
+	def getStatisticsSummary(stats: Statistics): String = {
 		s"""
 		|Stats enabled: ${stats.isStatisticsEnabled} (since ${DateFormat.print(stats.getStartTime)})
 		|

@@ -5,19 +5,19 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ComposableOrderingTest extends TestBase with Mockito {
 
-	val student1 = Fixtures.student("1234")
+	val student1: StudentMember = Fixtures.student("1234")
 	student1.firstName = "Dave"
 	student1.lastName = "Lister"
 
-	val student2 = Fixtures.student("2345")
+	val student2: StudentMember = Fixtures.student("2345")
 	student2.firstName = "Arnold"
 	student2.lastName = "Rimmer"
 
-	val student3 = Fixtures.student("3456")
+	val student3: StudentMember = Fixtures.student("3456")
 	student3.firstName = "Ace"
 	student3.lastName = "Rimmer"
 
-	val student4 = Fixtures.student("3457")
+	val student4: StudentMember = Fixtures.student("3457")
 	student4.firstName = "Ace"
 	student4.lastName = "Rimmer"
 
@@ -78,22 +78,22 @@ class ComposableOrderingTest extends TestBase with Mockito {
 	trait MockFixture {
 		private def toStudentMembers(any: Any): Array[StudentMember] = any.asInstanceOf[Array[_]].map(_.asInstanceOf[StudentMember])
 
-		val lastNameOrdering = Ordering.by[StudentMember, String](_.lastName)
-		val mockLastNameOrdering = smartMock[Ordering[StudentMember]]
+		val lastNameOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.lastName)
+		val mockLastNameOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
 		mockLastNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
 			val students = toStudentMembers(any)
 			lastNameOrdering.compare(students(0), students(1))
 		}
 
-		val firstNameOrdering = Ordering.by[StudentMember, String](_.firstName)
-		val mockFirstNameOrdering = smartMock[Ordering[StudentMember]]
+		val firstNameOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.firstName)
+		val mockFirstNameOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
 		mockFirstNameOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
 			val students = toStudentMembers(any)
 			firstNameOrdering.compare(students(0), students(1))
 		}
 
-		val universityIdOrdering = Ordering.by[StudentMember, String](_.universityId)
-		val mockUniversityIdOrdering = smartMock[Ordering[StudentMember]]
+		val universityIdOrdering: Ordering[StudentMember] = Ordering.by[StudentMember, String](_.universityId)
+		val mockUniversityIdOrdering: Ordering[StudentMember] = smartMock[Ordering[StudentMember]]
 		mockUniversityIdOrdering.compare(any[StudentMember], any[StudentMember]) answers { any =>
 			val students = toStudentMembers(any)
 			universityIdOrdering.compare(students(0), students(1))
@@ -108,7 +108,7 @@ class ComposableOrderingTest extends TestBase with Mockito {
 
 		new MockFixture {
 			// Different last names, so only first ordering called
-			val sorted = Seq(student1, student2).sorted(c)
+			val sorted: Seq[StudentMember] = Seq(student1, student2).sorted(c)
 			sorted should be (Seq(student1, student2))
 			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
 			verify(mockFirstNameOrdering, times(0)).compare(any[StudentMember], any[StudentMember])
@@ -117,7 +117,7 @@ class ComposableOrderingTest extends TestBase with Mockito {
 
 		new MockFixture {
 			// Same last name, different first name, so only 2 orderings called
-			val sorted = Seq(student2, student3).sorted(c)
+			val sorted: Seq[StudentMember] = Seq(student2, student3).sorted(c)
 			sorted should be (Seq(student3, student2))
 			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
 			verify(mockFirstNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
@@ -126,7 +126,7 @@ class ComposableOrderingTest extends TestBase with Mockito {
 
 		new MockFixture {
 			// Same furst and last name, so all 3 orderings called
-			val sorted = Seq(student4, student3).sorted(c)
+			val sorted: Seq[StudentMember] = Seq(student4, student3).sorted(c)
 			sorted should be (Seq(student3, student4))
 			verify(mockLastNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])
 			verify(mockFirstNameOrdering, atLeast(1)).compare(any[StudentMember], any[StudentMember])

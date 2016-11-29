@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, Notification, ScheduledMeetingRecord, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with Mockito {
@@ -30,11 +30,11 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	}
 
 	trait TitleFixture {
-		val agent = Fixtures.staff("1234567", "tutor")
+		val agent: StaffMember = Fixtures.staff("1234567", "tutor")
 		agent.firstName = "Tutor"
 		agent.lastName = "Name"
 
-		val student = Fixtures.student("7654321", "student")
+		val student: StudentMember = Fixtures.student("7654321", "student")
 		student.firstName = "Student"
 		student.lastName = "Name"
 
@@ -42,7 +42,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 
 		val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student)
 
-		val thirdParty = Fixtures.staff("1122331", "3rdparty")
+		val thirdParty: StaffMember = Fixtures.staff("1122331", "3rdparty")
 		thirdParty.firstName = "Third"
 		thirdParty.lastName = "Party"
 	}
@@ -50,7 +50,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	@Test def titleStudent() { new TitleFixture {
 		val meeting = new ScheduledMeetingRecord(agent, relationship)
 
-		val notification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, agent.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, agent.asSsoUser, meeting, relationship)
 		notification.title should be ("Scheduled personal tutor meeting with Tutor Name did not take place")
 		notification.recipient.getUserId should be (student.userId)
 	}}
@@ -58,7 +58,7 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	@Test def titleTutor() { new TitleFixture {
 		val meeting = new ScheduledMeetingRecord(student, relationship)
 
-		val notification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, student.asSsoUser, meeting, relationship)
+		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, student.asSsoUser, meeting, relationship)
 		notification.title should be ("Scheduled personal tutor meeting with Student Name did not take place")
 		notification.recipient.getUserId should be (agent.userId)
 	}}

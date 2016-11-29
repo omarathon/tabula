@@ -82,7 +82,7 @@ class OldAddMarkerFeedbackController extends OldCourseworkController {
 class OldAddMarkerFeedbackControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.feedback(assignment, currentUser.apparentUser))
 	}
 }

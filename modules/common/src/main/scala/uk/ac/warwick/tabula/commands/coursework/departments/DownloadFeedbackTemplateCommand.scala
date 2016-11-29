@@ -24,7 +24,7 @@ class DownloadFeedbackTemplateCommand(
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 
 		val attachment = Option(template.attachment)
 		val renderableAttachment = attachment find (_.name == filename) map (a => new RenderableAttachment(a))
@@ -36,11 +36,11 @@ class DownloadFeedbackTemplateCommand(
 		renderableAttachment
 	}
 
-	override def describe(d: Description) = d
+	override def describe(d: Description): Unit = d
 		.department(department)
 		.property("template", template.id)
 
-	override def describeResult(d: Description) = d
+	override def describeResult(d: Description): Unit = d
 		.property("fileFound", fileFound)
 
 }

@@ -13,33 +13,33 @@ import uk.ac.warwick.util.queue.Queue
 class AdminDepartmentHomeCommandTest extends TestBase with Mockito with FunctionalContextTesting {
 
 	trait CommandTestSupport extends AdminDepartmentHomeCommandState with ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with SecurityServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
-		val courseAndRouteService = mock[CourseAndRouteService]
-		val securityService = mock[SecurityService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val courseAndRouteService: CourseAndRouteService = mock[CourseAndRouteService]
+		val securityService: SecurityService = mock[SecurityService]
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 
-		val mod1 = Fixtures.module("in101")
-		val mod2 = Fixtures.module("in102")
-		val mod3 = Fixtures.module("in103")
+		val mod1: Module = Fixtures.module("in101")
+		val mod2: Module = Fixtures.module("in102")
+		val mod3: Module = Fixtures.module("in103")
 
 		Seq(mod1, mod2, mod3).foreach { mod =>
 			department.modules.add(mod)
 			mod.adminDepartment = department
 		}
 
-		val route1 = Fixtures.route("i100")
-		val route2 = Fixtures.route("i200")
-		val route3 = Fixtures.route("i300")
+		val route1: Route = Fixtures.route("i100")
+		val route2: Route = Fixtures.route("i200")
+		val route3: Route = Fixtures.route("i300")
 
 		Seq(route1, route2, route3).foreach { route =>
 			department.routes.add(route)
 			route.adminDepartment = department
 		}
 
-		val user = mock[CurrentUser]
+		val user: CurrentUser = mock[CurrentUser]
 
 		val command = new AdminDepartmentHomeCommandInternal(department, user) with CommandTestSupport with AdminDepartmentHomeCommandPermissions
 	}
@@ -106,35 +106,35 @@ class AdminDepartmentHomeCommandTest extends TestBase with Mockito with Function
 	}}
 
 	@Test def permissionsNoPerms() { new NoPermissionsFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
 	@Test def permissionsForDeptAdmin() { new DeptAdminFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.Module.Administer, department)
 	}}
 
 	@Test def permissionsForModuleManager() { new ModuleManagerFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))
 	}}
 
 	@Test def permissionsForRouteManager() { new RouteManagerFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.Route.Administer, Set(route1, route3))
 	}}
 
 	@Test def permissionsForModuleAndRouteManager() { new ModuleAndRouteManagerFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheckAll(Permissions.Module.Administer, Set(mod1, mod3))

@@ -38,7 +38,7 @@ class FindPointsCommandInternal(val department: Department, val academicYear: Ac
 
 	self: AttendanceMonitoringServiceComponent with FindPointsCommandState with GroupsPoints =>
 
-	override def applyInternal() = {
+	override def applyInternal(): FindPointsResult = {
 		restrictedStyle match {
 			case Some(AttendanceMonitoringPointStyle.Date) =>
 				val points = attendanceMonitoringService.findPoints(department, academicYear, findSchemes.asScala, types.asScala, styles.asScala)
@@ -78,7 +78,7 @@ trait FindPointsCommandState {
 		() => null
 	}
 
-	def serializeFilter = {
+	def serializeFilter: String = {
 		val result = new UriBuilder()
 		findSchemes.asScala.foreach(scheme => result.addQueryParameter("findSchemes", scheme.id))
 		types.asScala.foreach(t => result.addQueryParameter("types", t.dbValue))

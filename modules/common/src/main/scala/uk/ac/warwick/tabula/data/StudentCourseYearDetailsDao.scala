@@ -39,16 +39,16 @@ trait StudentCourseYearDetailsDao {
 class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
 	import Restrictions._
 
-	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails) = {
+	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails): Unit = {
 		session.saveOrUpdate(studentCourseYearDetails)
 	}
 
-	def delete(studentCourseYearDetails: StudentCourseYearDetails) =  {
+	def delete(studentCourseYearDetails: StudentCourseYearDetails): Unit =  {
 		session.delete(studentCourseYearDetails)
 		session.flush()
 	}
 
-	def getStudentCourseYearDetails(id: String) = getById[StudentCourseYearDetails](id)
+	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails] = getById[StudentCourseYearDetails](id)
 
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
 		session.newCriteria[StudentCourseYearDetails]
@@ -76,7 +76,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		.seq
 	}
 
-	def getFreshIds = {
+	def getFreshIds: Seq[String] = {
 		session.newCriteria[StudentCourseYearDetails]
 			.add(isNull("missingFromImportSince"))
 			.project[String](Projections.property("id"))
@@ -89,7 +89,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				key => getIdFromKey(key)
 			}
 
-	def getIdFromKey(key: StudentCourseYearKey) = {
+	def getIdFromKey(key: StudentCourseYearKey): Option[String] = {
 		session.newCriteria[StudentCourseYearDetails]
 		.add(is("studentCourseDetails.scjCode", key.scjCode))
 		.add(is("sceSequenceNumber", key.sceSequenceNumber))
@@ -97,7 +97,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		.uniqueResult
 	}
 
-	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime) = {
+	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime): Unit = {
 		newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
 			val sqlString = """
 				update
@@ -190,5 +190,5 @@ trait StudentCourseYearDetailsDaoComponent {
 }
 
 trait AutowiringStudentCourseYearDetailsDaoComponent extends StudentCourseYearDetailsDaoComponent{
-	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
+	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 }

@@ -21,12 +21,12 @@ abstract class AbstractOpenSmallGroupSetsNotification
 
 	def formats: List[String] = entities.map(_.format.description).distinct.toList
 
-	def formatsString = formats match {
+	def formatsString: String = formats match {
 		case singleFormat :: Nil => singleFormat
 		case _ => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
 	}
 
-	def title = {
+	def title: String = {
 		val moduleCodes = entities.map(_.module.code.toUpperCase).distinct.toList.sorted
 		val moduleCodesString = moduleCodes match {
 			case singleModuleCode :: Nil => singleModuleCode

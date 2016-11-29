@@ -111,7 +111,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
 	@transient final val dateTimeFormatter = DateFormats.NotificationDateTime
 
-	def permissionsParents = Stream.empty
+	def permissionsParents: Stream[Nothing] = Stream.empty
 
 	@Column(nullable=false)
 	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -121,7 +121,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@BatchSize(size = 1)
 	var items: JList[EntityReference[A]] = JArrayList()
 
-	def entities = items.asScala.map { _.entity }.toSeq
+	def entities: Seq[A] = items.asScala.map { _.entity }.toSeq
 
 	var created: DateTime = null
 
@@ -130,7 +130,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	var priority: NotificationPriority = NotificationPriority.Info
 
 	// The priority, or if it is null then the default value of Info.
-	def priorityOrDefault = Option(priority).getOrElse(NotificationPriority.Info)
+	def priorityOrDefault: NotificationPriority = Option(priority).getOrElse(NotificationPriority.Info)
 
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
@@ -144,17 +144,17 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 		}
 	}
 
-	def dismiss(user: User) = {
+	def dismiss(user: User): Unit = {
 		val info = getRecipientNotificationInfo(user)
 		info.dismissed = true
 	}
 
-	def unDismiss(user: User) = {
+	def unDismiss(user: User): Unit = {
 		val info = getRecipientNotificationInfo(user)
 		info.dismissed = false
 	}
 
-	def isDismissed(user: User) = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
+	def isDismissed(user: User): Boolean = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
 
 	@Column(name = "listeners_processed")
 	private var _listenersProcessed: Boolean = false
@@ -166,7 +166,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	// Not persisted, null for transient instances
 	@Column(name = "notification_type", insertable = false, updatable = false)
 	private var _notificationType: String = _
-	def notificationType = _notificationType.maybeText.getOrElse(getClass.getAnnotation(classOf[DiscriminatorValue]).value)
+	def notificationType: String = _notificationType.maybeText.getOrElse(getClass.getAnnotation(classOf[DiscriminatorValue]).value)
 
 	// HasSettings provides the JSONified settings field... ---> HERE <---
 
@@ -184,14 +184,14 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def urlTitle: String
 	@transient def recipients: Seq[User]
 
-	def addItems(seq: Seq[A]) = {
+	def addItems(seq: Seq[A]): Notification[A, B] = {
 		val x = seq.map { _.toEntityReference }.asInstanceOf[Seq[EntityReference[A]]]
 		x.foreach { _.notification = this }
 		items.addAll(x.asJava)
 		this
 	}
 
-	def safeTitle = try {
+	def safeTitle: Option[String] = try {
 		Some(title)
 	} catch {
 		// Can happen if reference to an entity has since been deleted, e.g.
@@ -251,7 +251,7 @@ trait UserIdRecipientNotification extends SingleRecipientNotification with Notif
 	this : UserLookupComponent =>
 
 	var recipientUserId: String = null
-	def recipient = userLookup.getUserByUserId(recipientUserId)
+	def recipient: User = userLookup.getUserByUserId(recipientUserId)
 
 	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUserId, "recipientUserId must be set")
@@ -267,7 +267,7 @@ trait UniversityIdRecipientNotification extends SingleRecipientNotification with
 	this : UserLookupComponent =>
 
 	var recipientUniversityId: String = null
-	def recipient = userLookup.getUserByWarwickUniId(recipientUniversityId)
+	def recipient: User = userLookup.getUserByWarwickUniId(recipientUniversityId)
 
 	override def onPreSave(newRecord: Boolean) {
 		Assert.notNull(recipientUniversityId, "recipientUniversityId must be set")
@@ -301,8 +301,8 @@ trait ConfigurableNotification {
 
 	@transient private val userSettingsService = Wire[UserSettingsService]
 
-	protected def departmentSettings = configuringDepartment.notificationSettings(notificationType)
-	protected def userSettings(u: User) = userSettingsService.getByUserId(u.getUserId).map { _.notificationSettings(notificationType) }
+	protected def departmentSettings: NotificationSettings = configuringDepartment.notificationSettings(notificationType)
+	protected def userSettings(u: User): Option[NotificationSettings] = userSettingsService.getByUserId(u.getUserId).map { _.notificationSettings(notificationType) }
 
 	private def enabledForDepartment: Boolean = departmentSettings.enabled.value
 	private def enabledForUser(u: User): Boolean = userSettings(u).fold(true) { _.enabled.value }
@@ -318,15 +318,15 @@ trait ActionRequiredNotification {
 
 	self: Notification[_, _] =>
 
-	@transient var notificationService = Wire[NotificationService]
+	@transient var notificationService: NotificationService = Wire[NotificationService]
 
 	@transient final protected val _completed = BooleanSetting("completed", false)
 	protected def completed_=(isCompleted: Boolean) { _completed.value = isCompleted }
-	def completed = _completed.value
+	def completed: Boolean = _completed.value
 
 	@transient final protected val _completedBy = StringSetting("completedBy", "")
 	protected def completedBy_=(userId: String) { _completedBy.value = userId }
-	def completedBy = _completedBy.value
+	def completedBy: String = _completedBy.value
 
 	@transient final protected val _completedOn = StringSetting("completedOn", "")
 	protected def completedOn_=(dateTime: DateTime) { _completedOn.value = dateTime.getMillis.toString }
@@ -336,7 +336,7 @@ trait ActionRequiredNotification {
 
 	def notificationItems: JList[EntityReference[_]] = items.asInstanceOf[JList[EntityReference[_]]]
 
-	def isRecipient(user: User) = recipientNotificationInfos.asScala.exists(_.recipient == user)
+	def isRecipient(user: User): Boolean = recipientNotificationInfos.asScala.exists(_.recipient == user)
 
 }
 
@@ -344,7 +344,7 @@ trait AllCompletedActionRequiredNotification extends ActionRequiredNotification 
 
 	self: Notification[_, _] =>
 
-	override final def actionCompleted(user: User) = transactional() {
+	override final def actionCompleted(user: User): Unit = transactional() {
 		dismiss(user)
 		completed = true
 		completedBy = user.getUserId
@@ -356,7 +356,7 @@ trait RecipientCompletedActionRequiredNotification extends ActionRequiredNotific
 
 	self: Notification[_, _] =>
 
-	override final def actionCompleted(user: User) = transactional() {
+	override final def actionCompleted(user: User): Unit = transactional() {
 		dismiss(user)
 	}
 }

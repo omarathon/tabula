@@ -8,9 +8,9 @@ import javax.mail.internet.MimeUtility
 
 trait UnicodeEmails {
 
-	def createMessage(sender: WarwickMailSender)(fn: => (MimeMessageHelper => Unit)) = prepareMessage(sender.createMimeMessage)(fn)
+	def createMessage(sender: WarwickMailSender)(fn: => (MimeMessageHelper => Unit)): MimeMessage = prepareMessage(sender.createMimeMessage)(fn)
 
-	def prepareMessage(message: MimeMessage)(fn: => (MimeMessageHelper => Unit)) = {
+	def prepareMessage(message: MimeMessage)(fn: => (MimeMessageHelper => Unit)): MimeMessage = {
 		val preparator = new FunctionalMimeMessagePreparator({ message =>
 			val helper = new MimeMessageHelper(message, false, "UTF-8")
 			fn(helper)
@@ -21,10 +21,10 @@ trait UnicodeEmails {
 		message
 	}
 
-	def encodeSubject(subject: String) = MimeUtility.encodeText(subject, "UTF-8", null)
+	def encodeSubject(subject: String): String = MimeUtility.encodeText(subject, "UTF-8", null)
 
 }
 
 class FunctionalMimeMessagePreparator(fn: => (MimeMessage => Unit)) extends MimeMessagePreparator {
-	override def prepare(message: MimeMessage) = fn(message)
+	override def prepare(message: MimeMessage): Unit = fn(message)
 }

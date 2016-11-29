@@ -54,22 +54,22 @@ case class AuditEvent(
 	 * Joins the JSON data for all the related audit events into one map. It is a simple
 	 * merge by key - if any events re-use the same key, only one will get returned.
 	 */
-	def combinedParsedData = relatedParsedData.foldLeft(BlankData) { (combined, map) => map ++ combined }
+	def combinedParsedData: Map[String, Any] = relatedParsedData.foldLeft(BlankData) { (combined, map) => map ++ combined }
 
-	def assignmentId = stringProperty("assignment")
-	def submissionId = stringProperty("submission")
-	def submissionIsNoteworthy = stringProperty("submissionIsNoteworthy")
-	def submissionIds = stringListProperty("submissions")
-	def feedbackIds = stringListProperty("feedbacks")
-	def students = stringListProperty("students")
-	def attachments = stringListProperty("attachments")
+	def assignmentId: Option[String] = stringProperty("assignment")
+	def submissionId: Option[String] = stringProperty("submission")
+	def submissionIsNoteworthy: Option[String] = stringProperty("submissionIsNoteworthy")
+	def submissionIds: Seq[String] = stringListProperty("submissions")
+	def feedbackIds: Seq[String] = stringListProperty("feedbacks")
+	def students: Seq[String] = stringListProperty("students")
+	def attachments: Seq[String] = stringListProperty("attachments")
 
 	/** Was there an "error" stage, indicating an exception was thrown? */
-	def hadError = findStage("error").isDefined
-	def isIncomplete = findStage("after").isEmpty
+	def hadError: Boolean = findStage("error").isDefined
+	def isIncomplete: Boolean = findStage("after").isEmpty
 
-	def findStage(stage: String) = related.find(_.eventStage == stage)
-	def findBeforeStage = findStage("before")
+	def findStage(stage: String): Option[AuditEvent] = related.find(_.eventStage == stage)
+	def findBeforeStage: Option[AuditEvent] = findStage("before")
 
 	/** Returns whether any of the events have a property. */
 	def hasProperty(name: String): Boolean = stringProperty(name).isDefined

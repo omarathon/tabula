@@ -53,7 +53,7 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 		for ((key, value) <- vars) this.setSharedVariable(key, nonCachingWrapper.wrap(value.asInstanceOf[Object]))
 	}
 
-	override def setServletContext(ctx: javax.servlet.ServletContext) = {
+	override def setServletContext(ctx: javax.servlet.ServletContext): Unit = {
 		setServletContextForTemplateLoading(ctx, "/")
 	}
 }
@@ -63,5 +63,5 @@ trait ScalaFreemarkerConfigurationComponent {
 }
 
 trait AutowiringScalaFreemarkerConfigurationComponent extends ScalaFreemarkerConfigurationComponent {
-	var freemarkerConfiguration = Wire[ScalaFreemarkerConfiguration]
+	var freemarkerConfiguration: ScalaFreemarkerConfiguration = Wire[ScalaFreemarkerConfiguration]
 }

@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.profiles.relationships._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, StudentAssociationResult}
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 
@@ -15,7 +16,7 @@ import uk.ac.warwick.tabula.web.views.{ExcelView, JSONView}
 class AllocateStudentsToRelationshipController extends ProfilesController {
 
 	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department) = department
+	def activeDepartment(@PathVariable department: Department): Department = department
 
 	@ModelAttribute("commandActions")
 	def commandActions = FetchDepartmentRelationshipInformationCommand.Actions
@@ -32,7 +33,7 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 		ExtractRelationshipsFromFileCommand(mandatory(department), mandatory(relationshipType))
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
+	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType): Mav = {
 		val results = cmd.apply()
 		if (ajax) {
 			Mav(new JSONView(
@@ -61,7 +62,7 @@ class AllocateStudentsToRelationshipTemplateController extends ProfilesControlle
 		StudentRelationshipTemplateCommand(mandatory(department), mandatory(relationshipType))
 
 	@RequestMapping
-	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]) = cmd.apply()
+	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]): ExcelView = cmd.apply()
 
 }
 
@@ -88,7 +89,7 @@ class AllocateStudentsToRelationshipUploadController extends ProfilesController 
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable relationshipType: StudentRelationshipType
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			Mav("profiles/relationships/allocate_upload")
 		} else {
@@ -103,7 +104,7 @@ class AllocateStudentsToRelationshipUploadController extends ProfilesController 
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("templateWithChanges"))
-	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]) = cmd.apply()
+	def template(@ModelAttribute("templateCommand") cmd: Appliable[ExcelView]): ExcelView = cmd.apply()
 
 }
 
@@ -121,7 +122,7 @@ class AllocateStudentsToRelationshipPreviewController extends ProfilesController
 	def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
 
 	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def form(@ModelAttribute("command") cmd: Appliable[AllocateStudentsToRelationshipCommand.Result], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) = {
+	def form(@ModelAttribute("command") cmd: Appliable[AllocateStudentsToRelationshipCommand.Result], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType): Mav = {
 		Mav("profiles/relationships/allocate_preview")
 	}
 
@@ -131,7 +132,7 @@ class AllocateStudentsToRelationshipPreviewController extends ProfilesController
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable relationshipType: StudentRelationshipType
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, department, relationshipType)
 		} else {

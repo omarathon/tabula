@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, MarkingUncompletedCommand, MarkingUncompletedState}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -30,7 +31,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 							submitter: CurrentUser) =
 		MarkingUncompletedCommand(module, assignment, marker, submitter)
 
-	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand) = {
+	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
 			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
 	}
 
@@ -45,7 +46,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 		@PathVariable marker: User,
 		@ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 
 		val previousStageRole = requestInfo
 			.flatMap(_.requestParameters.get("previousStageRole"))
@@ -70,7 +71,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 		@PathVariable marker: User,
 		@Valid @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
 		errors: Errors
-	) = transactional() {
+	): Mav = transactional() {
 			if (errors.hasErrors)
 				showForm(module,assignment, marker, form, errors)
 			else {
@@ -88,7 +89,7 @@ class OldMarkingUncompletedController extends OldCourseworkController {
 class OldMarkingUncompletedControllerCurrentUser extends OldCourseworkController {
 
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback.uncomplete(assignment, currentUser.apparentUser))
 	}
 

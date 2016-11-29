@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	@transient
-	var assessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
+	var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]("assignmentMembershipService")
 	var module: Module
 	var academicYear: AcademicYear
 	var name: String
@@ -36,13 +36,13 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	def allFeedback: Seq[Feedback]
 
 	// feedback that has been been through the marking process (not placeholders for marker feedback)
-	def fullFeedback = allFeedback.filterNot(_.isPlaceholder)
+	def fullFeedback: Seq[Feedback] = allFeedback.filterNot(_.isPlaceholder)
 
 	// returns feedback for a specified student
-	def findFeedback(uniId: String) = allFeedback.find(_.universityId == uniId)
+	def findFeedback(uniId: String): Option[Feedback] = allFeedback.find(_.universityId == uniId)
 
 	// returns feedback for a specified student
-	def findFullFeedback(uniId: String) = fullFeedback.find(_.universityId == uniId)
+	def findFullFeedback(uniId: String): Option[Feedback] = fullFeedback.find(_.universityId == uniId)
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
@@ -55,9 +55,9 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	def collectMarks: JBoolean
 
-	def hasWorkflow = markingWorkflow != null
+	def hasWorkflow: Boolean = markingWorkflow != null
 
-	def isMarker(user: User) = isFirstMarker(user) || isSecondMarker(user)
+	def isMarker(user: User): Boolean = isFirstMarker(user) || isSecondMarker(user)
 
 	def isFirstMarker(user: User): Boolean = {
 		if (markingWorkflow != null)

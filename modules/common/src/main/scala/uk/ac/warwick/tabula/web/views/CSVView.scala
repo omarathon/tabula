@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 class CSVView(var filename: String = "tabula-data.csv", var csv: Any) extends View {
 	override def getContentType() = "text/csv"
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		response.setContentType(s"$getContentType; charset=UTF-8")
 		response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"")
 		val out = response.getWriter
@@ -18,5 +18,5 @@ class CSVView(var filename: String = "tabula-data.csv", var csv: Any) extends Vi
 	}
 
 	// for testing
-	def getAsString = csv.toString
+	def getAsString: String = csv.toString
 }

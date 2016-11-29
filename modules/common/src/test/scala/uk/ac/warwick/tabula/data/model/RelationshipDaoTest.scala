@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Member, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 
 // scalastyle:off magic.number
@@ -17,8 +15,8 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	val relationshipDao = new RelationshipDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
 
-	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-	val sprPermanentlyWithdrawnStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+	val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+	val sprPermanentlyWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
 
 	@Before def setup() {
 		relationshipDao.sessionFactory = sessionFactory

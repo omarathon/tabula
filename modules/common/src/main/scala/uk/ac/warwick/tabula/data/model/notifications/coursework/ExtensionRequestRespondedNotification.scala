@@ -4,15 +4,16 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
+import uk.ac.warwick.userlookup.User
 
 
 abstract class ExtensionRequestRespondedNotification(val verbed: String) extends ExtensionNotification {
 
 	def verb = "respond"
 
-	def title = titlePrefix + "Extension request by %s for \"%s\" was %s".format(student.getFullName, assignment.name, verbed)
+	def title: String = titlePrefix + "Extension request by %s for \"%s\" was %s".format(student.getFullName, assignment.name, verbed)
 
-	def url = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
+	def url: String = Routes.admin.assignment.extension.expandrow(assignment, student.getWarwickId)
 	def urlTitle = "review this extension request"
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(
@@ -23,7 +24,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 		"path" ->  url
 	))
 
-	def recipients = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
+	def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
 
 }
 

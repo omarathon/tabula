@@ -16,10 +16,10 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 	trait Environment extends ImportCommandFactorySetup {
-		val blobBytes = Array[Byte](1,2,3,4,5)
+		val blobBytes: Array[Byte] = Array[Byte](1,2,3,4,5)
 
-		val rs = mock[ResultSet]
-		val md = mock[ResultSetMetaData]
+		val rs: ResultSet = mock[ResultSet]
+		val md: ResultSetMetaData = mock[ResultSetMetaData]
 		rs.getMetaData returns md
 		md.getColumnCount returns 3
 		md.getColumnName(1) returns "gender"

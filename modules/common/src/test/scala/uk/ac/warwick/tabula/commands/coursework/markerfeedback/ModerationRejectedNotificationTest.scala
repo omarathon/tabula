@@ -12,12 +12,12 @@ import uk.ac.warwick.userlookup.User
 class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
 	val HERON_PLUG = "Not enough time has been given to explaining the awesome nature of Herons"
-	val userLookupService = mock[UserLookupService]
+	val userLookupService: UserLookupService = mock[UserLookupService]
 
 	val cm1Prefix = "coursework"
 	Routes.coursework._cm1Prefix = Some(cm1Prefix)
 
-	def createNotification(agent: User, recipient: User, markerFeedback: MarkerFeedback) = {
+	def createNotification(agent: User, recipient: User, markerFeedback: MarkerFeedback): ModeratorRejectedNotification = {
 		val n =  Notification.init(new ModeratorRejectedNotification, agent, Seq(markerFeedback))
 		userLookupService.getUserByUserId(recipient.getUserId) returns recipient
 		userLookupService.getUserByWarwickUniId(recipient.getWarwickId) returns recipient
@@ -47,27 +47,27 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf2)
+		val n: ModeratorRejectedNotification =  createNotification(marker2, marker1, mf2)
 		n.title should be("HERON101: Feedback for student1 for \"Test assignment\" has been rejected by the moderator")
 	} }
 
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
-		val n =  createNotification(marker2, marker1, mf2)
+		val n: ModeratorRejectedNotification =  createNotification(marker2, marker1, mf2)
 		n.url should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/marker1/list")
 	}
 
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf2)
+		val n: ModeratorRejectedNotification =  createNotification(marker2, marker1, mf2)
 		n.content.template should be("/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
 
-		val n =  createNotification(marker2, marker1, mf2)
+		val n: ModeratorRejectedNotification =  createNotification(marker2, marker1, mf2)
 		n.url should be (s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/marker1/list")
 		n.content.model.get("assignment") should be(Some(testAssignment))
 		n.content.model.get("studentId") should be(Some("student1"))

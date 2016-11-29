@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, MemberOrUser, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AssessmentServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
@@ -28,11 +29,11 @@ class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser)
 		  FeaturesComponent with
 			StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback = assessmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithFeedback: Seq[Assignment] = assessmentService.getAssignmentsWithFeedback(memberOrUser.universityId)
 
-	override lazy val overridableEnrolledAssignments = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
+	override lazy val overridableEnrolledAssignments: Seq[Assignment] = assessmentMembershipService.getEnrolledAssignments(memberOrUser.asUser)
 
-	override lazy val overridableAssignmentsWithSubmission = assessmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
+	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(memberOrUser.universityId)
 
 	override val universityId: String = memberOrUser.universityId
 

@@ -37,7 +37,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
 	extends CommandInternal[DepartmentSmallGroupSet] with UpdateStudentsForDepartmentSmallGroupSetCommandState {
 	self: UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups =>
 
-	override def applyInternal() = {
+	override def applyInternal(): DepartmentSmallGroupSet = {
 		val autoDeregister = set.department.autoGroupDeregistration
 
 		val oldUsers =
@@ -130,5 +130,5 @@ trait RemovesUsersFromDepartmentGroups {
 }
 
 trait RemovesUsersFromDepartmentGroupsCommand extends RemovesUsersFromDepartmentGroups {
-	def removeFromGroup(user: User, group: DepartmentSmallGroup) = new RemoveUserFromDepartmentSmallGroupCommand(user, group).apply()
+	def removeFromGroup(user: User, group: DepartmentSmallGroup): Unit = new RemoveUserFromDepartmentSmallGroupCommand(user, group).apply()
 }

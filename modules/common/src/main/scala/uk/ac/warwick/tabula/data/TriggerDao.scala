@@ -12,7 +12,7 @@ trait TriggerDaoComponent {
 }
 
 trait AutowriringTriggerDaoComponent extends TriggerDaoComponent{
-	val triggerDao = Wire[TriggerDao]
+	val triggerDao: TriggerDao = Wire[TriggerDao]
 }
 
 trait TriggerDao {
@@ -38,7 +38,7 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 		session.saveOrUpdate(trigger)
 	}
 
-	override def getTriggers(entity: Any) = {
+	override def getTriggers(entity: Any): Seq[Trigger[_ >: Null <: ToEntityReference, _]] = {
 		val targetEntity = entity match {
 			case ref: ToEntityReference => ref.toEntityReference.entity
 			case _ => entity
@@ -50,6 +50,6 @@ class TriggerDaoImpl extends TriggerDao with Daoisms {
 			.seq
 	}
 
-	override def delete(trigger: Trigger[_  >: Null <: ToEntityReference, _]) = session.delete(trigger)
+	override def delete(trigger: Trigger[_  >: Null <: ToEntityReference, _]): Unit = session.delete(trigger)
 
 }

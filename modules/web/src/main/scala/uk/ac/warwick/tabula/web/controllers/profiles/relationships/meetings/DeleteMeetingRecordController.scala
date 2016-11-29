@@ -6,9 +6,10 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.{DeleteMeetingRecordCommand, PurgeMeetingRecordCommand, RestoreMeetingRecordCommand}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, SelfValidating}
 import uk.ac.warwick.tabula.data.model.AbstractMeetingRecord
+import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
@@ -33,7 +34,7 @@ class DeleteMeetingRecordController extends AbstractRemoveMeetingRecordControlle
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("deleteMeetingRecordCommand")
-	def getDeleteCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getDeleteCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): DeleteMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with DeleteMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with DeleteScheduledMeetingRecordNotification = {
 		DeleteMeetingRecordCommand(meetingRecord, currentUser)
 	}
 
@@ -54,7 +55,7 @@ class RestoreMeetingRecordController extends AbstractRemoveMeetingRecordControll
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("restoreMeetingRecordCommand")
-	def getRestoreCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getRestoreCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): RestoreMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with RestoreScheduledMeetingRecordNotification = {
 		RestoreMeetingRecordCommand(meetingRecord, currentUser)
 	}
 
@@ -74,12 +75,12 @@ class PurgeMeetingRecordController extends AbstractRemoveMeetingRecordController
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("purgeMeetingRecordCommand")
-	def getPurgeCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser) = {
+	def getPurgeCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): PurgeMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState = {
 		PurgeMeetingRecordCommand(meetingRecord, currentUser)
 	}
 
 	@RequestMapping(method = Array(POST))
-	def purgeMeetingRecord(@Valid @ModelAttribute("purgeMeetingRecordCommand") purgeCommand: Appliable[AbstractMeetingRecord], errors: Errors) = {
+	def purgeMeetingRecord(@Valid @ModelAttribute("purgeMeetingRecordCommand") purgeCommand: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
 		doApply(purgeCommand, errors)
 	}
 

@@ -1,21 +1,26 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import java.io.StringReader
+
 import scala.annotation.meta.field
 import org.hibernate.annotations.Type
 import org.springframework.validation.Errors
 import javax.persistence._
+
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
+
 import scala.reflect._
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+
+import com.fasterxml.jackson.databind.ObjectMapper
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -41,8 +46,8 @@ object FormField {
 @DiscriminatorColumn(name = "fieldtype")
 abstract class FormField extends GeneratedId with Logging {
 
-	@transient var json = JsonObjectMapperFactory.instance
-	@transient var userLookup = Wire.auto[UserLookupService]
+	@transient var json: ObjectMapper = JsonObjectMapperFactory.instance
+	@transient var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 	var name: String = _
 	var label: String = _
@@ -54,11 +59,11 @@ abstract class FormField extends GeneratedId with Logging {
 
 	@Basic(optional = false)
 	@Access(AccessType.PROPERTY)
-	def getProperties() = {
+	def getProperties(): String = {
 		// TODO cache the string value.
 		json.writeValueAsString(propertiesMap)
 	}
-	def properties = getProperties
+	def properties: String = getProperties
 
 	def setProperties(props: String) {
 		propertiesMap = json.readValue(new StringReader(props), classOf[Map[String, Any]])
@@ -66,7 +71,7 @@ abstract class FormField extends GeneratedId with Logging {
 
 	@transient var propertiesMap: collection.Map[String, Any] = Map()
 
-	protected def setProperty(name: String, value: Any) = {
+	protected def setProperty(name: String, value: Any): Unit = {
 		propertiesMap += name -> value
 	}
 	/**
@@ -75,7 +80,7 @@ abstract class FormField extends GeneratedId with Logging {
 	 * has decided on, so integers come out as JInteger, and Int
 	 * won't match.
 	 */
-	protected def getProperty[A : ClassTag](name: String, default: A) =
+	protected def getProperty[A : ClassTag](name: String, default: A): A =
 		propertiesMap.get(name) match {
 			case Some(null) => default
 			case Some(obj) if classTag[A].runtimeClass.isInstance(obj) => obj.asInstanceOf[A]
@@ -87,13 +92,13 @@ abstract class FormField extends GeneratedId with Logging {
 		}
 
 	def isReadOnly = false
-	final def readOnly = isReadOnly
+	final def readOnly: Boolean = isReadOnly
 
 	@Type(`type` = "int")
 	var position: JInteger = 0
 
 	/** Determines which Freemarker template is used to render it. */
-	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value
+	@transient lazy val template: String = getClass.getAnnotation(classOf[DiscriminatorValue]).value
 
 	/**
 	 * Return a blank FormValue that can be used to bind a submission
@@ -112,10 +117,10 @@ abstract class FormField extends GeneratedId with Logging {
 
 trait SimpleValue[A] { self: FormField =>
 	def value_=(value: A) { propertiesMap += "value" -> value }
-	def setValue(value: A) = value_=(value)
+	def setValue(value: A): Unit = value_=(value)
 
 	def value: A = propertiesMap.getOrElse("value", null).asInstanceOf[A]
-	def getValue() = value
+	def getValue(): A = value
 
 	override def validate(value: FormValue, errors: Errors) {
 		value match {
@@ -129,7 +134,7 @@ trait SimpleValue[A] { self: FormField =>
 
 	def blankFormValue = new StringFormValue(this)
 
-	def populatedFormValue(savedFormValue: SavedFormValue) = {
+	def populatedFormValue(savedFormValue: SavedFormValue): StringFormValue = {
 		val formValue = new StringFormValue(this)
 		formValue.value = savedFormValue.value
 		formValue
@@ -154,7 +159,7 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
 
 	def formattedHtml: String = formattedHtml(Option(value))
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): CommentField = {
 		val newField = new CommentField
 		newField.assignment = newAssignment
 		newField.name = Assignment.defaultCommentFieldName
@@ -168,7 +173,7 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
 @DiscriminatorValue("text")
 class TextField extends AssignmentFormField with SimpleValue[String] {
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): TextField = {
 		val newField = new TextField
 		newField.assignment = newAssignment
 		newField.context = this.context
@@ -184,14 +189,14 @@ class WordCountField extends AssignmentFormField {
 	context = FormFieldContext.Submission
 
 	def min: JInteger = getProperty[JInteger]("min", null)
-	def min_=(limit: JInteger) = setProperty("min", limit)
+	def min_=(limit: JInteger): Unit = setProperty("min", limit)
 	def max: JInteger = getProperty[JInteger]("max", null)
-	def max_=(limit: JInteger) = setProperty("max", limit)
+	def max_=(limit: JInteger): Unit = setProperty("max", limit)
 	def conventions: String = getProperty[String]("conventions", null)
-	def conventions_=(conventions: String) = setProperty("conventions", conventions)
+	def conventions_=(conventions: String): Unit = setProperty("conventions", conventions)
 
 	def blankFormValue = new IntegerFormValue(this)
-	def populatedFormValue(savedFormValue: SavedFormValue) = {
+	def populatedFormValue(savedFormValue: SavedFormValue): IntegerFormValue = {
 		val formValue = new IntegerFormValue(this)
 		formValue.value = savedFormValue.value.asInstanceOf[Integer]
 		formValue
@@ -206,7 +211,7 @@ class WordCountField extends AssignmentFormField {
 		}
 	}
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): WordCountField = {
 		val newField = new WordCountField
 		newField.assignment = newAssignment
 		newField.name = Assignment.defaultWordCountName
@@ -222,7 +227,7 @@ class WordCountField extends AssignmentFormField {
 @DiscriminatorValue("textarea")
 class TextareaField extends AssignmentFormField with SimpleValue[String] {
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): TextareaField = {
 		val newField = new TextareaField
 		newField.assignment = newAssignment
 		newField.context = this.context
@@ -236,7 +241,7 @@ class TextareaField extends AssignmentFormField with SimpleValue[String] {
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
 	def blankFormValue = new BooleanFormValue(this)
-	def populatedFormValue(savedFormValue: SavedFormValue) = {
+	def populatedFormValue(savedFormValue: SavedFormValue): BooleanFormValue = {
 		val formValue = new BooleanFormValue(this)
 		formValue.value = savedFormValue.value.asInstanceOf[Boolean]
 		formValue
@@ -267,7 +272,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 		}
 	}
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): MarkerSelectField = {
 		val newField = new MarkerSelectField
 		newField.assignment = newAssignment
 		newField.name = Assignment.defaultMarkerSelectorName
@@ -279,17 +284,17 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 @DiscriminatorValue("file")
 class FileField extends AssignmentFormField {
 	def blankFormValue = new FileFormValue(this)
-	def populatedFormValue(savedFormValue: SavedFormValue) = blankFormValue
+	def populatedFormValue(savedFormValue: SavedFormValue): FileFormValue = blankFormValue
 
 	def attachmentLimit: Int = getProperty[JInteger]("attachmentLimit", 1)
-	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)
+	def attachmentLimit_=(limit: Int): Unit = setProperty("attachmentLimit", limit)
 
 	// List of extensions.
 	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
-	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: Seq[String])
+	def attachmentTypes_=(types: Seq[String]): Unit = setProperty("attachmentTypes", types: Seq[String])
 
 	def individualFileSizeLimit: JInteger = getProperty[JInteger]("individualFileSizeLimit", null)
-	def individualFileSizeLimit_=(limit: JInteger) = setProperty("individualFileSizeLimit", limit)
+	def individualFileSizeLimit_=(limit: JInteger): Unit = setProperty("individualFileSizeLimit", limit)
 	private def individualFileSizeLimitInBytes: JLong = JLong(Option(individualFileSizeLimit).map(_.longValue() * 1024 * 1024))
 
 	// This is after onBind is called, so any multipart files have been persisted as attachments
@@ -329,7 +334,7 @@ class FileField extends AssignmentFormField {
 		}
 	}
 
-	override def duplicate(newAssignment: Assignment) = {
+	override def duplicate(newAssignment: Assignment): FileField = {
 		val newField = new FileField
 		newField.assignment = newAssignment
 		newField.name = Assignment.defaultUploadName
@@ -361,7 +366,7 @@ object FormFieldContext {
 	case object Submission extends FormFieldContext("submission", "Submission")
 	case object Feedback extends FormFieldContext("feedback", "Feedback")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): FormFieldContext = code match {
 		case Submission.dbValue => Submission
 		case Feedback.dbValue => Feedback
 		case _ => throw new IllegalArgumentException()
@@ -376,8 +381,8 @@ class FormFieldContextUserType extends AbstractBasicUserType[FormFieldContext, S
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = FormFieldContext.fromCode(string)
+	override def convertToObject(string: String): FormFieldContext = FormFieldContext.fromCode(string)
 
-	override def convertToValue(context: FormFieldContext) = context.dbValue
+	override def convertToValue(context: FormFieldContext): String = context.dbValue
 
 }

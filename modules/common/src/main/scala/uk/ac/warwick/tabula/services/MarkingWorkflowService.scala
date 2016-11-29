@@ -12,7 +12,7 @@ trait MarkingWorkflowServiceComponent {
 }
 
 trait AutowiringMarkingWorkflowServiceComponent extends MarkingWorkflowServiceComponent {
-	var markingWorkflowService = Wire[MarkingWorkflowService]
+	var markingWorkflowService: MarkingWorkflowService = Wire[MarkingWorkflowService]
 }
 
 trait MarkingWorkflowService {
@@ -29,12 +29,12 @@ abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
 	self: MarkingWorkflowDaoComponent
 		with Logging =>
 
-	def save(markingWorkflow: MarkingWorkflow) = markingWorkflowDao.save(markingWorkflow)
+	def save(markingWorkflow: MarkingWorkflow): Unit = markingWorkflowDao.save(markingWorkflow)
 
-	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =
+	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 
-	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow) =
+	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
 		markingWorkflowDao.getExamsUsingMarkingWorkflow(markingWorkflow)
 }
 

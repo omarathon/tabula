@@ -28,7 +28,7 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def populateNotEmpty(): Unit = new CommandFixture {
-		val dt = DateTime.now
+		val dt: DateTime = DateTime.now
 
 		command.maintenanceModeService.until returns Some(dt)
 		command.maintenanceModeService.message returns Some("yes")
@@ -45,7 +45,7 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 
 		command.populate()
 
-		val dt = DateTime.now
+		val dt: DateTime = DateTime.now
 
 		command.enable = true
 		command.message = "Sound the alarm"
@@ -65,7 +65,7 @@ class MaintenanceModeCommandTest extends TestBase with Mockito {
 
 		command.populate()
 
-		val dt = DateTime.now
+		val dt: DateTime = DateTime.now
 
 		command.enable = false
 		command.message = "Sound the alarm"

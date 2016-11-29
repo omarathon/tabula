@@ -10,7 +10,7 @@ import org.apache.http.message.BasicHttpResponse
 import org.apache.http.{HttpHost, HttpRequest, HttpVersion}
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-import uk.ac.warwick.tabula.data.model.{FileAttachment, OriginalityReport}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{UrkundDao, UrkundDaoComponent}
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.{Fixtures, JsonObjectMapperFactory, Mockito, TestBase}
@@ -20,11 +20,11 @@ import scala.util.{Failure, Success}
 class UrkundServiceTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val mockObjectStorageService = smartMock[ObjectStorageService]
+		val mockObjectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
 		val service = new AbstractUrkundService with UrkundDaoComponent {
 			override val http: Http = new Http {
-				override def make_client = smartMock[HttpClient]
+				override def make_client: HttpClient = smartMock[HttpClient]
 			}
 
 			override val urkundDao: UrkundDao = smartMock[UrkundDao]
@@ -40,19 +40,19 @@ class UrkundServiceTest extends TestBase with Mockito {
 		attachment.name = "submission.docx"
 		attachment.objectStorageService = mockObjectStorageService
 		val string = "Doe, a deer, a female deer"
-		val bytes = string.getBytes("UTF-8")
+		val bytes: Array[Byte] = string.getBytes("UTF-8")
 		attachment.id = "1234"
 		mockObjectStorageService.fetch(attachment.id) returns Some(new ByteArrayInputStream(bytes))
 
 		val submissionValue = new SavedFormValue
-		val submission = Fixtures.submission("1234")
+		val submission: Submission = Fixtures.submission("1234")
 		report.attachment = attachment
 		attachment.submissionValue = submissionValue
 		submissionValue.submission = submission
-		val assignment = Fixtures.assignment("test")
+		val assignment: Assignment = Fixtures.assignment("test")
 		assignment.id = "2345"
 		submission.assignment = assignment
-		val module = Fixtures.module("its01")
+		val module: Module = Fixtures.module("its01")
 		assignment.module = module
 	}
 
@@ -108,7 +108,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 			}
 		}
 
-		val response = service.submit(report) match {
+		val response: UrkundSuccessResponse = service.submit(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail(s"Not a success response")
 		}
@@ -171,7 +171,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 			}
 		}
 
-		val response = service.submit(report) match {
+		val response: UrkundSuccessResponse = service.submit(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -215,7 +215,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 			}
 		}
 
-		val response = service.submit(report) match {
+		val response: UrkundErrorResponse = service.submit(report) match {
 			case success: Success[UrkundErrorResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -261,7 +261,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
 
-		val response = service.retrieveReport(report) match {
+		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -302,7 +302,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
 
-		val response = service.retrieveReport(report) match {
+		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -346,7 +346,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
 
-		val response = service.retrieveReport(report) match {
+		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -394,7 +394,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
 
-		val response = service.retrieveReport(report) match {
+		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case _ => fail("Not a success response")
 		}
@@ -460,7 +460,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 
 		service.http.client.execute(any[HttpHost], any[HttpRequest]) returns httpResponse
 
-		val response = service.retrieveReport(report) match {
+		val response: UrkundSuccessResponse = service.retrieveReport(report) match {
 			case success: Success[UrkundSuccessResponse] @unchecked => success.value
 			case failure => fail("Not a success response")
 		}
@@ -480,7 +480,7 @@ class UrkundServiceTest extends TestBase with Mockito {
 		response.report.get.warnings.size should be (2)
 	}
 
-	val now = DateTime.now
+	val now: DateTime = DateTime.now
 
 	@Test
 	def nextSubmitAttempt(): Unit = withFakeTime(now){

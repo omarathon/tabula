@@ -9,7 +9,7 @@ import uk.ac.warwick.userlookup.User
 class UserConverterTest extends TestBase with Mockito {
 
 	val converter = new UserConverter
-	val userLookup = mock[UserLookupService]
+	val userLookup: UserLookupService = mock[UserLookupService]
 	converter.userLookup = userLookup
 
 	@Test def validInput {

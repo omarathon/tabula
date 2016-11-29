@@ -4,34 +4,35 @@ import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.{Assignment, FreemarkerModel, NotificationWithTarget, SingleItemNotification, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue(value="MarkedPlagarised")
 class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
 	with SingleItemNotification[Submission] with AutowiringUserLookupComponent {
 
-	def submission = item.entity
-	def assignment = target.entity
-	def module = assignment.module
-	def moduleCode = module.code.toUpperCase
-	def student = userLookup.getUserByWarwickUniId(submission.universityId)
+	def submission: Submission = item.entity
+	def assignment: Assignment = target.entity
+	def module: Module = assignment.module
+	def moduleCode: String = module.code.toUpperCase
+	def student: User = userLookup.getUserByWarwickUniId(submission.universityId)
 
 	priority = Warning
 
-	def recipients = {
+	def recipients: Seq[User] = {
 		val moduleManagers = module.managers
 		val departmentAdmins = module.adminDepartment.owners
 
 		moduleManagers.users ++ departmentAdmins.users
 	}
 
-	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
+	def url: String = Routes.admin.assignment.submissionsandfeedback(assignment)
 
 	def urlTitle = "view the submissions for this assignment"
 
-	def title = "%s: A submission by %s for \"%s\" is suspected of plagiarism".format(moduleCode, submission.universityId, assignment.name)
+	def title: String = "%s: A submission by %s for \"%s\" is suspected of plagiarism".format(moduleCode, submission.universityId, assignment.name)
 
 	def verb = "Mark plagiarised"
 

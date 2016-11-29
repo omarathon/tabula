@@ -12,7 +12,7 @@ import scala.util.{Failure, Success}
 
 class ProcessUrkundQueueCommandTest extends TestBase with Mockito {
 
-	val now = DateTime.now
+	val now: DateTime = DateTime.now
 
 	trait Fixture {
 		val report = new OriginalityReport

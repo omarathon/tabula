@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services.permissions
 
 import org.springframework.stereotype.Component
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.roles.{BuiltInRole, Role}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{LenientGroupService, UserLookupService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.webgroups.GroupServiceException
+
 import scala.reflect._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
@@ -18,10 +18,10 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 abstract class WebgroupRoleProvider[A <: BuiltInRole : ClassTag](role: A) extends ScopelessRoleProvider with TaskBenchmarking {
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 	var webgroup: String
 
-	def groupService = userLookup.getGroupService
+	def groupService: LenientGroupService = userLookup.getGroupService
 
 	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for WebgroupRoleProvider") {
 		try {

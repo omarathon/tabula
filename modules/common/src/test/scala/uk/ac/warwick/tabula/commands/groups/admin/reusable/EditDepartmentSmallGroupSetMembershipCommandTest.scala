@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.{Department, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserLookupComponent
@@ -15,12 +16,12 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 	val userLookup = new MockUserLookup
 
 	private trait CommandTestSupport extends UserLookupComponent {
-		val userLookup = EditDepartmentSmallGroupSetMembershipCommandTest.this.userLookup
+		val userLookup: MockUserLookup = EditDepartmentSmallGroupSetMembershipCommandTest.this.userLookup
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in", "IT Services")
-		val set = Fixtures.departmentSmallGroupSet("My set")
+		val department: Department = Fixtures.department("in", "IT Services")
+		val set: DepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("My set")
 		set.department = department
 
 		val user1 = new User("cuscav")
@@ -73,7 +74,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 		command.includedStudentIds.add(user2.getWarwickId)
 		command.excludedStudentIds.add(user3.getWarwickId)
 
-		val result = command.applyInternal()
+		val result: EditDepartmentSmallGroupSetMembershipCommandResult = command.applyInternal()
 		result.includedStudentIds.asScala should be (Seq(user1.getWarwickId, user2.getWarwickId))
 		result.excludedStudentIds.asScala should be (Seq(user3.getWarwickId))
 		result.membershipItems should be (Seq(
@@ -91,9 +92,9 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 	}
 
 	@Test def addUsers { new AddsCommandFixture {
-		val validStudent = Fixtures.student("1111111","abcd")
-		val validStudentWithUsercode = Fixtures.student("2222222","cdef")
-		val invalidStaff = Fixtures.staff("3333333","abcd")
+		val validStudent: StudentMember = Fixtures.student("1111111","abcd")
+		val validStudentWithUsercode: StudentMember = Fixtures.student("2222222","cdef")
+		val invalidStaff: StaffMember = Fixtures.staff("3333333","abcd")
 		val invalidNoone = "unknown"
 
 		command.massAddUsers = "%s\n%s\n%s\n%s" format (
@@ -106,7 +107,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 		command.userLookup.registerUserObjects(MemberOrUser(validStudent).asUser)
 		command.userLookup.registerUserObjects(MemberOrUser(validStudentWithUsercode).asUser)
 
-		val result = command.addUsers()
+		val result: AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult = command.addUsers()
 		result.missingUsers.size should be (2)
 		result.missingUsers.contains(invalidNoone) should be {true}
 		result.missingUsers.contains(invalidStaff.universityId) should be {true}
@@ -118,11 +119,11 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 	@Test def permissions { new Fixture {
 		val (theDepartment, theSet) = (department, set)
 		val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
-			val department = theDepartment
-			val set = theSet
+			val department: Department = theDepartment
+			val set: DepartmentSmallGroupSet = theSet
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, set)
@@ -140,7 +141,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
 		val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			val set = null
 		}
 
@@ -150,7 +151,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
 		val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			department.id = "set id"
 
 			val set = new DepartmentSmallGroupSet(Fixtures.department("other"))

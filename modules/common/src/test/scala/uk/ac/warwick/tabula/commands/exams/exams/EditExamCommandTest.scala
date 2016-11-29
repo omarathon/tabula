@@ -4,7 +4,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.exams._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.services._
 
 class EditExamCommandTest extends TestBase with Mockito {
@@ -15,15 +15,15 @@ class EditExamCommandTest extends TestBase with Mockito {
 		with HasAcademicYear
 		with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent {
-			val assessmentService = mock[AssessmentService]
+			val assessmentService: AssessmentService = mock[AssessmentService]
 			val userLookup = new MockUserLookup
-			val assessmentMembershipService = mock[AssessmentMembershipService]
+			val assessmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 		}
 
 	trait Fixture {
-		val module = Fixtures.module("ab123", "Test module")
+		val module: Module = Fixtures.module("ab123", "Test module")
 		val academicYear = new AcademicYear(2014)
-		val exam = Fixtures.exam("Exam 1")
+		val exam: Exam = Fixtures.exam("Exam 1")
 		exam.module=module
 		exam.academicYear=academicYear
 
@@ -31,10 +31,10 @@ class EditExamCommandTest extends TestBase with Mockito {
 
 		val validator = new ExamValidation with EditExamCommandState with AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
 			with AssessmentMembershipServiceComponent {
-				override def exam = command.exam
-				override val assessmentService = mock[AssessmentService]
-				override val assessmentMembershipService = mock[AssessmentMembershipService]
-				override val userLookup = mock[UserLookupService]
+				override def exam: Exam = command.exam
+				override val assessmentService: AssessmentService = mock[AssessmentService]
+				override val assessmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
+				override val userLookup: UserLookupService = mock[UserLookupService]
 				override def existingGroups = None
 				override def existingMembers = None
 				override def updateAssessmentGroups() = List()
@@ -44,7 +44,7 @@ class EditExamCommandTest extends TestBase with Mockito {
 	@Test def apply() { new Fixture {
 		command.name = "Exam 2"
 
-		val examSaved = command.applyInternal()
+		val examSaved: Exam = command.applyInternal()
 		examSaved.name should be ("Exam 2")
 		examSaved.module.code should be("ab123")
 		examSaved.module.name should be("Test module")

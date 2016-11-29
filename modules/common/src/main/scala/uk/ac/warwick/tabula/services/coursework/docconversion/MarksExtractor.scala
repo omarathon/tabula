@@ -56,5 +56,5 @@ trait MarksExtractorComponent {
 }
 
 trait AutowiringMarksExtractorComponent extends MarksExtractorComponent {
-	val marksExtractor = Wire[MarksExtractor]
+	val marksExtractor: MarksExtractor = Wire[MarksExtractor]
 }

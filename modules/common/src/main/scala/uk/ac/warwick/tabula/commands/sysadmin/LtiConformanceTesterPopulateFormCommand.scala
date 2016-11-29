@@ -30,7 +30,7 @@ class LtiConformanceTesterPopulateFormCommandInternal(val user: CurrentUser) ext
 
 	self: LtiConformanceTesterPopulateFormCommandState with TurnitinLtiServiceComponent with Logging =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Map[String, String] = transactional() {
 		turnitinLtiService.ltiConformanceTestParams(
 			endpoint, secret, key, givenName, familyName, email, role, mentee, customParams, tool_consumer_info_version, assignment, user
 		)

@@ -21,11 +21,11 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 	override type Entity = AttendanceMonitoringScheme
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var attendanceMonitoringService = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
+	@transient var attendanceMonitoringService: Option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers] = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
 
 	var name: String = _
 
-	def displayName = {
+	def displayName: String = {
 		if (name.hasText)
 			name
 		else
@@ -33,7 +33,7 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 			"Untitled scheme"
 	}
 
-	def shortDisplayName = displayName
+	def shortDisplayName: String = displayName
 
 	@NotNull
 	@Column(name = "academicyear")
@@ -76,9 +76,9 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 	@Column(name = "updated_date")
 	var updatedDate: DateTime = _
 
-	def permissionsParents = Option(department).toStream
+	def permissionsParents: Stream[Department] = Option(department).toStream
 
-	def hasRecordedCheckpoints =
+	def hasRecordedCheckpoints: Boolean =
 		attendanceMonitoringService.exists { service =>
 			points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0}
 		}

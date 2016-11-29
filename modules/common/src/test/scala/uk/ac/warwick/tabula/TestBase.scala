@@ -37,6 +37,7 @@ import org.junit.Rule
 import freemarker.template._
 import java.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import freemarker.core.Environment
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
@@ -56,7 +57,7 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
 
 	// No test should take longer than 2 minutes
 	val minuteTimeout = new Timeout(2, TimeUnit.MINUTES)
-	@Rule def timeoutRule = minuteTimeout
+	@Rule def timeoutRule: Timeout = minuteTimeout
 
 	@After
 	def tearDownTestLoggers: Unit = {
@@ -91,18 +92,18 @@ trait TestFixtures {
       setSharedVariables(sharedVariables)
     }
 
-	def testRequest(uri: String = null) = {
+	def testRequest(uri: String = null): MockHttpServletRequest = {
 		val req = new MockHttpServletRequest
 		req.setRequestURI(uri)
 		req
 	}
 
-	def emptyFeatures = Features.empty
+	def emptyFeatures: FeaturesImpl = Features.empty
 
 	/** Creates an Assignment with a module and department,
 	  * and a few pre-filled fields.
 	  */
-	def newDeepAssignment(moduleCode: String="IN101") = {
+	def newDeepAssignment(moduleCode: String="IN101"): Assignment = {
 		val department = new Department
 		val module = new Module(moduleCode, department)
 		val assignment = new Assignment(module)
@@ -116,7 +117,7 @@ trait TestFixtures {
 	def dateTime(year: Int, month: Int): DateTime = dateTime(year, month, 1)
 	def dateTime(year: Int, month: Int, day: Int): DateTime = new DateTime(year, month, day, 0, 0, 0, 0)
 
-	def newSSOConfiguration = {
+	def newSSOConfiguration: SSOConfiguration = {
 		val config = new PropertiesConfiguration()
 		config.addProperty("mode", "new")
     config.addProperty("origin.login.location", "https://xebsignon.warwick.ac.uk/origin/hs")
@@ -128,7 +129,7 @@ trait TestFixtures {
 }
 
 trait TestHelpers extends TestFixtures {
-	lazy val json = new JsonObjectMapperFactory().createInstance
+	lazy val json: ObjectMapper = new JsonObjectMapperFactory().createInstance
 
 	def readJsonMap(s: String): Map[String, Any] = json.readValue(new StringReader(s), classOf[JMap[String, Any]]).toMap
 
@@ -142,9 +143,9 @@ trait TestHelpers extends TestFixtures {
 	lazy val IoTmpDir = new File(System.getProperty("java.io.tmpdir"))
 	val random = new scala.util.Random
 
-	@Before def emptyTempDirSet = temporaryFiles = Set.empty
+	@Before def emptyTempDirSet: Unit = temporaryFiles = Set.empty
 
-	@Before def setupAspects = {
+	@Before def setupAspects: Unit = {
 
 	}
 
@@ -188,12 +189,12 @@ trait TestHelpers extends TestFixtures {
 
 	/** Removes any directories created by #createTemporaryDirectory
 	  */
-	@After def deleteTemporaryDirs = try{
+	@After def deleteTemporaryDirs: Unit = try{
 		temporaryFiles.par foreach FileUtils.recursiveDelete
 		if (blobStoreContext != null) blobStoreContext.close()
 	} catch {case _: Throwable => /* squash! will be cleaned from temp eventually anyway */}
 
-	def withFakeTime(when: ReadableInstant)(fn: => Unit) =
+	def withFakeTime(when: ReadableInstant)(fn: => Unit): Unit =
 		try {
 			DateTimeUtils.setCurrentMillisFixed(when.getMillis)
 			fn
@@ -262,7 +263,7 @@ trait TestHelpers extends TestFixtures {
 	 *
 	 * See https://groups.google.com/forum/#!topic/scalatest-users/UrdRM6XHB4Y
 	 */
-	def anInstanceOf[T](implicit manifest: Manifest[T]) = {
+	def anInstanceOf[T](implicit manifest: Manifest[T]): BePropertyMatcher[AnyRef] = {
 		val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]
 		new BePropertyMatcher[AnyRef] { def apply(left: AnyRef) =
 			BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)

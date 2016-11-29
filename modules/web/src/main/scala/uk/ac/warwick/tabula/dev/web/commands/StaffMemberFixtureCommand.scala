@@ -16,10 +16,10 @@ class StaffMemberFixtureCommand extends CommandInternal[StaffMember] with Loggin
 	var genderCode: String = _
 	var deptCode:String=""
 
-	var memberDao = Wire[MemberDao]
-	var deptDao = Wire[DepartmentDao]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var deptDao: DepartmentDao = Wire[DepartmentDao]
 
-	def applyInternal() = {
+	def applyInternal(): StaffMember = {
 		val userLookupUser = userLookup.getUserByUserId(userId)
 		assert(userLookupUser != null)
 
@@ -49,7 +49,7 @@ class StaffMemberFixtureCommand extends CommandInternal[StaffMember] with Loggin
 }
 
 object StaffMemberFixtureCommand {
-	def apply() = {
+	def apply(): StaffMemberFixtureCommand with ComposableCommand[StaffMember] with AutowiringUserLookupComponent with Unaudited with PubliclyVisiblePermissions = {
 		new StaffMemberFixtureCommand with ComposableCommand[StaffMember]
 			with AutowiringUserLookupComponent
 			with Unaudited

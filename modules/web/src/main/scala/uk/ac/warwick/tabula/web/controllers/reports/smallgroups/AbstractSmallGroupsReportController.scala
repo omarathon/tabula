@@ -7,17 +7,19 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.reports.smallgroups._
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentDataFetcher
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.LazyMaps
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 import scala.collection.JavaConverters._
+import scala.xml.Elem
 
 abstract class AbstractSmallGroupsReportController extends ReportsController
 	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
@@ -32,7 +34,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 	override val departmentPermission: Permission = Permissions.Department.Reports
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
@@ -48,7 +50,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@ModelAttribute("command") cmd: Appliable[AllSmallGroupsReportCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav(s"reports/smallgroups/$pageRenderPath")
 			.crumbs(ReportsBreadcrumbs.SmallGroups.Home(department, academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(urlGeneratorFactory(department)): _*)
@@ -59,7 +61,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@ModelAttribute("command") cmd: Appliable[AllSmallGroupsReportCommandResult],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val result = cmd.apply()
 		val allStudents: Seq[Map[String, String]] = result.studentDatas.map(studentData =>
 			Map(
@@ -105,7 +107,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): CSVView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
@@ -126,7 +128,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): ExcelView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new SmallGroupsReportExporter(processorResult, department).toXLSX
@@ -140,7 +142,7 @@ abstract class AbstractSmallGroupsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): Elem = {
 		val processorResult = getProcessorResult(processor, data)
 
 		new SmallGroupsReportExporter(processorResult, department).toXML

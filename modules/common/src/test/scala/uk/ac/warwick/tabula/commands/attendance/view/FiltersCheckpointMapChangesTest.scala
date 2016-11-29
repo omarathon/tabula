@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.commands.attendance.view
 
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class FiltersCheckpointMapChangesTest extends TestBase with Mockito {
 
-	val existingStudent = Fixtures.student("1234")
-	val newStudent = Fixtures.student("2345")
-	val existingPoint1 = Fixtures.attendanceMonitoringPoint(null)
-	val existingPoint2 = Fixtures.attendanceMonitoringPoint(null)
-	val existingPoint3 = Fixtures.attendanceMonitoringPoint(null)
-	val existingPoint4 = Fixtures.attendanceMonitoringPoint(null)
-	val newPoint = Fixtures.attendanceMonitoringPoint(null)
+	val existingStudent: StudentMember = Fixtures.student("1234")
+	val newStudent: StudentMember = Fixtures.student("2345")
+	val existingPoint1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
+	val existingPoint2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
+	val existingPoint3: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
+	val existingPoint4: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
+	val newPoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null)
 
 	@Test
 	def checkChanges(): Unit  = {

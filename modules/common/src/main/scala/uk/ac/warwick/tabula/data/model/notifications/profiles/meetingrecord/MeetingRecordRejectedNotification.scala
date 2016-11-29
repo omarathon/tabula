@@ -16,13 +16,13 @@ class MeetingRecordRejectedNotification
 
 	priority = NotificationPriority.Warning
 
-	def approval = item.entity
-	def meeting = approval.meetingRecord
-	def relationship = meeting.relationship
+	def approval: MeetingRecordApproval = item.entity
+	def meeting: MeetingRecord = approval.meetingRecord
+	def relationship: StudentRelationship = meeting.relationship
 
 	def verb = "return"
 
-	def title = {
+	def title: String = {
 		val name =
 			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
 			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")

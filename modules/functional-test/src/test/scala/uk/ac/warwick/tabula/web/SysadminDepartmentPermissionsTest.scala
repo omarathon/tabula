@@ -5,7 +5,7 @@ import org.scalatest.GivenWhenThen
 
 class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixtures with GivenWhenThen {
 
-	def withRoleInElement[T](permittedUser: String, parentElement:String, fixtureAdmins:Seq[String])(fn: => T) =
+	def withRoleInElement[T](permittedUser: String, parentElement:String, fixtureAdmins:Seq[String])(fn: => T): T =
 		as(P.Sysadmin) { withGodModeEnabled {
 
 			def usercodes = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)

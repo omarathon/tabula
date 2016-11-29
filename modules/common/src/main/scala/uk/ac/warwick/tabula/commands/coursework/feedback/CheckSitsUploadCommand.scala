@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.coursework.feedback.CheckSitsUploadCommand.Result
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, ExamFeedback, Feedback}
+import uk.ac.warwick.tabula.data.model.{AssignmentFeedback, ExamFeedback, Feedback, FeedbackForSits}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringExportFeedbackToSitsServiceComponent, ExportFeedbackToSitsService, ExportFeedbackToSitsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackForSitsServiceComponent, FeedbackForSitsServiceComponent}
@@ -34,7 +35,7 @@ class CheckSitsUploadCommandInternal(val feedback: Feedback) extends CommandInte
 
 	self: ExportFeedbackToSitsServiceComponent with CheckSitsUploadCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Result = {
 		if (feedback.assessmentGroups.isEmpty) {
 			CheckSitsUploadCommand.Result(hasAssessmentGroups = false)
 		} else {
@@ -100,5 +101,5 @@ trait CheckSitsUploadCommandState {
 	self: FeedbackForSitsServiceComponent =>
 
 	def feedback: Feedback
-	lazy val feedbackForSits = feedbackForSitsService.getByFeedback(feedback)
+	lazy val feedbackForSits: Option[FeedbackForSits] = feedbackForSitsService.getByFeedback(feedback)
 }

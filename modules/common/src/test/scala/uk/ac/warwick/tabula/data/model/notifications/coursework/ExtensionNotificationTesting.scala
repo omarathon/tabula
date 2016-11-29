@@ -7,9 +7,9 @@ import uk.ac.warwick.userlookup.User
 
 
 trait ExtensionNotificationTesting { m: Mockito =>
-	lazy val mockUserLookup = smartMock[UserLookupService]
-	lazy val mockProfileService = smartMock[ProfileService]
-	lazy val mockRelationshipService = mock[RelationshipService]
+	lazy val mockUserLookup: UserLookupService = smartMock[UserLookupService]
+	lazy val mockProfileService: ProfileService = smartMock[ProfileService]
+	lazy val mockRelationshipService: RelationshipService = mock[RelationshipService]
 
 	val cm1Prefix = "coursework"
 	Routes.coursework._cm1Prefix = Some(cm1Prefix)

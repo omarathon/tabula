@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 
 import scala.collection.mutable
 import scala.util.{Success, Try}
-import scala.xml.XML
+import scala.xml.{Elem, XML}
 
 /**
  * Proxy student requests to Syllabus+, cacheing responses.
@@ -27,11 +27,11 @@ class FakeSyllabusPlusController extends Logging {
 	val studentTimetables: mutable.Map[StudentYearKey, String] = mutable.Map.empty
 	val moduleTimetables: mutable.Map[ModuleYearKey, String] = mutable.Map.empty
 	val staffTimetables: mutable.Map[StaffYearKey, String] = mutable.Map.empty
-	val baseUri = Wire.optionProperty("${scientia.stubfallback.url}")
+	val baseUri: String = Wire.optionProperty("${scientia.stubfallback.url}")
 		.getOrElse("https://timetablingmanagement.warwick.ac.uk/xml")
-	def studentUri(year:String) = baseUri + year + "/?StudentXML"
-	def moduleUri(year:String) = baseUri + year + "/?ModuleXML"
-	def staffUri(year:String) = baseUri + year + "/?StaffXML"
+	def studentUri(year:String): String = baseUri + year + "/?StudentXML"
+	def moduleUri(year:String): String = baseUri + year + "/?ModuleXML"
+	def staffUri(year:String): String = baseUri + year + "/?StaffXML"
 
 
 	val http: Http = new Http with thread.Safety {
@@ -41,7 +41,7 @@ class FakeSyllabusPlusController extends Logging {
 	}
 
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("StudentXML"))
-	def getStudent(@RequestParam("p0") studentId: String, @PathVariable year:String) = {
+	def getStudent(@RequestParam("p0") studentId: String, @PathVariable year:String): Elem = {
 		val xml = studentTimetables.getOrElseUpdate(StudentYearKey(studentId, year) , {
 			val req = url(studentUri(year)) <<? Map("p0" -> studentId)
 			val xml = Try(http.when(_==200)(req.as_str)) match {
@@ -72,7 +72,7 @@ class FakeSyllabusPlusController extends Logging {
 	}
 
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("ModuleXML"))
-	def getModule(@RequestParam("p0") moduleCode: String, @PathVariable year:String) = {
+	def getModule(@RequestParam("p0") moduleCode: String, @PathVariable year:String): Elem = {
 		val xml = moduleTimetables.getOrElseUpdate(ModuleYearKey(moduleCode, year) , {
 			val req = url(moduleUri(year)) <<? Map("p0" -> moduleCode)
 			import scala.language.postfixOps
@@ -98,7 +98,7 @@ class FakeSyllabusPlusController extends Logging {
 	}
 
 	@RequestMapping(value = Array("/stubTimetable/{year}"), params = Array("StaffXML"))
-	def getStaff(@RequestParam("p0") staffId: String, @PathVariable year:String) = {
+	def getStaff(@RequestParam("p0") staffId: String, @PathVariable year:String): Elem = {
 		val xml = staffTimetables.getOrElseUpdate(StaffYearKey(staffId, year) , {
 			val req = url(staffUri(year)) <<? Map("p0" -> staffId)
 			import scala.language.postfixOps

@@ -21,7 +21,7 @@ class AllocateStudentsTemplateController extends BaseController {
 		AllocateStudentsToGroupsTemplateCommand(module, set)
 
 	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsTemplateCommand) = {
+	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsTemplateCommand): ExcelView = {
 		cmd.apply()
 	}
 

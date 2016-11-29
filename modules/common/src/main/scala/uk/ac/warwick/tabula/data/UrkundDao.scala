@@ -11,7 +11,7 @@ trait UrkundDaoComponent {
 }
 
 trait AutowiringUrkundDaoComponent extends UrkundDaoComponent{
-	val urkundDao = Wire[UrkundDao]
+	val urkundDao: UrkundDao = Wire[UrkundDao]
 }
 
 trait UrkundDao {

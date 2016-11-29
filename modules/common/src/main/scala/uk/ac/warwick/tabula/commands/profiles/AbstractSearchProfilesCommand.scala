@@ -20,9 +20,9 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 
 	import AbstractSearchProfilesCommand._
 
-	final val userTypes = Set(firstUserType) ++ otherUserTypes
+	final val userTypes: Set[MemberUserType] = Set(firstUserType) ++ otherUserTypes
 
-	def validQuery =
+	def validQuery: Boolean =
 		(query.trim().length >= MinimumQueryLength) &&
 		query.split("""\s+""").exists({_.length >= MinimumTermLength})
 
@@ -33,15 +33,15 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 
 	private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read.Core, member)
 
-	def usercodeMatches =
+	def usercodeMatches: Seq[Member] =
 		if (!isMaybeUsercode(query)) Seq()
 		else profileService.getAllMembersWithUserId(query).filter {m => userTypes.contains(m.userType)}.filter(canRead)
 
-	def universityIdMatches =
+	def universityIdMatches: Seq[Member] =
 		if (!isMaybeUniversityId(query)) Seq()
 		else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
 
-	override def describe(d: Description) = d.property("query" -> query)
+	override def describe(d: Description): Unit = d.property("query" -> query)
 
 }
 
@@ -57,9 +57,9 @@ object AbstractSearchProfilesCommand {
 
 	private val UsercodePattern = """^[A-Za-z0-9]{5,}$"""
 
-	def isMaybeUniversityId(query: String) = query.trim matches UniversityIdPattern
+	def isMaybeUniversityId(query: String): Boolean = query.trim matches UniversityIdPattern
 
-	def isMaybeUsercode(query: String) = query.trim matches UsercodePattern
+	def isMaybeUsercode(query: String): Boolean = query.trim matches UsercodePattern
 
 }
 

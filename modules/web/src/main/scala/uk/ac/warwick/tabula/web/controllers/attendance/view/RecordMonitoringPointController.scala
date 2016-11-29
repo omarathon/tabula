@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.web.controllers.attendance.{AttendanceController, Ha
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint}
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/points/{templatePoint}/record"))
@@ -30,7 +31,7 @@ class RecordMonitoringPointController extends AttendanceController with HasMonth
 			with PopulateOnForm with SetFilterPointsResultOnRecordMonitoringPointCommand,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val filterResult = filterCommand.apply()
 		cmd.setFilteredPoints(filterResult)
 		cmd.populate()
@@ -56,7 +57,7 @@ class RecordMonitoringPointController extends AttendanceController with HasMonth
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val filterResult = filterCommand.apply()
 		cmd.setFilteredPoints(filterResult)
 		cmd.validate(errors)

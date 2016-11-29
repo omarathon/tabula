@@ -52,7 +52,7 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 		private def weeksForYear(year: AcademicYear) =
 			termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
-		def weekNumberToDate(year: AcademicYear, weekNumber: Int, dayOfWeek: DayOfWeek) =
+		def weekNumberToDate(year: AcademicYear, weekNumber: Int, dayOfWeek: DayOfWeek): DateTime =
 			weeksForYear(year)(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 	}
 

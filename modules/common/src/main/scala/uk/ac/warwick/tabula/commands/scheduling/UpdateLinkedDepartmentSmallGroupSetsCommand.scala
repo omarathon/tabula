@@ -32,7 +32,7 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 
 	self: FeaturesComponent with SmallGroupServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[DepartmentSmallGroupSet] = {
 		val setsToUpdate = transactional(readOnly = true) { smallGroupService.listDepartmentSetsForMembershipUpdate }
 
 		logger.info(s"${setsToUpdate.size} sets need membership updating")

@@ -20,7 +20,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 object ViewMemberEventsCommand extends Logging {
-	val Timeout = 15.seconds
+	val Timeout: FiniteDuration = 15.seconds
 
 	private[timetables] type ReturnType = Try[EventOccurrenceList]
 	type TimetableCommand = Appliable[ReturnType] with ViewMemberEventsRequest with SelfValidating
@@ -108,7 +108,7 @@ trait MemberTimetableCommand {
 		new Interval(startDate, endDate)
 	}
 
-	protected def sorted(result: EventOccurrenceList) = {
+	protected def sorted(result: EventOccurrenceList): EventOccurrenceList = {
 		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 		result.map(_.sortBy(_.start))
 	}
@@ -169,8 +169,8 @@ trait ViewMemberEventsRequest extends ViewMemberEventsState {
 	var academicYear: AcademicYear = _
 	var from: LocalDate = LocalDate.now.minusMonths(12)
 	var to: LocalDate = from.plusMonths(13)
-	def start = from
-	def end = to
+	def start: LocalDate = from
+	def end: LocalDate = to
 }
 
 trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

@@ -41,7 +41,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 		currentUrl should include("/permissions")
 	}
 
-	def withRoleInElement[T](moduleCode: String, parentElement: String, usersToBeAdded: Seq[String])(fn: => T) = as(P.Admin1) {
+	def withRoleInElement[T](moduleCode: String, parentElement: String, usersToBeAdded: Seq[String])(fn: => T): T = as(P.Admin1) {
 		implicit val currentElement = parentElement
 
 		When("I try to go to the permissions page")

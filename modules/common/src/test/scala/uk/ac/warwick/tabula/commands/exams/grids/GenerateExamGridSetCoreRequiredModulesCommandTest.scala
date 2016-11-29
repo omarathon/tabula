@@ -2,19 +2,20 @@ package uk.ac.warwick.tabula.commands.exams.grids
 
 import org.mockito.ArgumentCaptor
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department}
+import uk.ac.warwick.tabula.data.model.{CoreRequiredModule, Department, Module, Route}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent, ModuleRegistrationService, ModuleRegistrationServiceComponent}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+
 import collection.JavaConverters._
 
 class GenerateExamGridSetCoreRequiredModulesCommandTest extends TestBase with Mockito {
 
-	val thisDepartment = Fixtures.department("its")
+	val thisDepartment: Department = Fixtures.department("its")
 	val thisAcademicYear = AcademicYear(2014)
-	val thisRoute = Fixtures.route("its1")
+	val thisRoute: Route = Fixtures.route("its1")
 	val thisYearOfStudy = 2
-	val module1 = Fixtures.module("its01")
-	val module2 = Fixtures.module("its02")
+	val module1: Module = Fixtures.module("its01")
+	val module2: Module = Fixtures.module("its02")
 
 	@Test
 	def populate(): Unit = {

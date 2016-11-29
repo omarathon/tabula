@@ -13,14 +13,14 @@ import org.scalatest.Matchers
 class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String)(implicit val webDriver:WebDriver)
 	extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with Matchers  with GroupSetList {
 
-	val url = "%s/groups/admin/department/%s/%s".format(FunctionalTestProperties.SiteRoot, departmentCode, academicYear)
+	val url: String = "%s/groups/admin/department/%s/%s".format(FunctionalTestProperties.SiteRoot, departmentCode, academicYear)
 
 	def isCurrentPage: Boolean = {
 		currentUrl should include ("/groups/admin/department/" + departmentCode + "/" + academicYear)
 		pageTitle == "Tabula - Small Group Teaching"
 	}
 
-	def getBatchOpenButton = {
+	def getBatchOpenButton: WebElement = {
 		val manageButton = find(linkText("Manage")).get.underlying
 		manageButton.click()
 		val manageDropdownContainer = find(cssSelector("div.dept-toolbar")).get.underlying
@@ -34,7 +34,7 @@ class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String
 
 class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with Matchers {
 
-	val groupsetId = {
+	val groupsetId: String = {
 		underlying.getAttribute("id").replaceFirst("set-","")
 	}
 
@@ -81,7 +81,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		eventsPage
 	}
 
-	def goToAllocate = {
+	def goToAllocate: AllocateStudentsToGroupsPage = {
 		val propsPage = goToEditProperties
 		propsPage.goToAllocate()
 
@@ -90,12 +90,12 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		allocatePage
 	}
 
-	def isShowingOpenButton = {
+	def isShowingOpenButton: Boolean = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		!underlying.findElements(By.partialLinkText("Open")).isEmpty
 	}
 
-	def getOpenButton = {
+	def getOpenButton: WebElement = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		underlying.findElement(By.partialLinkText("Open"))
 	}
@@ -103,16 +103,16 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 
 class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with Matchers {
 
-	val groupsetId = {
+	val groupsetId: String = {
 		val classes = underlying.getAttribute("class").split(" ")
 		classes.find(_.startsWith("groupset-")).get.replaceFirst("groupset-","")
 	}
 
-	def getSignupButton = {
+	def getSignupButton: WebElement = {
 		underlying.findElement(By.className("sign-up-button"))
 	}
 
-	def findLeaveButtonFor(groupName:String) = {
+	def findLeaveButtonFor(groupName:String): Option[WebElement] = {
 		underlying.findElements(By.tagName("h4")).asScala.find(e => e.getText.trim.startsWith(groupName + " ")).flatMap(
 
 			groupNameHeading=>{
@@ -133,9 +133,9 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 
 	}
 
-	def showsGroup(groupName:String) = underlying.findElements(By.tagName("h4")).asScala.exists(e => e.getText.trim.startsWith(groupName + " "))
+	def showsGroup(groupName:String): Boolean = underlying.findElements(By.tagName("h4")).asScala.exists(e => e.getText.trim.startsWith(groupName + " "))
 
-	def findSelectGroupCheckboxFor(groupName:String ) = {
+	def findSelectGroupCheckboxFor(groupName:String ): WebElement = {
 		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
 		// ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
 		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'pull-left')]/input"))
@@ -143,14 +143,14 @@ class ModuleGroupSetInfoSummarySection(val underlying: WebElement, val moduleCod
 }
 
 class BatchOpenPage(val departmentCode: String, val academicYear: FunctionalTestAcademicYear)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with Matchers {
-	val url = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/$departmentCode/groups/open"
+	val url: String = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/$departmentCode/groups/open"
 
 	def isCurrentPage: Boolean = {
 		currentUrl should include (s"/groups/admin/department/$departmentCode/${academicYear.startYear.toString}/groups/selfsignup/open")
 		find(cssSelector(".id7-main-content h1")).get.text.startsWith(s"Open groups for ${academicYear.toString}")
 	}
 
-	def checkboxForGroupSet(groupset: GroupSetInfoSummarySection) = {
+	def checkboxForGroupSet(groupset: GroupSetInfoSummarySection): WebElement = {
 		findAll(tagName("input")).filter(_.underlying.getAttribute("value") == groupset.groupsetId).next().underlying
 	}
 

@@ -6,10 +6,10 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class AttendanceMonitoringPointTypeConverter extends TwoWayConverter[String, AttendanceMonitoringPointType] {
 
-	override def convertRight(value: String) =
+	override def convertRight(value: String): AttendanceMonitoringPointType =
 		if (value.hasText) AttendanceMonitoringPointType.fromCode(value)
 		else null
 
-	override def convertLeft(pointType: AttendanceMonitoringPointType) = Option(pointType).map { _.dbValue }.orNull
+	override def convertLeft(pointType: AttendanceMonitoringPointType): String = Option(pointType).map { _.dbValue }.orNull
 
 }

@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 import org.mockito.Mockito._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, StringFormValue}
+import uk.ac.warwick.tabula.data.model.forms.{AssignmentFormField, SavedFormValue, StringFormValue}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{Fixtures, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConversions._
@@ -26,7 +26,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)
 
-		val feedbackField = assignment.feedbackFields.find(_.name == Assignment.defaultFeedbackTextFieldName).get
+		val feedbackField: AssignmentFormField = assignment.feedbackFields.find(_.name == Assignment.defaultFeedbackTextFieldName).get
 		feedbackField.id = Assignment.defaultFeedbackTextFieldName
 		val feedbackValue = new StringFormValue(feedbackField)
 		val heronRamble = "You would have got a first if you didn't mention Herons so much. I hate herons"
@@ -37,7 +37,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		savedFormValue.name = Assignment.defaultFeedbackTextFieldName
 		savedFormValue.value = heronRamble
 
-		val gradeGenerator = smartMock[GeneratesGradesFromMarks]
+		val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
 		gradeGenerator.applyForMarks(Map("student" -> 67)) returns Map("student" -> Seq())
 
 		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser.apparentUser, currentUser, gradeGenerator)
@@ -52,7 +52,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			command.grade = "2:1"
 			command.fields = JMap(Assignment.defaultFeedbackTextFieldName -> feedbackValue)
 
-			val feedback = command.apply()
+			val feedback: Feedback = command.apply()
 
 			feedback.actualMark should be(Some(67))
 			feedback.actualGrade should be(Some("2:1"))
@@ -68,7 +68,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			command.grade = ""
 			command.fields = JMap(Assignment.defaultFeedbackTextFieldName -> feedbackValue)
 
-			val feedback = command.apply()
+			val feedback: Feedback = command.apply()
 
 			feedback.actualMark should be(None)
 			feedback.actualGrade should be(None)
@@ -80,13 +80,13 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	@Test
 	def invalidateZipsWhenUpdatingFeedback() {
 		new Fixture {
-			val existingFeedback = Fixtures.assignmentFeedback("student")
+			val existingFeedback: AssignmentFeedback = Fixtures.assignmentFeedback("student")
 			existingFeedback.id = "existingFeedback"
 			assignment.feedbacks.add(existingFeedback)
 
 			when(command.savedFormValueDao.get(feedbackField, existingFeedback)) thenReturn None
 
-			val feedback = command.apply()
+			val feedback: Feedback = command.apply()
 
 			verify(command.zipService, times(1)).invalidateIndividualFeedbackZip(existingFeedback)
 		}
@@ -95,7 +95,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	@Test
 	def fieldsCopiedWhenUpdatingFeedback() {
 		new Fixture {
-			val existingFeedback = Fixtures.assignmentFeedback("student")
+			val existingFeedback: AssignmentFeedback = Fixtures.assignmentFeedback("student")
 			existingFeedback.assignment = assignment
 			existingFeedback.actualGrade = Option("2:2")
 			existingFeedback.actualMark = Option(55)
@@ -110,7 +110,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			command2.mark should be("55")
 			command2.grade should be("2:2")
 			command2.fields.size should be (1)
-			val field = command2.fields.get(Assignment.defaultFeedbackTextFieldName).asInstanceOf[StringFormValue]
+			val field: StringFormValue = command2.fields.get(Assignment.defaultFeedbackTextFieldName).asInstanceOf[StringFormValue]
 			field.value should be(heronRamble)
 		}
 	}
@@ -177,11 +177,11 @@ trait OnlineFeedbackFormCommandTestSupport extends FileAttachmentServiceComponen
 
 	this : OnlineFeedbackFormCommand =>
 
-	val fileAttachmentService = smartMock[FileAttachmentService]
-	val feedbackService = smartMock[FeedbackService]
-	val zipService = smartMock[ZipService]
-	val savedFormValueDao = smartMock[SavedFormValueDao]
-	val profileService = smartMock[ProfileService]
+	val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+	val feedbackService: FeedbackService = smartMock[FeedbackService]
+	val zipService: ZipService = smartMock[ZipService]
+	val savedFormValueDao: SavedFormValueDao = smartMock[SavedFormValueDao]
+	val profileService: ProfileService = smartMock[ProfileService]
 
 	def apply(): Feedback = this.applyInternal()
 }

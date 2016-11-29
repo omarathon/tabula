@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{ElasticClient, RichSearchResponse}
 import com.sksamuel.elastic4s.analyzers.SimpleAnalyzer
 import org.elasticsearch.search.sort.SortOrder
 import org.joda.time.DateTime
@@ -8,6 +9,7 @@ import org.junit.{After, Before}
 import uk.ac.warwick.tabula.data.model.Identifiable
 import uk.ac.warwick.tabula.{DateFormats, ElasticsearchTestBase}
 
+import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -28,15 +30,15 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 	val indexType = "wibble"
 
 	private trait ElasticsearchIndexingSupport extends ElasticsearchClientComponent {
-		override val client = ElasticsearchIndexingTest.this.client
+		override val client: ElasticClient = ElasticsearchIndexingTest.this.client
 	}
 
 	private trait Fixture {
-		val fakeItems = for (i <- 1 to 100) yield Item(i, s"item$i", new DateTime().plusMinutes(i))
+		val fakeItems: IndexedSeq[Item] = for (i <- 1 to 100) yield Item(i, s"item$i", new DateTime().plusMinutes(i))
 
 		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexingSupport with ElasticsearchIndexEnsure {
-			override val indexName = ElasticsearchIndexingTest.this.indexName
-			override val indexType = ElasticsearchIndexingTest.this.indexType
+			override val indexName: String = ElasticsearchIndexingTest.this.indexName
+			override val indexType: String = ElasticsearchIndexingTest.this.indexType
 			override val UpdatedDateField = "date"
 			override val IncrementalBatchSize: Int = 1000
 			override implicit val indexable = IndexableItem
@@ -61,7 +63,7 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 
 	@Test def indexItems(): Unit = new Fixture {
 		// Index at random to ensure things don't depend on ordered insertion
-		val result = service.indexItems(Random.shuffle(fakeItems)).await
+		val result: ElasticsearchIndexingResult = service.indexItems(Random.shuffle(fakeItems)).await
 
 		result.successful should be (100)
 		result.failed should be (0)
@@ -70,7 +72,7 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 		blockUntilCount(100, indexName, indexType)
 
 		// Get the most recent item from a sort
-		val searchResponse =
+		val searchResponse: RichSearchResponse =
 			client.execute { search in indexName / indexType sort ( field sort "date" order SortOrder.DESC ) limit 1 }.await
 
 		searchResponse.hits.length should be (1)

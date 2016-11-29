@@ -26,7 +26,7 @@ class AttendanceNoteAttachmentCommand(val member: Member, val occurrence: SmallG
 
 	self: SmallGroupServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		smallGroupService.getAttendanceNote(member.universityId, occurrence).flatMap{ note =>
 			Option(note.attachment).map{ attachment =>
 				new RenderableAttachment(attachment)

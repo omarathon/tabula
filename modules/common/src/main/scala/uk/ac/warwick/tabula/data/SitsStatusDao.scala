@@ -8,7 +8,7 @@ trait SitsStatusDaoComponent {
 }
 
 trait AutowiringSitsStatusDaoComponent extends SitsStatusDaoComponent {
-	val sitsStatusDao = Wire[SitsStatusDao]
+	val sitsStatusDao: SitsStatusDao = Wire[SitsStatusDao]
 }
 
 trait SitsStatusDao {
@@ -21,9 +21,9 @@ trait SitsStatusDao {
 @Repository
 class SitsStatusDaoImpl extends SitsStatusDao with Daoisms {
 
-	def saveOrUpdate(sitsStatus: SitsStatus) = session.saveOrUpdate(sitsStatus)
+	def saveOrUpdate(sitsStatus: SitsStatus): Unit = session.saveOrUpdate(sitsStatus)
 
-	def getByCode(code: String) =
+	def getByCode(code: String): Option[SitsStatus] =
 		session.newQuery[SitsStatus]("from SitsStatus sitsStatus where code = :code").setString("code", code).uniqueResult
 
 	def getAllStatusCodes: Seq[String] =

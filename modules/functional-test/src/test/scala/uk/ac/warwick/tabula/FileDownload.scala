@@ -15,14 +15,14 @@ class FileDownload(uri: String, credentials: Option[LoginDetails]) {
 		}
 	}
 
-	val request = (url(uri))
-	val authorizedRequest = credentials map (cred => request.as_!(cred.usercode, cred.password)) getOrElse (request)
+	val request: Request = (url(uri))
+	val authorizedRequest: Request = credentials map (cred => request.as_!(cred.usercode, cred.password)) getOrElse (request)
 
 	def streamToString(is:Reader):String = FileCopyUtils.copyToString(is)
 
 	case class Result(content:Option[String], statusCode:Option[Int])
 
-	lazy val result = {
+	lazy val result: Result = {
 		// as_str barfs with an EncodingException, on feedback PDFs even though everything renders fine.
 		// manually reading the content into a UTF-8 string seems to work, so we'll stick with that for now.
 		Try(http(authorizedRequest >>~{r=>streamToString(r)})) match {

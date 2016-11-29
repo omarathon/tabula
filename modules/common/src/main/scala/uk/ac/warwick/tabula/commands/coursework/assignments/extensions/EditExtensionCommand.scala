@@ -29,7 +29,7 @@ class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId
 		extends ModifyExtensionCommand(module, assignment, uniId, currentUser, action) with ModifyExtensionCommandState  {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	val e = assignment.findExtension(universityId)
+	val e: Option[Extension] = assignment.findExtension(universityId)
 	e match {
 		case Some(ext) =>
 			copyFrom(ext)
@@ -40,7 +40,7 @@ class EditExtensionCommandInternal(module: Module, assignment: Assignment, uniId
 			isNew = true
 	}
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Extension = transactional() {
 		copyTo(extension)
 		save(extension)
 		extension
@@ -65,7 +65,7 @@ trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
 trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
 	self: ModifyExtensionCommandState =>
 
-	def emit(extension: Extension) = {
+	def emit(extension: Extension): Seq[ExtensionNotification] = {
 		val admin = submitter.apparentUser
 
 		if (extension.isManual) {
@@ -99,7 +99,7 @@ trait EditExtensionCommandScheduledNotification extends SchedulesNotifications[E
 
 	override def transformResult(extension: Extension) = Seq(extension)
 
-	override def scheduledNotifications(extension: Extension) = {
+	override def scheduledNotifications(extension: Extension): Seq[ScheduledNotification[Extension]] = {
 		val notifications = for (
 			extension <- Seq(extension) if extension.isManual || extension.approved;
 			expiryDate <- extension.expiryDate

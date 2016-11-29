@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.Department
 class DepartmentCodeConverterTest extends TestBase with Mockito {
 
 	val converter = new DepartmentCodeConverter
-	val service = mock[ModuleAndDepartmentService]
+	val service: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	converter.service = service
 
 	@Test def validInput {

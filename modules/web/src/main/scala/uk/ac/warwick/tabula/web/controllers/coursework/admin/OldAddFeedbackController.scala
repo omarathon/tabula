@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/new"))
@@ -25,7 +26,7 @@ class OldAddFeedbackController extends OldCourseworkController {
 		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute form: AddFeedbackCommand) = {
+	def showForm(@ModelAttribute form: AddFeedbackCommand): Mav = {
 		Mav(s"$urlPrefix/admin/assignments/feedback/form",
 			"department" -> form.module.adminDepartment,
 			"module" -> form.module,
@@ -34,7 +35,7 @@ class OldAddFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: AddFeedbackCommand, errors: Errors) = {
+	def submit(@Valid form: AddFeedbackCommand, errors: Errors): Mav = {
 		transactional() {
 			form.preExtractValidation(errors)
 			form.postExtractValidation(errors)

@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, 
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 abstract class AbstractEditSmallGroupSetMembershipController extends GroupsController {
@@ -26,7 +27,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand, model: Map[String, _] = Map()) = {
+	protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand, model: Map[String, _] = Map()): Mav = {
 		Mav(renderPath, model ++ Map(
 			"department" -> cmd.module.adminDepartment,
 			"module" -> cmd.module,
@@ -40,7 +41,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand
-	) = {
+	): Mav = {
 		cmd.copyGroupsFrom(set)
 		cmd.afterBind()
 
@@ -48,7 +49,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet) = {
+	def update(@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav = {
 		cmd.afterBind()
 
 		if (!errors.hasErrors) {
@@ -61,7 +62,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 		render(set, cmd, Map("saved" -> true))
 	}
 
-	protected def submit(cmd: EditSmallGroupSetMembershipCommand, errors: Errors, set: SmallGroupSet, route: String) = {
+	protected def submit(cmd: EditSmallGroupSetMembershipCommand, errors: Errors, set: SmallGroupSet, route: String): Mav = {
 		cmd.afterBind()
 
 		if (errors.hasErrors) {
@@ -77,7 +78,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
+	): Mav = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
 
 	@InitBinder
 	def upstreamGroupBinder(binder: WebDataBinder) {
@@ -97,28 +98,28 @@ class CreateSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSet
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.create(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.create(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.createAndAddGroups))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.createAndAddEvents))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAddEvents(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAddEvents(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.createAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAllocate(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAllocate(set))
 
 }
 
@@ -133,27 +134,27 @@ class EditSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSetMe
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.edit(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.edit(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.editAndAddGroups))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.editAndAddEvents))
 	def saveAndAddEvents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAddEvents(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAddEvents(set))
 
 	@RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.editAndAllocate))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAllocate(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAllocate(set))
 
 }

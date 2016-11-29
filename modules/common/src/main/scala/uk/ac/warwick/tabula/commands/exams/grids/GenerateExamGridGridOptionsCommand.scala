@@ -5,9 +5,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption
+import uk.ac.warwick.tabula.exams.grids.columns.ExamGridColumnOption.Identifier
 import uk.ac.warwick.tabula.system.permissions.Public
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object GenerateExamGridGridOptionsCommand {
 	def apply() =
@@ -24,7 +26,7 @@ class GenerateExamGridGridOptionsCommandInternal extends CommandInternal[(Set[Ex
 
 	self: GenerateExamGridGridOptionsCommandRequest =>
 
-	override def applyInternal() = {
+	override def applyInternal(): (Set[Identifier], mutable.Buffer[String]) = {
 		(predefinedColumnIdentifiers.asScala.toSet, customColumnTitles.asScala)
 	}
 
@@ -59,7 +61,7 @@ trait GenerateExamGridGridOptionsCommandRequest {
 	var customColumnTitles: JList[String] = JArrayList()
 	var moduleNameToShow: String = "codeOnly"
 
-	def showFullName = nameToShow != "both"
-	def showComponentMarks = marksToShow == "all"
-	def showModuleNames = moduleNameToShow == "nameAndCode"
+	def showFullName: Boolean = nameToShow != "both"
+	def showComponentMarks: Boolean = marksToShow == "all"
+	def showModuleNames: Boolean = moduleNameToShow == "nameAndCode"
 }

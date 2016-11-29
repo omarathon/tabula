@@ -3,19 +3,19 @@ package uk.ac.warwick.tabula.api.web.controllers.timetables
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property._
-import org.joda.time.{LocalDate, DateTime, Interval}
+import org.joda.time.{DateTime, Interval, LocalDate}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.{DateFormats, AcademicYear}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.helpers.{KnowsUserNumberingSystem, WholeWeekFormatter}
-import uk.ac.warwick.tabula.services.{AutowiringUserSettingsServiceComponent, AutowiringTermServiceComponent, TermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringUserSettingsServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
-
 import TermDatesWeeksController._
+import uk.ac.warwick.tabula.web.Mav
 
 object TermDatesWeeksController {
 	case class TermWeek(weekNumber: Week, interval: Interval, name: String)
@@ -43,12 +43,12 @@ sealed trait AcademicYearScopedApi
 
 trait PathVariableAcademicYearScopedApi extends AcademicYearScopedApi {
 	self: PermissionsCheckingMethods =>
-	@ModelAttribute("academicYear") def academicYear(@PathVariable year: AcademicYear) = mandatory(year)
+	@ModelAttribute("academicYear") def academicYear(@PathVariable year: AcademicYear): AcademicYear = mandatory(year)
 }
 
 trait DefaultAcademicYearApi extends AcademicYearScopedApi {
 	self: TermServiceComponent =>
-	@ModelAttribute("academicYear") def academicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
+	@ModelAttribute("academicYear") def academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(DateTime.now)
 }
 
 trait GetTermDatesWeeksApi {
@@ -75,7 +75,7 @@ trait GetTermDatesWeeksApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def jsonTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek]) = {
+	def jsonTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek]): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
@@ -89,7 +89,7 @@ trait GetTermDatesWeeksApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek], @ModelAttribute("academicYear") academicYear: AcademicYear) = {
+	def icalTermDates(@ModelAttribute("termDates") weeks: Seq[TermWeek], @ModelAttribute("academicYear") academicYear: AcademicYear): Mav = {
 		val cal: Calendar = new Calendar
 		cal.getProperties.add(Version.VERSION_2_0)
 		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))

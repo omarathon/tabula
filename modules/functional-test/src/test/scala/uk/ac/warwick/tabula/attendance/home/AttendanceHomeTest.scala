@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.attendance.AttendanceFixture
 
 class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 
-	val year = FunctionalTestAcademicYear.current.startYear
-	val yearSITS = FunctionalTestAcademicYear.currentSITS.startYear
+	val year: Int = FunctionalTestAcademicYear.current.startYear
+	val yearSITS: Int = FunctionalTestAcademicYear.currentSITS.startYear
 
 	"A student" should "see monitoring points for the current year" in {
 		Given("I am logged in as Student1")
@@ -38,7 +38,7 @@ class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 		findAll(id(s"manage-department-$TEST_DEPARTMENT_CODE-$yearSITS")).toList.size should be (1)
 	}
 
-	def openDisplayAcademicYearSettings() = {
+	def openDisplayAcademicYearSettings(): Unit = {
 		eventually {
 			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
 		}

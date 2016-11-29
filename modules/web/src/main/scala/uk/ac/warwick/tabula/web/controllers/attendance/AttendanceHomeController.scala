@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.attendance.{HomeCommand, HomeInformation}
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
@@ -28,7 +29,7 @@ class AttendanceHomeController extends AttendanceController
 	def createCommand(user: CurrentUser) = HomeCommand(user)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @RequestParam(value = "academicYear", required = false) academicYearOverride: AcademicYear) = {
+	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @RequestParam(value = "academicYear", required = false) academicYearOverride: AcademicYear): Mav = {
 		val info = cmd.apply()
 
 		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}

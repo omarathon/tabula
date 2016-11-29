@@ -21,9 +21,9 @@ import scala.collection.immutable.ListMap
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {
 
-	val department = Fixtures.department("in", "IT Services")
-	val module = Fixtures.module("in101", "Introduction to Web Development")
-	val assignment = Fixtures.assignment("Programming Test")
+	val department: Department = Fixtures.department("in", "IT Services")
+	val module: Module = Fixtures.module("in101", "Introduction to Web Development")
+	val assignment: Assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
 	module.adminDepartment = department
 

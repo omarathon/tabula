@@ -78,7 +78,7 @@ class AuditEventIndexService
 		with AuditEventElasticsearchConfig
 		with AuditEventIndexType {
 
-	override implicit lazy val indexable = AuditEventIndexService.auditEventIndexable(auditEventService)
+	override implicit lazy val indexable: ElasticsearchIndexable[AuditEvent] = AuditEventIndexService.auditEventIndexable(auditEventService)
 
 	/**
 		* The name of the index that this service writes to
@@ -92,7 +92,7 @@ class AuditEventIndexService
 
 	override val UpdatedDateField = "eventDate"
 
-	override def listNewerThan(startDate: DateTime, batchSize: Int) =
+	override def listNewerThan(startDate: DateTime, batchSize: Int): Seq[AuditEvent] =
 		auditEventService.listNewerThan(startDate, batchSize)
 }
 

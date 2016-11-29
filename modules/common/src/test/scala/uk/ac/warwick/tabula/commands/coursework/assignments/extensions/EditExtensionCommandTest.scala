@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.commands.coursework.assignments.extensions
 
 import scala.collection.JavaConversions._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment}
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
-import uk.ac.warwick.tabula.{RequestInfo, Mockito, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
@@ -130,7 +130,7 @@ class EditExtensionCommandTest extends TestBase {
 		withUser("cuslat", "1171795") {
 
 			val deleteCommand = new DeleteExtensionCommandNotification with ModifyExtensionCommandState {
-				val currentUser = RequestInfo.fromThread.get.user
+				val currentUser: CurrentUser = RequestInfo.fromThread.get.user
 				submitter = currentUser
 				assignment = createAssignment()
 				assignment.extensions.add(extension)
@@ -170,7 +170,7 @@ with ExtensionPersistenceComponent
 with ModifyExtensionCommandState
 with Mockito {
 
-	var userLookup = mock[UserLookupService]
+	var userLookup: UserLookupService = mock[UserLookupService]
 	val testuser = new User("cuslat")
 	var deleted = false
 	testuser.setWarwickId("1171975")

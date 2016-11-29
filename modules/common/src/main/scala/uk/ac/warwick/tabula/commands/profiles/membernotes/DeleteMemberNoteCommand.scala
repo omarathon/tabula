@@ -50,7 +50,7 @@ class DeleteAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMe
 
 	self: MemberNoteServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMemberNote = {
 		abstractMemberNote.deleted = true
 		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
 			case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)

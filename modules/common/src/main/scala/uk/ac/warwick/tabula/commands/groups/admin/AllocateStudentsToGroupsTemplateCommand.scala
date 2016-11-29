@@ -31,12 +31,12 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 	val allocateSheetName = "AllocateStudents"
 	val sheetPassword = "roygbiv"
 
-	def applyInternal() = {
+	def applyInternal(): ExcelView = {
 		val workbook = generateWorkbook()
 		new ExcelView("Allocation for " + set.name +  ".xlsx", workbook)
 	}
 
-	def generateWorkbook() = {
+	def generateWorkbook(): XSSFWorkbook = {
 		val groups = set.groups.asScala.toList
 		val setUsers = removePermanentlyWithdrawn(set.allStudents)
 		val workbook = new XSSFWorkbook()
@@ -64,7 +64,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		workbook
 	}
 
-	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
+	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = ""): XSSFCell = {
 		val lockedCellStyle = workbook.createCellStyle()
 		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
@@ -73,7 +73,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		cell
 	}
 
-	def removePermanentlyWithdrawn(users: Seq[User]) = {
+	def removePermanentlyWithdrawn(users: Seq[User]): Seq[User] = {
 		val members: Seq[Member] = users.flatMap(usr => profileService.getMemberByUser(usr))
 		val membersFiltered: Seq[Member] = members.filter {
 			case (student: StudentMember) => !student.permanentlyWithdrawn
@@ -93,7 +93,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 	}
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	def getDataValidation(groups: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
+	def getDataValidation(groups: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList): XSSFDataValidation = {
 		val dvHelper = new XSSFDataValidationHelper(sheet)
 		val dvConstraint = dvHelper.createFormulaListConstraint(groupLookupSheetName + "!$A$2:$A$" + (groups.length + 1)).asInstanceOf[XSSFDataValidationConstraint]
 		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
@@ -102,7 +102,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		validation
 	}
 
-	def generateGroupLookupSheet(workbook: XSSFWorkbook) = {
+	def generateGroupLookupSheet(workbook: XSSFWorkbook): XSSFSheet = {
 		val groupSheet: XSSFSheet = workbook.createSheet(groupLookupSheetName)
 
 		for (group <- set.groups.asScala) {
@@ -131,7 +131,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
 		sheet
 	}
 
-	def formatWorkbook(workbook: XSSFWorkbook) = {
+	def formatWorkbook(workbook: XSSFWorkbook): Unit = {
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
 

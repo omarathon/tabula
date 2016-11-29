@@ -78,27 +78,27 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	@Autowired var profileQueryService: ProfileQueryService = _
 
-	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
+	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId, disableFilter, eagerLoad)
 	}
 
-	def getMemberByUniversityIdStaleOrFresh(universityId: String) = transactional(readOnly = true) {
+	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member] = transactional(readOnly = true) {
 		memberDao.getByUniversityIdStaleOrFresh(universityId)
 	}
 
-	def getAllMembersWithUniversityIds(universityIds: Seq[String]) = transactional(readOnly = true) {
+	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member] = transactional(readOnly = true) {
 		memberDao.getAllWithUniversityIds(universityIds)
 	}
 
-	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = transactional(readOnly = true) {
+	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member] = transactional(readOnly = true) {
 		memberDao.getAllWithUniversityIdsStaleOrFresh(universityIds)
 	}
 
-	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = transactional(readOnly = true) {
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] = transactional(readOnly = true) {
 		memberDao.getAllByUserId(userId, disableFilter, eagerLoad, activeOnly)
 	}
 
-	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
+	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = {
 		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter, eagerLoad)
 		val usercodeMatch =
 			allMembers.find(_.universityId == user.getWarwickId)
@@ -113,7 +113,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
-	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
+	def getStudentBySprCode(sprCode: String): Option[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getStudentBySprCode(sprCode)
 	}
 
@@ -121,21 +121,21 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.getMemberByTimetableHash(timetableHash)
 	}
 
-	def regenerateTimetableHash(member: Member) = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
+	def regenerateTimetableHash(member: Member): Unit = memberDao.setTimetableHash(member, UUID.randomUUID.toString)
 
-	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean) = transactional(readOnly = true) {
+	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], searchAllDepts: Boolean): Seq[Member] = transactional(readOnly = true) {
 		profileQueryService.find(query, departments, userTypes, searchAllDepts)
 	}
 
-	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]) = transactional(readOnly = true) {
+	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member] = transactional(readOnly = true) {
 		profileQueryService.find(department, includeTouched, userTypes)
 	}
 
-	def listMembersUpdatedSince(startDate: DateTime, max: Int) = transactional(readOnly = true) {
+	def listMembersUpdatedSince(startDate: DateTime, max: Int): Seq[Member] = transactional(readOnly = true) {
 		memberDao.listUpdatedSince(startDate, max)
 	}
 
-	def save(member: Member) = memberDao.saveOrUpdate(member)
+	def save(member: Member): Unit = memberDao.saveOrUpdate(member)
 
   def countStudentsByDepartment(department: Department): Int = transactional(readOnly = true) {
 			memberDao.getStudentsByDepartment(department.rootDepartment).count(s => department.filterRule.matches(s, Option(department)))
@@ -230,7 +230,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		department: Department,
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq()
-	) = transactional(readOnly = true) {
+	): Seq[StudentMember] = transactional(readOnly = true) {
 		if (department.hasParent) {
 			val allRestrictions = ScalaRestriction.is(
 				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
@@ -289,7 +289,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		Seq(departmentRestriction) ++ restrictions
 	}
 
-	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]) = transactional(readOnly = true) {
+	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String] = transactional(readOnly = true) {
 		val allRestrictions = {
 			if (department.hasParent) {
 				ScalaRestriction.is(
@@ -310,7 +310,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		department: Department,
 		restrictions: Seq[ScalaRestriction],
 		orders: Seq[ScalaOrder] = Seq()
-	) = transactional(readOnly = true) {
+	): Seq[String] = transactional(readOnly = true) {
 
 		val allRestrictions = affiliatedDepartmentsRestriction(department, restrictions) ++
 			department.filterRule.restriction(FiltersStudents.AliasPaths, Some(department))
@@ -344,7 +344,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.countStudentsByRestrictions(allRestrictions)
 	}
 
-	def findStaffMembersWithAssistant(user: User) = staffAssistantsHelper.findBy(user)
+	def findStaffMembersWithAssistant(user: User): Seq[StaffMember] = staffAssistantsHelper.findBy(user)
 
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance] = transactional(readOnly = true) {
 		memberDao.getAllModesOfAttendance(department).filter(_ != null)
@@ -373,7 +373,7 @@ trait ProfileServiceComponent {
 }
 
 trait AutowiringProfileServiceComponent extends ProfileServiceComponent {
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 }
 
 @Service("profileService")

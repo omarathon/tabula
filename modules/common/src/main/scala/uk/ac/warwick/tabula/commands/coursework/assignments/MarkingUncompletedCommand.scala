@@ -59,7 +59,7 @@ abstract class MarkingUncompletedCommand(val module: Module, val assignment: Ass
 		markerFeedback.asScala.foreach(feedbackService.delete)
 	}
 
-	def getSubsequentFeedback(markerFeedback: MarkerFeedback) = markerFeedback.getFeedbackPosition match {
+	def getSubsequentFeedback(markerFeedback: MarkerFeedback): Option[MarkerFeedback] = markerFeedback.getFeedbackPosition match {
 		case ThirdFeedback => Some(markerFeedback.feedback.secondMarkerFeedback)
 		case SecondFeedback => Some(markerFeedback.feedback.firstMarkerFeedback)
 		case FirstFeedback => None
@@ -98,7 +98,7 @@ trait MarkingUncompletedState {
 	val assignment: Assignment
 	val module: Module
 	val user: User
-	val marker = user
+	val marker: User = user
 	val submitter: CurrentUser
 
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
@@ -110,7 +110,7 @@ trait MarkerReturnedNotifier extends FeedbackReturnedNotifier[Unit] {
 	this: MarkingUncompletedState with ReleasedState with UserAware with Logging =>
 
 	// take the workflow position from the first item being returned.
-	val position = markerFeedback.asScala.headOption.map(_.getFeedbackPosition) match {
+	val position: Int = markerFeedback.asScala.headOption.map(_.getFeedbackPosition) match {
 		case None => 3
 		case Some(ThirdFeedback) => 2
 		case Some(SecondFeedback) => 1

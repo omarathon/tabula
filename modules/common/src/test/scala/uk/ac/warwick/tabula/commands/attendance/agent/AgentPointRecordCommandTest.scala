@@ -3,33 +3,36 @@ package uk.ac.warwick.tabula.commands.attendance.agent
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
 import org.springframework.core.convert.support.GenericConversionService
+import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import uk.ac.warwick.tabula.data.convert.AttendanceMonitoringPointIdConverter
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceState}
-import uk.ac.warwick.tabula.data.model.{UserGroup, MemberStudentRelationship, StudentMember, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.util.termdates.TermImpl
 
+import scala.Predef.Map
 import scala.collection.JavaConverters._
+import scala.collection.{Map, mutable}
 
 class AgentPointRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val autumnTerm = new TermImpl(null, null, null, TermType.autumn)
-		val dept1 = Fixtures.department("its1")
-		val dept2 = Fixtures.department("its2")
+		val dept1: Department = Fixtures.department("its1")
+		val dept2: Department = Fixtures.department("its2")
 		val thisRelationshipType = new StudentRelationshipType
 		thisRelationshipType.id = "123"
-		val student1 = Fixtures.student("2345")
+		val student1: StudentMember = Fixtures.student("2345")
 		val student1rel = new MemberStudentRelationship
 		student1rel.studentMember = student1
-		val student2 = Fixtures.student("3456")
+		val student2: StudentMember = Fixtures.student("3456")
 		val student2rel = new MemberStudentRelationship
 		student2rel.studentMember = student2
 		val scheme1 = new AttendanceMonitoringScheme
@@ -39,9 +42,9 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		scheme1.academicYear = AcademicYear(2014)
 		scheme1.members = UserGroup.ofUniversityIds
 		scheme1.members.addUserId(student1.universityId)
-		val scheme1point1 = Fixtures.attendanceMonitoringPoint(scheme1, "point1", 1, 2)
+		val scheme1point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, "point1", 1, 2)
 		scheme1point1.id = "1234"
-		val scheme1point2 = Fixtures.attendanceMonitoringPoint(scheme1, "point2", 1, 2)
+		val scheme1point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme1, "point2", 1, 2)
 		scheme1point2.id = "2345"
 		val scheme2 = new AttendanceMonitoringScheme
 		scheme2.attendanceMonitoringService = None
@@ -51,9 +54,9 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		scheme2.members = UserGroup.ofUniversityIds
 		scheme2.members.addUserId(student1.universityId)
 		scheme2.members.addUserId(student2.universityId)
-		val scheme2point1 = Fixtures.attendanceMonitoringPoint(scheme2, "point1", 1, 2)
+		val scheme2point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme2, "point1", 1, 2)
 		scheme2point1.id = "3456"
-		val scheme2point2 = Fixtures.attendanceMonitoringPoint(scheme2, "point2", 1, 2)
+		val scheme2point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme2, "point2", 1, 2)
 		scheme2point2.id = "4567"
 		val currentUser = new CurrentUser(new User, new User)
 	}
@@ -62,11 +65,11 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		var relationshipType: StudentRelationshipType = null
 		val academicYear = AcademicYear(2014)
 		var templatePoint: AttendanceMonitoringPoint = null
-		val user = currentUser
-		val member = Fixtures.staff("1234")
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val termService = smartMock[TermService]
-		val relationshipService = smartMock[RelationshipService]
+		val user: CurrentUser = currentUser
+		val member: StaffMember = Fixtures.staff("1234")
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val termService: TermService = smartMock[TermService]
+		val relationshipService: RelationshipService = smartMock[RelationshipService]
 	}
 
 	trait StateFixture extends Fixture {
@@ -81,7 +84,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 	def studentPointMap() {
 		new StateFixture {
 			state.templatePoint = scheme1point1
-			val result = state.studentPointMap
+			val result: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = state.studentPointMap
 			result(student1) should be (Seq(scheme1point1, scheme2point1))
 			result(student2) should be (Seq(scheme2point1))
 		}
@@ -92,12 +95,12 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 			var relationshipType: StudentRelationshipType = null
 			val academicYear = AcademicYear(2014)
 			var templatePoint: AttendanceMonitoringPoint = null
-			val user = currentUser
-			val member = Fixtures.staff("1234")
-			val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val termService = smartMock[TermService]
-			val relationshipService = smartMock[RelationshipService]
-			val securityService = smartMock[SecurityService]
+			val user: CurrentUser = currentUser
+			val member: StaffMember = Fixtures.staff("1234")
+			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+			val termService: TermService = smartMock[TermService]
+			val relationshipService: RelationshipService = smartMock[RelationshipService]
+			val securityService: SecurityService = smartMock[SecurityService]
 	}
 
 	trait PopulateFixture extends Fixture {
@@ -118,7 +121,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 		new PopulateFixture {
 			populate.templatePoint = scheme1point1
 			populate.populate()
-			val result = populate.checkpointMap.asScala.mapValues(_.asScala)
+			val result: Map[StudentMember, mutable.Map[AttendanceMonitoringPoint, AttendanceState]] = populate.checkpointMap.asScala.mapValues(_.asScala)
 			// Student1 doesn't have any attendance, but the checkpoint map should still be populated for each valid point
 			result(student1)(scheme1point1) should be (null)
 			result(student1)(scheme2point1) should be (null)
@@ -153,7 +156,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
 
 		var binder = new WebDataBinder(validator, "command")
 		binder.setConversionService(conversionService)
-		val errors = binder.getBindingResult
+		val errors: BindingResult = binder.getBindingResult
 	}
 
 	@Test

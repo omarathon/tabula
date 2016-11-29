@@ -21,21 +21,21 @@ trait CourseAndRouteServiceComponent {
 }
 
 trait AutowiringCourseAndRouteServiceComponent extends CourseAndRouteServiceComponent {
-	var courseAndRouteService = Wire[CourseAndRouteService]
+	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
 }
 
 trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
 
-	def allRoutes = transactional(readOnly = true) { routeDao.allRoutes }
+	def allRoutes: Seq[Route] = transactional(readOnly = true) { routeDao.allRoutes }
 
-	def save(route: Route) = routeDao.saveOrUpdate(route)
+	def save(route: Route): Unit = routeDao.saveOrUpdate(route)
 	def getRouteById(id: String): Option[Route] = transactional(readOnly = true) { routeDao.getById(id) }
 
 	def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap {
 		rcode => transactional(readOnly = true) { routeDao.getByCode(rcode.toLowerCase) }
 	}
 
-	def getRoutesByCodes(codes: Seq[String]) = transactional(readOnly = true) {
+	def getRoutesByCodes(codes: Seq[String]): Seq[Route] = transactional(readOnly = true) {
 		routeDao.getAllByCodes(codes.map(_.toLowerCase))
 	}
 
@@ -49,22 +49,22 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	def findRoutesInDepartment(department: Department): Seq[Route] =
 		routeDao.findByDepartment(department)
 
-	def saveOrUpdate(teachingInfo: RouteTeachingInformation) = transactional() {
+	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit = transactional() {
 		routeDao.saveOrUpdate(teachingInfo)
 	}
 
-	def delete(teachingInfo: RouteTeachingInformation) = transactional() {
+	def delete(teachingInfo: RouteTeachingInformation): Unit = transactional() {
 		routeDao.delete(teachingInfo)
 	}
 
 	def findRoutesNamedLike(query: String): Seq[Route] =
 		routeDao.findRoutesNamedLike(query)
 
-	def getRouteTeachingInformation(routeCode: String, departmentCode: String) = transactional(readOnly = true) {
+	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation] = transactional(readOnly = true) {
 		routeDao.getTeachingInformationByRouteCodeAndDepartmentCode(routeCode, departmentCode)
 	}
 
-	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {
+	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int = transactional() {
 		routeDao.stampMissingRows(dept, seenCodes)
 	}
 
@@ -75,21 +75,21 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
 		routesWithPermission(user, permission).filter { _.adminDepartment == dept }
 
-	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
+	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route] = {
 		moduleAndDepartmentService.departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)
 	}
 	def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] = {
 		if (moduleAndDepartmentService.departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
 	}
 
-	def addRouteManager(route: Route, owner: String) = transactional() {
+	def addRouteManager(route: Route, owner: String): Unit = transactional() {
 		val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 		permissionsService.clearCachesForUser((owner, classTag[Route]))
 	}
 
-	def removeRouteManager(route: Route, owner: String) = transactional() {
+	def removeRouteManager(route: Route, owner: String): Unit = transactional() {
 		val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)

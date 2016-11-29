@@ -6,20 +6,21 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.userlookup.User
 
 abstract class StudentRelationshipChangeNotification
 	extends Notification[StudentRelationship, Unit] with SingleItemNotification[StudentRelationship] {
 
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	def templateLocation: String
 
 	def verb = "change"
 
-	def relationship = item.entity
-	def relationshipType = relationship.relationshipType
+	def relationship: StudentRelationship = item.entity
+	def relationshipType: StudentRelationshipType = relationship.relationshipType
 
-	def newAgent = if (relationship.endDate != null && relationship.endDate.isBeforeNow) {
+	def newAgent: Option[Member] = if (relationship.endDate != null && relationship.endDate.isBeforeNow) {
 		None
 	} else {
 		relationship.agentMember
@@ -27,7 +28,7 @@ abstract class StudentRelationshipChangeNotification
 
 	@transient val oldAgentIds = StringSeqSetting("oldAgents", Nil)
 
-	def oldAgents = oldAgentIds.value.flatMap { id => profileService.getMemberByUniversityId(id)}
+	def oldAgents: Seq[Member] = oldAgentIds.value.flatMap { id => profileService.getMemberByUniversityId(id)}
 
 	def content =
 		FreemarkerModel(templateLocation, Map(
@@ -59,7 +60,7 @@ trait RelationshipChangeAgent {
 class StudentRelationshipChangeToStudentNotification extends StudentRelationshipChangeNotification {
 	def title: String = s"${relationshipType.agentRole.capitalize} allocation change"
 	def templateLocation = StudentRelationshipChangeNotification.StudentTemplate
-	def recipients = relationship.studentMember.map { _.asSsoUser }.toSeq
+	def recipients: Seq[User] = relationship.studentMember.map { _.asSsoUser }.toSeq
 	def urlTitle = "view your student profile"
 }
 
@@ -70,7 +71,7 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 
 	def title: String = s"Change to ${relationshipType.studentRole}s"
 	def templateLocation = StudentRelationshipChangeNotification.OldAgentTemplate
-	def recipients = oldAgents.map { _.asSsoUser }
+	def recipients: Seq[User] = oldAgents.map { _.asSsoUser }
 }
 
 @Entity
@@ -80,7 +81,7 @@ class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshi
 
 	def title = s"Allocation of new ${relationshipType.studentRole}s"
 	def templateLocation = StudentRelationshipChangeNotification.NewAgentTemplate
-	def recipients = relationship.agentMember.map { _.asSsoUser }.toSeq
+	def recipients: Seq[User] = relationship.agentMember.map { _.asSsoUser }.toSeq
 }
 
 object StudentRelationshipChangeNotification {

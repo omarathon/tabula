@@ -1,28 +1,28 @@
 package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{FirstMarkerOnlyWorkflow, Exam}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Exam, FirstMarkerOnlyWorkflow}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.{MarkingWorkflowDao, MarkingWorkflowDaoComponent}
 
 class DeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
 
-	val mockMarkingWorkflowDao = smartMock[MarkingWorkflowDao]
+	val mockMarkingWorkflowDao: MarkingWorkflowDao = smartMock[MarkingWorkflowDao]
 
 	trait Fixture {
 
 		val thisMarkingWorkflow = new FirstMarkerOnlyWorkflow
-		val dept = Fixtures.department("its")
+		val dept: Department = Fixtures.department("its")
 
 		val validator = new DeleteMarkingWorkflowCommandValidation with DeleteMarkingWorkflowCommandState with MarkingWorkflowDaoComponent
 		{
-			val markingWorkflowDao = mockMarkingWorkflowDao
-			val department = dept
-			val markingWorkflow = thisMarkingWorkflow
+			val markingWorkflowDao: MarkingWorkflowDao = mockMarkingWorkflowDao
+			val department: Department = dept
+			val markingWorkflow: FirstMarkerOnlyWorkflow = thisMarkingWorkflow
 		}
 
 		val command = new DeleteMarkingWorkflowCommandInternal(dept, thisMarkingWorkflow)
-		val assignment1 = Fixtures.assignment("assignment1")
+		val assignment1: Assignment = Fixtures.assignment("assignment1")
 		var errors = new BindException(validator, "command")
 	}
 

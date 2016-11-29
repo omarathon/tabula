@@ -6,8 +6,8 @@ import collection.JavaConverters._
 
 class CompositeExceptionHandlerTest extends TestBase with Mockito {
 
-	val listener1 = mock[ExceptionHandler]
-	val listener2 = mock[ExceptionHandler]
+	val listener1: ExceptionHandler = mock[ExceptionHandler]
+	val listener2: ExceptionHandler = mock[ExceptionHandler]
 
 	val handler = new CompositeExceptionHandler(Seq(listener1, listener2).asJava)
 

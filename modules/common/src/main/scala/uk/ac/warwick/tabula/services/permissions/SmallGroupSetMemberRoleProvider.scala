@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class SmallGroupSetMemberRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
+	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
 		scope match {
 			case set: SmallGroupSet => getRoles(user, Seq(set))
 			case _ => Stream.empty

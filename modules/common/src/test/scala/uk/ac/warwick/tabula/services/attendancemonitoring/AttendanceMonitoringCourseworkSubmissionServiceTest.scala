@@ -8,27 +8,27 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with Mockito {
 
-	val mockProfileService = smartMock[ProfileService]
-	val mockAttendanceMonitoringService = smartMock[AttendanceMonitoringService]
-	val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-	val mockAssignmentService = smartMock[AssessmentService]
+	val mockProfileService: ProfileService = smartMock[ProfileService]
+	val mockAttendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+	val mockModuleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+	val mockAssignmentService: AssessmentService = smartMock[AssessmentService]
 
 	trait ServiceTestSupport extends AttendanceMonitoringServiceComponent
 		with ProfileServiceComponent with AssessmentServiceComponent {
 
-		val attendanceMonitoringService = mockAttendanceMonitoringService
-		val assessmentService = mockAssignmentService
-		val profileService = mockProfileService
+		val attendanceMonitoringService: AttendanceMonitoringService = mockAttendanceMonitoringService
+		val assessmentService: AssessmentService = mockAssignmentService
+		val profileService: ProfileService = mockProfileService
 	}
 
 	trait Fixture {
 		val service = new AbstractAttendanceMonitoringCourseworkSubmissionService with ServiceTestSupport
 
-		val student = Fixtures.student("1234")
+		val student: StudentMember = Fixtures.student("1234")
 
-		val module1 = Fixtures.module("aa101")
+		val module1: Module = Fixtures.module("aa101")
 		module1.id = "aa101"
-		val module2 = Fixtures.module("aa202")
+		val module2: Module = Fixtures.module("aa202")
 		module2.id = "aa202"
 		mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
 		mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)

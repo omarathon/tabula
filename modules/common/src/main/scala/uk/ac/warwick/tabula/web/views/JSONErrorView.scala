@@ -13,9 +13,9 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 
 	def this(errors: Errors) = this(errors, Map())
 
-	var messageSource = Wire.auto[MessageSource]
+	var messageSource: MessageSource = Wire.auto[MessageSource]
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) = {
+	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		response.setContentType(getContentType())
 		response.setStatus(HttpStatus.BAD_REQUEST.value())
 
@@ -38,7 +38,7 @@ class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) exte
 		objectMapper.writeValue(out, finalJson)
 	}
 
-	def getMessage(key: String, args: Object*) = messageSource.getMessage(key, if (args == null) Array() else args.toArray, null)
+	def getMessage(key: String, args: Object*): String = messageSource.getMessage(key, if (args == null) Array() else args.toArray, null)
 
 	case class GlobalError(code: String, message: String)
 	case class FieldError(code: String, field: String, message: String)

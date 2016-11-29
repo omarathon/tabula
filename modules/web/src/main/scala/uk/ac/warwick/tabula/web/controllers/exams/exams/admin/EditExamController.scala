@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, 
 import uk.ac.warwick.tabula.data.model.Exam
 import uk.ac.warwick.tabula.commands.exams.{EditExamCommand, EditExamCommandState, ModifiesExamMembership, PopulateEditExamCommand}
 import uk.ac.warwick.tabula.exams.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
@@ -25,7 +26,7 @@ class EditExamController extends ExamsController {
 		@PathVariable exam : Exam) = EditExamCommand(mandatory(exam))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: EditExamCommand) = {
+	def showForm(@ModelAttribute("command") cmd: EditExamCommand): Mav = {
 		cmd.populateGroups(cmd.exam)
 		cmd.afterBind()
 
@@ -49,7 +50,7 @@ class EditExamController extends ExamsController {
 	def submit(
 		@Valid @ModelAttribute("command") cmd: EditExamCommand,
 		errors: Errors
-	) = {
+	): Mav = {
 			cmd.afterBind()
 			if (errors.hasErrors) {
 				render(cmd)

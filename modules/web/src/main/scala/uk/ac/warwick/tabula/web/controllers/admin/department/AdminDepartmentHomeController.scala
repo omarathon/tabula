@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.admin.department.AdminDepartmentHomeCommand
 import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringCourseAndRouteServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 import uk.ac.warwick.tabula.web.controllers.admin.{AdminController, AdminDepartmentsModulesAndRoutes}
 
@@ -42,7 +42,7 @@ class AdminDepartmentHomeController extends AdminController with DepartmentScope
 		AdminDepartmentHomeCommand(dept, user)
 
 	@RequestMapping
-	def adminDepartment(cmd: AdminDepartmentHomeCommand, @PathVariable("department") dept: Department) = {
+	def adminDepartment(cmd: AdminDepartmentHomeCommand, @PathVariable("department") dept: Department): Mav = {
 		val (modules, routes) = cmd.apply()
 
 		Mav("admin/department",

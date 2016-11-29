@@ -18,19 +18,19 @@ class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, use
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 
-	def admins = {
+	def admins: Seq[User] = {
 		// lookup the admin users - used to determine the recipients  for notifications
 		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 	}
 
 	// Returns the Seq of admin users
-	override def applyInternal() = admins
+	override def applyInternal(): Seq[User] = admins
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
 	}
 
-	def emit(admins: Seq[User]) = {
+	def emit(admins: Seq[User]): Seq[RequestAssignmentAccessNotification] = {
 		Seq(Notification.init(new RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
 	}
 }

@@ -21,8 +21,8 @@ object FeedbackZipFileJob {
 @Component
 class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent with AutowiringFeedbackServiceComponent {
 
-	override val identifier = FeedbackZipFileJob.identifier
-	override val zipFileName = FeedbackZipFileJob.zipFileName
+	override val identifier: String = FeedbackZipFileJob.identifier
+	override val zipFileName: String = FeedbackZipFileJob.zipFileName
 	override val itemDescription = "feedback"
 
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()

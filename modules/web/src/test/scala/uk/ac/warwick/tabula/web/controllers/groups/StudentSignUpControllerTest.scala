@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class StudentSignUpControllerTest extends TestBase with Mockito {
 
-	val smallGroupSet = Fixtures.smallGroupSet("test")
+	val smallGroupSet: SmallGroupSet = Fixtures.smallGroupSet("test")
 	smallGroupSet.academicYear = AcademicYear(2015)
 
 	@Test

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.{BrowserTest, FunctionalTestAcademicYear}
 
 class UnallocatedStudentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver with FixturesDriver {
 
-	val academicYearString = FunctionalTestAcademicYear.current.startYear.toString
+	val academicYearString: String = FunctionalTestAcademicYear.current.startYear.toString
 	val TEST_ROUTE_CODE="xx123"
 	val TEST_DEPARTMENT_CODE="xxx"
 	val TEST_COURSE_CODE="Ux123"

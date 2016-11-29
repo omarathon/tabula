@@ -41,7 +41,7 @@ class RateFeedbackCommandTest extends TestBase {
 		errors.hasFieldErrors("wasPrompt") should be (true)
 	}
 
-	def deepFeedback = {
+	def deepFeedback: (AssignmentFeedback, Assignment, Module, Department) = {
 		val feedback = Fixtures.assignmentFeedback("1234567")
 		val assignment = Fixtures.assignment("my assignment")
 		val module = Fixtures.module("cs118", "Introduction to programming")

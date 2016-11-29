@@ -120,7 +120,7 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 		currentUrl.endsWith("/allocate")
 	}
 
-	def findAllUnallocatedStudents =  {
+	def findAllUnallocatedStudents: Iterator[Element] =  {
 		val s= findAll(cssSelector("div.student-list ul li"))
 		s
 	}

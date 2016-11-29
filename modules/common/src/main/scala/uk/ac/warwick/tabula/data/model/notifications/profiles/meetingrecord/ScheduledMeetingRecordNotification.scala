@@ -22,17 +22,17 @@ abstract class ScheduledMeetingRecordNotification
 	with SingleItemNotification[ScheduledMeetingRecord]
 	with AutowiringTermServiceComponent {
 
-	def meeting = item.entity
+	def meeting: ScheduledMeetingRecord = item.entity
 
 	def verbSetting = StringSetting("verb", "")
-	def verb = verbSetting.value
+	def verb: String = verbSetting.value
 
-	def studentNotFoundMessage = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
-	def agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"
+	def studentNotFoundMessage: String = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
+	def agentNotFoundMessage: String = "Agent member for code " + meeting.relationship.agent + " not found"
 
-	def academicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
+	def academicYear: AcademicYear = AcademicYear.findAcademicYearContainingDate(meeting.meetingDate)
 
-	def url = Routes.Profile.relationshipType(
+	def url: String = Routes.Profile.relationshipType(
 		meeting.relationship.studentCourseDetails,
 		academicYear,
 		meeting.relationship.relationshipType
@@ -40,7 +40,7 @@ abstract class ScheduledMeetingRecordNotification
 
 	def urlTitle = "view this meeting"
 
-	def agentRole = meeting.relationship.relationshipType.agentRole
+	def agentRole: String = meeting.relationship.relationshipType.agentRole
 }
 
 private case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {

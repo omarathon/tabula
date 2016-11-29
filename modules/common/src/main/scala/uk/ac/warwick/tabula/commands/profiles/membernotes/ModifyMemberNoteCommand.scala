@@ -17,7 +17,7 @@ abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractM
 	self: ModifyMemberNoteCommandRequest with ModifyAbstractMemberNoteCommandState
 		with FileAttachmentServiceComponent with MemberNoteServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMemberNote = {
 		copyTo(abstractMemberNote)
 
 		if (abstractMemberNote.attachments != null) {
@@ -54,7 +54,7 @@ trait ModifyMemberNoteCommandBindListener extends BindListener {
 
 trait ModifyAbstractMemberNoteCommandState {
 	def abstractMemberNote: AbstractMemberNote
-	val attachmentTypes = Seq[String]()
+	val attachmentTypes: Seq[String] = Seq[String]()
 }
 
 trait ModifyMemberNoteCommandState extends ModifyAbstractMemberNoteCommandState {

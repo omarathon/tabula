@@ -25,7 +25,7 @@ class AttendanceNoteAttachmentCommand(val student: StudentMember, val point: Att
 
 	self: AttendanceMonitoringServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		attendanceMonitoringService.getAttendanceNote(student, point).flatMap{ note =>
 			Option(note.attachment).map{ attachment =>
 				new RenderableAttachment(attachment)

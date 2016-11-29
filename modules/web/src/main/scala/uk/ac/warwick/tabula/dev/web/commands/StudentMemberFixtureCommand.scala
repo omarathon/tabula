@@ -23,14 +23,14 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 	var deptCode:String=""
 	var academicYear: AcademicYear = _
 
-	var memberDao = Wire[MemberDao]
-	var routeDao = Wire[RouteDao]
-	var courseDao= Wire[CourseDao]
-  var deptDao = Wire[DepartmentDao]
-	var statusDao = Wire[SitsStatusDao]
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var memberDao: MemberDao = Wire[MemberDao]
+	var routeDao: RouteDao = Wire[RouteDao]
+	var courseDao: CourseDao = Wire[CourseDao]
+  var deptDao: DepartmentDao = Wire[DepartmentDao]
+	var statusDao: SitsStatusDao = Wire[SitsStatusDao]
+	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
-	def applyInternal() = {
+	def applyInternal(): StudentMember = {
 		val userLookupUser = userLookup.getUserByUserId(userId)
 		assert(userLookupUser != null)
 
@@ -95,7 +95,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 }
 
 object StudentMemberFixtureCommand {
-	def apply() = {
+	def apply(): StudentMemberFixtureCommand with ComposableCommand[StudentMember] with AutowiringUserLookupComponent with Unaudited with PubliclyVisiblePermissions = {
 		new StudentMemberFixtureCommand with ComposableCommand[StudentMember]
 			with AutowiringUserLookupComponent
 			with Unaudited

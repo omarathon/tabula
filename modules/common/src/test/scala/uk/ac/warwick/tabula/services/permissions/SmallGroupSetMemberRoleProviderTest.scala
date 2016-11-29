@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 
 	private trait Fixture{
-		val userLookup = mock[UserLookupService]
+		val userLookup: UserLookupService = mock[UserLookupService]
 		val groupSet = new SmallGroupSet
 		groupSet.module = Fixtures.module("in101")
 		groupSet.module.adminDepartment = Fixtures.department("in")
@@ -29,7 +29,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		wireUserLookup(groupSet.members)
 		groupSet.id= "test"
 
-		val membershipService = mock[AssessmentMembershipService]
+		val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
 		groupSet.membershipService = membershipService
 
 		val memberUser = new User("member")

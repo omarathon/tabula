@@ -9,6 +9,6 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 class FileAttachmentIdConverter extends TwoWayConverter[String, FileAttachment] {
 	@Autowired var fileDao: FileDao = _
 
-	override def convertRight(id: String) = fileDao.getFileById(id).orNull
-	override def convertLeft(attachment: FileAttachment) = (Option(attachment) map {_.id}).orNull
+	override def convertRight(id: String): FileAttachment = fileDao.getFileById(id).orNull
+	override def convertLeft(attachment: FileAttachment): String = (Option(attachment) map {_.id}).orNull
 }

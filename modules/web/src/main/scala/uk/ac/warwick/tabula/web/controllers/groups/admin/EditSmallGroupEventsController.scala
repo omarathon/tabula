@@ -2,17 +2,19 @@ package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import java.util.concurrent.TimeoutException
 import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.groups.admin.{ImportSmallGroupEventsFromExternalSystemCommand, PopulateEditSmallGroupEventsSubCommands, EditSmallGroupEventsCommand}
+import uk.ac.warwick.tabula.commands.groups.admin.{EditSmallGroupEventsCommand, ImportSmallGroupEventsFromExternalSystemCommand, PopulateEditSmallGroupEventsSubCommands}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
@@ -23,7 +25,7 @@ trait SyllabusPlusEventCountForModule {
 	self: ModuleTimetableFetchingServiceComponent =>
 
 	@ModelAttribute("syllabusPlusEventCount")
-	def syllabusPlusEventCount(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet) =
+	def syllabusPlusEventCount(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): Int =
 		Try(Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase), ImportSmallGroupEventsFromExternalSystemCommand.Timeout))
 			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }.get
 			.events.count(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
@@ -45,7 +47,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 
 	protected def renderPath: String
 
-	protected def render(set: SmallGroupSet, model: Map[String, _] = Map()) = {
+	protected def render(set: SmallGroupSet, model: Map[String, _] = Map()): Mav = {
 		Mav(renderPath, model ++ Map("groups" -> set.groups.asScala.sorted)).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
 	}
 
@@ -53,9 +55,9 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: EditSmallGroupEventsCommand
-	) = render(set)
+	): Mav = render(set)
 
-	protected def submit(cmd: EditSmallGroupEventsCommand, errors: Errors, set: SmallGroupSet, route: String) = {
+	protected def submit(cmd: EditSmallGroupEventsCommand, errors: Errors, set: SmallGroupSet, route: String): Mav = {
 		if (errors.hasErrors) {
 			render(set)
 		} else {
@@ -69,7 +71,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
+	): Mav = {
 		if (!errors.hasErrors) {
 			cmd.apply()
 			cmd.populate()
@@ -83,7 +85,7 @@ abstract class AbstractEditSmallGroupEventsController extends GroupsController
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
+	): Mav = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
 
 }
 
@@ -98,28 +100,28 @@ class CreateSmallGroupSetAddEventsController extends AbstractEditSmallGroupEvent
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.create(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.create(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAddStudents(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAddStudents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups, "action!=refresh", "action!=update"))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate, "action!=refresh", "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.createAllocate(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.createAllocate(set))
 
 }
 
@@ -134,27 +136,27 @@ class EditSmallGroupSetAddEventsController extends AbstractEditSmallGroupEventsC
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.edit(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.edit(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh", "action!=update"))
 	def saveAndAddStudents(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAddStudents(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAddStudents(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups, "action!=refresh", "action!=update"))
 	def saveAndAddGroups(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAddGroups(set))
 
 	@RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate, "action!=refresh", "action!=update"))
 	def saveAndAddAllocate(
 		@Valid @ModelAttribute("command") cmd: EditSmallGroupEventsCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = submit(cmd, errors, set, Routes.admin.editAllocate(set))
+	): Mav = submit(cmd, errors, set, Routes.admin.editAllocate(set))
 
 }

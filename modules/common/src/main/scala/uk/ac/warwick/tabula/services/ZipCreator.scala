@@ -32,7 +32,7 @@ case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends Z
 	var items: ListBuffer[ZipItem] = ListBuffer()
 	items.appendAll(startItems)
 
-	def length = items.map { _.length }.sum
+	def length: Long = items.map { _.length }.sum
 }
 
 /**
@@ -132,7 +132,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 	 *
 	 * @param name The name as passed to getZip when creating the file.
 	 */
-	def invalidate(name: String) = objectStorageService.delete(objectKey(name))
+	def invalidate(name: String): Unit = objectStorageService.delete(objectKey(name))
 
 	private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = {(_,_) => }): Unit = benchmarkTask("Write zip items") {
 		def writeFolder(basePath: String, items: Seq[ZipItem]) {
@@ -153,7 +153,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 		writeFolder("", items)
 	}
 
-	def trunc(name: String, limit: Int) =
+	def trunc(name: String, limit: Int): String =
 		if (name.length() <= limit) name
 		else {
 			val ext = FileUtils.getLowerCaseExtension(name)
@@ -201,13 +201,13 @@ trait ZipCreator extends Logging with TaskBenchmarking {
 }
 
 object ZipCreator {
-	val MaxZipItemsSizeInBytes = 2L * 1024 * 1024 * 1024 // 2gb
+	val MaxZipItemsSizeInBytes: Long = 2L * 1024 * 1024 * 1024 // 2gb
 
 	val MaxFolderLength = 20
 	val MaxFileLength = 100
 
 	val ObjectKeyPrefix = "zips/"
-	def objectKey(name: String) = ObjectKeyPrefix + name
+	def objectKey(name: String): String = ObjectKeyPrefix + name
 }
 
 class ZipRequestTooLargeError extends java.lang.RuntimeException("Files too large to compress") with UserError {

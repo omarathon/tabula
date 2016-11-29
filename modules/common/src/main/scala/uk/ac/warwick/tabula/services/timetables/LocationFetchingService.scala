@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.tabula.services.{AutowiringDispatchHttpClientComponent, DispatchHttpClientComponent}
-import uk.ac.warwick.util.cache.{CacheEntryFactory, Caches}
+import uk.ac.warwick.util.cache.{Cache, CacheEntryFactory, Caches}
 import uk.ac.warwick.util.web.Uri
 
 import scala.collection.JavaConverters._
@@ -23,7 +23,7 @@ trait LocationFetchingService {
 
 class CachedLocationFetchingService(delegate: LocationFetchingService) extends LocationFetchingService with AutowiringCacheStrategyComponent {
 
-	val CacheExpiryTime = 60 * 60 * 48 // 48 hours in seconds
+	val CacheExpiryTime: Int = 60 * 60 * 48 // 48 hours in seconds
 
 	val cacheEntryFactory = new CacheEntryFactory[String, Location] {
 		def create(name: String): Location = delegate.locationFor(name)
@@ -36,10 +36,10 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
 		def shouldBeCached(location: Location) = true
 	}
 
-	lazy val cache =
+	lazy val cache: Cache[String, Location] =
 		Caches.newCache("LocationCache", cacheEntryFactory, CacheExpiryTime, cacheStrategy)
 
-	def locationFor(name: String) = cache.get(name)
+	def locationFor(name: String): Location = cache.get(name)
 
 }
 
@@ -58,7 +58,7 @@ trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponen
 	val wai2GoConfiguration = new AutowiringWAI2GoConfiguration
 	class AutowiringWAI2GoConfiguration extends WAI2GoConfiguration {
 		val cached = true
-		val baseUri = Uri.parse("https://campus.warwick.ac.uk/Services/api.php")
+		val baseUri: Uri = Uri.parse("https://campus.warwick.ac.uk/Services/api.php")
 		val defaultProperties = Map(
 			"config" -> "warwick",
 			"act" -> "ac",
@@ -86,7 +86,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 
 	// a dispatch response handler which reads JSON from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler: (Map[String, Seq[String]], Request) => Handler[Seq[WAI2GoLocation]] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req >- { (rawJSON) =>
 			JSON.parseFull(rawJSON) match {
 				case Some(locations: Seq[Map[String, Any]] @unchecked) => locations.flatMap(WAI2GoLocation.fromProperties)
@@ -95,7 +95,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 		}
 	}
 
-	def locationFor(name: String) = {
+	def locationFor(name: String): Location = {
 		val req = url(config.baseUri.toString) <<? (config.defaultProperties ++ Map(config.queryParameter -> name))
 
 		// Execute the request
@@ -117,7 +117,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
 }
 
 object WAI2GoHttpLocationFetchingService {
-	def apply(config: WAI2GoConfiguration) = {
+	def apply(config: WAI2GoConfiguration): LocationFetchingService = {
 		val service = new WAI2GoHttpLocationFetchingService(config) with AutowiringDispatchHttpClientComponent
 
 		if (config.cached) {

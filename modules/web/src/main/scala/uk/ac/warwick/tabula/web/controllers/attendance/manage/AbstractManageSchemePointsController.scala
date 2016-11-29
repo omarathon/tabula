@@ -30,7 +30,7 @@ abstract class AbstractManageSchemePointsController extends AttendanceController
 		@PathVariable scheme: AttendanceMonitoringScheme,
 		@RequestParam(required = false) points: JInteger,
 		@RequestParam(required = false) actionCompleted: String
-	) = {
+	): Mav = {
 		findCommand.findSchemes = Seq(scheme).asJava
 		render(findCommand.apply(), scheme, points, actionCompleted)
 	}

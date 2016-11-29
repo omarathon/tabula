@@ -6,8 +6,8 @@ import org.springframework.core.convert.ConversionService
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.commands.profiles.SearchProfilesCommand
+import uk.ac.warwick.tabula.commands.{ComposableCommand, MemberOrUser, Unaudited}
+import uk.ac.warwick.tabula.commands.profiles.{SearchProfilesCommand, SearchProfilesCommandInternal, SearchProfilesCommandPermissions}
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
@@ -123,7 +123,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 	}
 
 	@ModelAttribute("viewProfileCommand")
-	protected def viewProfileCommand(@PathVariable pvs: JMap[String, String]) = {
+	protected def viewProfileCommand(@PathVariable pvs: JMap[String, String]): Any = {
 		val pathVariables = pvs.asScala
 		if (pathVariables.contains("member")) {
 			new ViewProfileCommand(user, mandatory(
@@ -138,7 +138,7 @@ abstract class AbstractViewProfileController extends ProfilesController
 
 
 	@ModelAttribute("searchProfilesCommand")
-	protected def searchProfilesCommand =
+	protected def searchProfilesCommand: SearchProfilesCommandInternal with ComposableCommand[Seq[Member]] with Unaudited with SearchProfilesCommandPermissions =
 		restricted(SearchProfilesCommand(currentMember, user)).orNull
 
 }

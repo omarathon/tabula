@@ -94,14 +94,14 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.none")
 
 		val firstMarkersValidator = new UsercodeListValidator(firstMarkers, "firstMarkers", universityIdRequired = true){
-			override def alreadyHasCode = hasDuplicates(firstMarkers.asScala)
+			override def alreadyHasCode: Boolean = hasDuplicates(firstMarkers.asScala)
 		}
 		firstMarkersValidator.validate(errors)
 
 		// validate only when second markers are used
 		if(Seq(SeenSecondMarking, SeenSecondMarkingLegacy, ModeratedMarking).contains(markingMethod)){
 			val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers", universityIdRequired = true){
-				override def alreadyHasCode = hasDuplicates(secondMarkers.asScala)
+				override def alreadyHasCode: Boolean = hasDuplicates(secondMarkers.asScala)
 			}
 			secondMarkersValidator.validate(errors)
 		}
@@ -114,7 +114,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 	// If there's a current markingWorkflow, returns whether "other" is a different
 	// scheme with the same name we're trying to use.
 	// If there's no current markingWorkflow we just check if it's just the same name.
-	def sameName(other: MarkingWorkflow) = currentMarkingWorkflow match {
+	def sameName(other: MarkingWorkflow): Boolean = currentMarkingWorkflow match {
 		case Some(existing) =>
 			other.id != existing.id && other.name == name
 		case None =>

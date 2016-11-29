@@ -8,15 +8,15 @@ import scala.collection.JavaConverters._
 
 sealed trait SmallGroupSetFilter {
 	def description: String
-	val getName = SmallGroupSetFilters.shortName(getClass.asInstanceOf[Class[_ <: SmallGroupSetFilter]])
+	val getName: String = SmallGroupSetFilters.shortName(getClass.asInstanceOf[Class[_ <: SmallGroupSetFilter]])
 	def apply(set: SmallGroupSet): Boolean
 }
 
 object SmallGroupSetFilters {
 	private val ObjectClassPrefix = SmallGroupSetFilters.getClass.getName
 
-	def shortName(clazz: Class[_ <: SmallGroupSetFilter])
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+	def shortName(clazz: Class[_ <: SmallGroupSetFilter]): String
+	= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
 	def of(name: String): SmallGroupSetFilter = {
 		try {
@@ -30,49 +30,49 @@ object SmallGroupSetFilters {
 	}
 
 	case class Module(module: model.Module) extends SmallGroupSetFilter {
-		val description = module.code.toUpperCase() + " " + module.name
-		override val getName = "Module(" + module.code + ")"
-		def apply(set: SmallGroupSet) = set.module == module
+		val description: String = module.code.toUpperCase() + " " + module.name
+		override val getName: String = "Module(" + module.code + ")"
+		def apply(set: SmallGroupSet): Boolean = set.module == module
 	}
 
-	def allModuleFilters(modules: Seq[model.Module]) = modules.map { Module }
+	def allModuleFilters(modules: Seq[model.Module]): Seq[Module] = modules.map { Module }
 
 	case class Format(format: SmallGroupFormat) extends SmallGroupSetFilter {
-		val description = format.description
-		override val getName = format.code
-		def apply(set: SmallGroupSet) = set.format == format
+		val description: String = format.description
+		override val getName: String = format.code
+		def apply(set: SmallGroupSet): Boolean = set.format == format
 	}
 
-	def allFormatFilters = SmallGroupFormat.members.map { Format }
+	def allFormatFilters: Seq[Format] = SmallGroupFormat.members.map { Format }
 
 	object Status {
 		case object NeedsGroupsCreating extends SmallGroupSetFilter {
 			val description = "Needs groups creating"
-			def apply(set: SmallGroupSet) = set.groups.asScala.isEmpty
+			def apply(set: SmallGroupSet): Boolean = set.groups.asScala.isEmpty
 		}
 		case object UnallocatedStudents extends SmallGroupSetFilter {
 			val description = "Contains unallocated students"
-			def apply(set: SmallGroupSet) = set.unallocatedStudentsCount > 0
+			def apply(set: SmallGroupSet): Boolean = set.unallocatedStudentsCount > 0
 		}
 		case object NeedsEventsCreating extends SmallGroupSetFilter {
 			val description = "Needs events creating"
-			def apply(set: SmallGroupSet) = set.groups.asScala.forall { _.events.isEmpty }
+			def apply(set: SmallGroupSet): Boolean = set.groups.asScala.forall { _.events.isEmpty }
 		}
 		case object OpenForSignUp extends SmallGroupSetFilter {
 			val description = "Open for sign up"
-			def apply(set: SmallGroupSet) = set.openForSignups
+			def apply(set: SmallGroupSet): Boolean = set.openForSignups
 		}
 		case object ClosedForSignUp extends SmallGroupSetFilter {
 			val description = "Closed for sign up"
-			def apply(set: SmallGroupSet) = !set.openForSignups
+			def apply(set: SmallGroupSet): Boolean = !set.openForSignups
 		}
 		case object NeedsNotificationsSending extends SmallGroupSetFilter {
 			val description = "Needs notifications sending"
-			def apply(set: SmallGroupSet) = !set.fullyReleased
+			def apply(set: SmallGroupSet): Boolean = !set.fullyReleased
 		}
 		case object Completed extends SmallGroupSetFilter {
 			val description = "Complete"
-			def apply(set: SmallGroupSet) = set.fullyReleased
+			def apply(set: SmallGroupSet): Boolean = set.fullyReleased
 		}
 
 		val all = Seq(NeedsGroupsCreating, UnallocatedStudents, NeedsEventsCreating, OpenForSignUp, ClosedForSignUp, NeedsNotificationsSending, Completed)
@@ -81,32 +81,32 @@ object SmallGroupSetFilters {
 	object AllocationMethod {
 		case object ManuallyAllocated extends SmallGroupSetFilter {
 			val description = "Manually allocated"
-			def apply(set: SmallGroupSet) = set.allocationMethod == SmallGroupAllocationMethod.Manual
+			def apply(set: SmallGroupSet): Boolean = set.allocationMethod == SmallGroupAllocationMethod.Manual
 		}
 		case object StudentSignUp extends SmallGroupSetFilter {
 			val description = "Self sign-up"
-			def apply(set: SmallGroupSet) = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+			def apply(set: SmallGroupSet): Boolean = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 		}
 		case class Linked(linked: DepartmentSmallGroupSet) extends SmallGroupSetFilter {
-			val description = linked.name
-			override val getName = "AllocationMethod.Linked(" + linked.id + ")"
-			def apply(set: SmallGroupSet) = set.linked && set.linkedDepartmentSmallGroupSet == linked
+			val description: String = linked.name
+			override val getName: String = "AllocationMethod.Linked(" + linked.id + ")"
+			def apply(set: SmallGroupSet): Boolean = set.linked && set.linkedDepartmentSmallGroupSet == linked
 		}
 
-		def all(linked: Seq[DepartmentSmallGroupSet]) = Seq(ManuallyAllocated, StudentSignUp) ++ linked.map { Linked }
+		def all(linked: Seq[DepartmentSmallGroupSet]): Seq[SmallGroupSetFilter with Product with Serializable] = Seq(ManuallyAllocated, StudentSignUp) ++ linked.map { Linked }
 	}
 
 	case class Term(termName: String, weekRange: WeekRange) extends SmallGroupSetFilter {
-		val description = termName
+		val description: String = termName
 		override val getName = s"Term($termName, ${weekRange.minWeek}, ${weekRange.maxWeek})"
-		def apply(set: SmallGroupSet) =
+		def apply(set: SmallGroupSet): Boolean =
 			set.groups.asScala
 				.flatMap { _.events }
 				.flatMap { _.weekRanges }
 				.flatMap { _.toWeeks }
 				.exists(weekRange.toWeeks.contains)
 	}
-	def allTermFilters(year: AcademicYear, termService: TermService) = {
+	def allTermFilters(year: AcademicYear, termService: TermService): Seq[Term] = {
 		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 		val terms =

@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
 
@@ -31,7 +32,7 @@ class AttendanceNoteProfileController extends AbstractViewProfileController {
 	def home(
 		@PathVariable student: StudentMember,
 		@PathVariable point: AttendanceMonitoringPoint
-	) = {
+	): Mav = {
 		val attendanceNote = monitoringPointService.getAttendanceNote(student, point).getOrElse(throw new ItemNotFoundException())
 
 		val mav = Mav("profiles/attendance/view_note",
@@ -81,7 +82,7 @@ class EditAttendanceNoteProfileController extends ProfilesController {
 	def getIframe(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, student, isIframe = true)
 	}
@@ -90,7 +91,7 @@ class EditAttendanceNoteProfileController extends ProfilesController {
 	def get(
 		@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, student)
 	}
@@ -118,7 +119,7 @@ class EditAttendanceNoteProfileController extends ProfilesController {
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, student, isIframe = true)
 		} else {
@@ -132,7 +133,7 @@ class EditAttendanceNoteProfileController extends ProfilesController {
 		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, student)
 		} else {

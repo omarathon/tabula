@@ -23,7 +23,7 @@ class ExtensionRequestController extends CourseworkController {
 
 	type ExtensionRequestCommand = Appliable[Extension] with RequestExtensionCommandState
 
-	var profileService = Wire.auto[ProfileService]
+	var profileService: ProfileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("command")
 	def cmd(

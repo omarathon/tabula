@@ -27,7 +27,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 	}
 
 	@transient
-	var userLookup = Wire[UserLookupService]("userLookup")
+	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
 	def getFeedbackPosition: FeedbackPosition = feedback.getFeedbackPosition(this)
 
@@ -91,17 +91,17 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityR
 		customFormValues.find( _.name == field.name )
 	}
 
-	def hasContent = hasMarkOrGrade || hasFeedback || hasComments
+	def hasContent: Boolean = hasMarkOrGrade || hasFeedback || hasComments
 
-	def hasMarkOrGrade = hasMark || hasGrade
+	def hasMarkOrGrade: Boolean = hasMark || hasGrade
 
 	def hasMark: Boolean = mark.isDefined
 
 	def hasGrade: Boolean = grade.isDefined
 
-	def hasFeedback = attachments != null && attachments.size() > 0
+	def hasFeedback: Boolean = attachments != null && attachments.size() > 0
 
-	def hasComments = customFormValues.exists(_.value != null)
+	def hasComments: Boolean = customFormValues.exists(_.value != null)
 
-	override def toEntityReference = new MarkerFeedbackEntityReference().put(this)
+	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

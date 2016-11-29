@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
-import org.joda.time.DateTimeConstants
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+import org.joda.time.{DateTime, DateTimeConstants}
+
 import collection.JavaConversions._
 
 // scalastyle:off magic.number
 class MeetingRecordTest extends PersistenceTestBase {
 
-	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
+	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
 
 	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
 		val orphanAttachment = flushing(session) {
@@ -94,5 +95,5 @@ class MeetingRecordTest extends PersistenceTestBase {
 	}
 
 	/** Zero-pad integer to a 7 digit string */
-	def idFormat(i:Int) = "%07d" format i
+	def idFormat(i:Int): String = "%07d" format i
 }

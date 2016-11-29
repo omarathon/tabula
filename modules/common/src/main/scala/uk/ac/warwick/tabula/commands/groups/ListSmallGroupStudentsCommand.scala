@@ -12,11 +12,11 @@ import uk.ac.warwick.tabula.services.ProfileService
  */
 class ListSmallGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[MemberOrUser]] with Unaudited with ReadOnly {
 
-	var profileService = Wire[ProfileService]
+	var profileService: ProfileService = Wire[ProfileService]
 
 	PermissionCheck(Permissions.SmallGroups.ReadMembership, group)
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[MemberOrUser] = {
 		group.students.users.map { user =>
 			val member = profileService.getMemberByUniversityId(user.getWarwickId)
 			MemberOrUser(member, user)

@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.coursework.markingworkflows.ReplaceMarkerIn
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/edit/{markingWorkflow}/replace"))
@@ -23,7 +24,7 @@ class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkControlle
 		ReplaceMarkerInMarkingWorkflowCommand(department, markingWorkflow)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow], @PathVariable department: Department) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow], @PathVariable department: Department): Mav = {
 		Mav(s"$urlPrefix/admin/markingworkflows/replace").crumbs(Breadcrumbs.Department(department))
 	}
 
@@ -32,7 +33,7 @@ class OldReplaceMarkerInMarkingWorkflowController extends OldCourseworkControlle
 		@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow], errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable markingWorkflow: MarkingWorkflow
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, department)
 		} else {

@@ -12,11 +12,14 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.reports.web.Routes
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, JSONView}
 import uk.ac.warwick.tabula.{AcademicYear, JsonHelper}
 import uk.ac.warwick.util.csv.GoodCsvDocument
+
+import scala.xml.Elem
 
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/groups/events"))
@@ -29,7 +32,7 @@ class SmallGroupEventsReportController extends ReportsController
 	override val departmentPermission: Permission = Permissions.Department.Reports
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department) = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
 	@ModelAttribute("activeAcademicYear")
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
@@ -47,7 +50,7 @@ class SmallGroupEventsReportController extends ReportsController
 		@ModelAttribute("command") cmd: Appliable[Seq[SmallGroupEventReportData]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav(s"reports/smallgroups/events")
 			.crumbs(ReportsBreadcrumbs.SmallGroups.Home(department, academicYear))
 			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.SmallGroups.events(department, year)):_*)
@@ -58,7 +61,7 @@ class SmallGroupEventsReportController extends ReportsController
 		@ModelAttribute("command") cmd: Appliable[Seq[SmallGroupEventReportData]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val result = cmd.apply()
 		Mav(new JSONView(Map("events" -> result.map(data => Map(
 			"departmentName" -> data.departmentName,
@@ -80,7 +83,7 @@ class SmallGroupEventsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): CSVView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val writer = new StringWriter
@@ -101,7 +104,7 @@ class SmallGroupEventsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): ExcelView = {
 		val processorResult = getProcessorResult(processor, data)
 
 		val workbook = new SmallGroupEventsReportExporter(processorResult, department).toXLSX
@@ -115,7 +118,7 @@ class SmallGroupEventsReportController extends ReportsController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam data: String
-	) = {
+	): Elem = {
 		val processorResult = getProcessorResult(processor, data)
 
 		new SmallGroupEventsReportExporter(processorResult, department).toXML

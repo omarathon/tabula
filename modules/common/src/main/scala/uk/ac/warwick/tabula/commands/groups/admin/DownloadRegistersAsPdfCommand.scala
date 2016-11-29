@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Interval}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper._
 import uk.ac.warwick.tabula.commands.{MemberOrUser, _}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -37,7 +37,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
 
 	self: DownloadRegistersAsPdfHelper.Dependencies =>
 
-	override def applyInternal() = {
+	override def applyInternal(): RenderableAttachment = {
 		val userSettings = transactional(readOnly = true) { userSettingsService.getByUserId(user.apparentId).getOrElse(new UserSettings(user.apparentId)) }
 		userSettings.registerPdfShowPhotos = showPhotos
 		userSettings.registerPdfDisplayName = displayName
@@ -160,8 +160,8 @@ trait DownloadRegistersAsPdfCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val weeksForYear = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
-	lazy val smallGroupsInDepartment = smallGroupService.getSmallGroupSets(department, academicYear).sortBy(sgs => (sgs.module, sgs.name))
+	lazy val weeksForYear: Map[Integer, Interval] = termService.getAcademicWeeksForYear(academicYear.dateInTermOne).toMap
+	lazy val smallGroupsInDepartment: Seq[SmallGroupSet] = smallGroupService.getSmallGroupSets(department, academicYear).sortBy(sgs => (sgs.module, sgs.name))
 }
 
 trait GetsOccurrencesForDownloadRegistersAsPdfCommand extends GetsOccurrences with TaskBenchmarking {

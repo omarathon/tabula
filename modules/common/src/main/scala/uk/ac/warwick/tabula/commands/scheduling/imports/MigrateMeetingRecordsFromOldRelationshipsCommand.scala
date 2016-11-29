@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, MeetingRecordServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -25,7 +25,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandInternal(val student: Stud
 
 	self: MigrateMeetingRecordsFromOldRelationshipsCommandState with MeetingRecordServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Unit = {
 		migrations.foreach{ case(from, to) => meetingRecordService.migrate(from, to) }
 	}
 
@@ -59,11 +59,11 @@ trait MigrateMeetingRecordsFromOldRelationshipsCommandState {
 
 	def student: StudentMember
 
-	lazy val personalTutorRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
+	lazy val personalTutorRelationshipType: StudentRelationshipType = relationshipService.getStudentRelationshipTypeByUrlPart("tutor").getOrElse(
 		throw new ItemNotFoundException("Could not find personal tutor relationship type")
 	)
 
-	lazy val studentRelationships = relationshipService.getRelationships(personalTutorRelationshipType, student)
+	lazy val studentRelationships: Seq[StudentRelationship] = relationshipService.getRelationships(personalTutorRelationshipType, student)
 
 	lazy val migrations: Map[StudentRelationship, StudentRelationship] = {
 		studentRelationships.groupBy(_.agent).flatMap{case(agent, agentRelationships) =>

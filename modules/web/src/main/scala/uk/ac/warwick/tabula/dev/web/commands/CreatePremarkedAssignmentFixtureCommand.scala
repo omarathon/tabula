@@ -16,17 +16,17 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 
 	this: TransactionalComponent =>
 
-	val assignmentSrv = Wire[AssessmentService]
-	val userLookup = Wire[UserLookupService]
-	val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	val markingWorkflowService = Wire[MarkingWorkflowService]
-	val submissionService = Wire[SubmissionService]
-	val feedbackService = Wire[FeedbackService]
-	val userGroupDao = Wire[UserGroupDao]
+	val assignmentSrv: AssessmentService = Wire[AssessmentService]
+	val userLookup: UserLookupService = Wire[UserLookupService]
+	val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	val markingWorkflowService: MarkingWorkflowService = Wire[MarkingWorkflowService]
+	val submissionService: SubmissionService = Wire[SubmissionService]
+	val feedbackService: FeedbackService = Wire[FeedbackService]
+	val userGroupDao: UserGroupDao = Wire[UserGroupDao]
 
 	var moduleCode: String = _
 
-	protected def applyInternal() = {
+	protected def applyInternal(): Assignment = {
 		val module = moduleAndDepartmentService.getModuleByCode(moduleCode).getOrElse(
 			throw new IllegalArgumentException(s"wrong module code $moduleCode")
 		)
@@ -114,7 +114,7 @@ object CreatePremarkedAssignmentFixtureCommand {
 	val students = Seq(Student("3000001", "tabula-functest-student1"), Student("3000003", "tabula-functest-student3"))
 	val firstMarkers = Seq("tabula-functest-marker1")
 
-	def apply() ={
+	def apply(): CreatePremarkedAssignmentFixtureCommand with ComposableCommand[Assignment] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited ={
 		new CreatePremarkedAssignmentFixtureCommand
 			with ComposableCommand[Assignment]
 			with AutowiringTransactionalComponent

@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewGroup, ViewSet}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 import scala.collection.JavaConverters._
@@ -27,7 +28,7 @@ object SmallGroupSetController {
 abstract class SmallGroupSetController extends ModuleSmallGroupSetsController with GetSmallGroupSetApiFullOutput {
 	validatesSelf[SelfValidating]
 
-	def getSmallGroupSetMav(smallGroupSet: SmallGroupSet) = {
+	def getSmallGroupSetMav(smallGroupSet: SmallGroupSet): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok"
@@ -58,13 +59,13 @@ trait GetSmallGroupSetApi {
 	self: SmallGroupSetController =>
 
 	@ModelAttribute("getCommand")
-	def getCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet) = {
+	def getCommand(@PathVariable module: Module, @PathVariable smallGroupSet: SmallGroupSet): ViewViewableCommand[SmallGroupSet] = {
 		mustBeLinked(mandatory(smallGroupSet), mandatory(module))
 		new ViewViewableCommand(Permissions.SmallGroups.Read, smallGroupSet)
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SmallGroupSet], errors: Errors, @PathVariable smallGroupSet: SmallGroupSet) = {
+	def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SmallGroupSet], errors: Errors, @PathVariable smallGroupSet: SmallGroupSet): Mav = {
 		// Return the GET representation
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
@@ -87,7 +88,7 @@ trait EditSmallGroupSetApi {
 		ModifySmallGroupSetCommand.edit(module, smallGroupSet)
 
 	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def edit(@RequestBody request: EditSmallGroupSetRequest, @ModelAttribute("editCommand") command: EditSmallGroupSetCommand, errors: Errors) = {
+	def edit(@RequestBody request: EditSmallGroupSetRequest, @ModelAttribute("editCommand") command: EditSmallGroupSetCommand, errors: Errors): Mav = {
 		request.copyTo(command, errors)
 		globalValidator.validate(command, errors)
 		command.validate(errors)
@@ -124,7 +125,7 @@ trait DeleteSmallGroupSetApi {
 	}
 
 	@RequestMapping(method = Array(DELETE), produces = Array("application/json"))
-	def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupSetCommand, errors: Errors) = {
+	def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteSmallGroupSetCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			Mav(new JSONErrorView(errors))
 		} else {

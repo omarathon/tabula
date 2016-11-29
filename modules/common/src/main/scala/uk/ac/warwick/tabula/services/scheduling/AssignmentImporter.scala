@@ -33,13 +33,13 @@ trait AssignmentImporter {
 
 	def getAllGradeBoundaries: Seq[GradeBoundary]
 
-	var yearsToImport = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
+	var yearsToImport: Seq[AcademicYear] = AcademicYear.guessSITSAcademicYearByDate(DateTime.now).yearsSurrounding(0, 1)
 }
 
 @Profile(Array("dev", "test", "production")) @Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
 	var assessmentComponentQuery: AssessmentComponentQuery = _
@@ -102,7 +102,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Profile(Array("sandbox")) @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
-	def allMembers(callback: UpstreamModuleRegistration => Unit) = {
+	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
 		var moduleCodesToIds = Map[String, Seq[Range]]()
 
 		for {
@@ -182,7 +182,7 @@ object AssignmentImporter {
 	var dialectRegexpLike = "regexp_like"
 
 	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
-	def castToString(orig: String) =
+	def castToString(orig: String): String =
 		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
 		else orig
 
@@ -427,7 +427,7 @@ object AssignmentImporter {
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
 			val a = new AssessmentComponent
 			a.moduleCode = rs.getString("module_code")
 			a.sequence = rs.getString("seq")
@@ -446,11 +446,11 @@ object AssignmentImporter {
 	class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) =
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): UpstreamAssessmentGroup =
 			mapRowToAssessmentGroup(rs)
 	}
 
-	def mapRowToAssessmentGroup(rs: ResultSet) = {
+	def mapRowToAssessmentGroup(rs: ResultSet): UpstreamAssessmentGroup = {
 		val ag = new UpstreamAssessmentGroup()
 		ag.moduleCode = rs.getString("module_code")
 		ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
@@ -462,7 +462,7 @@ object AssignmentImporter {
 
 	class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int): GradeBoundary = {
 			GradeBoundary(
 				rs.getString("marks_code"),
 				rs.getString("grade"),

@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConversions._
 
 trait LevelImporter extends Logging {
-	var levelDao = Wire[LevelDao]
+	var levelDao: LevelDao = Wire[LevelDao]
 
 	private var levelMap: Map[String, Level] = _
 
@@ -60,7 +60,7 @@ trait LevelImporter extends Logging {
 class SitsLevelImporter extends LevelImporter {
 	import SitsLevelImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val levelsQuery = new LevelsQuery(sits)
 
@@ -124,5 +124,5 @@ trait LevelImporterComponent {
 }
 
 trait AutowiringLevelImporterComponent extends LevelImporterComponent {
-	var levelImporter = Wire[LevelImporter]
+	var levelImporter: LevelImporter = Wire[LevelImporter]
 }

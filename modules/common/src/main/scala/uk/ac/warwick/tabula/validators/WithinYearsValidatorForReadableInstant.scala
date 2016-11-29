@@ -16,7 +16,7 @@ class WithinYearsValidatorForReadableInstant extends ConstraintValidator[WithinY
 		maxFuture = annotation.maxFuture()
 	}
 
-	override def isValid(value: ReadableInstant, context: ConstraintValidatorContext) = {
+	override def isValid(value: ReadableInstant, context: ConstraintValidatorContext): Boolean = {
 		val now = DateTime.now
 
 		Option(value) match {

@@ -33,7 +33,7 @@ class DownloadTimetableController extends ProfilesController with TaskBenchmarki
 		@ModelAttribute("timetableCommand") cmd: TimetableCommand,
 		@PathVariable member: Member,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
 		cmd.academicYear = academicYear
 
 		cmd.apply() match {

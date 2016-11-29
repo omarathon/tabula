@@ -10,7 +10,7 @@ trait StateServiceComponent {
 }
 
 trait AutowiringStateServiceComponent extends StateServiceComponent {
-	var stateService = Wire[StateService]
+	var stateService: StateService = Wire[StateService]
 }
 
 trait StateService {

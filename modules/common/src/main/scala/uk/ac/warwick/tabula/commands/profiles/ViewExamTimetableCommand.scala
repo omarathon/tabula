@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.timetables.ExamTimetableFetchingService.ExamTimetable
 import uk.ac.warwick.tabula.services.timetables.{AutowiringExamTimetableFetchingServiceComponent, ExamTimetableFetchingService, ExamTimetableFetchingServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -13,7 +14,7 @@ import scala.util.Try
 
 object ViewExamTimetableCommand {
 
-	val Timeout = 15.seconds
+	val Timeout: FiniteDuration = 15.seconds
 
 	def apply(member: Member, viewer: CurrentUser) =
 		new ViewExamTimetableCommandInternal(member, viewer)
@@ -29,7 +30,7 @@ class ViewExamTimetableCommandInternal(val member: Member, viewer: CurrentUser) 
 
 	self: ExamTimetableFetchingServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Try[ExamTimetable] = {
 		Try(Await.result(
 			examTimetableFetchingService.getTimetable(member, viewer), ViewExamTimetableCommand.Timeout
 		))

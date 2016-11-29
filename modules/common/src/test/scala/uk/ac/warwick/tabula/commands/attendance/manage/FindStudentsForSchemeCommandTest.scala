@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.MemberOrUser
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.{UserLookupComponent, ProfileService, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.data.model.{Route, Department}
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember}
 import uk.ac.warwick.tabula.data.SchemeMembershipItem
 
 class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
@@ -16,13 +16,13 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends ProfileServiceComponent
 		with FindStudentsForSchemeCommandState with AttendanceMonitoringServiceComponent with UserLookupComponent {
 
-		val profileService = smartMock[ProfileService]
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 		val userLookup = new MockUserLookup
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 			Set()
 		}
-		def deserializeFilter(filter: String) = {
+		def deserializeFilter(filter: String): Unit = {
 
 		}
 
@@ -32,9 +32,9 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 		val scheme = new AttendanceMonitoringScheme
 		scheme.department = new Department
 		scheme.academicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
-		val student1 = Fixtures.student(universityId = "1234", userId = "1234")
-		val student2 = Fixtures.student(universityId = "2345", userId = "2345")
-		val student3 = Fixtures.student(universityId = "3456", userId = "3456")
+		val student1: StudentMember = Fixtures.student(universityId = "1234", userId = "1234")
+		val student2: StudentMember = Fixtures.student(universityId = "2345", userId = "2345")
+		val student3: StudentMember = Fixtures.student(universityId = "3456", userId = "3456")
 	}
 
 	@Test
@@ -65,7 +65,7 @@ class FindStudentsForSchemeCommandTest extends TestBase with Mockito {
 
 		command.findStudents = "submit"
 
-		val result = command.applyInternal()
+		val result: FindStudentsForSchemeCommandResult = command.applyInternal()
 		// 2 results from search, even with 1 removed
 		result.membershipItems.size should be (2)
 		// 1 marked static

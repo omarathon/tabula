@@ -65,7 +65,7 @@ class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: Sm
 		set.members.copyFrom(members)
 	}
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		if (module.adminDepartment.autoGroupDeregistration) {
 			autoDeregister { () =>
 				copyTo(set)
@@ -118,7 +118,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 trait SmallGroupAutoDeregistration {
 	self: AssessmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
 
-	def autoDeregister(fn: () => SmallGroupSet) = {
+	def autoDeregister(fn: () => SmallGroupSet): SmallGroupSet = {
 		val oldUsers =
 			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
 
@@ -188,5 +188,5 @@ trait RemovesUsersFromGroups {
 }
 
 trait RemovesUsersFromGroupsCommand extends RemovesUsersFromGroups {
-	def removeFromGroup(user: User, group: SmallGroup) = new RemoveUserFromSmallGroupCommand(user, group).apply()
+	def removeFromGroup(user: User, group: SmallGroup): Unit = new RemoveUserFromSmallGroupCommand(user, group).apply()
 }

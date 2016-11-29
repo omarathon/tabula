@@ -5,11 +5,11 @@ import uk.ac.warwick.tabula.data.model._
 
 class MeetingRecordApprovalNotificationTest extends TestBase {
 
-	val agent = Fixtures.staff("1234567")
+	val agent: StaffMember = Fixtures.staff("1234567")
 	agent.firstName = "Tutor"
 	agent.lastName = "Name"
 
-	val student = Fixtures.student("7654321")
+	val student: StudentMember = Fixtures.student("7654321")
 	student.firstName = "Student"
 	student.lastName = "Name"
 

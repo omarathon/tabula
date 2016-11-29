@@ -24,7 +24,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 	var optionalConfig = "/tabula-instance.properties"
 	val profilesProperty = "spring.profiles.active"
 
-	override def initialize(ctx: ConfigurableWebApplicationContext) = {
+	override def initialize(ctx: ConfigurableWebApplicationContext): Unit = {
 		logger.info("Initialising context")
 
 		Wire.ignoreMissingContext = true
@@ -43,18 +43,18 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 		profiles ++ extraProfiles
 	}
 
-	def extraProfiles = scheduler ++ web ++ cm1Enabled ++ cm2Enabled
+	def extraProfiles: Iterable[String] = scheduler ++ web ++ cm1Enabled ++ cm2Enabled
 
-	def scheduler = extraProfile("scheduling.enabled", "scheduling", default = false)
-	def web = extraProfile("web.enabled", "web", default = true)
-	def cm1Enabled = extraProfile("cm1.enabled", "cm1Enabled", default = true)
-	def cm2Enabled = extraProfile("cm2.enabled", "cm2Enabled", default = false)
+	def scheduler: Option[String] = extraProfile("scheduling.enabled", "scheduling", default = false)
+	def web: Option[String] = extraProfile("web.enabled", "web", default = true)
+	def cm1Enabled: Option[String] = extraProfile("cm1.enabled", "cm1Enabled", default = true)
+	def cm2Enabled: Option[String] = extraProfile("cm2.enabled", "cm2Enabled", default = false)
 
 	/**
 	 * Function that checks a config property and returns an Option[String] of
 	 * a profile name if it should be enabled.
 	 */
-	def extraProfile(prop: String, profileName: String, default: Boolean) =
+	def extraProfile(prop: String, profileName: String, default: Boolean): Option[String] =
 		config.getBoolean(prop, default) match {
 			case true => Some(profileName)
 			case false => None
@@ -62,7 +62,7 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 
 	var testConfig: PropertySource[_] = _
 
-	lazy val config = {
+	lazy val config: CompositePropertySource = {
 		val properties = new CompositePropertySource("config")
 		if (testConfig == null) {
 			properties.addRequiredSource(propertySource(mainConfig))
@@ -89,15 +89,15 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 class CompositePropertySource(name: String) extends PropertySource[Unit](name, ()) {
 	val mutableSources = new MutablePropertySources
 
-	def addRequiredSource(src: Option[PropertySource[_]]) =
+	def addRequiredSource(src: Option[PropertySource[_]]): Unit =
 		mutableSources.addLast(src.getOrElse(throw new IllegalArgumentException("required property source missing")))
 
-	def addOptionalSource(src: Option[PropertySource[_]]) = src match {
+	def addOptionalSource(src: Option[PropertySource[_]]): Unit = src match {
 		case Some(source) => mutableSources.addLast(source)
 		case None =>
 	}
 
-	def getBoolean(prop: String, default: Boolean) = getString(prop) match {
+	def getBoolean(prop: String, default: Boolean): Boolean = getString(prop) match {
 		case "true" => true
 		case "false" => false
 		case _ => default

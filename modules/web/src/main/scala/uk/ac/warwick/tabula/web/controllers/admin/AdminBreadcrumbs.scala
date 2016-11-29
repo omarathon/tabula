@@ -14,7 +14,7 @@ object AdminBreadcrumbs {
 	 * Special case breadcrumb for the department admin page.
 	 */
 	case class Department(department: model.Department) extends BreadCrumb {
-		val title = department.name
+		val title: String = department.name
 		val url = Some(Routes.admin.department(department))
 	}
 
@@ -23,9 +23,9 @@ object AdminBreadcrumbs {
 	 * Text is the module code, showing the name as a tooltip on hover.
 	 */
 	case class Module(module: model.Module) extends BreadCrumb {
-		val title = module.code.toUpperCase
+		val title: String = module.code.toUpperCase
 		val url = Some(Routes.admin.module(module))
-		override val tooltip = module.name
+		override val tooltip: String = module.name
 	}
 
 	/**
@@ -33,16 +33,16 @@ object AdminBreadcrumbs {
 	 * Text is the route code, showing the name as a tooltip on hover.
 	 */
 	case class Route(route: model.Route) extends BreadCrumb {
-		val title = route.code.toUpperCase
+		val title: String = route.code.toUpperCase
 		val url = Some(Routes.admin.route(route))
-		override val tooltip = route.name
+		override val tooltip: String = route.name
 	}
 
 	/**
 	 * Special case breadcrumb for the permissions page
 	 */
 	case class Permissions[A <: PermissionsTarget](target: A) extends BreadCrumb {
-		val title = target.humanReadableId
+		val title: String = target.humanReadableId
 		val url = Some(Routes.admin.permissions(target))
 	}
 

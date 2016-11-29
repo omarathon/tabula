@@ -1,22 +1,23 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 
 class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends AddCustomRoleOverrideCommandState with PermissionsServiceComponent {
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val customRole = new CustomRoleDefinition
 		customRole.id = "custom"
@@ -39,7 +40,7 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 		command.permission = Permissions.Module.ManageAssignments
 		command.overrideType = RoleOverride.Allow
 
-		val created = command.applyInternal()
+		val created: RoleOverride = command.applyInternal()
 		created.permission should be (Permissions.Module.ManageAssignments)
 		created.overrideType should be (RoleOverride.Allow)
 		created.customRoleDefinition should be (customRole)
@@ -48,14 +49,14 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def permissions { new Fixture {
-		val d = department
+		val d: Department = department
 
 		val command = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
-			override val department = d
-			override val customRoleDefinition = customRole
+			override val department: Department = d
+			override val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Create, customRole)
@@ -64,19 +65,19 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {
 		val command = new AddCustomRoleOverrideCommandPermissions with AddCustomRoleOverrideCommandState {
 			override val department = null
-			override val customRoleDefinition = customRole
+			override val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 	}}
 
 	private trait ValidationFixture extends Fixture {
-		val d = department
+		val d: Department = department
 
 		val command = new AddCustomRoleOverrideCommandValidation with CommandTestSupport {
-			val department = d
-			val customRoleDefinition = customRole
+			val department: Department = d
+			val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 	}
 
@@ -148,12 +149,12 @@ class AddCustomRoleOverrideCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def description { new Fixture {
-		val dept = department
+		val dept: Department = department
 
 		val command = new AddCustomRoleOverrideCommandDescription with AddCustomRoleOverrideCommandState {
 			override val eventName: String = "test"
-			val department = dept
-			val customRoleDefinition = customRole
+			val department: Department = dept
+			val customRoleDefinition: CustomRoleDefinition = customRole
 		}
 
 		val d = new DescriptionImpl

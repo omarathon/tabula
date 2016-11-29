@@ -31,13 +31,13 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
 	@Test def worksWithNew() {
 		new Environment {
-			val memberDao = smartMock[MemberDao]
+			val memberDao: MemberDao = smartMock[MemberDao]
 			memberDao.getByUniversityIdStaleOrFresh("0672089") returns None
 
 			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
 			command.memberDao = memberDao
 
-			val member = command.applyInternal()
+			val member: Member = command.applyInternal()
 			member.isInstanceOf[StaffProperties] should be {true}
 
 			member.title should be ("Mr")
@@ -60,13 +60,13 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			val existingTimetableHash = "1234"
 			existing.timetableHash = existingTimetableHash
 
-			val memberDao = smartMock[MemberDao]
+			val memberDao: MemberDao = smartMock[MemberDao]
 			memberDao.getByUniversityIdStaleOrFresh("0672089") returns Some(existing)
 
 			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
 			command.memberDao = memberDao
 
-			val member = command.applyInternal()
+			val member: Member = command.applyInternal()
 			member.isInstanceOf[StaffProperties] should be {true}
 
 			member.title should be ("Mr")

@@ -13,18 +13,19 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportMemberHelpers
-import uk.ac.warwick.tabula.data.model.FeedbackForSits
+import uk.ac.warwick.tabula.data.model.{AssessmentGroup, FeedbackForSits}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, PartialMatchQuery, SasRow}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 trait ExportFeedbackToSitsServiceComponent {
 	def exportFeedbackToSitsService: ExportFeedbackToSitsService
 }
 
 trait AutowiringExportFeedbackToSitsServiceComponent extends ExportFeedbackToSitsServiceComponent {
-	var exportFeedbackToSitsService = Wire[ExportFeedbackToSitsService]
+	var exportFeedbackToSitsService: ExportFeedbackToSitsService = Wire[ExportFeedbackToSitsService]
 }
 
 trait ExportFeedbackToSitsService {
@@ -34,8 +35,8 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedbackForSits: FeedbackForSits) {
-	val assessGroups = feedbackForSits.feedback.assessmentGroups.asScala
-	val possibleOccurrenceSequencePairs = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
+	val assessGroups: mutable.Buffer[AssessmentGroup] = feedbackForSits.feedback.assessmentGroups.asScala
+	val possibleOccurrenceSequencePairs: mutable.Buffer[(String, String)] = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 
 	def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
 		case pairs if pairs.isEmpty => None

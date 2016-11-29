@@ -11,6 +11,6 @@ import scala.language.implicitConversions
  */
 class ConvertibleConverter[A >: Null <: String, B <: Convertible[A]](implicit factory: A => B, tagA: ClassTag[A], tagB: ClassTag[B])
 	extends TwoWayConverter[A, B] {
-	override def convertLeft(source: B) = source.value
-	override def convertRight(source: A) = factory(source)
+	override def convertLeft(source: B): A = source.value
+	override def convertRight(source: A): B = factory(source)
 }

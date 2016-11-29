@@ -7,7 +7,7 @@ package uk.ac.warwick.tabula
  * the Uni ID.
  */
 object SprCode {
-	def getUniversityId(sprCode: String) = {
+	def getUniversityId(sprCode: String): String = {
 		val slash = sprCode.indexOf("/")
 		if (slash == -1) {
 			sprCode

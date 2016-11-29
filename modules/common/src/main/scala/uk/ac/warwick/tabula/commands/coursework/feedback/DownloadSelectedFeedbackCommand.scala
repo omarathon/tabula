@@ -22,10 +22,10 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 
-	var assignmentService = Wire[AssessmentService]
-	var zipService = Wire[ZipService]
-	var feedbackDao = Wire[FeedbackDao]
-	var jobService = Wire[JobService]
+	var assignmentService: AssessmentService = Wire[AssessmentService]
+	var zipService: ZipService = Wire[ZipService]
+	var feedbackDao: FeedbackDao = Wire[FeedbackDao]
+	var jobService: JobService = Wire[JobService]
 
 
 	var filename: String = _
@@ -34,7 +34,7 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 
 	var feedbacks: JList[AssignmentFeedback] = _
 
-	override def applyInternal() = {
+	override def applyInternal(): Either[RenderableFile, JobInstance] = {
 		if (students.isEmpty) throw new ItemNotFoundException
 
 		feedbacks = (for (
@@ -55,11 +55,11 @@ class DownloadSelectedFeedbackCommand(val module: Module, val assignment: Assign
 		}
 	}
 
-	override def describe(d: Description) = d
+	override def describe(d: Description): Unit = d
 		.assignment(assignment)
 		.studentIds(students.asScala)
 
-	override def describeResult(d: Description) = d
+	override def describeResult(d: Description): Unit = d
 		.assignment(assignment)
 		.studentIds(students.asScala)
 		.properties(

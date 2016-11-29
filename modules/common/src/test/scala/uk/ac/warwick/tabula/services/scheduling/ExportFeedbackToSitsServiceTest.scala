@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
+import java.util
+
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, TestBase}
 
 class ExportFeedbackToSitsServiceTest extends TestBase {
@@ -8,9 +10,9 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 	trait Environment {
 		val year = new AcademicYear(2014)
 
-		val module = Fixtures.module("nl901", "Foraging Forays")
+		val module: Module = Fixtures.module("nl901", "Foraging Forays")
 
-		val assignment = Fixtures.assignment("Your challenge, should you choose to accept it")
+		val assignment: Assignment = Fixtures.assignment("Your challenge, should you choose to accept it")
 		assignment.academicYear = year
 		assignment.module = module
 		assignment.assessmentGroups.add({
@@ -21,10 +23,10 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 			group
 		})
 
-		val feedback = Fixtures.assignmentFeedback("0070790")
+		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")
 		feedback.assignment = assignment
 
-		val feedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+		val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
 		val paramGetter = new ParameterGetter(feedbackForSits)
 
@@ -33,7 +35,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 	@Test
 	def queryParams(): Unit = withUser("0070790", "cusdx") {
 		new Environment {
-			val inspectMe = paramGetter.getQueryParams.get
+			val inspectMe: util.HashMap[String, Object] = paramGetter.getQueryParams.get
 			inspectMe.get("studentId") should be("0070790")
 			inspectMe.get("academicYear") should be(year.toString)
 			inspectMe.get("moduleCodeMatcher") should be("NL901%")
@@ -45,7 +47,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 		new Environment {
 			assignment.assessmentGroups.clear()
 			val newParamGetter = new ParameterGetter(feedbackForSits)
-			val inspectMe = newParamGetter.getQueryParams
+			val inspectMe: Option[util.HashMap[String, Object]] = newParamGetter.getQueryParams
 			inspectMe.isEmpty should be (true)
 		}
 	}
@@ -54,7 +56,7 @@ class ExportFeedbackToSitsServiceTest extends TestBase {
 	def updateParams(): Unit = withUser("0070790", "cusdx") {
 		new Environment {
 
-			val inspectMe = paramGetter.getUpdateParams(73, "A").get
+			val inspectMe: util.HashMap[String, Object] = paramGetter.getUpdateParams(73, "A").get
 			inspectMe.get("studentId") should be("0070790")
 			inspectMe.get("academicYear") should be(year.toString)
 			inspectMe.get("moduleCodeMatcher") should be("NL901%")

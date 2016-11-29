@@ -15,7 +15,7 @@ trait AssessmentDaoComponent {
 }
 
 trait AutowiringAssessmentDaoComponent extends AssessmentDaoComponent {
-	val assessmentDao = Wire[AssessmentDao]
+	val assessmentDao: AssessmentDao = Wire[AssessmentDao]
 }
 
 trait AssessmentDao {
@@ -57,11 +57,11 @@ trait AssessmentDao {
 @Repository
 class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 
-	def getAssignmentById(id: String) = getById[Assignment](id)
-	def getExamById(id: String) = getById[Exam](id)
+	def getAssignmentById(id: String): Option[Assignment] = getById[Assignment](id)
+	def getExamById(id: String): Option[Exam] = getById[Exam](id)
 
-	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
-	def save(exam: Exam) = session.saveOrUpdate(exam)
+	def save(assignment: Assignment): Unit = session.saveOrUpdate(assignment)
+	def save(exam: Exam): Unit = session.saveOrUpdate(exam)
 
 	def deleteFormField(field: FormField) {
 		session.delete(field)
@@ -121,14 +121,14 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.add(lt("assignment.closeDate", endExclusive))
 			.seq
 
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
+	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
 			.seq
 
-	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module) =
+	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
 		session.newQuery[Exam]("from Exam where name=:name and academicYear=:year and module=:module and deleted=0")
 			.setString("name", name)
 			.setParameter("year", year)
@@ -146,7 +146,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 		assignments
 	}
 
-	def recentAssignment(department: Department) = {
+	def recentAssignment(department: Department): Option[Assignment] = {
 		session.newCriteria[Assignment]
 			.createAlias("module", "m")
 			.add(is("m.adminDepartment", department))
@@ -156,7 +156,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.uniqueResult
 	}
 
-	def getAssignmentsByName(partialName: String, department: Department) = {
+	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = {
 
 		session.newQuery[Assignment]("""select a from Assignment a
 				where a.module.adminDepartment = :dept
@@ -168,7 +168,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
 
-	def findAssignmentsByNameOrModule(query: String) = {
+	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = {
 		session.newQuery[Assignment]("""select a from Assignment
 				a where lower(a.name) like :nameLike
 				or lower(a.module.code) like :nameLike
@@ -178,7 +178,7 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
 
-	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime) =
+	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment] =
 		session.newCriteria[Assignment]
 			.add(is("openEnded", false))
 			.add(ge("closeDate", startInclusive))

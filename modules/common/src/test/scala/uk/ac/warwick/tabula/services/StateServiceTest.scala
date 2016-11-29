@@ -8,9 +8,9 @@ import uk.ac.warwick.tabula.data.model.MarkingState._
 
 class StateServiceTest extends TestBase with Mockito {
 
-	val mockSession = mock[Session]
+	val mockSession: Session = mock[Session]
 	val service = new StateServiceImpl {
-		override def session = mockSession
+		override def session: Session = mockSession
 	}
 
 	@Test

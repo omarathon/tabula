@@ -36,7 +36,7 @@ trait DatabaseEncodingChecker extends InitializingBean with Logging {
 
 class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: SessionFactory) extends DatabaseEncodingChecker {
 
-	override def fetchString = closeThis(sessionFactory.openSession()) { session =>
+	override def fetchString: String = closeThis(sessionFactory.openSession()) { session =>
 		val query = session.createSQLQuery("select :string from dual")
 		query.setString("string", testString)
 		query.uniqueResult().toString()
@@ -46,7 +46,7 @@ class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: Se
 
 class DataSourceDatabaseEncodingChecker @Autowired() (val dataSource: DataSource) extends DatabaseEncodingChecker {
 
-	override def fetchString = closeThis(dataSource.getConnection) { conn =>
+	override def fetchString: String = closeThis(dataSource.getConnection) { conn =>
 		closeThis(conn.prepareStatement("select ? from dual")) { stmt =>
 			stmt.setString(1, testString)
 			closeThis(stmt.executeQuery()) { rs =>

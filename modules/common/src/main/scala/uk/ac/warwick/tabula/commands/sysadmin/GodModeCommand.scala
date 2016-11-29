@@ -19,7 +19,7 @@ class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 
 	var action: String = _
 
-	def applyInternal() = {
+	def applyInternal(): Some[Cookie] = {
 		if (action == "remove") Some(newCookie(false))
 		else Some(newCookie(true))
 	}
@@ -29,7 +29,7 @@ class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 		value = isGod.toString,
 		path = "/")
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"action" -> action
 	)
 

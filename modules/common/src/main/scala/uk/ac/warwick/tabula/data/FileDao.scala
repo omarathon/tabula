@@ -25,7 +25,7 @@ trait FileDaoComponent {
 }
 
 trait AutowiringFileDaoComponent extends FileDaoComponent {
-	val fileDao = Wire[FileDao]
+	val fileDao: FileDao = Wire[FileDao]
 }
 
 trait FileHasherComponent {
@@ -65,24 +65,24 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		file
 	}
 
-	def saveTemporary(file: FileAttachment) = {
+	def saveTemporary(file: FileAttachment): FileAttachment = {
 		file.temporary = true
 		saveAttachment(file)
 	}
 
-	def savePermanent(file: FileAttachment) = {
+	def savePermanent(file: FileAttachment): FileAttachment = {
 		file.temporary = false
 		saveAttachment(file)
 	}
 
-	def saveOrUpdate(file: FileAttachment) = {
+	def saveOrUpdate(file: FileAttachment): FileAttachment = {
 		session.saveOrUpdate(file)
 		file
 	}
 
-	def getFileById(id: String) = getById[FileAttachment](id)
+	def getFileById(id: String): Option[FileAttachment] = getById[FileAttachment](id)
 
-	def getFileByStrippedId(id: String) = transactional(readOnly = true) {
+	def getFileByStrippedId(id: String): Option[FileAttachment] = transactional(readOnly = true) {
 		session.newCriteria[FileAttachment]
 				.add(Is.sqlRestriction("replace({alias}.id, '-', '') = ?", id, StringType.INSTANCE))
 				.setMaxResults(1)
@@ -122,7 +122,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 		criteria.project[String](Projections.id()).seq.toSet
 	}
 
-	def deleteAttachments(files: Seq[FileAttachment]) = files.foreach(session.delete(_))
+	def deleteAttachments(files: Seq[FileAttachment]): Unit = files.foreach(session.delete(_))
 
 	def saveOrUpdate(token: FileAttachmentToken): Unit = session.saveOrUpdate(token)
 

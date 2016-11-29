@@ -150,11 +150,11 @@ case class SubmissionResults(
 
 object TurnitinLtiResponse extends Logging {
 
-	def redirect(location: String) = {
+	def redirect(location: String): TurnitinLtiResponse = {
 		new TurnitinLtiResponse(true, redirectUrl = Some(location))
 	}
 
-	def fromJson(json: String) = {
+	def fromJson(json: String): TurnitinLtiResponse = {
 		val errorMessage: Option[String] = {
 			JSON.parseFull(json) match {
 				case Some(theJson: Map[String, String] @unchecked) =>
@@ -168,11 +168,11 @@ object TurnitinLtiResponse extends Logging {
 		new TurnitinLtiResponse(success = errorMessage.isEmpty, statusMessage = errorMessage, json = Some(json))
 	}
 
-	def fromHtml(success: Boolean, html: String) = {
+	def fromHtml(success: Boolean, html: String): TurnitinLtiResponse = {
 		new TurnitinLtiResponse(success, html = Some(html))
 	}
 
-	def fromXml(xml: Elem) = {
+	def fromXml(xml: Elem): TurnitinLtiResponse = {
 		new TurnitinLtiResponse((xml \\ "status").text.equals("fullsuccess"), statusMessage = Some((xml \\ "message").text), xml = Some(xml))
 	}
 

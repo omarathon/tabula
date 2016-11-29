@@ -14,7 +14,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 
 
 	private trait Fixture {
-		val TEST_TIME = DateTime.now
+		val TEST_TIME: DateTime = DateTime.now
 
 		val settingsWithNumberingSystem = new UserSettings()
 		settingsWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Term
@@ -24,13 +24,13 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 
 		val dumper = new WeekRangesDumper with StoppedClockComponent with UserSettingsServiceComponent with TermServiceComponent with ModuleAndDepartmentServiceComponent {
 			val stoppedTime = TEST_TIME
-			val userSettingsService = mock[UserSettingsService]
-			val termService = mock[TermService]
-			val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+			val userSettingsService: UserSettingsService = mock[UserSettingsService]
+			val termService: TermService = mock[TermService]
+			val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 		}
 
 		val singleWeek = Seq((AcademicYear(2012),1,new Interval(TEST_TIME.minusWeeks(1), TEST_TIME)))
-		val singleWeekTerm = mock[Term]
+		val singleWeekTerm: Term = mock[Term]
 	}
 
 	@Test

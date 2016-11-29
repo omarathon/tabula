@@ -16,8 +16,8 @@ import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 @Controller
 abstract class AbstractRoleTableController extends AdminController {
 
-	var permissionsService = Wire[PermissionsService]
-	var relationshipService = Wire[RelationshipService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
 	type Response = Option[Boolean]
 	val Allow: Response = Some(true)

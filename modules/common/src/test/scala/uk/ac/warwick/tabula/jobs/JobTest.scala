@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.Transactions
 class JobTest extends TestBase with Mockito with JobTestHelp {
 
 	val testingJob = new TestingJob
-	override def createJobs = Array[Job](testingJob)
+	override def createJobs: Array[Job] = Array[Job](testingJob)
 
 	@Before def setup() {
 		dao.clear

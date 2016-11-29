@@ -41,7 +41,7 @@ class SmallGroupsByModuleReportProcessorInternal(val department: Department, val
 
 	self: SmallGroupsByModuleReportProcessorState with TermServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): SmallGroupsByModuleReportProcessorResult = {
 		val processedStudents = students.asScala.map{properties =>
 			AttendanceMonitoringStudentData(
 				properties.get("firstName"),

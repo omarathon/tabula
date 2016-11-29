@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.assignments.{FeedbackAuditCommand, FeedbackAuditData}
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkingMethod}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -21,7 +22,7 @@ class OldFeedbackAuditController extends OldCourseworkController {
 	def list(@PathVariable assignment: Assignment,
 					 @PathVariable student: User,
 					 @ModelAttribute("auditCommand") auditCommand: Appliable[FeedbackAuditData]
-						) = {
+						): Mav = {
 		val auditData = auditCommand.apply()
 		Mav(s"$urlPrefix/admin/assignments/feedback_audit",
 			"command" -> auditCommand,

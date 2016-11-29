@@ -37,7 +37,7 @@ class FirstMarkersMap extends MarkerMap {
 }
 
 object FirstMarkersMap {
-	def apply(assessment: Assessment, marker_id: String, students: UserGroup) = {
+	def apply(assessment: Assessment, marker_id: String, students: UserGroup): FirstMarkersMap = {
 		val map = new FirstMarkersMap
 		assessment match {
 			case exam: Exam => map.exam = exam
@@ -65,7 +65,7 @@ class SecondMarkersMap extends MarkerMap {
 }
 
 object SecondMarkersMap {
-	def apply(assessment: Assessment, marker_id: String, students: UserGroup) = {
+	def apply(assessment: Assessment, marker_id: String, students: UserGroup): SecondMarkersMap = {
 		val map = new SecondMarkersMap
 		assessment match {
 			case exam: Exam => map.exam = exam

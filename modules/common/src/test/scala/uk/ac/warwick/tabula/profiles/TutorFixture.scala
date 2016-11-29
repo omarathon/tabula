@@ -34,7 +34,7 @@ trait TutorFixture extends Mockito {
 	val oldTutor = new StaffMember
 	oldTutor.universityId = "0000002"
 
-	val profileService = smartMock[ProfileService]
+	val profileService: ProfileService = smartMock[ProfileService]
 	profileService.getStudentBySprCode("student") returns Some(student)
 	profileService.getMemberByUniversityId("0000001") returns Some(newTutor)
 	profileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
@@ -50,7 +50,7 @@ trait TutorFixture extends Mockito {
 	relationshipOld.agentMember = oldTutor
 	relationshipOld.relationshipType = tutorRelationshipType
 
-	val relationshipService = smartMock[RelationshipService]
+	val relationshipService: RelationshipService = smartMock[RelationshipService]
 	relationshipService.saveStudentRelationships(tutorRelationshipType, studentCourseDetails, List(newTutor)) returns Seq(StudentRelationship(newTutor, tutorRelationshipType, studentCourseDetails))
 	relationshipService.findCurrentRelationships(tutorRelationshipType, studentCourseDetails) returns Seq(relationshipOld)
 

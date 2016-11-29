@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.JobInstanceToJsonConverter
 import uk.ac.warwick.tabula.services.jobs.JobInstance
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
@@ -17,7 +18,7 @@ trait GetJobInformationApi {
 	self: ApiController with JobInstanceToJsonConverter =>
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getJob(@PathVariable job: JobInstance) = {
+	def getJob(@PathVariable job: JobInstance): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",

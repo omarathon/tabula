@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 abstract class AbstractManageScheduledMeetingRecordController extends ProfilesController {
@@ -28,7 +29,7 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
 	}
@@ -39,7 +40,7 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		cmd.populate()
 		form(cmd, relationshipType, studentCourseDetails, academicYear)
 	}
@@ -72,7 +73,7 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
 		} else {
@@ -90,7 +91,7 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			form(cmd, relationshipType, studentCourseDetails, academicYear)
 		} else {

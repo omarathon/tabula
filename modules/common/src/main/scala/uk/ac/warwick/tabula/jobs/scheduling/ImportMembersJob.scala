@@ -22,7 +22,7 @@ object ImportMembersJob {
 @Component
 class ImportMembersJob extends Job {
 
-	val identifier = ImportMembersJob.identifier
+	val identifier: String = ImportMembersJob.identifier
 
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 

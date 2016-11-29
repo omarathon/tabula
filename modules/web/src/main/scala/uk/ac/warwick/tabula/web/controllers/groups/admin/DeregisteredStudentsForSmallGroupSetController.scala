@@ -11,9 +11,11 @@ import uk.ac.warwick.tabula.commands.{Appliable, MemberOrUser, PopulateOnForm}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 @Controller
 @RequestMapping(Array("/groups/admin/module/{module}/groups/{smallGroupSet}/deregistered"))
@@ -24,7 +26,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
 		DeregisteredStudentsForSmallGroupSetCommand(module, set)
 
-	@ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet) =
+	@ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[StudentNotInMembership] =
 		set.studentsNotInMembership.map { user =>
 			val member = profileService.getMemberByUser(user, disableFilter = true)
 
@@ -38,7 +40,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 	def form(
 		@PathVariable("smallGroupSet") set: SmallGroupSet,
 		@ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand
-	) = {
+	): Mav = {
 		cmd.populate()
 		renderForm(set, cmd)
 	}
@@ -55,7 +57,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
 		@Valid @ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand,
 		errors: Errors,
 		@PathVariable("smallGroupSet") set: SmallGroupSet
-	) = {
+	): Mav = {
 		if (errors.hasErrors) renderForm(set, cmd)
 		else {
 			val removed = cmd.apply()

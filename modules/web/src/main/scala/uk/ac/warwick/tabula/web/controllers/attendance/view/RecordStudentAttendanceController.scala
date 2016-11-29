@@ -16,6 +16,7 @@ import javax.validation.Valid
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/students/{student}/record"))
@@ -29,7 +30,7 @@ class RecordStudentAttendanceController extends AttendanceController
 	var points: Seq[AttendanceMonitoringPoint] = _
 
 	@InitBinder // do on each request
-	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) = {
+	def populatePoints(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
 			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), Option(mandatory(department)), mandatory(academicYear))
 	}
 
@@ -67,7 +68,7 @@ class RecordStudentAttendanceController extends AttendanceController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		cmd.populate()
 		render(department, academicYear, student)
 	}
@@ -91,7 +92,7 @@ class RecordStudentAttendanceController extends AttendanceController
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		@PathVariable student: StudentMember
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			render(department, academicYear, student)
 		} else {

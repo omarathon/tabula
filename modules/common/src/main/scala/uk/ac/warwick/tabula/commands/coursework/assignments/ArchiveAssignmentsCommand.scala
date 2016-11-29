@@ -57,7 +57,7 @@ trait ArchiveAssignmentsState {
 
 trait ArchiveAssignmentsDescription extends Describable[Seq[Assignment]] {
 	self: ArchiveAssignmentsState =>
-	def describe(d: Description) = d
+	def describe(d: Description): Unit = d
 		.properties("modules" -> modules.map(_.id))
 		.properties("assignments" -> assignments.asScala.map(_.id))
 }

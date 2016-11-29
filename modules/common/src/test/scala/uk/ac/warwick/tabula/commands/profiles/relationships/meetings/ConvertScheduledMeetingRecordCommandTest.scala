@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-		val meetingRecordDao = mock[MeetingRecordDao]
-		val notificationService = mock[NotificationService]
+		val meetingRecordDao: MeetingRecordDao = mock[MeetingRecordDao]
+		val notificationService: NotificationService = mock[NotificationService]
 		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 
 		var creator: StaffMember = Fixtures.staff(universityId = "12345")
-		val student = Fixtures.student(universityId = "0123456")
+		val student: StudentMember = Fixtures.student(universityId = "0123456")
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 
@@ -35,13 +35,13 @@ class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def apply() { new Fixture {
-		val newMeetingRecord = command.applyInternal()
+		val newMeetingRecord: MeetingRecord = command.applyInternal()
 
 		verify(mockMeetingRecordService, times(1)).purge(scheduledMeetingRecord)
 	}}
 
 	trait ConvertScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {
-		def fileAttachmentService = mock[FileAttachmentService]
+		def fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
 	}
 
 }

@@ -24,24 +24,24 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 		SpringConfigurer.applicationContext = null
 	}
 
-	val timetableFetchingService = mock[ModuleTimetableFetchingService]
-	val smallGroupService = mock[SmallGroupService]
+	val timetableFetchingService: ModuleTimetableFetchingService = mock[ModuleTimetableFetchingService]
+	val smallGroupService: SmallGroupService = mock[SmallGroupService]
 	val userLookup = new MockUserLookup
 
 	private trait MockServices extends ModuleTimetableFetchingServiceComponent
 		with SmallGroupServiceComponent
 		with UserLookupComponent {
 
-		val timetableFetchingService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.timetableFetchingService
-		val smallGroupService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.smallGroupService
-		val userLookup = UpdateSmallGroupEventFromExternalSystemCommandTest.this.userLookup
+		val timetableFetchingService: ModuleTimetableFetchingService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.timetableFetchingService
+		val smallGroupService: SmallGroupService = UpdateSmallGroupEventFromExternalSystemCommandTest.this.smallGroupService
+		val userLookup: MockUserLookup = UpdateSmallGroupEventFromExternalSystemCommandTest.this.userLookup
 
 	}
 
 	private trait CommandTestSupport extends SmallGroupEventUpdater {
 		self: MockServices with UpdateSmallGroupEventFromExternalSystemCommandState =>
 
-		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]) = {
+		def updateEvent(module: Module, set: SmallGroupSet, group: SmallGroup, event: SmallGroupEvent, weeks: Seq[WeekRange], day: DayOfWeek, startTime: LocalTime, endTime: LocalTime, location: Option[Location], title: String, tutorUsercodes: Seq[String]): SmallGroupEvent = {
 			event.title = title
 			event.weekRanges = weeks
 			event.day = day
@@ -55,10 +55,10 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 	}
 
 	private trait Fixture {
-		val module = Fixtures.module("in101")
-		val set = Fixtures.smallGroupSet("IN101 Seminars")
-		val group = Fixtures.smallGroup("Group 1")
-		val event = Fixtures.smallGroupEvent("Event 1")
+		val module: Module = Fixtures.module("in101")
+		val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
+		val group: SmallGroup = Fixtures.smallGroup("Group 1")
+		val event: SmallGroupEvent = Fixtures.smallGroupEvent("Event 1")
 	}
 
 	private trait CommandFixture extends Fixture {
@@ -170,7 +170,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 	@Test def apply() { new FixtureWithSingleSeminarForYear with CommandFixture {
 		command.index = 0
 
-		val sets = command.applyInternal()
+		val sets: SmallGroupEvent = command.applyInternal()
 
 		verify(command.smallGroupService, times(1)).saveOrUpdate(event)
 
@@ -184,10 +184,10 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 
 	private trait PermissionsFixture extends Fixture {
 		val command = new UpdateSmallGroupEventFromExternalSystemPermissions with UpdateSmallGroupEventFromExternalSystemCommandState with UpdateSmallGroupEventFromExternalSystemRequestState with MockServices {
-			val module = PermissionsFixture.this.module
-			val set = PermissionsFixture.this.set
-			val group = PermissionsFixture.this.group
-			val event = PermissionsFixture.this.event
+			val module: Module = PermissionsFixture.this.module
+			val set: SmallGroupSet = PermissionsFixture.this.set
+			val group: SmallGroup = PermissionsFixture.this.group
+			val event: SmallGroupEvent = PermissionsFixture.this.event
 		}
 	}
 
@@ -201,14 +201,14 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 		group.addEvent(event)
 		event.group = group
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Update, event)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def notLinked() { new PermissionsFixture {
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		fail("Expected exception")
@@ -217,10 +217,10 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
 	@Test def description() {
 		val command = new UpdateSmallGroupEventFromExternalSystemDescription with UpdateSmallGroupEventFromExternalSystemCommandState with UpdateSmallGroupEventFromExternalSystemRequestState with MockServices {
 			override val eventName: String = "test"
-			val module = Fixtures.module("in101")
-			val set = Fixtures.smallGroupSet("IN101 Seminars")
-			val group = Fixtures.smallGroup("Group 1")
-			val event = Fixtures.smallGroupEvent("Event 1")
+			val module: Module = Fixtures.module("in101")
+			val set: SmallGroupSet = Fixtures.smallGroupSet("IN101 Seminars")
+			val group: SmallGroup = Fixtures.smallGroup("Group 1")
+			val event: SmallGroupEvent = Fixtures.smallGroupEvent("Event 1")
 
 			module.id = "moduleId"
 			set.id = "setId"

@@ -37,7 +37,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 		with MeetingRecordServiceComponent with FeaturesComponent
 		with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): MeetingRecord = {
 		applyCommon(meetingRecord)
 	}
 

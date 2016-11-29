@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.mockito.Matchers
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointStyle, AttendanceMonitoringScheme, AttendanceMonitoringTemplate}
-import uk.ac.warwick.tabula.data.model.{Department, ScheduledNotification}
+import uk.ac.warwick.tabula.data.model.{Department, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -14,18 +14,18 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 
 	val academicYear = new AcademicYear(2014)
 	val department = new Department
-	val student = Fixtures.student("1234")
+	val student: StudentMember = Fixtures.student("1234")
 
 	trait CommandTestSupport extends AddTemplatePointsToSchemesCommandState with TermServiceComponent
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent {
-		val termService = smartMock[TermService]
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
-		val profileService = smartMock[ProfileService]
+		val termService: TermService = smartMock[TermService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val profileService: ProfileService = smartMock[ProfileService]
 
 		templateScheme = new AttendanceMonitoringTemplate
 		templateScheme.pointStyle = AttendanceMonitoringPointStyle.Date
 
-		val baseDate = DateTime.now.toLocalDate
+		val baseDate: LocalDate = DateTime.now.toLocalDate
 
 		val point1 = new AttendanceMonitoringPoint
 		point1.name = "point1"
@@ -73,7 +73,7 @@ class AddTemplatePointsToSchemesCommandTest extends TestBase with Mockito {
 	@Test
 	def addPointsFromTemplate() {
 		new Fixture {
-			val newPoints = command.applyInternal()
+			val newPoints: Seq[AttendanceMonitoringPoint] = command.applyInternal()
 			newPoints.size should be (6)
 			verify(command.thisScheduledNotificationService, times(1)).removeInvalidNotifications(department)
 			verify(command.thisScheduledNotificationService, atLeast(1)).push(Matchers.any[ScheduledNotification[Department]])

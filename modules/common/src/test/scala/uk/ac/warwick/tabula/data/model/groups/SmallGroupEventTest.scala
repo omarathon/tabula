@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.data.model.{NamedLocation, UserGroup}
 
 class SmallGroupEventTest extends TestBase with Mockito{
 
-	val mockSessionFactory = smartMock[SessionFactory]
-	val mockSession = smartMock[Session]
+	val mockSessionFactory: SessionFactory = smartMock[SessionFactory]
+	val mockSession: Session = smartMock[Session]
 	mockSessionFactory.getCurrentSession returns mockSession
 	mockSessionFactory.openSession() returns mockSession
 

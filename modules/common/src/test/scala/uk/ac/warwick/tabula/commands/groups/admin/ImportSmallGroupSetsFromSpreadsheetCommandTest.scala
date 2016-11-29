@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Module, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Module, NamedLocation}
 import uk.ac.warwick.tabula.services.groups.docconversion._
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.tabula.services.{MaintenanceModeService, SmallGroupService, SmallGroupServiceComponent}
@@ -22,10 +22,10 @@ import scala.collection.JavaConverters._
 class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mockito {
 
 	private trait BindingTestSupport extends ImportSmallGroupSetsFromSpreadsheetRequest with SmallGroupSetSpreadsheetHandlerComponent with SmallGroupServiceComponent {
-		val smallGroupSetSpreadsheetHandler = smartMock[SmallGroupSetSpreadsheetHandler]
-		val smallGroupService = smartMock[SmallGroupService]
+		val smallGroupSetSpreadsheetHandler: SmallGroupSetSpreadsheetHandler = smartMock[SmallGroupSetSpreadsheetHandler]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val academicYear = AcademicYear(2012)
 	}
 
@@ -34,7 +34,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		binding.file.maintenanceMode = smartMock[MaintenanceModeService]
 		binding.file.fileDao = smartMock[FileDao]
 
-		val in101 = Fixtures.module("in101", "Introduction to Infrastructure")
+		val in101: Module = Fixtures.module("in101", "Introduction to Infrastructure")
 		val cuscav = new User("cuscav")
 	}
 
@@ -121,11 +121,11 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 		binding.commands should not be 'empty
 		binding.commands.size() should be (1)
 
-		val commandHolder = binding.commands.get(0)
+		val commandHolder: ModifySmallGroupSetCommandHolder = binding.commands.get(0)
 		commandHolder.commandType should be ("Create")
 		commandHolder.command.isInstanceOf[CreateSmallGroupSetCommandInternal] should be (true)
 
-		val setCommand = commandHolder.command.asInstanceOf[CreateSmallGroupSetCommandInternal]
+		val setCommand: CreateSmallGroupSetCommandInternal = commandHolder.command.asInstanceOf[CreateSmallGroupSetCommandInternal]
 		setCommand.module should be (in101)
 		setCommand.format should be (SmallGroupFormat.Lab)
 		setCommand.name should be ("IN101 Labs")
@@ -139,21 +139,21 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 
 		commandHolder.modifyGroupCommands.size() should be (4)
 
-		val groupCommandHolder = commandHolder.modifyGroupCommands.get(0)
+		val groupCommandHolder: ModifySmallGroupCommandHolder = commandHolder.modifyGroupCommands.get(0)
 		groupCommandHolder.commandType should be ("Create")
 		groupCommandHolder.command.isInstanceOf[CreateSmallGroupCommandInternal] should be (true)
 
-		val groupCommand = groupCommandHolder.command.asInstanceOf[CreateSmallGroupCommandInternal]
+		val groupCommand: CreateSmallGroupCommandInternal = groupCommandHolder.command.asInstanceOf[CreateSmallGroupCommandInternal]
 		groupCommand.name should be ("Group 1")
 		groupCommand.maxGroupSize should be (15)
 
 		groupCommandHolder.modifyEventCommands.size() should be (1)
 
-		val eventCommandHolder = groupCommandHolder.modifyEventCommands.get(0)
+		val eventCommandHolder: ModifySmallGroupEventCommandHolder = groupCommandHolder.modifyEventCommands.get(0)
 		eventCommandHolder.commandType should be ("Create")
 		eventCommandHolder.command.isInstanceOf[CreateSmallGroupEventCommandInternal] should be (true)
 
-		val eventCommand = eventCommandHolder.command.asInstanceOf[CreateSmallGroupEventCommandInternal]
+		val eventCommand: CreateSmallGroupEventCommandInternal = eventCommandHolder.command.asInstanceOf[CreateSmallGroupEventCommandInternal]
 		eventCommand.title should be (null)
 		eventCommand.tutors.asScala should be (Seq("cuscav"))
 		eventCommand.weekRanges should be (Seq(WeekRange(15, 24)))
@@ -166,7 +166,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	class ModifySetCommand(val module: Module, set: SmallGroupSet) extends Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState {
 		val existingSet = None
 		var called = false
-		def apply() = {
+		def apply(): SmallGroupSet = {
 			called = true
 			set
 		}
@@ -175,7 +175,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 
 	class ModifyGroupCommand(val module: Module, val set: SmallGroupSet, val group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating with ModifySmallGroupCommandState {
 		var called = false
-		def apply() = {
+		def apply(): SmallGroup = {
 			called = true
 			group
 		}
@@ -185,7 +185,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	class DeleteGroupCommand(val set: SmallGroupSet, val group: SmallGroup) extends Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState {
 		def isSpreadsheetUpload = true
 		var called = false
-		def apply() = {
+		def apply(): SmallGroup = {
 			called = true
 			group
 		}
@@ -195,7 +195,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	class ModifyEventCommand(val module: Module, val set: SmallGroupSet, val group: SmallGroup, event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating with ModifySmallGroupEventCommandState with BindListener {
 		val existingEvent = None
 		var called = false
-		def apply() = {
+		def apply(): SmallGroupEvent = {
 			called = true
 			event
 		}
@@ -205,7 +205,7 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 
 	class DeleteEventCommand(val set: SmallGroupSet, val group: SmallGroup, val event: SmallGroupEvent) extends Appliable[SmallGroupEvent] with SelfValidating with DeleteSmallGroupEventCommandState {
 		var called = false
-		def apply() = {
+		def apply(): SmallGroupEvent = {
 			called = true
 			event
 		}
@@ -213,23 +213,23 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
 	}
 
 	private trait CommandFixture {
-		val department = Fixtures.department("in", "IT Services")
+		val department: Department = Fixtures.department("in", "IT Services")
 		val academicYear = AcademicYear(2015)
 
 		val command = new ImportSmallGroupSetsFromSpreadsheetCommandInternal(department, academicYear) {}
 	}
 
 	@Test def itWorks(): Unit = new CommandFixture {
-		val module = Fixtures.module("in101")
+		val module: Module = Fixtures.module("in101")
 
-		val set1 = Fixtures.smallGroupSet("set 1")
-		val s1group1 = Fixtures.smallGroup("s1 group 1")
-		val s1g1e1 = Fixtures.smallGroupEvent("s1g1e1")
-		val s1group2 = Fixtures.smallGroup("s1 group 2")
+		val set1: SmallGroupSet = Fixtures.smallGroupSet("set 1")
+		val s1group1: SmallGroup = Fixtures.smallGroup("s1 group 1")
+		val s1g1e1: SmallGroupEvent = Fixtures.smallGroupEvent("s1g1e1")
+		val s1group2: SmallGroup = Fixtures.smallGroup("s1 group 2")
 
-		val set2 = Fixtures.smallGroupSet("set 2")
-		val s2group1 = Fixtures.smallGroup("s1 group 1")
-		val s2group2 = Fixtures.smallGroup("s1 group 2")
+		val set2: SmallGroupSet = Fixtures.smallGroupSet("set 2")
+		val s2group1: SmallGroup = Fixtures.smallGroup("s1 group 1")
+		val s2group2: SmallGroup = Fixtures.smallGroup("s1 group 2")
 
 		command.commands = JList(
 			new ModifySmallGroupSetCommandHolder(new ModifySetCommand(module, set1), "Create", JList(

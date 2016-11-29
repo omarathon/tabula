@@ -17,7 +17,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 	var name: String = _
 	var inUse: Boolean = true
 
-	def applyInternal() = transactional() {
+	def applyInternal(): AssessmentComponent = transactional() {
 		val ac = new AssessmentComponent
 		ac.moduleCode = moduleCode
 		ac.module = moduleAndDepartmentService.getModuleByCode(ac.moduleCodeBasic.toLowerCase()).get
@@ -33,7 +33,7 @@ class AssessmentComponentCreationFixtureCommandInternal extends CommandInternal[
 }
 
 object AssessmentComponentCreationFixtureCommand {
-	def apply()={
+	def apply(): AssessmentComponentCreationFixtureCommandInternal with ComposableCommand[AssessmentComponent] with AutowiringAssessmentMembershipServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new AssessmentComponentCreationFixtureCommandInternal
 			with ComposableCommand[AssessmentComponent]
 			with AutowiringAssessmentMembershipServiceComponent

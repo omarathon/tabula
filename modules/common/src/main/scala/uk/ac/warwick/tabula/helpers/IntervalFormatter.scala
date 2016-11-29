@@ -17,7 +17,7 @@ Formats an Interval (which is a start and an end date together)
 	*/
 object IntervalFormatter {
 
-	def format(start: DateTime, end: DateTime, includeTime: Boolean = true, includeDays: Boolean = true) = {
+	def format(start: DateTime, end: DateTime, includeTime: Boolean = true, includeDays: Boolean = true): String = {
 		val timeFormatter = if (includeTime) Hour24IncludeMins else OmitTimes
 		val dateFormatter = if (includeDays) IncludeDays else OmitDays
 		val formatter = new ConfigurableIntervalFormatter(timeFormatter, dateFormatter)
@@ -50,7 +50,7 @@ class IntervalFormatter extends TemplateMethodModelEx {
 	import IntervalFormatter.format
 
 	/** Two-argument method taking a start and end date. */
-	override def exec(list: JList[_]) = {
+	override def exec(list: JList[_]): String = {
 		val args = list.toSeq.map {
 			model => {
 				DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
@@ -72,7 +72,7 @@ class IntervalFormatter extends TemplateMethodModelEx {
 class ConfigurableIntervalFormatter(val timeFormat: TimeFormats, val dateFormat: DateFormats) {
 
 
-	def format(start: DateTime, end: DateTime) = {
+	def format(start: DateTime, end: DateTime): String = {
 		if (start.toLocalDate == end.toLocalDate) {
 			// don't print the date twice if they're the same
 			val timeBit = timeFormat.formatTimes(new Interval(start, end)) match {
@@ -162,12 +162,12 @@ object ConfigurableIntervalFormatter {
 
 		def formatDates(interval: Interval): (String, String)
 
-		def ordinal(date: DateTime) = "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
+		def ordinal(date: DateTime): String = "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
 
-		protected val yearFormat = DateTimeFormat.forPattern(" yyyy")
-		protected val monthFormat = DateTimeFormat.forPattern(" MMM")
+		protected val yearFormat: DateTimeFormatter = DateTimeFormat.forPattern(" yyyy")
+		protected val monthFormat: DateTimeFormatter = DateTimeFormat.forPattern(" MMM")
 
-		protected def formatInterval(interval: Interval, dayFormat: DateTimeFormatter) = {
+		protected def formatInterval(interval: Interval, dayFormat: DateTimeFormatter): (String, String) = {
 			val sameMonth = interval.getStart.getMonthOfYear == interval.getEnd.getMonthOfYear
 			val sameYear = interval.getStart.getYear == interval.getEnd.getYear
 			val startString = dayFormat.print(interval.getStart) + ordinal(interval.getStart) +

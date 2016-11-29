@@ -13,7 +13,7 @@ trait UserSettingsServiceComponent {
 }
 
 trait AutowiringUserSettingsServiceComponent extends UserSettingsServiceComponent {
-	var userSettingsService = Wire[UserSettingsService]
+	var userSettingsService: UserSettingsService = Wire[UserSettingsService]
 }
 
 trait UserSettingsService {
@@ -24,7 +24,7 @@ trait UserSettingsService {
 @Service(value = "userSettingsService")
 class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logging {
 
-	val json = Wire.auto[ObjectMapper]
+	val json: ObjectMapper = Wire.auto[ObjectMapper]
 
 	def getByUserId(userId: String) : Option[UserSettings] = {
 		session.newCriteria[UserSettings]
@@ -32,7 +32,7 @@ class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logg
 			.uniqueResult
 	}
 
-	def save(user: CurrentUser, newSettings: UserSettings) =  {
+	def save(user: CurrentUser, newSettings: UserSettings): Unit =  {
 		val existingSettings = getByUserId(user.apparentId)
 		val settingsToSave = existingSettings match {
 			case Some(settings) => settings

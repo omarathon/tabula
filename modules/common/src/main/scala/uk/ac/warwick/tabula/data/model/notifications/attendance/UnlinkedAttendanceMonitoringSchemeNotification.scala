@@ -3,26 +3,29 @@ package uk.ac.warwick.tabula.data.model.notifications.attendance
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Department, NotificationWithTarget}
+import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, NotificationWithTarget}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
+
 import collection.JavaConverters._
+import scala.collection.mutable
 
 @Entity
 @DiscriminatorValue(value="UnlinkedAttendanceMonitoringScheme")
 class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTarget[AttendanceMonitoringScheme, Department] {
 
 	@transient
-	lazy val department = target.entity
+	lazy val department: Department = target.entity
 	@transient
-	lazy val schemes = items.asScala.map(_.entity)
+	lazy val schemes: mutable.Buffer[AttendanceMonitoringScheme] = items.asScala.map(_.entity)
 	@transient
-	lazy val academicYear = schemes.head.academicYear
+	lazy val academicYear: AcademicYear = schemes.head.academicYear
 
 	@transient
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	@transient
 	var topLevelUrl: String = Wire.property("${toplevel.url}")
 

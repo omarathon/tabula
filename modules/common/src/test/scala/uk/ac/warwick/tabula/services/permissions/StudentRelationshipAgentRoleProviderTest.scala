@@ -4,18 +4,17 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, RelationshipService}
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.{StaffMember, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
 
 trait StudentRelationshipRoleTestBase extends TestBase with Mockito {
 	val provider : RoleProvider with RelationshipServiceComponent
 
-	val student = Fixtures.student(universityId = "111111")
-	val staff = Fixtures.staff(universityId = "0123456", userId = "cuslaj")
-	val oldStaff = Fixtures.staff(universityId = "7891011", userId = "cusxad")
+	val student: StudentMember = Fixtures.student(universityId = "111111")
+	val staff: StaffMember = Fixtures.staff(universityId = "0123456", userId = "cuslaj")
+	val oldStaff: StaffMember = Fixtures.staff(universityId = "7891011", userId = "cusxad")
 
-	val relService = smartMock[RelationshipService]
+	val relService: RelationshipService = smartMock[RelationshipService]
 
 	val personalTutor = StudentRelationshipType("1", "tutor", "personal tutor", "personal tutee")
 	val rel = StudentRelationship(staff, personalTutor, student)

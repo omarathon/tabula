@@ -27,7 +27,7 @@ class TurnitinLtiListEndpointsCommandInternal(val user: CurrentUser) extends Com
 
 	self: TurnitinLtiListEndpointsCommandState with TurnitinLtiServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): TurnitinLtiResponse = transactional() {
 		turnitinLtiService.listEndpoints(turnitinAssignmentId, user)
 	}
 

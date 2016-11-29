@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{RequestBody, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestBody, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
-import uk.ac.warwick.tabula.{CurrentUser, SprCode, AcademicYear}
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.attendance.report.{CreateMonitoringPointReportCommand, CreateMonitoringPointReportCommandState, CreateMonitoringPointReportRequestState}
@@ -19,8 +19,8 @@ import uk.ac.warwick.tabula.services.ProfileService
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-
 import MonitoringPointReportController._
+import uk.ac.warwick.tabula.web.Mav
 
 object MonitoringPointReportController {
 	type CreateMonitoringPointReportCommand = Appliable[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState with SelfValidating
@@ -46,7 +46,7 @@ trait MonitoringPointReportCreateApi {
 		CreateMonitoringPointReportCommand(department, user)
 
 	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors) = {
+	def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors): Mav = {
 		request.copyTo(command, errors)
 
 		globalValidator.validate(command, errors)
@@ -63,7 +63,7 @@ trait MonitoringPointReportCreateApi {
 
 @JsonAutoDetect
 class CreateMonitoringPointReportRequest extends JsonApiRequest[CreateMonitoringPointReportRequestState] {
-	@transient var profileService = Wire[ProfileService]
+	@transient var profileService: ProfileService = Wire[ProfileService]
 
 	@BeanProperty var period: String = _
 	@BeanProperty var academicYear: AcademicYear = _

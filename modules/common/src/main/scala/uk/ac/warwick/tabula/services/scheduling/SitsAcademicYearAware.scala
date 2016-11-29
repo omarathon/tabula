@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConversions._
 
 trait SitsAcademicYearAware {
-	var sitsAcademicYearService = Wire[SitsAcademicYearService]
+	var sitsAcademicYearService: SitsAcademicYearService = Wire[SitsAcademicYearService]
 
 	def getCurrentSitsAcademicYearString: String = sitsAcademicYearService.getCurrentSitsAcademicYearString
 
@@ -30,7 +30,7 @@ trait SitsAcademicYearService {
 @Profile(Array("dev", "test", "production"))
 @Service
 class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	val GetCurrentAcademicYear = """
 		select GET_AYR() ayr from dual
@@ -46,7 +46,7 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 
 	class GetCurrentAcademicYearQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetCurrentAcademicYear) {
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("ayr")
+		override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("ayr")
 	}
 }
 

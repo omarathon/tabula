@@ -31,7 +31,7 @@ class ManageRoleTag extends TemplateDirectiveModel {
 	override def execute(env: Environment,
 		params: JMap[_, _],
 		loopVars: Array[TemplateModel],
-		body: TemplateDirectiveBody) = {
+		body: TemplateDirectiveBody): Unit = {
 
 		val wrapper = env.getObjectWrapper()
 
@@ -80,7 +80,7 @@ class ManageRoleTag extends TemplateDirectiveModel {
 		body.render(env.getOut())
 	}
 
-	def unwrap(obj: Any) = {
+	def unwrap(obj: Any): AnyRef = {
 		if (obj == null) null
 		else DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel])
 	}

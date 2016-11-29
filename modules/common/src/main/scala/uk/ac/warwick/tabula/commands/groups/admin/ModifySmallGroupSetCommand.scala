@@ -47,12 +47,12 @@ trait ModifySmallGroupSetCommandState extends CurrentSITSAcademicYear {
 	def module: Module
 	def existingSet: Option[SmallGroupSet]
 
-	def updatingExistingLink(set: SmallGroupSet) =
+	def updatingExistingLink(set: SmallGroupSet): Boolean =
 		(allocationMethod == SmallGroupAllocationMethod.Linked
 		&& set.allocationMethod == SmallGroupAllocationMethod.Linked
 		&& linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet)
 
-	def creatingNewLink(set: SmallGroupSet) =
+	def creatingNewLink(set: SmallGroupSet): Boolean =
 		(allocationMethod == SmallGroupAllocationMethod.Linked
 		&& set.allocationMethod != SmallGroupAllocationMethod.Linked)
 
@@ -83,7 +83,7 @@ trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
 	self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		val set = new SmallGroupSet(module)
 
 		// TAB-2541 By default, new sets should have default week ranges
@@ -126,7 +126,7 @@ trait GeneratesDefaultWeekRanges {
 trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRanges {
 	self: TermServiceComponent =>
 
-	def defaultWeekRanges(year: AcademicYear) = {
+	def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = {
 		val weeks = termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 		val startingWeekNumbers =
@@ -162,7 +162,7 @@ class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSe
 
 	copyFrom(set)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		if (updatingExistingLink(set) || creatingNewLink(set)) {
 			copyTo(set)
 
@@ -250,7 +250,7 @@ trait ModifySmallGroupSetValidation extends SelfValidating {
 		}
 	}
 
-	def hasAttendance(set: SmallGroupSet) = {
+	def hasAttendance(set: SmallGroupSet): Boolean = {
 		set.groups.asScala.exists (
 			group => group.events.exists { event =>
 				smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
@@ -278,7 +278,7 @@ trait CreateSmallGroupSetDescription extends Describable[SmallGroupSet] {
 		d.module(module).properties("name" -> name)
 	}
 
-	override def describeResult(d: Description, set: SmallGroupSet) =
+	override def describeResult(d: Description, set: SmallGroupSet): Unit =
 		d.smallGroupSet(set)
 }
 

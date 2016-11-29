@@ -2,17 +2,19 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.turnitinlti
 
 import org.springframework.stereotype.Controller
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.{PathVariable, RequestBody, ModelAttribute, RequestMapping}
-import com.fasterxml.jackson.annotation.{JsonIgnoreProperties, JsonAutoDetect}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestBody, RequestMapping}
+import com.fasterxml.jackson.annotation.{JsonAutoDetect, JsonIgnoreProperties}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands._
+
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
-import uk.ac.warwick.tabula.api.commands.coursework.turnitinlti.{TurnitinLtiSubmitAssignmentResponseRequestState, TurnitinLtiSubmitAssignmentResponseCommand}
+import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
+import uk.ac.warwick.tabula.api.commands.coursework.turnitinlti.{TurnitinLtiSubmitAssignmentResponseCommand, TurnitinLtiSubmitAssignmentResponseRequestState}
 import uk.ac.warwick.tabula.api.web.controllers.coursework.turnitinlti.TurnitinLtiSubmitAssignmentResponseController.TurnitinLtiSubmitAssignmentResponseCommand
+import uk.ac.warwick.tabula.web.Mav
 
 
 /**
@@ -48,7 +50,7 @@ trait TurnitinLtiSubmitAssignmentResponseApi {
 		@ModelAttribute("command") command: TurnitinLtiSubmitAssignmentResponseCommand,
 		@PathVariable assignment: Assignment,
 		errors: Errors
-	) = {
+	): Mav = {
 		req.copyTo(command, errors)
 		command.validate(errors)
 		if (errors.hasErrors) {

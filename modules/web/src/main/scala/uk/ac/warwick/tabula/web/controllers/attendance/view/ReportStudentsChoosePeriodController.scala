@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.attendance.view.{ReportStudentsChoosePeriod
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/report"))
@@ -26,7 +27,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		@ModelAttribute("command") cmd: Appliable[Seq[StudentReportCount]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		Mav("attendance/view/reportperiod").crumbs(
 			Breadcrumbs.View.Home,
 			Breadcrumbs.View.Department(department),
@@ -41,7 +42,7 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if(errors.hasErrors) {
 			form(cmd, department, academicYear)
 		} else {

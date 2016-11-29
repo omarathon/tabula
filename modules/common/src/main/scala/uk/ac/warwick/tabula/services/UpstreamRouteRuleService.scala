@@ -52,5 +52,5 @@ trait UpstreamRouteRuleServiceComponent {
 }
 
 trait AutowiringUpstreamRouteRuleServiceComponent extends UpstreamRouteRuleServiceComponent {
-	var upstreamRouteRuleService = Wire[UpstreamRouteRuleService]
+	var upstreamRouteRuleService: UpstreamRouteRuleService = Wire[UpstreamRouteRuleService]
 }

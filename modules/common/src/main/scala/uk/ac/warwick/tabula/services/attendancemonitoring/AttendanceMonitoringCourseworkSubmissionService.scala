@@ -12,7 +12,7 @@ trait AttendanceMonitoringCourseworkSubmissionServiceComponent {
 }
 
 trait AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent extends AttendanceMonitoringCourseworkSubmissionServiceComponent {
-	val attendanceMonitoringCourseworkSubmissionService = Wire[AttendanceMonitoringCourseworkSubmissionService]
+	val attendanceMonitoringCourseworkSubmissionService: AttendanceMonitoringCourseworkSubmissionService = Wire[AttendanceMonitoringCourseworkSubmissionService]
 }
 
 trait AttendanceMonitoringCourseworkSubmissionService {

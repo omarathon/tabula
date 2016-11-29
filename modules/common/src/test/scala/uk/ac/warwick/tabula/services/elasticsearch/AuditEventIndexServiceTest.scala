@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse}
 import com.sksamuel.elastic4s.testkit.IndexMatchers
 import org.elasticsearch.search.sort.SortOrder
+import org.hibernate.Session
 import org.hibernate.dialect.HSQLDialect
 import org.joda.time.DateTime
 import org.junit.After
@@ -16,6 +18,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StopWatch
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.IndexedSeq
+import scala.concurrent.Future
 
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient with IndexMatchers {
 
@@ -23,11 +27,11 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
 	val indexName = "audit"
-	val indexType = new AuditEventIndexType {}.indexType
+	val indexType: String = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
 		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
-			val session = sessionFactory.getCurrentSession
+			val session: Session = sessionFactory.getCurrentSession
 		}
 		service.dialect = new HSQLDialect()
 
@@ -40,7 +44,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		// Creates the index
 		indexer.ensureIndexExists().await should be (true)
 
-		implicit val indexable = AuditEventIndexService.auditEventIndexable(service)
+		implicit val indexable: ElasticsearchIndexable[AuditEvent] = AuditEventIndexService.auditEventIndexable(service)
 	}
 
 	@After def tearDown(): Unit = {
@@ -60,7 +64,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		blockUntilCount(1, indexName, indexType)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc = client.execute { get id event.id from indexName / indexType }.futureValue
+		val doc: RichGetResponse = client.execute { get id event.id from indexName / indexType }.futureValue
 
 		doc.source.asScala.toMap should be (Map(
 			"eventId" -> "eventId",
@@ -78,18 +82,18 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		val jsonData = Map(
 			"students" -> Array("0123456", "0199999")
 		)
-		val jsonDataString = json.writeValueAsString(jsonData)
+		val jsonDataString: String = json.writeValueAsString(jsonData)
 
 		stopwatch.start("creating items")
 
-		val defendEvents = for (i <- 1 to 1000)
+		val defendEvents: IndexedSeq[AuditEvent] = for (i <- 1 to 1000)
 			yield AuditEvent(
 				eventId="d"+i, eventType="DefendBase", eventStage="before", userId="jim",
 				eventDate=new DateTime(2000,1,2,0,0,0).plusSeconds(i),
 				data="{}"
 			)
 
-		val publishEvents = for (i <- 1 to 20)
+		val publishEvents: IndexedSeq[AuditEvent] = for (i <- 1 to 20)
 			yield AuditEvent(
 				eventId="s"+i, eventType="PublishFeedback", eventStage="before", userId="bob",
 				eventDate=new DateTime(2000,1,1,0,0,0).plusSeconds(i),
@@ -98,12 +102,12 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 
 		stopwatch.stop()
 
-		def addParsedData(event: AuditEvent) = {
+		def addParsedData(event: AuditEvent): AuditEvent = {
 			event.parsedData = service.parseData(event.data)
 			event
 		}
 
-		val events = defendEvents ++ publishEvents
+		val events: IndexedSeq[AuditEvent] = defendEvents ++ publishEvents
 
 		// Do this 50 at a time to avoid saturating the internal Elasticsearch server's bulk indexing threadpool
 		events.grouped(50).zipWithIndex.foreach { case (e, groupNum) =>
@@ -121,17 +125,17 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		val user = new User("jeb")
 		user.setWarwickId("0123456")
 
-		def listRecent(max: Int) =
+		def listRecent(max: Int): Future[RichSearchResponse] =
 			client.execute { search in indexName / indexType sort ( field sort "eventDate" order SortOrder.DESC ) limit max }
 
-		def resultsForStudent(user: User) =
+		def resultsForStudent(user: User): Future[RichSearchResponse] =
 			client.execute { search in indexName / indexType query termQuery("students", user.getWarwickId) }
 
 		listRecent(1000).futureValue.hits.length should be (1000)
 
 		resultsForStudent(user).futureValue.totalHits should be (20)
 
-		val moreEvents = {
+		val moreEvents: Seq[AuditEvent] = {
 			val events = Seq(addParsedData(AuditEvent(
 				eventId="x9000", eventType="PublishFeedback", eventStage="before", userId="bob",
 				eventDate=new DateTime(2000,1,1,0,0,0).plusSeconds(9000),
@@ -148,7 +152,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 
 		listRecent(13).futureValue.hits.length should be (13)
 
-		val publishFeedback =
+		val publishFeedback: Future[RichSearchResponse] =
 			client.execute { search in indexName / indexType query queryStringQuery("eventType:PublishFeedback") limit 100 }
 
 		publishFeedback.futureValue.totalHits should be (21)

@@ -28,7 +28,7 @@ class ViewStudentAttendanceCommandInternal(val department: Department, val acade
 
 	self: AttendanceMonitoringServiceComponent with TermServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
 		val points = benchmarkTask("listStudentsPoints"){
 			attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
 		}

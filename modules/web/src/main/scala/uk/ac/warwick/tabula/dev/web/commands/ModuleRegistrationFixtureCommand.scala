@@ -19,7 +19,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 	var universityIds: String = _
 	var academicYear: AcademicYear = _
 
-	protected def applyInternal() =
+	protected def applyInternal(): Seq[ModuleRegistration] =
 		transactional() {
 			val module = moduleDao.getByCode(moduleCode).get
 			val cats = new JBigDecimal(12.0)
@@ -43,7 +43,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 		}
 }
 object ModuleRegistrationFixtureCommand{
-	def apply()={
+	def apply(): ModuleRegistrationFixtureCommand with ComposableCommand[Seq[ModuleRegistration]] with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new ModuleRegistrationFixtureCommand
 			with ComposableCommand[Seq[ModuleRegistration]]
 			with Daoisms

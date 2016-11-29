@@ -50,7 +50,7 @@ class RestoreAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractM
 
 	self: MemberNoteServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMemberNote = {
 		abstractMemberNote.deleted = false
 		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
 			case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.{SprCode, ToString}
 abstract class StudentRelationship extends GeneratedId with Serializable with ToEntityReference {
 	type Entity = StudentRelationship
 
-	@transient var profileService = Wire.auto[ProfileService]
+	@transient var profileService: ProfileService = Wire.auto[ProfileService]
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	def agent: String
@@ -57,20 +57,20 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	def agentName: String
 	def agentLastName: String
 
-	def studentMember = Option(studentCourseDetails).map { _.student }
+	def studentMember: Option[StudentMember] = Option(studentCourseDetails).map { _.student }
 	def studentMember_=(student: StudentMember) {
 		student.mostSignificantCourseDetails.foreach { scd =>
 			studentCourseDetails = scd
 		}
 	}
 
-	def studentId = Option(studentCourseDetails).map { scd => SprCode.getUniversityId(scd.sprCode) }.orNull
+	def studentId: String = Option(studentCourseDetails).map { scd => SprCode.getUniversityId(scd.sprCode) }.orNull
 
-	override def toString = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> studentId)
+	override def toString: String = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> studentId)
 
-	def toEntityReference = new StudentRelationshipEntityReference().put(this)
+	def toEntityReference: StudentRelationshipEntityReference = new StudentRelationshipEntityReference().put(this)
 
-	def isCurrent = endDate == null || endDate.isAfterNow
+	def isCurrent: Boolean = endDate == null || endDate.isAfterNow
 
 }
 
@@ -85,12 +85,12 @@ class MemberStudentRelationship extends StudentRelationship {
 	def agentMember = Option(_agentMember)
 	def agentMember_=(member: Member) { _agentMember = member }
 
-	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
-	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
+	def agentName: String = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
+	def agentLastName: String = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 
-	def agent = agentMember.map { _.universityId }.orNull
+	def agent: String = agentMember.map { _.universityId }.orNull
 
-	override def toEntityReference = new StudentRelationshipEntityReference().put(this)
+	override def toEntityReference: StudentRelationshipEntityReference = new StudentRelationshipEntityReference().put(this)
 }
 
 @Entity
@@ -101,16 +101,16 @@ class ExternalStudentRelationship extends StudentRelationship {
 
 	@Column(name = "external_agent_name")
 	var _agentName: String = _
-	def agent = _agentName
+	def agent: String = _agentName
 	def agent_=(name: String) { _agentName = name }
 
-	def agentName = agent
-	def agentLastName = agent
+	def agentName: String = agent
+	def agentLastName: String = agent
 }
 
 object StudentRelationship {
 
-	def apply(agent: Member, relType: StudentRelationshipType, student: StudentMember) = {
+	def apply(agent: Member, relType: StudentRelationshipType, student: StudentMember): MemberStudentRelationship = {
 		val rel = new MemberStudentRelationship
 		rel.agentMember = agent
 		rel.relationshipType = relType
@@ -119,7 +119,7 @@ object StudentRelationship {
 		rel
 	}
 
-	def apply(agent: Member, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails) = {
+	def apply(agent: Member, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails): MemberStudentRelationship = {
 		val rel = new MemberStudentRelationship
 		rel.agentMember = agent
 		rel.relationshipType = relType
@@ -131,7 +131,7 @@ object StudentRelationship {
 }
 
 object ExternalStudentRelationship {
-	def apply(agent: String, relType: StudentRelationshipType, student: StudentMember) = {
+	def apply(agent: String, relType: StudentRelationshipType, student: StudentMember): ExternalStudentRelationship = {
 		val rel = new ExternalStudentRelationship
 		rel.agent = agent
 		rel.relationshipType = relType
@@ -140,7 +140,7 @@ object ExternalStudentRelationship {
 		rel
 	}
 
-	def apply(agent: String, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails) = {
+	def apply(agent: String, relType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails): ExternalStudentRelationship = {
 		val rel = new ExternalStudentRelationship
 		rel.agent = agent
 		rel.relationshipType = relType

@@ -24,7 +24,7 @@ class UpdateAttendanceMonitoringCheckpointTotalsCommandInternal extends CommandI
 
 	self: AttendanceMonitoringServiceComponent with UpdateAttendanceMonitoringCheckpointTotalsState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringCheckpointTotal] = {
 			totalsToUpdate.map(total =>
 				attendanceMonitoringService.updateCheckpointTotal(total.student, total.department, total.academicYear)
 			)
@@ -72,5 +72,5 @@ trait UpdateAttendanceMonitoringCheckpointTotalsDescription extends Describable[
 
 trait UpdateAttendanceMonitoringCheckpointTotalsState {
 	self: AttendanceMonitoringServiceComponent =>
-	lazy val totalsToUpdate = transactional(readOnly = true) { attendanceMonitoringService.listCheckpointTotalsForUpdate }
+	lazy val totalsToUpdate: Seq[AttendanceMonitoringCheckpointTotal] = transactional(readOnly = true) { attendanceMonitoringService.listCheckpointTotalsForUpdate }
 }

@@ -24,7 +24,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 		notification.title should be ("Allocation of new personal tutees")
 	}
 
-	def createNewTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]) = {
+	def createNewTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]): StudentRelationshipChangeToNewAgentNotification = {
 		val n = new StudentRelationshipChangeToNewAgentNotification
 		n.agent = actor
 		n.oldAgentIds.value = Seq(oldTutor.get.universityId)
@@ -32,7 +32,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 		n
 	}
 
-	def createOldTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]) = {
+	def createOldTutorNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]): StudentRelationshipChangeToOldAgentNotification = {
 		val n = new StudentRelationshipChangeToOldAgentNotification
 		n.profileService = profileService
 
@@ -42,7 +42,7 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 		n
 	}
 
-	def createTuteeNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]) = {
+	def createTuteeNotification(relationship:StudentRelationship, actor:User, oldTutor: Option[Member]): StudentRelationshipChangeToStudentNotification = {
 		val n = new StudentRelationshipChangeToStudentNotification
 		n.profileService = smartMock[ProfileService]
 		n.agent = actor
@@ -53,21 +53,21 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito wi
 
 	@Test
 	def urlIsProfilePage():Unit = new TutorFixture {
-		val n = createNewTutorNotification(relationship, actor, Some(oldTutor))
+		val n: StudentRelationshipChangeToNewAgentNotification = createNewTutorNotification(relationship, actor, Some(oldTutor))
 		n.url should be(s"/profiles/view/student/${relationship.relationshipType.urlPart}")
 		n.urlTitle should be ("view the student profile for Test Student")
 	}
 
 	@Test
 	def recipientsContainsSingleUser():Unit = new TutorFixture {
-		val n = createOldTutorNotification(relationship, actor, Some(oldTutor))
+		val n: StudentRelationshipChangeToOldAgentNotification = createOldTutorNotification(relationship, actor, Some(oldTutor))
 		n.recipients should be (Seq(recipient))
 		n.urlTitle should be ("view the student profile for Test Student")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new TutorFixture {
-		val n = createTuteeNotification(relationship, actor,  Some(oldTutor))
+		val n: StudentRelationshipChangeToStudentNotification = createTuteeNotification(relationship, actor,  Some(oldTutor))
 		n.profileService = profileService
 		n.content.template should be ("/WEB-INF/freemarker/notifications/student_change_relationship_notification.ftl")
 		n.content.model("student") should be (Some(student))

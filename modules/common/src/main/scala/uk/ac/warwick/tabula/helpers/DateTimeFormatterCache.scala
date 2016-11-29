@@ -5,5 +5,5 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 private[helpers] class DateTimeFormatterCache {
 	private val map = JConcurrentMap[String, DateTimeFormatter]()
-	def retrieve(pattern: String) = map.getOrElseUpdate(pattern, DateTimeFormat.forPattern(pattern))
+	def retrieve(pattern: String): DateTimeFormatter = map.getOrElseUpdate(pattern, DateTimeFormat.forPattern(pattern))
 }

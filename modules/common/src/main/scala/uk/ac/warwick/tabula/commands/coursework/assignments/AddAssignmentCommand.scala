@@ -22,9 +22,9 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 		assignment
 	}
 
-	override def describeResult(d: Description, assignment: Assignment) = d.assignment(assignment)
+	override def describeResult(d: Description, assignment: Assignment): Unit = d.assignment(assignment)
 
-	override def describe(d: Description) = d.module(module).properties(
+	override def describe(d: Description): Unit = d.module(module).properties(
 		"name" -> name,
 		"openDate" -> openDate,
 		"closeDate" -> closeDate)

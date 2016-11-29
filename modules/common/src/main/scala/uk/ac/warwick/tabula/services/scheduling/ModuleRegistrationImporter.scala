@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{Auto
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.HashMap
+import scala.collection.immutable.{HashMap, Iterable}
 
 /**
  * Import module registration data from SITS.
@@ -35,10 +35,10 @@ trait ModuleRegistrationImporter {
 
 trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with Logging {
 
-	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
-	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	protected def applyForRows(rows: Seq[ModuleRegistrationRow]) = {
+	protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Iterable[ImportModuleRegistrationsCommand] = {
 		val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
 			moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
 				case None =>
@@ -65,7 +65,7 @@ trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with
 @Service
 class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with TaskBenchmarking {
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val queries = Seq(
 		new UnconfirmedModuleRegistrationsQuery(sits),
@@ -89,7 +89,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 @Profile(Array("sandbox")) @Service
 class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
-	var memberDao = Wire.auto[MemberDaoImpl]
+	var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
 		membersAndCategories flatMap { mac =>
@@ -102,7 +102,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 			}
 		}
 
-	def studentModuleRegistrationDetails(universityId: String, ssoUser: User) = {
+	def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
 		val rows = (for {
 			(code, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
@@ -239,21 +239,21 @@ object ModuleRegistrationImporter {
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
+			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
 	}
 
 	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
+			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
 	}
 
 	class AutoUploadedConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, AutoUploadedConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
+			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
 	}
 }
 

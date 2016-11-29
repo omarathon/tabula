@@ -24,7 +24,7 @@ class DownloadSupportingFilesCommand(
 	private var fileFound: Boolean = _
 	var callback: (RenderableFile) => Unit = _
 
-	def applyInternal() = {
+	def applyInternal(): Option[RenderableAttachment] = {
 		val allAttachments = extension.nonEmptyAttachments
 		val attachment = allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
 

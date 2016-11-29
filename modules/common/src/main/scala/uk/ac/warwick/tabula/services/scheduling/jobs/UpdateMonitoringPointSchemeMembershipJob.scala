@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class UpdateMonitoringPointSchemeMembershipJob extends AutowiredJobBean {
 
-	implicit var termService = Wire[TermService]
+	implicit var termService: TermService = Wire[TermService]
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingAttendanceUpdateSchemes) {

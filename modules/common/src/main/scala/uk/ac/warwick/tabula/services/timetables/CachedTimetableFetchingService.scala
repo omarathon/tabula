@@ -30,7 +30,7 @@ class CachedPartialTimetableFetchingService(
 	cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
 ) extends PartialTimetableFetchingService with AutowiringCacheStrategyComponent {
 
-	val FetchTimeout = 15.seconds
+	val FetchTimeout: FiniteDuration = 15.seconds
 
 	val cacheEntryFactory = new CacheEntryFactory[TimetableCacheKey, EventList] {
 
@@ -72,7 +72,7 @@ class CachedPartialTimetableFetchingService(
 	}
 
 	// rather than using 5 little caches, use one big one with a composite key
-	lazy val timetableCache = {
+	lazy val timetableCache: Cache[TimetableCacheKey, EventList] = {
 		val cache = Caches.newCache(cacheName, cacheEntryFactory, cacheExpiryTime * 4, cacheStrategy)
 		// serve stale data if we have it while we update in the background
 		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[TimetableCacheKey, EventList] {
@@ -88,11 +88,11 @@ class CachedPartialTimetableFetchingService(
 		eventList.recoverWith { case e: CacheEntryUpdateException => Failure(e.getCause) }
 	)
 
-	def getTimetableForStudent(universityId: String) = toFuture(Try(timetableCache.get(StudentKey(universityId))))
-	def getTimetableForModule(moduleCode: String) = toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
-	def getTimetableForCourse(courseCode: String) = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
-	def getTimetableForRoom(roomName: String) = toFuture(Try(timetableCache.get(RoomKey(roomName))))
-	def getTimetableForStaff(universityId: String) = toFuture(Try(timetableCache.get(StaffKey(universityId))))
+	def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StudentKey(universityId))))
+	def getTimetableForModule(moduleCode: String): Future[EventList] = toFuture(Try(timetableCache.get(ModuleKey(moduleCode))))
+	def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(Try(timetableCache.get(CourseKey(courseCode))))
+	def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(Try(timetableCache.get(RoomKey(roomName))))
+	def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(Try(timetableCache.get(StaffKey(universityId))))
 
 }
 

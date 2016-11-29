@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.coursework.feedback._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
@@ -27,7 +28,7 @@ class ExamFeedbackAdjustmentsListController extends ExamsController {
 	def list(
 		@PathVariable exam: Exam,
 		@ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
-	) = {
+	): Mav = {
 		val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition { _.feedback.isDefined }
 
 		Mav("exams/exams/admin/adjustments/list",
@@ -53,7 +54,7 @@ class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringP
 		FeedbackAdjustmentCommand(mandatory(exam), student, submitter, GenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)))
 
 	@RequestMapping(method=Array(GET))
-	def showForm(@PathVariable exam: Exam) = {
+	def showForm(@PathVariable exam: Exam): Mav = {
 		Mav("exams/exams/admin/adjustments/student",
 			"isGradeValidation" -> exam.module.adminDepartment.assignmentGradeValidation
 		).noLayout()
@@ -64,7 +65,7 @@ class ExamFeedbackAdjustmentsController extends ExamsController with AutowiringP
 		@Valid @ModelAttribute("command") cmd: Appliable[Feedback] with FeedbackAdjustmentCommandState,
 		errors: Errors,
 		@PathVariable exam: Exam
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			showForm(exam)
 		} else {

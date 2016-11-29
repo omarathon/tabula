@@ -33,9 +33,9 @@ class ActivityService {
 
 	private val StreamSize = 8
 
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var assignmentService = Wire[AssessmentService]
-	var auditQueryService = Wire[AuditEventNoteworthySubmissionsService]
+	var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var assignmentService: AssessmentService = Wire[AssessmentService]
+	var auditQueryService: AuditEventNoteworthySubmissionsService = Wire[AuditEventNoteworthySubmissionsService]
 
 	// first page
 	def getNoteworthySubmissions(user: CurrentUser): Future[PagedActivities] =
@@ -58,5 +58,5 @@ trait ActivityServiceComponent {
 }
 
 trait AutowiringActivityServiceComponent extends ActivityServiceComponent {
-	var activityService = Wire[ActivityService]
+	var activityService: ActivityService = Wire[ActivityService]
 }

@@ -18,11 +18,11 @@ class DownloadAllSubmissionsCommand(
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var zipService = Wire.auto[ZipService]
+	var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal() = zipService.getAllSubmissionsZip(assignment)
+	override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
 
-	override def describe(d: Description) = d
+	override def describe(d: Description): Unit = d
 		.assignment(assignment)
 		.studentIds(assignment.submissions.map(_.universityId))
 		.properties(

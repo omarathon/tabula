@@ -27,16 +27,16 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 
 	def groups: Seq[SmallGroup] = entities
 
-	def isStudent = getBooleanSetting("isStudent", default=false)
+	def isStudent: Boolean = getBooleanSetting("isStudent", default=false)
 	def isStudent_= (b:Boolean) { settings += ("isStudent" -> b) }
 
 	def formats: List[String] = groups.map(_.groupSet.format.description).distinct.toList
-	def formatString = formats match {
+	def formatString: String = formats match {
 		case singleFormat :: Nil => singleFormat
 		case _ => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
 	}
 
-	def title = {
+	def title: String = {
 		val moduleCodes = entities.map(_.groupSet.module.code.toUpperCase).distinct.toList.sorted
 		val moduleCodesString = moduleCodes match {
 			case singleModuleCode :: Nil => singleModuleCode

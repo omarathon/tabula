@@ -29,7 +29,7 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 
 	var confirm: Boolean = _
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): StudentRelationshipType = transactional() {
 		relationshipService.delete(relationshipType)
 		relationshipType
 	}
@@ -57,7 +57,7 @@ trait DeleteStudentRelationshipTypeCommandDescription extends Describable[Studen
 	this: HasExistingStudentRelationshipType =>
 
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.properties(
 			"id" -> relationshipType.id,
 			"urlPart" -> relationshipType.urlPart,

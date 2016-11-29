@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
@@ -10,12 +10,12 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 
 	val tutorRelationshipType = new StudentRelationshipType
 	tutorRelationshipType.id = "tutor"
-	val agent = Fixtures.staff("234")
-	val thisStudent = Fixtures.student("123")
+	val agent: StaffMember = Fixtures.staff("234")
+	val thisStudent: StudentMember = Fixtures.student("123")
 
 	trait TestSupport extends RelationshipServiceComponent with ExpireRelationshipsOnOldCoursesCommandState {
-		override val student = thisStudent
-		override val relationshipService = smartMock[RelationshipService]
+		override val student: StudentMember = thisStudent
+		override val relationshipService: RelationshipService = smartMock[RelationshipService]
 		relationshipService.allStudentRelationshipTypes returns Seq(tutorRelationshipType)
 		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns Option(tutorRelationshipType)
 	}
@@ -25,9 +25,9 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	}
 
 	trait StudentWithOneCurrentOneEndedCourse extends Fixture {
-		val endedCourse = thisStudent.freshStudentCourseDetails.head
+		val endedCourse: StudentCourseDetails = thisStudent.freshStudentCourseDetails.head
 		endedCourse.endDate = DateTime.now.minusDays(1).toLocalDate
-		val currentCourse = Fixtures.studentCourseDetails(thisStudent, null)
+		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, null)
 		thisStudent.attachStudentCourseDetails(currentCourse)
 		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
 		val relationshipOnEndedCourse = StudentRelationship(agent, tutorRelationshipType, endedCourse)
@@ -35,9 +35,9 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	}
 
 	trait StudentWithOnlyEndedCourse extends Fixture {
-		val endedCourse = thisStudent.freshStudentCourseDetails.head
+		val endedCourse: StudentCourseDetails = thisStudent.freshStudentCourseDetails.head
 		endedCourse.endDate = DateTime.now.minusMonths(12).toLocalDate
-		val currentCourse = Fixtures.studentCourseDetails(thisStudent, null)
+		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, null)
 		currentCourse.endDate = DateTime.now.minusMonths(1).toLocalDate
 		thisStudent.attachStudentCourseDetails(currentCourse)
 		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
@@ -49,7 +49,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 	trait ValidationFixture extends Fixture {
 		val validator = new ExpireRelationshipsOnOldCoursesValidation with TestSupport
 		val errors = new BindException(validator, "command")
-		override val testObject = validator
+		override val testObject: ExpireRelationshipsOnOldCoursesValidation with TestSupport = validator
 	}
 
 	@Test
@@ -95,7 +95,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
 
 	trait ApplyFixture extends Fixture {
 		val command = new ExpireRelationshipsOnOldCoursesCommandInternal(thisStudent) with TestSupport
-		override val testObject = command
+		override val testObject: ExpireRelationshipsOnOldCoursesCommandInternal with TestSupport = command
 	}
 
 	@Test

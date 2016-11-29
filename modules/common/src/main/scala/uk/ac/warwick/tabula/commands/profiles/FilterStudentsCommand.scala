@@ -31,7 +31,7 @@ abstract class FilterStudentsCommand(val department: Department, val year: Acade
 	extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener with TaskBenchmarking {
 	self: ProfileServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): FilterStudentsResults = {
 		val restrictions = buildRestrictions(year)
 
 		val totalResults = benchmarkTask("countStudentsByRestrictions") { profileService.countStudentsByRestrictions(
@@ -100,7 +100,7 @@ trait ProfileFilterExtras extends FiltersStudents {
 		HAS_ADMIN_NOTE
 	)
 
-	override def getAliasPaths(table: String) = {
+	override def getAliasPaths(table: String): Seq[(String, AliasAndJoinType)] = {
 		(FiltersStudents.AliasPaths ++ Map(
 			"memberNotes" -> Seq(
 				"memberNotes" -> AliasAndJoinType("memberNotes")

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 @RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}"))
 class OldDownloadAttachmentController extends OldCourseworkController {
 
-	var submissionService = Wire.auto[SubmissionService]
+	var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]]
 		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, user.universityId)), optionalCurrentMember)
@@ -31,7 +31,7 @@ class OldDownloadAttachmentController extends OldCourseworkController {
 @RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{studentMember}"))
 class OldDownloadAttachmentForStudentController extends OldCourseworkController {
 
-	var submissionService = Wire[SubmissionService]
+	var submissionService: SubmissionService = Wire[SubmissionService]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable studentMember: Member): Appliable[Option[RenderableFile]]
 		= new DownloadAttachmentCommand(module, assignment, mandatory(submissionService.getSubmissionByUniId(assignment, studentMember.universityId)), Some(studentMember))

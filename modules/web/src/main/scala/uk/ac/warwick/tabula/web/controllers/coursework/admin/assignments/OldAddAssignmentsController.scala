@@ -110,7 +110,7 @@ class OldAddAssignmentsController extends OldCourseworkController {
 	}
 
 	// The shared Mav for most of the request mappings
-	def getMav(department: Department) = {
+	def getMav(department: Department): Mav = {
 		Mav(s"$urlPrefix/admin/assignments/batch_new_select")
 			.crumbs(Breadcrumbs.Department(department))
 	}

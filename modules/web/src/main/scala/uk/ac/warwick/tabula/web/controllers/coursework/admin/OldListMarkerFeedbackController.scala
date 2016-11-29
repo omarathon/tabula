@@ -68,7 +68,7 @@ class OldListMarkerFeedbackController extends OldCourseworkController {
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/list"))
 class OldListCurrentUsersMarkerFeedbackController extends OldCourseworkController {
 	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser) = {
+	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
 		Redirect(Routes.admin.assignment.markerFeedback(assignment, currentUser.apparentUser))
 	}
 }

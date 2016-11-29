@@ -3,15 +3,15 @@ package uk.ac.warwick.tabula.commands.scheduling
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{ExportAttendanceToSitsService, ExportAttendanceToSitsServiceComponent}
 import uk.ac.warwick.tabula.services.{TermService, TermServiceComponent}
-import uk.ac.warwick.tabula.{FeaturesComponent, Mockito, TestBase}
+import uk.ac.warwick.tabula.{FeaturesComponent, FeaturesImpl, Mockito, TestBase}
 
 class ExportAttendanceToSitsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends TermServiceComponent with AttendanceMonitoringServiceComponent with FeaturesComponent with ExportAttendanceToSitsServiceComponent {
-		val termService = mock[TermService]
-		val attendanceMonitoringService = mock[AttendanceMonitoringService]
-		val features = emptyFeatures
-		val exportAttendanceToSitsService = mock[ExportAttendanceToSitsService]
+		val termService: TermService = mock[TermService]
+		val attendanceMonitoringService: AttendanceMonitoringService = mock[AttendanceMonitoringService]
+		val features: FeaturesImpl = emptyFeatures
+		val exportAttendanceToSitsService: ExportAttendanceToSitsService = mock[ExportAttendanceToSitsService]
 	}
 
 	val cmd = new ExportAttendanceToSitsCommand with CommandTestSupport

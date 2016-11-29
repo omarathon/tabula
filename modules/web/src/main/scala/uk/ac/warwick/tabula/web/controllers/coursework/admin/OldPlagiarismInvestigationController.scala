@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestigationCommand, PlagiarismInvestigationCommandValidation}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
@@ -24,7 +25,7 @@ class OldPlagiarismInvestigationController extends OldCourseworkController {
 
 	validatesSelf[PlagiarismInvestigationCommandValidation]
 
-	def formView(assignment: Assignment) =
+	def formView(assignment: Assignment): Mav =
 		Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/mark-plagiarised",
 				"assignment" -> assignment
 		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
@@ -39,7 +40,7 @@ class OldPlagiarismInvestigationController extends OldCourseworkController {
 	def showForm(
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
-			@ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
+			@ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
 		formView(assignment)
 	}
 
@@ -47,7 +48,7 @@ class OldPlagiarismInvestigationController extends OldCourseworkController {
 	def submit(
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
-			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
+			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			formView(assignment)
 		} else {

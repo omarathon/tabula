@@ -61,7 +61,7 @@ trait RoleProvider {
  * because it's unaffected by scope, and do other optimisations.
  */
 trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
-	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getRolesFor(user) }
+	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = cachedBy(user) { getRolesFor(user) }
 
 	def getRolesFor(user: CurrentUser): Stream[Role]
 }
@@ -88,7 +88,7 @@ trait PermissionsProvider {
  * performance enhancements.
  */
 trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
-	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getPermissionsFor(user) }
+	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = cachedBy(user) { getPermissionsFor(user) }
 
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition]
 }
@@ -133,7 +133,7 @@ class RoleServiceImpl extends RoleService with Logging {
 	}
 
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = {
+	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
 		// Split providers into Scopeless and scoped
 		val (scopeless, scoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
 
@@ -161,7 +161,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		scopelessStream #::: streamScoped(scoped.toStream, scope)
 	}
 
-	def hasRole(user: CurrentUser, role: Role) = {
+	def hasRole(user: CurrentUser, role: Role): Boolean = {
 		val targetClass = role.getClass
 
 		// Go through the list of RoleProviders and get any that provide this role

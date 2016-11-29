@@ -28,7 +28,7 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 
 	self: ProfileServiceComponent with ProfileExportCommandState with SecurityServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringStudentData] = {
 		val result = {
 			if (searchSingle || searchMulti) {
 				val members = {

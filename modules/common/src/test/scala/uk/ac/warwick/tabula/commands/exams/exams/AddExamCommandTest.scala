@@ -4,7 +4,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.exams._
 import uk.ac.warwick.tabula.commands.{HasAcademicYear, SpecifiesGroupType}
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
@@ -15,13 +15,13 @@ class AddExamCommandTest extends TestBase with Mockito {
 		with HasAcademicYear
 		with SpecifiesGroupType
 		with AssessmentMembershipServiceComponent {
-			val assessmentService = smartMock[AssessmentService]
+			val assessmentService: AssessmentService = smartMock[AssessmentService]
 			val userLookup = new MockUserLookup
-			var assessmentMembershipService = smartMock[AssessmentMembershipService]
+			var assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		}
 
 	trait Fixture {
-		val module = Fixtures.module("ab123", "Test module")
+		val module: Module = Fixtures.module("ab123", "Test module")
 		val academicYear = new AcademicYear(2014)
 		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
@@ -29,12 +29,12 @@ class AddExamCommandTest extends TestBase with Mockito {
 			with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
 			with AssessmentMembershipServiceComponent {
 
-			def module = command.module
-			def academicYear = command.academicYear
+			def module: Module = command.module
+			def academicYear: AcademicYear = command.academicYear
 
-			override val assessmentService = smartMock[AssessmentService]
-			override val assessmentMembershipService = smartMock[AssessmentMembershipService]
-			override val userLookup = smartMock[UserLookupService]
+			override val assessmentService: AssessmentService = smartMock[AssessmentService]
+			override val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+			override val userLookup: UserLookupService = smartMock[UserLookupService]
 			override def existingGroups = None
 			override def existingMembers = None
 			override def updateAssessmentGroups() = List()
@@ -44,7 +44,7 @@ class AddExamCommandTest extends TestBase with Mockito {
 	@Test def apply() { new Fixture {
 		command.name = "Some exam"
 
-		val exam = command.applyInternal()
+		val exam: Exam = command.applyInternal()
 		exam.name should be ("Some exam")
 
 		verify(command.assessmentService, times(1)).save(exam)

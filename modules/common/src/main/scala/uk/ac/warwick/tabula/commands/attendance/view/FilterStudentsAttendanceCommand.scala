@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object FilterStudentsAttendanceCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -38,7 +39,7 @@ class FilterStudentsAttendanceCommandInternal(val department: Department, val ac
 	self: FilterStudentsAttendanceCommandState with TermServiceComponent
 		with ProfileServiceComponent with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): FilteredStudentsAttendanceResult = {
 		val totalResults = benchmarkTask("profileService.countStudentsByRestrictionsInAffiliatedDepartments") {
 			profileService.countStudentsByRestrictionsInAffiliatedDepartments(
 				department = department,
@@ -67,7 +68,7 @@ trait OnBindFilterStudentsAttendanceCommand extends BindListener {
 
 	self: FilterStudentsAttendanceCommandState =>
 
-	override def onBind(result: BindingResult) = {
+	override def onBind(result: BindingResult): Unit = {
 		if (!hasBeenFiltered) {
 			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
 		}
@@ -118,7 +119,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
 	// but we will use the root department if the current dept has no routes at all
-	override lazy val allRoutes =
+	override lazy val allRoutes: mutable.Buffer[Route] =
 		if (department.routes.isEmpty) {
 			department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
 		} else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
@@ -134,7 +135,7 @@ trait AttendanceFilterExtras extends FiltersStudents {
 		UNAUTHORISED6
 	)
 
-	override def getAliasPaths(table: String) = {
+	override def getAliasPaths(table: String): Seq[(String, AliasAndJoinType)] = {
 		(FiltersStudents.AliasPaths ++ Map(
 			"attendanceCheckpointTotals" -> Seq(
 				"attendanceCheckpointTotals" -> AliasAndJoinType(

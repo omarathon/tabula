@@ -58,7 +58,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 	var relatedUrl: String = _
 	var relatedUrlTitle: String = _
 
-	def weekRanges = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
+	def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map { _.intValue }) } getOrElse Seq()
 	def weekRanges_=(ranges: Seq[WeekRange]) {
 		weeks =
 			JHashSet(ranges
@@ -71,7 +71,7 @@ trait ModifySmallGroupEventCommandState extends CurrentSITSAcademicYear {
 trait CreateSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
 	val existingEvent = None
 
-	def isEmpty = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == null && endTime == null
+	def isEmpty: Boolean = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == null && endTime == null
 }
 
 trait EditSmallGroupEventCommandState extends ModifySmallGroupEventCommandState {
@@ -86,7 +86,7 @@ class CreateSmallGroupEventCommandInternal(val module: Module, var set: SmallGro
 
 	copyFromDefaults(set)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupEvent = transactional() {
 		val event = new SmallGroupEvent(group)
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
@@ -102,7 +102,7 @@ class EditSmallGroupEventCommandInternal(val module: Module, val set: SmallGroup
 
 	copyFrom(event)
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupEvent = transactional() {
 		copyTo(event)
 		smallGroupService.saveOrUpdate(event)
 		smallGroupService.getOrCreateSmallGroupEventOccurrences(event)
@@ -242,7 +242,7 @@ trait CreateSmallGroupEventDescription extends Describable[SmallGroupEvent] {
 		d.smallGroup(group)
 	}
 
-	override def describeResult(d: Description, event: SmallGroupEvent) =
+	override def describeResult(d: Description, event: SmallGroupEvent): Unit =
 		d.smallGroupEvent(event)
 }
 

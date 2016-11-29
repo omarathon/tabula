@@ -3,11 +3,12 @@ package uk.ac.warwick.tabula.commands.coursework.markingworkflows
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Department, MarkerMap, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, MarkerMap, MarkingWorkflow}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -32,7 +33,7 @@ class ReplaceMarkerInMarkingWorkflowCommandInternal(val department: Department, 
 	self: MarkingWorkflowServiceComponent with AssessmentServiceComponent with UserLookupComponent
 		with ReplaceMarkerInMarkingWorkflowCommandRequest with ReplaceMarkerInMarkingWorkflowCommandState =>
 
-	override def applyInternal() = {
+	override def applyInternal(): MarkingWorkflow = {
 		val oldUser = userLookup.getUserByUserId(oldMarker)
 		val newUser = userLookup.getUserByUserId(newMarker)
 		def replaceMarker[A <: MarkerMap](markers: JList[A]): Unit = {
@@ -124,7 +125,7 @@ trait ReplaceMarkerInMarkingWorkflowCommandState {
 	def department: Department
 	def markingWorkflow: MarkingWorkflow
 
-	lazy val allMarkers = (markingWorkflow.firstMarkers.users ++ (markingWorkflow.hasSecondMarker match {
+	lazy val allMarkers: Seq[User] = (markingWorkflow.firstMarkers.users ++ (markingWorkflow.hasSecondMarker match {
 		case true => markingWorkflow.secondMarkers.users
 		case false => Seq()
 	}) ++ (markingWorkflow.hasThirdMarker match {
@@ -132,7 +133,7 @@ trait ReplaceMarkerInMarkingWorkflowCommandState {
 		case false => Seq()
 	})).distinct.sortBy(u => (u.getLastName, u.getFirstName))
 
-	lazy val affectedAssignments = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
+	lazy val affectedAssignments: Seq[Assignment] = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 }
 
 trait ReplaceMarkerInMarkingWorkflowCommandRequest {

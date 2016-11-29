@@ -11,7 +11,7 @@ trait MeetingRecordServiceComponent {
 }
 
 trait AutowiringMeetingRecordServiceComponent extends MeetingRecordServiceComponent {
-	var meetingRecordService = Wire[MeetingRecordService]
+	var meetingRecordService: MeetingRecordService = Wire[MeetingRecordService]
 }
 
 trait MeetingRecordService {
@@ -38,10 +38,10 @@ trait MeetingRecordService {
 abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	self: MeetingRecordDaoComponent =>
 
-	def saveOrUpdate(meeting: MeetingRecord) = meetingRecordDao.saveOrUpdate(meeting)
-	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord) = meetingRecordDao.saveOrUpdate(scheduledMeeting)
-	def saveOrUpdate(meeting: AbstractMeetingRecord) = meetingRecordDao.saveOrUpdate(meeting)
-	def saveOrUpdate(approval: MeetingRecordApproval) = meetingRecordDao.saveOrUpdate(approval)
+	def saveOrUpdate(meeting: MeetingRecord): Unit = meetingRecordDao.saveOrUpdate(meeting)
+	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord): Unit = meetingRecordDao.saveOrUpdate(scheduledMeeting)
+	def saveOrUpdate(meeting: AbstractMeetingRecord): Unit = meetingRecordDao.saveOrUpdate(meeting)
+	def saveOrUpdate(approval: MeetingRecordApproval): Unit = meetingRecordDao.saveOrUpdate(approval)
 	def list(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[MeetingRecord] = meetingRecordDao.list(rel, currentMember)
 	def listScheduled(rel: Set[StudentRelationship], currentMember: Option[Member]): Seq[ScheduledMeetingRecord] =
 		meetingRecordDao.listScheduled(rel, currentMember)

@@ -8,6 +8,6 @@ import scala.util.Random
  */
 object ShortCode {
 	val length = 5
-	def random() = Random.alphanumeric.take(length).mkString
+	def random(): String = Random.alphanumeric.take(length).mkString
 }
 

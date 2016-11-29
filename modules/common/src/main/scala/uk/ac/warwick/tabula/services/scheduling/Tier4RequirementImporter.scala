@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services.scheduling
 
+import java.lang.Long
 import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 
@@ -20,7 +21,7 @@ trait Tier4RequirementImporter {
 class Tier4RequirementImporterImpl extends Tier4RequirementImporter {
 	import Tier4RequirementImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val tier4RequirementMappingQuery = new Tier4RequirementMappingQuery(sits)
 
@@ -55,7 +56,7 @@ object Tier4RequirementImporter {
 		extends MappingSqlQueryWithParameters[(Number)](ds, GetTier4RequirementSql) {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): Long = {
 			(rs.getLong("count"))
 		}
 	}
@@ -66,5 +67,5 @@ trait Tier4RequirementImporterComponent {
 }
 
 trait AutowiringTier4RequirementImporterComponent extends Tier4RequirementImporterComponent{
-	var tier4RequirementImporter = Wire[Tier4RequirementImporter]
+	var tier4RequirementImporter: Tier4RequirementImporter = Wire[Tier4RequirementImporter]
 }

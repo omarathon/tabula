@@ -21,7 +21,7 @@ class OldAddBatchFeedbackController extends OldCourseworkController {
 		new AddFeedbackCommand(module, assignment, user.apparentUser, user)
 
 	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module) = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def uploadZipForm(@ModelAttribute cmd: AddFeedbackCommand): Mav = {

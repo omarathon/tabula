@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.coursework.{StudentMemberSubmissionAndFeedbackCommandState, StudentSubmissionAndFeedbackCommand}
 import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackCommand._
+import uk.ac.warwick.tabula.web.Mav
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/${cm1.prefix}/module/{module}/{assignment}/{studentMember}"))
@@ -21,7 +22,7 @@ class OldAssignmentInformationForStudentController extends OldCourseworkControll
 		StudentSubmissionAndFeedbackCommand(module, assignment, studentMember, user)
 
 	@RequestMapping
-	def assignmentGadgetInStudentProfile(@ModelAttribute("command") command: StudentSubmissionAndFeedbackCommand) = {
+	def assignmentGadgetInStudentProfile(@ModelAttribute("command") command: StudentSubmissionAndFeedbackCommand): Mav = {
 		val info = command.apply()
 
 		Mav(

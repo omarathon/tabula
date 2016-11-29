@@ -23,7 +23,7 @@ import uk.ac.warwick.spring.Wire
 @Profile(Array("cm1Enabled")) @Controller
 class OldFeedbackRatingController extends OldCourseworkController {
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
 

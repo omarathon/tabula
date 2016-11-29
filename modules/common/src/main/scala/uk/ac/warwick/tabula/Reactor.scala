@@ -25,7 +25,7 @@ object Reactor {
 	 */
 	class EventSource[A]() {
 		type Observer = (A) => Unit
-		var observers = List[Observer]()
+		var observers: List[Observer] = List[Observer]()
 
 		/**
 		 * Observe events from this event source.

@@ -35,7 +35,7 @@ class GenerateExamMarksTemplateCommandInternal(val module: Module, val exam: Exa
 
 	self: FeedbackServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): XSSFWorkbook = {
 
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewMarkSheet(exam, workbook)

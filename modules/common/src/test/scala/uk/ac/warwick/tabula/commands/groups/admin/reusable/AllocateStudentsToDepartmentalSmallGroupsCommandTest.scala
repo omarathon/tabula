@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 
 import org.springframework.validation.{BindException, BindingResult}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.{AllocateStudentItem, GroupsExtractor, GroupsExtractorComponent}
@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
 class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with AllocateStudentsToDepartmentalSmallGroupsSorting {
-		val smallGroupService = smartMock[SmallGroupService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 	}
 
 	private trait Fixture {
@@ -32,8 +32,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 			case ug: UserGroup => ug.userLookup = userLookup
 		}
 
-		val department = Fixtures.department("in", "IT Services")
-		val set = Fixtures.departmentSmallGroupSet("My small groups")
+		val department: Department = Fixtures.department("in", "IT Services")
+		val set: DepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("My small groups")
 		set.id = "existingId"
 		set.department = department
 		wireUserLookup(set.members)
@@ -76,10 +76,10 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 			user5.getUserId -> user5
 		)
 
-		val group1 = Fixtures.departmentSmallGroup("Group 1")
+		val group1: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 1")
 		group1.id = "group1Id"
 
-		val group2 = Fixtures.departmentSmallGroup("Group 2")
+		val group2: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 2")
 		group2.id = "group2Id"
 
 		set.groups.add(group1)
@@ -179,7 +179,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		command.populate()
 		command.sort()
 
-		val group3 = Fixtures.departmentSmallGroup("Group 3")
+		val group3: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group 3")
 		group3.id = "group3Id"
 		group3.groupSet = Fixtures.departmentSmallGroupSet("Another set")
 
@@ -200,8 +200,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 			with PopulateAllocateStudentsToDepartmentalSmallGroupsCommand
 			with GroupsExtractorComponent with UserLookupComponent {
 
-			val groupsExtractor = smartMock[GroupsExtractor]
-			val userLookup = FileUploadSupportFixture.this.userLookup
+			val groupsExtractor: GroupsExtractor = smartMock[GroupsExtractor]
+			val userLookup: MockUserLookup = FileUploadSupportFixture.this.userLookup
 		}
 
 		command.smallGroupService.getDepartmentSmallGroupById(group1.id) returns Some(group1)
@@ -216,7 +216,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		attachment.id = "123"
 		attachment.name = "file.xlsx"
 
-		val backingFile = createTemporaryFile()
+		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
 		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
@@ -245,7 +245,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		attachment.id = "456"
 		attachment.name = "file.xlsx" // We only accept xlsx
 
-		val backingFile = createTemporaryFile()
+		val backingFile: File = createTemporaryFile()
 		attachment.objectStorageService = smartMock[ObjectStorageService]
 		attachment.objectStorageService.keyExists(attachment.id) returns true
 		attachment.objectStorageService.metadata(attachment.id) returns Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))
@@ -282,12 +282,12 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 	@Test def permissions() { new Fixture {
 		val (theDepartment, theSet) = (department, set)
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
-			val department = theDepartment
-			val set = theSet
+			val department: Department = theDepartment
+			val set: DepartmentSmallGroupSet = theSet
 			val viewer = new CurrentUser(user1, user1)
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -306,7 +306,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			val set = null
 			val viewer = null
 		}
@@ -317,7 +317,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 
 	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
 		val command = new AllocateStudentsToDepartmentalSmallGroupsPermissions with AllocateStudentsToDepartmentalSmallGroupsCommandState {
-			val department = Fixtures.department("in")
+			val department: Department = Fixtures.department("in")
 			department.id = "set id"
 
 			val set = new DepartmentSmallGroupSet(Fixtures.department("other"))
@@ -332,8 +332,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 		val (dept, s) = (department, set)
 		val command = new AllocateStudentsToDepartmentalSmallGroupsDescription with AllocateStudentsToDepartmentalSmallGroupsCommandState {
 			override val eventName = "test"
-			val department = dept
-			val set = s
+			val department: Department = dept
+			val set: DepartmentSmallGroupSet = s
 			val viewer = null
 		}
 

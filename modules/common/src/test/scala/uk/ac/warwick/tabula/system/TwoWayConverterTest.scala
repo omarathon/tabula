@@ -50,12 +50,12 @@ class TwoWayConverterTest extends TestBase {
  * etc.
  */
 class DaysConverter extends TwoWayConverter[String, Days] {
-	def convertRight(source: String) =
+	def convertRight(source: String): Days =
 		try {
 			Days.days(source.toInt)
 		} catch {
 			case _:NumberFormatException => null
 		}
 
-	def convertLeft(source: Days) = source.getDays.toString
+	def convertLeft(source: Days): String = source.getDays.toString
 }

@@ -91,7 +91,7 @@ trait PopulateNotificationSettingsCommandState {
 class NotificationSettingsCommandInternal(val department: Department) extends CommandInternal[Department] with NotificationSettingsCommandState {
 	self: ModuleAndDepartmentServiceComponent with UserLookupComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): Department = transactional() {
 		smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
 
 		smallGroupEventAttendanceReminderSettings.notifyTutors.value = smallGroupEventAttendanceReminderNotifyTutors
@@ -133,10 +133,10 @@ trait NotificationSettingsPermissions extends RequiresPermissionsChecking with P
 trait NotificationSettingsDescription extends Describable[Department] {
 	self: NotificationSettingsCommandState =>
 
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.department(department)
 
-	override def describeResult(d: Description, result: Department) =
+	override def describeResult(d: Description, result: Department): Unit =
 		d.department(department)
 		 .property("SmallGroupEventAttendanceReminder", department.notificationSettings("SmallGroupEventAttendanceReminder"))
 		 .property("FinaliseFeedback", department.notificationSettings("FinaliseFeedback"))

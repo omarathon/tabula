@@ -30,23 +30,23 @@ class Mav() {
 	var view: View = _
 	var viewName: String = _
 
-	var map = mutable.Map[String, Any]()
+	var map: mutable.Map[String, Any] = mutable.Map[String, Any]()
 
 	// CSS classes to add to <body>. See #bodyClasses
 	var classes: List[String] = Nil
 
-	def addObjects(items: (String, Any)*) = {
+	def addObjects(items: (String, Any)*): Mav = {
 		map ++= items
 		this
 	}
 
-	def addObjects(items: Map[String, Any]) = {
+	def addObjects(items: Map[String, Any]): Mav = {
 		map ++= items
 		this
 	}
 
 	// Set the CSS body classes to these strings.
-	def bodyClasses(c: String*) = {
+	def bodyClasses(c: String*): Mav = {
 		classes = c.toList
 		this
 	}
@@ -56,7 +56,7 @@ class Mav() {
 	 *
 	 * @see #noLayout
 	 */
-	def layout(name: String) = addObjects("renderLayout" -> name)
+	def layout(name: String): Mav = addObjects("renderLayout" -> name)
 
 	/**
 	 * Add a list of breadcrumbs to display in the navigation.
@@ -82,17 +82,17 @@ class Mav() {
 	 * Also sets embedded->true so views can decide whether to
 	 * render certain elements.
 	 */
-	def noLayout() = {
+	def noLayout(): Mav = {
 		addObjects("embedded" -> true)
 		layout("none")
 	}
 
-	def noNavigation() = {
+	def noNavigation(): Mav = {
 		addObjects("embedded" -> true)
 		layout("nonav")
 	}
 
-	def embedded = {
+	def embedded: Mav = {
 		addObjects("embedded" -> true)
 		layout("embedded")
 	}
@@ -100,13 +100,13 @@ class Mav() {
 	/**
 	 * CustomFreemarkerServlet will use this value if present to set the content type of the response.
 	 */
-	def contentType(contentType: String) = {
+	def contentType(contentType: String): Mav = {
 		addObjects("contentType" -> contentType)
 		this
 	}
 
 	/** Removes layout and sets contentType to text/xml */
-	def xml() = {
+	def xml(): Mav = {
 		noLayout()
 		contentType("text/xml")
 	}
@@ -118,7 +118,7 @@ class Mav() {
 		if (bool) noLayout()
 		else this
 
-	def toModel = {
+	def toModel: mutable.Map[String, Any] = {
 		map ++ bodyClassesItem
 	}
 
@@ -127,18 +127,18 @@ class Mav() {
 		case _ => List("bodyClasses" -> classes.mkString(" "))
 	}
 
-	def toModelAndView = {
+	def toModelAndView: ModelAndView = {
 		val mav = if (view != null) new ModelAndView(view) else new ModelAndView(viewName)
 		mav.addAllObjects(toModel)
 		mav
 	}
 
-	override def toString = {
+	override def toString: String = {
 		val v = if (view != null) view else viewName
 		"Mav(" + v + ", " + map + ")"
 	}
 
-	override def equals(other: Any) = other match {
+	override def equals(other: Any): Boolean = other match {
 		case m: Mav =>
 			view == m.view &&
 			viewName == m.viewName &&
@@ -160,11 +160,11 @@ object Mav {
 	 * constructor accepts the same kind of pair list, so "objects:_*" is used to pass the argument
 	 * list through as separate arguments rather than as a single list argument.
 	 */
-	def apply(view: String, objects: (String, _)*) = new Mav(view).addObjects(objects: _*)
-	def apply(view: String, objects: Map[String, _]) = new Mav(view).addObjects(objects)
+	def apply(view: String, objects: (String, _)*): Mav = new Mav(view).addObjects(objects: _*)
+	def apply(view: String, objects: Map[String, _]): Mav = new Mav(view).addObjects(objects)
 
-	def apply(view: View, objects: (String, _)*) = new Mav(view).addObjects(objects: _*)
-	def apply(view: View, objects: Map[String, _]) = new Mav(view).addObjects(objects)
+	def apply(view: View, objects: (String, _)*): Mav = new Mav(view).addObjects(objects: _*)
+	def apply(view: View, objects: Map[String, _]): Mav = new Mav(view).addObjects(objects)
 
 	def empty() = new Mav()
 }

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 import scala.collection.JavaConverters._
@@ -66,7 +67,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		addUsersResult: AddUsersToEditSchemeMembershipCommandResult = AddUsersToEditSchemeMembershipCommandResult(Seq(), Seq()),
 		expandFind: Boolean = false,
 		expandManual: Boolean = false
-	) = {
+	): Mav = {
 		Mav(renderPath,
 			"totalResults" -> 0,
 			"findCommandResult" -> findStudentsForSchemeCommandResult,
@@ -89,7 +90,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with PopulateOnForm with FindStudentsForSchemeCommandState,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with PopulateOnForm,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		findCommand.populate()
 		editMembershipCommand.populate()
 		val findStudentsForSchemeCommandResult = findCommand.apply()
@@ -100,7 +101,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 	@RequestMapping(Array("/all"))
 	def allStudents(
 		@ModelAttribute("persistanceCommand") cmd: AddStudentsToSchemeCommandState
-	) = {
+	): Mav = {
 		Mav("attendance/manage/_allstudents", "membershipItems" -> cmd.membershipItems).noLayoutIf(ajax)
 	}
 
@@ -109,7 +110,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		val findStudentsForSchemeCommandResult = findCommand.apply()
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult, expandFind = true)
@@ -120,7 +121,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		Mav("attendance/manage/manuallyaddstudents",
 			"ManageSchemeMappingParameters" -> ManageSchemeMappingParameters,
 			"returnTo" -> getReturnTo("")
@@ -136,7 +137,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with AddsUsersToEditSchemeMembershipCommand,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		val addUsersResult = editMembershipCommand.addUsers()
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		findCommand.update(editMembershipCommandResult)
@@ -149,7 +150,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with RemovesUsersFromEditSchemeMembershipCommand,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		editMembershipCommand.removeUsers()
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		findCommand.update(editMembershipCommandResult)
@@ -162,7 +163,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with UpdatesFindStudentsForSchemeCommand,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult] with ResetsMembershipInEditSchemeMembershipCommand,
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		editMembershipCommand.resetMembership()
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		findCommand.update(editMembershipCommandResult)
@@ -175,7 +176,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		findCommand.deserializeFilter("")
 		findCommand.staticStudentIds.clear()
 		val editMembershipCommandResult = editMembershipCommand.apply()
@@ -189,7 +190,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
 		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
 		@PathVariable scheme: AttendanceMonitoringScheme
-	) = {
+	): Mav = {
 		if (errors.hasErrors) {
 			val findStudentsForSchemeCommandResult = findCommand.apply()
 			val editMembershipCommandResult = editMembershipCommand.apply()

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.AssessmentService
 class AssignmentIdConverterTest extends TestBase with Mockito {
 
 	val converter = new AssignmentIdConverter
-	val service = mock[AssessmentService]
+	val service: AssessmentService = mock[AssessmentService]
 	converter.service = service
 
 	@Test def validInput {

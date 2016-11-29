@@ -35,7 +35,7 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
 		field
 	}
 
-	override def afterPropertiesSet = {
+	override def afterPropertiesSet: Unit = {
 		super.afterPropertiesSet()
 		val defaultHandlers = returnValueHandlersField.get(this).asInstanceOf[HandlerMethodReturnValueHandlerComposite]
 		val composite = new HandlerMethodReturnValueHandlerComposite
@@ -75,9 +75,9 @@ class TwoWayConvertersJsonModule(converters: Iterable[TwoWayConverter[String, _]
 		addDeserializer(c.typeB.runtimeClass.asInstanceOf[Class[Any]], c.asJsonDeserializer)
 	}
 
-	override def getModuleName = getClass.getSimpleName
-	override def hashCode = getClass.hashCode
-	override def equals(other: Any) =
+	override def getModuleName: String = getClass.getSimpleName
+	override def hashCode: Int = getClass.hashCode
+	override def equals(other: Any): Boolean =
 		other match {
 			case that: TwoWayConvertersJsonModule => this.eq(that) // Reference equality
 			case _ => false

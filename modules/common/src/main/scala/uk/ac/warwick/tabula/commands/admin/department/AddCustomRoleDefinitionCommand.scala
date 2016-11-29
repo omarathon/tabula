@@ -31,7 +31,7 @@ trait AddCustomRoleDefinitionCommandState {
 class AddCustomRoleDefinitionCommandInternal(val department: Department) extends CommandInternal[CustomRoleDefinition] with AddCustomRoleDefinitionCommandState {
 	self: PermissionsServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): CustomRoleDefinition = transactional() {
 		val definition = new CustomRoleDefinition
 		definition.department = department
 		definition.name = name
@@ -69,7 +69,7 @@ trait AddCustomRoleDefinitionCommandValidation extends SelfValidating {
 trait AddCustomRoleDefinitionCommandDescription extends Describable[CustomRoleDefinition] {
 	self: AddCustomRoleDefinitionCommandState =>
 	// describe the thing that's happening.
-	override def describe(d: Description) =
+	override def describe(d: Description): Unit =
 		d.department(department)
 }
 

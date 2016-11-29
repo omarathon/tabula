@@ -9,5 +9,5 @@ import org.springframework.jdbc.datasource.AbstractDataSource
 */
 class UnusableDataSource extends AbstractDataSource {
   override def getConnection() = throw new UnsupportedOperationException("This is not a real data source!")
-  override def getConnection(u:String, p:String) = getConnection()
+  override def getConnection(u:String, p:String): Nothing = getConnection()
 }

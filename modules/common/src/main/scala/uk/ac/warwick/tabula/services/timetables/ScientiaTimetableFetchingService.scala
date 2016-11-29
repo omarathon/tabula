@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import dispatch.classic.url
+import dispatch.classic.{Handler, Request, url}
 import org.apache.commons.codec.digest.DigestUtils
 import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
@@ -31,12 +31,12 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 	val scientiaConfiguration = new AutowiringScientiaConfiguration
 
 	class AutowiringScientiaConfiguration extends ScientiaConfiguration {
-		def scientiaFormat(year: AcademicYear) = {
+		def scientiaFormat(year: AcademicYear): String = {
 			// e.g. 1314
 			(year.startYear % 100).toString + (year.endYear % 100).toString
 		}
 
-		lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
+		lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
 		lazy val currentAcademicYear: Option[AcademicYear] = Some(AcademicYear.guessSITSAcademicYearByDate(clock.now))
 		lazy val prevAcademicYear: Option[AcademicYear] = {
 			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
@@ -50,11 +50,11 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 		def yearProperty: Option[Seq[AcademicYear]] =
 			Wire.optionProperty("${scientia.years}").map { _.split(",").map(AcademicYear.parse) }
 
-		lazy val academicYears = yearProperty.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
+		lazy val academicYears: Seq[AcademicYear] = yearProperty.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
 
-		lazy val perYearUris = academicYears.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
+		lazy val perYearUris: Seq[(String, AcademicYear)] = academicYears.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
 
-		lazy val cacheSuffix = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
+		lazy val cacheSuffix: String = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
 
 		val cacheExpiryTime: Int = 60 * 60 * 6 // 6 hours in seconds
 	}
@@ -69,7 +69,7 @@ trait AutowiringNewScientiaConfigurationComponent extends AutowiringScientiaConf
 	val newScientiaConfiguration = new AutowiringNewScientiaConfiguration
 
 	class AutowiringNewScientiaConfiguration extends AutowiringScientiaConfiguration {
-		override lazy val scientiaBaseUrl = Wire.optionProperty("${scientia.base.url.new}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
+		override lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url.new}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
 
 		override lazy val cacheSuffix = "New"
 
@@ -98,27 +98,27 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 
 	import ScientiaHttpTimetableFetchingService._
 
-	lazy val perYearUris = scientiaConfiguration.perYearUris
+	lazy val perYearUris: Seq[(String, AcademicYear)] = scientiaConfiguration.perYearUris
 
-	lazy val studentUris = perYearUris.map {
+	lazy val studentUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?StudentXML", year)
 	}
-	lazy val staffUris = perYearUris.map {
+	lazy val staffUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?StaffXML", year)
 	}
-	lazy val courseUris = perYearUris.map {
+	lazy val courseUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?CourseXML", year)
 	}
-	lazy val moduleUris = perYearUris.map {
+	lazy val moduleUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?ModuleXML", year)
 	}
-	lazy val roomUris = perYearUris.map {
+	lazy val roomUris: Seq[(String, AcademicYear)] = perYearUris.map {
 		case (uri, year) => (uri + "?RoomXML", year)
 	}
 
 	// a dispatch response handler which reads XML from the response and parses it into a list of TimetableEvents
 	// the timetable response doesn't include its year, so we pass that in separately.
-	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String) = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
+	def handler(year: AcademicYear, excludeSmallGroupEventsInTabula: Boolean = false, uniId: String): (Map[String, Seq[String]], Request) => Handler[Seq[TimetableEvent]] = { (headers: Map[String,Seq[String]], req: dispatch.classic.Request) =>
 		req <> { node =>
 			parseXml(node, year, uniId, locationFetchingService, moduleAndDepartmentService, userLookup)
 		}
@@ -129,11 +129,11 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 			!smallGroupService.getSmallGroupSets(module, year).forall(_.archived)
 		}
 
-	def getTimetableForStudent(universityId: String) = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
-	def getTimetableForModule(moduleCode: String) = doRequest(moduleUris, moduleCode)
-	def getTimetableForCourse(courseCode: String) = doRequest(courseUris, courseCode)
-	def getTimetableForRoom(roomName: String) = doRequest(roomUris, roomName)
-	def getTimetableForStaff(universityId: String) = doRequest(
+	def getTimetableForStudent(universityId: String): Future[EventList] = doRequest(studentUris, universityId, excludeSmallGroupEventsInTabula = true)
+	def getTimetableForModule(moduleCode: String): Future[EventList] = doRequest(moduleUris, moduleCode)
+	def getTimetableForCourse(courseCode: String): Future[EventList] = doRequest(courseUris, courseCode)
+	def getTimetableForRoom(roomName: String): Future[EventList] = doRequest(roomUris, roomName)
+	def getTimetableForStaff(universityId: String): Future[EventList] = doRequest(
 		staffUris,
 		universityId,
 		excludeSmallGroupEventsInTabula = true,
@@ -201,7 +201,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 
 	val cacheName = "SyllabusPlusTimetableLists"
 
-	def apply(scientiaConfiguration: ScientiaConfiguration) = {
+	def apply(scientiaConfiguration: ScientiaConfiguration): CompleteTimetableFetchingService = {
 		val service =
 			new ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 				with WAI2GoHttpLocationFetchingServiceComponent

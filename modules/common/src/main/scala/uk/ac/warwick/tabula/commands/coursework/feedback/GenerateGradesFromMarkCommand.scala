@@ -26,7 +26,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap = assessment.assessmentGroups.asScala.map(group =>
+	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroup]] = assessment.assessmentGroups.asScala.map(group =>
 		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
 	).toMap
 
@@ -44,7 +44,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 		}
 	}
 
-	override def applyInternal() = {
+	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
 		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter(s => isNotNullAndInt(s._2))
@@ -63,7 +63,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 		}.toMap
 	}
 
-	override def applyForMarks(marks: Map[String, Int]) = {
+	override def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]] = {
 		studentMarks = marks.mapValues(m => m.toString).asJava
 		applyInternal()
 	}

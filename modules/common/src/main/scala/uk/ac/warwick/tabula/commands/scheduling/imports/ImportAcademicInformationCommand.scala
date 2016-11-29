@@ -514,7 +514,7 @@ class ImportDepartmentsModulesCommandInternal() extends CommandInternal[Unit]
 	with TaskBenchmarking {
 	self: ImportDepartmentsModulesState with ImportModules with ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Unit = transactional() {
 		benchmarkTask("Import modules") {
 			val codes = deptCode.split(",")
 			val departments = codes.flatMap(moduleAndDepartmentService.getDepartmentByCode)

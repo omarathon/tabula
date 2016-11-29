@@ -15,7 +15,7 @@ object AbsenceType {
 	case object Unknown extends AbsenceType("unknown", "Unknown")
 	case object Other extends AbsenceType("other", "Other")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): AbsenceType = code match {
 		case Academic.dbValue => Academic
 		case Medical.dbValue => Medical
 		case Personal.dbValue => Personal
@@ -39,8 +39,8 @@ class AbsenceTypeUserType extends AbstractBasicUserType[AbsenceType, String] {
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = AbsenceType.fromCode(string)
+	override def convertToObject(string: String): AbsenceType = AbsenceType.fromCode(string)
 
-	override def convertToValue(state: AbsenceType) = state.dbValue
+	override def convertToValue(state: AbsenceType): String = state.dbValue
 
 }

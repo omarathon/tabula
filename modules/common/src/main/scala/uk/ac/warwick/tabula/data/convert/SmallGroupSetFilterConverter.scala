@@ -13,7 +13,7 @@ class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSet
 	@Autowired var moduleService: ModuleAndDepartmentService = _
 	@Autowired var smallGroupService: SmallGroupService = _
 
-	override def convertRight(source: String) = source match {
+	override def convertRight(source: String): SmallGroupSetFilter = source match {
 		case r"Module\(([^\)]+)${moduleCode}\)" =>
 			SmallGroupSetFilters.Module(moduleService.getModuleByCode(sanitise(moduleCode)).getOrElse { moduleService.getModuleById(moduleCode).orNull })
 		case r"AllocationMethod\.Linked\(([^\)]+)${id}\)" =>
@@ -27,9 +27,9 @@ class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSet
 
 	}
 
-	override def convertLeft(source: SmallGroupSetFilter) = Option(source).map { _.getName }.orNull
+	override def convertLeft(source: SmallGroupSetFilter): String = Option(source).map { _.getName }.orNull
 
-	def sanitise(code: String) = {
+	def sanitise(code: String): String = {
 		if (code == null) throw new IllegalArgumentException
 		else code.toLowerCase
 	}

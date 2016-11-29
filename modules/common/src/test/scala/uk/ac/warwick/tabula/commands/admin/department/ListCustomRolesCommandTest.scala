@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.data.model.permissions.{DepartmentGrantedRole, CustomRoleDefinition}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
 import ListCustomRolesCommand._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 
 class ListCustomRolesCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends ListCustomRolesCommandState with PermissionsServiceComponent {
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val command = new ListCustomRolesCommandInternal(department) with CommandTestSupport
 	}
@@ -41,7 +42,7 @@ class ListCustomRolesCommandTest extends TestBase with Mockito {
 
 	@Test def permissions {
 		val command = new ListCustomRolesCommandPermissions with ListCustomRolesCommandState {
-			override val department = Fixtures.department("in")
+			override val department: Department = Fixtures.department("in")
 		}
 
 		val checking = mock[PermissionsChecking]

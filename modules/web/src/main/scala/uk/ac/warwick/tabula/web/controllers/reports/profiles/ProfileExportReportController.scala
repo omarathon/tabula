@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.services.ZipCreator
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance}
 import uk.ac.warwick.tabula.services.objectstore.AutowiringObjectStorageServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
@@ -23,7 +24,7 @@ import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 @RequestMapping(Array("/reports/{department}/{academicYear}/profiles/export/report"))
 class ProfileExportReportController extends ReportsController with AutowiringJobServiceComponent with AutowiringObjectStorageServiceComponent {
 
-	var fileServer = Wire[FileServer]
+	var fileServer: FileServer = Wire[FileServer]
 
 	validatesSelf[SelfValidating]
 
@@ -36,7 +37,7 @@ class ProfileExportReportController extends ReportsController with AutowiringJob
 		@Valid @ModelAttribute("command") cmd: Appliable[JobInstance], errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		if(errors.hasErrors) {
 			Mav("reports/profiles/export").crumbs(
 				ReportsBreadcrumbs.Home.Department(department),
@@ -54,7 +55,7 @@ class ProfileExportReportController extends ReportsController with AutowiringJob
 	}
 
 	@RequestMapping(params = Array("jobId"))
-	def checkProgress(@RequestParam jobId: String) = {
+	def checkProgress(@RequestParam jobId: String): Mav = {
 		jobService.getInstance(jobId) match {
 			case Some(job: JobInstance) => Mav(new JSONView(Map(
 				"progress" -> job.progress.toString,

@@ -12,8 +12,8 @@ import uk.ac.warwick.userlookup.User
 
 class SmallGroupServiceTest extends TestBase with Mockito {
 	trait Environment {
-		val studentGroupMembershipHelper = smartMock[UserGroupMembershipHelper[SmallGroup]]
-		val departmentStudentGroupMembershipHelper = smartMock[UserGroupMembershipHelper[DepartmentSmallGroup]]
+		val studentGroupMembershipHelper: UserGroupMembershipHelper[SmallGroup] = smartMock[UserGroupMembershipHelper[SmallGroup]]
+		val departmentStudentGroupMembershipHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = smartMock[UserGroupMembershipHelper[DepartmentSmallGroup]]
 
 		val mockUserLookup: UserLookupService = smartMock[UserLookupService]
 
@@ -26,7 +26,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		val module = new Module("am101", dept)
 		val module2: Module = new Module("cs123", dept)
 
-		val student = Fixtures.student(userId = "cusdx", department = dept)
+		val student: StudentMember = Fixtures.student(userId = "cusdx", department = dept)
 
 		val groupSet = new SmallGroupSet
 		groupSet.module = module
@@ -55,7 +55,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		occurrence2.event = event1
 		occurrence2.week = 3
 
-		val eventOccurrencesGroup1 =  Seq(occurrence1) ++ Seq(occurrence2)
+		val eventOccurrencesGroup1: Seq[SmallGroupEventOccurrence] =  Seq(occurrence1) ++ Seq(occurrence2)
 
 		val user1 = new User
 		user1.setUserId("cusdy")
@@ -118,12 +118,12 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				val departmentGroupSetManualMembersHelper: UserGroupMembershipHelper[DepartmentSmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
 				val departmentStudentGroupHelper: UserGroupMembershipHelper[DepartmentSmallGroup] = departmentStudentGroupMembershipHelper
-				val termService = smartMock[TermService]
+				val termService: TermService = smartMock[TermService]
 
-				val membershipService = smartMock[AssessmentMembershipService]
+				val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 				val smallGroupDao: SmallGroupDao = smartMock[SmallGroupDao]
 
-				override val weekToDateConverter = smartMock[WeekToDateConverter]
+				override val weekToDateConverter: WeekToDateConverter = smartMock[WeekToDateConverter]
 
 				smallGroupDao.findByModuleAndYear(module, new AcademicYear(2013)) returns Seq[SmallGroup](group)
 				smallGroupDao.findByModuleAndYear(module2, new AcademicYear(2013)) returns Seq[SmallGroup]()
@@ -151,7 +151,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 				val userGroupDao: UserGroupDao = smartMock[UserGroupDao]
 			  val securityService: SecurityService = smartMock[SecurityService]
-				def userLookup = mockUserLookup
+				def userLookup: UserLookupService = mockUserLookup
 		}
 	}
 
@@ -204,9 +204,9 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			mockUserLookup.getUserByUserId("cusdy") returns user1
 			mockUserLookup.getUserByUserId("cusdz") returns user2
 			mockUserLookup.getUserByUserId("cusda") returns user3
-			val clashes = service.findPossibleTimetableClashesForGroupSet(group.groupSet)
+			val clashes: Seq[(SmallGroup, Seq[User])] = service.findPossibleTimetableClashesForGroupSet(group.groupSet)
 			clashes.size should be (1)
-			val doesUserClashTimetable = clashes.exists { case(clashGroup,  users) =>  clashGroup.id ==  group.id  &&  users.exists(groupUser => user.getUserId == groupUser.getUserId) && users.size == 1}
+			val doesUserClashTimetable: Boolean = clashes.exists { case(clashGroup,  users) =>  clashGroup.id ==  group.id  &&  users.exists(groupUser => user.getUserId == groupUser.getUserId) && users.size == 1}
 			doesUserClashTimetable should be (true)
 		}
 	}

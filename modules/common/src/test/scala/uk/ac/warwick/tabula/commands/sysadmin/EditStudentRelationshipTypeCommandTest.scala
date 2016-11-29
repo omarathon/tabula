@@ -25,7 +25,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 		testRelationshipType.sortOrder = 9
 
 		val commandInternal = new EditStudentRelationshipTypeCommandInternal(testRelationshipType) with RelationshipServiceComponent {
-			var relationshipService = mock[RelationshipService]
+			var relationshipService: RelationshipService = mock[RelationshipService]
 		}
 	}
 
@@ -88,7 +88,7 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			describable.urlPart = "theUrlPart"
 			describable.description = "role description"
 
-			val description = mock[Description]
+			val description: Description = mock[Description]
 			describable.describe(description)
 			verify(description, times(1)).properties(
 				"id" -> "theId",
@@ -102,9 +102,9 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	def permissionsRequireGlobalStudentRelationshipTypeUpdate {
 		new Fixture {
 			val perms = new EditStudentRelationshipTypeCommandPermissions with HasExistingStudentRelationshipType {
-				val relationshipType = testRelationshipType
+				val relationshipType: StudentRelationshipType = testRelationshipType
 			}
-			val checking = mock[PermissionsChecking]
+			val checking: PermissionsChecking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			verify(checking, times(1)).PermissionCheck(Permissions.StudentRelationshipType.Manage)
 		}

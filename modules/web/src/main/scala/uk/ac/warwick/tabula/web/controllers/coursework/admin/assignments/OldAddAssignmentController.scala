@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
+import uk.ac.warwick.tabula.web.Mav
 
 import scala.collection.JavaConverters._
 
@@ -38,14 +39,14 @@ class OldAddAssignmentController extends OldCourseworkController {
 
 	// Used for initial load and for prefilling from a chosen assignment
 	@RequestMapping()
-	def form(form: AddAssignmentCommand) = {
+	def form(form: AddAssignmentCommand): Mav = {
 		form.afterBind()
 		form.prefillFromRecentAssignment()
 		showForm(form)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=submit"))
-	def submit(@Valid form: AddAssignmentCommand, errors: Errors) = {
+	def submit(@Valid form: AddAssignmentCommand, errors: Errors): Mav = {
 		form.afterBind()
 		if (errors.hasErrors) {
 			showForm(form)
@@ -56,14 +57,14 @@ class OldAddAssignmentController extends OldCourseworkController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=refresh"))
-	def submit(form: AddAssignmentCommand) = {
+	def submit(form: AddAssignmentCommand): Mav = {
 		// No validation here
 		form.afterBind()
 		showForm(form)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid form: AddAssignmentCommand, errors: Errors) = {
+	def update(@Valid form: AddAssignmentCommand, errors: Errors): Mav = {
 		form.afterBind()
 		if (errors.hasErrors) {
 			showForm(form)
@@ -73,7 +74,7 @@ class OldAddAssignmentController extends OldCourseworkController {
 		}
 	}
 
-	def showForm(form: AddAssignmentCommand) = {
+	def showForm(form: AddAssignmentCommand): Mav = {
 		val module = form.module
 
 		Mav(s"$urlPrefix/admin/assignments/new",

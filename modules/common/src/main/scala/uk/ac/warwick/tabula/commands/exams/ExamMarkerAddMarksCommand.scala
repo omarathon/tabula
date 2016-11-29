@@ -46,7 +46,7 @@ trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
 	self: AdminAddMarksCommandState =>
 
-	def emit(updatedFeedback: Seq[Feedback]) = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
+	def emit(updatedFeedback: Seq[Feedback]): Seq[ExamMarkedNotification] = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
 		case examFeedback: ExamFeedback =>
 			Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback, examFeedback.exam))
 			case _ => None

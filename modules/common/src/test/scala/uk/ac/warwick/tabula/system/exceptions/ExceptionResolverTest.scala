@@ -94,14 +94,14 @@ class ExceptionResolverTest extends TestBase {
 		var handled = 0
 
 		resolver.userInterceptor = new CurrentUserInterceptor {
-			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 				handled += 7
 				true
 			}
 		}
 
 		resolver.infoInterceptor = new RequestInfoInterceptor {
-			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+			override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
 				handled += 13
 				true
 			}

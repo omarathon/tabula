@@ -10,7 +10,7 @@ trait AdminFixtures extends BrowserTest {
 		pageSource should include("Fixture setup successful")
 	}
 
-	def as[T](user: LoginDetails)(fn: => T) = {
+	def as[T](user: LoginDetails)(fn: => T): T = {
 		currentUser = user
 		signIn as user to Path("/admin")
 

@@ -1,8 +1,11 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import java.util
+
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedTutorNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedNotification}
-import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
+import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedTutorNotification}
+import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
@@ -18,7 +21,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 
 	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(transient = false)
 
-	def hasAffectedStudentsGroups(student: User) = {
+	def hasAffectedStudentsGroups(student: User): Boolean = {
 		val previousMembership = setBeforeUpdates.groups.asScala.find(_.students.users.contains(student))
 		val currentMembership = set.groups.asScala.find(_.students.users.contains(student))
 		// notify if the student's group membership has changed, or
@@ -26,7 +29,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 		(previousMembership != currentMembership) || !previousMembership.get.hasEquivalentEventsTo(currentMembership.get)
 	}
 
-	def hasAffectedTutorsEvents(tutor: User) = {
+	def hasAffectedTutorsEvents(tutor: User): Boolean = {
 		// can't use group.hasEquivalentEventsTo, because there might be a change to an event which this user is not a tutor of
 		// - so comparisons have to be at the event level rather than the group level
 		val previousEvents = setBeforeUpdates.groups.asScala.flatMap(_.events).filter(_.tutors.users.contains(tutor))
@@ -47,7 +50,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	/**
 	 * Just the groups in this set that are applicable to this tutor.
 	 */
-	def tutorsEvents(set: SmallGroupSet, tutor: User) = {
+	def tutorsEvents(set: SmallGroupSet, tutor: User): SmallGroupSet = {
 		val clone = set.duplicateTo(transient = false)
 		for (clonedGroup <- clone.groups.asScala) {
 			clonedGroup.events.filterNot(_.tutors.users.contains(tutor)).foreach(clonedGroup.removeEvent)
@@ -59,7 +62,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 	/**
 	 * Just the groups in this set that are applicable to this student.
 	 */
-	def studentsEvents(set: SmallGroupSet, student: User) = {
+	def studentsEvents(set: SmallGroupSet, student: User): util.List[SmallGroup] = {
 		set.groups.asScala.filter(_.students.users.contains(student)).asJava
 	}
 
@@ -73,7 +76,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 		createNotification(set, filteredGroups.asScala, student, new SmallGroupSetChangedStudentNotification, set.emailStudentsOnChange)
 	}
 
-	def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedNotification, sendEmail: Boolean) = {
+	def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedNotification, sendEmail: Boolean): Option[SmallGroupSetChangedNotification] = {
 		filteredGroups.toSeq match {
 			case Nil => None
 			case groups =>

@@ -13,14 +13,14 @@ import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationship] {
 	this: TransactionalComponent with SessionComponent=>
 
-	val memberDao = Wire[MemberDao]
-	val relationshipDao = Wire[RelationshipDao]
-	val relationshipService = Wire[RelationshipService]
+	val memberDao: MemberDao = Wire[MemberDao]
+	val relationshipDao: RelationshipDao = Wire[RelationshipDao]
+	val relationshipService: RelationshipService = Wire[RelationshipService]
 	var agent:String = _
 	var studentUniId:String = _
 	var relationshipType:String = "tutor"
 
-	protected def applyInternal() =
+	protected def applyInternal(): MemberStudentRelationship =
 		transactional() {
 			val relType = relationshipService.getStudentRelationshipTypeByUrlPart(relationshipType).get
 			val student = memberDao.getByUniversityId(studentUniId).get match {
@@ -46,7 +46,7 @@ class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationsh
 }
 
 object RelationshipFixtureCommand{
-	def apply()={
+	def apply(): RelationshipFixtureCommand with ComposableCommand[MemberStudentRelationship] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
 		new RelationshipFixtureCommand
 			with ComposableCommand[MemberStudentRelationship]
 			with AutowiringModuleAndDepartmentServiceComponent

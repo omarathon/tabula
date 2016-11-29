@@ -18,7 +18,7 @@ class ExamAssignMarkersTemplateController extends ExamsController {
 	def command(@PathVariable exam: Exam) = AssignMarkersTemplateCommand(exam)
 
 	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]) = {
+	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
 		cmd.apply()
 	}
 

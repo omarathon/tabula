@@ -13,7 +13,7 @@ object LazyMaps {
 	 * factory.
 	 */
 	def create[K,V](factory: (K)=>(V)) = new mutable.LinkedHashMap[K,V] {
-		override def apply(key: K) =
+		override def apply(key: K): V =
 			superGetOrUpdate(key, { factory(key) })
 
 		override def get(key: K) = Option(apply(key))

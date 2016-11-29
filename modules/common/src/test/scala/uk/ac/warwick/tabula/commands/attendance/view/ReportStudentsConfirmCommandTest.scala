@@ -3,17 +3,18 @@ package uk.ac.warwick.tabula.commands.attendance.view
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AttendanceMonitoringService}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringService, AttendanceMonitoringServiceComponent}
 
 class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent with TermServiceComponent {
-		val department = Fixtures.department("its")
+		val department: Department = Fixtures.department("its")
 		val academicYear = AcademicYear(2014)
 		val user: CurrentUser = null
-		val termService = smartMock[TermService]
-		val profileService = smartMock[ProfileService]
-		val attendanceMonitoringService = smartMock[AttendanceMonitoringService]
+		val termService: TermService = smartMock[TermService]
+		val profileService: ProfileService = smartMock[ProfileService]
+		val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
 	}
 
 	@Test

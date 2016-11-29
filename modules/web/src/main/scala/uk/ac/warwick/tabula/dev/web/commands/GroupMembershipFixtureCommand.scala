@@ -16,7 +16,7 @@ class GroupMembershipFixtureCommand extends CommandInternal[SmallGroup] with Log
 	var groupName: String = _
 	var userId: String = _
 
-	protected def applyInternal() =
+	protected def applyInternal(): SmallGroup =
 		transactional() {
 			val user = userLookup.getUserByUserId(userId)
 			val groupset = smallGroupDao.getSmallGroupSetById(groupSetId).get
@@ -27,7 +27,7 @@ class GroupMembershipFixtureCommand extends CommandInternal[SmallGroup] with Log
 		}
 }
 object GroupMembershipFixtureCommand {
-	def apply() = {
+	def apply(): GroupMembershipFixtureCommand with ComposableCommand[SmallGroup] with AutowiringUserLookupComponent with AutowiringSmallGroupDaoComponent with Daoisms with Unaudited with PubliclyVisiblePermissions = {
 		new GroupMembershipFixtureCommand
 			with ComposableCommand[SmallGroup]
 			with AutowiringUserLookupComponent

@@ -17,15 +17,18 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.coursework.{CourseworkFilter, CourseworkFilters}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
+
+import scala.xml.Elem
 
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}"))
 class OldSubmissionAndFeedbackController extends OldCourseworkController {
 
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
 
 	validatesSelf[SelfValidating]
 
@@ -34,11 +37,11 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 		SubmissionAndFeedbackCommand(module, assignment)
 
 	@ModelAttribute("allFilters")
-	def allFilters(@PathVariable assignment: Assignment) =
+	def allFilters(@PathVariable assignment: Assignment): Seq[CourseworkFilter with Product with Serializable] =
 		CourseworkFilters.AllFilters.filter(_.applies(assignment))
 
 	@RequestMapping(Array("/list"))
-	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
 		module.adminDepartment.assignmentInfoView match {
 			case Assignment.Settings.InfoViewType.Summary =>
 				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
@@ -53,7 +56,7 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/summary"))
-	def summary(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def summary(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
@@ -70,7 +73,7 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/table"))
-	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def table(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable module: Module, @PathVariable assignment: Assignment): Mav = {
 		if (errors.hasErrors) {
 			Mav(s"$urlPrefix/admin/assignments/submissionsandfeedback/list")
 				.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
@@ -93,7 +96,7 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/export.csv"))
-	def csv(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def csv(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment): CSVView = {
 		val results = command.apply()
 
 		val items = results.students
@@ -111,7 +114,7 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/export.xml"))
-	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment): Elem = {
 		val results = command.apply()
 
 		val items = results.students
@@ -120,7 +123,7 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 	}
 
 	@RequestMapping(Array("/export.xlsx"))
-	def xlsx(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment) = {
+	def xlsx(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable module: Module, @PathVariable assignment: Assignment): ExcelView = {
 		val results = command.apply()
 
 		val items = results.students
@@ -132,8 +135,8 @@ class OldSubmissionAndFeedbackController extends OldCourseworkController {
 
 	override def binding[A](binder: WebDataBinder, cmd: A) {
 		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
-			override def fromString(name: String) = CourseworkFilters.of(name)
-			override def toString(filter: CourseworkFilter) = filter.getName
+			override def fromString(name: String): CourseworkFilter = CourseworkFilters.of(name)
+			override def toString(filter: CourseworkFilter): String = filter.getName
 		})
 	}
 

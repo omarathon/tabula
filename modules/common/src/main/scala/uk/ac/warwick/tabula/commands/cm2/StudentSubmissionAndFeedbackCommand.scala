@@ -55,8 +55,8 @@ trait StudentSubmissionAndFeedbackCommandState {
 	def studentUser: User
 	def viewer: User
 
-	lazy val feedback = feedbackService.getAssignmentFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
-	lazy val submission = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
+	lazy val feedback: Option[AssignmentFeedback] = feedbackService.getAssignmentFeedbackByUniId(assignment, studentUser.getWarwickId).filter(_.released)
+	lazy val submission: Option[Submission] = submissionService.getSubmissionByUniId(assignment, studentUser.getWarwickId).filter { _.submitted }
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -65,8 +65,8 @@ trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAn
 	def studentMember: Member
 	def currentUser: CurrentUser
 
-	final lazy val studentUser = studentMember.asSsoUser
-	final lazy val viewer = currentUser.apparentUser
+	final lazy val studentUser: User = studentMember.asSsoUser
+	final lazy val viewer: User = currentUser.apparentUser
 }
 
 trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
@@ -74,8 +74,8 @@ trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndF
 
 	def currentUser: CurrentUser
 
-	final lazy val studentUser = currentUser.apparentUser
-	final lazy val viewer = currentUser.apparentUser
+	final lazy val studentUser: User = currentUser.apparentUser
+	final lazy val viewer: User = currentUser.apparentUser
 }
 
 abstract class StudentMemberSubmissionAndFeedbackCommandInternal(module: Module, assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
@@ -92,7 +92,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
 	extends CommandInternal[StudentSubmissionInformation] with StudentSubmissionAndFeedbackCommandState {
 	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
-	def applyInternal() = {
+	def applyInternal(): StudentSubmissionInformation = {
 		val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
 
 		// Log a ViewOnlineFeedback event if the student itself is viewing

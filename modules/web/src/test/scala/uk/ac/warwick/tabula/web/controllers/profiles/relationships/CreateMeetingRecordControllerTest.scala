@@ -1,21 +1,21 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships
 
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, MemberStudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings._
 
 class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 
-	val student = Fixtures.student()
-	val studentCourseDetails = student.mostSignificantCourseDetails.get
+	val student: StudentMember = Fixtures.student()
+	val studentCourseDetails: StudentCourseDetails = student.mostSignificantCourseDetails.get
 
 	val controller = new CreateMeetingRecordController
 
-	val profileService = mock[ProfileService]
+	val profileService: ProfileService = mock[ProfileService]
 	controller.profileService = profileService
-	val relationshipService  = mock[RelationshipService]
+	val relationshipService: RelationshipService = mock[RelationshipService]
 	controller.relationshipService = relationshipService
 
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 class DownloadFeedbackAsPdfController extends CourseworkController {
 
 	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
-	var feedbackService = Wire[FeedbackService]
+	var feedbackService: FeedbackService = Wire[FeedbackService]
 
 	@ModelAttribute def command(
 		@PathVariable module: Module,
@@ -35,7 +35,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	}
 
 	@RequestMapping
-	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: Member) = {
+	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: Member): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
 		new PDFView(
 			"feedback.pdf",
 			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,

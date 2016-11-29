@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 @Entity
 class AttendanceMonitoringCheckpoint extends GeneratedId {
 
-	@transient var attendanceMonitoringService = Wire[AttendanceMonitoringService]
+	@transient var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "point_id")
@@ -29,7 +29,7 @@ class AttendanceMonitoringCheckpoint extends GeneratedId {
 	@Column(name = "state")
 	private var _state: AttendanceState = _
 
-	def state = _state
+	def state: AttendanceState = _state
 	def state_=(state: AttendanceState) {
 		if (attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)){
 			throw new IllegalArgumentException

@@ -3,22 +3,22 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.Fixtures
 
 class ArchiveAssignmentsTest  extends TestBase with Mockito {
 
 	trait CommandTestSupport extends AssessmentServiceComponent {
-		val assessmentService = mock[AssessmentService]
+		val assessmentService: AssessmentService = mock[AssessmentService]
 		def apply(): Seq[Assignment] = Seq()
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("bs")
-		val module = Fixtures.module("bs101")
+		val department: Department = Fixtures.department("bs")
+		val module: Module = Fixtures.module("bs101")
 
-		val assignment = Fixtures.assignment("Essay 1")
+		val assignment: Assignment = Fixtures.assignment("Essay 1")
 		assignment.archive()
 	}
 

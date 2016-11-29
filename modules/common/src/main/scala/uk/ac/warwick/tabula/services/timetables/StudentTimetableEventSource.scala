@@ -39,7 +39,7 @@ trait CombinedStudentTimetableEventSourceComponent extends StudentTimetableEvent
 }
 
 trait AutowiringStudentTimetableEventSourceComponent extends StudentTimetableEventSourceComponent {
-	val studentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
+	val studentTimetableEventSource: StudentTimetableEventSource = (new CombinedStudentTimetableEventSourceComponent
 		with SmallGroupEventTimetableEventSourceComponentImpl
 		with CombinedHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent

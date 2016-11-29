@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+import scala.collection.mutable
 
 object SortRoutesCommand {
 	def apply(department: Department) =
@@ -26,7 +28,7 @@ object SortRoutesCommand {
 class SortRoutesCommandInternal(val department: Department) extends CommandInternal[Unit] with SortRoutesCommandState with SortRoutesCommandGrouping {
 	self: ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal() = transactional() {
+	def applyInternal(): Unit = transactional() {
 		for ((dept, routes) <- mapping.asScala) {
 			dept.routes.clear()
 			dept.routes.addAll(routes)
@@ -80,13 +82,13 @@ trait SortRoutesCommandValidation extends SelfValidating {
 
 trait SortRoutesCommandState extends GroupsObjects[Route, Department] {
 	def department: Department
-	def departments = (department :: department.children.asScala.toList)
+	def departments: List[Department] = (department :: department.children.asScala.toList)
 
-	protected def validRoute(route: Route) = route.code != null
+	protected def validRoute(route: Route): Boolean = route.code != null
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	def mappingByCode = mapping.asScala.map {
+	def mappingByCode: mutable.Map[String, _root_.uk.ac.warwick.tabula.JavaImports.JList[Route]] = mapping.asScala.map {
 		case (dept, routes) => (dept.code, routes)
 	}
 }
@@ -102,5 +104,5 @@ trait SortRoutesCommandPermissions extends RequiresPermissionsChecking with Perm
 trait SortRoutesCommandDescription extends Describable[Unit] {
 	self: SortRoutesCommandState =>
 
-	def describe(d: Description) = d.department(department)
+	def describe(d: Description): Unit = d.department(department)
 }

@@ -21,6 +21,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.spring.FileUtils
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.matching.Regex
 
 class FeedbackItem {
@@ -34,7 +35,7 @@ class FeedbackItem {
 	var duplicateFileNames: Set[String] = Set()
 	var ignoredFileNames: Set[String] = Set()
 
-	def listAttachments() = file.attached.asScala.map(f => {
+	def listAttachments(): mutable.Buffer[AttachmentItem] = file.attached.asScala.map(f => {
 		val duplicate = duplicateFileNames.contains(f.name)
 		val ignore = ignoredFileNames.contains(f.name)
 		new AttachmentItem(f.name, duplicate, ignore)
@@ -56,7 +57,7 @@ case class ProblemFile(var path: String, var file: FileAttachment) {
 // Purely to generate an audit log event
 class ExtractFeedbackZip(cmd: UploadFeedbackCommand[_]) extends Command[Unit] {
 	def applyInternal() {}
-	def describe(d: Description) = d.assignment(cmd.assignment).properties(
+	def describe(d: Description): Unit = d.assignment(cmd.assignment).properties(
 		"archive" -> cmd.archive.getOriginalFilename)
 }
 
@@ -77,14 +78,14 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 	val uniNumberPattern = new Regex("""(\d{7,})""")
 	// TAB-114 - vast majority of module codes match this pattern
 	val moduleCodePattern = new Regex("""([a-z][a-z][0-9][0-z][0-z])""")
-	@NoBind var disallowedFilenames = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
-	@NoBind var disallowedPrefixes = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
+	@NoBind var disallowedFilenames: List[String] = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
+	@NoBind var disallowedPrefixes: List[String] = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
 
-	var zipService = Wire[ZipService]
-	var userLookup = Wire[UserLookupService]
-	var fileDao = Wire[FileDao]
-	var assignmentService = Wire[AssessmentService]
-	var stateService = Wire[StateService]
+	var zipService: ZipService = Wire[ZipService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var fileDao: FileDao = Wire[FileDao]
+	var assignmentService: AssessmentService = Wire[AssessmentService]
+	var stateService: StateService = Wire[StateService]
 
 	/* for single upload */
 	var uniNumber: String = _
@@ -213,7 +214,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 		items = itemMap.values.toList.asJava
 	}
 
-	override def onBind(result: BindingResult) = transactional() {
+	override def onBind(result: BindingResult): Unit = transactional() {
 		file.onBind(result)
 
 		// ZIP has been uploaded. unpack it

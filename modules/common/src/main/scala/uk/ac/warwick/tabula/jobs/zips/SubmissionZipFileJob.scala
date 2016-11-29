@@ -21,8 +21,8 @@ object SubmissionZipFileJob {
 @Component
 class SubmissionZipFileJob extends ZipFileJob with AutowiringZipServiceComponent with AutowiringSubmissionServiceComponent {
 
-	override val identifier = SubmissionZipFileJob.identifier
-	override val zipFileName = SubmissionZipFileJob.zipFileName
+	override val identifier: String = SubmissionZipFileJob.identifier
+	override val zipFileName: String = SubmissionZipFileJob.zipFileName
 	override val itemDescription = "submissions"
 
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()

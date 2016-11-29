@@ -25,7 +25,7 @@ class DeleteExamCommandInternal(val exam: Exam)
 
 	self: AssessmentServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Exam = {
 		exam.markDeleted()
 		assessmentService.save(exam)
 		exam

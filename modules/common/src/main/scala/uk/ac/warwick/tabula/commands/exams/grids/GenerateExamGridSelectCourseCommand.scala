@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.{AutowiringCourseAndRouteServiceComponent, 
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 
+import scala.collection.immutable.Range.Inclusive
+
 object GenerateExamGridSelectCourseCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new GenerateExamGridSelectCourseCommandInternal(department, academicYear)
@@ -28,7 +30,7 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 
 	self: StudentCourseYearDetailsDaoComponent with GenerateExamGridSelectCourseCommandRequest =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[ExamGridEntity] = {
 		studentCourseYearDetailsDao.findByCourseRouteYear(
 			academicYear,
 			course,
@@ -45,7 +47,7 @@ trait GenerateExamGridSelectCourseValidation extends SelfValidating {
 
 	self: GenerateExamGridSelectCourseCommandState with GenerateExamGridSelectCourseCommandRequest =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		if (course == null) {
 			errors.reject("examGrid.course.empty")
 		} else if (!courses.contains(course)) {
@@ -81,9 +83,9 @@ trait GenerateExamGridSelectCourseCommandState {
 	def department: Department
 	def academicYear: AcademicYear
 
-	lazy val courses = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
-	lazy val routes = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
-	lazy val yearsOfStudy = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
+	lazy val courses: List[Course] = department.descendants.flatMap(d => courseAndRouteService.findCoursesInDepartment(d)).sortBy(_.code)
+	lazy val routes: List[Route] = department.descendants.flatMap(d => courseAndRouteService.findRoutesInDepartment(d)).sortBy(_.code)
+	lazy val yearsOfStudy: Inclusive = 1 to FilterStudentsOrRelationships.MaxYearsOfStudy
 }
 
 trait GenerateExamGridSelectCourseCommandRequest {

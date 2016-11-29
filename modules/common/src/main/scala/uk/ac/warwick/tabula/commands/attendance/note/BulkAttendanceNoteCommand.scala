@@ -8,20 +8,22 @@ import uk.ac.warwick.tabula.commands.PopulateOnForm
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint, AttendanceMonitoringNote}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringNote, AttendanceMonitoringPoint}
 import uk.ac.warwick.tabula.services.AutowiringFileAttachmentServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.services.FileAttachmentServiceComponent
 import uk.ac.warwick.tabula.services.UserLookupComponent
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AutowiringAttendanceMonitoringServiceComponent, AttendanceMonitoringServiceComponent}
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
-import org.springframework.validation.{Errors, BindingResult}
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 
 object BulkAttendanceNoteCommand {
@@ -45,7 +47,7 @@ abstract class BulkAttendanceNoteCommand (
 
 	self: AttendanceMonitoringServiceComponent with FileAttachmentServiceComponent with UserLookupComponent =>
 
-	def populate() = {
+	def populate(): Unit = {
 		val firstNote = students.asScala.flatMap(attendanceMonitoringService.getAttendanceNote(_, point)).headOption
 		firstNote.foreach(n => {
 			note = n.note
@@ -60,7 +62,7 @@ abstract class BulkAttendanceNoteCommand (
 		file.onBind(result)
 	}
 
-	def applyInternal() = {
+	def applyInternal(): mutable.Buffer[AttendanceMonitoringNote] = {
 
 		val notes = students.asScala.flatMap(student => {
 
@@ -100,7 +102,7 @@ abstract class BulkAttendanceNoteCommand (
 trait BulkAttendanceNoteValidation extends SelfValidating {
 	self: BulkAttendanceNoteCommandState =>
 
-	override def validate(errors: Errors) = {
+	override def validate(errors: Errors): Unit = {
 		if (absenceType == null) {
 			errors.rejectValue("absenceType", "attendanceNote.absenceType.empty")
 		}

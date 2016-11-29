@@ -48,7 +48,7 @@ class PurgeAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMem
 
 	self: MemberNoteServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AbstractMemberNote = {
 		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
 			case memberNote: MemberNote => memberNoteService.delete(memberNote)
 			case circumstances: ExtenuatingCircumstances => memberNoteService.delete(circumstances)

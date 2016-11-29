@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.commands.attendance.profile
 
+import org.joda.time.{DateTime, Interval}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.attendance.profile.ViewSmallGroupsForPointCommandResult.GroupData
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState.{NotRecorded, Late, MissedAuthorised, MissedUnauthorised}
+import uk.ac.warwick.tabula.commands.groups.SmallGroupAttendanceState.{Late, MissedAuthorised, MissedUnauthorised, NotRecorded}
 import uk.ac.warwick.tabula.commands.groups.ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.commands.groups.{SmallGroupAttendanceState, StudentGroupAttendance}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
@@ -77,12 +78,12 @@ class ViewSmallGroupsForPointCommandInternal(val student: StudentMember, val poi
 
 	type EventInstance = (SmallGroupEvent, SmallGroupEventOccurrence.WeekNumber)
 
-	lazy val weeksForYear = termService.getAcademicWeeksForYear(point.scheme.academicYear.dateInTermOne).toMap
+	lazy val weeksForYear: Map[Integer, Interval] = termService.getAcademicWeeksForYear(point.scheme.academicYear.dateInTermOne).toMap
 
-	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek): DateTime =
 		weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
-	override def applyInternal() = {
+	override def applyInternal(): ViewSmallGroupsForPointCommandResult = {
 		ViewSmallGroupsForPointCommandResult(
 			courseData,
 			moduleData,

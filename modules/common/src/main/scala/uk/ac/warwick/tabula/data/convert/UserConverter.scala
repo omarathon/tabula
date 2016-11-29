@@ -16,9 +16,9 @@ import uk.ac.warwick.tabula.UniversityId
  */
 class UserConverter extends TwoWayConverter[String, User] {
 
-	var userLookup = Wire[UserLookupService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
-	override def convertRight(userId: String) = {
+	override def convertRight(userId: String): User = {
 		if (UniversityId.isValid(userId)) {
 			Option(userLookup.getUserByWarwickUniId(userId))
 				.filter { _.isFoundUser } // We don't consider not-found users
@@ -28,6 +28,6 @@ class UserConverter extends TwoWayConverter[String, User] {
 		}
 	}
 
-	override def convertLeft(user: User) = (Option(user) map { _.getUserId }).orNull
+	override def convertLeft(user: User): String = (Option(user) map { _.getUserId }).orNull
 
 }

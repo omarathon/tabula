@@ -24,8 +24,8 @@ case class FeatureItem(name: String, value: Boolean)
 @RequestMapping(value = Array("/sysadmin/features"))
 final class FeaturesController extends BaseSysadminController with InitializingBean {
 
-	var features = Wire.auto[Features]
-	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var features: Features = Wire.auto[Features]
+	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
 	private var wrapper: BeanWrapper = _
 	private var properties: List[PropertyDescriptor] = _
@@ -37,7 +37,7 @@ final class FeaturesController extends BaseSysadminController with InitializingB
 			.sortBy { _.getDisplayName }
 	}
 
-	def currentValues = properties.map { (property) =>
+	def currentValues: List[FeatureItem] = properties.map { (property) =>
 		new FeatureItem(property.getDisplayName, wrapper.getPropertyValue(property.getName).asInstanceOf[JBoolean])
 	}
 

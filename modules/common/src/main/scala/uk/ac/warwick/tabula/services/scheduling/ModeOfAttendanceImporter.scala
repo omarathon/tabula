@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
  */
 trait ModeOfAttendanceImporter extends Logging {
 
-	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
+	var modeOfAttendanceDao: ModeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
 	var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
 
@@ -53,7 +53,7 @@ trait ModeOfAttendanceImporter extends Logging {
 class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	import ModeOfAttendanceImporter._
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
 
@@ -101,5 +101,5 @@ trait ModeOfAttendanceImporterComponent {
 }
 
 trait AutowiringModeOfAttendanceImporterComponent extends ModeOfAttendanceImporterComponent {
-	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var modeOfAttendanceImporter: ModeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
 }

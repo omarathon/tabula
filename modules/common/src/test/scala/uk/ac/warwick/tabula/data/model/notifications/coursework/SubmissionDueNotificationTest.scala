@@ -21,7 +21,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 	@Test
 	def generalRecipients() {
 		val notification = new SubmissionDueGeneralNotification {
-			override def assignment = SubmissionDueNotificationTest.this.assignment
+			override def assignment: Assignment = SubmissionDueNotificationTest.this.assignment
 		}
 
 		val membershipService = smartMock[AssessmentMembershipService]
@@ -53,7 +53,7 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		anExtension.universityId = "0133454"
 
 		val notification = new SubmissionDueWithExtensionNotification {
-			override def extension = anExtension
+			override def extension: Extension = anExtension
 		}
 		notification.userLookup = mock[UserLookupService]
 		notification.userLookup.getUserByWarwickUniId("0133454") returns users(1)

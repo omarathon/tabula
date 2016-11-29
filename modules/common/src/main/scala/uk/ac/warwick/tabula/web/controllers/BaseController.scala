@@ -43,7 +43,7 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl:String) =
+	def getReturnTo(defaultUrl:String): String =
 		requestInfo.flatMap {
 			_.requestParameters.get("returnTo")
 		}.flatMap {
@@ -69,7 +69,7 @@ trait ControllerViews extends Logging {
 
 	private def currentUri = requestInfo.get.requestedUri
 	private def currentPath: String = currentUri.getPath
-	def loginUrl = {
+	def loginUrl: String = {
 		val generator = new SSOLoginLinkGenerator
 		generator.setConfig(SSOConfiguration.getConfig)
 		generator.setTarget(currentUri.toString)
@@ -128,21 +128,21 @@ abstract class BaseController extends ControllerMethods
 	 * Resolve a message from messages.properties. This is the same way that
 	 * validation error codes are resolved.
 	 */
-	def getMessage(key: String, args: Object*) = messageSource.getMessage(key, args.toArray, null)
+	def getMessage(key: String, args: Object*): String = messageSource.getMessage(key, args.toArray, null)
 
 	var disallowedFields: List[String] = Nil
 
-	def requestInfo = RequestInfo.fromThread
-	def user = requestInfo.get.user
-	def ajax = requestInfo.exists(_.ajax)
+	def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
+	def user: CurrentUser = requestInfo.get.user
+	def ajax: Boolean = requestInfo.exists(_.ajax)
 
 	/**
 	 * Enables the Hibernate filter for this session to exclude
 	 * entities marked as deleted.
 	 */
 	private var _hideDeletedItems = false
-	def hideDeletedItems = { _hideDeletedItems = true }
-	def showDeletedItems = { _hideDeletedItems = false }
+	def hideDeletedItems: Unit = { _hideDeletedItems = true }
+	def showDeletedItems: Unit = { _hideDeletedItems = false }
 
 	final def preRequest {
 		// if hideDeletedItems has been called, exclude all "deleted=1" items from Hib queries.
@@ -163,7 +163,7 @@ abstract class BaseController extends ControllerMethods
 	 *
 	 * Sets up disallowedFields.
 	 */
-	@InitBinder final def _binding(binder: WebDataBinder) = {
+	@InitBinder final def _binding(binder: WebDataBinder): Unit = {
 		if (validator != null) {
 			if (keepOriginalValidator) {
 				val original = binder.getValidator

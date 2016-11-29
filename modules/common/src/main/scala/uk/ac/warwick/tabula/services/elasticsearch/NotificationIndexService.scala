@@ -64,7 +64,7 @@ class NotificationIndexService
 
 	override val UpdatedDateField: String = "created"
 
-	override protected def listNewerThan(startDate: DateTime, batchSize: Int) = transactional(readOnly = true) {
+	override protected def listNewerThan(startDate: DateTime, batchSize: Int): List[IndexedNotification] = transactional(readOnly = true) {
 		notificationDao.recent(startDate).take(batchSize).flatMap { notification =>
 			try {
 				notification.recipients.toList.map { user => IndexedNotification(notification, user) }

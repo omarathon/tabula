@@ -29,14 +29,14 @@ trait FeedbackForSitsServiceComponent {
 }
 
 trait AutowiringFeedbackForSitsServiceComponent extends FeedbackForSitsServiceComponent {
-	var feedbackForSitsService = Wire[FeedbackForSitsService]
+	var feedbackForSitsService: FeedbackForSitsService = Wire[FeedbackForSitsService]
 }
 
 abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
 	self: FeedbackForSitsDaoComponent =>
 
-	def saveOrUpdate(feedbackForSits: FeedbackForSits) =
+	def saveOrUpdate(feedbackForSits: FeedbackForSits): Unit =
 		feedbackForSitsDao.saveOrUpdate(feedbackForSits)
 
 	def feedbackToLoad: Seq[FeedbackForSits] =

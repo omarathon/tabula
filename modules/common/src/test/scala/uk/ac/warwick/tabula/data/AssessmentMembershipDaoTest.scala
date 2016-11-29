@@ -14,10 +14,10 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 	assignmentMembershipService.dao = dao
 
 	trait Fixture {
-		val dept = Fixtures.department("in")
+		val dept: Department = Fixtures.department("in")
 
-		val module1 = Fixtures.module("in101")
-		val module2 = Fixtures.module("in102")
+		val module1: Module = Fixtures.module("in101")
+		val module2: Module = Fixtures.module("in102")
 
 		dept.modules.add(module1)
 		dept.modules.add(module2)
@@ -26,16 +26,16 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		session.save(module1)
 		session.save(module2)
 
-		val assignment1 = Fixtures.assignment("assignment 1")
+		val assignment1: Assignment = Fixtures.assignment("assignment 1")
 		assignment1.assessmentMembershipService = assignmentMembershipService
 
-		val assignment2 = Fixtures.assignment("assignment 2")
+		val assignment2: Assignment = Fixtures.assignment("assignment 2")
 		assignment2.assessmentMembershipService = assignmentMembershipService
 
-		val assignment3 = Fixtures.assignment("assignment 3")
+		val assignment3: Assignment = Fixtures.assignment("assignment 3")
 		assignment3.assessmentMembershipService = assignmentMembershipService
 
-		val assignment4 = Fixtures.assignment("assignment 4")
+		val assignment4: Assignment = Fixtures.assignment("assignment 4")
 		assignment4.assessmentMembershipService = assignmentMembershipService
 
 		module1.assignments.add(assignment1)

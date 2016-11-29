@@ -13,7 +13,7 @@ object UrkundSubmissionStatus {
 	case object Analyzed extends UrkundSubmissionStatus("Analyzed")
 	case object Error extends UrkundSubmissionStatus("Error")
 
-	def fromStatus(status: String) = status match {
+	def fromStatus(status: String): UrkundSubmissionStatus = status match {
 		case Submitted.status => Submitted
 		case Rejected.status => Rejected
 		case Accepted.status => Accepted

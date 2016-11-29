@@ -26,17 +26,17 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var assignments: JList[Assignment] = JArrayList()
 
 	/* For permission parents, we include both the department and any assignments linked to this template */
-	def permissionsParents =
+	def permissionsParents: Stream[PermissionsTarget] =
 		Option[PermissionsTarget](department).toStream.append(Option(assignments) match {
 			case Some(assignments) => assignments.asScala.toStream
 			case _ => Stream.empty
 		})
 
-	def countLinkedAssignments = Option(assignments) match { case Some(a) => a.size()
+	def countLinkedAssignments: Int = Option(assignments) match { case Some(a) => a.size()
 		case None => 0
 	}
 
-	def hasAssignments = countLinkedAssignments > 0
+	def hasAssignments: Boolean = countLinkedAssignments > 0
 
 	def attachFile(attachment:FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

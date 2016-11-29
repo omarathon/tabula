@@ -27,7 +27,7 @@ class EditSchemeCommandInternal(val scheme: AttendanceMonitoringScheme, val user
 
 	self: EditSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): AttendanceMonitoringScheme = {
 		scheme.name = name
 		scheme.pointStyle = pointStyle
 		scheme.updatedDate = DateTime.now
@@ -41,7 +41,7 @@ trait PopulateEditSchemeCommandInternal extends PopulateOnForm {
 
 	self: EditSchemeCommandState =>
 
-	override def populate() = {
+	override def populate(): Unit = {
 		name = scheme.name
 		pointStyle = scheme.pointStyle
 	}

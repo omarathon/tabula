@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -21,11 +22,11 @@ class DatabaseBackedRoleProviderTest extends TestBase with Mockito {
 
 	val provider = new DatabaseBackedRoleProvider
 
-	val service = mock[PermissionsService]
+	val service: PermissionsService = mock[PermissionsService]
 	provider.service = service
 
-	val dept = Fixtures.department("in")
-	val module = Fixtures.module("in101")
+	val dept: Department = Fixtures.department("in")
+	val module: Module = Fixtures.module("in101")
 	module.adminDepartment = dept
 
 	@Test def getRoles = withUser("cuscav") {

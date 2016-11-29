@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.events
 
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 class SLF4JEventListener extends EventListener {
 	import EventDescription._
 
-	val logger = LoggerFactory.getLogger("uk.ac.warwick.tabula.AUDIT")
+	val logger: Logger = LoggerFactory.getLogger("uk.ac.warwick.tabula.AUDIT")
 
 	override def beforeCommand(event: Event) {
 		val s = generateMessage(event, "pre-event")
@@ -26,9 +26,9 @@ class SLF4JEventListener extends EventListener {
 
 object EventDescription {
 	val QUOTE = "\""
-	val ESCQUOTE = "\\" + QUOTE
+	val ESCQUOTE: String = "\\" + QUOTE
 
-	def generateMessage(event: Event, eventStage: String = "event") = {
+	def generateMessage(event: Event, eventStage: String = "event"): StringBuilder = {
 		val s = new StringBuilder
 		s ++= eventStage ++ "=" ++ event.name
 		if (event.userId != null) {
@@ -41,19 +41,19 @@ object EventDescription {
 		s
 	}
 
-	def userString(id: String) = id match {
+	def userString(id: String): String = id match {
 		case string: String => string
 		case _ => "null"
 	}
 
 	// only supports DescriptionImpl
-	def describe(event: Event, s: StringBuilder) =
+	def describe(event: Event, s: StringBuilder): Unit =
 		for ((key, value) <- event.extra)
 			s ++= " " ++ key ++ "=" ++ quote(stringOf(value))
 
 	private def stringOf(obj: Any) = if (obj == null) "(null)" else obj.toString
 
-	def quote(value: String) = {
+	def quote(value: String): String = {
 		if (value.contains(" ") || value.contains(QUOTE))
 			QUOTE + value.replace(QUOTE, ESCQUOTE) + QUOTE
 		else

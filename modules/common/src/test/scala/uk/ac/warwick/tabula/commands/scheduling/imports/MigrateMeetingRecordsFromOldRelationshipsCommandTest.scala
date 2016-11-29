@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, RelationshipService, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
@@ -10,15 +10,15 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 
 	val tutorRelationshipType = new StudentRelationshipType
 	tutorRelationshipType.id = "tutor"
-	val agent = Fixtures.staff("234")
-	val thisStudent = Fixtures.student("123", "123", null, Fixtures.department("xxx"))
+	val agent: StaffMember = Fixtures.staff("234")
+	val thisStudent: StudentMember = Fixtures.student("123", "123", null, Fixtures.department("xxx"))
 
 	trait TestSupport extends RelationshipServiceComponent with MeetingRecordServiceComponent
 		with MigrateMeetingRecordsFromOldRelationshipsCommandState {
 
-		override val student = thisStudent
-		override val relationshipService = smartMock[RelationshipService]
-		override val meetingRecordService = smartMock[MeetingRecordService]
+		override val student: StudentMember = thisStudent
+		override val relationshipService: RelationshipService = smartMock[RelationshipService]
+		override val meetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
 
 		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns Option(tutorRelationshipType)
 	}
@@ -28,10 +28,10 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 	}
 
 	trait StudentWithOneCurrentOneEndedCourse extends Fixture {
-		val endedCourse = thisStudent.freshStudentCourseDetails.head
+		val endedCourse: StudentCourseDetails = thisStudent.freshStudentCourseDetails.head
 		endedCourse.endDate = DateTime.now.minusDays(1).toLocalDate
 		endedCourse.sprCode = "spr"
-		val currentCourse = Fixtures.studentCourseDetails(thisStudent, endedCourse.department)
+		val currentCourse: StudentCourseDetails = Fixtures.studentCourseDetails(thisStudent, endedCourse.department)
 		currentCourse.sprCode = "spr"
 		thisStudent.attachStudentCourseDetails(currentCourse)
 		val relationshipOnCurrentCourse = StudentRelationship(agent, tutorRelationshipType, currentCourse)
@@ -46,7 +46,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 	trait ValidationFixture extends Fixture {
 		val validator = new MigrateMeetingRecordsFromOldRelationshipsValidation with TestSupport
 		val errors = new BindException(validator, "command")
-		override val testObject = validator
+		override val testObject: MigrateMeetingRecordsFromOldRelationshipsValidation with TestSupport = validator
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 
 	trait ApplyFixture extends Fixture {
 		val command = new MigrateMeetingRecordsFromOldRelationshipsCommandInternal(thisStudent) with TestSupport
-		override val testObject = command
+		override val testObject: MigrateMeetingRecordsFromOldRelationshipsCommandInternal with TestSupport = command
 	}
 
 	@Test

@@ -9,7 +9,7 @@ class SmallGroupSetIdConverter extends TwoWayConverter[String, SmallGroupSet] {
 
 	@Autowired var service: SmallGroupService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getSmallGroupSetById(_) }).orNull
-	override def convertLeft(set: SmallGroupSet) = (Option(set) map {_.id}).orNull
+	override def convertRight(id: String): SmallGroupSet = (Option(id) flatMap { service.getSmallGroupSetById(_) }).orNull
+	override def convertLeft(set: SmallGroupSet): String = (Option(set) map {_.id}).orNull
 
 }

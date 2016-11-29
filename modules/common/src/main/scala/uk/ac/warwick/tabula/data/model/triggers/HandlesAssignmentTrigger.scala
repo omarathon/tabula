@@ -14,13 +14,13 @@ import uk.ac.warwick.userlookup.AnonymousUser
 trait HandlesAssignmentTrigger extends Logging {
 
 	@transient
-	var jobService = Wire[JobService]
+	var jobService: JobService = Wire[JobService]
 
 	@transient
-	var features = Wire[Features]
+	var features: Features = Wire[Features]
 
 	@transient
-	var assessmentService = Wire[AssessmentService]
+	var assessmentService: AssessmentService = Wire[AssessmentService]
 
 	def assignment: Assignment
 

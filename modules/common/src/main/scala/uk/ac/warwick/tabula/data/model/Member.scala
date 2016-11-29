@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ToString}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -64,10 +65,10 @@ abstract class Member
 		with Serializable {
 
 	@transient
-	var profileService = Wire[ProfileService with StaffAssistantsHelpers]
+	var profileService: ProfileService with StaffAssistantsHelpers = Wire[ProfileService with StaffAssistantsHelpers]
 
 	@transient
-	var relationshipService = Wire[RelationshipService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
 	def this(user: CurrentUser) = {
 		this()
@@ -88,7 +89,7 @@ abstract class Member
 		this.universityId = id
 	}
 
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
 	var missingFromImportSince: DateTime = _
 
@@ -102,9 +103,9 @@ abstract class Member
 	}
 
 	def routeName: String = ""
-	def officialName = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
+	def officialName: String = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
 
-	def description = {
+	def description: String = {
 		val userTypeString =
 			if (userType == MemberUserType.Staff && Option(jobTitle).isDefined) jobTitle
 			else Option(groupName).getOrElse("")
@@ -118,7 +119,7 @@ abstract class Member
 		* Get all departments that this member is affiliated to.
 		* (Overriden by StudentMember).
 		*/
-	def affiliatedDepartments = homeDepartment match {
+	def affiliatedDepartments: Stream[Department] = homeDepartment match {
 		case null => Stream()
 		case _ => Stream(homeDepartment)
 	}
@@ -127,13 +128,13 @@ abstract class Member
 		* Get all departments that this member touches.
 		* (Overridden by StudentMember).
 		*/
-	def touchedDepartments = {
+	def touchedDepartments: Stream[Department] = {
 		val topLevelDepts = affiliatedDepartments
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
 	def permissionsParents: Stream[PermissionsTarget] = touchedDepartments
-	override def humanReadableId = fullName.getOrElse(toString())
+	override def humanReadableId: String = fullName.getOrElse(toString())
 	override final def urlCategory = "member"
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
@@ -145,7 +146,7 @@ abstract class Member
 		ensureSettings
 	}
 
-	def asSsoUser = {
+	def asSsoUser: User = {
 		val u = new User
 		u.setUserId(userId)
 		u.setWarwickId(universityId)
@@ -192,16 +193,16 @@ abstract class Member
 		"universityId" -> universityId
 	)
 
-	def isStaff = userType == MemberUserType.Staff
-	def isStudent = userType == MemberUserType.Student
-	def isRelationshipAgent(relationshipType: StudentRelationshipType) = {
+	def isStaff: Boolean = userType == MemberUserType.Staff
+	def isStudent: Boolean = userType == MemberUserType.Student
+	def isRelationshipAgent(relationshipType: StudentRelationshipType): Boolean = {
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, this).nonEmpty
 	}
 
 	// Overridden in StudentMember
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
 
-	def isFresh = missingFromImportSince == null
+	def isFresh: Boolean = missingFromImportSince == null
 
 	override final def equals(other: Any): Boolean = other match {
 		case that: Member =>
@@ -211,7 +212,7 @@ abstract class Member
 		case _ => false
 	}
 
-	override final def hashCode =
+	override final def hashCode: Int =
 		new HashCodeBuilder()
 			.append(universityId)
 			.build()
@@ -229,22 +230,22 @@ class StudentMember extends Member with StudentProperties {
 	private val studentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def freshStudentCourseDetails = {
+	def freshStudentCourseDetails: Seq[StudentCourseDetails] = {
 		studentCourseDetails.asScala.filter(scd => scd.isFresh).toSeq.sorted
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
+	def freshOrStaleStudentCourseDetails: mutable.Set[StudentCourseDetails] = studentCourseDetails.asScala
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def freshOrStaleStudentCourseYearDetails(year: AcademicYear) =
+	def freshOrStaleStudentCourseYearDetails(year: AcademicYear): mutable.Set[StudentCourseYearDetails] =
 		freshOrStaleStudentCourseDetails
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear == year)
 
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def freshStudentCourseYearDetailsForYear(year: AcademicYear) =
+	def freshStudentCourseYearDetailsForYear(year: AcademicYear): Option[StudentCourseYearDetails] =
 		freshOrStaleStudentCourseYearDetails(year).filter(scyd => scyd.isFresh).lastOption
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -252,7 +253,7 @@ class StudentMember extends Member with StudentProperties {
 		freshOrStaleStudentCourseYearDetails(year).lastOption
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def freshOrStaleStudentCourseYearDetailsFrom(year: AcademicYear) =
+	def freshOrStaleStudentCourseYearDetailsFrom(year: AcademicYear): mutable.Set[StudentCourseYearDetails] =
 		freshOrStaleStudentCourseDetails
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear >= year)
@@ -317,14 +318,14 @@ class StudentMember extends Member with StudentProperties {
 		*
 		* For each department, enumerate any sub-departments that the member matches
 		*/
-	override def touchedDepartments = {
+	override def touchedDepartments: Stream[Department] = {
 		def moduleDepts = registeredModulesByYear(None).map(_.adminDepartment).toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
-	@transient var smallGroupService = Wire[SmallGroupService]
+	@transient var smallGroupService: SmallGroupService = Wire[SmallGroupService]
 
 	/**
 		* Get all small groups that this student is signed up for
@@ -420,9 +421,9 @@ class StudentMember extends Member with StudentProperties {
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 
-	def isPGR = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
+	def isPGR: Boolean = groupName == "Postgraduate (research) FT" || groupName == "Postgraduate (research) PT"
 
-	def toExamGridEntity(baseSCYD: StudentCourseYearDetails) = {
+	def toExamGridEntity(baseSCYD: StudentCourseYearDetails): ExamGridEntity = {
 		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
 			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
 			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
@@ -489,13 +490,13 @@ class OtherMember extends Member with RestrictedPhoneNumber {
 }
 
 class RuntimeMember(user: CurrentUser) extends Member(user) with RestrictedPhoneNumber {
-	override def permissionsParents = Stream.empty
+	override def permissionsParents: Stream[Nothing] = Stream.empty
 }
 
 trait MemberProperties extends StringId {
 
 	@Id var universityId: String = _
-	def id = universityId
+	def id: String = universityId
 
 	@Restricted(Array("Profiles.Read.Usercode"))
 	var userId: String = _

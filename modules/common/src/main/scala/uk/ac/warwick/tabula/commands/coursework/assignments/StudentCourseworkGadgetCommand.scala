@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.coursework.assignments.StudentCourseworkCommand.StudentAssignments
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.model.{Assignment, StudentCourseYearDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.services.AssessmentServiceComponent
@@ -37,16 +37,16 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 		FeaturesComponent with
 		StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback = {
+	override lazy val overridableAssignmentsWithFeedback: Seq[Assignment] = {
 		assessmentService.getAssignmentsWithFeedback(studentCourseYearDetails)
 	}
 
-	override lazy val overridableEnrolledAssignments = {
+	override lazy val overridableEnrolledAssignments: Seq[Assignment] = {
 		val allAssignments = assessmentMembershipService.getEnrolledAssignments(studentCourseYearDetails.studentCourseDetails.student.asSsoUser)
 		assessmentService.filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
 	}
 
-	override lazy val overridableAssignmentsWithSubmission = assessmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
+	override lazy val overridableAssignmentsWithSubmission: Seq[Assignment] = assessmentService.getAssignmentsWithSubmission(studentCourseYearDetails)
 
 	override val user: User = student.asSsoUser
 	override val universityId: String = student.universityId
@@ -55,7 +55,7 @@ class StudentCourseworkGadgetCommandInternal(val studentCourseYearDetails: Stude
 
 trait StudentCourseworkGadgetCommandState {
 	def studentCourseYearDetails: StudentCourseYearDetails
-	def student = studentCourseYearDetails.studentCourseDetails.student
+	def student: StudentMember = studentCourseYearDetails.studentCourseDetails.student
 }
 
 trait StudentCourseworkGadgetCommandPermissions extends RequiresPermissionsChecking {

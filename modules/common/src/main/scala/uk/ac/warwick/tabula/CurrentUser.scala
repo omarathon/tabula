@@ -27,54 +27,54 @@ class CurrentUser(
 	var navigation: UserNavigation = UserNavigation("", "")
 ) {
 
-	def loggedIn = realUser.isLoggedIn
-	def idForPermissions = apparentUser.getUserId
-	def exists = realUser.isFoundUser
+	def loggedIn: Boolean = realUser.isLoggedIn
+	def idForPermissions: String = apparentUser.getUserId
+	def exists: Boolean = realUser.isFoundUser
 
 	/**
 	 * The user who we are acting as. This is the actual user when not masquerading,
 	 * otherwise it's whoever you're pretending to be.
 	 */
-	def apparentId = apparentUser.getUserId
+	def apparentId: String = apparentUser.getUserId
 	/**
 	 * This is always the user ID of the actual person signed in. Normally only for
 	 * use by the audit logging framework.
 	 */
-	def realId = realUser.getUserId
+	def realId: String = realUser.getUserId
 	/** Whether you're currently masquerading as someone else. */
-	def masquerading = !apparentId.equals(realId)
+	def masquerading: Boolean = !apparentId.equals(realId)
 
 	/** Full name of the apparent user. */
-	def fullName = profile flatMap { _.fullName } getOrElse apparentUser.getFullName
+	def fullName: String = profile flatMap { _.fullName } getOrElse apparentUser.getFullName
 	/** First name of the apparent user. */
-	def firstName = profile map { _.firstName } getOrElse apparentUser.getFirstName
+	def firstName: String = profile map { _.firstName } getOrElse apparentUser.getFirstName
 	/** Surname of the apparent user. */
-	def lastName = profile map { _.lastName } getOrElse apparentUser.getLastName
+	def lastName: String = profile map { _.lastName } getOrElse apparentUser.getLastName
 	/** Warwick Uni ID of the apparent user. */
-	def universityId = apparentUser.getWarwickId
+	def universityId: String = apparentUser.getWarwickId
 	/** Department code of the apparent user. */
-	def departmentCode = apparentUser.getDepartmentCode
+	def departmentCode: String = apparentUser.getDepartmentCode
 	/** Department name of the apparent user. */
-	def departmentName = apparentUser.getDepartment
+	def departmentName: String = apparentUser.getDepartment
 	/** Email address of the apparent user. */
-	def email = apparentUser.getEmail
+	def email: String = apparentUser.getEmail
 	/** User code of the apparent user. */
-	def userId = apparentUser.getUserId
+	def userId: String = apparentUser.getUserId
 
 	/** Is of type Postgraduate research student (FT )? (includes PT) */
-	def isPGR = apparentUser.getExtraProperty("warwickitsclass") == "PG(R)"
+	def isPGR: Boolean = apparentUser.getExtraProperty("warwickitsclass") == "PG(R)"
 
 	/** Is of type Student? (includes PGT) */
-	def isStudent = apparentUser.isStudent
+	def isStudent: Boolean = apparentUser.isStudent
 
 	/** Is of type Staff? (includes PGR) */
-	def isStaff = apparentUser.isStaff
+	def isStaff: Boolean = apparentUser.isStaff
 
-	def isAlumni = apparentUser.isAlumni
+	def isAlumni: Boolean = apparentUser.isAlumni
 
-	def isMember = isStudent || isStaff
+	def isMember: Boolean = isStudent || isStaff
 
-	override def toString = {
+	override def toString: String = {
 		if (!idForPermissions.hasText) "Anonymous user"
 		else {
 			val builder = new StringBuilder("User ")
@@ -102,7 +102,7 @@ object CurrentUser {
 }
 
 object NoCurrentUser {
-	def apply() = {
+	def apply(): CurrentUser = {
 		val anon = new AnonymousUser
 		new CurrentUser(realUser = anon, apparentUser = anon)
 	}

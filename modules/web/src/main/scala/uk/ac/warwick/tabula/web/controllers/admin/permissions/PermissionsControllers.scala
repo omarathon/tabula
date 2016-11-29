@@ -1,27 +1,32 @@
 package uk.ac.warwick.tabula.web.controllers.admin.permissions
 
 import org.joda.time.DateTime
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import org.springframework.stereotype.Controller
-import uk.ac.warwick.tabula.permissions.{SelectorPermission, Permission, Permissions, PermissionsSelector, PermissionsTarget}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsSelector, PermissionsTarget, SelectorPermission}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
 import uk.ac.warwick.tabula.commands.permissions._
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Assignment, Route, Module, Department, Member}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Member, Module, Route, StudentRelationshipType}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
-import uk.ac.warwick.tabula.roles.{SelectorBuiltInRoleDefinition, RoleBuilder, RoleDefinition}
+import uk.ac.warwick.tabula.roles.{RoleBuilder, RoleDefinition, SelectorBuiltInRoleDefinition}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
+
 import scala.collection.JavaConverters._
 import javax.validation.Valid
+
 import org.springframework.validation.Errors
+
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroupEvent, SmallGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
+
 import scala.collection.immutable.SortedMap
 import uk.ac.warwick.tabula.web.Routes
 
@@ -41,8 +46,8 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	@ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand = GrantPermissionsCommand(target)
 	@ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand = RevokePermissionsCommand(target)
 
-	var userLookup = Wire[UserLookupService]
-	var permissionsService = Wire[PermissionsService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
 
 	def form(target: A): Mav = {
 		Mav("admin/permissions/permissions",
@@ -121,10 +126,10 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 		}
 	}
 
-	implicit val defaultOrderingForRoleDefinition = Ordering.by[RoleDefinition, String] ( _.getName )
+	implicit val defaultOrderingForRoleDefinition: Ordering[RoleDefinition] = Ordering.by[RoleDefinition, String] ( _.getName )
 
 //	@ModelAttribute("existingRoleDefinitions") // Not a ModelAttribute because this changes after a change
-	def existingRoleDefinitions(@PathVariable target: A) = {
+	def existingRoleDefinitions(@PathVariable target: A): SortedMap[RoleDefinition, GeneratedRole] = {
 		SortedMap(
 			permissionsService.getAllGrantedRolesFor(target)
 				.groupBy { _.roleDefinition }
@@ -140,7 +145,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	}
 
 //	@ModelAttribute("grantableRoleDefinitions") // Not a ModelAttribute because this changes after a change
-	def grantableRoleDefinitions(@PathVariable target: A, user: CurrentUser) = transactional(readOnly = true) {
+	def grantableRoleDefinitions(@PathVariable target: A, user: CurrentUser): SortedMap[RoleDefinition, GeneratedRole] = transactional(readOnly = true) {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
 		val allDepartments = parentDepartments(target)
@@ -177,11 +182,11 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 	}
 
 //	@ModelAttribute("existingPermissions") // Not a ModelAttribute because this changes after a change
-	def existingPermissions(@PathVariable target: A) = {
+	def existingPermissions(@PathVariable target: A): Seq[GrantedPermission[A]] = {
 		permissionsService.getAllGrantedPermissionsFor(target).filter(!_.users.isEmpty)
 	}
 
-	@ModelAttribute("allPermissions") def allPermissions(@PathVariable target: A) = {
+	@ModelAttribute("allPermissions") def allPermissions(@PathVariable target: A): Map[String, Seq[(String, String)]] = {
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
 

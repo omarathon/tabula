@@ -35,7 +35,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
 			def populate() {
 				populateCalledCount += 1
 			}
-			def apply() = {
+			def apply(): Null = {
 				fail("Should not be called")
 				null
 			}
@@ -59,7 +59,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
 			def populate() {
 				populateCalledCount += 1
 			}
-			def apply() = {
+			def apply(): Department = {
 				applyCalledCount += 1
 				department
 			}
@@ -85,7 +85,7 @@ class DisplaySettingsControllerTest extends TestBase with Mockito {
 			def populate() {
 				populateCalledCount += 1
 			}
-			def apply() = {
+			def apply(): Department = {
 				applyCalledCount += 1
 				department
 			}

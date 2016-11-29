@@ -53,8 +53,8 @@ object GroupsViewModel {
 	) {
 		def hasUnreleasedGroupsets : Boolean = hasUnreleasedGroupsets(AcademicYear.guessSITSAcademicYearByDate(DateTime.now))
 		def hasUnreleasedGroupsets(academicYear: AcademicYear) : Boolean = moduleItems.exists(_.hasUnreleasedGroupsets(academicYear))
-		def hasOpenableGroupsets = moduleItems.exists(_.hasOpenableGroupsets)
-		def hasCloseableGroupsets = moduleItems.exists(_.hasCloseableGroupsets)
+		def hasOpenableGroupsets: Boolean = moduleItems.exists(_.hasOpenableGroupsets)
+		def hasCloseableGroupsets: Boolean = moduleItems.exists(_.hasCloseableGroupsets)
 	}
 
 	case class ViewModule(
@@ -62,9 +62,9 @@ object GroupsViewModel {
 		setItems: Seq[ViewSet],
 		canManageGroups: Boolean
 	) {
-		def hasUnreleasedGroupsets(academicYear: AcademicYear) = module.hasUnreleasedGroupSets(academicYear)
-		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
-		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => s.openForSignups && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
+		def hasUnreleasedGroupsets(academicYear: AcademicYear): Boolean = module.hasUnreleasedGroupSets(academicYear)
+		def hasOpenableGroupsets: Boolean = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
+		def hasCloseableGroupsets: Boolean = module.groupSets.asScala.exists(s => s.openForSignups && s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp )
 	}
 
 	trait ViewSetMethods {
@@ -72,12 +72,12 @@ object GroupsViewModel {
 		def groups: Seq[ViewGroup]
 		def viewerRole: ViewerRole
 
-		def viewerIsStudent = (viewerRole == StudentAssignedToGroup )|| (viewerRole == StudentNotAssignedToGroup)
-		def viewerMustSignUp = (viewerRole == StudentNotAssignedToGroup) && isStudentSignUp && set.openForSignups
-		def canViewMembers = viewerRole == Tutor || set.studentsCanSeeOtherMembers
-		def canViewTutors = viewerRole == Tutor || set.studentsCanSeeTutorName
-		def isStudentSignUp = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
-		def isLinked = set.allocationMethod == SmallGroupAllocationMethod.Linked
+		def viewerIsStudent: Boolean = (viewerRole == StudentAssignedToGroup )|| (viewerRole == StudentNotAssignedToGroup)
+		def viewerMustSignUp: Boolean = (viewerRole == StudentNotAssignedToGroup) && isStudentSignUp && set.openForSignups
+		def canViewMembers: Boolean = viewerRole == Tutor || set.studentsCanSeeOtherMembers
+		def canViewTutors: Boolean = viewerRole == Tutor || set.studentsCanSeeTutorName
+		def isStudentSignUp: Boolean = set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+		def isLinked: Boolean = set.allocationMethod == SmallGroupAllocationMethod.Linked
 	}
 
 	case class ViewSet(
@@ -102,13 +102,13 @@ object GroupsViewModel {
 	) extends ViewSetMethods
 
 	object ViewGroup {
-		def fromGroups(groups: Seq[SmallGroup]) = groups.map(g => ViewGroup(g, ViewEvent.fromEvents(g.events)))
+		def fromGroups(groups: Seq[SmallGroup]): Seq[ViewGroup] = groups.map(g => ViewGroup(g, ViewEvent.fromEvents(g.events)))
 	}
 
 	case class ViewGroup(group: SmallGroup, events: Seq[ViewEvent])
 
 	object ViewEvent {
-		def fromEvents(events: Seq[SmallGroupEvent]) = events.map(e => ViewEvent(e, Seq()))
+		def fromEvents(events: Seq[SmallGroupEvent]): Seq[ViewEvent] = events.map(e => ViewEvent(e, Seq()))
 	}
 
 	case class ViewEvent(event: SmallGroupEvent, occurrences: Seq[SmallGroupEventOccurrence])

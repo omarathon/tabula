@@ -29,7 +29,7 @@ object ProfileExportJob {
 class ProfileExportJob extends Job with AutowiringZipServiceComponent
 	with AutowiringFileAttachmentServiceComponent with AutowiringProfileServiceComponent {
 
-	val identifier = ProfileExportJob.identifier
+	val identifier: String = ProfileExportJob.identifier
 
 	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 

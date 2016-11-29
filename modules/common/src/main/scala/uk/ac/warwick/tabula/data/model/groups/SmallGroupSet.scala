@@ -5,7 +5,7 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
-import org.joda.time.{LocalTime, DateTime}
+import org.joda.time.{DateTime, LocalTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -30,7 +31,7 @@ object SmallGroupSet {
 
 	// For sorting a collection by set name. Either pass to the sort function,
 	// or expose as an implicit val.
-	val NameOrdering = Ordering.by { set: SmallGroupSet => (set.name, set.id) }
+	val NameOrdering: Ordering[SmallGroupSet] = Ordering.by { set: SmallGroupSet => (set.name, set.id) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small group sets.
@@ -58,11 +59,11 @@ class SmallGroupSet
 
 	import SmallGroupSet.Settings
 
-	@transient var permissionsService = Wire[PermissionsService]
-	@transient var membershipService = Wire[AssessmentMembershipService]
+	@transient var permissionsService: PermissionsService = Wire[PermissionsService]
+	@transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
 	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
 	def this(_module: Module) {
 		this()
@@ -89,9 +90,9 @@ class SmallGroupSet
 	@Column(name="email_tutors")
 	var emailTutorsOnChange: JBoolean = true
 
-  def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+  def visibleToStudents: Boolean = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
-  def fullyReleased = releasedToStudents && releasedToTutors
+  def fullyReleased: Boolean = releasedToStudents && releasedToTutors
 
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
@@ -181,7 +182,7 @@ class SmallGroupSet
 	@Column(name = "default_location")
 	var defaultLocation: Location = _
 
-	def showAttendanceReports = !archived && !deleted && collectAttendance
+	def showAttendanceReports: Boolean = !archived && !deleted && collectAttendance
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
@@ -196,22 +197,22 @@ class SmallGroupSet
 		}
 	}
 
-	def allStudents =
+	def allStudents: Seq[User] =
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudents }.getOrElse {
 			membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
 		}
 
-	def allStudentIds =
+	def allStudentIds: Seq[String] =
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentIds }.getOrElse {
 			membershipService.determineMembershipIds(upstreamAssessmentGroups, Some(members))
 		}
 
-	def allStudentsCount = benchmarkTask(s"${this.id} allStudentsCount") {
+	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
 		}}
 
-	def unallocatedStudents = {
+	def unallocatedStudents: Seq[User] = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
 			val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
@@ -219,7 +220,7 @@ class SmallGroupSet
 		}
 	}
 
-	def unallocatedStudentsCount = benchmarkTask(s"${this.id} unallocatedStudentsCount") {
+	def unallocatedStudentsCount: Int = benchmarkTask(s"${this.id} unallocatedStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
 				// Efficiency
@@ -233,7 +234,7 @@ class SmallGroupSet
 		}
 	}
 
-	def studentsNotInMembership = {
+	def studentsNotInMembership: mutable.Buffer[User] = {
 		Option(linkedDepartmentSmallGroupSet).map { _.studentsNotInMembership }.getOrElse {
 			val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
@@ -241,7 +242,7 @@ class SmallGroupSet
 		}
 	}
 
-	def studentsNotInMembershipCount = {
+	def studentsNotInMembershipCount: Int = {
 		Option(linkedDepartmentSmallGroupSet).map { _.studentsNotInMembershipCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
 				// Efficiency
@@ -255,25 +256,25 @@ class SmallGroupSet
 		}
 	}
 
-	def nameWithoutModulePrefix = {
+	def nameWithoutModulePrefix: String = {
 		val moduleCodePrefix = module.code.toUpperCase + " "
 		if (name.startsWith(moduleCodePrefix)) {
 			name.replaceFirst(moduleCodePrefix, "")
 		} else name
 	}
 
-	def linked = allocationMethod == SmallGroupAllocationMethod.Linked
+	def linked: Boolean = allocationMethod == SmallGroupAllocationMethod.Linked
 
-	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
+	def hasAllocated: Boolean = groups.asScala exists { !_.students.isEmpty }
 
-	def permissionsParents = Option(module).toStream
-	override def humanReadableId = name
+	def permissionsParents: Stream[Module] = Option(module).toStream
+	override def humanReadableId: String = name
 
-	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
-	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
+	def studentsCanSeeTutorName: Boolean = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
+	def studentsCanSeeTutorName_=(canSee:Boolean): Unit = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
 
-	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
-	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
+	def studentsCanSeeOtherMembers: Boolean = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
+	def studentsCanSeeOtherMembers_=(canSee:Boolean): Unit = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -314,6 +315,6 @@ class SmallGroupSet
 		ensureSettings
 	}
 
-	override def toEntityReference = new SmallGroupSetEntityReference().put(this)
+	override def toEntityReference: SmallGroupSetEntityReference = new SmallGroupSetEntityReference().put(this)
 }
 

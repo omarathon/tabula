@@ -1,15 +1,17 @@
 package uk.ac.warwick.tabula.web.controllers.admin.routes
 
-import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.permissions.{RouteGrantedRole, GrantedRole}
-import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, GrantRoleCommandState}
+import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.data.model.permissions.{GrantedRole, RouteGrantedRole}
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.mutable
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 
 class RoutePermissionControllerTest extends TestBase with Mockito {
 
@@ -18,8 +20,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 	val removeController = new RouteRemovePermissionController
 
 	trait Fixture {
-		val department = Fixtures.department("in")
-		val route = Fixtures.route("i100")
+		val department: Department = Fixtures.department("in")
+		val route: Route = Fixtures.route("i100")
 		route.adminDepartment = department
 
 		val userLookup = new MockUserLookup
@@ -30,8 +32,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 	@Test def createCommands {
 		Seq(listController, addController, removeController).foreach { controller => new Fixture {
-			val addCommand = controller.addCommandModel(route)
-			val removeCommand = controller.removeCommandModel(route)
+			val addCommand: controller.GrantRoleCommand = controller.addCommandModel(route)
+			val removeCommand: controller.RevokeRoleCommand = controller.removeCommandModel(route)
 
 			addCommand should be (anInstanceOf[Appliable[GrantedRole[Route]]])
 			addCommand should be (anInstanceOf[GrantRoleCommandState[Route]])
@@ -42,7 +44,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 	}
 
 	@Test def list { new Fixture {
-		val mav = listController.permissionsForm(route, Array(), null, null)
+		val mav: Mav = listController.permissionsForm(route, Array(), null, null)
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel("users").asInstanceOf[mutable.Map[String, User]] should be ('empty)
@@ -51,7 +53,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def listFromRedirect { new Fixture {
-		val mav = listController.permissionsForm(route, Array("cuscav", "cusebr"), RouteManagerRoleDefinition, "add")
+		val mav: Mav = listController.permissionsForm(route, Array("cuscav", "cusebr"), RouteManagerRoleDefinition, "add")
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel("users") should be (mutable.Map(
@@ -67,16 +69,16 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = route
+			def scope: Route = route
 			def grantedRole = Some(addedRole)
-			def apply = addedRole
+			def apply: RouteGrantedRole = addedRole
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		val errors = new BindException(command, "command")
 
-		val mav = addController.addPermission(command, errors)
+		val mav: Mav = addController.addPermission(command, errors)
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel("users") should be (mutable.Map(
@@ -92,9 +94,9 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = route
+			def scope: Route = route
 			def grantedRole = Some(addedRole)
-			def apply() = {
+			def apply(): Null = {
 				fail("Should not be called")
 				null
 			}
@@ -106,7 +108,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 		errors.reject("fail")
 
-		val mav = addController.addPermission(command, errors)
+		val mav: Mav = addController.addPermission(command, errors)
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel.contains("users") should be (false)
@@ -119,16 +121,16 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Route]] with RevokeRoleCommandState[Route] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = route
+			def scope: Route = route
 			def grantedRole = Some(removedRole)
-			def apply = removedRole
+			def apply: RouteGrantedRole = removedRole
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
 		val errors = new BindException(command, "command")
 
-		val mav = removeController.removePermission(command, errors)
+		val mav: Mav = removeController.removePermission(command, errors)
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel("users") should be (mutable.Map(
@@ -144,9 +146,9 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 
 		val command = new Appliable[GrantedRole[Route]] with RevokeRoleCommandState[Route] with PermissionsServiceComponent {
 			val permissionsService = null
-			def scope = route
+			def scope: Route = route
 			def grantedRole = Some(removedRole)
-			def apply() = {
+			def apply(): Null = {
 				fail("Should not be called")
 				null
 			}
@@ -157,7 +159,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
 		val errors = new BindException(command, "command")
 		errors.reject("fail")
 
-		val mav = removeController.removePermission(command, errors)
+		val mav: Mav = removeController.removePermission(command, errors)
 		mav.viewName should be ("admin/routes/permissions")
 		mav.toModel("route") should be (route)
 		mav.toModel.contains("users") should be (false)

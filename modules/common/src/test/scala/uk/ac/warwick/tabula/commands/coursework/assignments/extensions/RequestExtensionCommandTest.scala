@@ -177,11 +177,11 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
 					this : RequestExtensionCommandInternal =>
 
-					val fileAttachmentService = mock[FileAttachmentService]
+					val fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
 
 					def apply(): Extension = this.applyInternal()
 
-					var relationshipService = mock[RelationshipService]
+					var relationshipService: RelationshipService = mock[RelationshipService]
 					def delete(attachment: FileAttachment) {}
 					def delete(extension: Extension) {}
 					def save(extension: Extension) {}

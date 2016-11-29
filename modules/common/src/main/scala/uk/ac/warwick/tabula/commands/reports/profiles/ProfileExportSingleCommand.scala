@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports.profiles
 
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType}
@@ -20,8 +20,8 @@ import scala.collection.JavaConverters._
 object ProfileExportSingleCommand {
 	type CommandType = Appliable[Seq[FileAttachment]]
 
-	val DateFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
-	val TimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+	val DateFormat: DateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+	val TimeFormat: DateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
 
 	def apply(student: StudentMember, academicYear: AcademicYear, user: CurrentUser) =
 		new ProfileExportSingleCommandInternal(student, academicYear, user)
@@ -96,7 +96,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		description: String
 	)
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[FileAttachment] = {
 		// Get point data
 		val pointData = benchmarkTask("pointData") { getPointData }
 

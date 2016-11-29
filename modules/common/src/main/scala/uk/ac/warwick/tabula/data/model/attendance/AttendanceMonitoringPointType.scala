@@ -10,7 +10,7 @@ object AttendanceMonitoringPointType {
 	case object SmallGroup extends AttendanceMonitoringPointType("smallGroup", "Teaching event")
 	case object AssignmentSubmission extends AttendanceMonitoringPointType("assignmentSubmission", "Coursework")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): AttendanceMonitoringPointType = code match {
 		case Standard.dbValue => Standard
 		case Meeting.dbValue => Meeting
 		case SmallGroup.dbValue => SmallGroup
@@ -23,8 +23,8 @@ object AttendanceMonitoringPointType {
 
 class AttendanceMonitoringPointTypeUserType extends AbstractStringUserType[AttendanceMonitoringPointType] {
 
-	override def convertToObject(string: String) = AttendanceMonitoringPointType.fromCode(string)
+	override def convertToObject(string: String): AttendanceMonitoringPointType = AttendanceMonitoringPointType.fromCode(string)
 
-	override def convertToValue(state: AttendanceMonitoringPointType) = state.dbValue
+	override def convertToValue(state: AttendanceMonitoringPointType): String = state.dbValue
 
 }

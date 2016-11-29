@@ -18,7 +18,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			val assignmentService = new AbstractAssessmentService with AssessmentDaoComponent
 				with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent {
-				val assessmentDao = thisAssignmentDao
+				val assessmentDao: AssessmentDaoImpl = thisAssignmentDao
 				val firstMarkerHelper = null
 				val secondMarkerHelper = null
 				val markingWorkflowService = null

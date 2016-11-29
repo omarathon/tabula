@@ -13,13 +13,14 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 trait MemberDaoComponent {
 	def memberDao: MemberDao
 }
 
 trait AutowiringMemberDaoComponent extends MemberDaoComponent {
-	var memberDao = Wire[MemberDao]
+	var memberDao: MemberDao = Wire[MemberDao]
 }
 
 trait MemberDao {
@@ -70,12 +71,12 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	import org.hibernate.criterion.Projections._
 	import org.hibernate.criterion.Restrictions._
 
-	def saveOrUpdate(member: Member) = member match {
+	def saveOrUpdate(member: Member): Unit = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ => session.saveOrUpdate(member)
 	}
 
-	def delete(member: Member) = member match {
+	def delete(member: Member): Unit = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ =>
 			session.delete(member)
@@ -83,7 +84,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			session.flush()
 	}
 
-	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
+	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
@@ -124,28 +125,28 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		s
 	}
 
-	def getByUniversityIdStaleOrFresh(universityId: String) = {
+	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member] = {
 		val member = sessionWithoutFreshFilters.newCriteria[Member]
 			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 		member
 	}
 
-	def getFreshUniversityIds() =
+	def getFreshUniversityIds(): Seq[String] =
 			session.newCriteria[StudentMember]
 			.project[String](Projections.property("universityId"))
 			.seq
 
-	def getAllWithUniversityIds(universityIds: Seq[String]) =
+	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member] =
 		if (universityIds.isEmpty) Seq.empty
 		else safeInSeq(() => { session.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 
-	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = {
+	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member] = {
 		if (universityIds.isEmpty) Seq.empty
 		else safeInSeq(() => { sessionWithoutFreshFilters.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 	}
 
-	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true) = {
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
@@ -186,7 +187,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		}
 	}
 
-	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): mutable.Buffer[Member] = {
 		val homeDepartmentMatches = session.newCriteria[Member]
 			.add(gt("lastUpdatedDate", startDate))
 			.add(is("homeDepartment", department))
@@ -210,7 +211,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		(homeDepartmentMatches.asScala ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
 	}
 
-	def listUpdatedSince(startDate: DateTime, max: Int) =
+	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member] =
 		session.newQuery[Member]( """select staffOrStudent from Member staffOrStudent
 			where staffOrStudent.lastUpdatedDate > :lastUpdated
 			order by lastUpdatedDate asc
@@ -218,7 +219,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq.distinct
 
-	def listUpdatedSince(startDate: DateTime) = {
+	def listUpdatedSince(startDate: DateTime): ScrollableImpl[Member] = {
 		val scrollable = session.newCriteria[Member]
 			.add(gt("lastUpdatedDate", startDate))
 			.addOrder(asc("lastUpdatedDate"))
@@ -226,7 +227,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		Scrollable(scrollable, session)
 	}
 
-	def listUpdatedSince(startDate: DateTime, department: Department) = {
+	def listUpdatedSince(startDate: DateTime, department: Department): ScrollableImpl[Member] = {
 		val scrollable = session.newCriteria[Member]
 			.createAlias("studentCourseDetails", "scd")
 			.add(gt("lastUpdatedDate", startDate))
@@ -357,14 +358,14 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		}
 	}
 
-	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
+	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int = {
 		val c = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(c) }
 
 		c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()
 	}
 
-	def getAllModesOfAttendance(department: Department) =
+	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance] =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
 				.createAlias("scd.latestStudentCourseYearDetails", "scyd")
@@ -377,7 +378,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 				)
 				.seq.map { array => array(0).asInstanceOf[ModeOfAttendance] }
 
-	def getAllSprStatuses(department: Department) =
+	def getAllSprStatuses(department: Department): Seq[SitsStatus] =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
 				.add(is("scd.department", department))
@@ -389,7 +390,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
-	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
+	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime): Unit = {
 		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds =>
 			val hqlString = """
 				update
@@ -419,7 +420,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		.uniqueResult
 	}
 
-	def setTimetableHash(member: Member, timetableHash: String) = member match {
+	def setTimetableHash(member: Member, timetableHash: String): Unit = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ =>
 			session.newQuery("update Member set timetableHash = :timetableHash where universityId = :universityId")

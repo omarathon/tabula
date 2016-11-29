@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 import javax.persistence.{DiscriminatorValue, Entity}
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordBehalf")
@@ -19,7 +20,7 @@ class ScheduledMeetingRecordBehalfNotification
 
 	def title = s"${agentRole.capitalize} meeting with ${student.getFullName} $verb on your behalf by ${agent.getFullName}"
 
-	def student = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
+	def student: User = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
@@ -30,6 +31,6 @@ class ScheduledMeetingRecordBehalfNotification
 		"meetingRecord" -> meeting
 	))
 
-	def recipient = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+	def recipient: User = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 
 }

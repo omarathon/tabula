@@ -11,7 +11,7 @@ class StudentCourseYearDetailsIdConverterTest extends TestBase with Mockito {
 	scyd.id = "foo"
 
 	val converter = new StudentCourseYearDetailsIdConverter
-	val dao = smartMock[StudentCourseYearDetailsDao]
+	val dao: StudentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 	converter.dao = dao
 
 	dao.getStudentCourseYearDetails("foo") returns Some(scyd)

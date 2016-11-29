@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class SortRoutesCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends SortRoutesCommandState with ModuleAndDepartmentServiceComponent {
-		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait SortRoutesWorld {
-		val department = Fixtures.department("in", "IT Services")
-		val ugDepartment = Fixtures.department("in-ug", "ITS Undergraduates")
-		val pgDepartment = Fixtures.department("in-pg", "ITS Postgraduates")
+		val department: Department = Fixtures.department("in", "IT Services")
+		val ugDepartment: Department = Fixtures.department("in-ug", "ITS Undergraduates")
+		val pgDepartment: Department = Fixtures.department("in-pg", "ITS Postgraduates")
 
 		department.children.add(ugDepartment)
 		department.children.add(pgDepartment)
@@ -27,13 +27,13 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 		ugDepartment.parent = department
 		pgDepartment.parent = department
 
-		val route1 = Fixtures.route("in101")
-		val route2 = Fixtures.route("in102")
-		val route3 = Fixtures.route("in103")
-		val route4 = Fixtures.route("in104")
-		val route5 = Fixtures.route("in105")
-		val route6 = Fixtures.route("in106")
-		val route7 = Fixtures.route("in107")
+		val route1: Route = Fixtures.route("in101")
+		val route2: Route = Fixtures.route("in102")
+		val route3: Route = Fixtures.route("in103")
+		val route4: Route = Fixtures.route("in104")
+		val route5: Route = Fixtures.route("in105")
+		val route6: Route = Fixtures.route("in106")
+		val route7: Route = Fixtures.route("in107")
 
 		department.routes.add(route1)
 		department.routes.add(route2)
@@ -112,9 +112,9 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 	}}
 
 	trait ValidationFixture extends SortRoutesWorld {
-		val d = department
+		val d: Department = department
 		val command = new SortRoutesCommandValidation with CommandTestSupport with SortRoutesCommandGrouping {
-			val department = d
+			val department: Department = d
 		}
 
 		command.populate()
@@ -163,7 +163,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in")
 
 		val command = new SortRoutesCommandPermissions with CommandTestSupport {
-			val department = dept
+			val department: Department = dept
 			def sort() {}
 			def populate() {}
 		}
@@ -179,7 +179,7 @@ class SortRoutesCommandTest extends TestBase with Mockito {
 
 		val command = new SortRoutesCommandDescription with CommandTestSupport {
 			val eventName: String = "test"
-			val department = dept
+			val department: Department = dept
 			def sort() {}
 			def populate() {}
 		}

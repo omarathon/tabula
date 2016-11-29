@@ -44,6 +44,6 @@ trait TestElasticsearchClient extends ElasticSugar {
 		localClient.close()
 	}
 
-	override implicit def client = localClient
+	override implicit def client: ElasticClient = localClient
 
 }

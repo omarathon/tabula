@@ -7,8 +7,9 @@ import org.springframework.web.method.support.InvocableHandlerMethod
 import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder
 import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
 import javax.servlet.ServletRequest
+
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{PermissionDeniedException, RequestInfo, ItemNotFoundException}
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.SecurityService
@@ -28,8 +29,8 @@ trait PermissionsBinding
 
 	val securityService: SecurityService // abstract dependency
 
-	def requestInfo = RequestInfo.fromThread
-	def user = requestInfo.get.user
+	def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
+	def user: CurrentUser = requestInfo.get.user
 
 	// Permissions checking
 	if (target.isInstanceOf[PermissionsChecking]) {

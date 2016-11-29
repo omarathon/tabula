@@ -12,7 +12,7 @@ trait UpstreamRouteRuleDaoComponent {
 }
 
 trait AutowiringUpstreamRouteRuleDaoComponent extends UpstreamRouteRuleDaoComponent {
-	val upstreamRouteRuleDao = Wire[UpstreamRouteRuleDao]
+	val upstreamRouteRuleDao: UpstreamRouteRuleDao = Wire[UpstreamRouteRuleDao]
 }
 
 trait UpstreamRouteRuleDao {

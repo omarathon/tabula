@@ -96,7 +96,7 @@ class GenerateExamGridController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value = "route", required = false) route: Route,
 		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger
-	) = {
+	): Seq[CoreRequiredModule] = {
 		if (Option(route).nonEmpty && Option(yearOfStudy).nonEmpty) {
 			moduleRegistrationService.findCoreRequiredModules(route, academicYear, yearOfStudy)
 		} else {

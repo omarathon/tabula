@@ -17,7 +17,7 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 
 		var filename: String = _
 
-		var zipService = Wire.auto[ZipService]
+		var zipService: ZipService = Wire.auto[ZipService]
 
 		private var fileFound: Boolean = _
 
@@ -26,7 +26,7 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 		 * If filename is set, it will return a renderable attachment if found.
 		 * In either case if it's not found, None is returned.
 		 */
-		def applyInternal() = {
+		def applyInternal(): Option[RenderableFile] = {
 			val result: Option[RenderableFile] =
 				filename match {
 					case filename: String if filename.hasText => {
@@ -41,7 +41,7 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 
 		private def zipped(memberNote: MemberNote) = zipService.getSomeMemberNoteAttachmentsZip(memberNote)
 
-		override def describe(d: Description) = {
+		override def describe(d: Description): Unit = {
 			d.property("filename", filename)
 		}
 

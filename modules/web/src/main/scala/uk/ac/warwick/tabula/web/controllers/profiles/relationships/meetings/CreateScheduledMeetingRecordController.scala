@@ -3,8 +3,10 @@ package uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.CreateScheduledMeetingRecordCommand
+import uk.ac.warwick.tabula.commands.{ComposableCommand, PopulateOnForm}
+import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
+import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/schedule/create"))
@@ -16,7 +18,7 @@ class CreateScheduledMeetingRecordController extends AbstractManageScheduledMeet
 		@PathVariable studentCourseDetails: StudentCourseDetails,
 		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship,
 		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
-	) = {
+	): CreateScheduledMeetingRecordCommand with ComposableCommand[ScheduledMeetingRecord] with CreateScheduledMeetingPermissions with CreateScheduledMeetingRecordState with CreateScheduledMeetingRecordDescription with AutowiringMeetingRecordServiceComponent with CreateScheduledMeetingRecordCommandValidation with CreateScheduledMeetingRecordNotification with CreateScheduledMeetingRecordScheduledNotifications with PopulateOnForm = {
 		allRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>

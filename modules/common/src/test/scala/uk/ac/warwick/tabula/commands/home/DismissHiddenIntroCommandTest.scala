@@ -9,7 +9,7 @@ class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 	val user = NoCurrentUser()
 	val settings = new UserSettings("userId")
 
-	val service = mock[UserSettingsService]
+	val service: UserSettingsService = mock[UserSettingsService]
 
 	@Test def setupWithNonExisting {
 		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")

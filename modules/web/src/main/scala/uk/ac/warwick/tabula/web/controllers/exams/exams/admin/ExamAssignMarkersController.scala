@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.AssignMarkersCommand
 import uk.ac.warwick.tabula.data.model.{Exam, Module}
 import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, UserLookupService}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.userlookup.User
 
@@ -26,7 +27,7 @@ class ExamAssignMarkersController extends ExamsController {
 			case true => user.getFullName
 			case false => user.getWarwickId
 		}
-		def sortValue = seatNumber.map(seat => (seat, seat)).getOrElse((100000,100000))
+		def sortValue: (Int, Int) = seatNumber.map(seat => (seat, seat)).getOrElse((100000,100000))
 	}
 	case class Marker(fullName: String, userCode: String, students: Seq[ExamStudent])
 
@@ -60,7 +61,7 @@ class ExamAssignMarkersController extends ExamsController {
 		@PathVariable module: Module,
 		@PathVariable exam: Exam,
 		@PathVariable academicYear: AcademicYear
-	) = {
+	): Mav = {
 		val members = assessmentMembershipService.determineMembershipUsersWithOrder(exam).map{ case(user, seatOrder) =>
 			new ExamStudent(user, seatOrder, module)
 		}
@@ -86,7 +87,7 @@ class ExamAssignMarkersController extends ExamsController {
 		@PathVariable module: Module,
 		@PathVariable(value = "exam") exam: Exam,
 		@ModelAttribute("command") cmd: Appliable[Exam]
-	) = {
+	): Mav = {
 		cmd.apply()
 		Redirect(Routes.Exams.admin.module(module, exam.academicYear))
 	}
@@ -98,7 +99,7 @@ class ExamAssignMarkersController extends ExamsController {
 		@PathVariable academicYear: AcademicYear,
 		@ModelAttribute("command") cmd: Appliable[Exam],
 		errors: Errors
-	) = {
+	): Mav = {
 		Mav("exams/exams/admin/assignmarkers/upload-preview",
 			"assessment" -> exam,
 			"isExam" -> true,

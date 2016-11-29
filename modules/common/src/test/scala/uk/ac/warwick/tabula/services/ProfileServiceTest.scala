@@ -20,9 +20,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 		thisStudentCourseDetailsDao.sessionFactory = sessionFactory
 		profileService = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = thisMemberDao
-			val studentCourseDetailsDao = thisStudentCourseDetailsDao
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: AutowiringMemberDaoImpl = thisMemberDao
+			val studentCourseDetailsDao: StudentCourseDetailsDaoImpl = thisStudentCourseDetailsDao
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 	}
 
@@ -108,9 +108,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def studentsByRouteForAcademicYear() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = mock[MemberDao]
-			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: MemberDao = mock[MemberDao]
+			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -165,9 +165,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def studentsByRouteWithdrawn() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = mock[MemberDao]
-			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: MemberDao = mock[MemberDao]
+			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -212,9 +212,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def studentsByRouteMostSignificantCourse() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = mock[MemberDao]
-			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: MemberDao = mock[MemberDao]
+			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -244,9 +244,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def studentsByRouteNotMostSignificantCourse() = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = mock[MemberDao]
-			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: MemberDao = mock[MemberDao]
+			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -273,9 +273,9 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	}
 	trait MockFixture {
 		val profileServiceWithMocks = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
-			val memberDao = mock[MemberDao]
-			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
-			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
+			val memberDao: MemberDao = mock[MemberDao]
+			val studentCourseDetailsDao: StudentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember] = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 	}
 

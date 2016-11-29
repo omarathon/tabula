@@ -13,8 +13,8 @@ class AssignMarkersCommandTest extends TestBase with Mockito {
 	@Test
 	def assignMarkers() { new MarkingWorkflowWorld {
 		val command = new AssignMarkersCommand(assignment.module, assignment) with AssignMarkersCommandState with AssessmentServiceComponent with UserGroupDaoComponent {
-			val assessmentService = smartMock[AssessmentService]
-			val userGroupDao = smartMock[UserGroupDao]
+			val assessmentService: AssessmentService = smartMock[AssessmentService]
+			val userGroupDao: UserGroupDao = smartMock[UserGroupDao]
 		}
 
 		command.firstMarkerMapping = Map(

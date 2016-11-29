@@ -9,16 +9,18 @@ import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 
+import scala.collection.mutable.ArrayBuffer
+
 @RunWith(classOf[JUnitRunner])
 class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 	trait Fixture {
-		val mockSession = smartMock[Session]
-		val importer = smartMock[AssignmentImporter]
-		val membershipService = smartMock[AssessmentMembershipService]
-		val moduleService = smartMock[ModuleAndDepartmentService]
+		val mockSession: Session = smartMock[Session]
+		val importer: AssignmentImporter = smartMock[AssignmentImporter]
+		val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+		val moduleService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		val command = new ImportAssignmentsCommand {
-			def session = mockSession
+			def session: Session = mockSession
 		}
 		command.assignmentImporter = importer
 		command.assessmentMembershipService = membershipService
@@ -62,7 +64,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 			}
 		)
 
-		val hi900_30 = {
+		val hi900_30: UpstreamAssessmentGroup = {
 			val g = new UpstreamAssessmentGroup
 			g.id = "hi900_30"
 			g.moduleCode = "HI900-30"
@@ -139,7 +141,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
-			val members = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
+			val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
 			membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
 				val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
 				members.append(member)
@@ -179,7 +181,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
 			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
-			val members = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
+			val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
 			membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
 				val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
 				members.append(member)
@@ -197,12 +199,12 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 				)
 			))
 
-			val member1 = members.find(_.universityId == "0100001").get
+			val member1: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100001").get
 			member1.actualMark should be (Some(BigDecimal(34)))
 			member1.actualGrade should be (None)
 			member1.agreedMark should be (Some(BigDecimal(34)))
 			member1.agreedGrade should be (None)
-			val member2 = members.find(_.universityId == "0100002").get
+			val member2: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100002").get
 			member2.actualMark should be (Some(BigDecimal(67)))
 			member2.actualGrade should be (Some("21"))
 			member2.agreedMark should be (Some(BigDecimal(72)))
@@ -211,7 +213,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 	}
 
 	/** Matches on an UpstreamAssessmentGroup's module code. */
-	def hasModuleCode(code: String) = CustomHamcrestMatchers.hasProperty('moduleCode, code)
+	def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty('moduleCode, code)
 
 
 }

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 @RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}"))
 class DownloadFeedbackController extends CourseworkController {
 
-	var feedbackService = Wire[FeedbackService]
+	var feedbackService: FeedbackService = Wire[FeedbackService]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser)
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUniId(assignment, user.universityId).filter(_.released)), optionalCurrentMember)

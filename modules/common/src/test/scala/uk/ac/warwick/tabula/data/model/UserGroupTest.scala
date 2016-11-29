@@ -10,8 +10,8 @@ import scala.collection.JavaConverters._
 
 class UserGroupTest extends PersistenceTestBase  with Mockito{
 
-	val mockSessionFactory = smartMock[SessionFactory]
-	val mockSession = smartMock[Session]
+	val mockSessionFactory: SessionFactory = smartMock[SessionFactory]
+	val mockSession: Session = smartMock[Session]
 	mockSessionFactory.getCurrentSession returns mockSession
 	mockSessionFactory.openSession() returns mockSession
 

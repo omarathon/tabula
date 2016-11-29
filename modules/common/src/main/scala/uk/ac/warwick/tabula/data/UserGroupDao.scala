@@ -10,7 +10,7 @@ trait UserGroupDaoComponent {
 }
 
 trait AutowiringUserGroupDaoComponent extends UserGroupDaoComponent {
-	val userGroupDao = Wire[UserGroupDao]
+	val userGroupDao: UserGroupDao = Wire[UserGroupDao]
 }
 
 trait UserGroupDao {
@@ -20,6 +20,6 @@ trait UserGroupDao {
 @Repository
 class UserGroupDaoImpl extends UserGroupDao with Daoisms {
 
-	def saveOrUpdate(userGroup: UserGroup) = session.saveOrUpdate(userGroup)
+	def saveOrUpdate(userGroup: UserGroup): Unit = session.saveOrUpdate(userGroup)
 
 }

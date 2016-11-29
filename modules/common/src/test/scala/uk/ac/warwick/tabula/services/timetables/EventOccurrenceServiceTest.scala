@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time._
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
@@ -10,16 +11,16 @@ import uk.ac.warwick.util.termdates.{TermFactory, TermImpl}
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
 
-	val module = Fixtures.module("XX-123")
+	val module: Module = Fixtures.module("XX-123")
 	val week1:WeekRange.Week = 1
 	val week2:WeekRange.Week = 2
 	// deliberately pick a date that _isn't_ now, so that we can highlight places where we're accidentally
 	// guessing the current year instead of reading it from the event
-	val week1Start = DateTime.now().minusYears(2).withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
-	val year = AcademicYear.guessSITSAcademicYearByDate(week1Start)
-	val week1end = week1Start.plusDays(7)
-	val week2Start = week1end
-	val week2End = week2Start.plusDays(7)
+	val week1Start: DateTime = DateTime.now().minusYears(2).withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
+	val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(week1Start)
+	val week1end: DateTime = week1Start.plusDays(7)
+	val week2Start: DateTime = week1end
+	val week2End: DateTime = week2Start.plusDays(7)
 	val tenAm = new LocalTime(10,0,0)
 	val tenThirty = new LocalTime(10,30,0)
 
@@ -38,13 +39,13 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val intervalOutsideOccurrence = new Interval(1,2)
 
 	val occurrenceService = new TermBasedEventOccurrenceService with WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent with UserLookupComponent {
-		val weekToDateConverter = mock[WeekToDateConverter]
-		var termService = mock[TermService]
-		val profileService = mock[ProfileService]
+		val weekToDateConverter: WeekToDateConverter = mock[WeekToDateConverter]
+		var termService: TermService = mock[TermService]
+		val profileService: ProfileService = mock[ProfileService]
 		val userLookup = new MockUserLookup
 	}
 
-	val termFactory = mock[TermFactory]
+	val termFactory: TermFactory = mock[TermFactory]
 
 	occurrenceService.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
 

@@ -41,7 +41,7 @@ class CreateNewAttendancePointsFromCopyCommandInternal(
 	self: CreateNewAttendancePointsFromCopyCommandState with TermServiceComponent
 		with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
 		val points = getPoints(findPointsResult, schemes, pointStyle, academicYear, addToScheme = true)
 		points.foreach(attendanceMonitoringService.saveOrUpdate)
 

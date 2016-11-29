@@ -2,9 +2,9 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.notifications.groups.ReleaseSmallGroupSetsNotification
-import uk.ac.warwick.tabula.{SmallGroupFixture, Mockito, TestBase}
+import uk.ac.warwick.tabula.{Mockito, SmallGroupFixture, TestBase}
 
 class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
@@ -12,7 +12,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   def applyShouldSetReleasedToStudentsFlag() {new SmallGroupFixture {
       val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
       command.notifyStudents = true
-      val updatedSets = command.applyInternal()
+      val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
       updatedSets.foreach(updatedSet=>
         updatedSet.set.releasedToStudents.booleanValue should be(true)
       )
@@ -24,7 +24,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     groupSet2.releasedToStudents = true
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     command.notifyStudents = false
-    val updatedSets = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     updatedSets.foreach(updatedSet=>
       updatedSet.set.releasedToStudents.booleanValue should be(true)
     )
@@ -36,7 +36,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     groupSet2.releasedToStudents = false
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
     command.notifyStudents = false
-    val updatedSets = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     updatedSets.foreach(updatedSet=>
       updatedSet.set.releasedToStudents.booleanValue should be(false)
     )
@@ -46,8 +46,8 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   def applyShouldSetReleasedToTutorsFlag() {new SmallGroupFixture {
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
     command.notifyTutors = true
-    val updatedSet = command.applyInternal()
-    val updatedSets = command.applyInternal()
+    val updatedSet: Seq[ReleasedSmallGroupSet] = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     updatedSets.foreach(updatedSet=>
       updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
@@ -59,7 +59,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     groupSet2.releasedToTutors = true
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1, groupSet2), requestingUser)
     command.notifyTutors = false
-    val updatedSets = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     updatedSets.foreach(updatedSet=>
       updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
@@ -71,7 +71,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     groupSet2.releasedToTutors = false
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1,groupSet2), requestingUser)
     command.notifyTutors = false
-    val updatedSets = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     updatedSets.foreach(updatedSet=>
       updatedSet.set.releasedToTutors.booleanValue should be(false)
     )
@@ -81,7 +81,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   def describeShouldIncludeSmallGroupSets() { new SmallGroupFixture{
     val sets = Seq(groupSet1, groupSet2)
     val command = new ReleaseGroupSetCommandImpl(sets, requestingUser)
-    val desc = mock[Description]
+    val desc: Description = mock[Description]
     command.describe(desc)
     verify(desc, atLeastOnce()).smallGroupSetCollection(sets)
   }}
@@ -94,7 +94,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     cmd.applyInternal()
 
-		val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+		val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.foreach {
 			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
 		}
@@ -107,7 +107,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyStudents = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+    val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.foreach {
 			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
 		}
@@ -121,7 +121,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyTutors = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
-    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+    val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.foreach {
 			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
 		}
@@ -134,7 +134,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyTutors = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+    val notifications: Seq[ReleaseSmallGroupSetsNotification] = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.foreach {
 			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
 		}
@@ -183,10 +183,10 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1,groupSet2), requestingUser)
     command.userLookup = userLookup
     command.notifyTutors = true
-    val updatedSets = command.applyInternal()
+    val updatedSets: Seq[ReleasedSmallGroupSet] = command.applyInternal()
     val notifications: Seq[ReleaseSmallGroupSetsNotification] =
 			command.emit(Seq(ReleasedSmallGroupSet(groupSet1, false, false), ReleasedSmallGroupSet(groupSet2, command.notifyStudents, true)))
-		val groups = notifications.flatMap(_.groups)
+		val groups: Seq[SmallGroup] = notifications.flatMap(_.groups)
     val allNotifiedGroupSets: Seq[SmallGroupSet] = groups.map(_.groupSet)
     allNotifiedGroupSets.exists(_ == groupSet1) should be (false)
   }}

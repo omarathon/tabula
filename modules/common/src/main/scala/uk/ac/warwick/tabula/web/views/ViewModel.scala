@@ -20,7 +20,7 @@ object ViewModel {
 			url: String,
 			enabled: Boolean = true,
 			disabledPopupText: Option[String] = None) extends MenuEntry("action") {
-		def disabledIf(cond: => Boolean, disabledMessage: String) = copy(enabled=(!cond), disabledPopupText=Some(disabledMessage))
+		def disabledIf(cond: => Boolean, disabledMessage: String): MenuAction = copy(enabled=(!cond), disabledPopupText=Some(disabledMessage))
 	}
 
 }

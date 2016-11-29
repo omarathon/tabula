@@ -31,7 +31,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 		@PathVariable member: Member,
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable agent: String
-	) = {
+	): ViewStudentRelationshipPhotoCommand = {
 		mandatory(member) match {
 			case student: StudentMember =>
 				val relationships =

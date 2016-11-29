@@ -1,23 +1,25 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
-import uk.ac.warwick.tabula.data.model.permissions.{RoleOverride, CustomRoleDefinition}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
+
 import scala.collection.JavaConverters._
 
 class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends DeleteCustomRoleOverrideCommandState with PermissionsServiceComponent {
-		val permissionsService = mock[PermissionsService]
+		val permissionsService: PermissionsService = mock[PermissionsService]
 	}
 
 	private trait Fixture {
-		val department = Fixtures.department("in")
+		val department: Department = Fixtures.department("in")
 
 		val customRole = new CustomRoleDefinition
 		customRole.id = "custom"
@@ -51,42 +53,42 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def permissions { new Fixture {
-		val d = department
-		val o = roleOverride
+		val d: Department = department
+		val o: RoleOverride = roleOverride
 
 		val command = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
-			override val department = d
-			override val customRoleDefinition = customRole
-			override val roleOverride = o
+			override val department: Department = d
+			override val customRoleDefinition: CustomRoleDefinition = customRole
+			override val roleOverride: RoleOverride = o
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 
 		verify(checking, times(1)).PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
 	}}
 
 	@Test(expected = classOf[ItemNotFoundException]) def noDepartment { new Fixture {
-		val o = roleOverride
+		val o: RoleOverride = roleOverride
 
 		val command = new DeleteCustomRoleOverrideCommandPermissions with DeleteCustomRoleOverrideCommandState {
 			override val department = null
-			override val customRoleDefinition = customRole
-			override val roleOverride = o
+			override val customRoleDefinition: CustomRoleDefinition = customRole
+			override val roleOverride: RoleOverride = o
 		}
 
-		val checking = mock[PermissionsChecking]
+		val checking: PermissionsChecking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
 	}}
 
 	private trait ValidationFixture extends Fixture {
-		val d = department
-		val o = roleOverride
+		val d: Department = department
+		val o: RoleOverride = roleOverride
 
 		val command = new DeleteCustomRoleOverrideCommandValidation with CommandTestSupport {
-			val department = d
-			val customRoleDefinition = customRole
-			val roleOverride = o
+			val department: Department = d
+			val customRoleDefinition: CustomRoleDefinition = customRole
+			val roleOverride: RoleOverride = o
 		}
 	}
 
@@ -98,14 +100,14 @@ class DeleteCustomRoleOverrideCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def description { new Fixture {
-		val dept = department
-		val o = roleOverride
+		val dept: Department = department
+		val o: RoleOverride = roleOverride
 
 		val command = new DeleteCustomRoleOverrideCommandDescription with DeleteCustomRoleOverrideCommandState {
 			override val eventName: String = "test"
-			val department = dept
-			val customRoleDefinition = customRole
-			val roleOverride = o
+			val department: Department = dept
+			val customRoleDefinition: CustomRoleDefinition = customRole
+			val roleOverride: RoleOverride = o
 		}
 
 		val d = new DescriptionImpl

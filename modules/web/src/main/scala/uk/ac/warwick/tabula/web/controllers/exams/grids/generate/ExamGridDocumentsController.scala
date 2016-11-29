@@ -22,7 +22,7 @@ trait ExamGridDocumentsController extends ExamsController
 
 	self: GenerateExamGridController =>
 
-	var messageSource = Wire.auto[MessageSource]
+	var messageSource: MessageSource = Wire.auto[MessageSource]
 
 	@RequestMapping(method = Array(POST), params = Array(GenerateExamGridMappingParameters.excel))
 	def excel(

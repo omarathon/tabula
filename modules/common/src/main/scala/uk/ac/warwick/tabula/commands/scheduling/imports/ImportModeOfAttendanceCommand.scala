@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.scheduling.imports
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand.ImportResult
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, ModeOfAttendanceDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -18,14 +19,14 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo)
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
+	var modeOfAttendanceDao: ModeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
 	// A couple of intermediate properties that will be transformed later
-	var code = info.code
-	var shortName = info.shortName
-	var fullName = info.fullName
+	var code: String = info.code
+	var shortName: String = info.shortName
+	var fullName: String = info.fullName
 
-	override def applyInternal() = transactional() ({
+	override def applyInternal(): (ModeOfAttendance, ImportResult) = transactional() ({
 		val modeOfAttendanceExisting = modeOfAttendanceDao.getByCode(code)
 
 		logger.debug("Importing mode of attendance " + code + " into " + modeOfAttendanceExisting)
@@ -61,6 +62,6 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo)
 		"code", "shortName", "fullName"
 	)
 
-	override def describe(d: Description) = d.property("shortName" -> shortName)
+	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

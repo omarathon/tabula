@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.{Mav, Routes}
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import org.springframework.stereotype.Controller
@@ -17,17 +17,17 @@ import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
+import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition}
 import uk.ac.warwick.tabula.services.RelationshipService
 
 trait CustomRoleControllerMethods extends AdminController {
 	validatesSelf[SelfValidating]
 
-	var permissionsService = Wire[PermissionsService]
-	var relationshipService = Wire[RelationshipService]
+	var permissionsService: PermissionsService = Wire[PermissionsService]
+	var relationshipService: RelationshipService = Wire[RelationshipService]
 
 	@ModelAttribute("allRoleDefinitions")
-	def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser) = transactional(readOnly = true) {
+	def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser): Seq[RoleDefinition] = transactional(readOnly = true) {
 		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
 		def parentDepartments[B <: PermissionsTarget](permissionsTarget: B): Seq[Department] = permissionsTarget match {
@@ -64,7 +64,7 @@ class ListCustomRolesController extends CustomRoleControllerMethods {
 	@ModelAttribute("command") def command(@PathVariable department: Department) = ListCustomRolesCommand(department)
 
 	@RequestMapping
-	def list(@ModelAttribute("command") command: ListCustomRolesCommand) = {
+	def list(@ModelAttribute("command") command: ListCustomRolesCommand): Mav = {
 		Mav("admin/department/customroles/list",
 			"customRoles" -> command.apply()
 		).crumbs(
@@ -82,13 +82,13 @@ class AddCustomRoleDefinitionController extends CustomRoleControllerMethods {
 	def command(@PathVariable department: Department) = AddCustomRoleDefinitionCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department) =
+	def form(@PathVariable department: Department): Mav =
 		Mav("admin/department/customroles/add").crumbs(
 			Breadcrumbs.Department(department)
 		)
 
 	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: AddCustomRoleDefinitionCommand, errors: Errors) = {
+	def save(@Valid @ModelAttribute("command") command: AddCustomRoleDefinitionCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form(command.department)
 		} else {
@@ -108,13 +108,13 @@ class EditCustomRoleDefinitionController extends CustomRoleControllerMethods {
 		EditCustomRoleDefinitionCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department) =
+	def form(@PathVariable department: Department): Mav =
 		Mav("admin/department/customroles/edit").crumbs(
 			Breadcrumbs.Department(department)
 		)
 
 	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: EditCustomRoleDefinitionCommand, errors: Errors) = {
+	def save(@Valid @ModelAttribute("command") command: EditCustomRoleDefinitionCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form(command.department)
 		} else {
@@ -133,10 +133,10 @@ class DeleteCustomRoleDefinitionController extends CustomRoleControllerMethods {
 		DeleteCustomRoleDefinitionCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("admin/department/customroles/delete").noLayoutIf(ajax)
+	def form(): Mav = Mav("admin/department/customroles/delete").noLayoutIf(ajax)
 
 	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleDefinitionCommand, errors: Errors) = {
+	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleDefinitionCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form()
 		} else {
@@ -149,7 +149,7 @@ class DeleteCustomRoleDefinitionController extends CustomRoleControllerMethods {
 trait CustomRoleOverridesControllerMethods extends AdminController {
 	validatesSelf[SelfValidating]
 
-	@ModelAttribute("allPermissions") def allPermissions(@PathVariable department: Department) = {
+	@ModelAttribute("allPermissions") def allPermissions(@PathVariable department: Department): Map[String, Seq[(String, String)]] = {
 		def groupFn(p: Permission) = {
 			val simpleName = Permissions.shortName(p.getClass)
 
@@ -196,7 +196,7 @@ class ListCustomRoleDefinitionOverridesController extends CustomRoleOverridesCon
 		ListCustomRoleOverridesCommand(department, customRoleDefinition)
 
 	@RequestMapping
-	def list(@ModelAttribute("command") command: ListCustomRoleOverridesCommand) = {
+	def list(@ModelAttribute("command") command: ListCustomRoleOverridesCommand): Mav = {
 		Mav("admin/department/customroles/overrides",
 			"roleInfo" -> command.apply()
 		).crumbs(
@@ -215,13 +215,13 @@ class AddCustomRoleOverrideController extends CustomRoleOverridesControllerMetho
 		AddCustomRoleOverrideCommand(department, customRoleDefinition)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department) =
+	def form(@PathVariable department: Department): Mav =
 		Mav("admin/department/customroles/addOverride").crumbs(
 			Breadcrumbs.Department(department)
 		)
 
 	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: AddCustomRoleOverrideCommand, errors: Errors) = {
+	def save(@Valid @ModelAttribute("command") command: AddCustomRoleOverrideCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form(command.department)
 		} else {
@@ -240,10 +240,10 @@ class DeleteCustomRoleOverrideController extends CustomRoleOverridesControllerMe
 		DeleteCustomRoleOverrideCommand(department, customRoleDefinition, roleOverride)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("admin/department/customroles/deleteOverride").noLayoutIf(ajax)
+	def form(): Mav = Mav("admin/department/customroles/deleteOverride").noLayoutIf(ajax)
 
 	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleOverrideCommand, errors: Errors) = {
+	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleOverrideCommand, errors: Errors): Mav = {
 		if (errors.hasErrors) {
 			form()
 		} else {

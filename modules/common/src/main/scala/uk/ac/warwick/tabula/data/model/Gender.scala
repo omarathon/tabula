@@ -11,7 +11,7 @@ object Gender {
 	case object Other extends Gender("N", "Other")
 	case object Unspecified extends Gender("P", "Prefer not to say")
 
-	def fromCode(code: String) = code match {
+	def fromCode(code: String): Gender = code match {
 	  	case Male.dbValue => Male
 	  	case Female.dbValue => Female
 	  	case Other.dbValue => Other
@@ -29,8 +29,8 @@ class GenderUserType extends AbstractBasicUserType[Gender, String] {
 	val nullValue = null
 	val nullObject = null
 
-	override def convertToObject(string: String) = Gender.fromCode(string)
+	override def convertToObject(string: String): Gender = Gender.fromCode(string)
 
-	override def convertToValue(gender: Gender) = gender.dbValue
+	override def convertToValue(gender: Gender): String = gender.dbValue
 
 }

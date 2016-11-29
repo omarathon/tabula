@@ -11,9 +11,9 @@ class PermissionConverter extends TwoWayConverter[String, Permission] {
 
 	val userType = new PermissionUserType
 
-	override def convertLeft(permission: Permission) = Option(permission).map(userType.convertToValue).orNull
+	override def convertLeft(permission: Permission): String = Option(permission).map(userType.convertToValue).orNull
 
-	override def convertRight(name: String) = {
+	override def convertRight(name: String): Permission = {
 		if (!name.hasText) null
 		else try { userType.convertToObject(name) } catch { case e: IllegalArgumentException => null }
 	}

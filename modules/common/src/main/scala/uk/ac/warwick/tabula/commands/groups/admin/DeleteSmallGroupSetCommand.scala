@@ -16,11 +16,11 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
 	mustBeLinked(set, module)
 	PermissionCheck(Permissions.SmallGroups.Delete, set)
 
-	var service = Wire[SmallGroupService]
+	var service: SmallGroupService = Wire[SmallGroupService]
 
 	var confirm = false
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): SmallGroupSet = transactional() {
 		set.markDeleted()
 		service.saveOrUpdate(set)
 		set
@@ -40,7 +40,7 @@ class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
 		}
 	}
 
-	override def describe(d: Description) = d.smallGroupSet(set)
+	override def describe(d: Description): Unit = d.smallGroupSet(set)
 
 	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
 		set.groups.asScala.flatMap(

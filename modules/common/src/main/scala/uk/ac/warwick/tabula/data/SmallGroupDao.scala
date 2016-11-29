@@ -20,7 +20,7 @@ trait SmallGroupDaoComponent {
 }
 
 trait AutowiringSmallGroupDaoComponent extends SmallGroupDaoComponent {
-	val smallGroupDao = Wire[SmallGroupDao]
+	val smallGroupDao: SmallGroupDao = Wire[SmallGroupDao]
 }
 
 case class SmallGroupEventReportData(
@@ -102,28 +102,28 @@ class SmallGroupDaoImpl extends SmallGroupDao
 
 	import Order._
 
-	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
-	def getSmallGroupById(id: String) = getById[SmallGroup](id)
-	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
-	def getSmallGroupEventOccurrenceById(id: String) = getById[SmallGroupEventOccurrence](id)
-	def getDepartmentSmallGroupSetById(id: String) = getById[DepartmentSmallGroupSet](id)
-	def getDepartmentSmallGroupById(id: String) = getById[DepartmentSmallGroup](id)
-	def saveOrUpdate(smallGroupSet: SmallGroupSet) = session.saveOrUpdate(smallGroupSet)
-	def saveOrUpdate(smallGroup: SmallGroup) = session.saveOrUpdate(smallGroup)
-	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
-	def saveOrUpdate(occurrence: SmallGroupEventOccurrence) = session.saveOrUpdate(occurrence)
-	def saveOrUpdate(attendance: SmallGroupEventAttendance) = session.saveOrUpdate(attendance)
-	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = session.saveOrUpdate(note)
-	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet) = session.saveOrUpdate(smallGroupSet)
-	def saveOrUpdate(smallGroup: DepartmentSmallGroup) = session.saveOrUpdate(smallGroup)
+	def getSmallGroupSetById(id: String): Option[SmallGroupSet] = getById[SmallGroupSet](id)
+	def getSmallGroupById(id: String): Option[SmallGroup] = getById[SmallGroup](id)
+	def getSmallGroupEventById(id: String): Option[SmallGroupEvent] = getById[SmallGroupEvent](id)
+	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence] = getById[SmallGroupEventOccurrence](id)
+	def getDepartmentSmallGroupSetById(id: String): Option[DepartmentSmallGroupSet] = getById[DepartmentSmallGroupSet](id)
+	def getDepartmentSmallGroupById(id: String): Option[DepartmentSmallGroup] = getById[DepartmentSmallGroup](id)
+	def saveOrUpdate(smallGroupSet: SmallGroupSet): Unit = session.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: SmallGroup): Unit = session.saveOrUpdate(smallGroup)
+	def saveOrUpdate(smallGroupEvent: SmallGroupEvent): Unit = session.saveOrUpdate(smallGroupEvent)
+	def saveOrUpdate(occurrence: SmallGroupEventOccurrence): Unit = session.saveOrUpdate(occurrence)
+	def saveOrUpdate(attendance: SmallGroupEventAttendance): Unit = session.saveOrUpdate(attendance)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote): Unit = session.saveOrUpdate(note)
+	def saveOrUpdate(smallGroupSet: DepartmentSmallGroupSet): Unit = session.saveOrUpdate(smallGroupSet)
+	def saveOrUpdate(smallGroup: DepartmentSmallGroup): Unit = session.saveOrUpdate(smallGroup)
 
-	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int) =
+	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence] =
 		session.newCriteria[SmallGroupEventOccurrence]
 			.add(is("event", event))
 			.add(is("week", week))
 			.uniqueResult
 
-	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear) =
+	def findSetsByDepartmentAndYear(department: Department, year: AcademicYear): Seq[SmallGroupSet] =
 		session.newCriteria[SmallGroupSet]
 			.createAlias("module", "module")
 			.add(is("module.adminDepartment", department))
@@ -133,7 +133,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.addOrder(asc("name"))
 			.seq
 
-	def findSetsByModuleAndYear(module: Module, year: AcademicYear) =
+	def findSetsByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroupSet] =
 		session.newCriteria[SmallGroupSet]
 			.add(is("module", module))
 			.add(is("academicYear", year))
@@ -142,20 +142,20 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.addOrder(asc("name"))
 			.seq
 
-	def findAllSetsByDepartment(department: Department) =
+	def findAllSetsByDepartment(department: Department): Seq[SmallGroupSet] =
 		session.newCriteria[SmallGroupSet]
 			.createAlias("module", "module")
 			.add(is("module.adminDepartment", department))
 			.seq
 
-	def findByModuleAndYear(module: Module, year: AcademicYear) =
+	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup] =
 		session.newCriteria[SmallGroup]
 			.createAlias("groupSet", "set")
 			.add(is("set.module", module))
 			.add(is("set.academicYear", year))
 			.seq
 
-	def findSmallGroupOccurrencesByGroup(group: SmallGroup) =
+	def findSmallGroupOccurrencesByGroup(group: SmallGroup): Seq[SmallGroupEventOccurrence] =
 		session.newCriteria[SmallGroupEventOccurrence]
 			.createAlias("event", "event")
 			.add(is("event.group", group))
@@ -163,7 +163,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.addOrder(asc("event.day"))
 			.seq
 
-	def findSmallGroupOccurrencesByEvent(event: SmallGroupEvent) =
+	def findSmallGroupOccurrencesByEvent(event: SmallGroupEvent): Seq[SmallGroupEventOccurrence] =
 		session.newCriteria[SmallGroupEventOccurrence]
 			.add(is("event", event))
 			.addOrder(asc("week"))
@@ -281,7 +281,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.uniqueResult.get.intValue() > 0
 	}
 
-	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear) = {
+	def getDepartmentSmallGroupSets(department: Department, year: AcademicYear): Seq[DepartmentSmallGroupSet] = {
 		session.newCriteria[DepartmentSmallGroupSet]
 			.add(is("department", department))
 			.add(is("academicYear", year))
@@ -302,9 +302,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.groupBy(_.department)
 	}
 
-	def delete(occurrence: SmallGroupEventOccurrence) = session.delete(occurrence)
+	def delete(occurrence: SmallGroupEventOccurrence): Unit = session.delete(occurrence)
 
-	def findAttendedSmallGroupEvents(studentId: String) =
+	def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance] =
 		session.newCriteria[SmallGroupEventAttendance]
 			.add(is("universityId", studentId))
 			.add(is("state", AttendanceState.Attended))

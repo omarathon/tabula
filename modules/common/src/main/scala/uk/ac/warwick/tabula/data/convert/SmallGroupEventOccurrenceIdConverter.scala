@@ -10,7 +10,7 @@ class SmallGroupEventOccurrenceIdConverter extends TwoWayConverter[String, Small
 
 	@Autowired var service: SmallGroupService = _
 
-	override def convertRight(id: String) = (Option(id) flatMap { service.getSmallGroupEventOccurrenceById }).orNull
-	override def convertLeft(group: SmallGroupEventOccurrence) = (Option(group) map {_.id}).orNull
+	override def convertRight(id: String): SmallGroupEventOccurrence = (Option(id) flatMap { service.getSmallGroupEventOccurrenceById }).orNull
+	override def convertLeft(group: SmallGroupEventOccurrence): String = (Option(group) map {_.id}).orNull
 
 }

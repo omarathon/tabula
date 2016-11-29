@@ -314,5 +314,5 @@ trait ProgressionServiceComponent {
 }
 
 trait AutowiringProgressionServiceComponent extends ProgressionServiceComponent {
-	var progressionService = Wire[ProgressionService]
+	var progressionService: ProgressionService = Wire[ProgressionService]
 }

@@ -26,5 +26,5 @@ class SmallGroupSetSelfSignUpStateUserType extends AbstractBasicUserType[SmallGr
 	val nullObject = null
 
 	override def convertToObject(string: String) = SmallGroupSetSelfSignUpState(string)
-	override def convertToValue(state: SmallGroupSetSelfSignUpState) = state.name
+	override def convertToValue(state: SmallGroupSetSelfSignUpState): String = state.name
 }

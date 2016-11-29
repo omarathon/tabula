@@ -35,7 +35,7 @@ trait ModuleListImporter {
 class ModuleListImporterImpl extends ModuleListImporter with InitializingBean
 	with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent {
 
-	var sits = Wire[DataSource]("sitsDataSource")
+	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
 	var moduleListQuery: UpstreamModuleListQuery = _
 	var moduleListEntityQuery: UpstreamModuleListEntityQuery = _
@@ -93,7 +93,7 @@ object ModuleListImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 	var dialectRegexpLike = "regexp_like"
 
-	def GetModuleLists = """
+	def GetModuleLists: String = """
 		select
 			fmc.fmc_code as code
 		from %s.cam_fmc fmc
@@ -111,7 +111,7 @@ object ModuleListImporter {
 
 	class UpstreamModuleListQuery(ds: DataSource) extends MappingSqlQuery[UpstreamModuleListRow](ds, GetModuleLists) {
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int): UpstreamModuleListRow = {
 			val codeParts = rs.getString("code").split("-")
 			if (codeParts.length == 4) {
 				UpstreamModuleListRow(
@@ -127,7 +127,7 @@ object ModuleListImporter {
 		}
 	}
 
-	def GetModuleListEntities = """
+	def GetModuleListEntities: String = """
 		select
 			fme.fmc_code as list,
 	 		fme.fme_modp as glob
@@ -144,7 +144,7 @@ object ModuleListImporter {
 	class UpstreamModuleListEntityQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamModuleListEntityRow](ds, GetModuleListEntities) {
 		declareParameter(new SqlParameter("lists", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): UpstreamModuleListEntityRow = {
 			UpstreamModuleListEntityRow(
 				rs.getString("list"),
 				rs.getString("glob")

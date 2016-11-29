@@ -5,12 +5,14 @@ import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.sysadmin._
 import org.springframework.web.bind.annotation
 import javax.validation.Valid
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiResponse
 import uk.ac.warwick.tabula.web.controllers.sysadmin.LtiConformanceTesterGenerateController.LtiConformanceTesterPopulateFormCommand
 import uk.ac.warwick.tabula.commands.sysadmin.LtiConformanceTesterPopulateFormCommand
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/sysadmin/turnitinlti"))
@@ -34,7 +36,7 @@ class TurnitinLtiSubmitAssignmentController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/submit-assignment")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmitAssignmentCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("turnitinLtiSubmitAssignmentCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
 		if (errors.hasErrors){
 			form()
 		} else {
@@ -57,7 +59,7 @@ class TurnitinLtiSubmitPaperController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/submit-paper")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmitPaperCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("turnitinLtiSubmitPaperCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
 		if (errors.hasErrors){
 			form()
 		} else {
@@ -79,7 +81,7 @@ class TurnitinLtiListEndpointsController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/list-endpoints")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiListEndpointsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("turnitinLtiListEndpointsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
 		if (errors.hasErrors){
 			form()
 		} else {
@@ -101,7 +103,7 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/submission-details")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors) =
+	def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
 	if (errors.hasErrors){
 		form()
 	} else {
@@ -131,7 +133,7 @@ class LtiConformanceTesterGenerateController extends BaseSysadminController {
 	def form() = Mav("sysadmin/turnitinlti/conformance-tester-generate")
 
 	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("ltiConformanceTesterPopulateFormCommand") cmd: LtiConformanceTesterPopulateFormCommand, errors: Errors) =
+	def add(@Valid @ModelAttribute("ltiConformanceTesterPopulateFormCommand") cmd: LtiConformanceTesterPopulateFormCommand, errors: Errors): Mav =
 		if (errors.hasErrors){
 			form()
 		} else {

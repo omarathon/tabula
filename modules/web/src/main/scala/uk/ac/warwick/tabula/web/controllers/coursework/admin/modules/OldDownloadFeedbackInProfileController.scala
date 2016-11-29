@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 @RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}"))
 class OldDownloadFeedbackInProfileController extends OldCourseworkController {
 
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
 	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
 		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUniId(assignment, student.universityId).filter(_.released)), Some(student))

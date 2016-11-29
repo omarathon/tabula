@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.services.elasticsearch
 
 import java.io.Closeable
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
@@ -48,7 +49,7 @@ trait ElasticsearchIndexType {
 }
 
 trait ElasticsearchIndexable[A] extends Indexable[A] {
-	var json = JsonObjectMapperFactory.instance
+	var json: ObjectMapper = JsonObjectMapperFactory.instance
 
 	def fields(item: A): Map[String, Any]
 	def lastUpdatedDate(item: A): DateTime

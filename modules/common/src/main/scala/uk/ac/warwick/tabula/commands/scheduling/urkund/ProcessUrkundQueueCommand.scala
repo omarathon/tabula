@@ -28,7 +28,7 @@ class ProcessUrkundQueueCommandInternal extends CommandInternal[Option[Assignmen
 
 	self: UrkundServiceComponent with OriginalityReportServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Option[Assignment] = {
 		lazy val processedReportForSubmission = urkundService.findReportToSubmit.map(processReportForSubmission)
 		lazy val processedReportForReport = urkundService.findReportToRetreive.map(processReportForReport)
 

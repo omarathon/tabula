@@ -14,9 +14,9 @@ class CourseworkWorkflowService {
 	import CourseworkWorkflowStages._
 
 	final val MaxPower = 100
-	var features = Wire.auto[Features]
+	var features: Features = Wire.auto[Features]
 
-	def getStagesFor(assignment: Assignment) = {
+	def getStagesFor(assignment: Assignment): Seq[CourseworkWorkflowStage] = {
 		var stages = Seq[CourseworkWorkflowStage]()
 		if (assignment.collectSubmissions) {
 			stages = stages ++ Seq(Submission)
@@ -53,7 +53,7 @@ class CourseworkWorkflowService {
 		stages
 	}
 
-	def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+	def progress(assignment: Assignment)(coursework: WorkflowItems): WorkflowProgress = {
 		val allStages = getStagesFor(assignment)
 		val progresses = allStages map { _.progress(assignment)(coursework) }
 
@@ -86,7 +86,7 @@ object CourseworkWorkflowStages {
 
 	case object Submission extends CourseworkWorkflowStage {
 		def actionCode = "workflow.Submission.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
 			case None if coursework.enhancedFeedback.exists(!_.feedback.isPlaceholder) =>
 				StageProgress(Submission, started = false, messageCode = "workflow.Submission.unsubmitted.withFeedback")
@@ -114,7 +114,7 @@ object CourseworkWorkflowStages {
 
 	case object DownloadSubmission extends CourseworkWorkflowStage {
 		def actionCode = "workflow.DownloadSubmission.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			case Some(submission) if submission.downloaded =>
 				StageProgress(DownloadSubmission, started = true, messageCode = "workflow.DownloadSubmission.downloaded", health = Good, completed = true)
 			case Some(_) =>
@@ -127,7 +127,7 @@ object CourseworkWorkflowStages {
 
 	case object CheckForPlagiarism extends CourseworkWorkflowStage {
 		def actionCode = "workflow.CheckForPlagiarism.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedSubmission match {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedSubmission match {
 			case Some(item) if item.submission.suspectPlagiarised =>
 				StageProgress(CheckForPlagiarism, started = true, messageCode = "workflow.CheckForPlagiarism.suspectPlagiarised", health = Danger, completed = true)
 			case Some(item) if item.submission.allAttachments.exists(_.originalityReportReceived) =>
@@ -140,7 +140,7 @@ object CourseworkWorkflowStages {
 
 	case object ReleaseForMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ReleaseForMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			if (assignment.isReleasedForMarking(coursework.student.getWarwickId)) {
 				StageProgress(ReleaseForMarking, started = true, messageCode = "workflow.ReleaseForMarking.released", health = Good, completed = true)
 			} else {
@@ -152,7 +152,7 @@ object CourseworkWorkflowStages {
 
 	case object FirstMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.FirstMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedFeedback match {
 			case Some(item) =>
 				if (item.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 					StageProgress(FirstMarking, started = true, messageCode = "workflow.FirstMarking.marked", health = Good, completed = true)
@@ -165,7 +165,7 @@ object CourseworkWorkflowStages {
 
 	case object SecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
@@ -193,7 +193,7 @@ object CourseworkWorkflowStages {
 
 	case object Moderation extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ModeratedMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToSecondMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getSecondMarkerFeedback.exists(_.state != Rejected) =>
@@ -221,7 +221,7 @@ object CourseworkWorkflowStages {
 
 	case object FinaliseSeenSecondMarking extends CourseworkWorkflowStage {
 		def actionCode = "workflow.FinaliseSeenSecondMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = {
 			val released = assignment.isReleasedToThirdMarker(coursework.student.getWarwickId)
 			coursework.enhancedFeedback match {
 				case Some(item) if released && item.feedback.getThirdMarkerFeedback.exists(_.state != Rejected) =>
@@ -252,7 +252,7 @@ object CourseworkWorkflowStages {
 
 	case object AddMarks extends CourseworkWorkflowStage {
 		def actionCode = "workflow.AddMarks.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.hasMarkOrGrade =>
 					StageProgress(AddMarks, started = true, messageCode = "workflow.AddMarks.marked", health = Good, completed = true)
@@ -263,7 +263,7 @@ object CourseworkWorkflowStages {
 
 	case object AddFeedback extends CourseworkWorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress = coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
 				StageProgress(AddFeedback, started = true, messageCode = "workflow.AddFeedback.uploaded", health = Good, completed = true)
 			case Some(_) =>
@@ -275,7 +275,7 @@ object CourseworkWorkflowStages {
 
 	case object ReleaseFeedback extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ReleaseFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
 					StageProgress(ReleaseFeedback, started = true, messageCode = "workflow.ReleaseFeedback.released", health = Good, completed = true)
@@ -288,7 +288,7 @@ object CourseworkWorkflowStages {
 
 	case object ViewOnlineFeedback extends CourseworkWorkflowStage {
 		def actionCode = "workflow.ViewOnlineFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released && item.onlineViewed =>
 					StageProgress(ViewOnlineFeedback, started = true, messageCode = "workflow.ViewOnlineFeedback.viewed", health = Good, completed = true)
@@ -301,7 +301,7 @@ object CourseworkWorkflowStages {
 
 	case object DownloadFeedback extends CourseworkWorkflowStage {
 		def actionCode = "workflow.DownloadFeedback.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+		def progress(assignment: Assignment)(coursework: WorkflowItems): StageProgress =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) && !item.downloaded  =>
 					StageProgress(DownloadFeedback, started = false, messageCode = "workflow.DownloadFeedback.notDownloaded")
@@ -320,5 +320,5 @@ trait CourseworkWorkflowServiceComponent {
 }
 
 trait AutowiringCourseworkWorkflowServiceComponent extends CourseworkWorkflowServiceComponent {
-	var courseworkWorkflowService = Wire[CourseworkWorkflowService]
+	var courseworkWorkflowService: CourseworkWorkflowService = Wire[CourseworkWorkflowService]
 }

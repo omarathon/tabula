@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.commands.coursework.assignments.CopyAssignmentsCommand
+import uk.ac.warwick.tabula.commands.coursework.assignments.{CopyAssignmentsCommand, CopyAssignmentsDescription, CopyAssignmentsPermissions}
+import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 @Profile(Array("cm1Enabled")) @Controller
@@ -20,7 +23,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand) = {
+	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
 
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> module.name,
@@ -30,7 +33,7 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser) = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.module(module))
 	}
@@ -42,13 +45,13 @@ class OldCopyModuleAssignmentsController extends OldCourseworkController with Un
 class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable department: Department) = {
+	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
 		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy { _.code }
 		CopyAssignmentsCommand(department, modules)
 	}
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand) = {
+	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
 
 		Mav(s"$urlPrefix/admin/modules/copy_assignments",
 			"title" -> department.name,
@@ -59,7 +62,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser) = {
+	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser): Mav = {
 		cmd.apply()
 		Redirect(Routes.admin.department(department))
 	}

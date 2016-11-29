@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.profiles.relationships
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.profiles.relationships.AllocateStudentsToRelationshipCommand.Result
 import uk.ac.warwick.tabula.commands.profiles.relationships.ExtractRelationshipsFromFileCommand.AllocationTypes
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.{BulkNewAgentRelationshipNotification, BulkOldAgentRelationshipNotification, BulkStudentRelationshipNotification}
@@ -38,7 +39,7 @@ class AllocateStudentsToRelationshipCommandInternal(val department: Department, 
 
 	self: AllocateStudentsToRelationshipCommandRequest with AllocateStudentsToRelationshipCommandState with RelationshipServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): Result = {
 		val relationshipsToExpire: Seq[StudentRelationship] = (allocationType match {
 			case AllocationTypes.Replace =>
 				relationshipsNotInAdditions.groupBy(_._2).mapValues(_.map(_._1)).flatMap { case(entity, studentsToRemove) =>
@@ -134,9 +135,9 @@ trait AllocateStudentsToRelationshipCommandRequest {
 
 	var additionalEntities: JList[String] = JArrayList()
 
-	lazy val dbUnallocated = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
-	lazy val dbAllocated = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
-	lazy val allStudents = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
+	lazy val dbUnallocated: Seq[StudentAssociationData] = relationshipService.getStudentAssociationDataWithoutRelationship(department, relationshipType, Seq())
+	lazy val dbAllocated: Seq[StudentAssociationEntityData] = relationshipService.getStudentAssociationEntityData(department, relationshipType, additionalEntities.asScala)
+	lazy val allStudents: Seq[StudentAssociationData] = dbUnallocated ++ dbAllocated.flatMap(_.students).distinct
 
 	var additions: JMap[String, JList[String]] =
 		LazyMaps.create{entityId: String => JArrayList(): JList[String] }.asJava

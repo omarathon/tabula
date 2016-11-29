@@ -25,7 +25,7 @@ trait ListCustomRoleOverridesCommandState {
 }
 
 class ListCustomRoleOverridesCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition) extends CommandInternal[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState {
-	override def applyInternal() = {
+	override def applyInternal(): CustomRoleOverridesInfo = {
 		// Use Some(null) instead of None so we show scoped permissions too
 		val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
 		val overrides = customRoleDefinition.overrides.asScala

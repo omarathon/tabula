@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, Small
 import uk.ac.warwick.tabula.commands.groups.admin.OpenSmallGroupSetCommand
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.userlookup.User
 
@@ -32,7 +33,7 @@ class OpenSmallGroupSetsController extends GroupsController with AutowiringSmall
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
 		showFlash: Boolean = false
-	) = {
+	): Mav = {
 		val groupSets = smallGroupService.getSmallGroupSets(department, academicYear)
 			.filter(groupset => groupset.allocationMethod == SmallGroupAllocationMethod.StudentSignUp)
 		Mav("groups/admin/groups/bulk-open",
@@ -44,7 +45,7 @@ class OpenSmallGroupSetsController extends GroupsController with AutowiringSmall
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department: Department, @PathVariable academicYear: AcademicYear) = {
+	def submit(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
 		model.applyCommand(user.apparentUser)
 		Redirect(Routes.admin.selfsignup(department, academicYear, model.getName), "batchOpenSuccess" -> true)
 	}
@@ -52,9 +53,9 @@ class OpenSmallGroupSetsController extends GroupsController with AutowiringSmall
 	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet]) => Appliable[Seq[SmallGroupSet]], var action: SmallGroupSetSelfSignUpState) {
 		var checkedGroupsets: JList[SmallGroupSet] = JArrayList()
 
-		def getName = action.name
+		def getName: String = action.name
 
-		def applyCommand(user: User)= {
+		def applyCommand(user: User): Seq[SmallGroupSet] = {
 			createCommand(user, checkedGroupsets.asScala).apply()
 		}
 	}

@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{Manual, StudentSignUp}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsDisplayHelper
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{StudentAssignedToGroup, StudentNotAssignedToGroup, ViewerRole}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.{Mockito, SmallGroupBuilder, SmallGroupSetBuilder, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
@@ -16,7 +16,7 @@ class HomeControllerTest extends TestBase with Mockito{
 	import GroupsDisplayHelper._
 
 	private trait Fixture{
-		val userLookup = mock[UserLookupService]
+		val userLookup: UserLookupService = mock[UserLookupService]
 
 		val unallocatedUser = new User
 		unallocatedUser.setWarwickId("unallocated")
@@ -31,26 +31,26 @@ class HomeControllerTest extends TestBase with Mockito{
 			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}}
 
-		val group1 = new SmallGroupBuilder()
+		val group1: SmallGroup = new SmallGroupBuilder()
 			.withStudents(createUserGroup(Seq(allocatedUser)))
 			.build
 
-		val group2 = new SmallGroupBuilder().build
-		val group3 = new SmallGroupBuilder().build
+		val group2: SmallGroup = new SmallGroupBuilder().build
+		val group3: SmallGroup = new SmallGroupBuilder().build
 
-		val groupSet = new SmallGroupSetBuilder()
+		val groupSet: SmallGroupSet = new SmallGroupSetBuilder()
 			.withAllocationMethod(StudentSignUp)
 			.withMembers(createUserGroup(Seq(allocatedUser,unallocatedUser)))
 			.withGroups(Seq(group1, group2))
 			.build
-		val groupSet2 = new SmallGroupSetBuilder()
+		val groupSet2: SmallGroupSet = new SmallGroupSetBuilder()
 			.withAllocationMethod(StudentSignUp)
 			.withMembers(createUserGroup(Seq(allocatedUser,unallocatedUser)))
 			.withGroups(Seq(group3))
 			.withModule(groupSet.module)
 			.build
 
-		def createUserGroup(users:Seq[User])= {
+		def createUserGroup(users:Seq[User]): UserGroup = {
 			val ug = UserGroup.ofUniversityIds
 			ug.userLookup = userLookup
 			users.foreach (ug.add)
@@ -128,10 +128,10 @@ class HomeControllerTest extends TestBase with Mockito{
 	def viewModulesConvertsModuleToViewModule(){ new Fixture{
 		// dummy getGroupsToDisplay that always returns all groups in the set
 		def allGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (set.groups.asScala,StudentNotAssignedToGroup )
-		val viewModules = getViewModulesForStudent(Seq(groupSet), allGroups)
+		val viewModules: Seq[ViewModule] = getViewModulesForStudent(Seq(groupSet), allGroups)
 		viewModules.size should be(1)
 		viewModules.head.canManageGroups should be(false)
-		val viewSets = viewModules.head.setItems
+		val viewSets: Seq[ViewSet] = viewModules.head.setItems
 		viewSets.size should be(1)
 		viewSets.head.groups.map(_.group) should be (Seq(group1, group2).sorted)
 	}}
@@ -142,9 +142,9 @@ class HomeControllerTest extends TestBase with Mockito{
 		def allGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (set.groups.asScala,StudentNotAssignedToGroup )
 
 		// two groupsets, both for the same module
-		val viewModules = getViewModulesForStudent(Seq(groupSet, groupSet2), allGroups)
+		val viewModules: Seq[ViewModule] = getViewModulesForStudent(Seq(groupSet, groupSet2), allGroups)
 		viewModules.size should be(1)
-		val viewSets = viewModules.head.setItems
+		val viewSets: Seq[ViewSet] = viewModules.head.setItems
 		viewSets.size should be(2)
 		viewSets.head.groups.map(_.group) should be (Seq(group1, group2).sorted)
 		viewSets.tail.head.groups.map(_.group) should be (Seq(group3))

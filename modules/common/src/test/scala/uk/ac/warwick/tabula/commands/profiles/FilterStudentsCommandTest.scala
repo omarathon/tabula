@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.ScalaRestriction._
-import uk.ac.warwick.tabula.data.model.{CourseType, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
@@ -19,41 +19,41 @@ import scala.collection.JavaConverters._
 class FilterStudentsCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ProfileServiceComponent {
-		val profileService = mock[ProfileService]
+		val profileService: ProfileService = mock[ProfileService]
 
 		// this seems to need the 'anArgThat(anything)' matcher to correctly set up a catch-all mocked method, 'any' just isn't good enough
 		profileService.findStudentsByRestrictions(anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything), anArgThat(anything)) returns ((0, Seq(new StudentMember)))
 	}
 
 	trait Fixture {
-		val department = Fixtures.department("arc", "School of Architecture")
-		val subDept = Fixtures.department("arc-ug", "Architecture Undergraduates")
+		val department: Department = Fixtures.department("arc", "School of Architecture")
+		val subDept: Department = Fixtures.department("arc-ug", "Architecture Undergraduates")
 		subDept.parent = department
 		department.children.add(subDept)
 
-		val mod1 = Fixtures.module("ac101", "Introduction to Architecture")
-		val mod2 = Fixtures.module("ac102", "Architecture Basics")
-		val mod3 = Fixtures.module("ac901", "Postgraduate Thesis")
+		val mod1: Module = Fixtures.module("ac101", "Introduction to Architecture")
+		val mod2: Module = Fixtures.module("ac102", "Architecture Basics")
+		val mod3: Module = Fixtures.module("ac901", "Postgraduate Thesis")
 
 		department.modules.add(mod3)
 		subDept.modules.add(mod2)
 		subDept.modules.add(mod1)
 
-		val route1 = Fixtures.route("a501", "Architecture BA")
-		val route2 = Fixtures.route("a502", "Architecture BA with Intercalated year")
-		val route3 = Fixtures.route("a9p1", "Architecture MA")
+		val route1: Route = Fixtures.route("a501", "Architecture BA")
+		val route2: Route = Fixtures.route("a502", "Architecture BA with Intercalated year")
+		val route3: Route = Fixtures.route("a9p1", "Architecture MA")
 
 		department.routes.add(route3)
 		subDept.routes.add(route2)
 		subDept.routes.add(route1)
 
-		val sprF = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-		val sprP = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+		val sprF: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+		val sprP: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
 
-		val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
-		val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
+		val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+		val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
-		val year = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
+		val year: AcademicYear = AcademicYear.guessSITSAcademicYearByDate(DateTime.now)
 
 	}
 
@@ -126,7 +126,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		sprRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
 
 		// no need to test ScalaRestriction.inIfNotEmptyMultipleProperties - it's tested in ScalaRestrictionTest
-		val modRestriction = inIfNotEmptyMultipleProperties(
+		val modRestriction: ScalaRestriction = inIfNotEmptyMultipleProperties(
 			Seq("moduleRegistration.module", "moduleRegistration.academicYear"),
 			Seq(Seq(mod2, mod3), Seq(AcademicYear.guessSITSAcademicYearByDate(DateTime.now)))
 		).get
@@ -134,7 +134,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		modRestriction.alias("mostSignificantCourse", AliasAndJoinType("mostSignificantCourse"))
 		modRestriction.alias("mostSignificantCourse._moduleRegistrations", AliasAndJoinType("moduleRegistration"))
 
-		val expectedRestrictions = Seq(
+		val expectedRestrictions: Seq[ScalaRestriction] = Seq(
 			courseTypeRestriction,
 			routeRestriction,
 			moaRestriction,
@@ -184,12 +184,12 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 	}}
 
 	def seqToStringMatches[A](o: Seq[A]) = new ArgumentMatcher[Seq[A]] {
-		def matches(that: Any) = that match {
+		def matches(that: Any): Boolean = that match {
 			case s: Seq[_] => s.length == o.length && (o, s).zipped.forall { case (l, r) => l.toString == r.toString }
 			case _ => false
 		}
 
-		override def describeTo(description: Description) = description.appendText(o.toString())
+		override def describeTo(description: Description): Unit = description.appendText(o.toString())
 	}
 
 }

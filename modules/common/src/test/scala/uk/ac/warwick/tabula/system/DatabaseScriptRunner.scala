@@ -13,16 +13,16 @@ class DatabaseScriptRunner extends InitializingBean {
 
     var dataSource:DataSource =_
 
-    def setScripts(scripts: Array[Resource]) = {
+    def setScripts(scripts: Array[Resource]): Unit = {
     	populator.setScripts(scripts: _*)
     }
 
-	def addScript(path:String) = {
+	def addScript(path:String): DatabaseScriptRunner = {
 	  populator.addScript(new ClassPathResource(path))
 	  this
 	}
 
-	def afterPropertiesSet = {
+	def afterPropertiesSet: Unit = {
 //		val populator = new ResourceDatabasePopulator
 //		for (script <- scripts)
 //			populator.addScript(script)

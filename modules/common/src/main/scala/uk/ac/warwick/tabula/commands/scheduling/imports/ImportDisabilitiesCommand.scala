@@ -18,11 +18,11 @@ class ImportDisabilitiesCommand(info: DisabilityInfo)
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var disabilityDao = Wire.auto[DisabilityDao]
+	var disabilityDao: DisabilityDao = Wire.auto[DisabilityDao]
 
-	var code = info.code
-	var shortName = info.shortName
-	var sitsDefinition = info.definition
+	var code: String = info.code
+	var shortName: String = info.shortName
+	var sitsDefinition: String = info.definition
 
 	override def applyInternal(): (Disability, ImportAcademicInformationCommand.ImportResult) = transactional() {
 		val disabilityExisting = disabilityDao.getByCode(code)
@@ -57,6 +57,6 @@ class ImportDisabilitiesCommand(info: DisabilityInfo)
 		"code", "shortName", "sitsDefinition"
 	)
 
-	override def describe(d: Description) = d.property("shortName" -> shortName)
+	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

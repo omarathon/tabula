@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.pages
 
-import org.openqa.selenium.{By, Keys, WebDriver}
+import org.openqa.selenium.{By, Keys, WebDriver, WebElement}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 
 
 class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDriver) extends WebBrowser with Matchers with Eventually with IntegrationPatience {
-	val thisYear = FunctionalTestAcademicYear.currentSITS
+	val thisYear: FunctionalTestAcademicYear = FunctionalTestAcademicYear.currentSITS
 	val url = s"${FunctionalTestProperties.SiteRoot}/coursework/admin/department/$departmentCode/setup-assignments?academicYear=${thisYear}"
 
 	def shouldBeCurrentPage() {
@@ -18,9 +18,9 @@ class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDrive
 		cssSelector("#main-content h1").element.text should be ("Setup assignments")
 	}
 
-	def itemRows = cssSelector("tr.itemContainer").findAllElements.toSeq
+	def itemRows: Seq[Element] = cssSelector("tr.itemContainer").findAllElements.toSeq
 
-	def getCheckboxForRow(row: Element) = {
+	def getCheckboxForRow(row: Element): WebElement = {
 		row.underlying.findElement(By.cssSelector("input[type=checkbox]"))
 	}
 
@@ -39,11 +39,11 @@ class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDrive
 		eventually { span.getText should be (title) }
 	}
 
-	def itemCount = itemRows.size
+	def itemCount: Int = itemRows.size
 
-	def clickNext() = clickButtonWithAction("options")
-	def clickBack() = clickButtonWithAction("refresh-select")
-	def clickSubmit() = clickButtonWithAction("submit")
+	def clickNext(): Unit = clickButtonWithAction("options")
+	def clickBack(): Unit = clickButtonWithAction("refresh-select")
+	def clickSubmit(): Unit = clickButtonWithAction("submit")
 
 	// All the navigation buttons have an "action" data attribute.
 	private def clickButtonWithAction(action: String) {

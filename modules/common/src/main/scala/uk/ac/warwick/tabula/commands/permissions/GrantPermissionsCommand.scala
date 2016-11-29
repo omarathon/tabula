@@ -36,9 +36,9 @@ class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sco
 
 	self: PermissionsServiceComponent with UserLookupComponent =>
 
-	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
+	lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
-	def applyInternal() = transactional() {
+	def applyInternal(): GrantedPermission[A] = transactional() {
 		val granted = grantedPermission.getOrElse(GrantedPermission(scope, permission, overrideType))
 
 		usercodes.asScala.foreach(granted.users.knownType.addUserId)
@@ -64,7 +64,7 @@ trait GrantPermissionsCommandValidation extends SelfValidating {
 		} else {
 			grantedPermission.map { _.users }.foreach { users =>
 				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode = usercodes.asScala.exists { users.knownType.includesUserId }
+					override def alreadyHasCode: Boolean = usercodes.asScala.exists { users.knownType.includesUserId }
 				}
 
 				usercodeValidator.validate(errors)
@@ -103,7 +103,7 @@ trait GrantPermissionsCommandPermissions extends RequiresPermissionsChecking wit
 trait GrantPermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
 	self: GrantPermissionsCommandState[A] =>
 
-	def describe(d: Description) = d.properties(
+	def describe(d: Description): Unit = d.properties(
 		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
 		"usercodes" -> usercodes.asScala.mkString(","),
 		"permission" -> permission.getName,

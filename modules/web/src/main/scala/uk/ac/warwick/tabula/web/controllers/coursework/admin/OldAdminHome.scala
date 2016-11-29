@@ -10,9 +10,12 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.xml.Elem
 
 /**
  * Screens for department and module admins.
@@ -35,7 +38,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 		new AdminDepartmentHomeCommand(dept, user)
 
 	@RequestMapping
-	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
+	def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
 		val info = cmd.apply()
 
 		Mav(s"$urlPrefix/admin/department",
@@ -45,7 +48,7 @@ class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController
 	}
 
 	@RequestMapping(Array("/assignments.xml"))
-	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable dept: Department) = {
+	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable dept: Department): Elem = {
 		val info = cmd.apply()
 
 		new AdminHomeExports.XMLBuilder(dept, DepartmentHomeInformation(info, cmd.gatherNotices(info))).toXML
@@ -62,7 +65,7 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
 	@RequestMapping
-	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]) = {
+	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
 		val module = cmd.apply()
 
 		if (ajax) Mav(s"$urlPrefix/admin/modules/admin_partial").noLayout()
@@ -73,8 +76,8 @@ class OldCourseworkAdminModuleHomeController extends OldCourseworkController {
 class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]]
 		with ReadOnly with Unaudited {
 
-	var securityService = Wire.auto[SecurityService]
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var securityService: SecurityService = Wire.auto[SecurityService]
+	var moduleService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	val modules: JList[Module] =
 		if (securityService.can(user, Permissions.Module.ManageAssignments, mandatory(department))) {
@@ -94,11 +97,11 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			managedModules
 		}
 
-	def applyInternal() = {
+	def applyInternal(): mutable.Buffer[Module] = {
 		modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
 	}
 
-	def gatherNotices(modules: Seq[Module]) = benchmarkTask("Gather notices") {
+	def gatherNotices(modules: Seq[Module]): Map[String, Seq[Assignment]] = benchmarkTask("Gather notices") {
 		val unpublished = for (
 				module <- modules;
 				assignment <- module.assignments

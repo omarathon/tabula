@@ -30,7 +30,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		with UpdatesStudentMembership
 		with GeneratesTriggers[Assignment] {
 
-	var service = Wire.auto[AssessmentService]
+	var service: AssessmentService = Wire.auto[AssessmentService]
 
 	def assignment: Assignment
 
@@ -48,12 +48,12 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 	var prefillAssignment: Assignment = _
 
 	private var _prefilled: Boolean = _
-	def prefilled = _prefilled
+	def prefilled: Boolean = _prefilled
 
 	var removeWorkflow: Boolean = false
 
 	// TAB-3597
-	lazy val allMarkingWorkflows = assignment match {
+	lazy val allMarkingWorkflows: Seq[MarkingWorkflow] = assignment match {
 		case existing: Assignment if Option(existing.markingWorkflow).exists(_.department != module.adminDepartment) =>
 			module.adminDepartment.markingWorkflows ++ Seq(existing.markingWorkflow)
 		case _ =>
@@ -153,8 +153,8 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		copyNonspecificFrom(assignment)
 	}
 
-	val existingGroups = Option(assignment).map(_.upstreamAssessmentGroups)
-	val existingMembers = Option(assignment).map(_.members)
+	val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(assignment).map(_.upstreamAssessmentGroups)
+	val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(assignment).map(_.members)
 
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
@@ -171,7 +171,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 
 	override def transformResult(assignment: Assignment) = Seq(assignment)
 
-	override def scheduledNotifications(assignment: Assignment) = {
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = {
 		// if the assignment doesn't collect submissions or is open ended then don't schedule any notifications about deadlines
 		if (!assignment.collectSubmissions || assignment.openEnded) {
 			Seq()

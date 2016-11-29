@@ -12,7 +12,7 @@ trait TurnitinLtiQueueDaoComponent {
 }
 
 trait AutowriringTurnitinLtiQueueDaoComponent extends TurnitinLtiQueueDaoComponent{
-	val turnitinLtiQueueDao = Wire[TurnitinLtiQueueDao]
+	val turnitinLtiQueueDao: TurnitinLtiQueueDao = Wire[TurnitinLtiQueueDao]
 }
 
 trait TurnitinLtiQueueDao {

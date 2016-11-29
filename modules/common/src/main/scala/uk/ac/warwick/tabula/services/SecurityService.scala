@@ -16,7 +16,7 @@ trait SecurityServiceComponent {
 }
 
 trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
-	var securityService = Wire[SecurityService]
+	var securityService: SecurityService = Wire[SecurityService]
 }
 
 /**
@@ -26,8 +26,8 @@ trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
 class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Permission, PermissionsTarget), Option[Boolean]]
 	with TaskBenchmarking {
 
-	var roleService = Wire[RoleService]
-	var features = Wire[Features]
+	var roleService: RoleService = Wire[RoleService]
+	var features: Features = Wire[Features]
 
 	type Response = Option[Boolean]
 	type PermissionChecker = (CurrentUser, Permission, PermissionsTarget) => Response
@@ -131,13 +131,13 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	}
 
 
-	def can(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, canDelegate = false)
-	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), canDelegate = false)
+	def can(user: CurrentUser, permission: ScopelessPermission ): Boolean = _can(user, permission, None, canDelegate = false)
+	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Boolean = _can(user, permission, Option(scope), canDelegate = false)
 	def canForAny(user: CurrentUser, permission: Permission, scopes: Seq[PermissionsTarget]): Boolean  = {
 		scopes.exists(scope => _can(user, permission, Option(scope), canDelegate = false))
 	}
-	def canDelegate(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, canDelegate = true)
-	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), canDelegate = true)
+	def canDelegate(user: CurrentUser, permission: ScopelessPermission ): Boolean = _can(user, permission, None, canDelegate = true)
+	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Boolean = _can(user, permission, Option(scope), canDelegate = true)
 
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget],canDelegate:Boolean): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
@@ -169,8 +169,8 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		}
 	}
 
-	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
-	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
+	def check(user: CurrentUser, permission: ScopelessPermission): Unit = _check(user, permission, None)
+	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Unit = _check(user, permission, Option(scope))
 
 	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope, canDelegate = false)) {
 		(permission, scope) match {

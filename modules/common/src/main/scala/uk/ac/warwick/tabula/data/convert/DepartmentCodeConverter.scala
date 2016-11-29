@@ -12,15 +12,15 @@ class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
 
 	@Autowired var service: ModuleAndDepartmentService = _
 
-	override def convertRight(code: String) = {
+	override def convertRight(code: String): Department = {
 		service.getDepartmentByCode(sanitise(code)).getOrElse {
 			service.getDepartmentById(code).orNull
 		}
 	}
 
-	override def convertLeft(department: Department) = (Option(department) map { _.code }).orNull
+	override def convertLeft(department: Department): String = (Option(department) map { _.code }).orNull
 
-	def sanitise(code: String) = {
+	def sanitise(code: String): String = {
 		if (code == null) throw new IllegalArgumentException
 		else code.toLowerCase
 	}

@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.Assessment
+import uk.ac.warwick.tabula.data.model.{Assessment, Module}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -28,10 +30,10 @@ class SmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
 
 	self : SmallGroupServiceComponent with AssessmentMembershipServiceComponent =>
 
-	val module = assessment.module
-	val academicYear = assessment.academicYear
+	val module: Module = assessment.module
+	val academicYear: AcademicYear = assessment.academicYear
 
-	def applyInternal() = {
+	def applyInternal(): Seq[SetAllocation] = {
 		val sets = smallGroupService.getSmallGroupSets(module, academicYear)
 		val validStudents = assessmentMembershipService.determineMembershipUsers(assessment)
 

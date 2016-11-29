@@ -36,8 +36,8 @@ object RequestInfo {
 		override def initialValue = None
 	}
 
-	def fromThread = threadLocal.get
-	def open(info: RequestInfo) = threadLocal.set(Some(info))
+	def fromThread: Option[RequestInfo] = threadLocal.get
+	def open(info: RequestInfo): Unit = threadLocal.set(Some(info))
 
 	def use[A](info: RequestInfo)(fn: => A): A =
 		try { open(info); fn }
@@ -48,7 +48,7 @@ object RequestInfo {
 		threadLocal.remove()
 	}
 
-	def mappedPage = {
+	def mappedPage: String = {
 		// get the @RequestMapping (without path variables resolved), so that users don't get the same popup again
 		// for a given kind of page with only variables changing
 		val requestAttributes = RequestContextHolder.getRequestAttributes.asInstanceOf[ServletRequestAttributes]
@@ -74,14 +74,14 @@ object EarlyRequestInfo {
 		override def initialValue = None
 	}
 
-	def open(info: EarlyRequestInfo) = threadLocal.set(Some(info))
+	def open(info: EarlyRequestInfo): Unit = threadLocal.set(Some(info))
 
 	/** Only useful for an edge case. Use #fromThread usually.
 		* If a full RequestInfo is available, this is used instead of
 		* the EarlyRequestInfo. This is so tests can set up a RequestInfo
 		* as normal and don't need updating.
 		*/
-	def fromThread = RequestInfo.fromThread orElse threadLocal.get
+	def fromThread: Option[EarlyRequestInfo] = RequestInfo.fromThread orElse threadLocal.get
 
 	def close() {
 		fromThread foreach { _.requestLevelCache.shutdown() }

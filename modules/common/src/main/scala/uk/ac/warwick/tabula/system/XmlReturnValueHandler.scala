@@ -19,14 +19,14 @@ import scala.xml.MinimizeMode
  */
 class XmlReturnValueHandler extends HandlerMethodReturnValueHandler {
 
-	override def supportsReturnType(methodParam: MethodParameter) = {
+	override def supportsReturnType(methodParam: MethodParameter): Boolean = {
 		classOf[Elem] isAssignableFrom methodParam.getMethod.getReturnType
 	}
 
 	override def handleReturnValue(returnValue: Object,
 		returnType: MethodParameter,
 		mavContainer: ModelAndViewContainer,
-		webRequest: NativeWebRequest) =
+		webRequest: NativeWebRequest): Unit =
 		returnValue match {
 			case xml: Elem => mavContainer.setView(new XmlView(xml))
 		}

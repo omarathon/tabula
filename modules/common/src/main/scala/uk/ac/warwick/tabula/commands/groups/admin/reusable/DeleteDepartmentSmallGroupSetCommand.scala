@@ -31,7 +31,7 @@ class DeleteDepartmentSmallGroupSetCommandInternal(val department: Department, v
 	extends CommandInternal[DepartmentSmallGroupSet] with DeleteDepartmentSmallGroupSetCommandState {
 	self: SmallGroupServiceComponent =>
 
-	override def applyInternal() = transactional() {
+	override def applyInternal(): DepartmentSmallGroupSet = transactional() {
 		set.markDeleted()
 		smallGroupService.saveOrUpdate(set)
 		set

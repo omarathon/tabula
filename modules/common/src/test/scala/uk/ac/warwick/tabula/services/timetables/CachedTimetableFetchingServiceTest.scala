@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.services.timetables
 import net.spy.memcached.transcoders.SerializingTranscoder
 import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.NamedLocation
+import uk.ac.warwick.tabula.data.model.{Module, NamedLocation}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{RelatedUrl, TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{Fixtures, AcademicYear, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.cache.HashMapCacheStore
 
@@ -16,10 +16,10 @@ import scala.concurrent.Future
 class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
 
 	private trait Fixture {
-		val module = Fixtures.module("cs118")
+		val module: Module = Fixtures.module("cs118")
 		val studentId = "studentId"
 		val studentEvents = Seq(new TimetableEvent("test", "test", "test", "test", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None))
-		val delegate = mock[CompleteTimetableFetchingService]
+		val delegate: CompleteTimetableFetchingService = mock[CompleteTimetableFetchingService]
 
 		delegate.getTimetableForStudent(studentId) returns Future.successful(EventList.fresh(studentEvents))
 

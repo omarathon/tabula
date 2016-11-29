@@ -86,7 +86,7 @@ class OldDownloadAllSubmissionsController extends OldCourseworkController {
 	params = Array("!single"))
 class OldDownloadSingleSubmissionController extends OldCourseworkController {
 
-	var userLookup = Wire[UserLookupService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable module: Module,
@@ -101,13 +101,13 @@ class OldDownloadSingleSubmissionController extends OldCourseworkController {
 @Profile(Array("cm1Enabled")) @Controller
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissions/download/{submission}/{filename}"))
 class OldDownloadSingleSubmissionFileController extends OldCourseworkController {
-	var userLookup = Wire[UserLookupService]
-	var profileService = Wire.auto[ProfileService]
+	var userLookup: UserLookupService = Wire[UserLookupService]
+	var profileService: ProfileService = Wire.auto[ProfileService]
 
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable module: Module,
 			@PathVariable assignment: Assignment,
-			@PathVariable submission: Submission ) = {
+			@PathVariable submission: Submission ): DownloadAttachmentCommand = {
 		val student = profileService.getMemberByUser(userLookup.getUserByUserId(mandatory(submission).userId))
 		new DownloadAttachmentCommand(module, assignment, mandatory(submission), student)
 	}
@@ -124,7 +124,7 @@ class OldDownloadSingleSubmissionFileController extends OldCourseworkController 
 @RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}"))
 class OldDownloadFeedbackSheetsController extends OldCourseworkController {
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
 	@ModelAttribute def feedbackSheetsCommand(@PathVariable module: Module, @PathVariable assignment: Assignment) =
 		new DownloadFeedbackSheetsCommand(module, assignment)

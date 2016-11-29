@@ -7,7 +7,7 @@ import org.hibernate.ScrollableResults
  * object using a plain old sequence of things, instead of the database.
  */
 class MockScrollableResults(seq: Seq[_ <: AnyRef]) extends ScrollableResults {
-	val itr = seq.iterator
+	val itr: Iterator[AnyRef] = seq.iterator
 
 	def next(): Boolean = itr.hasNext
 	def get(i: Int): AnyRef = if (i == 0) itr.next() else ???

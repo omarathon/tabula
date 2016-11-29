@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.admin.web.Routes
 import uk.ac.warwick.tabula.data.model.{Department, Module, Route}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
 
 import scala.collection.JavaConverters._
@@ -47,7 +48,7 @@ class AdminHomeController extends AdminController with DepartmentScopedControlle
 	}
 	
 	@RequestMapping(Array("/admin"))
-	def home(@ModelAttribute("activeDepartment") activeDepartment: Option[Department]) = {
+	def home(@ModelAttribute("activeDepartment") activeDepartment: Option[Department]): Mav = {
 		if (activeDepartment.isDefined) {
 			Redirect(Routes.department(activeDepartment.get))
 		} else {

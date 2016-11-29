@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.Public
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 
@@ -20,7 +21,7 @@ class ModulePickerController extends BaseController {
 	def command = ModulePickerCommand()
 
 	@RequestMapping
-	def query(@ModelAttribute("command") cmd: Appliable[Seq[ModulePickerResult]]) = {
+	def query(@ModelAttribute("command") cmd: Appliable[Seq[ModulePickerResult]]): Mav = {
 		val results = cmd.apply()
 		Mav(
 			new JSONView(
@@ -46,7 +47,7 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 	var checkAssignments: Boolean = _
 	var checkGroups: Boolean = _
 
-	def applyInternal() = {
+	def applyInternal(): Seq[ModulePickerResult] = {
 		if (!query.hasText) {
 			Seq()
 		} else {

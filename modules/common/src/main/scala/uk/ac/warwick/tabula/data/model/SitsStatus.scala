@@ -23,8 +23,8 @@ class SitsStatus {
 	var shortName: String = _
 	var fullName: String = _
 
-	var lastUpdatedDate = DateTime.now
+	var lastUpdatedDate: DateTime = DateTime.now
 
-	override def toString = fullName.toLowerCase()
+	override def toString: String = fullName.toLowerCase()
 
 }

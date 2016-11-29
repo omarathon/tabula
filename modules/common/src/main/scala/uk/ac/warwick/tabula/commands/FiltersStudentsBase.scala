@@ -30,7 +30,7 @@ trait FiltersStudentsBase {
 	protected def routesForDepartmentAndSubDepartments(department: Department): Seq[Route] =
 		(department.routes.asScala ++ department.children.asScala.flatMap { routesForDepartmentAndSubDepartments }).sorted
 
-	def serializeFilter = {
+	def serializeFilter: String = {
 		val result = new UriBuilder()
 		courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
 		routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
@@ -45,7 +45,7 @@ trait FiltersStudentsBase {
 			result.getQuery
 	}
 
-	def filterMap = {
+	def filterMap: Map[String, String] = {
 		Map(
 			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
 			"routes" -> routes.asScala.map{_.code}.mkString(","),

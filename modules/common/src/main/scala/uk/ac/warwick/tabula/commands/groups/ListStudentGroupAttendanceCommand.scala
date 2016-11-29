@@ -49,11 +49,11 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
 	self: SmallGroupServiceComponent with TermServiceComponent with WeekToDateConverterComponent =>
 
-	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
-	implicit val defaultOrderingForDateTime = Ordering.by[DateTime, Long] ( _.getMillis )
-	implicit val defaultOrderingForTerm = Ordering.by[Term, DateTime] ( _.getStartDate )
+	implicit val defaultOrderingForGroup: Ordering[SmallGroup] = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
+	implicit val defaultOrderingForDateTime: Ordering[DateTime] = Ordering.by[DateTime, Long] ( _.getMillis )
+	implicit val defaultOrderingForTerm: Ordering[Term] = Ordering.by[Term, DateTime] ( _.getStartDate )
 
-	def applyInternal() = {
+	def applyInternal(): StudentGroupAttendance = {
 		val user = member.asSsoUser
 
 		val memberGroups = smallGroupService.findSmallGroupsByStudent(user)

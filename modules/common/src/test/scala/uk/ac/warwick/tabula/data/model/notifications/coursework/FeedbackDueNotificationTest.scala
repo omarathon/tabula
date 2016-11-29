@@ -2,29 +2,29 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.sql.DataSource
 
-import org.hibernate.{SessionFactory, Session}
+import org.hibernate.{Session, SessionFactory}
 import org.joda.time.{DateTime, DateTimeConstants}
-import org.junit.{Before, After}
+import org.junit.{After, Before}
 import org.springframework.beans.factory.config.{BeanDefinition, ConfigurableListableBeanFactory}
 import org.springframework.context.ConfigurableApplicationContext
 import uk.ac.warwick.spring.SpringConfigurer
-import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Notification}
+import uk.ac.warwick.tabula.data.model.{Module, Notification, UserGroup}
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.JavaImports._
 
 class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
-	val freeMarkerConfig = newFreemarkerConfiguration()
-	val extensionService = smartMock[ExtensionService]
+	val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
+	val extensionService: ExtensionService = smartMock[ExtensionService]
 	val userLookup = new MockUserLookup()
-	val moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-	val permissionsService = smartMock[PermissionsService]
+	val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+	val permissionsService: PermissionsService = smartMock[PermissionsService]
 
 	@Before def setupAppContext(): Unit = {
 		val applicationContext = smartMock[ConfigurableApplicationContext]

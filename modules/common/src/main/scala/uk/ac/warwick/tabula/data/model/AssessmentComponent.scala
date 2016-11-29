@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 @Table(name="UPSTREAMASSIGNMENT")
 class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
 
-	@transient var membershipService = Wire.auto[AssessmentMembershipService]
+	@transient var membershipService: AssessmentMembershipService = Wire.auto[AssessmentMembershipService]
 
 	/**
 	 * Uppercase module code, with CATS. e.g. IN304-15
@@ -88,7 +88,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	 */
 	def cats: Option[String] = Module.extractCats(moduleCode)
 
-	def needsUpdatingFrom(other: AssessmentComponent) =
+	def needsUpdatingFrom(other: AssessmentComponent): Boolean =
 		this.name != other.name ||
 		this.module != other.module ||
 		this.inUse != other.inUse ||
@@ -114,7 +114,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 		marksCode = other.marksCode
 	}
 
-	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)
+	def upstreamAssessmentGroups(year: AcademicYear): Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this, year)
 }
 
 object AssessmentComponent {

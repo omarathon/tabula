@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Student
 import collection.JavaConverters._
 
 object AllocateSelfToGroupCommand{
-	def apply(user:User, groupSet:SmallGroupSet)= {
+	def apply(user:User, groupSet:SmallGroupSet): AllocateSelfToGroupCommand with ComposableCommand[SmallGroupSet] with StudentSignupCommandPermissions with StudentSignUpCommandDescription with AllocateSelfToGroupValidator with AllocateSelfToGroupNotificationCompletion = {
 		new AllocateSelfToGroupCommand(user, groupSet)
 			with ComposableCommand[SmallGroupSet]
 			with StudentSignupCommandPermissions
@@ -22,7 +22,7 @@ object AllocateSelfToGroupCommand{
 	}
 }
 object DeallocateSelfFromGroupCommand{
-	def apply(user:User, groupSet:SmallGroupSet)= {
+	def apply(user:User, groupSet:SmallGroupSet): DeallocateSelfFromGroupCommand with ComposableCommand[SmallGroupSet] with StudentSignupCommandPermissions with StudentSignUpCommandDescription with DeallocateSelfFromGroupValidator = {
 		new DeallocateSelfFromGroupCommand(user, groupSet)
 			with ComposableCommand[SmallGroupSet]
 			with StudentSignupCommandPermissions

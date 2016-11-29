@@ -32,7 +32,7 @@ class CheckEventAttendanceCheckpointsCommandInternal(val occurrence: SmallGroupE
 
 	self: CheckEventAttendanceCheckpointsCommandState with AttendanceMonitoringEventAttendanceServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal(): CheckpointResult = {
 		val attendanceList = attendances.asScala.map{ case (universityId, state) =>
 			val attendance = new SmallGroupEventAttendance
 			attendance.occurrence = occurrence

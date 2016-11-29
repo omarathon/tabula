@@ -17,22 +17,22 @@ object Routes {
 	private val context = "/sysadmin"
 
 	object Departments {
-		def home = context + "/departments"
-		def department(department: Department) = context + "/departments/%s" format encoded(department.code)
+		def home: String = context + "/departments"
+		def department(department: Department): String = context + "/departments/%s" format encoded(department.code)
 	}
 
 	object AttendanceTemplates {
-		def home = context + "/attendancetemplates"
-		def edit(template: AttendanceMonitoringTemplate) = context + "/attendancetemplates/%s/edit" format encoded(template.id)
+		def home: String = context + "/attendancetemplates"
+		def edit(template: AttendanceMonitoringTemplate): String = context + "/attendancetemplates/%s/edit" format encoded(template.id)
 	}
 
 	object Relationships {
-		def home = context + "/relationships"
+		def home: String = context + "/relationships"
 	}
 
 	object jobs {
-		def list = context + "/jobs/list"
-		def status(instance: JobInstance) = context + "/jobs/job-status?id=%s" format encoded(instance.id)
-		def quartzStatus(triggerKey: TriggerKey) = context + "/jobs/quartz-status?key=%s" format encoded(triggerKey.getName)
+		def list: String = context + "/jobs/list"
+		def status(instance: JobInstance): String = context + "/jobs/job-status?id=%s" format encoded(instance.id)
+		def quartzStatus(triggerKey: TriggerKey): String = context + "/jobs/quartz-status?key=%s" format encoded(triggerKey.getName)
 	}
 }

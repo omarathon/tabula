@@ -13,7 +13,7 @@ class UserSettingFunctionTest extends TestBase with Mockito {
 
 	val fn = new UserSettingFunction
 
-	val settingsService = mock[UserSettingsService]
+	val settingsService: UserSettingsService = mock[UserSettingsService]
 	fn.userSettings = settingsService
 
 	@Test def noSettings = withUser("cuscav") {
