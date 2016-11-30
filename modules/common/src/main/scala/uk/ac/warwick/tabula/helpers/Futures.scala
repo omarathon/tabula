@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.util.concurrent.{Executor, Executors, ScheduledExecutorService, TimeoutException}
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeoutException}
 
 import org.hibernate.{FlushMode, SessionFactory}
 import org.springframework.orm.hibernate4.{SessionFactoryUtils, SessionHolder}
@@ -114,7 +114,7 @@ object Futures extends Futures {
 				}
 			})
 		}
-		override def reportFailure(cause: Throwable): Unit = ExecutionContext.Implicits.global.reportFailure(cause)
+		override def reportFailure(cause: Throwable): Unit = executionContextExecutor.reportFailure(cause)
 	}
 
 }
